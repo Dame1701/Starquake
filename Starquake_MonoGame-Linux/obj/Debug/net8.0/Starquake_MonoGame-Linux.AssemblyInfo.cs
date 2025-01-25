@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Starquake_MonoGame-Linux")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2b0c48b0ecdd381047ea8a06cde62be42bb59760")]
 [assembly: System.Reflection.AssemblyProductAttribute("Starquake_MonoGame-Linux")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Starquake_MonoGame-Linux")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -458,3 +458,4 @@
 /home/damien/RiderProjects/Starquake-Linux/Starquake_MonoGame-Linux/obj/Debug/net8.0/Starquake_MonoGame-Linux.pdb
 /home/damien/RiderProjects/Starquake-Linux/Starquake_MonoGame-Linux/obj/Debug/net8.0/Starquake_MonoGame-Linux.genruntimeconfig.cache
 /home/damien/RiderProjects/Starquake-Linux/Starquake_MonoGame-Linux/obj/Debug/net8.0/ref/Starquake_MonoGame-Linux.dll
+/home/damien/RiderProjects/Starquake-Linux/Starquake_MonoGame-Linux/obj/Debug/net8.0/Starquake_MonoGame-Linux.sourcelink.json
