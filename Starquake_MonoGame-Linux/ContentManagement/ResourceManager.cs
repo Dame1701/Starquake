@@ -29,15 +29,13 @@ namespace StarquakeXNA
         public string FilePath;
         public int Width;
         public int Height;
-        public enSpriteEffect SpriteEffect;
 
-        public SpriteDescription(string resourceName, string filePath, int width, int height, enSpriteEffect spriteEffect)
+        public SpriteDescription(string resourceName, string filePath, int width, int height)
         {
             ResourceName = resourceName;
             FilePath = filePath;
             Width = width;
             Height = height;
-            SpriteEffect = spriteEffect;
         }
     }
 
@@ -177,11 +175,6 @@ namespace StarquakeXNA
                         t.Width,
                         t.Height);
 
-                if (t.SpriteEffect != enSpriteEffect.None)
-                {
-                    sc.CurrentSpriteEffect = t.SpriteEffect;
-                }
-
                 resources.Add(t.ResourceName, sc);
                 componentsLoaded++;
             }
@@ -256,12 +249,7 @@ namespace StarquakeXNA
 
         public void AddSpriteResource(string ResourceName, string FilePath, int SpriteWidth, int SpriteHeight)
         {
-            AddSpriteResource(ResourceName, FilePath, SpriteWidth, SpriteHeight, enSpriteEffect.None);
-        }
-
-        public void AddSpriteResource(string ResourceName, string FilePath, int SpriteWidth, int SpriteHeight, enSpriteEffect SpriteEffect)
-        {
-            spriteDescriptions.Add(new SpriteDescription(ResourceName, FilePath, SpriteWidth, SpriteHeight, SpriteEffect));
+            spriteDescriptions.Add(new SpriteDescription(ResourceName, FilePath, SpriteWidth, SpriteHeight));
         }
 
         public void AddAnimatedSpriteResource(string ResourceName, string FilePath, int SpriteWidth, int SpriteHeight, int TileToAnimate, int Delay)

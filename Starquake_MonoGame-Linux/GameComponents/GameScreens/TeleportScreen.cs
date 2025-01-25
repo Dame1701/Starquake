@@ -102,9 +102,6 @@ namespace StarquakeXNA.GameComponents
             teleportMonitorScreen = new SpriteCollection(gameEngine, gameEngine.ContentMgr, "Graphics\\TeleportInfoMonitor", 268, 210);
             teleportMonitorScreenDistortion = new SpriteCollection(gameEngine, gameEngine.ContentMgr, "Graphics\\TeleportInfoMonitorDistortion", 230, 30);
 
-            teleportDistort.CurrentSpriteEffect = enSpriteEffect.Distortion;
-            teleportMonitorScreenDistortion.CurrentSpriteEffect = enSpriteEffect.Distortion;
-
             teleportMonitorScreenDistortionYPos = gameEngine.ScreenYOffset + 28;
         }
 

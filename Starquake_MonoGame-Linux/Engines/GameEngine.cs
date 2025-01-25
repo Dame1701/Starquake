@@ -368,7 +368,7 @@ namespace StarquakeXNA
             ContentResourceManager.AddSpriteResource("LowerScreenTiles", "Graphics\\StartilesNew", 128, 96);
             ContentResourceManager.AddSpriteResource("LowerScreenTilesOriginal", "Graphics\\StartilesOriginal", 128, 96);
 
-            ContentResourceManager.AddSpriteResource("LowerScreenTilesDark", "Graphics\\startilesNew", 128, 96, enSpriteEffect.DrawAsSolidColour);
+            ContentResourceManager.AddSpriteResource("LowerScreenTilesDark", "Graphics\\startilesNew", 128, 96);
             ContentResourceManager.AddSpriteResource("ExitShadows", "Graphics\\ExitShadows", 128, 96);
 
             // Blob's graphics
@@ -385,7 +385,7 @@ namespace StarquakeXNA
             ContentResourceManager.AddSpriteResource("BlobFire2", "Graphics\\BlobFireNew2", 32, 32);
             ContentResourceManager.AddSpriteResource("BlobFire2Original", "Graphics\\BlobFire2Original", 64, 64);
 
-            ContentResourceManager.AddSpriteResource("BlobFire2Overlay", "Graphics\\BlobFire2Overlay", 48, 48, enSpriteEffect.Distortion);
+            ContentResourceManager.AddSpriteResource("BlobFire2Overlay", "Graphics\\BlobFire2Overlay", 48, 48);
             ContentResourceManager.AddSpriteResource("JumpPlatforms", "Graphics\\BlobJumpPlatform", 64, 32);
             ContentResourceManager.AddSpriteResource("JumpPlatformsOriginal", "Graphics\\BlobJumpPlatformOriginal", 64, 32);
 
@@ -423,10 +423,10 @@ namespace StarquakeXNA
             ContentResourceManager.AddSpriteResource("TeleporterPowerSupply", "Graphics\\TeleporterPowerSupply", 246, 402);
 
             // ElectricityGatesAndNodes
-            ContentResourceManager.AddSpriteResource("ElectricityNodeElectricity1", "Graphics\\ElectricityAnim", 70, 64, enSpriteEffect.None);
-            ContentResourceManager.AddSpriteResource("ElectricityNodeElectricity2", "Graphics\\ElectricityAnim", 70, 64, enSpriteEffect.None);
-            ContentResourceManager.AddSpriteResource("NodeLights", "Graphics\\NodeLight", 64, 64, enSpriteEffect.Distortion);
-            ContentResourceManager.AddSpriteResource("GateLights", "Graphics\\GateLight", 32, 32, enSpriteEffect.Distortion);
+            ContentResourceManager.AddSpriteResource("ElectricityNodeElectricity1", "Graphics\\ElectricityAnim", 70, 64);
+            ContentResourceManager.AddSpriteResource("ElectricityNodeElectricity2", "Graphics\\ElectricityAnim", 70, 64);
+            ContentResourceManager.AddSpriteResource("NodeLights", "Graphics\\NodeLight", 64, 64);
+            ContentResourceManager.AddSpriteResource("GateLights", "Graphics\\GateLight", 32, 32);
             ContentResourceManager.AddSpriteResource("ElectricityOriginal", "Graphics\\ElectricityOriginal", 64, 64);
 
             // Odd sized graphics

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -9,14 +7,6 @@ using Starquake_MonoGame.Structure;
 
 namespace StarquakeXNA
 {
-    public enum enSpriteEffect
-    {
-        None,
-        Distortion,
-        Dissolve,
-        DrawAsSolidColour,
-    }
-
     public class EffectSprite
     {
         public SpriteCollection Sprite;
@@ -31,6 +21,7 @@ namespace StarquakeXNA
         private int noImages;
 
         private int effectSpeed;
+
         public int EffectSpeed
         {
             get { return effectSpeed; }
@@ -38,6 +29,7 @@ namespace StarquakeXNA
         }
 
         private float spriteRotation = 0f;
+
         public float SpriteRotation
         {
             get { return spriteRotation; }
@@ -49,19 +41,19 @@ namespace StarquakeXNA
 
         public static Texture2D SpriteEffectsTexture;
 
-        [NonSerialized]
-        private SpriteBatch sprites;
+        [NonSerialized] private SpriteBatch sprites;
 
-        [NonSerialized]
-        private Texture2D spriteImages;
+        [NonSerialized] private Texture2D spriteImages;
 
         private int spriteWidth;
+
         public int SpriteWidth
         {
             get { return spriteWidth; }
         }
 
         private int spriteHeight;
+
         public int SpriteHeight
         {
             get { return spriteHeight; }
@@ -70,6 +62,7 @@ namespace StarquakeXNA
         private byte fade;
 
         private bool effectEnded;
+
         public bool EffectEnded
         {
             get { return effectEnded; }
@@ -82,24 +75,10 @@ namespace StarquakeXNA
 
         private string imageFilePath;
 
-        [NonSerialized]
-        private Effect spriteEffect;
+        [NonSerialized] private GameEngine gameEngineReference;
 
-        private enSpriteEffect currentSpriteEffect;
-        public enSpriteEffect CurrentSpriteEffect
-        {
-            get { return currentSpriteEffect; }
-            set
-            {
-                currentSpriteEffect = value;
-                SetSpriteEffect();
-            }
-        }
-
-        [NonSerialized]
-        private GameEngine gameEngineReference;
-
-        public SpriteCollection(GameEngine GameEngineReference, ContentManager Content, string ImageFilePath, int SpriteWidth, int SpriteHeight)
+        public SpriteCollection(GameEngine GameEngineReference, ContentManager Content, string ImageFilePath,
+            int SpriteWidth, int SpriteHeight)
         {
             imageFilePath = ImageFilePath;
             gameEngineReference = GameEngineReference;
@@ -121,10 +100,7 @@ namespace StarquakeXNA
             spriteTexturePosY = new int[noImages];
 
             int Counter = 0;
-
             fade = 255;
-
-            CurrentSpriteEffect = enSpriteEffect.None;
 
             // Generate Coordinates for the textures of the tiles found
             for (int y = 0; y < NoVerticleImages; y++)
@@ -140,19 +116,6 @@ namespace StarquakeXNA
 
         private void SetSpriteEffect()
         {
-            if (currentSpriteEffect == enSpriteEffect.Distortion)
-            {
-                //spriteEffect = gameEngineReference.ContentMgr.Load<Effect>("Shaders\\refraction");
-            }
-            else if (currentSpriteEffect == enSpriteEffect.Dissolve)
-            {
-                //spriteEffect = gameEngineReference.ContentMgr.Load<Effect>("Shaders\\disappear");
-            }
-            else if (currentSpriteEffect == enSpriteEffect.DrawAsSolidColour)
-            {
-                //spriteEffect = gameEngineReference.ContentMgr.Load<Effect>("Shaders\\drawaswhite");
-            }
-
             effectEnded = false;
             fade = 255;
         }
@@ -165,112 +128,12 @@ namespace StarquakeXNA
 
         public void Begin(BlendState blendState, GameTime gameTime)
         {
-            if (currentSpriteEffect == enSpriteEffect.None)
-            {
-                sprites.Begin(SpriteSortMode.Deferred, blendState);
-            }
-            else
-            {
-                sprites.Begin(SpriteSortMode.Immediate, blendState);
-            }
-
-
-            if (currentSpriteEffect == enSpriteEffect.Distortion)
-            {
-                spriteEffect.Parameters["DisplacementScroll"].SetValue(
-                                                           MoveInCircle(gameTime, 0.1f));
-                /*
-                if (fade > 0)
-                {
-                    int fade2 = fade;
-                    fade2 = fade2 - effectSpeed;
-
-                    if (fade2 > 0)
-                    {
-                        fade = (byte)fade2;
-                    }
-                    else
-                    {
-                        fade = 0;
-                    }
-                }
-                */
-            }
-            else if (currentSpriteEffect == enSpriteEffect.Dissolve)
-            {
-                Vector2 moveInCircle = MoveInCircle(gameTime, 0.8f) * 0.25f;
-                spriteEffect.Parameters["OverlayScroll"].SetValue(moveInCircle);
-
-
-                if (fade > 0)
-                {
-                    int fade2 = fade;
-                    fade2 = fade2 - effectSpeed;
-
-                    if (fade2 > 0)
-                    {
-                        fade = (byte)fade2;
-                    }
-                    else
-                    {
-                        fade = 0;
-                    }
-                }
-
-            }
-
-            // Begin the custom effect.
-            if (currentSpriteEffect != enSpriteEffect.None)
-            {
-                spriteEffect.CurrentTechnique.Passes[0].Apply();
-            }
+            sprites.Begin(SpriteSortMode.Deferred, blendState);
         }
 
         public void Begin(BlendState blendState, SpriteSortMode sortMode, GameTime gameTime)
         {
-            if (currentSpriteEffect == enSpriteEffect.None)
-            {
-                sprites.Begin(sortMode, blendState);
-
-            }
-            else
-            {
-                gameEngineReference.GraphicsDeviceMgr.GraphicsDevice.Textures[1] = SpriteEffectsTexture;
-                sprites.Begin(SpriteSortMode.Immediate,
-                              blendState);
-            }
-
-            if (spriteEffect != null)
-            {
-                if (currentSpriteEffect == enSpriteEffect.Distortion)
-                {
-                    spriteEffect.Parameters["DisplacementScroll"].SetValue(
-                                                               MoveInCircle(gameTime, 0.1f));
-                }
-                else if (currentSpriteEffect == enSpriteEffect.Dissolve)
-                {
-                    if (fade > 0)
-                    {
-                        int fade2 = fade;
-                        fade2 = fade2 - 4;
-
-                        if (fade2 > 0)
-                        {
-                            fade = (byte)fade2;
-                        }
-                        else
-                        {
-                            fade = 0;
-                        }
-                    }
-                }
-
-                // Begin the custom effect.
-                if (currentSpriteEffect != enSpriteEffect.None)
-                {
-                    spriteEffect.CurrentTechnique.Passes[0].Apply();
-                }
-            }
+            sprites.Begin(sortMode, blendState);
         }
 
         public void DrawSpriteUnscaled(int SpriteNumber, int XPosition, int YPosition)
@@ -278,8 +141,9 @@ namespace StarquakeXNA
             sprites.Draw(
                 spriteImages,
                 new Vector2(XPosition, YPosition),
-                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth, spriteHeight),
-                 ColourHelper.GetXNA4Colour(255, 255, 255, fade),
+                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
+                    spriteHeight),
+                ColourHelper.GetXNA4Colour(255, 255, 255, fade),
                 0f,
                 new Vector2(0, 0),
                 new Vector2(1, 1),
@@ -292,8 +156,9 @@ namespace StarquakeXNA
             sprites.Draw(
                 spriteImages,
                 new Vector2(XPosition, YPosition),
-                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth, spriteHeight),
-                 ColourHelper.GetXNA4Colour(255, 255, 255, Fade),
+                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
+                    spriteHeight),
+                ColourHelper.GetXNA4Colour(255, 255, 255, Fade),
                 0f,
                 new Vector2(0, 0),
                 new Vector2(1, 1),
@@ -309,8 +174,9 @@ namespace StarquakeXNA
             sprites.Draw(
                 spriteImages,
                 new Vector2((float)XPosition * HScaling, (float)YPosition * VScaling),
-                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth, spriteHeight),
-                 ColourHelper.GetXNA4Colour(255, 255, 255, fade),
+                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
+                    spriteHeight),
+                ColourHelper.GetXNA4Colour(255, 255, 255, fade),
                 0f,
                 new Vector2(0, 0),
                 new Vector2(HScaling, VScaling),
@@ -326,11 +192,13 @@ namespace StarquakeXNA
             sprites.Draw(
                 spriteImages,
                 new Vector2((float)XPosition * HScaling, (float)YPosition * VScaling),
-                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth, spriteHeight),
-                 ColourHelper.GetXNA4Colour(255, 255, 255, fade));
+                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
+                    spriteHeight),
+                ColourHelper.GetXNA4Colour(255, 255, 255, fade));
         }
 
-        public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, Color SpriteColour, SpritePixel[] Matrix, int BlockSize = 4, SpriteEffects SpriteEffect = SpriteEffects.None)
+        public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, Color SpriteColour, SpritePixel[] Matrix,
+            int BlockSize = 4, SpriteEffects SpriteEffect = SpriteEffects.None)
         {
             if (Matrix.Length == spriteWidth * spriteHeight)
             {
@@ -361,7 +229,8 @@ namespace StarquakeXNA
                         sprites.Draw(
                             spriteImages,
                             new Vector2((float)(XPosition + x) * HScaling, (float)(YPosition + y) * VScaling),
-                            new Rectangle(spriteTexturePosX[SpriteNumber] + x, spriteTexturePosY[SpriteNumber] + y, BlockSize, BlockSize),
+                            new Rectangle(spriteTexturePosX[SpriteNumber] + x, spriteTexturePosY[SpriteNumber] + y,
+                                BlockSize, BlockSize),
                             Matrix[a].Colour,
                             0f,
                             new Vector2(0, 0),
@@ -369,6 +238,7 @@ namespace StarquakeXNA
                             SpriteEffect,
                             0f);
                     }
+
                     if (x > spriteWidth)
                     {
                         x = 0;
@@ -382,7 +252,8 @@ namespace StarquakeXNA
             }
         }
 
-        public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, int Width, int Height, Color SpriteColour)
+        public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, int Width, int Height,
+            Color SpriteColour)
         {
             float HScaling = 1f;
             float VScaling = 1f;
@@ -398,7 +269,6 @@ namespace StarquakeXNA
                 new Vector2(HScaling, VScaling),
                 SpriteEffects.None,
                 0);
-
         }
 
         public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, Color SpriteColour)
@@ -415,8 +285,9 @@ namespace StarquakeXNA
             sprites.Draw(
                 spriteImages,
                 new Vector2((float)XPosition * HScaling, (float)YPosition * VScaling),
-                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth, spriteHeight),
-                 ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
+                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
+                    spriteHeight),
+                ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
                 0f,
                 new Vector2(0, 0),
                 new Vector2(HScaling, VScaling),
@@ -424,7 +295,8 @@ namespace StarquakeXNA
                 0f);
         }
 
-        public void DrawSpriteSubSection(int SpriteNumber, int XPosition, int YPosition, Rectangle SubSpriteArea, Color SpriteColour)
+        public void DrawSpriteSubSection(int SpriteNumber, int XPosition, int YPosition, Rectangle SubSpriteArea,
+            Color SpriteColour)
         {
             float HScaling = 1f;
             float VScaling = 1f;
@@ -435,64 +307,71 @@ namespace StarquakeXNA
                 spriteHeight >= SubSpriteArea.Height + SubSpriteArea.Y)
             {
                 sprites.Draw(
-                spriteImages,
-                new Vector2((float)XPosition * HScaling, (float)YPosition * VScaling),
-                new Rectangle(
-                    spriteTexturePosX[SpriteNumber] + SubSpriteArea.X,
-                    spriteTexturePosY[SpriteNumber] + SubSpriteArea.Y,
-                    SubSpriteArea.Width,
-                    SubSpriteArea.Height),
-                SpriteColour,
-                0f,
-                new Vector2(0, 0),
-                new Vector2(HScaling, VScaling),
+                    spriteImages,
+                    new Vector2((float)XPosition * HScaling, (float)YPosition * VScaling),
+                    new Rectangle(
+                        spriteTexturePosX[SpriteNumber] + SubSpriteArea.X,
+                        spriteTexturePosY[SpriteNumber] + SubSpriteArea.Y,
+                        SubSpriteArea.Width,
+                        SubSpriteArea.Height),
+                    SpriteColour,
+                    0f,
+                    new Vector2(0, 0),
+                    new Vector2(HScaling, VScaling),
+                    SpriteEffects.None,
+                    0);
+            }
+        }
+
+        public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, Color SpriteColour, float Scale,
+            float Rotation)
+        {
+            float HScaling = 1f;
+            float VScaling = 1f;
+
+            sprites.Draw(spriteImages,
+                new Vector2((float)(XPosition + spriteWidth / 2) * HScaling,
+                    (float)(YPosition + spriteHeight / 2) * VScaling),
+                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
+                    spriteHeight),
+                ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
+                Rotation,
+                new Vector2(spriteWidth / 2, spriteHeight / 2),
+                new Vector2(HScaling * Scale, VScaling * Scale),
                 SpriteEffects.None,
                 0);
-            }
-
         }
 
-        public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, Color SpriteColour, float Scale, float Rotation)
+        public void DrawSprite(int SpriteNumber, float XPosition, float YPosition, Color SpriteColour, float Scale,
+            float Rotation)
         {
             float HScaling = 1f;
             float VScaling = 1f;
 
             sprites.Draw(spriteImages,
-               new Vector2((float)(XPosition + spriteWidth / 2) * HScaling, (float)(YPosition + spriteHeight / 2) * VScaling),
-               new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth, spriteHeight),
+                new Vector2((float)(XPosition + spriteWidth / 2) * HScaling,
+                    (float)(YPosition + spriteHeight / 2) * VScaling),
+                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
+                    spriteHeight),
                 ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
-               Rotation,
-               new Vector2(spriteWidth / 2, spriteHeight / 2),
-               new Vector2(HScaling * Scale, VScaling * Scale),
-               SpriteEffects.None,
-               0);
+                Rotation,
+                new Vector2(spriteWidth / 2, spriteHeight / 2),
+                new Vector2(HScaling * Scale, VScaling * Scale),
+                SpriteEffects.None,
+                0);
         }
 
-        public void DrawSprite(int SpriteNumber, float XPosition, float YPosition, Color SpriteColour, float Scale, float Rotation)
-        {
-            float HScaling = 1f;
-            float VScaling = 1f;
-
-            sprites.Draw(spriteImages,
-               new Vector2((float)(XPosition + spriteWidth / 2) * HScaling, (float)(YPosition + spriteHeight / 2) * VScaling),
-               new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth, spriteHeight),
-                ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
-               Rotation,
-               new Vector2(spriteWidth / 2, spriteHeight / 2),
-               new Vector2(HScaling * Scale, VScaling * Scale),
-               SpriteEffects.None,
-               0);
-        }
-
-        public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, Color SpriteColour, float Scale, float Rotation, int OriginX, int OriginY)
+        public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, Color SpriteColour, float Scale,
+            float Rotation, int OriginX, int OriginY)
         {
             float HScaling = 1f;
             float VScaling = 1f;
 
             sprites.Draw(spriteImages,
                 new Vector2((float)(XPosition + OriginX) * HScaling, (float)(YPosition + OriginY) * VScaling),
-                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth, spriteHeight),
-                 ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
+                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
+                    spriteHeight),
+                ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
                 Rotation,
                 new Vector2(OriginX, OriginY),
                 new Vector2(HScaling * Scale, VScaling * Scale),
@@ -500,22 +379,25 @@ namespace StarquakeXNA
         }
 
 
-        public void DrawSprite(int SpriteNumber, float XPosition, float YPosition, Color SpriteColour, float Scale, float Rotation, int OriginX, int OriginY)
+        public void DrawSprite(int SpriteNumber, float XPosition, float YPosition, Color SpriteColour, float Scale,
+            float Rotation, int OriginX, int OriginY)
         {
             float HScaling = 1f;
             float VScaling = 1f;
 
             sprites.Draw(spriteImages,
                 new Vector2((float)(XPosition + OriginX) * HScaling, (float)(YPosition + OriginY) * VScaling),
-                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth, spriteHeight),
-                 ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
+                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
+                    spriteHeight),
+                ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
                 Rotation,
                 new Vector2(OriginX, OriginY),
                 new Vector2(HScaling * Scale, VScaling * Scale),
                 SpriteEffects.None, 0);
         }
 
-        public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, Color SpriteColour, float Scale, float RotationSpeed, bool Clockwise, bool Paused)
+        public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, Color SpriteColour, float Scale,
+            float RotationSpeed, bool Clockwise, bool Paused)
         {
             float HScaling = 1f;
             float VScaling = 1f;
@@ -532,16 +414,19 @@ namespace StarquakeXNA
             }
 
             sprites.Draw(spriteImages,
-                new Vector2((float)(XPosition + spriteWidth / 2) * HScaling, (float)(YPosition + spriteHeight / 2) * VScaling),
-                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth, spriteHeight),
-                 ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
+                new Vector2((float)(XPosition + spriteWidth / 2) * HScaling,
+                    (float)(YPosition + spriteHeight / 2) * VScaling),
+                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
+                    spriteHeight),
+                ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
                 MathHelper.ToRadians(spriteRotation),
                 new Vector2(spriteWidth / 2, spriteHeight / 2),
                 new Vector2(HScaling * Scale, VScaling * Scale),
                 SpriteEffects.None, 0);
         }
 
-        public void DrawSprite(int SpriteNumber, float XPosition, float YPosition, Color SpriteColour, float Scale, float RotationSpeed, bool Clockwise, bool Paused)
+        public void DrawSprite(int SpriteNumber, float XPosition, float YPosition, Color SpriteColour, float Scale,
+            float RotationSpeed, bool Clockwise, bool Paused)
         {
             float HScaling = 1f;
             float VScaling = 1f;
@@ -558,9 +443,11 @@ namespace StarquakeXNA
             }
 
             sprites.Draw(spriteImages,
-                new Vector2((float)(XPosition + spriteWidth / 2) * HScaling, (float)(YPosition + spriteHeight / 2) * VScaling),
-                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth, spriteHeight),
-                 ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
+                new Vector2((float)(XPosition + spriteWidth / 2) * HScaling,
+                    (float)(YPosition + spriteHeight / 2) * VScaling),
+                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
+                    spriteHeight),
+                ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
                 MathHelper.ToRadians(spriteRotation),
                 new Vector2(spriteWidth / 2, spriteHeight / 2),
                 new Vector2(HScaling * Scale, VScaling * Scale),
@@ -573,9 +460,9 @@ namespace StarquakeXNA
 
             if (fade == 0)
             {
-                CurrentSpriteEffect = enSpriteEffect.None;
                 effectEnded = true;
             }
+
             Update();
         }
 
@@ -588,6 +475,7 @@ namespace StarquakeXNA
                 {
                     spriteRotation = spriteRotation + rotationSpeed;
                 }
+
                 if (spriteRotation >= 360f)
                 {
                     spriteRotation = 0f;
@@ -599,6 +487,7 @@ namespace StarquakeXNA
                 {
                     spriteRotation = spriteRotation - rotationSpeed;
                 }
+
                 if (spriteRotation <= 0f)
                 {
                     spriteRotation = 360f;
