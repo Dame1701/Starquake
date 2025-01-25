@@ -1,0 +1,197 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<XnaContent xmlns:Modifiers="ProjectMercury.Modifiers">
+  <Asset Type="ProjectMercury.ParticleEffect">
+    <Item>
+      <Name>Small Stars</Name>
+      <Budget>10</Budget>
+      <Term>2</Term>
+      <ReleaseQuantity>1</ReleaseQuantity>
+      <Enabled>true</Enabled>
+      <ReleaseSpeed>
+        <Value>96</Value>
+        <Variation>64</Variation>
+      </ReleaseSpeed>
+      <ReleaseColour>
+        <Value>1 1 1</Value>
+        <Variation>0 0 0</Variation>
+      </ReleaseColour>
+      <ReleaseOpacity>
+        <Value>1</Value>
+        <Variation>0</Variation>
+      </ReleaseOpacity>
+      <ReleaseScale>
+        <Value>16</Value>
+        <Variation>0</Variation>
+      </ReleaseScale>
+      <ReleaseRotation>
+        <Value>0</Value>
+        <Variation>3.14</Variation>
+      </ReleaseRotation>
+      <ReleaseImpulse>0 0</ReleaseImpulse>
+      <ParticleTextureAssetName>Textures\Star</ParticleTextureAssetName>
+      <Modifiers>
+        <Item Type="Modifiers:OpacityInterpolatorModifier">
+          <InitialOpacity>0</InitialOpacity>
+          <MiddleOpacity>1</MiddleOpacity>
+          <MiddlePosition>0.75</MiddlePosition>
+          <FinalOpacity>0</FinalOpacity>
+        </Item>
+        <Item Type="Modifiers:DampingModifier">
+          <DampingCoefficient>3</DampingCoefficient>
+        </Item>
+        <Item Type="Modifiers:ColourModifier">
+          <InitialColour>1 1 1</InitialColour>
+          <UltimateColour>1 1 0</UltimateColour>
+        </Item>
+        <Item Type="Modifiers:LinearGravityModifier">
+          <Gravity>-150 -150</Gravity>
+        </Item>
+        <Item Type="Modifiers:ScaleModifier">
+          <InitialScale>16</InitialScale>
+          <UltimateScale>0</UltimateScale>
+        </Item>
+        <Item Type="Modifiers:ScaleOscillator">
+          <Frequency>6</Frequency>
+          <MinimumScale>8</MinimumScale>
+          <MaximumScale>16</MaximumScale>
+        </Item>
+        <Item Type="Modifiers:RotationModifier">
+          <RotationRate>32</RotationRate>
+        </Item>
+      </Modifiers>
+      <BlendMode>Add</BlendMode>
+      <TriggerOffset>0 0</TriggerOffset>
+      <MinimumTriggerPeriod>1</MinimumTriggerPeriod>
+    </Item>
+    <Item>
+      <Name>Small Stars Red</Name>
+      <Budget>10</Budget>
+      <Term>2</Term>
+      <ReleaseQuantity>1</ReleaseQuantity>
+      <Enabled>true</Enabled>
+      <ReleaseSpeed>
+        <Value>96</Value>
+        <Variation>64</Variation>
+      </ReleaseSpeed>
+      <ReleaseColour>
+        <Value>1 1 1</Value>
+        <Variation>0 0 0</Variation>
+      </ReleaseColour>
+      <ReleaseOpacity>
+        <Value>1</Value>
+        <Variation>0</Variation>
+      </ReleaseOpacity>
+      <ReleaseScale>
+        <Value>16</Value>
+        <Variation>0</Variation>
+      </ReleaseScale>
+      <ReleaseRotation>
+        <Value>0</Value>
+        <Variation>3.14</Variation>
+      </ReleaseRotation>
+      <ReleaseImpulse>0 0</ReleaseImpulse>
+      <ParticleTextureAssetName>Textures\Star</ParticleTextureAssetName>
+      <Modifiers>
+        <Item Type="Modifiers:OpacityInterpolatorModifier">
+          <InitialOpacity>0</InitialOpacity>
+          <MiddleOpacity>1</MiddleOpacity>
+          <MiddlePosition>0.75</MiddlePosition>
+          <FinalOpacity>0</FinalOpacity>
+        </Item>
+        <Item Type="Modifiers:DampingModifier">
+          <DampingCoefficient>3</DampingCoefficient>
+        </Item>
+        <Item Type="Modifiers:ColourModifier">
+          <InitialColour>1 1 1</InitialColour>
+          <UltimateColour>1 0 0</UltimateColour>
+        </Item>
+        <Item Type="Modifiers:LinearGravityModifier">
+          <Gravity>150 -100</Gravity>
+        </Item>
+        <Item Type="Modifiers:ScaleModifier">
+          <InitialScale>16</InitialScale>
+          <UltimateScale>0</UltimateScale>
+        </Item>
+        <Item Type="Modifiers:ScaleOscillator">
+          <Frequency>4</Frequency>
+          <MinimumScale>8</MinimumScale>
+          <MaximumScale>16</MaximumScale>
+        </Item>
+        <Item Type="Modifiers:RotationModifier">
+          <RotationRate>32</RotationRate>
+        </Item>
+        <Item Type="Modifiers:DampingModifier">
+          <DampingCoefficient>1</DampingCoefficient>
+        </Item>
+      </Modifiers>
+      <BlendMode>Add</BlendMode>
+      <TriggerOffset>0 0</TriggerOffset>
+      <MinimumTriggerPeriod>1</MinimumTriggerPeriod>
+    </Item>
+    <Item>
+      <Name>Small Stars orange</Name>
+      <Budget>10</Budget>
+      <Term>2</Term>
+      <ReleaseQuantity>1</ReleaseQuantity>
+      <Enabled>true</Enabled>
+      <ReleaseSpeed>
+        <Value>96</Value>
+        <Variation>64</Variation>
+      </ReleaseSpeed>
+      <ReleaseColour>
+        <Value>1 1 1</Value>
+        <Variation>0 0 0</Variation>
+      </ReleaseColour>
+      <ReleaseOpacity>
+        <Value>1</Value>
+        <Variation>0</Variation>
+      </ReleaseOpacity>
+      <ReleaseScale>
+        <Value>16</Value>
+        <Variation>0</Variation>
+      </ReleaseScale>
+      <ReleaseRotation>
+        <Value>0</Value>
+        <Variation>3.14</Variation>
+      </ReleaseRotation>
+      <ReleaseImpulse>0 0</ReleaseImpulse>
+      <ParticleTextureAssetName>Textures\Star</ParticleTextureAssetName>
+      <Modifiers>
+        <Item Type="Modifiers:OpacityInterpolatorModifier">
+          <InitialOpacity>0</InitialOpacity>
+          <MiddleOpacity>1</MiddleOpacity>
+          <MiddlePosition>0.75</MiddlePosition>
+          <FinalOpacity>0</FinalOpacity>
+        </Item>
+        <Item Type="Modifiers:DampingModifier">
+          <DampingCoefficient>3</DampingCoefficient>
+        </Item>
+        <Item Type="Modifiers:ColourModifier">
+          <InitialColour>1 1 1</InitialColour>
+          <UltimateColour>1 0.5 0</UltimateColour>
+        </Item>
+        <Item Type="Modifiers:LinearGravityModifier">
+          <Gravity>0 -150</Gravity>
+        </Item>
+        <Item Type="Modifiers:ScaleModifier">
+          <InitialScale>16</InitialScale>
+          <UltimateScale>0</UltimateScale>
+        </Item>
+        <Item Type="Modifiers:ScaleOscillator">
+          <Frequency>6</Frequency>
+          <MinimumScale>8</MinimumScale>
+          <MaximumScale>16</MaximumScale>
+        </Item>
+        <Item Type="Modifiers:RotationModifier">
+          <RotationRate>32</RotationRate>
+        </Item>
+      </Modifiers>
+      <BlendMode>Add</BlendMode>
+      <TriggerOffset>0 0</TriggerOffset>
+      <MinimumTriggerPeriod>1</MinimumTriggerPeriod>
+    </Item>
+    <Name>Magic Trail</Name>
+    <Author>Matt Davey</Author>
+    <Description />
+  </Asset>
+</XnaContent>

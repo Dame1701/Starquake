@@ -1,0 +1,12 @@
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/ProjectMercury.Linux/bin/Debug/net9.0/ProjectMercury.Linux.deps.json
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/ProjectMercury.Linux/bin/Debug/net9.0/ProjectMercury.Linux.dll
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/ProjectMercury.Linux/bin/Debug/net9.0/ProjectMercury.Linux.pdb
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/ProjectMercury.Linux/obj/Debug/net9.0/ProjectMercury.Linux.csproj.AssemblyReference.cache
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/ProjectMercury.Linux/obj/Debug/net9.0/ProjectMercury.Linux.GeneratedMSBuildEditorConfig.editorconfig
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/ProjectMercury.Linux/obj/Debug/net9.0/ProjectMercury.Linux.AssemblyInfoInputs.cache
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/ProjectMercury.Linux/obj/Debug/net9.0/ProjectMercury.Linux.AssemblyInfo.cs
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/ProjectMercury.Linux/obj/Debug/net9.0/ProjectMercury.Linux.csproj.CoreCompileInputs.cache
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/ProjectMercury.Linux/obj/Debug/net9.0/ProjectMercury.Linux.dll
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/ProjectMercury.Linux/obj/Debug/net9.0/refint/ProjectMercury.Linux.dll
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/ProjectMercury.Linux/obj/Debug/net9.0/ProjectMercury.Linux.pdb
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/ProjectMercury.Linux/obj/Debug/net9.0/ref/ProjectMercury.Linux.dll

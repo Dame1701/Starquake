@@ -1,0 +1,22 @@
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/SharedLibs/bin/Debug/net8.0/SharedLibs.deps.json
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/SharedLibs/bin/Debug/net8.0/SharedLibs.dll
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/SharedLibs/bin/Debug/net8.0/SharedLibs.pdb
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/SharedLibs/obj/Debug/net8.0/SharedLibs.GeneratedMSBuildEditorConfig.editorconfig
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/SharedLibs/obj/Debug/net8.0/SharedLibs.AssemblyInfoInputs.cache
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/SharedLibs/obj/Debug/net8.0/SharedLibs.AssemblyInfo.cs
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/SharedLibs/obj/Debug/net8.0/SharedLibs.csproj.CoreCompileInputs.cache
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/SharedLibs/obj/Debug/net8.0/SharedLibs.dll
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/SharedLibs/obj/Debug/net8.0/refint/SharedLibs.dll
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/SharedLibs/obj/Debug/net8.0/SharedLibs.pdb
+/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/SharedLibs/obj/Debug/net8.0/ref/SharedLibs.dll
+/home/damien/RiderProjects/Starquake-Linux/SharedLibs/bin/Debug/net8.0/SharedLibs.deps.json
+/home/damien/RiderProjects/Starquake-Linux/SharedLibs/bin/Debug/net8.0/SharedLibs.dll
+/home/damien/RiderProjects/Starquake-Linux/SharedLibs/bin/Debug/net8.0/SharedLibs.pdb
+/home/damien/RiderProjects/Starquake-Linux/SharedLibs/obj/Debug/net8.0/SharedLibs.GeneratedMSBuildEditorConfig.editorconfig
+/home/damien/RiderProjects/Starquake-Linux/SharedLibs/obj/Debug/net8.0/SharedLibs.AssemblyInfoInputs.cache
+/home/damien/RiderProjects/Starquake-Linux/SharedLibs/obj/Debug/net8.0/SharedLibs.AssemblyInfo.cs
+/home/damien/RiderProjects/Starquake-Linux/SharedLibs/obj/Debug/net8.0/SharedLibs.csproj.CoreCompileInputs.cache
+/home/damien/RiderProjects/Starquake-Linux/SharedLibs/obj/Debug/net8.0/SharedLibs.dll
+/home/damien/RiderProjects/Starquake-Linux/SharedLibs/obj/Debug/net8.0/refint/SharedLibs.dll
+/home/damien/RiderProjects/Starquake-Linux/SharedLibs/obj/Debug/net8.0/SharedLibs.pdb
+/home/damien/RiderProjects/Starquake-Linux/SharedLibs/obj/Debug/net8.0/ref/SharedLibs.dll

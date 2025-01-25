@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PipelineBuildEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <SourceFile>/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/Starquake_MonoGame-Linux/Content/Sounds/BlobShipFall.wav</SourceFile>
+  <SourceTime>2015-10-27T18:11:58.425748+00:00</SourceTime>
+  <DestFile>/home/damien/Development/Sherbetsheep Remakes/Starquake/Starquake_MonoGame/Starquake_MonoGame-Linux/Content/bin/DesktopGL/Content/Sounds/BlobShipFall.xnb</DestFile>
+  <DestTime>2025-01-25T15:01:10.5164403+00:00</DestTime>
+  <Importer>WavImporter</Importer>
+  <ImporterTime>2024-08-16T18:05:56+01:00</ImporterTime>
+  <Processor>SoundEffectProcessor</Processor>
+  <ProcessorTime>2024-08-16T18:05:56+01:00</ProcessorTime>
+  <Parameters>
+    <Key>Quality</Key>
+    <Value>Best</Value>
+  </Parameters>
+  <Dependencies />
+  <BuildAsset />
+  <BuildOutput />
+</PipelineBuildEvent>

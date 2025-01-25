@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<XnaContent xmlns:Modifiers="ProjectMercury.Modifiers">
+  <Asset Type="ProjectMercury.ParticleEffect">
+    <Item>
+      <Name>Stars1</Name>
+      <Budget>5000</Budget>
+      <Term>0.1</Term>
+      <ReleaseQuantity>1</ReleaseQuantity>
+      <Enabled>true</Enabled>
+      <ReleaseSpeed>
+        <Value>0</Value>
+        <Variation>10</Variation>
+      </ReleaseSpeed>
+      <ReleaseColour>
+        <Value>1 1 1</Value>
+        <Variation>0 0 0</Variation>
+      </ReleaseColour>
+      <ReleaseOpacity>
+        <Value>1</Value>
+        <Variation>0</Variation>
+      </ReleaseOpacity>
+      <ReleaseScale>
+        <Value>24</Value>
+        <Variation>16</Variation>
+      </ReleaseScale>
+      <ReleaseRotation>
+        <Value>0</Value>
+        <Variation>3.14</Variation>
+      </ReleaseRotation>
+      <ReleaseImpulse>10 0</ReleaseImpulse>
+      <ParticleTextureAssetName>Textures\LensFlare</ParticleTextureAssetName>
+      <Modifiers>
+        <Item Type="Modifiers:DampingModifier">
+          <DampingCoefficient>-8</DampingCoefficient>
+        </Item>
+        <Item Type="Modifiers:VelocityClampModifier">
+          <MaximumVelocity>1.5</MaximumVelocity>
+        </Item>
+        <Item Type="Modifiers:ScaleInterpolatorModifier">
+          <InitialScale>0</InitialScale>
+          <MiddleScale>256</MiddleScale>
+          <MiddlePosition>0.5</MiddlePosition>
+          <FinalScale>0</FinalScale>
+        </Item>
+        <Item Type="Modifiers:ColourModifier">
+          <InitialColour>0.5019608 1 1</InitialColour>
+          <UltimateColour>0 0 0.7529412</UltimateColour>
+        </Item>
+      </Modifiers>
+      <BlendMode>Add</BlendMode>
+      <TriggerOffset>0 0</TriggerOffset>
+      <MinimumTriggerPeriod>0</MinimumTriggerPeriod>
+    </Item>
+    <Item>
+      <Name>Stars2</Name>
+      <Budget>5000</Budget>
+      <Term>0.1</Term>
+      <ReleaseQuantity>1</ReleaseQuantity>
+      <Enabled>true</Enabled>
+      <ReleaseSpeed>
+        <Value>0</Value>
+        <Variation>20</Variation>
+      </ReleaseSpeed>
+      <ReleaseColour>
+        <Value>0 0 1</Value>
+        <Variation>0 0 0</Variation>
+      </ReleaseColour>
+      <ReleaseOpacity>
+        <Value>1</Value>
+        <Variation>0</Variation>
+      </ReleaseOpacity>
+      <ReleaseScale>
+        <Value>8</Value>
+        <Variation>4</Variation>
+      </ReleaseScale>
+      <ReleaseRotation>
+        <Value>0</Value>
+        <Variation>3.14</Variation>
+      </ReleaseRotation>
+      <ReleaseImpulse>50 20</ReleaseImpulse>
+      <ParticleTextureAssetName>Textures\LensFlare</ParticleTextureAssetName>
+      <Modifiers>
+        <Item Type="Modifiers:DampingModifier">
+          <DampingCoefficient>-8</DampingCoefficient>
+        </Item>
+        <Item Type="Modifiers:VelocityClampModifier">
+          <MaximumVelocity>1.5</MaximumVelocity>
+        </Item>
+        <Item Type="Modifiers:ScaleInterpolatorModifier">
+          <InitialScale>0</InitialScale>
+          <MiddleScale>64</MiddleScale>
+          <MiddlePosition>0.5</MiddlePosition>
+          <FinalScale>0</FinalScale>
+        </Item>
+        <Item Type="Modifiers:ColourModifier">
+          <InitialColour>1 1 1</InitialColour>
+          <UltimateColour>0.8784314 0.8784314 0.8784314</UltimateColour>
+        </Item>
+      </Modifiers>
+      <BlendMode>Add</BlendMode>
+      <TriggerOffset>0 0</TriggerOffset>
+      <MinimumTriggerPeriod>0</MinimumTriggerPeriod>
+    </Item>
+    <Name>Fire Trail</Name>
+    <Author>Matt Davey</Author>
+    <Description />
+  </Asset>
+</XnaContent>

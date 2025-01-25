@@ -1,0 +1,247 @@
+﻿28/03/2012
+- Added: Window scaling now works
+
+25/03/2013
+- Changed: Made the toggle keys routine static and updated from main game - now doesn't cache keypresses
+- Added: Preliminary game completed screen
+- Fixed: Completing the game caused a crash second time around (core elements not reset before MainGameScreen
+- Added: ColourAnimation engine
+
+22/03/2013
+- Changed: Keylock doors will never let nasties through only Blob
+
+21/03/2013
+- Added: Routine to ensure Blob never gets stuck in screen tiles when he's changing screens
+- Fixed: Bug in nasty AI routine which led to their inital spawn movements carrying over from the previous killed nasty
+- Changed: When nasties spawn they start off slowly - gives Blob a chance to react and makes the game fairer
+- Added: Splat death effect for the organic nasties
+- Added: When organic nasties die they splat in their original colours
+- Added: Full implementation of the keylock doors
+- Added: Added bones and eyes to the nasty splat death routine
+
+20/03/2013
+- Fixed: If game ended with Blob on a shuttle pad, he started on it next game
+- Added: Core elements are placed in a defined preferred location if there is one
+- Changed: Screen rumble effect now works on the viewport. All screen shake offsets removed from code to improve readability
+- Changed: Improved nasty birth animation
+- Added: Capability to pause the game
+- Changed: Changing from windowed to fullscreen now pauses the game automatically
+- Fixed: Nasty smoke effect when nasties collide with a electricity node or gate was broken
+
+19/03/2013
+- Added: Score is increased by 10,000 for every core element that is replaced
+- Added: High score entry
+- Changed: Fonts now use a leading value of 2 to better space out the characters rendering them more readable
+
+18/03/2013
+- Changed: Game Over screen colours made more appealing
+- Added: Initial implementation of reseting of game back to defaults (check core element routine)
+- Added: HiScore screen
+- Changed: Blob is now white, though you will be able to select different Blob's from the title screen
+- Added: Blob death explosion spund
+- Added: Clang sound for Blob's particles when he explodes
+
+17/03/2013
+- Added: Game Over screen
+
+12/03/2013
+- Fixed: Object ref error when Blob drops a pickup on certain screens
+- Fixed: Powerup that tops up lowest capability (ammo, jump, life) wasn't always topping up the right one
+- Changed: Decreased accuracy at which Blob can be struck by the electricity gates to make the game a little easier
+
+11/03/2013
+- Changed: Blob's energy is drained by the same amount no matter how many nasties are touching him - make the game a little easier
+- Changed: Status bars updated to proper 256 pixel versions
+- Added: Exit shadowing to make exits to screens appear dark and mysterious
+- Added: Shadowing to secret passages 
+
+07/03/2013
+- Changed: Initial work for new status panel to match title screen style
+- Added: Status panel shadow
+- Added: If full screen change is detected on startup it will happen when the game has started
+- Added: Overlay to status panel
+
+05/03/2013
+- Added: Blob death routine, the parts now spark when they bounce off any screen tiles
+
+26/02/2013
+- Changed: Blob now has instant death and overload death
+
+19/02/2013
+- Changed: Improvements to blob death animation
+
+29/01/2013
+- Added: Initial word on key door effect
+
+23/12/2012
+- Changed: A random number of between two and six of the core elements dotted around the map will now match what the core needs
+
+22/12/2012
+- Changed: All plant tiles modified to match jungle tile
+- Changed: Screenmap adjusted to make some tile combinations look better
+
+21/12/2012
+- Changed: Jungle tiles redrawn to match perfectly
+
+18/12/2012
+- Added: Proper distribution of core elements
+- Changed: Spiky nasties now move slower
+- Changed: Blob can now shoot nbasties during birth
+- Fixed: Occasions when Blob's fire gets stuck in mid air
+
+06/12/2012
+- Fixed: particle problems on Quadro video cards
+- Fixed: Blob gets stuck on a pad inside a teleporter when killed after arriving on a screen via a teleporter sometimes
+
+05/12/2012
+- Added: Blob can now be killed by the spiky tiles
+- Changed: When Blob is killed by electricity his position is not reset
+- Changed: Collision map removed for spiky tiles
+- Added: Nasties can no longer enter access booths, tunnel lifts or teleport booths
+- Fixed: If Blob respawns in a tunnel lift, he gets stuck
+- Fixed: If Blob is resurrected when on a teleporter, the collision map was not updated
+- Changed: Far walls of secret passages now have a blob fire and nasty collision map
+- Converted project to XNA 4.0
+
+04/12/2012
+- Changed: Blob's death routine integration improved
+- Added: Blob can now be killed by the electricity nodes
+- Added: Blob can now be killed by the electricity gates
+- Fixed: Electricity gates and nodes engine now updates correctly
+- Changed: Various tweaks and improvements to the death animation
+- Changed: Moved blob's death animation into a separate file
+- Fixed: Conveyer nasties no longer appear on screens they shouldn't
+
+02/12/2012
+- Changed: Blob death animation refactored into an object
+
+14/11/2012
+- Added: Initial work on bouncing object routine
+- Added: Near finalised bouncing object routine
+
+13/11/2012
+- Fixed: Nasties: Core guardian movement routine
+- Fixed: Nasties: Diagonal bouncing routine
+- Added: Initial implementation of Blob's death routine
+- Changed: Blob death routine moved out of the MainGameScreen and into the GameEngine
+- Changed: Nasties moved out of MainGameScreen and into the GameEngine
+- Changed: Effect sprite moved out of MainGameScreen and into the GameEngine
+- Changed: Electricity randomiser moved out of MainGameScreen and into the GameEngine
+- Changed: Extended screen effects engine to allow custom renderers
+- Added: Inital addictive fade screen effect
+
+30/10/2012
+- Added: Tunnel left and right screen effects
+- Changed: Rewrite of ScreenEffectEngine started
+- Changed: Refactored scaling routine in the ParticleEffectEngine to prepare the way for the rewrite of the screen effect engine
+
+28/10/2012
+- Added: Inactive electricity gates
+
+23/10/2012
+- Changed: Initial AI tweaking of nasties routines
+- Changed: Proper distribution of Cheops pyramids
+
+22/10/2012
+- Chaged: Cleaned up the jungle tiles
+
+20/10/2012
+- Changed: Improvements to the Spikey nasty's AI
+- Fixed: Non spiky nasties sometimes took on Spikey's movement routine
+
+19/10/2012
+- Changed: Tweaked the sound FX for Blob's falling
+- Changed: Nasty AI routines, a number of bugs have were fixed to do with the nasty movement routine selection
+- Added: Spikey Nasty AI routine
+- Added: Nasty AI, routine that will make all nasties the same sometimes and more often make them spikey!
+
+18/10/2012
+- Changed: redrawn helmet nasty properly
+- Fixed: Nasties were sometimes getting stuck on core objects / cheops pyramids / powerups
+
+17/10/2012
+- Fixed: Rumble sound would play long after rumbling had stopped
+- Added: Ghost nasty
+
+16/10/2012
+- Changed: Removed some old test code from the nasty AI routine
+- Fixed: Tunnel lift bug where sometimes Blob cannot exit a lift halfway up
+- Fixed: Nasties no longer get stuck in Blob's jump platforms
+
+10/10/2012
+- Changed: Improved nasty AI, nasties should not longer appear stuck when they're attracted to Blob
+- Fixed: jump platform bug, we didn't check above Blob before making a platform depleated just resulting in unfortunate scenary interaction
+- Changed: Improved sound effect engine to implement looping correctly
+- Added: Blob fall sound effect
+- Added: Rumble sound effect
+
+09/10/2012
+- Changed: Tewaked nodes and gates to make them switch off for longer, makes gameplay fairer, may need further tweaking
+- Changed: Refactored Blob's JumpPlatform engine to fix an occasional collision bug and a nonsense dual reference list
+
+28/09/2012
+- Fixed: sometimes when the screen changes during normal play particle artefacts are left around the borders
+
+27/09/2012
+- Fixed: Blob's fire routine so he can fire when over core elements or Cheops pyramids without the fire hitting the object he's over
+- Fixed: bug where if platforms or firepower were depleted, collecting a powerup for either did not reactivate those abilities
+
+23/09/2012
+- Added: Sound effects engine
+- Changed: Moved majority of resources into the XNA content pipeline
+- Changed: Rewrote the JumpPlatforms routine (needs further work)
+- Added: Blob's fire sound effects
+- Fixed: Memory leak in JumpPlatforms routine
+
+22/09/2012
+- Changed: Cleaned up some of the tiles to remove artifacts left over by anti-aliasing in PSP
+
+20/09/2012
+- Added: options screen and computer malfunction screen
+
+10/09/2012
+- Changed: Rewrote splash screen to remove windows dependent code, new splash screen added
+
+21/07/2011
+- Changed: Rewrite of resource management routine to support splash screen progress while loading and to keep all resources and allocation central
+
+22/07/2011
+- Added: Initial implementation of the core element replacement routine
+- Added: Finialisation of the core element replacement routine
+
+24/07/2011
+- Changed: Rewrite of particle engine to improve efficiency and to allow for more advanced effect management
+
+25/07/2011
+- Added: Started a routine that will cause Blob's laser to spark when it hits the game blocks etc
+
+26/07/2011
+- Added: Implimented multi trigger particle effect
+
+27/07/2011 
+- Fixed: Bugs in Blob fire spark routine
+- Added: Nasty Smoke effect routine
+- Added: More work to fix the nasties getting stuck on active objects. Improved but still broken
+- Added: Started a routine to determine which part of a sprite hit something. Use for particle effects
+
+02/08/2011
+- Added: Olly's eye movement animation
+- Added: Extended the animation tile routine to allow different delay periods
+- Added: initial tile animation for the Transporter Pads
+
+03/08/2011
+- Changed: Re-styled the jungle tiles
+- Added: Flower tile
+
+04/08/2011
+- Added: Additional work on the jungle tiles to incorporate existing graphics
+
+04/08/2011
+- Changed: Blob's platform lay routine, he can only lay platforms when he's not moving left or right
+- Changed: Blob's inventory drop / pick routine so he doesn't switch objects when he's moving left or right
+- Added: Improved the Nasty movement logic to incorporate random move speeds
+- Added: Further work to fix the nasty getting stuck in objects bug
+- Added: Improved nasty spawning routine to make them spawn at random intervals like the original game
+
+07/08/2011
+- Fixed: the routine which sees nasties getting stuck in Blob's platforms and occasionally in objects like cheops pyramids, core elements and powerups
