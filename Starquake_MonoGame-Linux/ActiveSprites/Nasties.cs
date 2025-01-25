@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using ProjectMercury;
 using StarquakeXNA.ContentManagement;
-using StarquakeXNA.Particles;
-using SharedLibs;
 using StarquakeXNA.Helpers;
+using StarquakeXNA.Particles;
 
 namespace StarquakeXNA
 {
@@ -26,7 +24,9 @@ namespace StarquakeXNA
         {
             nastyCount = NastyCount;
             nasties = new List<Nasty>();
-            nastySmokes = gameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume", enParticleEffectType.TriggeredMultiLocationTimed, null) as IPositionalTriggerParticleEffect;
+            nastySmokes =
+                gameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume",
+                    enParticleEffectType.TriggeredMultiLocationTimed, null) as IPositionalTriggerParticleEffect;
 
             // Create double the number needed for screen swap operations
             for (int a = 0; a < (nastyCount * 2); a++)
@@ -42,7 +42,6 @@ namespace StarquakeXNA
 
         #region IGameComponent Members
 
-
         public void LoadContent(ContentList Content)
         {
             for (int a = 0; a < (nastyCount * 2); a++)
@@ -51,11 +50,11 @@ namespace StarquakeXNA
             }
         }
 
-        public void Initialise(List<EffectSprite> EffectSprites)
+        public void Initialise()
         {
             for (int a = 0; a < (nastyCount * 2); a++)
             {
-                nasties[a].Initialise(EffectSprites);
+                nasties[a].Initialise();
             }
 
             // Maybe we should call this on start of the game for all involved....?
@@ -68,6 +67,7 @@ namespace StarquakeXNA
             {
                 nasties[a].NastyState = enNastyState.PreConception;
             }
+
             PerformPostChangeScreenActions();
         }
 
@@ -108,14 +108,14 @@ namespace StarquakeXNA
                         // We raise the event to affect the status panel
                         // Going to move the offsets etc. in a bit so it's not too precise and unfair!
                         if (CollisionDetection.Check(
-                            gameEngine.Player.BlobXPos + 8,
-                            gameEngine.Player.BlobYPos + 8,
-                            gameEngine.Player.BlobWidth - 16,
-                            gameEngine.Player.BlobHeight - 16,
-                            nasties[a].XPos,
-                            nasties[a].YPos,
-                            nasties[a].NastyWidth,
-                            nasties[a].NastyHeight))
+                                gameEngine.Player.BlobXPos + 8,
+                                gameEngine.Player.BlobYPos + 8,
+                                gameEngine.Player.BlobWidth - 16,
+                                gameEngine.Player.BlobHeight - 16,
+                                nasties[a].XPos,
+                                nasties[a].YPos,
+                                nasties[a].NastyWidth,
+                                nasties[a].NastyHeight))
                         {
                             if (nasties[a].NastyState == enNastyState.Normal)
                             {
@@ -132,21 +132,20 @@ namespace StarquakeXNA
                                 // Trigger the blob animation
                                 gameEngine.Player.BlobTouchedByNasty = true;
                             }
-
                         }
 
                         // Has blob shot a nasty
                         if (gameEngine.Player.BlobHasFired)
                         {
                             if (CollisionDetection.Check(
-                                gameEngine.Player.BlobFireX,
-                                gameEngine.Player.BlobFireY,
-                                32,
-                                32,
-                                nasties[a].XPos,
-                                nasties[a].YPos,
-                                nasties[a].NastyWidth,
-                                nasties[a].NastyHeight))
+                                    gameEngine.Player.BlobFireX,
+                                    gameEngine.Player.BlobFireY,
+                                    32,
+                                    32,
+                                    nasties[a].XPos,
+                                    nasties[a].YPos,
+                                    nasties[a].NastyWidth,
+                                    nasties[a].NastyHeight))
                             {
                                 if (nasties[a].NastyState == enNastyState.Normal ||
                                     nasties[a].NastyState == enNastyState.Birth)
@@ -165,7 +164,8 @@ namespace StarquakeXNA
 
                                     if (OnNastyInteractionWithBlob != null)
                                     {
-                                        OnNastyInteractionWithBlob(enNastyInterationType.BlobShot, nasties[a].NastyType);
+                                        OnNastyInteractionWithBlob(enNastyInterationType.BlobShot,
+                                            nasties[a].NastyType);
                                     }
                                 }
                             }
@@ -176,39 +176,50 @@ namespace StarquakeXNA
 
                         if (gameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers != null)
                         {
-                            for (int b = 0; b < gameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers.Length; b++)
+                            for (int b = 0;
+                                 b < gameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers.Length;
+                                 b++)
                             {
                                 if (gameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].ElectricityOn)
                                 {
                                     if (CollisionDetection.Check(
-                                    gameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location.X,
-                                    gameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location.Y,
-                                    128,
-                                    32,
-                                    nasties[a].XPos,
-                                    nasties[a].YPos,
-                                    nasties[a].NastyWidth,
-                                    nasties[a].NastyHeight))
+                                            gameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
+                                                .X,
+                                            gameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
+                                                .Y,
+                                            128,
+                                            32,
+                                            nasties[a].XPos,
+                                            nasties[a].YPos,
+                                            nasties[a].NastyWidth,
+                                            nasties[a].NastyHeight))
                                     {
                                         enDirection NastyTravelDirection = CollisionDetection.CheckCollisionDirection(
-                                        nasties[a].Speed,
-                                        nasties[a].XPos,
-                                        nasties[a].YPos,
-                                        nasties[a].NastyWidth,
-                                        nasties[a].NastyHeight,
-                                        gameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location.X,
-                                        gameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location.Y,
-                                        128,
-                                        32);
+                                            nasties[a].Speed,
+                                            nasties[a].XPos,
+                                            nasties[a].YPos,
+                                            nasties[a].NastyWidth,
+                                            nasties[a].NastyHeight,
+                                            gameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
+                                                .X,
+                                            gameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
+                                                .Y,
+                                            128,
+                                            32);
 
-                                        if (NastyTravelDirection != enDirection.None && nasties[a].NastyState == enNastyState.Normal)
+                                        if (NastyTravelDirection != enDirection.None &&
+                                            nasties[a].NastyState == enNastyState.Normal)
                                         {
                                             if (nastySmokes != null)
                                             {
                                                 nasties[a].Smoking = true;
                                                 nastySmokes.Start(
-                                                    SpriteHelpers.GetSpriteLocationOffset(nasties[a].Direction, nasties[a].NastyWidth, nasties[a].NastyHeight).X + nasties[a].XPos,
-                                                    SpriteHelpers.GetSpriteLocationOffset(nasties[a].Direction, nasties[a].NastyWidth, nasties[a].NastyHeight).Y + nasties[a].YPos);
+                                                    SpriteHelpers.GetSpriteLocationOffset(nasties[a].Direction,
+                                                        nasties[a].NastyWidth, nasties[a].NastyHeight).X +
+                                                    nasties[a].XPos,
+                                                    SpriteHelpers.GetSpriteLocationOffset(nasties[a].Direction,
+                                                        nasties[a].NastyWidth, nasties[a].NastyHeight).Y +
+                                                    nasties[a].YPos);
                                             }
                                         }
                                     }
@@ -344,6 +355,7 @@ namespace StarquakeXNA
                 }
             }
         }
+
         #endregion
     }
 
@@ -371,6 +383,7 @@ namespace StarquakeXNA
 
         // Behaviour
         MoveType movementTypeInternal;
+
         MoveType movementType
         {
             get { return movementTypeInternal; }
@@ -385,20 +398,19 @@ namespace StarquakeXNA
         //bool attractedToBlobFlag;
 
         enDirection nastyDirection;
+
         public enDirection Direction
         {
             get { return nastyDirection; }
         }
 
         bool constantMovement; // Movement type that doesn't rely on a number of steps
-        
+
         int moveSpeedInternal;
+
         int moveSpeed
         {
-            get
-            {
-                return moveSpeedInternal;
-            }
+            get { return moveSpeedInternal; }
             set
             {
                 moveSpeedInternal = value;
@@ -410,6 +422,7 @@ namespace StarquakeXNA
         {
             get { return moveSpeed; }
         }
+
         enDirection lastCollisionDirection;
 
         // Birth stuff
@@ -433,6 +446,7 @@ namespace StarquakeXNA
         bool firstMovement = false;
 
         bool keepNastyTheSame = false;
+
         public bool KeepNastyTheSame
         {
             get { return keepNastyTheSame; }
@@ -445,6 +459,7 @@ namespace StarquakeXNA
         bool deathAnticlockwise = false;
 
         int nastyWidth = 64;
+
         public int NastyWidth
         {
             get { return nastyWidth; }
@@ -452,6 +467,7 @@ namespace StarquakeXNA
         }
 
         enNastyState nastyState;
+
         public enNastyState NastyState
         {
             get { return nastyState; }
@@ -459,6 +475,7 @@ namespace StarquakeXNA
         }
 
         int nastyHeight = 64;
+
         public int NastyHeight
         {
             get { return nastyHeight; }
@@ -466,6 +483,7 @@ namespace StarquakeXNA
         }
 
         bool smoking;
+
         public bool Smoking
         {
             get { return smoking; }
@@ -474,6 +492,7 @@ namespace StarquakeXNA
 
         // Position
         private int xPos;
+
         public int XPos
         {
             get { return xPos; }
@@ -481,6 +500,7 @@ namespace StarquakeXNA
         }
 
         private int yPos;
+
         public int YPos
         {
             get { return yPos; }
@@ -492,11 +512,13 @@ namespace StarquakeXNA
         /// So this records such an instance and releases it after a number of frames
         /// </summary>
         private int nastyStuckCounter;
+
         private int prevXpos;
         private int prevYpos;
         private int nastyDeadPauseCounter;
 
         private enNastyType nastyType;
+
         public enNastyType NastyType
         {
             get { return nastyType; }
@@ -513,7 +535,9 @@ namespace StarquakeXNA
                 }
                 else
                 {
-                    movementType = (MoveType)gameEngine.RandomNumberGenerator.Next(0, (Enum.GetValues(typeof(MoveType)).Length - 1));
+                    movementType =
+                        (MoveType)gameEngine.RandomNumberGenerator.Next(0,
+                            (Enum.GetValues(typeof(MoveType)).Length - 1));
                 }
             }
         }
@@ -595,7 +619,8 @@ namespace StarquakeXNA
                 int nastyLocationIndex = gameEngine.RandomNumberGenerator.Next(0, potentialLocations.Count);
 
                 // Return a location
-                return new Point(potentialLocations[nastyLocationIndex].X + 32, potentialLocations[nastyLocationIndex].Y + 16);
+                return new Point(potentialLocations[nastyLocationIndex].X + 32,
+                    potentialLocations[nastyLocationIndex].Y + 16);
             }
 
             // this should never happen
@@ -613,15 +638,19 @@ namespace StarquakeXNA
             nastyDiesAnimation.Repeat = true;
             nastyDiesAnimation.AnimateForwards = true;
 
-            nastySpriteOriginal = gameEngine.ContentResourceManager.GetSpriteCollection("NastiesOriginal").Clone(gameEngine);
+            nastySpriteOriginal = gameEngine.ContentResourceManager.GetSpriteCollection("NastiesOriginal")
+                .Clone(gameEngine);
             nastySpriteNew = gameEngine.ContentResourceManager.GetSpriteCollection("Nasties").Clone(gameEngine);
 
             CheckSpritesInUse();
 
-            nastyDies = gameEngine.ContentResourceManager.GetParticleEffectInstance("NastyDies", enParticleEffectType.Triggered, null) as IStandardParticleEffect;
+            nastyDies = gameEngine.ContentResourceManager.GetParticleEffectInstance("NastyDies",
+                enParticleEffectType.Triggered, null) as IStandardParticleEffect;
             nastyDies.ParticleEffectComplete += new RaiseEffectComplete(nastyDies_ParticleEffectComplete);
 
-            nastyDiesType2 = gameEngine.ContentResourceManager.GetParticleEffectInstance("NastySplat", enParticleEffectType.Triggered, null) as IStandardParticleEffect;
+            nastyDiesType2 =
+                gameEngine.ContentResourceManager.GetParticleEffectInstance("NastySplat",
+                    enParticleEffectType.Triggered, null) as IStandardParticleEffect;
             nastyDiesType2.ParticleEffectComplete += new RaiseEffectComplete(nastyDies_ParticleEffectComplete);
         }
 
@@ -648,7 +677,7 @@ namespace StarquakeXNA
             }
         }
 
-        public void Initialise(List<EffectSprite> EffectSprites)
+        public void Initialise()
         {
             stepsMovedCounter = 0;
             stepsToMove = 0;
@@ -658,11 +687,10 @@ namespace StarquakeXNA
                 nastyDirection = (enDirection)gameEngine.RandomNumberGenerator.Next(4, 8); // select from 2nd four
             }
             else if (movementType == MoveType.RandomMovement ||
-                movementType == MoveType.RandomUpDownLeftRight)
+                     movementType == MoveType.RandomUpDownLeftRight)
             {
                 nastyDirection = (enDirection)gameEngine.RandomNumberGenerator.Next(0, 4); // select from 1st four
             }
-
         }
 
         public static enNastyType GetRandomNastyType(GameEngine GameEngineReference, bool KeepNastiesTheSame)
@@ -823,6 +851,7 @@ namespace StarquakeXNA
                 {
                     birthScale = birthScale + (1f / (float)birthPeriod);
                 }
+
                 if (birthScale > 1.0f)
                 {
                     birthScale = 1.0f;
@@ -832,7 +861,11 @@ namespace StarquakeXNA
                 // Fade the nasty in
                 if (birthFadeLevel < 255)
                 {
-                    birthFadeLevel = birthFadeLevel + (int)((double)255 / (double)((double)birthPeriod / 2)); // We only have half the time to do the colour fade in 
+                    birthFadeLevel =
+                        birthFadeLevel +
+                        (int)((double)255 /
+                              (double)((double)birthPeriod /
+                                       2)); // We only have half the time to do the colour fade in 
                 }
 
 
@@ -841,7 +874,11 @@ namespace StarquakeXNA
                 {
                     if (birthColourLevel < 255)
                     {
-                        birthColourLevel = birthColourLevel + (int)((double)255 / (double)((double)birthPeriod / 2)); // We only have half the time to do the colour fade in 
+                        birthColourLevel =
+                            birthColourLevel +
+                            (int)((double)255 /
+                                  (double)((double)birthPeriod /
+                                           2)); // We only have half the time to do the colour fade in 
                     }
 
                     if (birthRotateSpeed > 16)
@@ -976,7 +1013,6 @@ namespace StarquakeXNA
                             // Unattract blob
                             attractedToBlob = false;
                             nastyStuckCounter = 0;
-
                         }
 
                         prevXpos = xPos;
@@ -1036,7 +1072,6 @@ namespace StarquakeXNA
                             {
                                 DiagonalBouncing(0, 0);
                             }
-
                         }
                         else if (movementType == MoveType.DiagonalBouncingInSteps)
                         {
@@ -1095,21 +1130,25 @@ namespace StarquakeXNA
                             }
                             else
                             {
-                                movementType = (MoveType)gameEngine.RandomNumberGenerator.Next(0, (Enum.GetValues(typeof(MoveType)).Length - 1));
+                                movementType = (MoveType)gameEngine.RandomNumberGenerator.Next(0,
+                                    (Enum.GetValues(typeof(MoveType)).Length - 1));
                             }
 
                             if (movementType == MoveType.DiagonalBouncing)
                             {
-                                nastyDirection = (enDirection)gameEngine.RandomNumberGenerator.Next(4, 8); // select from 2nd four
+                                nastyDirection =
+                                    (enDirection)gameEngine.RandomNumberGenerator.Next(4, 8); // select from 2nd four
                             }
                             else if (movementType == MoveType.RandomMovement ||
-                            movementType == MoveType.RandomUpDownLeftRight)
+                                     movementType == MoveType.RandomUpDownLeftRight)
                             {
-                                nastyDirection = (enDirection)gameEngine.RandomNumberGenerator.Next(0, 4); // select from 1st four
+                                nastyDirection =
+                                    (enDirection)gameEngine.RandomNumberGenerator.Next(0, 4); // select from 1st four
                             }
                             else if (movementType == MoveType.DiagonalBouncingInSteps)
                             {
-                                nastyDirection = (enDirection)gameEngine.RandomNumberGenerator.Next(4, 8); // select from 2nd four
+                                nastyDirection =
+                                    (enDirection)gameEngine.RandomNumberGenerator.Next(4, 8); // select from 2nd four
                                 stepsToMove = gameEngine.RandomNumberGenerator.Next(8, 16);
                             }
 
@@ -1123,7 +1162,7 @@ namespace StarquakeXNA
                                     moveSpeed = gameEngine.RandomNumberGenerator.Next(6, 8);
                                 }
                                 else if (movementType == MoveType.RandomMovement ||
-                                    movementType == MoveType.RandomMovementsAllDirections)
+                                         movementType == MoveType.RandomMovementsAllDirections)
                                 {
                                     moveSpeed = gameEngine.RandomNumberGenerator.Next(2, 4);
                                 }
@@ -1140,8 +1179,8 @@ namespace StarquakeXNA
                                     moveSpeed = gameEngine.RandomNumberGenerator.Next(4, 6);
                                 }
                                 else if (movementType == MoveType.RandomUpDownLeftRight ||
-                                    movementType == MoveType.DiagonalBouncing ||
-                                    movementType == MoveType.DiagonalBouncingInSteps)
+                                         movementType == MoveType.DiagonalBouncing ||
+                                         movementType == MoveType.DiagonalBouncingInSteps)
                                 {
                                     moveSpeed = gameEngine.RandomNumberGenerator.Next(8, 10);
                                 }
@@ -1172,7 +1211,6 @@ namespace StarquakeXNA
                     movementType = MoveType.DiagonalBouncing;
                     moveSpeed = 8;
                 }
-
             }
         }
 
@@ -1328,6 +1366,7 @@ namespace StarquakeXNA
                     nastyDirection = enDirection.UpRight;
                 }
             }
+
             stepsToMove = gameEngine.RandomNumberGenerator.Next(8, 40);
         }
 
@@ -1411,6 +1450,7 @@ namespace StarquakeXNA
                     }
                 }
             }
+
             stepsToMove = gameEngine.RandomNumberGenerator.Next(8, 40);
         }
 
@@ -1495,7 +1535,6 @@ namespace StarquakeXNA
                         }
                     }
                 }
-
             }
 
             stepsToMove = gameEngine.RandomNumberGenerator.Next(1, 4);
@@ -1505,7 +1544,8 @@ namespace StarquakeXNA
         {
             if (lastCollisionDirection == enDirection.None || nastyDirection == enDirection.None)
             {
-                nastyDirection = (enDirection)gameEngine.RandomNumberGenerator.Next(0, 8); // Select from all movement directions
+                nastyDirection =
+                    (enDirection)gameEngine.RandomNumberGenerator.Next(0, 8); // Select from all movement directions
             }
 
             if (!attractedToBlob)
@@ -1718,6 +1758,7 @@ namespace StarquakeXNA
                     }
                 }
             }
+
             stepsToMove = gameEngine.RandomNumberGenerator.Next(10, 40);
         }
 
@@ -1951,7 +1992,10 @@ namespace StarquakeXNA
 
             if (!spikeyPause)
             {
-                stepsToMove = gameEngine.RandomNumberGenerator.Next((int)(((double)stepsFromBlob / (double)moveSpeed) / 2), (int)((double)stepsFromBlob / (double)moveSpeed)) + 10; // An additional 10 to stop the spiky lads from getting stuck on scenary
+                stepsToMove = gameEngine.RandomNumberGenerator.Next(
+                                  (int)(((double)stepsFromBlob / (double)moveSpeed) / 2),
+                                  (int)((double)stepsFromBlob / (double)moveSpeed)) +
+                              10; // An additional 10 to stop the spiky lads from getting stuck on scenary
             }
             else
             {
@@ -1965,7 +2009,8 @@ namespace StarquakeXNA
 
             if (nastyDirection == enDirection.Down)
             {
-                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Down, xPos, yPos, nastyWidth, nastyHeight, moveSpeed, false);
+                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Down, xPos, yPos, nastyWidth,
+                    nastyHeight, moveSpeed, false);
 
                 if (amountToMoveY == 0)
                 {
@@ -1976,7 +2021,8 @@ namespace StarquakeXNA
             }
             else if (nastyDirection == enDirection.Up)
             {
-                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Up, xPos, yPos, nastyWidth, nastyHeight, moveSpeed, false);
+                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Up, xPos, yPos, nastyWidth,
+                    nastyHeight, moveSpeed, false);
 
                 if (amountToMoveY == 0)
                 {
@@ -1987,7 +2033,8 @@ namespace StarquakeXNA
             }
             else if (nastyDirection == enDirection.Left)
             {
-                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Left, xPos, yPos, nastyWidth, nastyHeight, moveSpeed, false);
+                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Left, xPos, yPos, nastyWidth,
+                    nastyHeight, moveSpeed, false);
 
                 if (amountToMoveX == 0)
                 {
@@ -1998,18 +2045,22 @@ namespace StarquakeXNA
             }
             else if (nastyDirection == enDirection.Right)
             {
-                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Right, xPos, yPos, nastyWidth, nastyHeight, moveSpeed, false);
+                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Right, xPos, yPos, nastyWidth,
+                    nastyHeight, moveSpeed, false);
 
                 if (amountToMoveX == 0)
                 {
                     stepsMovedCounter = stepsToMove;
                 }
+
                 xPos = xPos + amountToMoveX;
             }
             else if (nastyDirection == enDirection.UpLeft)
             {
-                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Up, xPos, yPos, nastyWidth, nastyHeight, moveSpeed, false);
-                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Left, xPos, yPos - amountToMoveY, nastyWidth, nastyHeight, moveSpeed, false);
+                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Up, xPos, yPos, nastyWidth,
+                    nastyHeight, moveSpeed, false);
+                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Left, xPos, yPos - amountToMoveY,
+                    nastyWidth, nastyHeight, moveSpeed, false);
 
                 if (amountToMoveY == 0)
                 {
@@ -2025,8 +2076,10 @@ namespace StarquakeXNA
             }
             else if (nastyDirection == enDirection.DownLeft)
             {
-                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Down, xPos, yPos, nastyWidth, nastyHeight, moveSpeed, false);
-                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Left, xPos, yPos + amountToMoveY, nastyWidth, nastyHeight, moveSpeed, false);
+                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Down, xPos, yPos, nastyWidth,
+                    nastyHeight, moveSpeed, false);
+                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Left, xPos, yPos + amountToMoveY,
+                    nastyWidth, nastyHeight, moveSpeed, false);
 
                 if (amountToMoveY == 0)
                 {
@@ -2042,8 +2095,10 @@ namespace StarquakeXNA
             }
             else if (nastyDirection == enDirection.UpRight)
             {
-                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Up, xPos, yPos, nastyWidth, nastyHeight, moveSpeed, false);
-                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Right, xPos, yPos - amountToMoveY, nastyWidth, nastyHeight, moveSpeed, false);
+                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Up, xPos, yPos, nastyWidth,
+                    nastyHeight, moveSpeed, false);
+                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Right, xPos, yPos - amountToMoveY,
+                    nastyWidth, nastyHeight, moveSpeed, false);
 
                 if (amountToMoveY == 0)
                 {
@@ -2059,8 +2114,10 @@ namespace StarquakeXNA
             }
             else if (nastyDirection == enDirection.DownRight)
             {
-                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Down, xPos, yPos, nastyWidth, nastyHeight, moveSpeed, false);
-                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Right, xPos, yPos + amountToMoveY, nastyWidth, nastyHeight, moveSpeed, false);
+                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Down, xPos, yPos, nastyWidth,
+                    nastyHeight, moveSpeed, false);
+                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Right, xPos, yPos + amountToMoveY,
+                    nastyWidth, nastyHeight, moveSpeed, false);
 
                 if (amountToMoveY == 0)
                 {
@@ -2118,7 +2175,6 @@ namespace StarquakeXNA
                 {
                     lastCollisionDirection = enDirection.Left;
                 }
-
             }
             else if (nastyDirection == enDirection.UpRight)
             {
@@ -2212,7 +2268,8 @@ namespace StarquakeXNA
                 nastySprite.Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
 
                 // Choose the image
-                nastySprite.DrawSprite(nastyImage + nastyAnim.CurrentFrame, xPos, yPos, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)ScreenFade), 1.0f, 4f, true, gameEngine.Paused);
+                nastySprite.DrawSprite(nastyImage + nastyAnim.CurrentFrame, xPos, yPos,
+                    ColourHelper.GetXNA4Colour(255, 255, 255, (byte)ScreenFade), 1.0f, 4f, true, gameEngine.Paused);
                 nastySprite.End();
             }
             else
@@ -2222,10 +2279,11 @@ namespace StarquakeXNA
                     nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
 
                     // Choose the image
-                    nastySprite.DrawSprite(nastyImage + nastyAnim.CurrentFrame, xPos, yPos, ColourHelper.GetXNA4Colour((byte)birthColourLevel, (byte)birthColourLevel, 255, (byte)((double)255 * (double)((double)ScreenFade / 255))), birthScale, birthRotateSpeed, true, gameEngine.Paused);
+                    nastySprite.DrawSprite(nastyImage + nastyAnim.CurrentFrame, xPos, yPos,
+                        ColourHelper.GetXNA4Colour((byte)birthColourLevel, (byte)birthColourLevel, 255,
+                            (byte)((double)255 * (double)((double)ScreenFade / 255))), birthScale, birthRotateSpeed,
+                        true, gameEngine.Paused);
                     nastySprite.End();
-
-
                 }
                 else if (nastyState == enNastyState.Normal)
                 {
@@ -2233,14 +2291,18 @@ namespace StarquakeXNA
                     if (smoking)
                     {
                         nastySprite.Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
-                        nastySprite.DrawSprite(nastyImage + nastyAnim.CurrentFrame, xPos, yPos, ColourHelper.GetXNA4Colour(50, 50, 50, (byte)ScreenFade));
-                        nastySprite.DrawSprite(nastyImage + nastyAnim.CurrentFrame, xPos, yPos, ColourHelper.GetXNA4Colour(255, 0, 0, (byte)ScreenFade));
-                        nastySprite.DrawSprite(nastyImage + nastyAnim.CurrentFrame, xPos, yPos, ColourHelper.GetXNA4Colour(0, 100, 0, (byte)ScreenFade));
+                        nastySprite.DrawSprite(nastyImage + nastyAnim.CurrentFrame, xPos, yPos,
+                            ColourHelper.GetXNA4Colour(50, 50, 50, (byte)ScreenFade));
+                        nastySprite.DrawSprite(nastyImage + nastyAnim.CurrentFrame, xPos, yPos,
+                            ColourHelper.GetXNA4Colour(255, 0, 0, (byte)ScreenFade));
+                        nastySprite.DrawSprite(nastyImage + nastyAnim.CurrentFrame, xPos, yPos,
+                            ColourHelper.GetXNA4Colour(0, 100, 0, (byte)ScreenFade));
                     }
                     else
                     {
                         nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                        nastySprite.DrawSprite(nastyImage + nastyAnim.CurrentFrame, xPos, yPos, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)ScreenFade));
+                        nastySprite.DrawSprite(nastyImage + nastyAnim.CurrentFrame, xPos, yPos,
+                            ColourHelper.GetXNA4Colour(255, 255, 255, (byte)ScreenFade));
                     }
 
                     nastySprite.End();
@@ -2283,25 +2345,32 @@ namespace StarquakeXNA
                     if (deathFadeLevel > 0)
                     {
                         nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                        nastySprite.DrawSprite(nastyImage + nastyAnim.CurrentFrame, xPos, yPos, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)((double)deathFadeLevel * (double)((double)ScreenFade / 255))), deathScale, 16f, deathAnticlockwise, gameEngine.Paused);
+                        nastySprite.DrawSprite(nastyImage + nastyAnim.CurrentFrame, xPos, yPos,
+                            ColourHelper.GetXNA4Colour(255, 255, 255,
+                                (byte)((double)deathFadeLevel * (double)((double)ScreenFade / 255))), deathScale, 16f,
+                            deathAnticlockwise, gameEngine.Paused);
                         nastySprite.End();
                     }
 
                     if (gameEngine.UsingOldGraphics)
                     {
-                        gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                        gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").DrawSprite(nastyDiesAnimation.CurrentFrame, xPos, yPos, ColourHelper.GetXNA4Colour(255, 255, 255, ScreenFade), 1f, 0f);
+                        gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original")
+                            .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+                        gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").DrawSprite(
+                            nastyDiesAnimation.CurrentFrame, xPos, yPos,
+                            ColourHelper.GetXNA4Colour(255, 255, 255, ScreenFade), 1f, 0f);
                         gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").End();
                     }
                 }
             }
         }
+
         #endregion
     }
 
     public class NastyHelpers
     {
-        public static void ApplyNastyColours(enNastyType NastyType, ProjectMercury.ParticleEffect Effect)
+        public static void ApplyNastyColours(enNastyType NastyType, ParticleEffect Effect)
         {
             if (NastyType == enNastyType.FriedEgg)
             {

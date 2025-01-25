@@ -33,12 +33,7 @@ namespace StarquakeXNA
             conveyerNasties = ConvyrNasties;
         }
 
-        public void LoadContent(StarquakeXNA.ContentManagement.ContentList Content)
-        {
-            
-        }
-
-        public void Initialise(List<EffectSprite> EffectSprites)
+        public override void Initialise(object data)
         {
             electricityAnimationOriginal = new Animation();
             electricityAnimationOriginal.FirstFrame = 0;

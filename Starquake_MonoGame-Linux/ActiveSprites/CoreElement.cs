@@ -325,7 +325,7 @@ namespace StarquakeXNA
             }
         }
 
-        public void Initialise(List<EffectSprite> EffectSprites)
+        public void Initialise()
         {
             
         }

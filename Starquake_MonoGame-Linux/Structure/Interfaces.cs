@@ -13,7 +13,7 @@ namespace StarquakeXNA
     {
         event RaiseScreenChanged OnScreenChanged;
         void LoadContent(ContentList Content);
-        void Initialise(List<EffectSprite> EffectSprites);
+        void Initialise();
         void PerformPostChangeScreenActions();
         void Draw(GameTime gameTime, int ScreenShakeXOffset, int ScreenShakeYOffset, int ScreenFade);
     }

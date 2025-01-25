@@ -59,14 +59,6 @@ namespace StarquakeXNA
             }
         }
 
-        public void Initialise(List<EffectSprite> EffectSprites)
-        {
-            //for (int a = 0; a < nasties.Count; a++)
-            //{
-            //    nasties[a].Initialise(null);
-            //}
-        }
-
         public void PerformPostChangeScreenActions()
         {
             // See if we need to create some nasties and get on with it
@@ -285,7 +277,7 @@ namespace StarquakeXNA
             nastyActive = false;
         }
 
-        public void Initialise(List<EffectSprite> EffectSprites)
+        public void Initialise()
         {
             nastyState = enNastyState.Conception;
             nastyActive = true;

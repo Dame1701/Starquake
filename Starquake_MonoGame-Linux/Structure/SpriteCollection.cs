@@ -5,525 +5,442 @@ using Microsoft.Xna.Framework.Content;
 using StarquakeXNA.Helpers;
 using Starquake_MonoGame.Structure;
 
-namespace StarquakeXNA
+namespace StarquakeXNA;
+
+[Serializable]
+public class SpriteCollection
 {
-    public class EffectSprite
+    private int[] _spriteTexturePosX;
+    private int[] _spriteTexturePosY;
+
+    private float _spriteRotation;
+
+    public float SpriteRotation
     {
-        public SpriteCollection Sprite;
-        public Point Location;
+        get => _spriteRotation;
+        set => _spriteRotation = value;
     }
 
-    [Serializable]
-    public class SpriteCollection
+    private bool _clockWise = true;
+    private float _rotationSpeed = 1f;
+
+    [NonSerialized] private SpriteBatch _sprites;
+
+    [NonSerialized] private Texture2D _spriteImages;
+
+    private int _spriteWidth;
+
+    public int SpriteWidth => _spriteWidth;
+
+    public int SpriteHeight { get; }
+
+    private byte _fade;
+
+    public int SpriteCount { get; }
+
+    private string _imageFilePath;
+
+    [NonSerialized] private GameEngine _gameEngineReference;
+
+    public SpriteCollection(GameEngine GameEngineReference, ContentManager Content, string ImageFilePath,
+        int SpriteWidth, int SpriteHeight)
     {
-        private int[] spriteTexturePosX;
-        private int[] spriteTexturePosY;
-        private int noImages;
+        _imageFilePath = ImageFilePath;
+        _gameEngineReference = GameEngineReference;
 
-        private int effectSpeed;
+        _spriteWidth = SpriteWidth;
+        this.SpriteHeight = SpriteHeight;
 
-        public int EffectSpeed
+        _sprites = new SpriteBatch(_gameEngineReference.GraphicsDeviceMgr.GraphicsDevice);
+        _spriteImages = Content.Load<Texture2D>(ImageFilePath);
+
+        var noHorizontalImages = _spriteImages.Width / SpriteWidth;
+        var noVerticalImages = _spriteImages.Height / SpriteHeight;
+
+        SpriteCount = noHorizontalImages * noVerticalImages;
+
+        _spriteTexturePosX = new int[SpriteCount];
+        _spriteTexturePosY = new int[SpriteCount];
+
+        var counter = 0;
+        _fade = 255;
+
+        // Generate Coordinates for the textures of the tiles found
+        for (int y = 0; y < noVerticalImages; y++)
         {
-            get { return effectSpeed; }
-            set { effectSpeed = value; }
-        }
-
-        private float spriteRotation = 0f;
-
-        public float SpriteRotation
-        {
-            get { return spriteRotation; }
-            set { spriteRotation = value; }
-        }
-
-        private bool clockWise = true;
-        private float rotationSpeed = 1f;
-
-        public static Texture2D SpriteEffectsTexture;
-
-        [NonSerialized] private SpriteBatch sprites;
-
-        [NonSerialized] private Texture2D spriteImages;
-
-        private int spriteWidth;
-
-        public int SpriteWidth
-        {
-            get { return spriteWidth; }
-        }
-
-        private int spriteHeight;
-
-        public int SpriteHeight
-        {
-            get { return spriteHeight; }
-        }
-
-        private byte fade;
-
-        private bool effectEnded;
-
-        public bool EffectEnded
-        {
-            get { return effectEnded; }
-        }
-
-        public int SpriteCount
-        {
-            get { return noImages; }
-        }
-
-        private string imageFilePath;
-
-        [NonSerialized] private GameEngine gameEngineReference;
-
-        public SpriteCollection(GameEngine GameEngineReference, ContentManager Content, string ImageFilePath,
-            int SpriteWidth, int SpriteHeight)
-        {
-            imageFilePath = ImageFilePath;
-            gameEngineReference = GameEngineReference;
-
-            effectSpeed = 4;
-
-            spriteWidth = SpriteWidth;
-            spriteHeight = SpriteHeight;
-
-            sprites = new SpriteBatch(gameEngineReference.GraphicsDeviceMgr.GraphicsDevice);
-            spriteImages = Content.Load<Texture2D>(ImageFilePath);
-
-            int NoHorizontalImages = spriteImages.Width / SpriteWidth;
-            int NoVerticleImages = spriteImages.Height / SpriteHeight;
-
-            noImages = NoHorizontalImages * NoVerticleImages;
-
-            spriteTexturePosX = new int[noImages];
-            spriteTexturePosY = new int[noImages];
-
-            int Counter = 0;
-            fade = 255;
-
-            // Generate Coordinates for the textures of the tiles found
-            for (int y = 0; y < NoVerticleImages; y++)
+            for (int x = 0; x < noHorizontalImages; x++)
             {
-                for (int x = 0; x < NoHorizontalImages; x++)
+                _spriteTexturePosX[counter] = x * _spriteWidth;
+                _spriteTexturePosY[counter] = y * this.SpriteHeight;
+                counter++;
+            }
+        }
+    }
+
+    private void SetSpriteEffect()
+    {
+        _fade = 255;
+    }
+
+    public void ResetEffect()
+    {
+        _fade = 0;
+    }
+
+    public void Begin(BlendState blendState, GameTime gameTime)
+    {
+        _sprites.Begin(SpriteSortMode.Deferred, blendState);
+    }
+
+    public void Begin(BlendState blendState, SpriteSortMode sortMode, GameTime gameTime)
+    {
+        _sprites.Begin(sortMode, blendState);
+    }
+
+    public void DrawSpriteUnscaled(int SpriteNumber, int XPosition, int YPosition)
+    {
+        _sprites.Draw(
+            _spriteImages,
+            new Vector2(XPosition, YPosition),
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+                SpriteHeight),
+            ColourHelper.GetXNA4Colour(255, 255, 255, _fade),
+            0f,
+            new Vector2(0, 0),
+            new Vector2(1, 1),
+            SpriteEffects.None,
+            0);
+    }
+
+    public void DrawSpriteUnscaled(int SpriteNumber, int XPosition, int YPosition, int Fade)
+    {
+        _sprites.Draw(
+            _spriteImages,
+            new Vector2(XPosition, YPosition),
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+                SpriteHeight),
+            ColourHelper.GetXNA4Colour(255, 255, 255, Fade),
+            0f,
+            new Vector2(0, 0),
+            new Vector2(1, 1),
+            SpriteEffects.None,
+            0);
+    }
+
+    public void DrawSprite(int SpriteNumber, int XPosition, int YPosition)
+    {
+        const float hScaling = 1f;
+        const float vScaling = 1f;
+
+        _sprites.Draw(
+            _spriteImages,
+            new Vector2(XPosition * hScaling, YPosition * vScaling),
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+                SpriteHeight),
+            ColourHelper.GetXNA4Colour(255, 255, 255, _fade),
+            0f,
+            new Vector2(0, 0),
+            new Vector2(hScaling, vScaling),
+            SpriteEffects.None,
+            0);
+    }
+
+    public void DrawSprite(int SpriteNumber, float XPosition, float YPosition)
+    {
+        const float hScaling = 1f;
+        const float vScaling = 1f;
+
+        _sprites.Draw(
+            _spriteImages,
+            new Vector2(XPosition * hScaling, YPosition * vScaling),
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+                SpriteHeight),
+            ColourHelper.GetXNA4Colour(255, 255, 255, _fade));
+    }
+
+    public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, Color SpriteColour, SpritePixel[] Matrix,
+        int BlockSize = 4, SpriteEffects SpriteEffect = SpriteEffects.None)
+    {
+        if (Matrix.Length == _spriteWidth * SpriteHeight)
+        {
+            const float hScaling = 1f;
+            const float vScaling = 1f;
+
+            var x = 0;
+            var y = 0;
+
+            var blockMultiplier = 1;
+            if (BlockSize > 1)
+            {
+                blockMultiplier = 2;
+            }
+
+            for (var a = 0; a < Matrix.Length; a += (BlockSize * blockMultiplier))
+            {
+                if (Matrix[a].IsOn)
                 {
-                    spriteTexturePosX[Counter] = x * spriteWidth;
-                    spriteTexturePosY[Counter] = y * spriteHeight;
-                    Counter++;
+                    _sprites.Draw(
+                        _spriteImages,
+                        new Vector2((XPosition + x) * hScaling, (YPosition + y) * vScaling),
+                        new Rectangle(_spriteTexturePosX[SpriteNumber] + x, _spriteTexturePosY[SpriteNumber] + y,
+                            BlockSize, BlockSize),
+                        Matrix[a].Colour,
+                        0f,
+                        new Vector2(0, 0),
+                        new Vector2(hScaling, vScaling),
+                        SpriteEffect,
+                        0f);
+                }
+
+                if (x > _spriteWidth)
+                {
+                    x = 0;
+                    y += BlockSize;
+                }
+                else
+                {
+                    x += BlockSize;
                 }
             }
         }
+    }
 
-        private void SetSpriteEffect()
+    public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, int Width, int Height, Color SpriteColour)
+    {
+        const float hScaling = 1f;
+        const float vScaling = 1f;
+
+        _sprites.Draw(
+            _spriteImages,
+            new Vector2(XPosition * hScaling, YPosition * vScaling),
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], Width, Height),
+            SpriteColour,
+            0f,
+            new Vector2(0, 0),
+            new Vector2(hScaling, vScaling),
+            SpriteEffects.None,
+            0);
+    }
+
+    public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, Color SpriteColour)
+    {
+        const float hScaling = 1f;
+        const float vScaling = 1f;
+
+        _sprites.Draw(
+            _spriteImages,
+            new Vector2(XPosition * hScaling, YPosition * vScaling),
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+                SpriteHeight),
+            ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
+            0f,
+            new Vector2(0, 0),
+            new Vector2(hScaling, vScaling),
+            SpriteEffects.None,
+            0f);
+    }
+
+    public void DrawSpriteSubSection(int SpriteNumber, int XPosition, int YPosition, Rectangle SubSpriteArea,
+        Color SpriteColour)
+    {
+        const float hScaling = 1f;
+        const float vScaling = 1f;
+
+        if (_spriteWidth >= SubSpriteArea.Width &&
+            SpriteHeight >= SubSpriteArea.Height &&
+            _spriteWidth >= SubSpriteArea.Width + SubSpriteArea.X &&
+            SpriteHeight >= SubSpriteArea.Height + SubSpriteArea.Y)
         {
-            effectEnded = false;
-            fade = 255;
-        }
-
-        public void ResetEffect()
-        {
-            fade = 0;
-            effectEnded = true;
-        }
-
-        public void Begin(BlendState blendState, GameTime gameTime)
-        {
-            sprites.Begin(SpriteSortMode.Deferred, blendState);
-        }
-
-        public void Begin(BlendState blendState, SpriteSortMode sortMode, GameTime gameTime)
-        {
-            sprites.Begin(sortMode, blendState);
-        }
-
-        public void DrawSpriteUnscaled(int SpriteNumber, int XPosition, int YPosition)
-        {
-            sprites.Draw(
-                spriteImages,
-                new Vector2(XPosition, YPosition),
-                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
-                    spriteHeight),
-                ColourHelper.GetXNA4Colour(255, 255, 255, fade),
-                0f,
-                new Vector2(0, 0),
-                new Vector2(1, 1),
-                SpriteEffects.None,
-                0);
-        }
-
-        public void DrawSpriteUnscaled(int SpriteNumber, int XPosition, int YPosition, int Fade)
-        {
-            sprites.Draw(
-                spriteImages,
-                new Vector2(XPosition, YPosition),
-                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
-                    spriteHeight),
-                ColourHelper.GetXNA4Colour(255, 255, 255, Fade),
-                0f,
-                new Vector2(0, 0),
-                new Vector2(1, 1),
-                SpriteEffects.None,
-                0);
-        }
-
-        public void DrawSprite(int SpriteNumber, int XPosition, int YPosition)
-        {
-            float HScaling = 1f;
-            float VScaling = 1f;
-
-            sprites.Draw(
-                spriteImages,
-                new Vector2((float)XPosition * HScaling, (float)YPosition * VScaling),
-                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
-                    spriteHeight),
-                ColourHelper.GetXNA4Colour(255, 255, 255, fade),
-                0f,
-                new Vector2(0, 0),
-                new Vector2(HScaling, VScaling),
-                SpriteEffects.None,
-                0);
-        }
-
-        public void DrawSprite(int SpriteNumber, float XPosition, float YPosition)
-        {
-            float HScaling = 1f;
-            float VScaling = 1f;
-
-            sprites.Draw(
-                spriteImages,
-                new Vector2((float)XPosition * HScaling, (float)YPosition * VScaling),
-                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
-                    spriteHeight),
-                ColourHelper.GetXNA4Colour(255, 255, 255, fade));
-        }
-
-        public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, Color SpriteColour, SpritePixel[] Matrix,
-            int BlockSize = 4, SpriteEffects SpriteEffect = SpriteEffects.None)
-        {
-            if (Matrix.Length == spriteWidth * spriteHeight)
-            {
-                float HScaling = 1f;
-                float VScaling = 1f;
-
-                byte Alpha = SpriteColour.A;
-                if (Alpha == 255)
-                {
-                    Alpha = fade;
-                }
-
-                int x = 0;
-                int y = 0;
-                int counter = 0;
-
-                int BlockMultiplier = 1;
-                if (BlockSize > 1)
-                {
-                    BlockMultiplier = 2;
-                }
-
-                for (int a = 0; a < Matrix.Length; a += (BlockSize * BlockMultiplier))
-                {
-                    counter++;
-                    if (Matrix[a].IsOn)
-                    {
-                        sprites.Draw(
-                            spriteImages,
-                            new Vector2((float)(XPosition + x) * HScaling, (float)(YPosition + y) * VScaling),
-                            new Rectangle(spriteTexturePosX[SpriteNumber] + x, spriteTexturePosY[SpriteNumber] + y,
-                                BlockSize, BlockSize),
-                            Matrix[a].Colour,
-                            0f,
-                            new Vector2(0, 0),
-                            new Vector2(HScaling, VScaling),
-                            SpriteEffect,
-                            0f);
-                    }
-
-                    if (x > spriteWidth)
-                    {
-                        x = 0;
-                        y = y + BlockSize;
-                    }
-                    else
-                    {
-                        x = x + BlockSize;
-                    }
-                }
-            }
-        }
-
-        public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, int Width, int Height,
-            Color SpriteColour)
-        {
-            float HScaling = 1f;
-            float VScaling = 1f;
-
-
-            sprites.Draw(
-                spriteImages,
-                new Vector2((float)XPosition * HScaling, (float)YPosition * VScaling),
-                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], Width, Height),
+            _sprites.Draw(
+                _spriteImages,
+                new Vector2(XPosition * hScaling, YPosition * vScaling),
+                new Rectangle(
+                    _spriteTexturePosX[SpriteNumber] + SubSpriteArea.X,
+                    _spriteTexturePosY[SpriteNumber] + SubSpriteArea.Y,
+                    SubSpriteArea.Width,
+                    SubSpriteArea.Height),
                 SpriteColour,
                 0f,
                 new Vector2(0, 0),
-                new Vector2(HScaling, VScaling),
+                new Vector2(hScaling, vScaling),
                 SpriteEffects.None,
                 0);
         }
+    }
 
-        public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, Color SpriteColour)
+    public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, Color SpriteColour, float Scale,
+        float Rotation)
+    {
+        const float hScaling = 1f;
+        const float vScaling = 1f;
+
+        _sprites.Draw(_spriteImages,
+            new Vector2((float)((XPosition + _spriteWidth / 2.0) * hScaling),
+                (float)(YPosition + SpriteHeight / 2.0) * vScaling),
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+                SpriteHeight),
+            ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
+            Rotation,
+            new Vector2((float)_spriteWidth / 2, (float)SpriteHeight / 2),
+            new Vector2(hScaling * Scale, vScaling * Scale),
+            SpriteEffects.None,
+            0);
+    }
+
+    public void DrawSprite(int SpriteNumber, float XPosition, float YPosition, Color SpriteColour, float Scale,
+        float Rotation)
+    {
+        const float hScaling = 1f;
+        const float vScaling = 1f;
+
+        _sprites.Draw(_spriteImages,
+            new Vector2((float)((XPosition + _spriteWidth / 2.0) * hScaling),
+                (float)(YPosition + SpriteHeight / 2.0) * vScaling),
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+                SpriteHeight),
+            ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
+            Rotation,
+            new Vector2((float)_spriteWidth / 2, (float)SpriteHeight / 2),
+            new Vector2(hScaling * Scale, vScaling * Scale),
+            SpriteEffects.None,
+            0);
+    }
+
+    public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, Color SpriteColour, float Scale,
+        float Rotation, int OriginX, int OriginY)
+    {
+        const float hScaling = 1f;
+        const float vScaling = 1f;
+
+        _sprites.Draw(_spriteImages,
+            new Vector2((XPosition + OriginX) * hScaling, (YPosition + OriginY) * vScaling),
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+                SpriteHeight),
+            ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
+            Rotation,
+            new Vector2(OriginX, OriginY),
+            new Vector2(hScaling * Scale, vScaling * Scale),
+            SpriteEffects.None, 0);
+    }
+
+
+    public void DrawSprite(int SpriteNumber, float XPosition, float YPosition, Color SpriteColour, float Scale,
+        float Rotation, int OriginX, int OriginY)
+    {
+        const float hScaling = 1f;
+        const float vScaling = 1f;
+
+        _sprites.Draw(_spriteImages,
+            new Vector2((XPosition + OriginX) * hScaling, (YPosition + OriginY) * vScaling),
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+                SpriteHeight),
+            ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
+            Rotation,
+            new Vector2(OriginX, OriginY),
+            new Vector2(hScaling * Scale, vScaling * Scale),
+            SpriteEffects.None, 0);
+    }
+
+    public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, Color SpriteColour, float Scale,
+        float RotationSpeed, bool Clockwise, bool Paused)
+    {
+        const float hScaling = 1f;
+        const float vScaling = 1f;
+
+        _clockWise = Clockwise;
+
+        if (Paused)
         {
-            float HScaling = 1f;
-            float VScaling = 1f;
+            _rotationSpeed = 0;
+        }
+        else
+        {
+            _rotationSpeed = RotationSpeed;
+        }
 
-            byte Alpha = SpriteColour.A;
-            if (Alpha == 255)
+        _sprites.Draw(_spriteImages,
+            new Vector2((float)((XPosition + _spriteWidth / 2.0) * hScaling),
+                (float)((YPosition + SpriteHeight / 2.0) * vScaling)),
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+                SpriteHeight),
+            ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
+            MathHelper.ToRadians(_spriteRotation),
+            new Vector2((float)_spriteWidth / 2, (float)SpriteHeight / 2),
+            new Vector2(hScaling * Scale, vScaling * Scale),
+            SpriteEffects.None, 0);
+    }
+
+    public void DrawSprite(int SpriteNumber, float XPosition, float YPosition, Color SpriteColour, float Scale,
+        float RotationSpeed, bool Clockwise, bool Paused)
+    {
+        const float hScaling = 1f;
+        const float vScaling = 1f;
+
+        _clockWise = Clockwise;
+
+        if (Paused)
+        {
+            _rotationSpeed = 0;
+        }
+        else
+        {
+            _rotationSpeed = RotationSpeed;
+        }
+
+        _sprites.Draw(_spriteImages,
+            new Vector2((float)(XPosition + _spriteWidth / 2.0) * hScaling,
+                (float)(YPosition + SpriteHeight / 2.0) * vScaling),
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+                SpriteHeight),
+            ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
+            MathHelper.ToRadians(_spriteRotation),
+            new Vector2((float)_spriteWidth / 2, (float)SpriteHeight / 2),
+            new Vector2(hScaling * Scale, vScaling * Scale),
+            SpriteEffects.None, 0);
+    }
+
+    public void End()
+    {
+        _sprites.End();
+        Update();
+    }
+
+    private void Update()
+    {
+        if (_clockWise)
+        {
+            if (_spriteRotation < 360f)
             {
-                Alpha = fade;
+                _spriteRotation += _rotationSpeed;
             }
 
-            sprites.Draw(
-                spriteImages,
-                new Vector2((float)XPosition * HScaling, (float)YPosition * VScaling),
-                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
-                    spriteHeight),
-                ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
-                0f,
-                new Vector2(0, 0),
-                new Vector2(HScaling, VScaling),
-                SpriteEffects.None,
-                0f);
-        }
-
-        public void DrawSpriteSubSection(int SpriteNumber, int XPosition, int YPosition, Rectangle SubSpriteArea,
-            Color SpriteColour)
-        {
-            float HScaling = 1f;
-            float VScaling = 1f;
-
-            if (spriteWidth >= SubSpriteArea.Width &&
-                spriteHeight >= SubSpriteArea.Height &&
-                spriteWidth >= SubSpriteArea.Width + SubSpriteArea.X &&
-                spriteHeight >= SubSpriteArea.Height + SubSpriteArea.Y)
+            if (_spriteRotation >= 360f)
             {
-                sprites.Draw(
-                    spriteImages,
-                    new Vector2((float)XPosition * HScaling, (float)YPosition * VScaling),
-                    new Rectangle(
-                        spriteTexturePosX[SpriteNumber] + SubSpriteArea.X,
-                        spriteTexturePosY[SpriteNumber] + SubSpriteArea.Y,
-                        SubSpriteArea.Width,
-                        SubSpriteArea.Height),
-                    SpriteColour,
-                    0f,
-                    new Vector2(0, 0),
-                    new Vector2(HScaling, VScaling),
-                    SpriteEffects.None,
-                    0);
+                _spriteRotation = 0f;
             }
         }
-
-        public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, Color SpriteColour, float Scale,
-            float Rotation)
+        else
         {
-            float HScaling = 1f;
-            float VScaling = 1f;
-
-            sprites.Draw(spriteImages,
-                new Vector2((float)(XPosition + spriteWidth / 2) * HScaling,
-                    (float)(YPosition + spriteHeight / 2) * VScaling),
-                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
-                    spriteHeight),
-                ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
-                Rotation,
-                new Vector2(spriteWidth / 2, spriteHeight / 2),
-                new Vector2(HScaling * Scale, VScaling * Scale),
-                SpriteEffects.None,
-                0);
-        }
-
-        public void DrawSprite(int SpriteNumber, float XPosition, float YPosition, Color SpriteColour, float Scale,
-            float Rotation)
-        {
-            float HScaling = 1f;
-            float VScaling = 1f;
-
-            sprites.Draw(spriteImages,
-                new Vector2((float)(XPosition + spriteWidth / 2) * HScaling,
-                    (float)(YPosition + spriteHeight / 2) * VScaling),
-                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
-                    spriteHeight),
-                ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
-                Rotation,
-                new Vector2(spriteWidth / 2, spriteHeight / 2),
-                new Vector2(HScaling * Scale, VScaling * Scale),
-                SpriteEffects.None,
-                0);
-        }
-
-        public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, Color SpriteColour, float Scale,
-            float Rotation, int OriginX, int OriginY)
-        {
-            float HScaling = 1f;
-            float VScaling = 1f;
-
-            sprites.Draw(spriteImages,
-                new Vector2((float)(XPosition + OriginX) * HScaling, (float)(YPosition + OriginY) * VScaling),
-                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
-                    spriteHeight),
-                ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
-                Rotation,
-                new Vector2(OriginX, OriginY),
-                new Vector2(HScaling * Scale, VScaling * Scale),
-                SpriteEffects.None, 0);
-        }
-
-
-        public void DrawSprite(int SpriteNumber, float XPosition, float YPosition, Color SpriteColour, float Scale,
-            float Rotation, int OriginX, int OriginY)
-        {
-            float HScaling = 1f;
-            float VScaling = 1f;
-
-            sprites.Draw(spriteImages,
-                new Vector2((float)(XPosition + OriginX) * HScaling, (float)(YPosition + OriginY) * VScaling),
-                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
-                    spriteHeight),
-                ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
-                Rotation,
-                new Vector2(OriginX, OriginY),
-                new Vector2(HScaling * Scale, VScaling * Scale),
-                SpriteEffects.None, 0);
-        }
-
-        public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, Color SpriteColour, float Scale,
-            float RotationSpeed, bool Clockwise, bool Paused)
-        {
-            float HScaling = 1f;
-            float VScaling = 1f;
-
-            clockWise = Clockwise;
-
-            if (Paused)
+            if (_spriteRotation > 0f)
             {
-                rotationSpeed = 0;
-            }
-            else
-            {
-                rotationSpeed = RotationSpeed;
+                _spriteRotation -= _rotationSpeed;
             }
 
-            sprites.Draw(spriteImages,
-                new Vector2((float)(XPosition + spriteWidth / 2) * HScaling,
-                    (float)(YPosition + spriteHeight / 2) * VScaling),
-                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
-                    spriteHeight),
-                ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
-                MathHelper.ToRadians(spriteRotation),
-                new Vector2(spriteWidth / 2, spriteHeight / 2),
-                new Vector2(HScaling * Scale, VScaling * Scale),
-                SpriteEffects.None, 0);
-        }
-
-        public void DrawSprite(int SpriteNumber, float XPosition, float YPosition, Color SpriteColour, float Scale,
-            float RotationSpeed, bool Clockwise, bool Paused)
-        {
-            float HScaling = 1f;
-            float VScaling = 1f;
-
-            clockWise = Clockwise;
-
-            if (Paused)
+            if (_spriteRotation <= 0f)
             {
-                rotationSpeed = 0;
-            }
-            else
-            {
-                rotationSpeed = RotationSpeed;
-            }
-
-            sprites.Draw(spriteImages,
-                new Vector2((float)(XPosition + spriteWidth / 2) * HScaling,
-                    (float)(YPosition + spriteHeight / 2) * VScaling),
-                new Rectangle(spriteTexturePosX[SpriteNumber], spriteTexturePosY[SpriteNumber], spriteWidth,
-                    spriteHeight),
-                ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
-                MathHelper.ToRadians(spriteRotation),
-                new Vector2(spriteWidth / 2, spriteHeight / 2),
-                new Vector2(HScaling * Scale, VScaling * Scale),
-                SpriteEffects.None, 0);
-        }
-
-        public void End()
-        {
-            sprites.End();
-
-            if (fade == 0)
-            {
-                effectEnded = true;
-            }
-
-            Update();
-        }
-
-        // Updates rotational sprites
-        private void Update()
-        {
-            if (clockWise)
-            {
-                if (spriteRotation < 360f)
-                {
-                    spriteRotation = spriteRotation + rotationSpeed;
-                }
-
-                if (spriteRotation >= 360f)
-                {
-                    spriteRotation = 0f;
-                }
-            }
-            else
-            {
-                if (spriteRotation > 0f)
-                {
-                    spriteRotation = spriteRotation - rotationSpeed;
-                }
-
-                if (spriteRotation <= 0f)
-                {
-                    spriteRotation = 360f;
-                }
+                _spriteRotation = 360f;
             }
         }
+    }
 
-        private Vector2 MoveInCircle(GameTime gameTime, float speed)
-        {
-            double time = gameTime.TotalGameTime.TotalSeconds * speed;
+    public SpriteCollection Clone(GameEngine GameEngineReference)
+    {
+        var clonedSprites = SharedLibs.BinarySerialiser.SerialiseCloneBinary(this);
 
-            float x = (float)Math.Cos(time);
-            float y = (float)Math.Sin(time);
+        clonedSprites._gameEngineReference = GameEngineReference;
+        clonedSprites._sprites = new SpriteBatch(_gameEngineReference.GraphicsDeviceMgr.GraphicsDevice);
+        clonedSprites._spriteImages = _gameEngineReference.ContentMgr.Load<Texture2D>(clonedSprites._imageFilePath);
 
-            return new Vector2(x, y);
-        }
-
-        private float Pulsate(double counter, float speed, float min, float max)
-        {
-            return min + ((float)Math.Sin(counter) + 1) / 2 * (max - min);
-        }
-
-        public override string ToString()
-        {
-            return "SpriteCollection, Effect Ended: " + effectEnded.ToString();
-        }
-
-        public SpriteCollection Clone(GameEngine GameEngineReference)
-        {
-            SpriteCollection ClonedSprites = SharedLibs.BinarySerialiser.SerialiseCloneBinary(this);
-
-            ClonedSprites.gameEngineReference = GameEngineReference;
-            ClonedSprites.sprites = new SpriteBatch(gameEngineReference.GraphicsDeviceMgr.GraphicsDevice);
-            ClonedSprites.spriteImages = gameEngineReference.ContentMgr.Load<Texture2D>(ClonedSprites.imageFilePath);
-
-            return ClonedSprites;
-        }
+        return clonedSprites;
     }
 }
