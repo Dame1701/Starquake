@@ -2,18 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
+using MessagePack;
+using MessagePack.Formatters;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
-using StarquakeXNA.GameComponents;
-using StarquakeXNA.ContentManagement;
+using ProjectMercury.Emitters;
 using SharedLibs;
 using StarquakeXNA.Particles;
-using StarquakeXNA.Helpers;
 
 namespace StarquakeXNA
 {
@@ -144,9 +139,12 @@ namespace StarquakeXNA
 
             keyDoorForceFieldNoAccess = gameEngine.ContentResourceManager.GetParticleEffectInstance("ForceField", enParticleEffectType.Continual, null) as IStandardParticleEffect;
 
-            // Make this better in future...?
+            // Make this better in the future...?
             tileWidth = 128;
             tileHeight = 96;
+            
+            // Save out the data to MessagePack
+            //SaveData();
         }
 
         public override void Initialise(object Data)
@@ -196,11 +194,11 @@ namespace StarquakeXNA
         // Scan the screen for collision tiles
         public List<Point> GetNastyPotentialLocations()
         {
-            List<Point> potentialLocations = new List<Point>();
+            List<Point> potentialLocations = [];
 
-            for (int y = 0; y < TilesDown; y++)
+            for (var y = 0; y < TilesDown; y++)
             {
-                for (int x = 0; x < TilesAcross; x++)
+                for (var x = 0; x < TilesAcross; x++)
                 {
                     if (CurrentGameScreen.ScreenTiles[x, y].TileImage == -1)
                     {
@@ -331,16 +329,26 @@ namespace StarquakeXNA
 
         public void SaveData()
         {
-            // Save out the data
-            System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+            var gameScreensData = MessagePackSerializer.Serialize(gameScreens);
+            var collisionData = MessagePackSerializer.Serialize(screenCollisionDataArray);
+            
+            using (var fs = new FileStream("SQScreenData2.dat", FileMode.Create, FileAccess.Write))
+            {
+                // Write the length of the first array
+                fs.Write(BitConverter.GetBytes(gameScreensData.Length), 0, sizeof(int));
 
-            Stream data = File.Open(@"C:\SQScreenData.dat", FileMode.Create);
+                // Write the first array
+                fs.Write(gameScreensData, 0, gameScreensData.Length);
 
-            bf.Serialize(data, gameScreens);
-            bf.Serialize(data, screenCollisionDataArray);
+                // Write the length of the second array
+                fs.Write(BitConverter.GetBytes(collisionData.Length), 0, sizeof(int));
 
-            data.Close();
-            data.Dispose();
+                // Write the second array
+                fs.Write(collisionData, 0, collisionData.Length);
+            }
+
+            //var newGameScreensData = MessagePackSerializer.Deserialize<GameScreen[]>(gameScreensData);
+            //var newCollisionData = MessagePackSerializer.Deserialize<int[,,]>(collisionData);
         }
 
         public void UpdateCollisionMap(bool ScreenChanged)
@@ -1052,11 +1060,11 @@ namespace StarquakeXNA
 
                         keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseColour = new Color(100,100, 100).ToVector3();
                         keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseQuantity = 100;
-                        keyDoorForceFieldNoAccess.Effect["Emitter01"].BlendMode = ProjectMercury.Emitters.EmitterBlendMode.Alpha;
+                        keyDoorForceFieldNoAccess.Effect["Emitter01"].BlendMode = EmitterBlendMode.Alpha;
 
                         keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseColour = new Color(100,100,100).ToVector3();
                         keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseQuantity = 100;
-                        keyDoorForceFieldNoAccess.Effect["Emitter05"].BlendMode = ProjectMercury.Emitters.EmitterBlendMode.Alpha;
+                        keyDoorForceFieldNoAccess.Effect["Emitter05"].BlendMode = EmitterBlendMode.Alpha;
 
                         for (int c = 0; c < 4; c++)
                         {
@@ -1095,9 +1103,9 @@ namespace StarquakeXNA
                         }
 
                         keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseQuantity = 10;
-                        keyDoorForceFieldNoAccess.Effect["Emitter01"].BlendMode = ProjectMercury.Emitters.EmitterBlendMode.Add;
+                        keyDoorForceFieldNoAccess.Effect["Emitter01"].BlendMode = EmitterBlendMode.Add;
                         keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseQuantity = 10;
-                        keyDoorForceFieldNoAccess.Effect["Emitter05"].BlendMode = ProjectMercury.Emitters.EmitterBlendMode.Add;
+                        keyDoorForceFieldNoAccess.Effect["Emitter05"].BlendMode = EmitterBlendMode.Add;
 
                         for (int c = 0; c < 12; c++)
                         {
@@ -1420,7 +1428,7 @@ namespace StarquakeXNA
             ScreenNumber = 8;
 
             // Setup Powerups and pickups
-            Random r = new Random((int)System.DateTime.Now.Ticks);
+            Random r = new Random((int)DateTime.Now.Ticks);
 
             // Select 15 pickups to place on random screens
             List<int> powerUpScreens = new List<int>();

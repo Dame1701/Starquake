@@ -60,11 +60,11 @@ namespace StarquakeXNA
         private PlayerKeySet playerKeys;
         public PlayerKeySet PlayerKeys
         {
-            get { return playerKeys; }
+            get => playerKeys;
             set
             {
                 playerKeys = value;
-                if (Player != null && Player.BlobsControl != null)
+                if (Player is { BlobsControl: not null })
                 {
                     Player.BlobsControl.PlayerKeySet = value;
 
@@ -95,7 +95,7 @@ namespace StarquakeXNA
         bool paused;
         public bool Paused
         {
-            get { return paused; }
+            get => paused;
             set
             {
                 paused = value;
@@ -288,27 +288,27 @@ namespace StarquakeXNA
 
             // Player (Blob)
             Player = new Blob(this);
-            Player.OnScreenChanged += new RaiseScreenChanged(Player_OnScreenChanged);
-            Player.OnBlobActionRaised += new Blob.RaiseBlobAction(Player_OnBlobActionRaised);
+            Player.OnScreenChanged += Player_OnScreenChanged;
+            Player.OnBlobActionRaised += Player_OnBlobActionRaised;
             Player.Initialise();
 
             // Nasties
             Nasties = new Nasties(this, 4);
-            Nasties.OnNastyInteractionWithBlob += new RaiseInteractionWithBlob(Nasties_OnNastyInteractionWithBlob);
+            Nasties.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
 
             // Conveyer nasties
             ConveyerNastiesInstance = new ConveyerNasties(this);
-            ConveyerNastiesInstance.OnNastyInteractionWithBlob += new RaiseInteractionWithBlob(Nasties_OnNastyInteractionWithBlob);
+            ConveyerNastiesInstance.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
 
             // Nodes and gates engine
             ElectricityNodeGateEngine = new ElectricityGatesAndNodesEngine(this, ConveyerNastiesInstance);
-            ElectricityNodeGateEngine.OnBlobStruckByElectricity += new EventHandler(ElectricityNodeGateEngine_OnBlobStruckByElectricity);
+            ElectricityNodeGateEngine.OnBlobStruckByElectricity += ElectricityNodeGateEngine_OnBlobStruckByElectricity;
 
             // Animations
             TunnelAnimations = new TunnelLiftAnimationEngine(this);
 
             // Test area
-            ShapeDrawer = new Shapes(this.GraphicsDeviceMgr.GraphicsDevice);
+            ShapeDrawer = new Shapes(GraphicsDeviceMgr.GraphicsDevice);
         }
 
         public void DefineContent()
@@ -338,8 +338,8 @@ namespace StarquakeXNA
             ContentResourceManager.AddSpriteResource("ProportionalNumbers", "Graphics\\ProportionalNumbers", 27, 26);
 
             // Game data, if these hit the same file they must be presented in order
-            ContentResourceManager.AddDataResource("GameScreens", "Data/SQScreenData.dat", typeof(GameScreen[]));
-            ContentResourceManager.AddDataResource("ScreenCollisionData", "Data/SQScreenData.dat", typeof(int[,,]));
+            ContentResourceManager.AddDataResource("GameScreens", "Data/SQScreenData2.dat", typeof(GameScreen[]));
+            ContentResourceManager.AddDataResource("ScreenCollisionData", "Data/SQScreenData2.dat", typeof(int[,,]));
 
             // Option screen graphics
             ContentResourceManager.AddSpriteResource("OptionScreenBackground", "Graphics\\OptionsScreenBackground", 1280, 800);
@@ -542,7 +542,7 @@ namespace StarquakeXNA
                 GameScreens.LoadContent();
 
                 // Animation engine
-                ColourAnimationEngine = new StarquakeXNA.ColourAnimationEngine(this);
+                ColourAnimationEngine = new ColourAnimationEngine(this);
 
                 // Add the colour animations to the colour animation engine
                 ColourAnimationEngine.RegisterTile(new ColourFaderAnimation() { TileNo = 397, UpperTileToDraw = 7, Intensity = 4, TransitionColour = new Color(0, 0, 255), Speed = 8 }); // Teleport booths

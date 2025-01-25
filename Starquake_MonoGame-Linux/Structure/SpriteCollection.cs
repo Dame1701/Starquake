@@ -628,7 +628,7 @@ namespace StarquakeXNA
 
         public SpriteCollection Clone(GameEngine GameEngineReference)
         {
-            SpriteCollection ClonedSprites = SharedLibs.BinarySerialiser.SerialiseCloneBinary<SpriteCollection>(this);
+            SpriteCollection ClonedSprites = SharedLibs.BinarySerialiser.SerialiseCloneBinary(this);
 
             ClonedSprites.gameEngineReference = GameEngineReference;
             ClonedSprites.sprites = new SpriteBatch(gameEngineReference.GraphicsDeviceMgr.GraphicsDevice);

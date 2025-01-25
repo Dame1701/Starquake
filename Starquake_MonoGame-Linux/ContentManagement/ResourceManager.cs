@@ -1,22 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Xna.Framework.Content;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.ComponentModel;
+using System.IO;
 using System.Threading;
+using MessagePack;
+using SharedLibs;
 using StarquakeXNA.Particles;
 
 namespace StarquakeXNA
 {
-    public enum enResourceType
-    {
-        Sprite,
-        ParticleEffect
-    }
-
     internal class DataDescription
     {
         public string ResourceName;
@@ -97,7 +89,7 @@ namespace StarquakeXNA
         private List<SoundDescription> soundDescriptions;
 
         private Dictionary<string, object> resources;
-        private StarquakeXNA.Particles.ParticleEngine particleEngine;
+        private ParticleEngine particleEngine;
 
         private AnimTileEngine animationTileEngine;
 
@@ -107,11 +99,10 @@ namespace StarquakeXNA
         public ResourceManager(GameEngine GameEngineInstance) 
             : base(GameEngineInstance)
         {
-            particleEngine = new StarquakeXNA.Particles.ParticleEngine(gameEngineInstance);
+            particleEngine = new ParticleEngine(gameEngineInstance);
             animationTileEngine = new AnimTileEngine(gameEngineInstance);
             soundEngine = new SoundEffectEngine(gameEngineInstance);
-
-
+            
             spriteDescriptions = new List<SpriteDescription>();
             animSpriteDescriptions = new List<AnimSpriteDescription>();
             dataDescriptions = new List<DataDescription>();
@@ -162,19 +153,19 @@ namespace StarquakeXNA
                 0,
                 enGameComponentStatus.Starting);
 
-            int totalComponentsToLoad =
+            var totalComponentsToLoad =
                 spriteDescriptions.Count +
                 dataDescriptions.Count +
                 animSpriteDescriptions.Count +
                 soundDescriptions.Count;
 
-            int componentsLoaded = 0;
+            var componentsLoaded = 0;
 
             // Sprite Resources
-            for (int a = 0; a < spriteDescriptions.Count; a++)
+            foreach (var t in spriteDescriptions)
             {
                 UpdateStatus(
-                    "Loading content, sprite set: '" + spriteDescriptions[a].ResourceName + "'",
+                    "Loading content, sprite set: '" + t.ResourceName + "'",
                     (int)(double)(((double)componentsLoaded / (double)totalComponentsToLoad) * 100),
                     enGameComponentStatus.Starting);
 
@@ -182,24 +173,24 @@ namespace StarquakeXNA
                     new SpriteCollection(
                         gameEngineInstance,
                         contentManagerInstance,
-                        spriteDescriptions[a].FilePath,
-                        spriteDescriptions[a].Width,
-                        spriteDescriptions[a].Height);
+                        t.FilePath,
+                        t.Width,
+                        t.Height);
 
-                if (spriteDescriptions[a].SpriteEffect != enSpriteEffect.None)
+                if (t.SpriteEffect != enSpriteEffect.None)
                 {
-                    sc.CurrentSpriteEffect = spriteDescriptions[a].SpriteEffect;
+                    sc.CurrentSpriteEffect = t.SpriteEffect;
                 }
 
-                resources.Add(spriteDescriptions[a].ResourceName, sc);
+                resources.Add(t.ResourceName, sc);
                 componentsLoaded++;
             }
 
             // Anim Sprite Resources
-            for (int a = 0; a < animSpriteDescriptions.Count; a++)
+            foreach (var t in animSpriteDescriptions)
             {
                 UpdateStatus(
-                    "Loading content, anim sprite set: '" + animSpriteDescriptions[a].ResourceName + "'",
+                    "Loading content, anim sprite set: '" + t.ResourceName + "'",
                     (int)(double)(((double)componentsLoaded / (double)totalComponentsToLoad) * 100),
                     enGameComponentStatus.Starting);
 
@@ -207,61 +198,50 @@ namespace StarquakeXNA
                     new SpriteCollection(
                         gameEngineInstance,
                         contentManagerInstance,
-                        animSpriteDescriptions[a].FilePath,
-                        animSpriteDescriptions[a].Width,
-                        animSpriteDescriptions[a].Height);
+                        t.FilePath,
+                        t.Width,
+                        t.Height);
 
-                animationTileEngine.AnimTilesList.Add(new AnimTile(gameEngineInstance, animSpriteDescriptions[a].TileToAnimate, sc, animSpriteDescriptions[a].Delay));
+                animationTileEngine.AnimTilesList.Add(new AnimTile(gameEngineInstance, t.TileToAnimate, sc, t.Delay));
                 componentsLoaded++;
             }
 
             particleEngine.LoadContent();
 
             // Data Resources
-            for (int a = 0; a < dataDescriptions.Count; a++)
+            // TODO this is hacked in right now need to improve
+            using (var fs = new FileStream(dataDescriptions[0].FilePath, FileMode.Open, FileAccess.Read))
             {
-                UpdateStatus(
-                    "Loading content, data: '" + dataDescriptions[a].ResourceName + "'",
-                    (int)(double)(((double)componentsLoaded / (double)totalComponentsToLoad) * 100),
-                    enGameComponentStatus.Starting);
+                // Read the length of the first array
+                var lengthBuffer = new byte[sizeof(int)];
+                fs.ReadExactly(lengthBuffer, 0, sizeof(int));
+                var gameScreensArraySize = BitConverter.ToInt32(lengthBuffer, 0);
 
-                using (FileStream dataReader = new FileStream(dataDescriptions[a].FilePath, FileMode.Open))
-                {
-                    BinaryFormatter binaryFormatter = new BinaryFormatter();
-                    binaryFormatter.Binder = new SharedLibs.StarquakeDeserializationBinder();
+                // Read the first array
+                var gameScreensData = new byte[gameScreensArraySize];
+                fs.ReadExactly(gameScreensData, 0, gameScreensArraySize);
 
-                    object o = binaryFormatter.Deserialize(dataReader);
-                    resources.Add(dataDescriptions[a].ResourceName, o);
-                    componentsLoaded++;
+                // Read the length of the second array
+                fs.ReadExactly(lengthBuffer, 0, sizeof(int));
+                var collisionTilesArraySize = BitConverter.ToInt32(lengthBuffer, 0);
 
-                    // Grab anything else in the same data array
-                    for (int b = a + 1; b < dataDescriptions.Count; b++)
-                    {
-                        if (dataDescriptions[b].FilePath == dataDescriptions[a].FilePath)
-                        {
-                            UpdateStatus(
-                                "Loading content, data: '" + dataDescriptions[b].ResourceName + "'",
-                                (int)(double)(((double)componentsLoaded / (double)totalComponentsToLoad) * 100),
-                                enGameComponentStatus.Starting);
-
-                            o = binaryFormatter.Deserialize(dataReader);
-                            resources.Add(dataDescriptions[b].ResourceName, o);
-                            componentsLoaded++;
-                            a++;
-                        }
-                    }
-                }
+                // Read the second array
+                var collisionTilesData = new byte[collisionTilesArraySize];
+                fs.ReadExactly(collisionTilesData, 0, collisionTilesArraySize);
+                
+                resources.Add(dataDescriptions[0].ResourceName, MessagePackSerializer.Deserialize<GameScreen[]>(gameScreensData));
+                resources.Add(dataDescriptions[1].ResourceName, MessagePackSerializer.Deserialize<int[,,]>(collisionTilesData));
             }
-
+            
             // Sound resources
-            for (int a = 0; a < soundDescriptions.Count; a++)
+            foreach (var t in soundDescriptions)
             {
                 UpdateStatus(
-                    "Loading content, sound effect: '" + soundDescriptions[a].ResourceName + "'",
+                    "Loading content, sound effect: '" + t.ResourceName + "'",
                     (int)(double)(((double)componentsLoaded / (double)totalComponentsToLoad) * 100),
                     enGameComponentStatus.Starting);
 
-                soundEngine.LoadSoundEffect(soundDescriptions[a]);
+                soundEngine.LoadSoundEffect(t);
 
                 componentsLoaded++;
             }
@@ -271,7 +251,7 @@ namespace StarquakeXNA
                 100,
                 enGameComponentStatus.Starting);
 
-            System.Threading.Thread.Sleep(500);
+            Thread.Sleep(500);
         }
 
         public void AddSpriteResource(string ResourceName, string FilePath, int SpriteWidth, int SpriteHeight)

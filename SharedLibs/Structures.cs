@@ -1,9 +1,14 @@
-﻿namespace SharedLibs
+﻿using MessagePack;
+
+namespace SharedLibs
 {
     [Serializable]
+    [MessagePackObject]
     public class GameScreen
     {
         private ScreenTile[,] screenTiles;
+        
+        [Key(0)]
         public ScreenTile[,] ScreenTiles
         {
             get { return screenTiles; }
@@ -14,6 +19,8 @@
         }
 
         private List<CollisionTile> collisionMap;
+        
+        [Key(1)]
         public List<CollisionTile> CollisionMap
         {
             get { return collisionMap; }
@@ -22,6 +29,8 @@
 
         [NonSerialized]
         private bool keepNastiesTheSame;
+        
+        [IgnoreMember]
         public bool KeepNastiesTheSame
         {
             get { return keepNastiesTheSame; }
@@ -31,6 +40,8 @@
 
         [NonSerialized]
         private Item powerUp;
+        
+        [IgnoreMember]
         public Item PowerUp
         {
             get { return powerUp; }
@@ -39,6 +50,8 @@
 
         [NonSerialized]
         private Item cheopsPyramid;
+        
+        [IgnoreMember]
         public Item CheopsPyramid
         {
             get { return cheopsPyramid; }
@@ -47,6 +60,8 @@
 
         [NonSerialized]
         private List<Item> pickUps;
+        
+        [IgnoreMember]
         public List<Item> PickUps
         {
             get { return pickUps; }
@@ -55,6 +70,8 @@
 
         [NonSerialized]
         private string accessCode;
+        
+        [IgnoreMember]
         public string AccessCode
         {
             get { return accessCode; }
@@ -63,6 +80,8 @@
 
         [NonSerialized]
         private string cheopsAccessCode;
+        
+        [IgnoreMember]
         public string CheopsAccessCode
         {
             get { return cheopsAccessCode; }
@@ -72,6 +91,8 @@
 
         [NonSerialized]
         private bool screenVisited;
+        
+        [IgnoreMember]
         public bool ScreenVisited
         {
             get { return screenVisited; }
@@ -179,10 +200,13 @@
         FadeDown,
     }
 
+    [MessagePackObject]
     [Serializable]
     public class CollisionTile
     {
         private int tileImage;
+        
+        [Key(0)]
         public int TileImage
         {
             get { return tileImage; }
@@ -190,6 +214,8 @@
         }
 
         private int xPos;
+        
+        [Key(1)]
         public int XPos
         {
             get { return xPos; }
@@ -197,6 +223,8 @@
         }
 
         private int yPos;
+        
+        [Key(2)]
         public int YPos
         {
             get { return yPos; }
@@ -204,6 +232,8 @@
         }
 
         private enCollTileType colType;
+        
+        [Key(3)]
         public enCollTileType ColType
         {
             get { return colType; }
@@ -224,14 +254,21 @@
         }
     }
 
+    [MessagePackObject]
     [Serializable]
     public class ScreenTile
     {
         private int tileImage;
+        
+        [Key(0)]
         public int TileImage
         {
             get { return tileImage; }
             set { tileImage = value; }
+        }
+
+        public ScreenTile()
+        {
         }
 
         public ScreenTile(int tileImage, int tileType)
