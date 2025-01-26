@@ -1,4 +1,5 @@
 ﻿using System;
+using MessagePack;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -9,38 +10,49 @@ namespace StarquakeXNA;
 
 [Serializable]
 public class SpriteCollection
-{
+{  
+    private string _imageFilePath;
+    
+    private byte _fade;
+    
+    private bool _clockWise = true;
+    
+    private float _rotationSpeed = 1f;
+    
     private int[] _spriteTexturePosX;
+    
     private int[] _spriteTexturePosY;
 
-    private float _spriteRotation;
+    [NonSerialized]
+    private GameEngine _gameEngineReference;
+    
+    [NonSerialized] 
+    private SpriteBatch _sprites;
+
+    [NonSerialized] 
+    private Texture2D _spriteImages;
 
     public float SpriteRotation
     {
-        get => _spriteRotation;
-        set => _spriteRotation = value;
+        get;
+        private set;
     }
 
-    private bool _clockWise = true;
-    private float _rotationSpeed = 1f;
+    public int SpriteWidth
+    {
+        get; 
+    }
 
-    [NonSerialized] private SpriteBatch _sprites;
+    public int SpriteHeight
+    {
+        get;
+    }
 
-    [NonSerialized] private Texture2D _spriteImages;
-
-    private int _spriteWidth;
-
-    public int SpriteWidth => _spriteWidth;
-
-    public int SpriteHeight { get; }
-
-    private byte _fade;
-
-    public int SpriteCount { get; }
-
-    private string _imageFilePath;
-
-    [NonSerialized] private GameEngine _gameEngineReference;
+    public int SpriteCount
+    {
+        get;
+        private set;
+    }
 
     public SpriteCollection(GameEngine GameEngineReference, ContentManager Content, string ImageFilePath,
         int SpriteWidth, int SpriteHeight)
@@ -48,7 +60,7 @@ public class SpriteCollection
         _imageFilePath = ImageFilePath;
         _gameEngineReference = GameEngineReference;
 
-        _spriteWidth = SpriteWidth;
+        this.SpriteWidth = SpriteWidth;
         this.SpriteHeight = SpriteHeight;
 
         _sprites = new SpriteBatch(_gameEngineReference.GraphicsDeviceMgr.GraphicsDevice);
@@ -66,11 +78,11 @@ public class SpriteCollection
         _fade = 255;
 
         // Generate Coordinates for the textures of the tiles found
-        for (int y = 0; y < noVerticalImages; y++)
+        for (var y = 0; y < noVerticalImages; y++)
         {
-            for (int x = 0; x < noHorizontalImages; x++)
+            for (var x = 0; x < noHorizontalImages; x++)
             {
-                _spriteTexturePosX[counter] = x * _spriteWidth;
+                _spriteTexturePosX[counter] = x * this.SpriteWidth;
                 _spriteTexturePosY[counter] = y * this.SpriteHeight;
                 counter++;
             }
@@ -102,7 +114,7 @@ public class SpriteCollection
         _sprites.Draw(
             _spriteImages,
             new Vector2(XPosition, YPosition),
-            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], SpriteWidth,
                 SpriteHeight),
             ColourHelper.GetXNA4Colour(255, 255, 255, _fade),
             0f,
@@ -117,7 +129,7 @@ public class SpriteCollection
         _sprites.Draw(
             _spriteImages,
             new Vector2(XPosition, YPosition),
-            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], SpriteWidth,
                 SpriteHeight),
             ColourHelper.GetXNA4Colour(255, 255, 255, Fade),
             0f,
@@ -135,7 +147,7 @@ public class SpriteCollection
         _sprites.Draw(
             _spriteImages,
             new Vector2(XPosition * hScaling, YPosition * vScaling),
-            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], SpriteWidth,
                 SpriteHeight),
             ColourHelper.GetXNA4Colour(255, 255, 255, _fade),
             0f,
@@ -153,7 +165,7 @@ public class SpriteCollection
         _sprites.Draw(
             _spriteImages,
             new Vector2(XPosition * hScaling, YPosition * vScaling),
-            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], SpriteWidth,
                 SpriteHeight),
             ColourHelper.GetXNA4Colour(255, 255, 255, _fade));
     }
@@ -161,7 +173,7 @@ public class SpriteCollection
     public void DrawSprite(int SpriteNumber, int XPosition, int YPosition, Color SpriteColour, SpritePixel[] Matrix,
         int BlockSize = 4, SpriteEffects SpriteEffect = SpriteEffects.None)
     {
-        if (Matrix.Length == _spriteWidth * SpriteHeight)
+        if (Matrix.Length == SpriteWidth * SpriteHeight)
         {
             const float hScaling = 1f;
             const float vScaling = 1f;
@@ -192,7 +204,7 @@ public class SpriteCollection
                         0f);
                 }
 
-                if (x > _spriteWidth)
+                if (x > SpriteWidth)
                 {
                     x = 0;
                     y += BlockSize;
@@ -230,7 +242,7 @@ public class SpriteCollection
         _sprites.Draw(
             _spriteImages,
             new Vector2(XPosition * hScaling, YPosition * vScaling),
-            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], SpriteWidth,
                 SpriteHeight),
             ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
             0f,
@@ -246,9 +258,9 @@ public class SpriteCollection
         const float hScaling = 1f;
         const float vScaling = 1f;
 
-        if (_spriteWidth >= SubSpriteArea.Width &&
+        if (SpriteWidth >= SubSpriteArea.Width &&
             SpriteHeight >= SubSpriteArea.Height &&
-            _spriteWidth >= SubSpriteArea.Width + SubSpriteArea.X &&
+            SpriteWidth >= SubSpriteArea.Width + SubSpriteArea.X &&
             SpriteHeight >= SubSpriteArea.Height + SubSpriteArea.Y)
         {
             _sprites.Draw(
@@ -275,13 +287,13 @@ public class SpriteCollection
         const float vScaling = 1f;
 
         _sprites.Draw(_spriteImages,
-            new Vector2((float)((XPosition + _spriteWidth / 2.0) * hScaling),
+            new Vector2((float)((XPosition + SpriteWidth / 2.0) * hScaling),
                 (float)(YPosition + SpriteHeight / 2.0) * vScaling),
-            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], SpriteWidth,
                 SpriteHeight),
             ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
             Rotation,
-            new Vector2((float)_spriteWidth / 2, (float)SpriteHeight / 2),
+            new Vector2((float)SpriteWidth / 2, (float)SpriteHeight / 2),
             new Vector2(hScaling * Scale, vScaling * Scale),
             SpriteEffects.None,
             0);
@@ -294,13 +306,13 @@ public class SpriteCollection
         const float vScaling = 1f;
 
         _sprites.Draw(_spriteImages,
-            new Vector2((float)((XPosition + _spriteWidth / 2.0) * hScaling),
+            new Vector2((float)((XPosition + SpriteWidth / 2.0) * hScaling),
                 (float)(YPosition + SpriteHeight / 2.0) * vScaling),
-            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], SpriteWidth,
                 SpriteHeight),
             ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
             Rotation,
-            new Vector2((float)_spriteWidth / 2, (float)SpriteHeight / 2),
+            new Vector2((float)SpriteWidth / 2, (float)SpriteHeight / 2),
             new Vector2(hScaling * Scale, vScaling * Scale),
             SpriteEffects.None,
             0);
@@ -314,7 +326,7 @@ public class SpriteCollection
 
         _sprites.Draw(_spriteImages,
             new Vector2((XPosition + OriginX) * hScaling, (YPosition + OriginY) * vScaling),
-            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], SpriteWidth,
                 SpriteHeight),
             ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
             Rotation,
@@ -332,7 +344,7 @@ public class SpriteCollection
 
         _sprites.Draw(_spriteImages,
             new Vector2((XPosition + OriginX) * hScaling, (YPosition + OriginY) * vScaling),
-            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], SpriteWidth,
                 SpriteHeight),
             ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
             Rotation,
@@ -359,13 +371,13 @@ public class SpriteCollection
         }
 
         _sprites.Draw(_spriteImages,
-            new Vector2((float)((XPosition + _spriteWidth / 2.0) * hScaling),
+            new Vector2((float)((XPosition + SpriteWidth / 2.0) * hScaling),
                 (float)((YPosition + SpriteHeight / 2.0) * vScaling)),
-            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], SpriteWidth,
                 SpriteHeight),
             ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
-            MathHelper.ToRadians(_spriteRotation),
-            new Vector2((float)_spriteWidth / 2, (float)SpriteHeight / 2),
+            MathHelper.ToRadians(SpriteRotation),
+            new Vector2((float)SpriteWidth / 2, (float)SpriteHeight / 2),
             new Vector2(hScaling * Scale, vScaling * Scale),
             SpriteEffects.None, 0);
     }
@@ -388,13 +400,13 @@ public class SpriteCollection
         }
 
         _sprites.Draw(_spriteImages,
-            new Vector2((float)(XPosition + _spriteWidth / 2.0) * hScaling,
+            new Vector2((float)(XPosition + SpriteWidth / 2.0) * hScaling,
                 (float)(YPosition + SpriteHeight / 2.0) * vScaling),
-            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], _spriteWidth,
+            new Rectangle(_spriteTexturePosX[SpriteNumber], _spriteTexturePosY[SpriteNumber], SpriteWidth,
                 SpriteHeight),
             ColourHelper.GetXNA4Colour(SpriteColour.R, SpriteColour.G, SpriteColour.B, SpriteColour.A),
-            MathHelper.ToRadians(_spriteRotation),
-            new Vector2((float)_spriteWidth / 2, (float)SpriteHeight / 2),
+            MathHelper.ToRadians(SpriteRotation),
+            new Vector2((float)SpriteWidth / 2, (float)SpriteHeight / 2),
             new Vector2(hScaling * Scale, vScaling * Scale),
             SpriteEffects.None, 0);
     }
@@ -409,38 +421,48 @@ public class SpriteCollection
     {
         if (_clockWise)
         {
-            if (_spriteRotation < 360f)
+            if (SpriteRotation < 360f)
             {
-                _spriteRotation += _rotationSpeed;
+                SpriteRotation += _rotationSpeed;
             }
 
-            if (_spriteRotation >= 360f)
+            if (SpriteRotation >= 360f)
             {
-                _spriteRotation = 0f;
+                SpriteRotation = 0f;
             }
         }
         else
         {
-            if (_spriteRotation > 0f)
+            if (SpriteRotation > 0f)
             {
-                _spriteRotation -= _rotationSpeed;
+                SpriteRotation -= _rotationSpeed;
             }
 
-            if (_spriteRotation <= 0f)
+            if (SpriteRotation <= 0f)
             {
-                _spriteRotation = 360f;
+                SpriteRotation = 360f;
             }
         }
     }
 
     public SpriteCollection Clone(GameEngine GameEngineReference)
     {
-        var clonedSprites = SharedLibs.BinarySerialiser.SerialiseCloneBinary(this);
-
-        clonedSprites._gameEngineReference = GameEngineReference;
-        clonedSprites._sprites = new SpriteBatch(_gameEngineReference.GraphicsDeviceMgr.GraphicsDevice);
-        clonedSprites._spriteImages = _gameEngineReference.ContentMgr.Load<Texture2D>(clonedSprites._imageFilePath);
-
-        return clonedSprites;
+        var clonedSpriteCollection = new SpriteCollection(
+            GameEngineReference,
+            GameEngineReference.ContentMgr,
+            _imageFilePath,
+            SpriteWidth,
+            SpriteHeight)
+        {
+            _fade = _fade,
+            _clockWise = _clockWise,
+            _rotationSpeed = _rotationSpeed,
+            _spriteTexturePosX = MessagePackSerializer.Deserialize<int[]>(MessagePackSerializer.Serialize(_spriteTexturePosX)),
+            _spriteTexturePosY = MessagePackSerializer.Deserialize<int[]>(MessagePackSerializer.Serialize(_spriteTexturePosY)),
+            SpriteRotation = SpriteRotation,
+            _spriteImages = _gameEngineReference.ContentMgr.Load<Texture2D>(_imageFilePath)
+        };
+        
+        return clonedSpriteCollection;
     }
 }
