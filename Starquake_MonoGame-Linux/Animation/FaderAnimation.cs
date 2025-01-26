@@ -9,7 +9,7 @@ namespace Starquake_XNA
     public class FaderAnimation
     {
         public int FadeLevel;
-        public enFadeDirection FadeDirection;
+        public FadeDirection FadeDirection;
         public bool FadeOperational;
         Random randomGenerator;
         int fadeSpeed;
@@ -20,7 +20,7 @@ namespace Starquake_XNA
             minFade = MinFade;
             randomGenerator = RandomGenerator;
             FadeOperational = false;
-            FadeDirection = enFadeDirection.FadeUp;
+            FadeDirection = FadeDirection.FadeUp;
             FadeLevel = minFade;
             fadeSpeed = FadeSpeed;
         }
@@ -34,7 +34,7 @@ namespace Starquake_XNA
 
             if (FadeOperational || randomGenerator == null)
             {
-                if (FadeDirection == enFadeDirection.FadeUp)
+                if (FadeDirection == FadeDirection.FadeUp)
                 {
                     if (FadeLevel < 255)
                     {
@@ -43,10 +43,10 @@ namespace Starquake_XNA
                     else
                     {
                         FadeLevel = 255;
-                        FadeDirection = enFadeDirection.FadeDown;
+                        FadeDirection = FadeDirection.FadeDown;
                     }
                 }
-                else if (FadeDirection == enFadeDirection.FadeDown)
+                else if (FadeDirection == FadeDirection.FadeDown)
                 {
                     if (FadeLevel > minFade)
                     {
@@ -55,7 +55,7 @@ namespace Starquake_XNA
                     else
                     {
                         FadeLevel = minFade;
-                        FadeDirection = enFadeDirection.FadeUp;
+                        FadeDirection = FadeDirection.FadeUp;
                         FadeOperational = false;
                     }
                 }

@@ -54,8 +54,8 @@ namespace StarquakeXNA
                 platforms.Add(newPlatform);
             }
 
-            newPlatform.LeftCollisionTile = new CollisionTile((int)enCollisionObjectType.JumpPlatform, newPlatform.XPos, newPlatform.YPos, enCollTileType.EveryoneHits);
-            newPlatform.RightCollisionTile = new CollisionTile((int)enCollisionObjectType.JumpPlatform, newPlatform.XPos + 32, newPlatform.YPos, enCollTileType.EveryoneHits);
+            newPlatform.LeftCollisionTile = new CollisionTile((int)CollisionObjectType.JumpPlatform, newPlatform.XPos, newPlatform.YPos, CollisionTileType.EveryoneHits);
+            newPlatform.RightCollisionTile = new CollisionTile((int)CollisionObjectType.JumpPlatform, newPlatform.XPos + 32, newPlatform.YPos, CollisionTileType.EveryoneHits);
             newPlatform.PlatformActive = true;
             newPlatform.ReadyToAllocate = false;
 

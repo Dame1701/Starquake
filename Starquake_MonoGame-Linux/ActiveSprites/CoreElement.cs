@@ -137,10 +137,10 @@ namespace StarquakeXNA
             {
                 for (int x = 0; x < 3; x++)
                 {
-                    toReturn.Add(new CollisionTile((int)enCollisionObjectType.CoreElement, coreX + (x * 64), coreY + (y * 64), enCollTileType.NotBlob));
-                    toReturn.Add(new CollisionTile((int)enCollisionObjectType.CoreElement, coreX + (x * 64) + 32, coreY + (y * 64), enCollTileType.NotBlob));
-                    toReturn.Add(new CollisionTile((int)enCollisionObjectType.CoreElement, coreX + (x * 64), coreY + (y * 64) + 32, enCollTileType.NotBlob));
-                    toReturn.Add(new CollisionTile((int)enCollisionObjectType.CoreElement, coreX + (x * 64) + 32, coreY + (y * 64) + 32, enCollTileType.NotBlob));
+                    toReturn.Add(new CollisionTile((int)CollisionObjectType.CoreElement, coreX + (x * 64), coreY + (y * 64), CollisionTileType.NotBlob));
+                    toReturn.Add(new CollisionTile((int)CollisionObjectType.CoreElement, coreX + (x * 64) + 32, coreY + (y * 64), CollisionTileType.NotBlob));
+                    toReturn.Add(new CollisionTile((int)CollisionObjectType.CoreElement, coreX + (x * 64), coreY + (y * 64) + 32, CollisionTileType.NotBlob));
+                    toReturn.Add(new CollisionTile((int)CollisionObjectType.CoreElement, coreX + (x * 64) + 32, coreY + (y * 64) + 32, CollisionTileType.NotBlob));
                 }
             }
 

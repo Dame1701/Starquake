@@ -214,7 +214,7 @@ namespace StarquakeXNA
                                     if (gameScreens[ScreenNumber].CollisionMap[a].XPos == (x * tileWidth) + (x1 * collAreaWidth) &&
                                         gameScreens[ScreenNumber].CollisionMap[a].YPos == (y * tileHeight) + (y1 * collAreaHeight))
                                     {
-                                        if (gameScreens[ScreenNumber].CollisionMap[a].ColType == enCollTileType.NotBlob)
+                                        if (gameScreens[ScreenNumber].CollisionMap[a].ColType == CollisionTileType.NotBlob)
                                         {
                                             addLocation = false;
                                             break;
@@ -375,7 +375,7 @@ namespace StarquakeXNA
 
                 for (int a = 0; a < gameScreens[ScreenNumber].CollisionMap.Count; a++)
                 {
-                    if (gameScreens[ScreenNumber].CollisionMap[a].TileImage == (int)enCollisionObjectType.GameObject)
+                    if (gameScreens[ScreenNumber].CollisionMap[a].TileImage == (int)CollisionObjectType.GameObject)
                     {
                         // Remove any game object collision tiles becuase we are about to update them
                         gameScreens[ScreenNumber].CollisionMap.Remove(gameScreens[ScreenNumber].CollisionMap[a]);
@@ -403,7 +403,7 @@ namespace StarquakeXNA
                                         gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage,
                                         ((x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth) + (x1 * collAreaWidth)),
                                         ((y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight) + (y1 * collAreaHeight)),
-                                        enCollTileType.EveryoneHits));
+                                        CollisionTileType.EveryoneHits));
 
                                 }
                             }
@@ -433,10 +433,10 @@ namespace StarquakeXNA
                                 {
                                     gameScreens[ScreenNumber].CollisionMap.Add(
                                                     new CollisionTile(
-                                                        (int)enCollisionObjectType.GameObject, // Random image that's meaningless
+                                                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                                         (b * 32) + tileX,
                                                         (a * 32) + tileY,
-                                                        enCollTileType.NotBlob));
+                                                        CollisionTileType.NotBlob));
                                 }
                             }
                         }
@@ -451,31 +451,31 @@ namespace StarquakeXNA
                         {
                             gameScreens[ScreenNumber].CollisionMap.Add(
                                                     new CollisionTile(
-                                                        (int)enCollisionObjectType.GameObject, // Random image that's meaningless
+                                                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                                         32 + tileX,
                                                         32 + tileY,
-                                                        enCollTileType.NotBlob));
+                                                        CollisionTileType.NotBlob));
 
                             gameScreens[ScreenNumber].CollisionMap.Add(
                                                     new CollisionTile(
-                                                        (int)enCollisionObjectType.GameObject, // Random image that's meaningless
+                                                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                                         32 + tileX,
                                                         64 + tileY,
-                                                        enCollTileType.NotBlob));
+                                                        CollisionTileType.NotBlob));
 
                             gameScreens[ScreenNumber].CollisionMap.Add(
                                                     new CollisionTile(
-                                                        (int)enCollisionObjectType.GameObject, // Random image that's meaningless
+                                                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                                         64 + tileX,
                                                         32 + tileY,
-                                                        enCollTileType.NotBlob));
+                                                        CollisionTileType.NotBlob));
 
                             gameScreens[ScreenNumber].CollisionMap.Add(
                                                     new CollisionTile(
-                                                        (int)enCollisionObjectType.GameObject, // Random image that's meaningless
+                                                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                                         64 + tileX,
                                                         64 + tileY,
-                                                        enCollTileType.NotBlob));
+                                                        CollisionTileType.NotBlob));
                         }
 
                         // Right side mounted spikey tiles
@@ -483,31 +483,31 @@ namespace StarquakeXNA
                         {
                             gameScreens[ScreenNumber].CollisionMap.Add(
                                                     new CollisionTile(
-                                                        (int)enCollisionObjectType.GameObject, // Random image that's meaningless
+                                                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                                         64 + tileX,
                                                         tileY,
-                                                        enCollTileType.NotBlob));
+                                                        CollisionTileType.NotBlob));
 
                             gameScreens[ScreenNumber].CollisionMap.Add(
                                                     new CollisionTile(
-                                                        (int)enCollisionObjectType.GameObject, // Random image that's meaningless
+                                                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                                         96 + tileX,
                                                         tileY,
-                                                        enCollTileType.NotBlob));
+                                                        CollisionTileType.NotBlob));
 
                             gameScreens[ScreenNumber].CollisionMap.Add(
                                                     new CollisionTile(
-                                                        (int)enCollisionObjectType.GameObject, // Random image that's meaningless
+                                                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                                         64 + tileX,
                                                         32 + tileY,
-                                                        enCollTileType.NotBlob));
+                                                        CollisionTileType.NotBlob));
 
                             gameScreens[ScreenNumber].CollisionMap.Add(
                                                     new CollisionTile(
-                                                        (int)enCollisionObjectType.GameObject, // Random image that's meaningless
+                                                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                                         96 + tileX,
                                                         32 + tileY,
-                                                        enCollTileType.NotBlob));
+                                                        CollisionTileType.NotBlob));
                         }
 
                         // Add collision map for the secret passages
@@ -526,10 +526,10 @@ namespace StarquakeXNA
                                     {
                                         gameScreens[ScreenNumber].CollisionMap.Add(
                                                         new CollisionTile(
-                                                            (int)enCollisionObjectType.GameObject, // Random image that's meaningless
+                                                            (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                                             tileX,
                                                             (b * 32) + tileY,
-                                                            enCollTileType.NotBlob));
+                                                            CollisionTileType.NotBlob));
                                     }
                                 }
                             }
@@ -542,10 +542,10 @@ namespace StarquakeXNA
                                     {
                                         gameScreens[ScreenNumber].CollisionMap.Add(
                                                         new CollisionTile(
-                                                            (int)enCollisionObjectType.GameObject, // Random image that's meaningless
+                                                            (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                                             tileX + 96,
                                                             (b * 32) + tileY,
-                                                            enCollTileType.NotBlob));
+                                                            CollisionTileType.NotBlob));
                                     }
                                 }
                             }
@@ -567,19 +567,19 @@ namespace StarquakeXNA
                         {
                             gameScreens[ScreenNumber].CollisionMap.Add(
                                 new CollisionTile(
-                                    (int)enCollisionObjectType.GameObject, // Random image that's meaningless
+                                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                     gameScreens[ScreenNumber].PowerUp.XLocation + (x * 32),
                                     gameScreens[ScreenNumber].PowerUp.YLocation + (y * 32),
-                                    enCollTileType.NotBlob));
+                                    CollisionTileType.NotBlob));
                         }
                         else
                         {
                             collisionsToAppend.Add(
                                 new CollisionTile(
-                                    (int)enCollisionObjectType.GameObject, // Random image that's meaningless
+                                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                     gameScreens[ScreenNumber].PowerUp.XLocation + (x * 32),
                                     gameScreens[ScreenNumber].PowerUp.YLocation + (y * 32),
-                                    enCollTileType.NotBlob));
+                                    CollisionTileType.NotBlob));
                         }
                     }
                 }
@@ -597,19 +597,19 @@ namespace StarquakeXNA
                             {
                                 gameScreens[ScreenNumber].CollisionMap.Add(
                                     new CollisionTile(
-                                        (int)enCollisionObjectType.GameObject, // Random image that's meaningless
+                                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                         gameScreens[ScreenNumber].PickUps[a].XLocation + (x * 32),
                                         gameScreens[ScreenNumber].PickUps[a].YLocation + (y * 32),
-                                        enCollTileType.NotBlob));
+                                        CollisionTileType.NotBlob));
                             }
                             else
                             {
                                 collisionsToAppend.Add(
                                     new CollisionTile(
-                                        (int)enCollisionObjectType.GameObject, // Random image that's meaningless
+                                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                         gameScreens[ScreenNumber].PickUps[a].XLocation + (x * 32),
                                         gameScreens[ScreenNumber].PickUps[a].YLocation + (y * 32),
-                                        enCollTileType.NotBlob));
+                                        CollisionTileType.NotBlob));
                             }
                         }
                     }
@@ -626,19 +626,19 @@ namespace StarquakeXNA
                         {
                             gameScreens[ScreenNumber].CollisionMap.Add(
                                 new CollisionTile(
-                                    (int)enCollisionObjectType.GameObject, // Random image that's meaningless
+                                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                     gameScreens[ScreenNumber].CheopsPyramid.XLocation + (x * 32),
                                     gameScreens[ScreenNumber].CheopsPyramid.YLocation + (y * 32),
-                                    enCollTileType.NotBlob));
+                                    CollisionTileType.NotBlob));
                         }
                         else
                         {
                             collisionsToAppend.Add(
                                 new CollisionTile(
-                                    (int)enCollisionObjectType.GameObject, // Random image that's meaningless
+                                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                     gameScreens[ScreenNumber].CheopsPyramid.XLocation + (x * 32),
                                     gameScreens[ScreenNumber].CheopsPyramid.YLocation + (y * 32),
-                                    enCollTileType.NotBlob));
+                                    CollisionTileType.NotBlob));
                         }
                     }
                 }
@@ -708,7 +708,7 @@ namespace StarquakeXNA
 
                 if (Collide)
                 {
-                    if (IsBlob && gameScreens[screenNumber].CollisionMap[a].ColType == enCollTileType.NotBlob)
+                    if (IsBlob && gameScreens[screenNumber].CollisionMap[a].ColType == CollisionTileType.NotBlob)
                     {
                         Collide = false;
                     }
@@ -755,7 +755,7 @@ namespace StarquakeXNA
                                        );
                
 
-                if (colTile.ColType == enCollTileType.NotBlob &&
+                if (colTile.ColType == CollisionTileType.NotBlob &&
                         IsBlob)
                 {
                     CheckMovementAmountTemp = Velocity;
@@ -767,9 +767,9 @@ namespace StarquakeXNA
                         new Rectangle(PlayerXPos, PlayerYPos, PlayerWidth, PlayerHeight),
                         new Rectangle(colTile.XPos, colTile.YPos, 32, 32)))
                     {
-                        if ((enCollisionObjectType)colTile.TileImage == enCollisionObjectType.JumpPlatform ||
-                            (enCollisionObjectType)colTile.TileImage == enCollisionObjectType.CoreElement ||
-                            (enCollisionObjectType)colTile.TileImage == enCollisionObjectType.GameObject)
+                        if ((CollisionObjectType)colTile.TileImage == CollisionObjectType.JumpPlatform ||
+                            (CollisionObjectType)colTile.TileImage == CollisionObjectType.CoreElement ||
+                            (CollisionObjectType)colTile.TileImage == CollisionObjectType.GameObject)
                         {
                             // Now see if it's actually embedded
                             // And if it is, let it out
@@ -1044,10 +1044,10 @@ namespace StarquakeXNA
                             {
                                 keyLockCollisionTile =
                                     new CollisionTile(
-                                    (int)enCollisionObjectType.KeyAccessDoor, // Random image that's meaningless
+                                    (int)CollisionObjectType.KeyAccessDoor, // Random image that's meaningless
                                     keyLockDoors[b].Location.X + 48,
                                     keyLockDoors[b].Location.Y + (c * 32),
-                                    enCollTileType.None);
+                                    CollisionTileType.None);
 
                                 // Add the tile to the keylock door so we can remove it later
                                 keyLockDoors[b].CollisionTiles.Add(keyLockCollisionTile);
@@ -1086,7 +1086,7 @@ namespace StarquakeXNA
                             for (int c = 0; c < keyLockDoors[b].CollisionTiles.Count; c++)
                             {
                                 // Remove the tile from screen and from the key door lock collection
-                                keyLockDoors[b].CollisionTiles[c].ColType = enCollTileType.NotBlob;
+                                keyLockDoors[b].CollisionTiles[c].ColType = CollisionTileType.NotBlob;
                             }
                         }
                         else
@@ -1098,7 +1098,7 @@ namespace StarquakeXNA
                             for (int c = 0; c < keyLockDoors[b].CollisionTiles.Count; c++)
                             {
                                 // Remove the tile from screen and from the key door lock collection
-                                keyLockDoors[b].CollisionTiles[c].ColType = enCollTileType.EveryoneHits;
+                                keyLockDoors[b].CollisionTiles[c].ColType = CollisionTileType.EveryoneHits;
                             }
                         }
 
