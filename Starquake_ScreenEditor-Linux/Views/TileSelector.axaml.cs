@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 
-namespace ScreenEditor;
+namespace ScreenEditor.Views;
 
 public partial class TileSelector : UserControl
 {

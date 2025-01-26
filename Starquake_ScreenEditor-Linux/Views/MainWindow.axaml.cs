@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace ScreenEditor;
+namespace ScreenEditor.Views;
 
 public partial class MainWindow : Window
 {
