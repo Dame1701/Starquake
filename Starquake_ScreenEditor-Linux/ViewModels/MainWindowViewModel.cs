@@ -1,5 +1,3 @@
-using System.Reactive;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -16,7 +14,6 @@ public class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel()
     {
         NewMapDataCommand = ReactiveCommand.Create(NewMapDataAction);
-
         SaveMapDataAsyncCommand = ReactiveCommand.CreateFromTask(SaveMapDataAsyncAction);
     }
 
