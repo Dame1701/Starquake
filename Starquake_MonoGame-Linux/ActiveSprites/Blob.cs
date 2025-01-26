@@ -13,6 +13,7 @@ namespace StarquakeXNA;
 public class Blob : GameComponentBase
 {
     private int _blobXPos;
+
     public int BlobXPos
     {
         get => _blobXPos;
@@ -24,6 +25,7 @@ public class Blob : GameComponentBase
     }
 
     private int _blobYPos;
+
     public int BlobYPos
     {
         get => _blobYPos;
@@ -57,9 +59,9 @@ public class Blob : GameComponentBase
 
     private float _blobScale = 1f;
 
-    public int BlobFireX { get; set; }
+    public int BlobFireX { get; private set; }
 
-    public int BlobFireY { get; set; }
+    public int BlobFireY { get; private set; }
 
     private int _blobFireFade;
     private const int BlobFireSpeed = 16;
@@ -140,22 +142,17 @@ public class Blob : GameComponentBase
 
     public void KillBlob(bool ResetBlobToScreenEntryPoint, bool OverloadFirst)
     {
-        if (BlobsState == enBlobState.Normal)
+        if (BlobsState != enBlobState.Normal)
         {
-            _resetBlobToScreenEntryPoint = ResetBlobToScreenEntryPoint;
-
-            if (OverloadFirst)
-            {
-                _blobOverloadState = 0;
-            }
-            else
-            {
-                _blobOverloadState = 3;
-            }
-
-            BlobsState = enBlobState.Overloading;
-            _blobAlarmSoundCounter = 0;
+            return;
         }
+
+        _resetBlobToScreenEntryPoint = ResetBlobToScreenEntryPoint;
+
+        _blobOverloadState = OverloadFirst ? 0 : 3;
+
+        BlobsState = enBlobState.Overloading;
+        _blobAlarmSoundCounter = 0;
     }
 
     public void LoadContent(ContentList Content)
@@ -272,11 +269,7 @@ public class Blob : GameComponentBase
 
     public void TriggerBlobTeleportedAnimation()
     {
-        if (_blobTeleporterBeam != null)
-        {
-            _blobTeleporterBeam.Start();
-        }
-
+        _blobTeleporterBeam?.Start();
         _startBlobTeleporting = true;
         _teleportFadeLevel = 0;
     }
@@ -284,543 +277,587 @@ public class Blob : GameComponentBase
     public override void Update(GameTime gameTime)
     {
         var changedScreens = false;
-
-        if (BlobsState == enBlobState.Normal)
+        switch (BlobsState)
         {
-            // Do something about being on something etc.
-            if (_blobOnShuttlePad)
+            case enBlobState.Normal:
             {
-                if (_tileBelowBlob != null)
+                // Do something about being on something etc.
+                if (_blobOnShuttlePad)
                 {
-                    // Change the map to reflect shuttle has been taken
-                    if (_tileBelowBlob.TileNumber == (int)enActionTiles.ShuttlePlatform)
+                    if (_tileBelowBlob != null)
                     {
-                        if (BlobsControl.MovedUp())
+                        switch (_tileBelowBlob.TileNumber)
                         {
-                            gameEngine.GameScreens.ChangeShuttlePlatformState(true);
-                            BlobHeight = 96;
-                            _blobOnShuttle = true;
-                        }
-                    }
-                    else if (_tileBelowBlob.TileNumber == (int)enActionTiles.RemovedShuttlePlatform)
-                    {
-                        if (BlobsControl.MovedLeft() || BlobsControl.MovedRight())
-                        {
-                            gameEngine.GameScreens.ChangeShuttlePlatformState(false);
-                            BlobHeight = 64;
-                            _blobOnShuttle = false;
-                        }
-                    }
+                            // Change the map to reflect shuttle has been taken
+                            case (int)enActionTiles.ShuttlePlatform:
+                            {
+                                if (BlobsControl.MovedUp())
+                                {
+                                    gameEngine.GameScreens.ChangeShuttlePlatformState(true);
+                                    BlobHeight = 96;
+                                    _blobOnShuttle = true;
+                                }
 
-                    // Update the collision map for the current screen
-                    gameEngine.GameScreens.UpdateCollisionMap(false);
+                                break;
+                            }
+                            case (int)enActionTiles.RemovedShuttlePlatform:
+                            {
+                                if (BlobsControl.MovedLeft() || BlobsControl.MovedRight())
+                                {
+                                    gameEngine.GameScreens.ChangeShuttlePlatformState(false);
+                                    BlobHeight = 64;
+                                    _blobOnShuttle = false;
+                                }
+
+                                break;
+                            }
+                        }
+
+                        // Update the collision map for the current screen
+                        gameEngine.GameScreens.UpdateCollisionMap(false);
+                    }
                 }
-            }
 
-            if (BlobsControl.MovedLeft())
-            {
-                if (_blobsLastAnimDirection == enDirection.Right)
+                if (BlobsControl.MovedLeft())
                 {
-                    if (BlobFrame > 6)
+                    if (_blobsLastAnimDirection == enDirection.Right)
                     {
-                        _blobAnimLeft.CurrentFrame = 6;
+                        _blobAnimLeft.CurrentFrame = BlobFrame > 6 ? 6 : BlobFrame;
                     }
                     else
                     {
-                        _blobAnimLeft.CurrentFrame = BlobFrame;
-                    }
-                }
-                else
-                {
-                    _blobAnimLeft.GetNextFrame();
-                }
-
-                var amountToMove = gameEngine.GameScreens.CheckCollision(enDirection.Left, _blobXPos, _blobYPos,
-                    BlobWidth, BlobHeight, BlobHSpeed, true);
-                if (amountToMove > 0)
-                {
-                    _blobXPos = _blobXPos - amountToMove;
-                    if (_blobOnShuttle)
-                    {
-                        _blobShuttleAnim.GetNextFrame();
-                    }
-                }
-
-                BlobFrame = _blobAnimLeft.CurrentFrame;
-                DirectionBlobMoved = enDirection.Left;
-                _blobsLastAnimDirection = enDirection.Left;
-
-                if (!_blobOnShuttle && _blobFallHeight == 0)
-                {
-                    gameEngine.ContentResourceManager.GetSoundFXEngine()
-                        .PlaySound("BlobRun", true);
-                }
-            }
-
-            if (BlobsControl.MovedRight())
-            {
-                if (_blobsLastAnimDirection == enDirection.Left)
-                {
-                    if (BlobFrame < 4)
-                    {
-                        _blobAnimRight.CurrentFrame = 4;
-                    }
-                    else
-                    {
-                        _blobAnimRight.CurrentFrame = BlobFrame;
-                    }
-                }
-                else
-                {
-                    _blobAnimRight.GetNextFrame();
-                }
-
-                var amountToMove = gameEngine.GameScreens.CheckCollision(enDirection.Right, _blobXPos, _blobYPos,
-                    BlobWidth, BlobHeight, BlobHSpeed, true);
-                if (amountToMove > 0)
-                {
-                    _blobXPos = _blobXPos + amountToMove;
-                    if (_blobOnShuttle)
-                    {
-                        _blobShuttleAnim.GetNextFrame();
-                    }
-                }
-
-                BlobFrame = _blobAnimRight.CurrentFrame;
-                DirectionBlobMoved = enDirection.Right;
-                _blobsLastAnimDirection = enDirection.Right;
-
-                if (!_blobOnShuttle && _blobFallHeight == 0)
-                {
-                    gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("BlobRun", true);
-                }
-            }
-
-            if (_blobOnShuttle)
-            {
-                if (_blobAnimRight.Repeat)
-                {
-                    _blobAnimRight.Repeat = false;
-                }
-
-                if (_blobAnimLeft.Repeat)
-                {
-                    _blobAnimLeft.Repeat = false;
-                }
-
-                if (BlobsControl.MovedUp())
-                {
-                    _blobYPos = _blobYPos - gameEngine.GameScreens.CheckCollision(enDirection.Up, _blobXPos,
-                        _blobYPos,
-                        BlobWidth, BlobHeight, BlobVSpeed, true);
-                    DirectionBlobMoved = enDirection.Up;
-                }
-
-                if (BlobsControl.MovedDown())
-                {
-                    _blobYPos = _blobYPos + gameEngine.GameScreens.CheckCollision(enDirection.Down, _blobXPos,
-                        _blobYPos, BlobWidth, BlobHeight, BlobVSpeed, true);
-                    DirectionBlobMoved = enDirection.Down;
-                }
-            }
-            else
-            {
-                // Create a standing platform
-                if (BlobsControl.MovedDown() &&
-                    !BlobsControl.MovedLeft() &&
-                    !BlobsControl.MovedRight())
-                {
-                    if (_jumpPressed == false)
-                    {
-                        _jumpPressed = true;
-
-                        if (gameEngine.BlobStatusPanel.Platforms > 0)
-                        {
-                            if (_blobOnShuttlePad == false)
-                            {
-                                int temp = _blobJumpPlatformEngine.GetNewJumpPlatform(_blobXPos, _blobYPos,
-                                    BlobWidth,
-                                    BlobHeight, true);
-
-                                if (temp == -1)
-                                {
-                                }
-
-                                // If -1 is returned from this routine, the collision check failed
-                                if (temp != -1000)
-                                {
-                                    _blobYPos = temp;
-
-                                    gameEngine.ContentResourceManager.GetSoundFXEngine()
-                                        .PlaySound("BlobJumps", 0.3f, false);
-
-                                    if (OnBlobActionRaised != null)
-                                        OnBlobActionRaised(enBlobAction.LaidPlatform, null);
-                                }
-                            }
-                        }
-                        else // just jump aimlessly in the air
-                        {
-                            // Check that we are on the ground first.... and above blob's head
-                            if (gameEngine.GameScreens.CheckCollision(enDirection.Down, _blobXPos, _blobYPos,
-                                    BlobWidth, BlobHeight, 1, true) == 0 &&
-                                gameEngine.GameScreens.CheckCollision(enDirection.Up, _blobXPos, _blobYPos - 32,
-                                    BlobWidth, BlobHeight, 1, true) != 0
-                               )
-                            {
-                                _blobYPos = _blobYPos - 32;
-                                gameEngine.ContentResourceManager.GetSoundFXEngine()
-                                    .PlaySound("BlobJumpsNoPlatforms", 1f, false);
-                            }
-                        }
-                    }
-                }
-
-                bool accessingCheops = false;
-
-                if (gameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid != null)
-                {
-                    if (CollisionDetection.Check(
-                            new Rectangle(
-                                _blobXPos,
-                                _blobYPos,
-                                64,
-                                64),
-                            new Rectangle(
-                                gameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid.XLocation,
-                                gameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid.YLocation,
-                                64,
-                                64)))
-                    {
-                        accessingCheops = true;
-                    }
-                }
-
-                // Ensure Blob isn't going through a force field
-                bool inAccessForceField = false;
-                TileDetected forceFieldTile = gameEngine.GameScreens.CheckTileByObject(enDirection.None, _blobXPos,
-                    _blobYPos, BlobWidth, BlobHeight, 0);
-
-                if (forceFieldTile != null && forceFieldTile.TileNumber == 419)
-                {
-                    inAccessForceField = true;
-                }
-
-                // Pick up an object or drop one perhaps.....
-                if (BlobsControl.MovedUp() &&
-                    !BlobsControl.MovedLeft() &&
-                    !BlobsControl.MovedRight())
-                {
-                    if (_inventoryAccessed == false &&
-                        !_inTunnelLift &&
-                        !inAccessForceField) // Ensure Blob isn't going through a force field
-                    {
-                        if (accessingCheops)
-                        {
-                            // Do something with the pyramid.....
-                            gameEngine.GetGameScreen(enGameScreen.Cheops).Reset(null);
-                            gameEngine.CurrentGameScreen = enGameScreen.Cheops;
-                        }
-                        else
-                        {
-                            gameEngine.ContentResourceManager.GetSoundFXEngine()
-                                .PlaySound("BlobPickUp", 0.3f, false);
-
-                            _inventoryAccessed = true;
-
-                            // Collect powerups
-                            InteractiveItem interactiveItemDropped = null;
-
-                            // Pull out the last item and put it on the screen
-                            if (BlobInventory[BlobInventory.Length - 1] != enCollectables.None)
-                            {
-                                //gameEngine.GameScreens.C
-                                int itemXPos = (_blobXPos / gameEngine.GameScreens.CollAreaWidth) *
-                                               gameEngine.GameScreens.CollAreaWidth;
-                                int itemYPos = (_blobYPos / gameEngine.GameScreens.CollAreaHeight) *
-                                               gameEngine.GameScreens.CollAreaHeight;
-
-                                interactiveItemDropped = new InteractiveItem(itemXPos, itemYPos,
-                                    (int)BlobInventory[BlobInventory.Length - 1]);
-
-                                gameEngine.GameScreens.CurrentGameScreenData.PickUps.Add(interactiveItemDropped);
-
-                                // Nothing held here now
-                                BlobInventory[BlobInventory.Length - 1] = enCollectables.None;
-                            }
-
-                            // Move everything along one in Blob's inventory
-                            for (int b = BlobInventory.Length - 1; b > 0; b--)
-                            {
-                                BlobInventory[b] = BlobInventory[b - 1];
-                                BlobInventory[b - 1] = enCollectables.None;
-                            }
-
-                            // Pick up an item if we can....
-                            if (gameEngine.GameScreens.CurrentGameScreenData.PickUps != null)
-                            {
-                                for (int a = 0; a < gameEngine.GameScreens.CurrentGameScreenData.PickUps.Count; a++)
-                                {
-                                    if (CollisionDetection.Check(
-                                            _blobXPos,
-                                            BlobYPos,
-                                            BlobWidth,
-                                            BlobHeight,
-                                            gameEngine.GameScreens.CurrentGameScreenData.PickUps[a].XLocation + 16,
-                                            gameEngine.GameScreens.CurrentGameScreenData.PickUps[a].YLocation + 32,
-                                            32,
-                                            32))
-                                    {
-                                        // Make sure it's not what we just dropped....
-                                        bool pickupItem = true;
-
-                                        if (interactiveItemDropped != null &&
-                                            interactiveItemDropped ==
-                                            gameEngine.GameScreens.CurrentGameScreenData.PickUps[a])
-                                        {
-                                            pickupItem = false;
-                                        }
-
-                                        if (pickupItem)
-                                        {
-                                            // Add the item to Blob's inventory
-                                            BlobInventory[0] = (enCollectables)gameEngine.GameScreens
-                                                .CurrentGameScreenData.PickUps[a].Type;
-
-                                            // Remove it from the screen
-                                            gameEngine.GameScreens.CurrentGameScreenData.PickUps.Remove(
-                                                gameEngine.GameScreens.CurrentGameScreenData.PickUps[a]);
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-
-                            gameEngine.GameScreens.UpdateCollisionMap(false);
-                        }
-                    }
-                }
-
-                if (!BlobsControl.MovedUp())
-                {
-                    _inventoryAccessed = false;
-                }
-
-                if (!BlobsControl.MovedDown())
-                {
-                    _jumpPressed = false;
-                }
-
-                if (!_blobAnimRight.Repeat)
-                {
-                    _blobAnimRight.Repeat = true;
-                }
-
-                if (!_blobAnimLeft.Repeat)
-                {
-                    _blobAnimLeft.Repeat = true;
-                }
-
-                // Crappy fake gravity routine :p
-                if (!_inTunnelLift) // Can't fall if we are in a tunnel lift
-                {
-                    int falling = gameEngine.GameScreens.CheckCollision(enDirection.Down, _blobXPos, _blobYPos,
-                        BlobWidth, BlobHeight, _blobFallSpeed, true);
-
-                    if (falling > 0)
-                    {
-                        _blobDistanceFallen = _blobDistanceFallen + falling;
-                        _blobTotalDistanceFallen = _blobTotalDistanceFallen + falling;
-
-                        if (_blobDistanceFallen > 12 && _blobFallSpeed < 12)
-                        {
-                            _blobFallSpeed++;
-                            _blobDistanceFallen = 0;
-                        }
-                    }
-                    else
-                    {
-                        _blobTotalDistanceFallen = 0;
-                        _blobDistanceFallen = 0;
-                        _blobFallSpeed = 4;
-                        _blobFallHeight = 0;
+                        _blobAnimLeft.GetNextFrame();
                     }
 
-                    // Fall - arrrgh!!!
-                    int fallDistance = gameEngine.GameScreens.CheckCollision(enDirection.Down, _blobXPos, _blobYPos,
-                        BlobWidth, BlobHeight, _blobFallSpeed, true);
-
-                    if (fallDistance > 0 && _blobTotalDistanceFallen > 64)
+                    var amountToMove = gameEngine.GameScreens.CheckCollision(enDirection.Left, _blobXPos, _blobYPos,
+                        BlobWidth, BlobHeight, BlobHSpeed, true);
+                    if (amountToMove > 0)
                     {
-                        _blobFallsSoundId = gameEngine.ContentResourceManager.GetSoundFXEngine()
-                            .PlaySound("BlobFalls", true);
-                    }
-
-                    if (falling == 0)
-                    {
-                        gameEngine.ContentResourceManager.GetSoundFXEngine()
-                            .StopSound(_blobFallsSoundId, SoundFade.Fast);
-                    }
-
-                    // Check to see if Blob can potentially enter a teleport booth, tunnel etc.
-                    if (BlobsControl.MovedRight())
-                    {
-                        for (int a = 0; a < fallDistance; a++)
-                        {
-                            if (gameEngine.GameScreens.CheckCollision(enDirection.Down, _blobXPos + BlobWidth,
-                                    _blobYPos + a, BlobWidth + 1, BlobHeight, 1, true) == 0)
-                            {
-                                if (gameEngine.GameScreens.CheckCollision(enDirection.Right, _blobXPos + BlobWidth,
-                                        _blobYPos + a, BlobWidth, BlobHeight, 1, true) > 0)
-                                {
-                                    fallDistance = a;
-
-                                    if (fallDistance == 0)
-                                        fallDistance = 1;
-
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    if (BlobsControl.MovedLeft())
-                    {
-                        for (int a = 0; a < fallDistance; a++)
-                        {
-                            if (gameEngine.GameScreens.CheckCollision(enDirection.Down, _blobXPos - BlobWidth,
-                                    _blobYPos + a, BlobWidth + 1, BlobHeight, 1, true) == 0)
-                            {
-                                if (gameEngine.GameScreens.CheckCollision(enDirection.Right, _blobXPos - BlobWidth,
-                                        _blobYPos + a, BlobWidth, BlobHeight, 1, true) > 0)
-                                {
-                                    fallDistance = a;
-
-                                    if (fallDistance == 0)
-                                        fallDistance = 1;
-
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    _blobYPos = _blobYPos + fallDistance;
-                    _blobFallHeight = _blobFallHeight + fallDistance;
-                }
-            }
-
-            // Fire not on a shuttle
-            if (BlobsControl.HasFired())
-            {
-                if (gameEngine.BlobStatusPanel.FirePower > 0)
-                {
-                    if (_blobCanFire)
-                    {
-                        // Play sound
-                        gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("BlobLazer");
-                        _blobFireDistance = 0;
-
-                        BlobFireX = _blobXPos + 16;
-                        BlobFireY = _blobYPos + 16;
-                        _blobFireFade = 0;
-
-                        _blobCanFire = false;
-                        BlobHasFired = true;
-                        _blobFireCollisionDirection = 0;
-
-                        if (OnBlobActionRaised != null)
-                        {
-                            OnBlobActionRaised(enBlobAction.FiredLazer, null);
-                        }
-
+                        _blobXPos = _blobXPos - amountToMove;
                         if (_blobOnShuttle)
                         {
-                            _directionBlobFired = DirectionBlobMoved;
+                            _blobShuttleAnim.GetNextFrame();
+                        }
+                    }
+
+                    BlobFrame = _blobAnimLeft.CurrentFrame;
+                    DirectionBlobMoved = enDirection.Left;
+                    _blobsLastAnimDirection = enDirection.Left;
+
+                    if (!_blobOnShuttle && _blobFallHeight == 0)
+                    {
+                        gameEngine.ContentResourceManager.GetSoundFXEngine()
+                            .PlaySound("BlobRun", true);
+                    }
+                }
+
+                if (BlobsControl.MovedRight())
+                {
+                    if (_blobsLastAnimDirection == enDirection.Left)
+                    {
+                        _blobAnimRight.CurrentFrame = BlobFrame < 4 ? 4 : BlobFrame;
+                    }
+                    else
+                    {
+                        _blobAnimRight.GetNextFrame();
+                    }
+
+                    var amountToMove = gameEngine.GameScreens.CheckCollision(enDirection.Right, _blobXPos, _blobYPos,
+                        BlobWidth, BlobHeight, BlobHSpeed, true);
+                    if (amountToMove > 0)
+                    {
+                        _blobXPos = _blobXPos + amountToMove;
+                        if (_blobOnShuttle)
+                        {
+                            _blobShuttleAnim.GetNextFrame();
+                        }
+                    }
+
+                    BlobFrame = _blobAnimRight.CurrentFrame;
+                    DirectionBlobMoved = enDirection.Right;
+                    _blobsLastAnimDirection = enDirection.Right;
+
+                    if (!_blobOnShuttle && _blobFallHeight == 0)
+                    {
+                        gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("BlobRun", true);
+                    }
+                }
+
+                if (_blobOnShuttle)
+                {
+                    if (_blobAnimRight.Repeat)
+                    {
+                        _blobAnimRight.Repeat = false;
+                    }
+
+                    if (_blobAnimLeft.Repeat)
+                    {
+                        _blobAnimLeft.Repeat = false;
+                    }
+
+                    if (BlobsControl.MovedUp())
+                    {
+                        _blobYPos = _blobYPos - gameEngine.GameScreens.CheckCollision(enDirection.Up, _blobXPos,
+                            _blobYPos,
+                            BlobWidth, BlobHeight, BlobVSpeed, true);
+                        DirectionBlobMoved = enDirection.Up;
+                    }
+
+                    if (BlobsControl.MovedDown())
+                    {
+                        _blobYPos = _blobYPos + gameEngine.GameScreens.CheckCollision(enDirection.Down, _blobXPos,
+                            _blobYPos, BlobWidth, BlobHeight, BlobVSpeed, true);
+                        DirectionBlobMoved = enDirection.Down;
+                    }
+                }
+                else
+                {
+                    // Create a standing platform
+                    if (BlobsControl.MovedDown() &&
+                        !BlobsControl.MovedLeft() &&
+                        !BlobsControl.MovedRight())
+                    {
+                        if (_jumpPressed == false)
+                        {
+                            _jumpPressed = true;
+
+                            if (gameEngine.BlobStatusPanel.Platforms > 0)
+                            {
+                                if (_blobOnShuttlePad == false)
+                                {
+                                    int temp = _blobJumpPlatformEngine.GetNewJumpPlatform(_blobXPos, _blobYPos,
+                                        BlobWidth,
+                                        BlobHeight, true);
+
+                                    if (temp == -1)
+                                    {
+                                    }
+
+                                    // If -1 is returned from this routine, the collision check failed
+                                    if (temp != -1000)
+                                    {
+                                        _blobYPos = temp;
+
+                                        gameEngine.ContentResourceManager.GetSoundFXEngine()
+                                            .PlaySound("BlobJumps", 0.3f, false);
+
+                                        if (OnBlobActionRaised != null)
+                                            OnBlobActionRaised(enBlobAction.LaidPlatform, null);
+                                    }
+                                }
+                            }
+                            else // just jump aimlessly in the air
+                            {
+                                // Check that we are on the ground first.... and above blob's head
+                                if (gameEngine.GameScreens.CheckCollision(enDirection.Down, _blobXPos, _blobYPos,
+                                        BlobWidth, BlobHeight, 1, true) == 0 &&
+                                    gameEngine.GameScreens.CheckCollision(enDirection.Up, _blobXPos, _blobYPos - 32,
+                                        BlobWidth, BlobHeight, 1, true) != 0
+                                   )
+                                {
+                                    _blobYPos = _blobYPos - 32;
+                                    gameEngine.ContentResourceManager.GetSoundFXEngine()
+                                        .PlaySound("BlobJumpsNoPlatforms", 1f, false);
+                                }
+                            }
+                        }
+                    }
+
+                    var accessingCheops = false;
+                    if (gameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid != null)
+                    {
+                        if (CollisionDetection.Check(
+                                new Rectangle(
+                                    _blobXPos,
+                                    _blobYPos,
+                                    64,
+                                    64),
+                                new Rectangle(
+                                    gameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid.XLocation,
+                                    gameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid.YLocation,
+                                    64,
+                                    64)))
+                        {
+                            accessingCheops = true;
+                        }
+                    }
+
+                    // Ensure Blob isn't going through a force field
+                    var inAccessForceField = false;
+                    var forceFieldTile = gameEngine.GameScreens.CheckTileByObject(enDirection.None, _blobXPos,
+                        _blobYPos, BlobWidth, BlobHeight, 0);
+
+                    if (forceFieldTile is { TileNumber: 419 })
+                    {
+                        inAccessForceField = true;
+                    }
+
+                    // Pick up an object or drop one perhaps.....
+                    if (BlobsControl.MovedUp() &&
+                        !BlobsControl.MovedLeft() &&
+                        !BlobsControl.MovedRight())
+                    {
+                        if (_inventoryAccessed == false &&
+                            !_inTunnelLift &&
+                            !inAccessForceField) // Ensure Blob isn't going through a force field
+                        {
+                            if (accessingCheops)
+                            {
+                                // Do something with the pyramid.....
+                                gameEngine.GetGameScreen(enGameScreen.Cheops).Reset(null);
+                                gameEngine.CurrentGameScreen = enGameScreen.Cheops;
+                            }
+                            else
+                            {
+                                gameEngine.ContentResourceManager.GetSoundFXEngine()
+                                    .PlaySound("BlobPickUp", 0.3f, false);
+
+                                _inventoryAccessed = true;
+
+                                // Collect powerups
+                                InteractiveItem interactiveItemDropped = null;
+
+                                // Pull out the last item and put it on the screen
+                                if (BlobInventory[^1] != enCollectables.None)
+                                {
+                                    //gameEngine.GameScreens.C
+                                    var itemXPos = (_blobXPos / gameEngine.GameScreens.CollAreaWidth) *
+                                                   gameEngine.GameScreens.CollAreaWidth;
+                                    var itemYPos = (_blobYPos / gameEngine.GameScreens.CollAreaHeight) *
+                                                   gameEngine.GameScreens.CollAreaHeight;
+
+                                    interactiveItemDropped = new InteractiveItem(itemXPos, itemYPos,
+                                        (int)BlobInventory[^1]);
+
+                                    gameEngine.GameScreens.CurrentGameScreenData.PickUps.Add(interactiveItemDropped);
+
+                                    // Nothing held here now
+                                    BlobInventory[^1] = enCollectables.None;
+                                }
+
+                                // Move everything along one in Blob's inventory
+                                for (var b = BlobInventory.Length - 1; b > 0; b--)
+                                {
+                                    BlobInventory[b] = BlobInventory[b - 1];
+                                    BlobInventory[b - 1] = enCollectables.None;
+                                }
+
+                                // Pick up an item if we can....
+                                if (gameEngine.GameScreens.CurrentGameScreenData.PickUps != null)
+                                {
+                                    for (var a = 0; a < gameEngine.GameScreens.CurrentGameScreenData.PickUps.Count; a++)
+                                    {
+                                        if (!CollisionDetection.Check(
+                                                _blobXPos,
+                                                BlobYPos,
+                                                BlobWidth,
+                                                BlobHeight,
+                                                gameEngine.GameScreens.CurrentGameScreenData.PickUps[a].XLocation + 16,
+                                                gameEngine.GameScreens.CurrentGameScreenData.PickUps[a].YLocation + 32,
+                                                32,
+                                                32))
+                                        {
+                                            continue;
+                                        }
+
+                                        // Make sure it's not what we just dropped....
+                                        var pickupItem = !(interactiveItemDropped != null &&
+                                                           interactiveItemDropped ==
+                                                           gameEngine.GameScreens.CurrentGameScreenData.PickUps[a]);
+
+                                        if (!pickupItem)
+                                        {
+                                            continue;
+                                        }
+
+                                        // Add the item to Blob's inventory
+                                        BlobInventory[0] = (enCollectables)gameEngine.GameScreens
+                                            .CurrentGameScreenData.PickUps[a].Type;
+
+                                        // Remove it from the screen
+                                        gameEngine.GameScreens.CurrentGameScreenData.PickUps.Remove(
+                                            gameEngine.GameScreens.CurrentGameScreenData.PickUps[a]);
+                                        break;
+                                    }
+                                }
+
+                                gameEngine.GameScreens.UpdateCollisionMap(false);
+                            }
+                        }
+                    }
+
+                    if (!BlobsControl.MovedUp())
+                    {
+                        _inventoryAccessed = false;
+                    }
+
+                    if (!BlobsControl.MovedDown())
+                    {
+                        _jumpPressed = false;
+                    }
+
+                    if (!_blobAnimRight.Repeat)
+                    {
+                        _blobAnimRight.Repeat = true;
+                    }
+
+                    if (!_blobAnimLeft.Repeat)
+                    {
+                        _blobAnimLeft.Repeat = true;
+                    }
+
+                    // Crappy fake gravity routine :p
+                    if (!_inTunnelLift) // Can't fall if we are in a tunnel lift
+                    {
+                        int falling = gameEngine.GameScreens.CheckCollision(enDirection.Down, _blobXPos, _blobYPos,
+                            BlobWidth, BlobHeight, _blobFallSpeed, true);
+
+                        if (falling > 0)
+                        {
+                            _blobDistanceFallen = _blobDistanceFallen + falling;
+                            _blobTotalDistanceFallen = _blobTotalDistanceFallen + falling;
+
+                            if (_blobDistanceFallen > 12 && _blobFallSpeed < 12)
+                            {
+                                _blobFallSpeed++;
+                                _blobDistanceFallen = 0;
+                            }
                         }
                         else
                         {
-                            if (DirectionBlobMoved == enDirection.Left)
+                            _blobTotalDistanceFallen = 0;
+                            _blobDistanceFallen = 0;
+                            _blobFallSpeed = 4;
+                            _blobFallHeight = 0;
+                        }
+
+                        // Fall - arrrgh!!!
+                        int fallDistance = gameEngine.GameScreens.CheckCollision(enDirection.Down, _blobXPos, _blobYPos,
+                            BlobWidth, BlobHeight, _blobFallSpeed, true);
+
+                        if (fallDistance > 0 && _blobTotalDistanceFallen > 64)
+                        {
+                            _blobFallsSoundId = gameEngine.ContentResourceManager.GetSoundFXEngine()
+                                .PlaySound("BlobFalls", true);
+                        }
+
+                        if (falling == 0)
+                        {
+                            gameEngine.ContentResourceManager.GetSoundFXEngine()
+                                .StopSound(_blobFallsSoundId, SoundFade.Fast);
+                        }
+
+                        // Check to see if Blob can potentially enter a teleport booth, tunnel etc.
+                        if (BlobsControl.MovedRight())
+                        {
+                            for (int a = 0; a < fallDistance; a++)
                             {
-                                _directionBlobFired = enDirection.Left;
+                                if (gameEngine.GameScreens.CheckCollision(enDirection.Down, _blobXPos + BlobWidth,
+                                        _blobYPos + a, BlobWidth + 1, BlobHeight, 1, true) == 0)
+                                {
+                                    if (gameEngine.GameScreens.CheckCollision(enDirection.Right, _blobXPos + BlobWidth,
+                                            _blobYPos + a, BlobWidth, BlobHeight, 1, true) > 0)
+                                    {
+                                        fallDistance = a;
+
+                                        if (fallDistance == 0)
+                                            fallDistance = 1;
+
+                                        break;
+                                    }
+                                }
                             }
-                            else if (DirectionBlobMoved == enDirection.Right)
+                        }
+
+                        if (BlobsControl.MovedLeft())
+                        {
+                            for (int a = 0; a < fallDistance; a++)
                             {
-                                _directionBlobFired = enDirection.Right;
+                                if (gameEngine.GameScreens.CheckCollision(enDirection.Down, _blobXPos - BlobWidth,
+                                        _blobYPos + a, BlobWidth + 1, BlobHeight, 1, true) == 0)
+                                {
+                                    if (gameEngine.GameScreens.CheckCollision(enDirection.Right, _blobXPos - BlobWidth,
+                                            _blobYPos + a, BlobWidth, BlobHeight, 1, true) > 0)
+                                    {
+                                        fallDistance = a;
+
+                                        if (fallDistance == 0)
+                                            fallDistance = 1;
+
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        _blobYPos = _blobYPos + fallDistance;
+                        _blobFallHeight = _blobFallHeight + fallDistance;
+                    }
+                }
+
+                // Fire not on a shuttle
+                if (BlobsControl.HasFired())
+                {
+                    if (gameEngine.BlobStatusPanel.FirePower > 0)
+                    {
+                        if (_blobCanFire)
+                        {
+                            // Play sound
+                            gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("BlobLazer");
+                            _blobFireDistance = 0;
+
+                            BlobFireX = _blobXPos + 16;
+                            BlobFireY = _blobYPos + 16;
+                            _blobFireFade = 0;
+
+                            _blobCanFire = false;
+                            BlobHasFired = true;
+                            _blobFireCollisionDirection = 0;
+
+                            if (OnBlobActionRaised != null)
+                            {
+                                OnBlobActionRaised(enBlobAction.FiredLazer, null);
+                            }
+
+                            if (_blobOnShuttle)
+                            {
+                                _directionBlobFired = DirectionBlobMoved;
+                            }
+                            else
+                            {
+                                if (DirectionBlobMoved == enDirection.Left)
+                                {
+                                    _directionBlobFired = enDirection.Left;
+                                }
+                                else if (DirectionBlobMoved == enDirection.Right)
+                                {
+                                    _directionBlobFired = enDirection.Right;
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            // Fire routine
-            if (BlobHasFired)
-            {
-                bool hitScreenBoundary = false;
-
-                if (_blobFireTrail != null)
+                // Fire routine
+                if (BlobHasFired)
                 {
-                    _blobFireTrail.Start();
-                }
+                    bool hitScreenBoundary = false;
 
-                if (_blobOnShuttleCached)
-                {
-                    if (_directionBlobFired == enDirection.Up)
+                    if (_blobFireTrail != null)
                     {
-                        int amountToMoveY = 0;
-                        int amountToMoveX = 0;
+                        _blobFireTrail.Start();
+                    }
 
-                        if (_blobFireCollisionDirection == 0)
+                    if (_blobOnShuttleCached)
+                    {
+                        if (_directionBlobFired == enDirection.Up)
                         {
-                            amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Up, BlobFireX,
-                                BlobFireY, 2, 32, BlobFireSpeed, false);
-                        }
-                        else if (_blobFireCollisionDirection == 1)
-                        {
-                            amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Left, BlobFireX,
-                                BlobFireY, 2, 32, BlobFireSpeed, false);
-                            amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Down, BlobFireX,
-                                BlobFireY, 2, 32, BlobFireSpeed, false);
-                        }
-                        else if (_blobFireCollisionDirection == 2)
-                        {
-                            amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Right, BlobFireX,
-                                BlobFireY, 2, 32, BlobFireSpeed, false);
-                            amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Down, BlobFireX,
-                                BlobFireY, 2, 32, BlobFireSpeed, false);
-                        }
+                            int amountToMoveY = 0;
+                            int amountToMoveX = 0;
 
-                        // have we hit game scenary
-                        if (_blobFireCollisionDirection == 0)
-                        {
-                            if (amountToMoveY == 0)
+                            if (_blobFireCollisionDirection == 0)
                             {
-                                // Lets change fire direction, we can go diagonal 
+                                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Up, BlobFireX,
+                                    BlobFireY, 2, 32, BlobFireSpeed, false);
+                            }
+                            else if (_blobFireCollisionDirection == 1)
+                            {
+                                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Left, BlobFireX,
+                                    BlobFireY, 2, 32, BlobFireSpeed, false);
+                                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Down, BlobFireX,
+                                    BlobFireY, 2, 32, BlobFireSpeed, false);
+                            }
+                            else if (_blobFireCollisionDirection == 2)
+                            {
+                                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Right, BlobFireX,
+                                    BlobFireY, 2, 32, BlobFireSpeed, false);
+                                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Down, BlobFireX,
+                                    BlobFireY, 2, 32, BlobFireSpeed, false);
+                            }
+
+                            // have we hit game scenary
+                            if (_blobFireCollisionDirection == 0)
+                            {
+                                if (amountToMoveY == 0)
+                                {
+                                    // Lets change fire direction, we can go diagonal 
+                                    if (_blobFireCollisionDirection == 0)
+                                    {
+                                        // Randomly select the new direction
+                                        _blobFireCollisionDirection = gameEngine.RandomNumberGenerator.Next(1, 3);
+
+                                        if (_blobFireSparks != null)
+                                        {
+                                            _blobFireSparks.Start(BlobFireX, BlobFireY + 24);
+                                        }
+                                    }
+                                }
+
+                                // Have we crossed the screen boundary
+                                if (BlobFireY < 0)
+                                {
+                                    amountToMoveY = 0;
+                                    hitScreenBoundary = true;
+                                }
+
+                                // Have we hit a nastie
                                 if (_blobFireCollisionDirection == 0)
                                 {
-                                    // Randomly select the new direction
-                                    _blobFireCollisionDirection = gameEngine.RandomNumberGenerator.Next(1, 3);
-
-                                    if (_blobFireSparks != null)
+                                    if (amountToMoveY > 0)
                                     {
-                                        _blobFireSparks.Start(BlobFireX, BlobFireY + 24);
+                                        BlobFireY = BlobFireY - amountToMoveY;
+                                    }
+                                    else
+                                    {
+                                        BlobHasFired = false;
+                                        _blobCanFire = true;
+
+                                        if (_blobFireSparks != null && !hitScreenBoundary)
+                                        {
+                                            _blobFireSparks.Start(BlobFireX, BlobFireY + 24);
+                                        }
                                     }
                                 }
                             }
-
-                            // Have we crossed the screen boundary
-                            if (BlobFireY < 0)
+                            else if (_blobFireCollisionDirection > 0)
                             {
-                                amountToMoveY = 0;
-                                hitScreenBoundary = true;
-                            }
-
-                            // Have we hit a nastie
-                            if (_blobFireCollisionDirection == 0)
-                            {
-                                if (amountToMoveY > 0)
+                                if (BlobFireY + 32 > gameEngine.GameScreens.ScreenHeight)
                                 {
-                                    BlobFireY = BlobFireY - amountToMoveY;
+                                    amountToMoveY = 0;
+                                    hitScreenBoundary = true;
+                                }
+
+                                if (_blobFireCollisionDirection == 1)
+                                {
+                                    if (BlobFireX < 0)
+                                    {
+                                        amountToMoveX = 0;
+                                        hitScreenBoundary = true;
+                                    }
+                                }
+                                else if (_blobFireCollisionDirection == 2)
+                                {
+                                    if (BlobFireX + 32 > gameEngine.GameScreens.ScreenWidth)
+                                    {
+                                        amountToMoveX = 0;
+                                        hitScreenBoundary = true;
+                                    }
+                                }
+
+                                if (amountToMoveX > 0 && amountToMoveY > 0)
+                                {
+                                    BlobFireY = BlobFireY + amountToMoveY;
+
+                                    if (_blobFireCollisionDirection == 1)
+                                    {
+                                        BlobFireX = BlobFireX - amountToMoveX;
+                                        _blobFireDistance = _blobFireDistance + amountToMoveX;
+                                    }
+                                    else if (_blobFireCollisionDirection == 2)
+                                    {
+                                        BlobFireX = BlobFireX + amountToMoveX;
+                                        _blobFireDistance = _blobFireDistance + amountToMoveX;
+                                    }
                                 }
                                 else
                                 {
@@ -834,114 +871,242 @@ public class Blob : GameComponentBase
                                 }
                             }
                         }
-                        else if (_blobFireCollisionDirection > 0)
+                        else if (_directionBlobFired == enDirection.Down)
                         {
-                            if (BlobFireY + 32 > gameEngine.GameScreens.ScreenHeight)
+                            int amountToMoveY = 0;
+                            int amountToMoveX = 0;
+
+                            if (_blobFireCollisionDirection == 0)
                             {
-                                amountToMoveY = 0;
-                                hitScreenBoundary = true;
+                                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Down, BlobFireX,
+                                    BlobFireY, 2, 32, BlobFireSpeed, false);
+                            }
+                            else if (_blobFireCollisionDirection == 1)
+                            {
+                                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Left, BlobFireX,
+                                    BlobFireY, 2, 32, BlobFireSpeed, false);
+                                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Up, BlobFireX,
+                                    BlobFireY, 2, 32, BlobFireSpeed, false);
+                            }
+                            else if (_blobFireCollisionDirection == 2)
+                            {
+                                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Right, BlobFireX,
+                                    BlobFireY, 2, 32, BlobFireSpeed, false);
+                                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Up, BlobFireX,
+                                    BlobFireY, 2, 32, BlobFireSpeed, false);
                             }
 
-                            if (_blobFireCollisionDirection == 1)
+                            // have we hit game scenary
+                            if (_blobFireCollisionDirection == 0)
                             {
+                                if (amountToMoveY == 0)
+                                {
+                                    // Lets change fire direction, we can go diagonal 
+                                    if (_blobFireCollisionDirection == 0)
+                                    {
+                                        // Randomly select the new direction
+                                        _blobFireCollisionDirection = gameEngine.RandomNumberGenerator.Next(1, 3);
+
+                                        if (_blobFireSparks != null)
+                                        {
+                                            _blobFireSparks.Start(BlobFireX, BlobFireY + 24);
+                                        }
+                                    }
+                                }
+
+                                // Have we crossed the screen boundary
+                                if (BlobFireY + 32 > gameEngine.GameScreens.ScreenHeight)
+                                {
+                                    amountToMoveY = 0;
+                                    hitScreenBoundary = true;
+                                }
+
+                                // Have we hit a nastie
+                                if (_blobFireCollisionDirection == 0)
+                                {
+                                    if (amountToMoveY > 0)
+                                    {
+                                        BlobFireY = BlobFireY + amountToMoveY;
+                                    }
+                                    else
+                                    {
+                                        BlobHasFired = false;
+                                        _blobCanFire = true;
+
+                                        if (_blobFireSparks != null && !hitScreenBoundary)
+                                        {
+                                            _blobFireSparks.Start(BlobFireX, BlobFireY + 24);
+                                        }
+                                    }
+                                }
+                            }
+                            else if (_blobFireCollisionDirection > 0)
+                            {
+                                if (BlobFireY < 0)
+                                {
+                                    amountToMoveY = 0;
+                                    hitScreenBoundary = true;
+                                }
+
+                                if (_blobFireCollisionDirection == 1)
+                                {
+                                    if (BlobFireX < 0)
+                                    {
+                                        amountToMoveX = 0;
+                                        hitScreenBoundary = true;
+                                    }
+                                }
+                                else if (_blobFireCollisionDirection == 2)
+                                {
+                                    if (BlobFireY + 32 > gameEngine.GameScreens.ScreenWidth)
+                                    {
+                                        amountToMoveY = 0;
+                                        hitScreenBoundary = true;
+                                    }
+                                }
+
+                                if (amountToMoveX > 0 && amountToMoveY > 0)
+                                {
+                                    BlobFireY = BlobFireY - amountToMoveY;
+
+                                    if (_blobFireCollisionDirection == 1)
+                                    {
+                                        BlobFireX = BlobFireX - amountToMoveX;
+                                        _blobFireDistance = _blobFireDistance + amountToMoveX;
+                                    }
+                                    else if (_blobFireCollisionDirection == 2)
+                                    {
+                                        BlobFireX = BlobFireX + amountToMoveX;
+                                        _blobFireDistance = _blobFireDistance + amountToMoveX;
+                                    }
+                                }
+                                else
+                                {
+                                    BlobHasFired = false;
+                                    _blobCanFire = true;
+
+                                    if (_blobFireSparks != null && !hitScreenBoundary)
+                                    {
+                                        _blobFireSparks.Start(BlobFireX, BlobFireY + 24);
+                                    }
+                                }
+                            }
+                        }
+                        else if (_directionBlobFired == enDirection.Left)
+                        {
+                            int amountToMoveY = 0;
+                            int amountToMoveX = 0;
+
+                            if (_blobFireCollisionDirection == 0)
+                            {
+                                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Left, BlobFireX,
+                                    BlobFireY, 2, 32, BlobFireSpeed, false);
+                            }
+                            else if (_blobFireCollisionDirection == 1)
+                            {
+                                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Right, BlobFireX,
+                                    BlobFireY, 2, 32, BlobFireSpeed, false);
+                                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Up, BlobFireX,
+                                    BlobFireY, 2, 32, BlobFireSpeed, false);
+                            }
+                            else if (_blobFireCollisionDirection == 2)
+                            {
+                                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Right, BlobFireX,
+                                    BlobFireY, 2, 32, BlobFireSpeed, false);
+                                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Down, BlobFireX,
+                                    BlobFireY, 2, 32, BlobFireSpeed, false);
+                            }
+
+                            if (CheckForBlobCollisionWithObject(
+                                    new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight), out var offset))
+                            {
+                                if (_blobFireDistance < offset + (BlobWidth / 2))
+                                {
+                                    amountToMoveX = BlobFireSpeed;
+                                    amountToMoveY = BlobFireSpeed;
+                                }
+                            }
+
+                            // have we hit game scenary
+                            if (_blobFireCollisionDirection == 0)
+                            {
+                                if (amountToMoveX == 0)
+                                {
+                                    // Lets change fire direction, we can go diagonal 
+                                    if (_blobFireCollisionDirection == 0)
+                                    {
+                                        // Randomly select the new direction
+                                        _blobFireCollisionDirection = gameEngine.RandomNumberGenerator.Next(1, 3);
+
+                                        _blobFireSparks?.Start(BlobFireX, BlobFireY + 24);
+                                    }
+                                }
+
+                                // Have we crossed the screen boundary
                                 if (BlobFireX < 0)
                                 {
                                     amountToMoveX = 0;
                                     hitScreenBoundary = true;
                                 }
+
+                                // Have we hit a nastie
+                                if (_blobFireCollisionDirection == 0)
+                                {
+                                    if (amountToMoveX > 0)
+                                    {
+                                        BlobFireX -= amountToMoveX;
+                                        _blobFireDistance += amountToMoveX;
+                                    }
+                                    else
+                                    {
+                                        BlobHasFired = false;
+                                        _blobCanFire = true;
+
+                                        if (_blobFireSparks != null && !hitScreenBoundary)
+                                        {
+                                            _blobFireSparks.Start(BlobFireX, BlobFireY + 24);
+                                        }
+                                    }
+                                }
                             }
-                            else if (_blobFireCollisionDirection == 2)
+                            else if (_blobFireCollisionDirection > 0)
                             {
                                 if (BlobFireX + 32 > gameEngine.GameScreens.ScreenWidth)
                                 {
                                     amountToMoveX = 0;
                                     hitScreenBoundary = true;
                                 }
-                            }
-
-                            if (amountToMoveX > 0 && amountToMoveY > 0)
-                            {
-                                BlobFireY = BlobFireY + amountToMoveY;
 
                                 if (_blobFireCollisionDirection == 1)
                                 {
-                                    BlobFireX = BlobFireX - amountToMoveX;
-                                    _blobFireDistance = _blobFireDistance + amountToMoveX;
+                                    if (BlobFireY < 0)
+                                    {
+                                        amountToMoveY = 0;
+                                        hitScreenBoundary = true;
+                                    }
                                 }
                                 else if (_blobFireCollisionDirection == 2)
                                 {
-                                    BlobFireX = BlobFireX + amountToMoveX;
-                                    _blobFireDistance = _blobFireDistance + amountToMoveX;
-                                }
-                            }
-                            else
-                            {
-                                BlobHasFired = false;
-                                _blobCanFire = true;
-
-                                if (_blobFireSparks != null && !hitScreenBoundary)
-                                {
-                                    _blobFireSparks.Start(BlobFireX, BlobFireY + 24);
-                                }
-                            }
-                        }
-                    }
-                    else if (_directionBlobFired == enDirection.Down)
-                    {
-                        int amountToMoveY = 0;
-                        int amountToMoveX = 0;
-
-                        if (_blobFireCollisionDirection == 0)
-                        {
-                            amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Down, BlobFireX,
-                                BlobFireY, 2, 32, BlobFireSpeed, false);
-                        }
-                        else if (_blobFireCollisionDirection == 1)
-                        {
-                            amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Left, BlobFireX,
-                                BlobFireY, 2, 32, BlobFireSpeed, false);
-                            amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Up, BlobFireX,
-                                BlobFireY, 2, 32, BlobFireSpeed, false);
-                        }
-                        else if (_blobFireCollisionDirection == 2)
-                        {
-                            amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Right, BlobFireX,
-                                BlobFireY, 2, 32, BlobFireSpeed, false);
-                            amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Up, BlobFireX,
-                                BlobFireY, 2, 32, BlobFireSpeed, false);
-                        }
-
-                        // have we hit game scenary
-                        if (_blobFireCollisionDirection == 0)
-                        {
-                            if (amountToMoveY == 0)
-                            {
-                                // Lets change fire direction, we can go diagonal 
-                                if (_blobFireCollisionDirection == 0)
-                                {
-                                    // Randomly select the new direction
-                                    _blobFireCollisionDirection = gameEngine.RandomNumberGenerator.Next(1, 3);
-
-                                    if (_blobFireSparks != null)
+                                    if (BlobFireY + 32 > gameEngine.GameScreens.ScreenHeight)
                                     {
-                                        _blobFireSparks.Start(BlobFireX, BlobFireY + 24);
+                                        amountToMoveY = 0;
+                                        hitScreenBoundary = true;
                                     }
                                 }
-                            }
 
-                            // Have we crossed the screen boundary
-                            if (BlobFireY + 32 > gameEngine.GameScreens.ScreenHeight)
-                            {
-                                amountToMoveY = 0;
-                                hitScreenBoundary = true;
-                            }
-
-                            // Have we hit a nastie
-                            if (_blobFireCollisionDirection == 0)
-                            {
-                                if (amountToMoveY > 0)
+                                if (amountToMoveX > 0 && amountToMoveY > 0)
                                 {
-                                    BlobFireY = BlobFireY + amountToMoveY;
+                                    BlobFireX = BlobFireX + amountToMoveX;
+                                    _blobFireDistance = _blobFireDistance + amountToMoveX;
+
+                                    if (_blobFireCollisionDirection == 1)
+                                    {
+                                        BlobFireY = BlobFireY - amountToMoveY;
+                                    }
+                                    else if (_blobFireCollisionDirection == 2)
+                                    {
+                                        BlobFireY = BlobFireY + amountToMoveY;
+                                    }
                                 }
                                 else
                                 {
@@ -955,122 +1120,126 @@ public class Blob : GameComponentBase
                                 }
                             }
                         }
-                        else if (_blobFireCollisionDirection > 0)
+                        else if (_directionBlobFired == enDirection.Right)
                         {
-                            if (BlobFireY < 0)
+                            int amountToMoveY = 0;
+                            int amountToMoveX = 0;
+
+                            if (_blobFireCollisionDirection == 0)
                             {
-                                amountToMoveY = 0;
-                                hitScreenBoundary = true;
+                                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Right, BlobFireX,
+                                    BlobFireY, 2, 32, BlobFireSpeed, false);
+                            }
+                            else if (_blobFireCollisionDirection == 1)
+                            {
+                                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Left, BlobFireX,
+                                    BlobFireY, 2, 32, BlobFireSpeed, false);
+                                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Up, BlobFireX,
+                                    BlobFireY, 2, 32, BlobFireSpeed, false);
+                            }
+                            else if (_blobFireCollisionDirection == 2)
+                            {
+                                amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Left, BlobFireX,
+                                    BlobFireY, 2, 32, BlobFireSpeed, false);
+                                amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Down, BlobFireX,
+                                    BlobFireY, 2, 32, BlobFireSpeed, false);
                             }
 
-                            if (_blobFireCollisionDirection == 1)
+                            if (CheckForBlobCollisionWithObject(
+                                    new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight), out var offset))
                             {
-                                if (BlobFireX < 0)
+                                if (_blobFireDistance < offset + (BlobWidth / 2))
+                                {
+                                    amountToMoveX = BlobFireSpeed;
+                                    amountToMoveY = BlobFireSpeed;
+                                }
+                            }
+
+                            //if (CheckForBlobFireCollisionWithObject(new Rectangle(blobFireX, blobFireY, 32, 32)))
+                            //{
+                            //    amountToMoveX = blobFireSpeed;
+                            //    amountToMoveY = blobFireSpeed;
+                            //}
+
+                            // have we hit game scenary
+                            if (_blobFireCollisionDirection == 0)
+                            {
+                                if (amountToMoveX == 0)
+                                {
+                                    // Lets change fire direction, we can go diagonal 
+                                    if (_blobFireCollisionDirection == 0)
+                                    {
+                                        // Randomly select the new direction
+                                        _blobFireCollisionDirection = gameEngine.RandomNumberGenerator.Next(1, 3);
+
+                                        _blobFireSparks?.Start(BlobFireX, BlobFireY + 24);
+                                    }
+                                }
+
+                                // Have we crossed the screen boundary
+                                if (BlobFireX + 32 > gameEngine.GameScreens.ScreenWidth)
                                 {
                                     amountToMoveX = 0;
                                     hitScreenBoundary = true;
                                 }
-                            }
-                            else if (_blobFireCollisionDirection == 2)
-                            {
-                                if (BlobFireY + 32 > gameEngine.GameScreens.ScreenWidth)
+
+                                // Have we hit a nastie
+                                if (_blobFireCollisionDirection == 0)
                                 {
-                                    amountToMoveY = 0;
-                                    hitScreenBoundary = true;
+                                    if (amountToMoveX > 0)
+                                    {
+                                        BlobFireX = BlobFireX + amountToMoveX;
+                                        _blobFireDistance = _blobFireDistance + amountToMoveX;
+                                    }
+                                    else
+                                    {
+                                        BlobHasFired = false;
+                                        _blobCanFire = true;
+
+                                        if (_blobFireSparks != null && !hitScreenBoundary)
+                                        {
+                                            _blobFireSparks.Start(BlobFireX, BlobFireY + 24);
+                                        }
+                                    }
                                 }
                             }
-
-                            if (amountToMoveX > 0 && amountToMoveY > 0)
+                            else if (_blobFireCollisionDirection > 0)
                             {
-                                BlobFireY = BlobFireY - amountToMoveY;
+                                if (BlobFireX < 0)
+                                {
+                                    amountToMoveX = 0;
+                                }
 
                                 if (_blobFireCollisionDirection == 1)
                                 {
-                                    BlobFireX = BlobFireX - amountToMoveX;
-                                    _blobFireDistance = _blobFireDistance + amountToMoveX;
+                                    if (BlobFireY < 0)
+                                    {
+                                        amountToMoveY = 0;
+                                        hitScreenBoundary = true;
+                                    }
                                 }
                                 else if (_blobFireCollisionDirection == 2)
                                 {
-                                    BlobFireX = BlobFireX + amountToMoveX;
-                                    _blobFireDistance = _blobFireDistance + amountToMoveX;
+                                    if (BlobFireY + 32 > gameEngine.GameScreens.ScreenHeight)
+                                    {
+                                        amountToMoveY = 0;
+                                        hitScreenBoundary = true;
+                                    }
                                 }
-                            }
-                            else
-                            {
-                                BlobHasFired = false;
-                                _blobCanFire = true;
 
-                                if (_blobFireSparks != null && !hitScreenBoundary)
-                                {
-                                    _blobFireSparks.Start(BlobFireX, BlobFireY + 24);
-                                }
-                            }
-                        }
-                    }
-                    else if (_directionBlobFired == enDirection.Left)
-                    {
-                        int amountToMoveY = 0;
-                        int amountToMoveX = 0;
-
-                        if (_blobFireCollisionDirection == 0)
-                        {
-                            amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Left, BlobFireX,
-                                BlobFireY, 2, 32, BlobFireSpeed, false);
-                        }
-                        else if (_blobFireCollisionDirection == 1)
-                        {
-                            amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Right, BlobFireX,
-                                BlobFireY, 2, 32, BlobFireSpeed, false);
-                            amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Up, BlobFireX,
-                                BlobFireY, 2, 32, BlobFireSpeed, false);
-                        }
-                        else if (_blobFireCollisionDirection == 2)
-                        {
-                            amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Right, BlobFireX,
-                                BlobFireY, 2, 32, BlobFireSpeed, false);
-                            amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Down, BlobFireX,
-                                BlobFireY, 2, 32, BlobFireSpeed, false);
-                        }
-
-                        if (CheckForBlobCollisionWithObject(
-                                new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight), out var offset))
-                        {
-                            if (_blobFireDistance < offset + (BlobWidth / 2))
-                            {
-                                amountToMoveX = BlobFireSpeed;
-                                amountToMoveY = BlobFireSpeed;
-                            }
-                        }
-
-                        // have we hit game scenary
-                        if (_blobFireCollisionDirection == 0)
-                        {
-                            if (amountToMoveX == 0)
-                            {
-                                // Lets change fire direction, we can go diagonal 
-                                if (_blobFireCollisionDirection == 0)
-                                {
-                                    // Randomly select the new direction
-                                    _blobFireCollisionDirection = gameEngine.RandomNumberGenerator.Next(1, 3);
-
-                                    _blobFireSparks?.Start(BlobFireX, BlobFireY + 24);
-                                }
-                            }
-
-                            // Have we crossed the screen boundary
-                            if (BlobFireX < 0)
-                            {
-                                amountToMoveX = 0;
-                                hitScreenBoundary = true;
-                            }
-
-                            // Have we hit a nastie
-                            if (_blobFireCollisionDirection == 0)
-                            {
-                                if (amountToMoveX > 0)
+                                if (amountToMoveX > 0 && amountToMoveY > 0)
                                 {
                                     BlobFireX -= amountToMoveX;
                                     _blobFireDistance += amountToMoveX;
+
+                                    if (_blobFireCollisionDirection == 1)
+                                    {
+                                        BlobFireY -= amountToMoveY;
+                                    }
+                                    else if (_blobFireCollisionDirection == 2)
+                                    {
+                                        BlobFireY += amountToMoveY;
+                                    }
                                 }
                                 else
                                 {
@@ -1082,465 +1251,269 @@ public class Blob : GameComponentBase
                                         _blobFireSparks.Start(BlobFireX, BlobFireY + 24);
                                     }
                                 }
-                            }
-                        }
-                        else if (_blobFireCollisionDirection > 0)
-                        {
-                            if (BlobFireX + 32 > gameEngine.GameScreens.ScreenWidth)
-                            {
-                                amountToMoveX = 0;
-                                hitScreenBoundary = true;
-                            }
-
-                            if (_blobFireCollisionDirection == 1)
-                            {
-                                if (BlobFireY < 0)
-                                {
-                                    amountToMoveY = 0;
-                                    hitScreenBoundary = true;
-                                }
-                            }
-                            else if (_blobFireCollisionDirection == 2)
-                            {
-                                if (BlobFireY + 32 > gameEngine.GameScreens.ScreenHeight)
-                                {
-                                    amountToMoveY = 0;
-                                    hitScreenBoundary = true;
-                                }
-                            }
-
-                            if (amountToMoveX > 0 && amountToMoveY > 0)
-                            {
-                                BlobFireX = BlobFireX + amountToMoveX;
-                                _blobFireDistance = _blobFireDistance + amountToMoveX;
-
-                                if (_blobFireCollisionDirection == 1)
-                                {
-                                    BlobFireY = BlobFireY - amountToMoveY;
-                                }
-                                else if (_blobFireCollisionDirection == 2)
-                                {
-                                    BlobFireY = BlobFireY + amountToMoveY;
-                                }
-                            }
-                            else
-                            {
-                                BlobHasFired = false;
-                                _blobCanFire = true;
-
-                                if (_blobFireSparks != null && !hitScreenBoundary)
-                                {
-                                    _blobFireSparks.Start(BlobFireX, BlobFireY + 24);
-                                }
-                            }
-                        }
-                    }
-                    else if (_directionBlobFired == enDirection.Right)
-                    {
-                        int amountToMoveY = 0;
-                        int amountToMoveX = 0;
-
-                        if (_blobFireCollisionDirection == 0)
-                        {
-                            amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Right, BlobFireX,
-                                BlobFireY, 2, 32, BlobFireSpeed, false);
-                        }
-                        else if (_blobFireCollisionDirection == 1)
-                        {
-                            amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Left, BlobFireX,
-                                BlobFireY, 2, 32, BlobFireSpeed, false);
-                            amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Up, BlobFireX,
-                                BlobFireY, 2, 32, BlobFireSpeed, false);
-                        }
-                        else if (_blobFireCollisionDirection == 2)
-                        {
-                            amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Left, BlobFireX,
-                                BlobFireY, 2, 32, BlobFireSpeed, false);
-                            amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Down, BlobFireX,
-                                BlobFireY, 2, 32, BlobFireSpeed, false);
-                        }
-
-                        if (CheckForBlobCollisionWithObject(
-                                new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight), out var offset))
-                        {
-                            if (_blobFireDistance < offset + (BlobWidth / 2))
-                            {
-                                amountToMoveX = BlobFireSpeed;
-                                amountToMoveY = BlobFireSpeed;
-                            }
-                        }
-
-                        //if (CheckForBlobFireCollisionWithObject(new Rectangle(blobFireX, blobFireY, 32, 32)))
-                        //{
-                        //    amountToMoveX = blobFireSpeed;
-                        //    amountToMoveY = blobFireSpeed;
-                        //}
-
-                        // have we hit game scenary
-                        if (_blobFireCollisionDirection == 0)
-                        {
-                            if (amountToMoveX == 0)
-                            {
-                                // Lets change fire direction, we can go diagonal 
-                                if (_blobFireCollisionDirection == 0)
-                                {
-                                    // Randomly select the new direction
-                                    _blobFireCollisionDirection = gameEngine.RandomNumberGenerator.Next(1, 3);
-
-                                    _blobFireSparks?.Start(BlobFireX, BlobFireY + 24);
-                                }
-                            }
-
-                            // Have we crossed the screen boundary
-                            if (BlobFireX + 32 > gameEngine.GameScreens.ScreenWidth)
-                            {
-                                amountToMoveX = 0;
-                                hitScreenBoundary = true;
-                            }
-
-                            // Have we hit a nastie
-                            if (_blobFireCollisionDirection == 0)
-                            {
-                                if (amountToMoveX > 0)
-                                {
-                                    BlobFireX = BlobFireX + amountToMoveX;
-                                    _blobFireDistance = _blobFireDistance + amountToMoveX;
-                                }
-                                else
-                                {
-                                    BlobHasFired = false;
-                                    _blobCanFire = true;
-
-                                    if (_blobFireSparks != null && !hitScreenBoundary)
-                                    {
-                                        _blobFireSparks.Start(BlobFireX, BlobFireY + 24);
-                                    }
-                                }
-                            }
-                        }
-                        else if (_blobFireCollisionDirection > 0)
-                        {
-                            if (BlobFireX < 0)
-                            {
-                                amountToMoveX = 0;
-                            }
-
-                            if (_blobFireCollisionDirection == 1)
-                            {
-                                if (BlobFireY < 0)
-                                {
-                                    amountToMoveY = 0;
-                                    hitScreenBoundary = true;
-                                }
-                            }
-                            else if (_blobFireCollisionDirection == 2)
-                            {
-                                if (BlobFireY + 32 > gameEngine.GameScreens.ScreenHeight)
-                                {
-                                    amountToMoveY = 0;
-                                    hitScreenBoundary = true;
-                                }
-                            }
-
-                            if (amountToMoveX > 0 && amountToMoveY > 0)
-                            {
-                                BlobFireX -= amountToMoveX;
-                                _blobFireDistance += amountToMoveX;
-
-                                if (_blobFireCollisionDirection == 1)
-                                {
-                                    BlobFireY -= amountToMoveY;
-                                }
-                                else if (_blobFireCollisionDirection == 2)
-                                {
-                                    BlobFireY += amountToMoveY;
-                                }
-                            }
-                            else
-                            {
-                                BlobHasFired = false;
-                                _blobCanFire = true;
-
-                                if (_blobFireSparks != null && !hitScreenBoundary)
-                                {
-                                    _blobFireSparks.Start(BlobFireX, BlobFireY + 24);
-                                }
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    if (_directionBlobFired == enDirection.Left)
-                    {
-                        var amountToMove = gameEngine.GameScreens.CheckCollision(enDirection.Left, BlobFireX,
-                            BlobFireY, 2, 32, BlobFireSpeed, false);
-
-                        if (CheckForBlobCollisionWithObject(
-                                new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight), out var offset))
-                        {
-                            if (_blobFireDistance < offset + (BlobWidth / 2))
-                            {
-                                amountToMove = BlobFireSpeed;
-                            }
-                        }
-
-                        // Have we crossed the screen boundary
-                        if (BlobFireX < 0)
-                        {
-                            amountToMove = 0;
-                            hitScreenBoundary = true;
-                        }
-
-                        // Have we hit a nastie
-                        if (amountToMove > 0)
-                        {
-                            BlobFireX -= amountToMove;
-                            _blobFireDistance += amountToMove;
-                        }
-                        else
-                        {
-                            BlobHasFired = false;
-                            _blobCanFire = true;
-
-                            if (_blobFireSparks != null && !hitScreenBoundary)
-                            {
-                                _blobFireSparks.Start(BlobFireX, BlobFireY + 24);
-                            }
-                        }
-                    }
-                    else if (_directionBlobFired == enDirection.Right)
-                    {
-                        var amountToMove = gameEngine.GameScreens.CheckCollision(enDirection.Right, BlobFireX,
-                            BlobFireY, 2, 32, BlobFireSpeed, false);
-
-                        if (CheckForBlobCollisionWithObject(
-                                new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight), out var offset))
-                        {
-                            if (_blobFireDistance < offset + (BlobWidth / 2))
-                            {
-                                amountToMove = BlobFireSpeed;
-                            }
-                        }
-
-                        // Have we crossed the screen boundary
-                        if (BlobFireX + 32 > gameEngine.GameScreens.ScreenWidth)
-                        {
-                            amountToMove = 0;
-                            hitScreenBoundary = true;
-                        }
-
-                        // Have we hit a nastie
-                        if (amountToMove > 0)
-                        {
-                            BlobFireX = BlobFireX + amountToMove;
-                            _blobFireDistance = _blobFireDistance + amountToMove;
-                        }
-                        else
-                        {
-                            BlobHasFired = false;
-                            _blobCanFire = true;
-
-                            if (_blobFireSparks != null && !hitScreenBoundary)
-                            {
-                                _blobFireSparks.Start(BlobFireX, BlobFireY + 24);
                             }
                         }
                     }
                     else
                     {
-                        // Blob has fired in an invalid direction, probably since he steped off a shuttle pad so kill the fire
-                        BlobHasFired = false;
-                        _blobCanFire = true;
-                    }
-                }
-
-                _blobAnimFire1.GetNextFrame();
-                _blobAnimFire2.GetNextFrame();
-            }
-
-            // Stop the particle effect since the fire has stopped
-            if (BlobHasFired == false)
-            {
-                if (_blobFireTrail != null)
-                {
-                    _blobFireTrail.Stop();
-                }
-
-                _blobOnShuttleCached = _blobOnShuttle;
-            }
-
-            // Change screens...?
-            if (_blobXPos < 0)
-            {
-                if (gameEngine.GameScreens.ScreenNumber - 1 >= 0)
-                {
-                    gameEngine.GameScreens.ScreenNumber--;
-                    _blobXPos = gameEngine.GameScreens.ScreenWidth - gameEngine.ContentResourceManager
-                        .GetSpriteCollection(gameEngine.BlobSpritesName).SpriteWidth;
-                    changedScreens = true;
-
-                    if (OnScreenChanged != null)
-                    {
-                        OnScreenChanged(enGameScreen.MainGame);
-                    }
-                }
-            }
-
-            if (_blobXPos + gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.BlobSpritesName)
-                    .SpriteWidth > gameEngine.GameScreens.ScreenWidth)
-            {
-                if (gameEngine.GameScreens.ScreenNumber + 1 <= 512)
-                {
-                    gameEngine.GameScreens.ScreenNumber++;
-                    _blobXPos = 0;
-                    changedScreens = true;
-
-                    if (OnScreenChanged != null)
-                    {
-                        OnScreenChanged(enGameScreen.MainGame);
-                    }
-                }
-            }
-
-            if (_blobYPos < 0)
-            {
-                if (gameEngine.GameScreens.ScreenNumber - 16 >= 0)
-                {
-                    gameEngine.GameScreens.ScreenNumber -= 16;
-                    changedScreens = true;
-
-                    if (OnScreenChanged != null)
-                    {
-                        OnScreenChanged(enGameScreen.MainGame);
-                    }
-
-                    if (_blobOnShuttle)
-                    {
-                        _blobYPos = gameEngine.GameScreens.ScreenHeight - BlobHeight;
-                    }
-                    else // Must be on a jumpplatform unless we're in a tunnel lift.....
-                    {
-                        if (!_inTunnelLift)
+                        if (_directionBlobFired == enDirection.Left)
                         {
-                            _blobYPos = _blobJumpPlatformEngine.GetNewJumpPlatform(_blobXPos,
-                                gameEngine.GameScreens.ScreenHeight - gameEngine.ContentResourceManager
-                                    .GetSpriteCollection(gameEngine.BlobSpritesName).SpriteHeight, 0, 0, false);
+                            var amountToMove = gameEngine.GameScreens.CheckCollision(enDirection.Left, BlobFireX,
+                                BlobFireY, 2, 32, BlobFireSpeed, false);
+
+                            if (CheckForBlobCollisionWithObject(
+                                    new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight), out var offset))
+                            {
+                                if (_blobFireDistance < offset + (BlobWidth / 2))
+                                {
+                                    amountToMove = BlobFireSpeed;
+                                }
+                            }
+
+                            // Have we crossed the screen boundary
+                            if (BlobFireX < 0)
+                            {
+                                amountToMove = 0;
+                                hitScreenBoundary = true;
+                            }
+
+                            // Have we hit a nastie
+                            if (amountToMove > 0)
+                            {
+                                BlobFireX -= amountToMove;
+                                _blobFireDistance += amountToMove;
+                            }
+                            else
+                            {
+                                BlobHasFired = false;
+                                _blobCanFire = true;
+
+                                if (_blobFireSparks != null && !hitScreenBoundary)
+                                {
+                                    _blobFireSparks.Start(BlobFireX, BlobFireY + 24);
+                                }
+                            }
+                        }
+                        else if (_directionBlobFired == enDirection.Right)
+                        {
+                            var amountToMove = gameEngine.GameScreens.CheckCollision(enDirection.Right, BlobFireX,
+                                BlobFireY, 2, 32, BlobFireSpeed, false);
+
+                            if (CheckForBlobCollisionWithObject(
+                                    new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight), out var offset))
+                            {
+                                if (_blobFireDistance < offset + (BlobWidth / 2))
+                                {
+                                    amountToMove = BlobFireSpeed;
+                                }
+                            }
+
+                            // Have we crossed the screen boundary
+                            if (BlobFireX + 32 > gameEngine.GameScreens.ScreenWidth)
+                            {
+                                amountToMove = 0;
+                                hitScreenBoundary = true;
+                            }
+
+                            // Have we hit a nastie
+                            if (amountToMove > 0)
+                            {
+                                BlobFireX = BlobFireX + amountToMove;
+                                _blobFireDistance = _blobFireDistance + amountToMove;
+                            }
+                            else
+                            {
+                                BlobHasFired = false;
+                                _blobCanFire = true;
+
+                                if (_blobFireSparks != null && !hitScreenBoundary)
+                                {
+                                    _blobFireSparks.Start(BlobFireX, BlobFireY + 24);
+                                }
+                            }
                         }
                         else
                         {
-                            _blobYPos = gameEngine.GameScreens.ScreenHeight - BlobHeight;
+                            // Blob has fired in an invalid direction, probably since he steped off a shuttle pad so kill the fire
+                            BlobHasFired = false;
+                            _blobCanFire = true;
+                        }
+                    }
+
+                    _blobAnimFire1.GetNextFrame();
+                    _blobAnimFire2.GetNextFrame();
+                }
+
+                // Stop the particle effect since the fire has stopped
+                if (BlobHasFired == false)
+                {
+                    if (_blobFireTrail != null)
+                    {
+                        _blobFireTrail.Stop();
+                    }
+
+                    _blobOnShuttleCached = _blobOnShuttle;
+                }
+
+                // Change screens...?
+                if (_blobXPos < 0)
+                {
+                    if (gameEngine.GameScreens.ScreenNumber - 1 >= 0)
+                    {
+                        gameEngine.GameScreens.ScreenNumber--;
+                        _blobXPos = gameEngine.GameScreens.ScreenWidth - gameEngine.ContentResourceManager
+                            .GetSpriteCollection(gameEngine.BlobSpritesName).SpriteWidth;
+                        changedScreens = true;
+
+                        if (OnScreenChanged != null)
+                        {
+                            OnScreenChanged(enGameScreen.MainGame);
                         }
                     }
                 }
-            }
 
-            if (_blobYPos + BlobHeight > gameEngine.GameScreens.ScreenHeight)
-            {
-                if (gameEngine.GameScreens.ScreenNumber + 16 <= 512)
+                if (_blobXPos + gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.BlobSpritesName)
+                        .SpriteWidth > gameEngine.GameScreens.ScreenWidth)
                 {
-                    gameEngine.GameScreens.ScreenNumber += 16;
-                    _blobYPos = 0;
-                    _blobDistanceFallen = 0;
-                    _blobFallSpeed = 4;
-
-                    changedScreens = true;
-                    if (OnScreenChanged != null)
+                    if (gameEngine.GameScreens.ScreenNumber + 1 <= 512)
                     {
-                        OnScreenChanged(enGameScreen.MainGame);
+                        gameEngine.GameScreens.ScreenNumber++;
+                        _blobXPos = 0;
+                        changedScreens = true;
+
+                        if (OnScreenChanged != null)
+                        {
+                            OnScreenChanged(enGameScreen.MainGame);
+                        }
                     }
                 }
-            }
 
-            _tileAboveBlob = gameEngine.GameScreens.CheckTileByObject(enDirection.Up, _blobXPos, _blobYPos,
-                BlobWidth,
-                BlobHeight, BlobVSpeed);
-
-            if (_blobOnShuttle)
-            {
-                _tileBelowBlob = gameEngine.GameScreens.CheckTileByObject(enDirection.Down, _blobXPos, _blobYPos,
-                    BlobWidth, BlobHeight - 32, BlobVSpeed); // Subtract the shuttle height off
-            }
-            else
-            {
-                _tileBelowBlob = gameEngine.GameScreens.CheckTileByObject(enDirection.Down, _blobXPos, _blobYPos,
-                    BlobWidth, BlobHeight, BlobVSpeed);
-            }
-
-            _tileLeftBlob = gameEngine.GameScreens.CheckTileByObject(enDirection.Left, _blobXPos, _blobYPos,
-                BlobWidth,
-                BlobHeight, BlobHSpeed);
-            _tileRightBlob = gameEngine.GameScreens.CheckTileByObject(enDirection.Right, _blobXPos, _blobYPos,
-                BlobWidth, BlobHeight, BlobHSpeed);
-
-            // Detect Blob on a shuttle pad
-            _blobOnShuttlePad = false;
-            if (_tileBelowBlob != null)
-            {
-                if ((enActionTiles)_tileBelowBlob.TileNumber == enActionTiles.ShuttlePlatform ||
-                    (enActionTiles)_tileBelowBlob.TileNumber == enActionTiles.RemovedShuttlePlatform)
+                if (_blobYPos < 0)
                 {
-                    if (_tileBelowBlob.XPosition == 32 && _tileBelowBlob.YPosition == 0)
+                    if (gameEngine.GameScreens.ScreenNumber - 16 >= 0)
                     {
-                        _blobOnShuttlePad = true;
+                        gameEngine.GameScreens.ScreenNumber -= 16;
+                        changedScreens = true;
+
+                        if (OnScreenChanged != null)
+                        {
+                            OnScreenChanged(enGameScreen.MainGame);
+                        }
+
+                        if (_blobOnShuttle)
+                        {
+                            _blobYPos = gameEngine.GameScreens.ScreenHeight - BlobHeight;
+                        }
+                        else // Must be on a jumpplatform unless we're in a tunnel lift.....
+                        {
+                            if (!_inTunnelLift)
+                            {
+                                _blobYPos = _blobJumpPlatformEngine.GetNewJumpPlatform(_blobXPos,
+                                    gameEngine.GameScreens.ScreenHeight - gameEngine.ContentResourceManager
+                                        .GetSpriteCollection(gameEngine.BlobSpritesName).SpriteHeight, 0, 0, false);
+                            }
+                            else
+                            {
+                                _blobYPos = gameEngine.GameScreens.ScreenHeight - BlobHeight;
+                            }
+                        }
                     }
                 }
-            }
 
-            // Detect a teleporter
-            if (_tileRightBlob != null && BlobsControl.MovedRight())
-            {
-                if (_tileRightBlob.TileNumber == 397)
+                if (_blobYPos + BlobHeight > gameEngine.GameScreens.ScreenHeight)
+                {
+                    if (gameEngine.GameScreens.ScreenNumber + 16 <= 512)
+                    {
+                        gameEngine.GameScreens.ScreenNumber += 16;
+                        _blobYPos = 0;
+                        _blobDistanceFallen = 0;
+                        _blobFallSpeed = 4;
+
+                        changedScreens = true;
+                        if (OnScreenChanged != null)
+                        {
+                            OnScreenChanged(enGameScreen.MainGame);
+                        }
+                    }
+                }
+
+                _tileAboveBlob = gameEngine.GameScreens.CheckTileByObject(enDirection.Up, _blobXPos, _blobYPos,
+                    BlobWidth,
+                    BlobHeight, BlobVSpeed);
+
+                if (_blobOnShuttle)
+                {
+                    _tileBelowBlob = gameEngine.GameScreens.CheckTileByObject(enDirection.Down, _blobXPos, _blobYPos,
+                        BlobWidth, BlobHeight - 32, BlobVSpeed); // Subtract the shuttle height off
+                }
+                else
+                {
+                    _tileBelowBlob = gameEngine.GameScreens.CheckTileByObject(enDirection.Down, _blobXPos, _blobYPos,
+                        BlobWidth, BlobHeight, BlobVSpeed);
+                }
+
+                _tileLeftBlob = gameEngine.GameScreens.CheckTileByObject(enDirection.Left, _blobXPos, _blobYPos,
+                    BlobWidth,
+                    BlobHeight, BlobHSpeed);
+                _tileRightBlob = gameEngine.GameScreens.CheckTileByObject(enDirection.Right, _blobXPos, _blobYPos,
+                    BlobWidth, BlobHeight, BlobHSpeed);
+
+                // Detect Blob on a shuttle pad
+                _blobOnShuttlePad = false;
+                if (_tileBelowBlob != null)
+                {
+                    if ((enActionTiles)_tileBelowBlob.TileNumber == enActionTiles.ShuttlePlatform ||
+                        (enActionTiles)_tileBelowBlob.TileNumber == enActionTiles.RemovedShuttlePlatform)
+                    {
+                        if (_tileBelowBlob.XPosition == 32 && _tileBelowBlob.YPosition == 0)
+                        {
+                            _blobOnShuttlePad = true;
+                        }
+                    }
+                }
+
+                // Detect a teleporter
+                if (_tileRightBlob != null && BlobsControl.MovedRight())
+                {
+                    if (_tileRightBlob.TileNumber == 397)
+                    {
+                        if (_tileRightBlob.XPosition >= 24 &&
+                            _tileRightBlob.YPosition == 32)
+                        {
+                            gameEngine.CurrentGameScreen = enGameScreen.Teleporter;
+
+                            gameEngine.GetGameScreen(enGameScreen.Teleporter).Reset(null);
+                            _blobXPos = (_tileRightBlob.MapXPosition * 128) + 20;
+                            BlobFrame = 7;
+                        }
+                    }
+                }
+
+                // Detect an access booth
+                if (_tileLeftBlob is { TileNumber: 400 })
+                {
+                    if (_tileLeftBlob.XPosition <= 46 &&
+                        _tileLeftBlob.YPosition == 32)
+                    {
+                        gameEngine.GetGameScreen(enGameScreen.AccessBooth).Reset(new object[]
+                            { enDirection.Left, _tileRightBlob.MapXPosition });
+                        gameEngine.CurrentGameScreen = enGameScreen.AccessBooth;
+                    }
+                }
+
+                if (_tileRightBlob is { TileNumber: 399 })
                 {
                     if (_tileRightBlob.XPosition >= 24 &&
                         _tileRightBlob.YPosition == 32)
                     {
-                        gameEngine.CurrentGameScreen = enGameScreen.Teleporter;
-
-                        gameEngine.GetGameScreen(enGameScreen.Teleporter).Reset(null);
-                        _blobXPos = (_tileRightBlob.MapXPosition * 128) + 20;
-                        BlobFrame = 7;
+                        gameEngine.GetGameScreen(enGameScreen.AccessBooth).Reset(new object[]
+                            { enDirection.Right, _tileLeftBlob.MapXPosition });
+                        gameEngine.CurrentGameScreen = enGameScreen.AccessBooth;
                     }
                 }
-            }
 
-            // Detect an access booth
-            if (_tileLeftBlob != null && _tileLeftBlob.TileNumber == 400)
-            {
-                if (_tileLeftBlob.XPosition <= 46 &&
-                    _tileLeftBlob.YPosition == 32)
-                {
-                    gameEngine.GetGameScreen(enGameScreen.AccessBooth).Reset(new object[]
-                        { enDirection.Left, _tileRightBlob.MapXPosition });
-                    gameEngine.CurrentGameScreen = enGameScreen.AccessBooth;
-                }
-            }
-
-            if (_tileRightBlob != null && _tileRightBlob.TileNumber == 399)
-            {
-                if (_tileRightBlob.XPosition >= 24 &&
-                    _tileRightBlob.YPosition == 32)
-                {
-                    gameEngine.GetGameScreen(enGameScreen.AccessBooth).Reset(new object[]
-                        { enDirection.Right, _tileLeftBlob.MapXPosition });
-                    gameEngine.CurrentGameScreen = enGameScreen.AccessBooth;
-                }
-            }
-
-            // Detect a lefthand tunnel
-            if (_tileLeftBlob != null)
-            {
-                if (_tileLeftBlob.TileNumber == 420 ||
-                    _tileLeftBlob.TileNumber == 422 ||
-                    _tileLeftBlob.TileNumber == 424 ||
-                    _tileLeftBlob.TileNumber == 426 ||
-                    _tileLeftBlob.TileNumber == 428 ||
-                    _tileLeftBlob.TileNumber == 430 ||
-                    _tileLeftBlob.TileNumber == 432 ||
-                    _tileLeftBlob.TileNumber == 434 ||
-                    _tileLeftBlob.TileNumber == 436 ||
-                    _tileLeftBlob.TileNumber == 438
-                   )
+                // Detect a lefthand tunnel
+                if (_tileLeftBlob?.TileNumber is 420 or 422 or 424 or 426 or 428 or 430 or 432 or 434 or 436 or 438)
                 {
                     if (_tileLeftBlob.XPosition <= 32 && _tileLeftBlob.YPosition == 32)
                     {
@@ -1558,22 +1531,9 @@ public class Blob : GameComponentBase
                         }
                     }
                 }
-            }
 
-            // Detect a righthand tunnel
-            if (_tileRightBlob != null)
-            {
-                if (_tileRightBlob.TileNumber == 421 ||
-                    _tileRightBlob.TileNumber == 423 ||
-                    _tileRightBlob.TileNumber == 425 ||
-                    _tileRightBlob.TileNumber == 427 ||
-                    _tileRightBlob.TileNumber == 429 ||
-                    _tileRightBlob.TileNumber == 431 ||
-                    _tileRightBlob.TileNumber == 433 ||
-                    _tileRightBlob.TileNumber == 435 ||
-                    _tileRightBlob.TileNumber == 437 ||
-                    _tileRightBlob.TileNumber == 439
-                   )
+                // Detect a righthand tunnel
+                if (_tileRightBlob?.TileNumber is 421 or 423 or 425 or 427 or 429 or 431 or 433 or 435 or 437 or 439)
                 {
                     if (_tileRightBlob.XPosition >= 32 && _tileRightBlob.YPosition == 32)
                     {
@@ -1591,12 +1551,9 @@ public class Blob : GameComponentBase
                         }
                     }
                 }
-            }
 
-            // Breakable bridges
-            if (_tileBelowBlob != null)
-            {
-                if (_tileBelowBlob.TileNumber == 410)
+                // Breakable bridges
+                if (_tileBelowBlob is { TileNumber: 410 })
                 {
                     if (_blobFallHeight >= 128)
                     {
@@ -1616,224 +1573,236 @@ public class Blob : GameComponentBase
                                 _tileBelowBlob.MapYPosition));
                     }
                 }
-            }
 
-            // Tunnel lifts
-            if (_tileAboveBlob != null)
-            {
-                if (_tileAboveBlob.TileNumber is 409 or 412 or 408 or 413)
-                {
-                    if (_tileAboveBlob.XPosition == 32)
-                    {
-                        if (_inTunnelLift == false)
-                        {
-                            _distanceInTunnelLift = 0;
-                        }
-
-                        _inTunnelLift = true;
-                    }
-                }
-                else if (_tileAboveBlob.TileNumber is 407 or 414 or 415)
-                {
-                    if (_tileAboveBlob.YPosition == 96)
-                    {
-                        _inTunnelLift = false;
-                    }
-                }
-            }
-
-            if (_inTunnelLift)
-            {
-                var moveBlob = true;
+                // Tunnel lifts
                 if (_tileAboveBlob != null)
                 {
-                    if (_tileAboveBlob.TileNumber == 409 ||
-                        _tileAboveBlob.TileNumber == 412 ||
-                        _tileAboveBlob.TileNumber == 413)
+                    switch (_tileAboveBlob.TileNumber)
                     {
-                        if (_tileAboveBlob.YPosition == 96)
+                        case 409 or 412 or 408 or 413:
                         {
-                            if (BlobsControl.MovedLeft() && gameEngine.GameScreens.CheckCollision(enDirection.Left,
-                                    _blobXPos, _blobYPos, BlobWidth, BlobHeight, BlobHSpeed, true) > 0)
+                            if (_tileAboveBlob.XPosition == 32)
                             {
-                                if (_distanceInTunnelLift > 8)
+                                if (_inTunnelLift == false)
                                 {
-                                    _inTunnelLift = false;
-                                    moveBlob = false;
+                                    _distanceInTunnelLift = 0;
                                 }
+
+                                _inTunnelLift = true;
                             }
-                            else if (BlobsControl.MovedRight() &&
-                                     gameEngine.GameScreens.CheckCollision(enDirection.Right, _blobXPos, _blobYPos,
-                                         BlobWidth, BlobHeight, BlobHSpeed, true) > 0)
+
+                            break;
+                        }
+                        case 407 or 414 or 415:
+                        {
+                            if (_tileAboveBlob.YPosition == 96)
                             {
-                                if (_distanceInTunnelLift > 8)
-                                {
-                                    _inTunnelLift = false;
-                                    moveBlob = false;
-                                }
+                                _inTunnelLift = false;
                             }
+
+                            break;
                         }
                     }
                 }
 
-                if (moveBlob)
+                if (_inTunnelLift)
                 {
-                    _blobTunnelLiftSoundId = gameEngine.ContentResourceManager.GetSoundFXEngine()
-                        .PlaySound("TunnelLift", true);
-                    _blobYPos -= 8;
-                    _distanceInTunnelLift += 8;
+                    var moveBlob = true;
+                    if (_tileAboveBlob != null)
+                    {
+                        if (_tileAboveBlob.TileNumber == 409 ||
+                            _tileAboveBlob.TileNumber == 412 ||
+                            _tileAboveBlob.TileNumber == 413)
+                        {
+                            if (_tileAboveBlob.YPosition == 96)
+                            {
+                                if (BlobsControl.MovedLeft() && gameEngine.GameScreens.CheckCollision(enDirection.Left,
+                                        _blobXPos, _blobYPos, BlobWidth, BlobHeight, BlobHSpeed, true) > 0)
+                                {
+                                    if (_distanceInTunnelLift > 8)
+                                    {
+                                        _inTunnelLift = false;
+                                        moveBlob = false;
+                                    }
+                                }
+                                else if (BlobsControl.MovedRight() &&
+                                         gameEngine.GameScreens.CheckCollision(enDirection.Right, _blobXPos, _blobYPos,
+                                             BlobWidth, BlobHeight, BlobHSpeed, true) > 0)
+                                {
+                                    if (_distanceInTunnelLift > 8)
+                                    {
+                                        _inTunnelLift = false;
+                                        moveBlob = false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (moveBlob)
+                    {
+                        _blobTunnelLiftSoundId = gameEngine.ContentResourceManager.GetSoundFXEngine()
+                            .PlaySound("TunnelLift", true);
+                        _blobYPos -= 8;
+                        _distanceInTunnelLift += 8;
+                    }
+                    else
+                    {
+                        gameEngine.ContentResourceManager.GetSoundFXEngine()
+                            .StopSound(_blobTunnelLiftSoundId, SoundFade.None);
+                    }
+                }
+
+                // Spiky tiles
+                TileDetected tileIntersectingBlob =
+                    gameEngine.GameScreens.CheckTileByObject(enDirection.None, _blobXPos, _blobYPos, BlobWidth,
+                        BlobHeight, 0);
+
+                if (tileIntersectingBlob != null)
+                {
+                    // Central spiky tiles
+                    if (tileIntersectingBlob.TileNumber == 405)
+                    {
+                        if (tileIntersectingBlob.XPosition is > -16 and < 64 &&
+                            tileIntersectingBlob.YPosition > -8)
+                        {
+                            KillBlob(true, false);
+                        }
+                    }
+
+                    // Right side mounted spikey tiles
+                    if (tileIntersectingBlob.TileNumber == 404)
+                    {
+                        if (tileIntersectingBlob.YPosition is < 64 and > -32 &&
+                            tileIntersectingBlob.XPosition > 16)
+                        {
+                            KillBlob(true, false);
+                        }
+                    }
+
+                    // Broken bottle spiky tiles
+                    if (tileIntersectingBlob.TileNumber == 416)
+                    {
+                        if (tileIntersectingBlob.XPosition is > -16 and < 64 &&
+                            tileIntersectingBlob.YPosition > -16)
+                        {
+                            KillBlob(true, false);
+                        }
+                    }
+                }
+
+                // Collect powerups
+                if (gameEngine.GameScreens.CurrentGameScreenData.PowerUp != null)
+                {
+                    if (CollisionDetection.Check(
+                            _blobXPos,
+                            BlobYPos,
+                            BlobWidth,
+                            BlobHeight,
+                            gameEngine.GameScreens.CurrentGameScreenData.PowerUp.XLocation,
+                            gameEngine.GameScreens.CurrentGameScreenData.PowerUp.YLocation,
+                            32,
+                            32))
+                    {
+                        if (OnBlobActionRaised != null)
+                        {
+                            OnBlobActionRaised(enBlobAction.GotPowerUp,
+                                gameEngine.GameScreens.CurrentGameScreenData.PowerUp.Type);
+                        }
+
+                        gameEngine.GameScreens.CurrentGameScreenData.PowerUp = null;
+                        gameEngine.GameScreens.UpdateCollisionMap(false);
+                    }
+                }
+
+                _blobJumpPlatformEngine.Update(gameEngine.GameScreens);
+                break;
+            }
+            case enBlobState.Overloading:
+            {
+                // Play the alarm sound for a bit
+                if (_blobAlarmSoundCounter == 1)
+                {
+                    gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("BlobOverloadAlarm", 1.0f, false);
+                }
+
+                if (_blobOverloadState < 3 && _blobAlarmSoundCounter < 60)
+                {
+                    _blobAlarmSoundCounter++;
                 }
                 else
                 {
-                    gameEngine.ContentResourceManager.GetSoundFXEngine()
-                        .StopSound(_blobTunnelLiftSoundId, SoundFade.None);
-                }
-            }
-
-            // Spiky tiles
-            TileDetected tileIntersectingBlob =
-                gameEngine.GameScreens.CheckTileByObject(enDirection.None, _blobXPos, _blobYPos, BlobWidth,
-                    BlobHeight, 0);
-
-            if (tileIntersectingBlob != null)
-            {
-                // Central spiky tiles
-                if (tileIntersectingBlob.TileNumber == 405)
-                {
-                    if (tileIntersectingBlob.XPosition is > -16 and < 64 &&
-                        tileIntersectingBlob.YPosition > -8)
+                    if (gameEngine.BlobKiller.Triggered == false)
                     {
-                        KillBlob(true, false);
+                        BlobHasFired = false;
+                        _blobCanFire = true;
+                        _blobFireTrail.Stop();
+
+                        _blobJumpPlatformEngine.ResetPlatforms();
+                        gameEngine.ElectricityNodeGateEngine.Reset();
+
+                        if (_blobOverloadState == 0)
+                        {
+                            _blobScale = _blobScale + 0.30f;
+
+                            if (_blobScale > 1.6f)
+                            {
+                                _blobOverloadState = 1;
+                                _blobScale = 1.6f;
+                            }
+                        }
+                        else if (_blobOverloadState == 1)
+                        {
+                            _blobScale = _blobScale - 0.30f;
+
+                            if (_blobScale < -1f)
+                            {
+                                _blobScale = -1f;
+                                _blobOverloadState = 3;
+                            }
+                        }
+
+                        if (_blobOverloadState == 3)
+                        {
+                            gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("BlobExplodes", false);
+                            gameEngine.BlobKiller.Trigger(gameEngine.Player.BlobXPos, gameEngine.Player.BlobYPos, true);
+                            BlobsState = enBlobState.Dying;
+                        }
                     }
                 }
 
-                // Right side mounted spikey tiles
-                if (tileIntersectingBlob.TileNumber == 404)
-                {
-                    if (tileIntersectingBlob.YPosition is < 64 and > -32 &&
-                        tileIntersectingBlob.XPosition > 16)
-                    {
-                        KillBlob(true, false);
-                    }
-                }
-
-                // Broken bottle spiky tiles
-                if (tileIntersectingBlob.TileNumber == 416)
-                {
-                    if (tileIntersectingBlob.XPosition is > -16 and < 64 &&
-                        tileIntersectingBlob.YPosition > -16)
-                    {
-                        KillBlob(true, false);
-                    }
-                }
+                break;
             }
-
-            // Collect powerups
-            if (gameEngine.GameScreens.CurrentGameScreenData.PowerUp != null)
-            {
-                if (CollisionDetection.Check(
-                        _blobXPos,
-                        BlobYPos,
-                        BlobWidth,
-                        BlobHeight,
-                        gameEngine.GameScreens.CurrentGameScreenData.PowerUp.XLocation,
-                        gameEngine.GameScreens.CurrentGameScreenData.PowerUp.YLocation,
-                        32,
-                        32))
-                {
-                    if (OnBlobActionRaised != null)
-                    {
-                        OnBlobActionRaised(enBlobAction.GotPowerUp,
-                            gameEngine.GameScreens.CurrentGameScreenData.PowerUp.Type);
-                    }
-
-                    gameEngine.GameScreens.CurrentGameScreenData.PowerUp = null;
-                    gameEngine.GameScreens.UpdateCollisionMap(false);
-                }
-            }
-
-            _blobJumpPlatformEngine.Update(gameEngine.GameScreens);
-        }
-        else if (BlobsState == enBlobState.Overloading)
-        {
-            // Play the alarm sound for a bit
-            if (_blobAlarmSoundCounter == 1)
-            {
-                gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("BlobOverloadAlarm", 1.0f, false);
-            }
-
-            if (_blobOverloadState < 3 && _blobAlarmSoundCounter < 60)
-            {
-                _blobAlarmSoundCounter++;
-            }
-            else
+            case enBlobState.Dying:
             {
                 if (gameEngine.BlobKiller.Triggered == false)
                 {
-                    BlobHasFired = false;
-                    _blobCanFire = true;
-                    _blobFireTrail.Stop();
-
-                    _blobJumpPlatformEngine.ResetPlatforms();
-                    gameEngine.ElectricityNodeGateEngine.Reset();
-
-                    if (_blobOverloadState == 0)
+                    _blobOverloadState = 0;
+                    _blobScale = 1.0f;
+                    // If Blob is killed by a spiky tile, we reset his position to when he entered
+                    if (_resetBlobToScreenEntryPoint)
                     {
-                        _blobScale = _blobScale + 0.30f;
+                        _blobYPos = _blobScreenEntryLocation.Y;
+                        _blobXPos = _blobScreenEntryLocation.X;
+                        _blobOnShuttle = _blobOnShuttleOnEntry;
+                        gameEngine.GameScreens.ChangeShuttlePlatformState(_blobOnShuttle);
+                        gameEngine.GameScreens.UpdateCollisionMap(false);
+                        BlobFrame = _blobFrameOnEntry;
+                        _inTunnelLift = false;
+                        _blobFallSpeed = 4;
 
-                        if (_blobScale > 1.6f)
-                        {
-                            _blobOverloadState = 1;
-                            _blobScale = 1.6f;
-                        }
-                    }
-                    else if (_blobOverloadState == 1)
-                    {
-                        _blobScale = _blobScale - 0.30f;
-
-                        if (_blobScale < -1f)
-                        {
-                            _blobScale = -1f;
-                            _blobOverloadState = 3;
-                        }
+                        if (_blobOnShuttle)
+                            BlobHeight = 96;
+                        else
+                            BlobHeight = 64;
                     }
 
-                    if (_blobOverloadState == 3)
-                    {
-                        gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("BlobExplodes", false);
-                        gameEngine.BlobKiller.Trigger(gameEngine.Player.BlobXPos, gameEngine.Player.BlobYPos, true);
-                        BlobsState = enBlobState.Dying;
-                    }
-                }
-            }
-        }
-        else if (BlobsState == enBlobState.Dying)
-        {
-            if (gameEngine.BlobKiller.Triggered == false)
-            {
-                _blobOverloadState = 0;
-                _blobScale = 1.0f;
-                // If Blob is killed by a spiky tile, we reset his position to when he entered
-                if (_resetBlobToScreenEntryPoint)
-                {
-                    _blobYPos = _blobScreenEntryLocation.Y;
-                    _blobXPos = _blobScreenEntryLocation.X;
-                    _blobOnShuttle = _blobOnShuttleOnEntry;
-                    gameEngine.GameScreens.ChangeShuttlePlatformState(_blobOnShuttle);
-                    gameEngine.GameScreens.UpdateCollisionMap(false);
-                    BlobFrame = _blobFrameOnEntry;
-                    _inTunnelLift = false;
-                    _blobFallSpeed = 4;
-
-                    if (_blobOnShuttle)
-                        BlobHeight = 96;
-                    else
-                        BlobHeight = 64;
+                    _resetBlobToScreenEntryPoint = false;
+                    BlobsState = enBlobState.Dead;
+                    gameEngine.BlobKiller.Reset();
                 }
 
-                _resetBlobToScreenEntryPoint = false;
-                BlobsState = enBlobState.Dead;
-                gameEngine.BlobKiller.Reset();
+                break;
             }
         }
 
@@ -1842,12 +1811,14 @@ public class Blob : GameComponentBase
         _blobTeleporterBeam?.Update(_blobXPos + 30, _blobYPos + 50, gameTime);
         _blobFireTrail?.Update(BlobFireX + 14, BlobFireY + 14, gameTime);
 
-        if (changedScreens)
+        if (!changedScreens)
         {
-            _blobScreenEntryLocation = new Point(BlobXPos, BlobYPos);
-            _blobOnShuttleOnEntry = _blobOnShuttle;
-            _blobFrameOnEntry = BlobFrame;
+            return;
         }
+
+        _blobScreenEntryLocation = new Point(BlobXPos, BlobYPos);
+        _blobOnShuttleOnEntry = _blobOnShuttle;
+        _blobFrameOnEntry = BlobFrame;
     }
 
     public void UnstickBlobFromTiles()
@@ -1856,39 +1827,55 @@ public class Blob : GameComponentBase
         if (gameEngine.GameScreens.CheckRectangles(_blobXPos, _blobYPos, BlobWidth, 8, true) >= 0)
         {
             // And not stuck at the bottom?
-            if (gameEngine.GameScreens.CheckRectangles(_blobXPos, _blobYPos + (BlobHeight - 8), BlobWidth, 8,
-                    true) <
-                0)
+            if (gameEngine.GameScreens.CheckRectangles(
+                    _blobXPos,
+                    _blobYPos + (BlobHeight - 8),
+                    BlobWidth,
+                    8,
+                    true) < 0)
             {
                 // He's stuck at the top so lets figure out how far we need to go to release him
-                int distanceToMoveY = 0;
-                while (gameEngine.GameScreens.CheckRectangles(_blobXPos, _blobYPos + distanceToMoveY, BlobWidth, 8,
+                var distanceToMoveY = 0;
+                while (gameEngine.GameScreens.CheckRectangles(
+                           _blobXPos,
+                           _blobYPos + distanceToMoveY,
+                           BlobWidth,
+                           8,
                            true) >= 0)
                 {
                     distanceToMoveY++;
                 }
 
                 // Shift Blob to a safe position
-                _blobYPos = _blobYPos + distanceToMoveY;
+                _blobYPos += distanceToMoveY;
             }
         }
 
-        if (gameEngine.GameScreens.CheckRectangles(_blobXPos, _blobYPos + (BlobHeight - 8), BlobWidth, 8, true) >=
-            0) // Is Blob stuck at the bottom
+        if (gameEngine.GameScreens.CheckRectangles(
+                _blobXPos,
+                _blobYPos + (BlobHeight - 8),
+                BlobWidth,
+                8, true) >= 0) // Is Blob stuck at the bottom
         {
             // And not stuck at the top?
-            if (gameEngine.GameScreens.CheckRectangles(_blobXPos, _blobYPos, BlobWidth, 8, true) < 0)
+            if (gameEngine.GameScreens.CheckRectangles(
+                    _blobXPos,
+                    _blobYPos,
+                    BlobWidth,
+                    8,
+                    true) < 0)
             {
                 // He's stuck at the bottom so lets figure out how far we need to go to release him
-                int distanceToMoveY = 0;
-                while (gameEngine.GameScreens.CheckRectangles(_blobXPos,
+                var distanceToMoveY = 0;
+                while (gameEngine.GameScreens.CheckRectangles(
+                           _blobXPos,
                            (_blobYPos + (BlobHeight - 8)) - distanceToMoveY, BlobWidth, 8, true) >= 0)
                 {
                     distanceToMoveY++;
                 }
 
                 // Shift Blob to a safe position
-                _blobYPos = _blobYPos - distanceToMoveY;
+                _blobYPos -= distanceToMoveY;
             }
         }
 
@@ -1896,12 +1883,10 @@ public class Blob : GameComponentBase
             0) // Is Blob stuck at the left
         {
             // And not stuck at the right?
-            if (gameEngine.GameScreens.CheckRectangles(_blobXPos + (BlobWidth - 8), _blobYPos, 8, BlobHeight,
-                    true) <
-                0)
+            if (gameEngine.GameScreens.CheckRectangles(_blobXPos + (BlobWidth - 8), _blobYPos, 8, BlobHeight, true) < 0)
             {
                 // He's stuck at the top so lets figure out how far we need to go to release him
-                int distanceToMoveX = 0;
+                var distanceToMoveX = 0;
                 while (gameEngine.GameScreens.CheckRectangles(_blobXPos + distanceToMoveX, _blobYPos, 8, BlobHeight,
                            true) >= 0)
                 {
@@ -1909,7 +1894,7 @@ public class Blob : GameComponentBase
                 }
 
                 // Shift Blob to a safe position
-                _blobXPos = _blobXPos + distanceToMoveX;
+                _blobXPos += distanceToMoveX;
             }
         }
 
@@ -1920,7 +1905,7 @@ public class Blob : GameComponentBase
             if (gameEngine.GameScreens.CheckRectangles(_blobXPos, _blobYPos, 8, BlobHeight, true) < 0)
             {
                 // He's stuck at the top so lets figure out how far we need to go to release him
-                int distanceToMoveX = 0;
+                var distanceToMoveX = 0;
                 while (gameEngine.GameScreens.CheckRectangles((_blobXPos + (BlobWidth - 8)) - distanceToMoveX,
                            _blobYPos, 8, BlobHeight, true) >= 0)
                 {
@@ -1928,7 +1913,7 @@ public class Blob : GameComponentBase
                 }
 
                 // Shift Blob to a safe position
-                _blobXPos = _blobXPos - distanceToMoveX;
+                _blobXPos -= distanceToMoveX;
             }
         }
     }
@@ -1953,30 +1938,34 @@ public class Blob : GameComponentBase
         {
             if (_directionGoingThroughTunnel == enDirection.Left)
             {
-                for (int a = 421; a < 441; a = a + 2)
+                for (var a = 421; a < 441; a += 2)
                 {
-                    List<Point> tiles = gameEngine.GameScreens.GetCoordsOfTiles(a);
+                    var tiles = gameEngine.GameScreens.GetCoordsOfTiles(a);
 
-                    if (tiles != null && tiles.Count == 1)
+                    if (tiles is not { Count: 1 })
                     {
-                        _blobXPos = tiles[0].X + 24;
-                        _blobYPos = tiles[0].Y + 32;
-                        break;
+                        continue;
                     }
+
+                    _blobXPos = tiles[0].X + 24;
+                    _blobYPos = tiles[0].Y + 32;
+                    break;
                 }
             }
             else if (_directionGoingThroughTunnel == enDirection.Right)
             {
-                for (int a = 420; a < 442; a = a + 2)
+                for (var a = 420; a < 442; a += 2)
                 {
-                    List<Point> tiles = gameEngine.GameScreens.GetCoordsOfTiles(a);
+                    var tiles = gameEngine.GameScreens.GetCoordsOfTiles(a);
 
-                    if (tiles != null && tiles.Count == 1)
+                    if (tiles is not { Count: 1 })
                     {
-                        _blobXPos = tiles[0].X + 40;
-                        _blobYPos = tiles[0].Y + 32;
-                        break;
+                        continue;
                     }
+
+                    _blobXPos = tiles[0].X + 40;
+                    _blobYPos = tiles[0].Y + 32;
+                    break;
                 }
             }
 
@@ -1993,9 +1982,7 @@ public class Blob : GameComponentBase
         }
 
         _tilesToReset.Clear();
-
         _blobFireSparks?.Reset();
-
         _blobFireTrail?.Reset();
     }
 
@@ -2003,148 +1990,150 @@ public class Blob : GameComponentBase
         GameTime gameTime,
         int ScreenFade)
     {
-        if (BlobsState == enBlobState.Normal)
+        switch (BlobsState)
         {
-            // Draw the fire trail particles
-            _blobFireTrail?.Draw();
-
-            // Draw blob
-            if (BlobTouchedByNasty)
+            case enBlobState.Normal:
             {
-                // Reset the counter
-                if (!_blobTouched)
+                // Draw the fire trail particles
+                _blobFireTrail?.Draw();
+
+                // Draw blob
+                if (BlobTouchedByNasty)
                 {
-                    _blobEnergyDrainCounter = 255;
-                    _blobTouched = true;
-                }
+                    // Reset the counter
+                    if (!_blobTouched)
+                    {
+                        _blobEnergyDrainCounter = 255;
+                        _blobTouched = true;
+                    }
 
-                if (_blobEnergyDrainCounter > 0)
-                    _blobEnergyDrainCounter -= 16;
+                    if (_blobEnergyDrainCounter > 0)
+                        _blobEnergyDrainCounter -= 16;
 
-                if (_blobEnergyDrainCounter < 0)
-                    _blobEnergyDrainCounter = 0;
-            }
-            else
-            {
-                if (_blobEnergyDrainCounter < 255)
-                    _blobEnergyDrainCounter += 16;
-
-                if (_blobEnergyDrainCounter > 255)
-                {
-                    _blobEnergyDrainCounter = 255;
-                }
-
-                _blobTouched = false;
-            }
-
-            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.BlobSpritesName)
-                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.BlobSpritesName).DrawSprite(BlobFrame,
-                _blobXPos, _blobYPos,
-                ColourHelper.GetXNA4Colour(255, (byte)_blobEnergyDrainCounter, (byte)_blobEnergyDrainCounter,
-                    (byte)(_teleportFadeLevel * ((double)ScreenFade / 255))), 1f, 0f);
-            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.BlobSpritesName).End();
-
-            // Draw other bits
-            if (_blobOnShuttle)
-            {
-                if (gameEngine.UsingOldGraphics)
-                {
-                    gameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttleOriginal")
-                        .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                    gameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttleOriginal").DrawSprite(
-                        _blobShuttleAnim.CurrentFrame, _blobXPos, _blobYPos + 64,
-                        ColourHelper.GetXNA4Colour(255, 255, 255, (byte)ScreenFade));
-                    gameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttleOriginal").End();
+                    if (_blobEnergyDrainCounter < 0)
+                        _blobEnergyDrainCounter = 0;
                 }
                 else
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttle")
-                        .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                    gameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttle").DrawSprite(0, _blobXPos,
-                        _blobYPos + 64, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)ScreenFade));
-                    gameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttle").End();
-                }
-            }
+                    if (_blobEnergyDrainCounter < 255)
+                        _blobEnergyDrainCounter += 16;
 
-            _blobJumpPlatformEngine.Draw(gameTime);
-
-            if (BlobHasFired)
-            {
-                if (_blobFireFade < 255)
-                {
-                    _blobFireFade = _blobFireFade + 16;
-                }
-
-                if (_blobFireFade > 255)
-                {
-                    _blobFireFade = 255;
-                }
-
-                if (gameEngine.UsingOldGraphics)
-                {
-                    if (_blobOnShuttle)
+                    if (_blobEnergyDrainCounter > 255)
                     {
-                        gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original")
-                            .Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
-                        gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").DrawSprite(
-                            _blobAnimFire1.CurrentFrame, BlobFireX, BlobFireY,
-                            ColourHelper.GetXNA4Colour(255, 255, 255,
-                                (byte)(255 * ((double)ScreenFade / 255))), 1.0f, 0f, true,
-                            gameEngine.Paused);
-                        gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").End();
+                        _blobEnergyDrainCounter = 255;
+                    }
+
+                    _blobTouched = false;
+                }
+
+                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.BlobSpritesName)
+                    .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.BlobSpritesName).DrawSprite(BlobFrame,
+                    _blobXPos, _blobYPos,
+                    ColourHelper.GetXNA4Colour(255, (byte)_blobEnergyDrainCounter, (byte)_blobEnergyDrainCounter,
+                        (byte)(_teleportFadeLevel * ((double)ScreenFade / 255))), 1f, 0f);
+                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.BlobSpritesName).End();
+
+                // Draw other bits
+                if (_blobOnShuttle)
+                {
+                    if (gameEngine.UsingOldGraphics)
+                    {
+                        gameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttleOriginal")
+                            .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+                        gameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttleOriginal").DrawSprite(
+                            _blobShuttleAnim.CurrentFrame, _blobXPos, _blobYPos + 64,
+                            ColourHelper.GetXNA4Colour(255, 255, 255, (byte)ScreenFade));
+                        gameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttleOriginal").End();
                     }
                     else
                     {
-                        gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire1")
-                            .Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
-                        gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire1").DrawSprite(
-                            _blobAnimFire1.CurrentFrame, BlobFireX, BlobFireY - 16,
-                            ColourHelper.GetXNA4Colour(255, 255, 255,
-                                (byte)(255 * ((double)ScreenFade / 255))), 1.0f, 0f, true,
-                            gameEngine.Paused);
-                        gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire1").End();
+                        gameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttle")
+                            .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+                        gameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttle").DrawSprite(0, _blobXPos,
+                            _blobYPos + 64, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)ScreenFade));
+                        gameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttle").End();
                     }
                 }
-                else
+
+                _blobJumpPlatformEngine.Draw(gameTime);
+
+                if (BlobHasFired)
                 {
-                    if (_blobOnShuttle)
+                    if (_blobFireFade < 255)
                     {
-                        gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2")
-                            .Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
-                        gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2").DrawSprite(
-                            _blobAnimFire2.CurrentFrame, BlobFireX, BlobFireY,
-                            ColourHelper.GetXNA4Colour(255, 255, 255,
-                                (byte)(_blobFireFade * ((double)ScreenFade / 255))), 1.0f, 10f,
-                            true,
-                            gameEngine.Paused);
-                        gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2").End();
+                        _blobFireFade = _blobFireFade + 16;
+                    }
+
+                    if (_blobFireFade > 255)
+                    {
+                        _blobFireFade = 255;
+                    }
+
+                    if (gameEngine.UsingOldGraphics)
+                    {
+                        if (_blobOnShuttle)
+                        {
+                            gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original")
+                                .Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+                            gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").DrawSprite(
+                                _blobAnimFire1.CurrentFrame, BlobFireX, BlobFireY,
+                                ColourHelper.GetXNA4Colour(255, 255, 255,
+                                    (byte)(255 * ((double)ScreenFade / 255))), 1.0f, 0f, true,
+                                gameEngine.Paused);
+                            gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").End();
+                        }
+                        else
+                        {
+                            gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire1")
+                                .Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+                            gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire1").DrawSprite(
+                                _blobAnimFire1.CurrentFrame, BlobFireX, BlobFireY - 16,
+                                ColourHelper.GetXNA4Colour(255, 255, 255,
+                                    (byte)(255 * ((double)ScreenFade / 255))), 1.0f, 0f, true,
+                                gameEngine.Paused);
+                            gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire1").End();
+                        }
+                    }
+                    else
+                    {
+                        if (_blobOnShuttle)
+                        {
+                            gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2")
+                                .Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+                            gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2").DrawSprite(
+                                _blobAnimFire2.CurrentFrame, BlobFireX, BlobFireY,
+                                ColourHelper.GetXNA4Colour(255, 255, 255,
+                                    (byte)(_blobFireFade * ((double)ScreenFade / 255))), 1.0f, 10f,
+                                true,
+                                gameEngine.Paused);
+                            gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2").End();
+                        }
                     }
                 }
-            }
 
-            // Draw teleport beam effect
-            if (_startBlobTeleporting)
-            {
-                if (_blobTeleporterBeam != null)
+                // Draw teleport beam effect
+                if (_startBlobTeleporting)
                 {
-                    _blobTeleporterBeam.Draw();
+                    if (_blobTeleporterBeam != null)
+                    {
+                        _blobTeleporterBeam.Draw();
+                    }
                 }
-            }
 
-            if (_teleportFadeLevel < 255)
-            {
-                _teleportFadeLevel += 8;
-            }
+                if (_teleportFadeLevel < 255)
+                {
+                    _teleportFadeLevel += 8;
+                }
 
-            if (_teleportFadeLevel > 255)
-            {
-                _teleportFadeLevel = 255;
+                if (_teleportFadeLevel > 255)
+                {
+                    _teleportFadeLevel = 255;
+                }
+
+                break;
             }
-        }
-        else if (BlobsState == enBlobState.Overloading)
-        {
-            if (_blobAlarmSoundCounter < 60)
+            case enBlobState.Overloading when _blobAlarmSoundCounter < 60:
             {
                 // Make blob flicker
                 if (_blobAlarmSoundCounter % 2 == 0)
@@ -2167,8 +2156,10 @@ public class Blob : GameComponentBase
                         _blobYPos + 64, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)ScreenFade));
                     gameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttle").End();
                 }
+
+                break;
             }
-            else
+            case enBlobState.Overloading:
             {
                 gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.BlobSpritesName)
                     .Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
@@ -2187,6 +2178,7 @@ public class Blob : GameComponentBase
                 }
 
                 gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.BlobSpritesName).End();
+                break;
             }
         }
     }
