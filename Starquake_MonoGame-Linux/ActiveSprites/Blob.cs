@@ -166,7 +166,7 @@ public class Blob : GameComponentBase
         _blobFireTrail =
             gameEngine.ContentResourceManager.GetParticleEffectInstance("FireTrail", enParticleEffectType.Continual,
                 null) as IStandardParticleEffect;
-        //blobFireSparks = gameEngine.ContentResourceManager.GetParticleEffectInstance("FireSparks", enParticleEffectType.Triggered, null);
+
         _blobFireSparks =
             gameEngine.ContentResourceManager.GetParticleEffectInstance("FireSparks",
                 enParticleEffectType.TriggeredMultiLocationTimed, null) as IPositionalTriggerParticleEffect;
@@ -177,9 +177,8 @@ public class Blob : GameComponentBase
         }
     }
 
-    void blobTeleporterBeam_ParticleEffectComplete()
+    private void blobTeleporterBeam_ParticleEffectComplete()
     {
-        //blobCanMove = true;
         _startBlobTeleporting = false;
     }
 
@@ -254,7 +253,7 @@ public class Blob : GameComponentBase
             BlobInventory[a] = enCollectables.None;
         }
 
-        // Temporary test code to give Blob Accesscard and Key
+        // Temporary test code to give Blob Access card and Key
         BlobInventory[1] = enCollectables.Key;
         BlobInventory[0] = enCollectables.AccessCard;
 
