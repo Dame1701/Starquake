@@ -59,8 +59,8 @@ namespace StarquakeXNA
             newPlatform.PlatformActive = true;
             newPlatform.ReadyToAllocate = false;
 
-            gameEngine.GameScreens.CurrentGameScreen.CollisionMap.Add(newPlatform.LeftCollisionTile);
-            gameEngine.GameScreens.CurrentGameScreen.CollisionMap.Add(newPlatform.RightCollisionTile);
+            gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.Add(newPlatform.LeftCollisionTile);
+            gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.Add(newPlatform.RightCollisionTile);
 
             // Returns blob's new YPosition
             return newPlatform.YPos - 64;
@@ -70,8 +70,8 @@ namespace StarquakeXNA
         {
             for (int a = 0; a < platforms.Count; a++)
             {
-                gameEngine.GameScreens.CurrentGameScreen.CollisionMap.Remove(platforms[a].LeftCollisionTile);
-                gameEngine.GameScreens.CurrentGameScreen.CollisionMap.Remove(platforms[a].RightCollisionTile);
+                gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.Remove(platforms[a].LeftCollisionTile);
+                gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.Remove(platforms[a].RightCollisionTile);
                 platforms[a].Reset();
             }
         }
@@ -87,8 +87,8 @@ namespace StarquakeXNA
                     {
                         if (platforms[a].Finished)
                         {
-                            GameScreensReference.CurrentGameScreen.CollisionMap.Remove(platforms[a].LeftCollisionTile);
-                            GameScreensReference.CurrentGameScreen.CollisionMap.Remove(platforms[a].RightCollisionTile);
+                            GameScreensReference.CurrentGameScreenData.CollisionMap.Remove(platforms[a].LeftCollisionTile);
+                            GameScreensReference.CurrentGameScreenData.CollisionMap.Remove(platforms[a].RightCollisionTile);
                             platforms[a].Reset();
                         }
                         else

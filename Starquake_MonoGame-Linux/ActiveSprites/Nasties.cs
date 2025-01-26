@@ -286,15 +286,15 @@ namespace StarquakeXNA
                 // Do we generate all nasties the same
                 if (gameEngine.RandomNumberGenerator.Next(0, 4) == 0)
                 {
-                    gameEngine.GameScreens.CurrentGameScreen.KeepNastiesTheSame = true;
+                    gameEngine.GameScreens.CurrentGameScreenData.KeepNastiesTheSame = true;
                 }
                 else
                 {
-                    gameEngine.GameScreens.CurrentGameScreen.KeepNastiesTheSame = false;
+                    gameEngine.GameScreens.CurrentGameScreenData.KeepNastiesTheSame = false;
                 }
 
                 enNastyType nastyType = enNastyType.Ghost;
-                if (gameEngine.GameScreens.CurrentGameScreen.KeepNastiesTheSame)
+                if (gameEngine.GameScreens.CurrentGameScreenData.KeepNastiesTheSame)
                 {
                     nastyType = Nasty.GetRandomNastyType(gameEngine, true);
                 }
@@ -302,10 +302,10 @@ namespace StarquakeXNA
                 // Reset the nasties
                 for (int a = 0; a < nastyCount; a++)
                 {
-                    nasties[a].KeepNastyTheSame = gameEngine.GameScreens.CurrentGameScreen.KeepNastiesTheSame;
+                    nasties[a].KeepNastyTheSame = gameEngine.GameScreens.CurrentGameScreenData.KeepNastiesTheSame;
                     nasties[a].NastyState = enNastyState.PreConception;
 
-                    if (gameEngine.GameScreens.CurrentGameScreen.KeepNastiesTheSame)
+                    if (gameEngine.GameScreens.CurrentGameScreenData.KeepNastiesTheSame)
                     {
                         nasties[a].KeepNastyTheSame = true;
                         nasties[a].NastyType = nastyType;

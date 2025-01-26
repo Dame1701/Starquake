@@ -88,7 +88,7 @@ namespace StarquakeXNA.GameComponents
                 gameEngine.GameScreens.ScreenNumber = 199;
 
                 // Add the collision map for the core elements
-                gameEngine.GameScreens.CurrentGameScreen.CollisionMap.AddRange(elements.GetCollisionMap());
+                gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.AddRange(elements.GetCollisionMap());
 
                 List<Point> potentialLocations = gameEngine.GameScreens.GetNastyPotentialLocations();
                 if (potentialLocations.Count < coreAlienCount)

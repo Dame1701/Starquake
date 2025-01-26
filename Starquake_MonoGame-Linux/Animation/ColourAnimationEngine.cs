@@ -338,7 +338,7 @@ namespace StarquakeXNA
                     {
                         if (colourAnimationsRegistered[a].Running)
                         {
-                            if (gameEngine.GameScreens.CurrentGameScreen.ScreenTiles[x, y].TileImage == colourAnimationsRegistered[a].TileNo) // Teleport booths
+                            if (gameEngine.GameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage == colourAnimationsRegistered[a].TileNo) // Teleport booths
                             {
                                 // Layer up the tiles to make the intensity deeper
                                 for (int b = 0; b < colourAnimationsRegistered[a].Intensity; b++)
@@ -367,7 +367,7 @@ namespace StarquakeXNA
                         if (colourAnimationsRegistered[a].Running &&
                               colourAnimationsRegistered[a].TileNo >= 0)
                         {
-                            if (gameEngine.GameScreens.CurrentGameScreen.ScreenTiles[x, y].TileImage == colourAnimationsRegistered[a].TileNo) // Teleport booths
+                            if (gameEngine.GameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage == colourAnimationsRegistered[a].TileNo) // Teleport booths
                             {
                                 // Layer up the tiles to make the intensity deeper
                                 for (int b = 0; b < colourAnimationsRegistered[a].Intensity; b++)
@@ -396,7 +396,7 @@ namespace StarquakeXNA
                         if (colourAnimationsRegistered[a].Running &&
                             colourAnimationsRegistered[a].UpperTileToDraw >=0)
                         {
-                            if (gameEngine.GameScreens.CurrentGameScreen.ScreenTiles[x, y].TileImage == colourAnimationsRegistered[a].TileNo) // Teleport booths
+                            if (gameEngine.GameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage == colourAnimationsRegistered[a].TileNo) // Teleport booths
                             {
                                 // Layer up the tiles to make the intensity deeper
                                 for (int b = 0; b < colourAnimationsRegistered[a].Intensity; b++)

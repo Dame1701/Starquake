@@ -532,7 +532,7 @@ namespace StarquakeXNA
 
                     bool accessingCheops = false;
 
-                    if (gameEngine.GameScreens.CurrentGameScreen.CheopsPyramid != null)
+                    if (gameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid != null)
                     {
                         if (CollisionDetection.Check(
                             new Rectangle(
@@ -541,8 +541,8 @@ namespace StarquakeXNA
                                 64,
                                 64),
                             new Rectangle(
-                                gameEngine.GameScreens.CurrentGameScreen.CheopsPyramid.XLocation,
-                                gameEngine.GameScreens.CurrentGameScreen.CheopsPyramid.YLocation,
+                                gameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid.XLocation,
+                                gameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid.YLocation,
                                 64,
                                 64)))
                         {
@@ -592,7 +592,7 @@ namespace StarquakeXNA
                                     
                                     itemDropped = new Item(itemXPos, itemYPos, (int)blobInventory[blobInventory.Length - 1]);
 
-                                    gameEngine.GameScreens.CurrentGameScreen.PickUps.Add(itemDropped);
+                                    gameEngine.GameScreens.CurrentGameScreenData.PickUps.Add(itemDropped);
 
                                     // Nothing held here now
                                     blobInventory[blobInventory.Length - 1] = enCollectables.None;
@@ -606,17 +606,17 @@ namespace StarquakeXNA
                                 }
 
                                 // Pick up an item if we can....
-                                if (gameEngine.GameScreens.CurrentGameScreen.PickUps != null)
+                                if (gameEngine.GameScreens.CurrentGameScreenData.PickUps != null)
                                 {
-                                    for (int a = 0; a < gameEngine.GameScreens.CurrentGameScreen.PickUps.Count; a++)
+                                    for (int a = 0; a < gameEngine.GameScreens.CurrentGameScreenData.PickUps.Count; a++)
                                     {
                                         if (CollisionDetection.Check(
                                             blobXPos,
                                             BlobYPos,
                                             blobWidth,
                                             blobHeight,
-                                            gameEngine.GameScreens.CurrentGameScreen.PickUps[a].XLocation + 16,
-                                            gameEngine.GameScreens.CurrentGameScreen.PickUps[a].YLocation + 32,
+                                            gameEngine.GameScreens.CurrentGameScreenData.PickUps[a].XLocation + 16,
+                                            gameEngine.GameScreens.CurrentGameScreenData.PickUps[a].YLocation + 32,
                                             32,
                                             32))
                                         {
@@ -624,7 +624,7 @@ namespace StarquakeXNA
                                             bool pickupItem = true;
 
                                             if (itemDropped != null &&
-                                                itemDropped == gameEngine.GameScreens.CurrentGameScreen.PickUps[a])
+                                                itemDropped == gameEngine.GameScreens.CurrentGameScreenData.PickUps[a])
                                             {
                                                 pickupItem = false;
                                             }
@@ -632,10 +632,10 @@ namespace StarquakeXNA
                                             if (pickupItem)
                                             {
                                                 // Add the item to Blob's inventory
-                                                blobInventory[0] = (enCollectables)gameEngine.GameScreens.CurrentGameScreen.PickUps[a].Type;
+                                                blobInventory[0] = (enCollectables)gameEngine.GameScreens.CurrentGameScreenData.PickUps[a].Type;
 
                                                 // Remove it from the screen
-                                                gameEngine.GameScreens.CurrentGameScreen.PickUps.Remove(gameEngine.GameScreens.CurrentGameScreen.PickUps[a]);
+                                                gameEngine.GameScreens.CurrentGameScreenData.PickUps.Remove(gameEngine.GameScreens.CurrentGameScreenData.PickUps[a]);
                                                 break;
                                             }
                                         }
@@ -1621,7 +1621,7 @@ namespace StarquakeXNA
                             tilesToReset.Add(new ResetTile(tileBelowBlob, gameEngine.GameScreens.ScreenNumber));
 
                             // Remove the tile
-                            gameEngine.GameScreens.CurrentGameScreen.ScreenTiles[tileBelowBlob.MapXPosition, tileBelowBlob.MapYPosition].TileImage = -1;
+                            gameEngine.GameScreens.CurrentGameScreenData.ScreenTiles[tileBelowBlob.MapXPosition, tileBelowBlob.MapYPosition].TileImage = -1;
 
                             // Add the tile to the Breakable bridges engine
                             gameEngine.BreakableBridgesEngine.AddBridge(gameEngine.GameScreens.ConvertToScreenCoords(tileBelowBlob.MapXPosition, tileBelowBlob.MapYPosition));
@@ -1743,23 +1743,23 @@ namespace StarquakeXNA
                 }
 
                 // Collect powerups
-                if (gameEngine.GameScreens.CurrentGameScreen.PowerUp != null)
+                if (gameEngine.GameScreens.CurrentGameScreenData.PowerUp != null)
                 {
                     if (CollisionDetection.Check(
                         blobXPos,
                         BlobYPos,
                         blobWidth,
                         blobHeight,
-                        gameEngine.GameScreens.CurrentGameScreen.PowerUp.XLocation,
-                        gameEngine.GameScreens.CurrentGameScreen.PowerUp.YLocation,
+                        gameEngine.GameScreens.CurrentGameScreenData.PowerUp.XLocation,
+                        gameEngine.GameScreens.CurrentGameScreenData.PowerUp.YLocation,
                         32,
                         32))
                     {
                         if (OnBlobActionRaised != null)
                         {
-                            OnBlobActionRaised(enBlobAction.GotPowerUp, gameEngine.GameScreens.CurrentGameScreen.PowerUp.Type);
+                            OnBlobActionRaised(enBlobAction.GotPowerUp, gameEngine.GameScreens.CurrentGameScreenData.PowerUp.Type);
                         }
-                        gameEngine.GameScreens.CurrentGameScreen.PowerUp = null;
+                        gameEngine.GameScreens.CurrentGameScreenData.PowerUp = null;
                         gameEngine.GameScreens.UpdateCollisionMap(false);
                     }
                 }
@@ -2183,16 +2183,16 @@ namespace StarquakeXNA
         {
             List<Item> temp = new List<Item>();
 
-            if (gameEngine.GameScreens.CurrentGameScreen.CheopsPyramid != null)
+            if (gameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid != null)
             {
-                temp.Add(gameEngine.GameScreens.CurrentGameScreen.CheopsPyramid);
+                temp.Add(gameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid);
             }
 
-            if (gameEngine.GameScreens.CurrentGameScreen.PickUps != null)
+            if (gameEngine.GameScreens.CurrentGameScreenData.PickUps != null)
             {
-                for (int a = 0; a < gameEngine.GameScreens.CurrentGameScreen.PickUps.Count; a++)
+                for (int a = 0; a < gameEngine.GameScreens.CurrentGameScreenData.PickUps.Count; a++)
                 {
-                    temp.Add(gameEngine.GameScreens.CurrentGameScreen.PickUps[a]);
+                    temp.Add(gameEngine.GameScreens.CurrentGameScreenData.PickUps[a]);
                 }
             }
 

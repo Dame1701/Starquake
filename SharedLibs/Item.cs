@@ -1,32 +1,10 @@
 namespace SharedLibs;
 
-public class Item
+public sealed record Item(int XLocation, int YLocation, int Type)
 {
-    int xLocation;
-    public int XLocation
-    {
-        get { return xLocation; }
-        set { xLocation = value; }
-    }
+    public int XLocation { get; } = XLocation;
 
-    int yLocation;
-    public int YLocation
-    {
-        get { return yLocation; }
-        set { yLocation = value; }
-    }
+    public int YLocation { get; } = YLocation;
 
-    int type;
-    public int Type
-    {
-        get { return type; }
-        set { type = value; }
-    }
-
-    public Item(int xLocation, int yLocation, int type)
-    {
-        XLocation = xLocation;
-        YLocation = yLocation;
-        Type = type;
-    }
+    public int Type { get; set; } = Type;
 }

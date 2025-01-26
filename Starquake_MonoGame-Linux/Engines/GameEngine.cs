@@ -338,7 +338,7 @@ namespace StarquakeXNA
             ContentResourceManager.AddSpriteResource("ProportionalNumbers", "Graphics\\ProportionalNumbers", 27, 26);
 
             // Game data, if these hit the same file they must be presented in order
-            ContentResourceManager.AddDataResource("GameScreens", "Data/SQScreenData2.dat", typeof(GameScreen[]));
+            ContentResourceManager.AddDataResource("GameScreens", "Data/SQScreenData2.dat", typeof(GameScreenData[]));
             ContentResourceManager.AddDataResource("ScreenCollisionData", "Data/SQScreenData2.dat", typeof(int[,,]));
 
             // Option screen graphics

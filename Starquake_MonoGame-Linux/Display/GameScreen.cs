@@ -33,13 +33,13 @@ namespace StarquakeXNA
         private const int c_maxCheops = 40;
         private const int c_maxCoreElements = 18;
 
-        private GameScreen[] gameScreens;
-        public GameScreen CurrentGameScreen
+        private GameScreenData[] gameScreens;
+        public GameScreenData CurrentGameScreenData
         {
             get { return gameScreens[ScreenNumber]; }
         }
 
-        public GameScreen GetGameScreen(int Number)
+        public GameScreenData GetGameScreen(int Number)
         {
             return gameScreens[Number];
         }
@@ -131,7 +131,7 @@ namespace StarquakeXNA
         public new void LoadContent()
         {
             // Load screen data
-            gameScreens = (GameScreen[])gameEngine.ContentResourceManager.GetDataResource("GameScreens");
+            gameScreens = (GameScreenData[])gameEngine.ContentResourceManager.GetDataResource("GameScreens");
             screenCollisionDataArray = (int[, ,])gameEngine.ContentResourceManager.GetDataResource("ScreenCollisionData");
 
             blobsShipSmoke1 = gameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume", enParticleEffectType.Continual, null) as IStandardParticleEffect;
@@ -200,7 +200,7 @@ namespace StarquakeXNA
             {
                 for (var x = 0; x < TilesAcross; x++)
                 {
-                    if (CurrentGameScreen.ScreenTiles[x, y].TileImage == -1)
+                    if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == -1)
                     {
                         bool addLocation = true;
                         
@@ -1175,37 +1175,37 @@ namespace StarquakeXNA
             gameEngine.ColourAnimationEngine.Draw(gameTime, Colour.A);
 
             // Draw Powerups
-            if ((!IntroSequenceRunning || IntroSequenceStage == enIntroSequenceStage.EndPause) && CurrentGameScreen.PowerUp != null)
+            if ((!IntroSequenceRunning || IntroSequenceStage == enIntroSequenceStage.EndPause) && CurrentGameScreenData.PowerUp != null)
             {
                 gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PowerUpsName).Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PowerUpsName).DrawSprite(CurrentGameScreen.PowerUp.Type, CurrentGameScreen.PowerUp.XLocation, CurrentGameScreen.PowerUp.YLocation, Colour);
+                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PowerUpsName).DrawSprite(CurrentGameScreenData.PowerUp.Type, CurrentGameScreenData.PowerUp.XLocation, CurrentGameScreenData.PowerUp.YLocation, Colour);
                 gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PowerUpsName).End();
             }
 
             // Draw Pickups
-            if ((!IntroSequenceRunning || IntroSequenceStage == enIntroSequenceStage.EndPause) && CurrentGameScreen.PickUps != null)
+            if ((!IntroSequenceRunning || IntroSequenceStage == enIntroSequenceStage.EndPause) && CurrentGameScreenData.PickUps != null)
             {
                 gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
-                for (int a = 0; a < CurrentGameScreen.PickUps.Count; a++)
+                for (int a = 0; a < CurrentGameScreenData.PickUps.Count; a++)
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).DrawSprite(CurrentGameScreen.PickUps[a].Type, CurrentGameScreen.PickUps[a].XLocation, CurrentGameScreen.PickUps[a].YLocation, Colour);
+                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).DrawSprite(CurrentGameScreenData.PickUps[a].Type, CurrentGameScreenData.PickUps[a].XLocation, CurrentGameScreenData.PickUps[a].YLocation, Colour);
                 }
                 gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).End();
             }
 
             // Draw Cheops pyramids
-            if ((!IntroSequenceRunning || IntroSequenceStage == enIntroSequenceStage.EndPause) && CurrentGameScreen.CheopsPyramid != null)
+            if ((!IntroSequenceRunning || IntroSequenceStage == enIntroSequenceStage.EndPause) && CurrentGameScreenData.CheopsPyramid != null)
             {
                 if (gameEngine.UsingOldGraphics)
                 {
                     gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                    gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").DrawSprite(0, CurrentGameScreen.CheopsPyramid.XLocation, CurrentGameScreen.CheopsPyramid.YLocation, Colour);
+                    gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").DrawSprite(0, CurrentGameScreenData.CheopsPyramid.XLocation, CurrentGameScreenData.CheopsPyramid.YLocation, Colour);
                     gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").End();
                 }
                 else
                 {
                     gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                    gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").DrawSprite(0, CurrentGameScreen.CheopsPyramid.XLocation, CurrentGameScreen.CheopsPyramid.YLocation, Colour);
+                    gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").DrawSprite(0, CurrentGameScreenData.CheopsPyramid.XLocation, CurrentGameScreenData.CheopsPyramid.YLocation, Colour);
                     gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").End();
                 }
             }
@@ -1244,98 +1244,98 @@ namespace StarquakeXNA
                 for (int x = 0; x < TilesAcross; x++)
                 {
                     gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                    if (CurrentGameScreen.ScreenTiles[x, y].TileImage == 396)
+                    if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 396)
                     {
                         gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(0, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
                                                     (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
-                    else if (CurrentGameScreen.ScreenTiles[x, y].TileImage == 407)
+                    else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 407)
                     {
                         gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(0, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
                                                     (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
-                    else if (CurrentGameScreen.ScreenTiles[x, y].TileImage == 408)
+                    else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 408)
                     {
                         gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(1, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
                                                     (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
-                    else if (CurrentGameScreen.ScreenTiles[x, y].TileImage == 409)
+                    else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 409)
                     {
                         gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(2, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
                                                     (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
-                    else if (CurrentGameScreen.ScreenTiles[x, y].TileImage == 412)
+                    else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 412)
                     {
                         gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(3, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
                                                     (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
-                    else if (CurrentGameScreen.ScreenTiles[x, y].TileImage == 413)
+                    else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 413)
                     {
                         gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(4, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
                                                     (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
-                    else if (CurrentGameScreen.ScreenTiles[x, y].TileImage == 414)
+                    else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 414)
                     {
                         gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(5, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
                                                     (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
-                    else if (CurrentGameScreen.ScreenTiles[x, y].TileImage == 415)
+                    else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 415)
                     {
                         gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(6, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
                                                     (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
-                    else if (CurrentGameScreen.ScreenTiles[x, y].TileImage == 397) // Teleport booths
+                    else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 397) // Teleport booths
                     {
                         gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(7, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
                                                     (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
-                    else if (CurrentGameScreen.ScreenTiles[x, y].TileImage == 377 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 378 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 380 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 381 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 385 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 386 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 388 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 389
+                    else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 377 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 378 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 380 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 381 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 385 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 386 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 388 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 389
                         ) // Shadows
                     {
                         gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(8, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
                                                     ((y + 1) * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
-                    else if (CurrentGameScreen.ScreenTiles[x, y].TileImage == 399) // Access booth left
+                    else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 399) // Access booth left
                     {
                         gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(9, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
                                                     (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
-                    else if (CurrentGameScreen.ScreenTiles[x, y].TileImage == 400) // Access booth right
+                    else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 400) // Access booth right
                     {
                         gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(10, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
                                                     (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
-                    else if (CurrentGameScreen.ScreenTiles[x, y].TileImage == 420 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 422 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 424 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 426 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 428 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 430 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 432 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 434 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 436 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 438)
+                    else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 420 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 422 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 424 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 426 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 428 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 430 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 432 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 434 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 436 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 438)
                     {
                         gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(11, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
                                                     (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
-                    else if (CurrentGameScreen.ScreenTiles[x, y].TileImage == 421 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 423 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 425 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 427 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 429 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 431 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 433 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 435 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 437 ||
-                        CurrentGameScreen.ScreenTiles[x, y].TileImage == 439)
+                    else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 421 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 423 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 425 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 427 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 429 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 431 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 433 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 435 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 437 ||
+                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 439)
                     {
                         gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(12, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
                                                     (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
@@ -1344,7 +1344,7 @@ namespace StarquakeXNA
                     gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).End();
 
                     // Draw Tunnel entrances
-                    if (CurrentGameScreen.ScreenTiles[x, y].TileImage > 418)
+                    if (CurrentGameScreenData.ScreenTiles[x, y].TileImage > 418)
                     {
                         gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
                         gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).DrawSprite(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, (x * tileWidth), (y * tileHeight), Colour);
@@ -1549,8 +1549,8 @@ namespace StarquakeXNA
             }
 
             // Remove most of the Cheops pyramids - we'll use the same technique for core elements
-            List<GameScreen> screensContainingCheopsPyramid = new List<GameScreen>();
-            List<GameScreen> screensContainingCoreElements = new List<GameScreen>();
+            List<GameScreenData> screensContainingCheopsPyramid = new List<GameScreenData>();
+            List<GameScreenData> screensContainingCoreElements = new List<GameScreenData>();
 
             for (int a = 0; a < gameScreens.Length; a++)
             {
@@ -1580,7 +1580,7 @@ namespace StarquakeXNA
             while (screensContainingCheopsPyramid.Count > c_maxCheops)
             {
                 // Randomly select a cheops from the list of screens
-                GameScreen temp = screensContainingCheopsPyramid[gameEngine.RandomNumberGenerator.Next(0, screensContainingCheopsPyramid.Count)];
+                GameScreenData temp = screensContainingCheopsPyramid[gameEngine.RandomNumberGenerator.Next(0, screensContainingCheopsPyramid.Count)];
 
                 // Remove it
                 temp.CheopsPyramid = null;
@@ -1593,7 +1593,7 @@ namespace StarquakeXNA
             while (screensContainingCoreElements.Count > c_maxCoreElements)
             {
                 // Randomly select a pickup from the list of screens
-                GameScreen temp = screensContainingCoreElements[gameEngine.RandomNumberGenerator.Next(0, screensContainingCoreElements.Count)];
+                GameScreenData temp = screensContainingCoreElements[gameEngine.RandomNumberGenerator.Next(0, screensContainingCoreElements.Count)];
 
                 // Remove them
                 temp.PickUps = new List<Item>();

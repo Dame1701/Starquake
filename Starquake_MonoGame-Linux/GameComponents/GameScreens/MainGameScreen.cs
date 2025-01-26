@@ -446,9 +446,9 @@ namespace StarquakeXNA.GameComponents
             }
 
             // Update score for each new screen visited
-            if (gameEngine.GameScreens.CurrentGameScreen.ScreenVisited == false)
+            if (gameEngine.GameScreens.CurrentGameScreenData.ScreenVisited == false)
             {
-                gameEngine.GameScreens.CurrentGameScreen.ScreenVisited = true;
+                gameEngine.GameScreens.CurrentGameScreenData.ScreenVisited = true;
                 gameEngine.BlobStatusPanel.PlayerScore += 250;
             }
 

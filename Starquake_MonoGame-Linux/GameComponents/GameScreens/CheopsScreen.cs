@@ -63,11 +63,11 @@ namespace StarquakeXNA.GameComponents
             resultMessageFade = 255;
             elementSelectionMode = false;
 
-            if (gameEngine.GameScreens.CurrentGameScreen.CheopsAccessCode != null)
+            if (gameEngine.GameScreens.CurrentGameScreenData.CheopsAccessCode != null)
             {
                 for (int a = 0; a < accessCode.Length; a++)
                 {
-                    accessCode[a] = Int32.Parse(gameEngine.GameScreens.CurrentGameScreen.CheopsAccessCode.Substring(a, 1));
+                    accessCode[a] = Int32.Parse(gameEngine.GameScreens.CurrentGameScreenData.CheopsAccessCode.Substring(a, 1));
                 }
             }
 
@@ -358,7 +358,7 @@ namespace StarquakeXNA.GameComponents
                     gameEngine.Player.BlobInventory[itemToSwap] = (enCollectables)itemsToSelect[0].Type;
                     gameEngine.GetGameScreen(enGameScreen.MainGame).ScreenFade = 40;
                     gameEngine.CurrentGameScreen = enGameScreen.MainGame;
-                    gameEngine.GameScreens.CurrentGameScreen.CheopsPyramid = null;
+                    gameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
                     gameEngine.GameScreens.UpdateCollisionMap(false);
                     gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("BlobPickUp", 0.5f, false);
                 }
@@ -367,7 +367,7 @@ namespace StarquakeXNA.GameComponents
                     gameEngine.Player.BlobInventory[itemToSwap] = (enCollectables)itemsToSelect[1].Type;
                     gameEngine.GetGameScreen(enGameScreen.MainGame).ScreenFade = 40;
                     gameEngine.CurrentGameScreen = enGameScreen.MainGame;
-                    gameEngine.GameScreens.CurrentGameScreen.CheopsPyramid = null;
+                    gameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
                     gameEngine.GameScreens.UpdateCollisionMap(false);
                     gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("BlobPickUp", 0.5f, false);
                 }
@@ -376,7 +376,7 @@ namespace StarquakeXNA.GameComponents
                     gameEngine.Player.BlobInventory[itemToSwap] = (enCollectables)itemsToSelect[2].Type;
                     gameEngine.GetGameScreen(enGameScreen.MainGame).ScreenFade = 40;
                     gameEngine.CurrentGameScreen = enGameScreen.MainGame;
-                    gameEngine.GameScreens.CurrentGameScreen.CheopsPyramid = null;
+                    gameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
                     gameEngine.GameScreens.UpdateCollisionMap(false);
                     gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("BlobPickUp", 0.5f, false);
                 }
@@ -385,7 +385,7 @@ namespace StarquakeXNA.GameComponents
                     gameEngine.Player.BlobInventory[itemToSwap] = (enCollectables)itemsToSelect[3].Type;
                     gameEngine.GetGameScreen(enGameScreen.MainGame).ScreenFade = 40;
                     gameEngine.CurrentGameScreen = enGameScreen.MainGame;
-                    gameEngine.GameScreens.CurrentGameScreen.CheopsPyramid = null;
+                    gameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
                     gameEngine.GameScreens.UpdateCollisionMap(false);
                     gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("BlobPickUp", 0.5f, false);
                 }
@@ -394,7 +394,7 @@ namespace StarquakeXNA.GameComponents
                     gameEngine.Player.BlobInventory[itemToSwap] = (enCollectables)itemsToSelect[4].Type;
                     gameEngine.GetGameScreen(enGameScreen.MainGame).ScreenFade = 40;
                     gameEngine.CurrentGameScreen = enGameScreen.MainGame;
-                    gameEngine.GameScreens.CurrentGameScreen.CheopsPyramid = null;
+                    gameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
                     gameEngine.GameScreens.UpdateCollisionMap(false);
                     gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("BlobPickUp", 0.5f, false);
                 }

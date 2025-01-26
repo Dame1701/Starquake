@@ -222,7 +222,7 @@ namespace StarquakeXNA
                 var collisionTilesData = new byte[collisionTilesArraySize];
                 fs.ReadExactly(collisionTilesData, 0, collisionTilesArraySize);
                 
-                resources.Add(dataDescriptions[0].ResourceName, MessagePackSerializer.Deserialize<GameScreen[]>(gameScreensData));
+                resources.Add(dataDescriptions[0].ResourceName, MessagePackSerializer.Deserialize<GameScreenData[]>(gameScreensData));
                 resources.Add(dataDescriptions[1].ResourceName, MessagePackSerializer.Deserialize<int[,,]>(collisionTilesData));
             }
             

@@ -63,11 +63,11 @@ namespace StarquakeXNA.GameComponents
             blobAnim1.Reset(enDirection.Left);
             blobAnim2.Reset(enDirection.Right);
 
-            if (gameEngine.GameScreens.CurrentGameScreen.AccessCode != null)
+            if (gameEngine.GameScreens.CurrentGameScreenData.AccessCode != null)
             {
                 for (int a = 0; a < accessCode.Length; a++)
                 {
-                    accessCode[a] = Int32.Parse(gameEngine.GameScreens.CurrentGameScreen.AccessCode.Substring(a, 1));
+                    accessCode[a] = Int32.Parse(gameEngine.GameScreens.CurrentGameScreenData.AccessCode.Substring(a, 1));
                 }
             }
 
