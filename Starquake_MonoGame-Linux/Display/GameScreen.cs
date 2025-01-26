@@ -214,7 +214,7 @@ namespace StarquakeXNA
                                     if (gameScreens[ScreenNumber].CollisionMap[a].XPos == (x * tileWidth) + (x1 * collAreaWidth) &&
                                         gameScreens[ScreenNumber].CollisionMap[a].YPos == (y * tileHeight) + (y1 * collAreaHeight))
                                     {
-                                        if (gameScreens[ScreenNumber].CollisionMap[a].ColType == CollisionTileType.NotBlob)
+                                        if (gameScreens[ScreenNumber].CollisionMap[a].CollisionTileType == CollisionTileType.NotBlob)
                                         {
                                             addLocation = false;
                                             break;
@@ -708,7 +708,7 @@ namespace StarquakeXNA
 
                 if (Collide)
                 {
-                    if (IsBlob && gameScreens[screenNumber].CollisionMap[a].ColType == CollisionTileType.NotBlob)
+                    if (IsBlob && gameScreens[screenNumber].CollisionMap[a].CollisionTileType == CollisionTileType.NotBlob)
                     {
                         Collide = false;
                     }
@@ -755,7 +755,7 @@ namespace StarquakeXNA
                                        );
                
 
-                if (colTile.ColType == CollisionTileType.NotBlob &&
+                if (colTile.CollisionTileType == CollisionTileType.NotBlob &&
                         IsBlob)
                 {
                     CheckMovementAmountTemp = Velocity;
@@ -1086,7 +1086,7 @@ namespace StarquakeXNA
                             for (int c = 0; c < keyLockDoors[b].CollisionTiles.Count; c++)
                             {
                                 // Remove the tile from screen and from the key door lock collection
-                                keyLockDoors[b].CollisionTiles[c].ColType = CollisionTileType.NotBlob;
+                                keyLockDoors[b].CollisionTiles[c].CollisionTileType = CollisionTileType.NotBlob;
                             }
                         }
                         else
@@ -1098,7 +1098,7 @@ namespace StarquakeXNA
                             for (int c = 0; c < keyLockDoors[b].CollisionTiles.Count; c++)
                             {
                                 // Remove the tile from screen and from the key door lock collection
-                                keyLockDoors[b].CollisionTiles[c].ColType = CollisionTileType.EveryoneHits;
+                                keyLockDoors[b].CollisionTiles[c].CollisionTileType = CollisionTileType.EveryoneHits;
                             }
                         }
 
