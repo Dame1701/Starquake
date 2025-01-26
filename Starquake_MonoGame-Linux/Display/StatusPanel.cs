@@ -262,7 +262,7 @@ namespace StarquakeXNA
             }
             else if (gameEngine.Player.BlobsState == enBlobState.Dead)
             {
-                blobLives = blobLives - 1;
+                blobLives -= 1;
 
                 if (blobLives < 0)
                 {

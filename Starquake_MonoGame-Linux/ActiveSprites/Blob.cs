@@ -1772,7 +1772,6 @@ namespace StarquakeXNA
                 if (blobAlarmSoundCounter == 1)
                 {
                     gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("BlobOverloadAlarm", 1.0f, false);
-                    
                 }
 
                 if (blobOverloadState < 3 && blobAlarmSoundCounter < 60)
@@ -1781,7 +1780,6 @@ namespace StarquakeXNA
                 }
                 else
                 {
-
                     if (gameEngine.BlobKiller.Triggered == false)
                     {
                         blobHasFired = false;
@@ -1825,8 +1823,6 @@ namespace StarquakeXNA
             {
                 if (gameEngine.BlobKiller.Triggered == false)
                 {
-                   
-
                     blobOverloadState = 0;
                     blobScale = 1.0f;
                     // If Blob is killed by a spiky tile, we reset his position to when he entered
@@ -1849,24 +1845,14 @@ namespace StarquakeXNA
 
                     resetBlobToScreenEntryPoint = false;
                     BlobsState = enBlobState.Dead;
+                    gameEngine.BlobKiller.Reset();
                 }
             }
             
             // Update the teleport beam effect - probably should have a boolean to stop drawing when not needed.....
-            if (blobFireSparks != null)
-            {
-                blobFireSparks.Update(gameTime);
-            }
-            
-            if (blobTeleporterBeam != null)
-            {
-                blobTeleporterBeam.Update(blobXPos + 30, blobYPos + 50, gameTime);
-            }
-
-            if (blobFireTrail != null)
-            {
-                blobFireTrail.Update(blobFireX + 14, blobFireY + 14, gameTime);
-            }
+            blobFireSparks?.Update(gameTime);
+            blobTeleporterBeam?.Update(blobXPos + 30, blobYPos + 50, gameTime);
+            blobFireTrail?.Update(blobFireX + 14, blobFireY + 14, gameTime);
 
             if (changedScreens)
             {

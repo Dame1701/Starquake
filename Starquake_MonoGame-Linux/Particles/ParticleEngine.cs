@@ -36,7 +36,7 @@ namespace StarquakeXNA.Particles
     {
         Triggered,
         Continual,
-        TriggeredMultiLocationTimed,
+        TriggeredMultiLocationTimed
     }
 
     public class ParticleEngine

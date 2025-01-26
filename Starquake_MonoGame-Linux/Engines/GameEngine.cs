@@ -756,8 +756,6 @@ namespace StarquakeXNA
                     }
                 }
 
-
-
                 // Switch between old and new graphics
                 if (ToggleKeys.GetPressedKey() == Keys.F8)
                 {
@@ -943,7 +941,6 @@ namespace StarquakeXNA
                                     ((IRealTimeGameScreen)igs).UpdateOffScreen(gameTime);
                                 }
 
-
                                 if (GameScreens.ScreenNumber == 197)
                                 {
                                     /*
@@ -989,20 +986,8 @@ namespace StarquakeXNA
                 ScreenEffctEngine.SelectRenderViewPort("GameArea"); // GameArea;
                 GraphicsDeviceMgr.GraphicsDevice.Clear(ScreenClearColour);
 
-                IGameScreen screenToDraw = null;
-                Screens.TryGetValue(CurrentGameScreen, out screenToDraw);
-                if (screenToDraw != null)
-                {
-                    screenToDraw.Draw(gameTime);
-                }
-
-                //TextWriter.OutputText(PowerUpType.ToString(), 0, 200, Color.White);
-                //TextWriter.OutputText("BlobX: " + (Player.BlobXPos).ToString(), 0,220, Color.White);
-                //TextWriter.OutputText("BlobY: " + (Player.BlobYPos).ToString(), 0, 240, Color.White);
-                //CheopsPyramid.Begin(BlendState.AlphaBlend, gameTime);
-                //CheopsPyramid.DrawSprite(0, 100, 100);
-                //CheopsPyramid.End();
-                //testElement1.Draw(gameTime);
+                Screens.TryGetValue(CurrentGameScreen, out var screenToDraw);
+                screenToDraw?.Draw(gameTime);
 
                 if (Paused)
                 {

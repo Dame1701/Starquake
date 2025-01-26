@@ -10,6 +10,7 @@ namespace StarquakeXNA.GameComponents
     public class MainGameScreen : GameComponentBase, IGameScreen
     {
         int screenFadeSpeed;
+
         public int ScreenFadeSpeed
         {
             get { return screenFadeSpeed; }
@@ -22,12 +23,14 @@ namespace StarquakeXNA.GameComponents
         }
 
         private DateTime gameStartedTime;
+
         public TimeSpan GetPlayTime()
         {
             return DateTime.Now - gameStartedTime;
         }
 
         int screenFade;
+
         public int ScreenFade
         {
             get { return screenFade; }
@@ -92,7 +95,8 @@ namespace StarquakeXNA.GameComponents
                 {
                     if (RumbleSoundID != Guid.Empty)
                     {
-                        gameEngine.ContentResourceManager.GetSoundFXEngine().StopSound(RumbleSoundID, enSoundFade.Medium);
+                        gameEngine.ContentResourceManager.GetSoundFXEngine()
+                            .StopSound(RumbleSoundID, enSoundFade.Medium);
                     }
                 }
 
@@ -100,14 +104,16 @@ namespace StarquakeXNA.GameComponents
                 if (ToggleKeys.GetPressedKey() == gameEngine.PlayerKeys.Quit)
                 {
                     gameEngine.CurrentGameScreen = enGameScreen.GameOver;
-                    gameEngine.GetGameScreen(enGameScreen.GameOver).PerformPostScreenChangeActions(enGameScreen.MainGame, null);
+                    gameEngine.GetGameScreen(enGameScreen.GameOver)
+                        .PerformPostScreenChangeActions(enGameScreen.MainGame, null);
                 }
 
                 // Test game complete screen
                 if (ToggleKeys.GetPressedKey() == Keys.W)
                 {
                     gameEngine.CurrentGameScreen = enGameScreen.GameComplete;
-                    gameEngine.GetGameScreen(enGameScreen.GameComplete).PerformPostScreenChangeActions(enGameScreen.MainGame, null);
+                    gameEngine.GetGameScreen(enGameScreen.GameComplete)
+                        .PerformPostScreenChangeActions(enGameScreen.MainGame, null);
                 }
 
                 // Test completing core
@@ -133,7 +139,8 @@ namespace StarquakeXNA.GameComponents
             }
 
             // Fade screen back up
-            if (!gameEngine.IntroSequence.SequenceRunning || gameEngine.IntroSequence.SequenceStage == enIntroSequenceStage.EndPause)
+            if (!gameEngine.IntroSequence.SequenceRunning ||
+                gameEngine.IntroSequence.SequenceStage == enIntroSequenceStage.EndPause)
             {
                 if (screenFade < 255)
                 {
@@ -150,7 +157,8 @@ namespace StarquakeXNA.GameComponents
             gameEngine.ScreenEffctEngine.Update();
             gameEngine.GameScreens.Update(gameTime);
 
-            if (!gameEngine.IntroSequence.SequenceRunning || gameEngine.IntroSequence.SequenceStage == enIntroSequenceStage.EndPause)
+            if (!gameEngine.IntroSequence.SequenceRunning ||
+                gameEngine.IntroSequence.SequenceStage == enIntroSequenceStage.EndPause)
             {
                 if (gameEngine.ScreenEffctEngine.HaltBlobAndNasties == false)
                 {
@@ -172,17 +180,20 @@ namespace StarquakeXNA.GameComponents
                 if (gameEngine.GameScreens.BlobsShipSmoke1 != null)
                 {
                     gameEngine.GameScreens.BlobsShipSmoke1.Start();
-                    gameEngine.GameScreens.BlobsShipSmoke1.Update(gameEngine.IntroSequence.BlobSpaceShipXPos, gameEngine.IntroSequence.BlobSpaceShipYPos, gameTime);
+                    gameEngine.GameScreens.BlobsShipSmoke1.Update(gameEngine.IntroSequence.BlobSpaceShipXPos,
+                        gameEngine.IntroSequence.BlobSpaceShipYPos, gameTime);
                 }
 
                 if (gameEngine.GameScreens.BlobsShipSmoke2 != null)
                 {
                     gameEngine.GameScreens.BlobsShipSmoke2.Start();
-                    gameEngine.GameScreens.BlobsShipSmoke2.Update(gameEngine.IntroSequence.BlobSpaceShipXPos, gameEngine.IntroSequence.BlobSpaceShipYPos, gameTime);
+                    gameEngine.GameScreens.BlobsShipSmoke2.Update(gameEngine.IntroSequence.BlobSpaceShipXPos,
+                        gameEngine.IntroSequence.BlobSpaceShipYPos, gameTime);
                 }
             }
 
-            if (!gameEngine.IntroSequence.SequenceRunning || gameEngine.IntroSequence.SequenceStage == enIntroSequenceStage.EndPause)
+            if (!gameEngine.IntroSequence.SequenceRunning ||
+                gameEngine.IntroSequence.SequenceStage == enIntroSequenceStage.EndPause)
             {
                 // Put the delay stuff in here
                 if (!gameEngine.IntroSequence.SequenceRunning)
@@ -196,7 +207,7 @@ namespace StarquakeXNA.GameComponents
                 gameEngine.TunnelAnimations.Update(gameTime);
                 gameEngine.ConveyerNastiesInstance.Update(gameTime);
                 gameEngine.ElectricityNodeGateEngine.Update();
-                
+
                 // Update breakable bridges
                 gameEngine.BreakableBridgesEngine.Update();
 
@@ -207,7 +218,8 @@ namespace StarquakeXNA.GameComponents
                     gameEngine.ContentResourceManager.GetSoundFXEngine().DisablePeriodicBackgroundSounds(true);
 
                     // Change to gameover screen
-                    gameEngine.GetGameScreen(enGameScreen.GameOver).PerformPostScreenChangeActions(enGameScreen.MainGame, null);
+                    gameEngine.GetGameScreen(enGameScreen.GameOver)
+                        .PerformPostScreenChangeActions(enGameScreen.MainGame, null);
                     gameEngine.CurrentGameScreen = enGameScreen.GameOver;
                 }
 
@@ -263,7 +275,8 @@ namespace StarquakeXNA.GameComponents
                             YShakeOffset = YShakeOffset - 1;
                         }
 
-                        gameEngine.ContentResourceManager.GetSoundFXEngine().StopSound(rumbleSoundID, enSoundFade.Medium);
+                        gameEngine.ContentResourceManager.GetSoundFXEngine()
+                            .StopSound(rumbleSoundID, enSoundFade.Medium);
                     }
 
                     if (YShakeOffset > 0 && XShakeOffset > 0)
@@ -271,10 +284,10 @@ namespace StarquakeXNA.GameComponents
                         gameEngine.ScreenEffctEngine.MoveViewPort("GameArea", XShakeOffset, YShakeOffset);
                     }
                 }
-
             }
-            
-            if (gameEngine.IntroSequence.SequenceRunning || gameEngine.IntroSequence.SequenceStage == enIntroSequenceStage.Finished)
+
+            if (gameEngine.IntroSequence.SequenceRunning ||
+                gameEngine.IntroSequence.SequenceStage == enIntroSequenceStage.Finished)
             {
                 gameEngine.IntroSequence.Update(gameTime);
             }
@@ -288,15 +301,18 @@ namespace StarquakeXNA.GameComponents
 
         public override void Draw(GameTime gameTime)
         {
-            if (gameEngine.IntroSequence.SequenceStage != enIntroSequenceStage.CaptionFadeUp && gameEngine.IntroSequence.SequenceStage != enIntroSequenceStage.CaptionFadeDown)
+            if (gameEngine.IntroSequence.SequenceStage != enIntroSequenceStage.CaptionFadeUp &&
+                gameEngine.IntroSequence.SequenceStage != enIntroSequenceStage.CaptionFadeDown)
             {
                 // Draw background
                 if (gameEngine.DrawBackgrounds)
                 {
                     int ScreenXPos = gameEngine.GameScreens.ScreenNumber % 16;
-                    
-                    gameEngine.ContentResourceManager.GetSpriteCollection("Background1").Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                    gameEngine.ContentResourceManager.GetSpriteCollection("Background1").DrawSprite(0, ScreenXPos * 16, 0, new Color((byte)255, (byte)255, (byte)255, (byte)(150 / 255 * screenFade)));
+
+                    gameEngine.ContentResourceManager.GetSpriteCollection("Background1")
+                        .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+                    gameEngine.ContentResourceManager.GetSpriteCollection("Background1").DrawSprite(0, ScreenXPos * 16,
+                        0, new Color((byte)255, (byte)255, (byte)255, (byte)(150 / 255 * screenFade)));
                     gameEngine.ContentResourceManager.GetSpriteCollection("Background1").End();
                 }
 
@@ -305,13 +321,14 @@ namespace StarquakeXNA.GameComponents
 
                 // Draw screen
                 gameEngine.GameScreens.Draw(
-                     ColourHelper.GetXNA4Colour(255, 255, 255, (byte)screenFade),
+                    ColourHelper.GetXNA4Colour(255, 255, 255, (byte)screenFade),
                     gameTime, gameEngine.IntroSequence.SequenceRunning, gameEngine.IntroSequence.SequenceStage);
 
                 // Draw breakable bridges
                 gameEngine.BreakableBridgesEngine.Draw(gameTime);
 
-                if (!gameEngine.IntroSequence.SequenceRunning || gameEngine.IntroSequence.SequenceStage == enIntroSequenceStage.EndPause)
+                if (!gameEngine.IntroSequence.SequenceRunning ||
+                    gameEngine.IntroSequence.SequenceStage == enIntroSequenceStage.EndPause)
                 {
                     // Draw blob
                     gameEngine.Player.Draw(
@@ -322,9 +339,7 @@ namespace StarquakeXNA.GameComponents
                 if (!gameEngine.IntroSequence.SequenceRunning)
                 {
                     // Draw blob's death routine
-                    if (gameEngine.Player.BlobsState == enBlobState.Dead ||
-                            gameEngine.Player.BlobsState == enBlobState.Dying ||
-                            gameEngine.Player.BlobsState == enBlobState.Overloading)
+                    if (gameEngine.Player.BlobsState is enBlobState.Dead or enBlobState.Dying or enBlobState.Overloading)
                     {
                         gameEngine.BlobKiller.Draw(gameTime, screenFade);
                     }
@@ -344,7 +359,7 @@ namespace StarquakeXNA.GameComponents
                     screenFade);
 
                 gameEngine.GameScreens.DrawUpperLayer(
-                     ColourHelper.GetXNA4Colour(255, 255, 255, (byte)screenFade),
+                    ColourHelper.GetXNA4Colour(255, 255, 255, (byte)screenFade),
                     gameTime);
 
                 // Draw tunnel animations
@@ -359,7 +374,8 @@ namespace StarquakeXNA.GameComponents
                     }
                 }
 
-                if (!gameEngine.IntroSequence.SequenceRunning || gameEngine.IntroSequence.SequenceStage == enIntroSequenceStage.EndPause)
+                if (!gameEngine.IntroSequence.SequenceRunning ||
+                    gameEngine.IntroSequence.SequenceStage == enIntroSequenceStage.EndPause)
                 {
                     // Screen Exit shadows
                     gameEngine.GameScreens.DrawShadowing(gameTime);
@@ -375,7 +391,8 @@ namespace StarquakeXNA.GameComponents
             }
 
             // Draw blob's ship smoke
-            if (gameEngine.IntroSequence.SequenceStage != enIntroSequenceStage.CaptionFadeUp && gameEngine.IntroSequence.SequenceStage != enIntroSequenceStage.CaptionFadeDown)
+            if (gameEngine.IntroSequence.SequenceStage != enIntroSequenceStage.CaptionFadeUp &&
+                gameEngine.IntroSequence.SequenceStage != enIntroSequenceStage.CaptionFadeDown)
             {
                 if (gameEngine.GameScreens.ScreenNumber == 8)
                 {
@@ -401,7 +418,7 @@ namespace StarquakeXNA.GameComponents
         public void PerformPostScreenChangeActions(enGameScreen TriggeringScreen, object Param)
         {
             gameEngine.ContentResourceManager.GetSoundFXEngine().DisablePeriodicBackgroundSounds();
-            
+
             if (TriggeringScreen != enGameScreen.AccessBooth && TriggeringScreen != enGameScreen.Cheops)
             {
                 gameEngine.Player.PerformPostChangeScreenActions();
@@ -423,7 +440,7 @@ namespace StarquakeXNA.GameComponents
 
             // Clear the viewport
             if (TriggeringScreen == enGameScreen.MainGame)
-            {               
+            {
                 // Reset viewport back to game area
                 gameEngine.ScreenEffctEngine.SelectRenderViewPort("GameArea");
             }
@@ -467,5 +484,5 @@ namespace StarquakeXNA.GameComponents
                 }
             }
         }
-    }  
+    }
 }

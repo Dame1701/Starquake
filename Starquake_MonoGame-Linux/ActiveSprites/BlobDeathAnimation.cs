@@ -1,379 +1,378 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StarquakeXNA.Particles;
-using StarquakeXNA.Helpers;
 
-namespace StarquakeXNA
+namespace StarquakeXNA;
+
+public class BouncingParticle
 {
-    public class BouncingParticle
+    private readonly BouncingAnimation _particleBounce;
+
+    public IStandardParticleEffect Fireball { get; set; }
+
+    private int _oldXPos;
+    private int _oldYPos;
+
+    public int XPos { get; private set; }
+
+    public int YPos { get; private set; }
+
+    public bool Triggered => _particleBounce.Triggered;
+
+    private readonly GameEngine _gameEngine;
+
+    private IPositionalTriggerParticleEffect _sparkEffect;
+
+    public IPositionalTriggerParticleEffect SparkEffect
     {
-        BouncingAnimation particleBounce;
+        get => _sparkEffect;
+        set => _sparkEffect = value;
+    }
 
-        IStandardParticleEffect fireball;
-        public IStandardParticleEffect Fireball
+    public BouncingParticle(GameEngine GameEngineReference, int SpriteNo)
+    {
+        _gameEngine = GameEngineReference;
+        _particleBounce = new BouncingAnimation(GameEngineReference, SpriteNo);
+    }
+
+    public void XBounce()
+    {
+        _particleBounce.XBounce();
+    }
+
+    public void YBounce()
+    {
+        _particleBounce.YBounce();
+    }
+
+    public void Trigger(int xPos, int yPos, int effectMinDuration = 50, int effectMaxDuration = 100)
+    {
+        XPos = xPos + 16;
+        YPos = yPos + 16;
+
+        _oldYPos = YPos;
+        _oldXPos = XPos;
+
+        var xSpeed = _gameEngine.RandomNumberGenerator.Next(4, 12);
+
+        var xDirection = _gameEngine.RandomNumberGenerator.Next(0, 2);
+        if (xDirection == 0)
         {
-            get { return fireball; }
-            set { fireball = value; }
+            xSpeed = -xSpeed;
         }
 
-        int oldXPos;
-        int oldYPos;
+        Fireball.Start();
 
-        int xPos;
-        public int XPos
+        _particleBounce.Trigger(
+            _gameEngine.RandomNumberGenerator.Next(1, 2),
+            _gameEngine.RandomNumberGenerator.Next(1, 20),
+            xSpeed, effectMinDuration, effectMaxDuration);
+    }
+
+    public void Reset()
+    {
+        _particleBounce.Reset();
+    }
+    
+    public void Update(GameTime gameTime)
+    {
+        if (_particleBounce.Triggered)
         {
-            get { return xPos; }
-        }
+            var p = _particleBounce.Update();
 
-        int yPos;
-        public int YPos
-        {
-            get { return yPos; }
-        }
+            int xSpeed;
+            int ySpeed;
 
-        public bool Triggered
-        {
-            get { return particleBounce.Triggered; }
-        }
-
-        GameEngine gameEngine;
-
-        
-
-        IPositionalTriggerParticleEffect sparkEffect;
-        public IPositionalTriggerParticleEffect SparkEffect
-        {
-            get { return sparkEffect; }
-            set { sparkEffect = value; }
-        }
-
-        public BouncingParticle(GameEngine GameEngineReference, int SpriteNo)
-        {
-            gameEngine = GameEngineReference;
-            particleBounce = new BouncingAnimation(GameEngineReference, SpriteNo);
-        }
-
-        public void XBounce()
-        {
-            particleBounce.XBounce();
-        }
-
-        public void YBounce()
-        {
-            particleBounce.YBounce();
-        }
-
-        public void Trigger(int XPos, int YPos, int EffectMinDuration = 50, int EffectMaxDuration = 100)
-        {
-            xPos = XPos + 16;
-            yPos = YPos + 16;
-
-            oldYPos = yPos;
-            oldXPos = xPos;
-
-            int xDirection = gameEngine.RandomNumberGenerator.Next(0, 2);
-
-            int xSpeed = 0;
-            xSpeed = gameEngine.RandomNumberGenerator.Next(4, 12);
-
-            if (xDirection == 0)
+            if (p.Y > 0)
             {
-                xSpeed = -xSpeed;
-            }
-
-            fireball.Start();
-
-            particleBounce.Trigger(
-                gameEngine.RandomNumberGenerator.Next(1, 2),
-                gameEngine.RandomNumberGenerator.Next(1, 20),
-                xSpeed, EffectMinDuration, EffectMaxDuration);
-        }
-
-        public void Update(GameTime gameTime)
-        {
-            if (particleBounce.Triggered)
-            {
-                Point p = particleBounce.Update();
-
-                int xSpeed = 0;
-                int ySpeed = 0;
-
-
-                if (p.Y > 0)
+                // Ensure we don't move more than the size of the collision tilemap
+                if (p.Y > 32)
                 {
-                    // Ensure we don't move more than the size of the collision tilemap
-                    if (p.Y > 32)
-                    {
-                        p.Y = 32;
-                    }
-
-                    ySpeed = gameEngine.GameScreens.CheckCollision(enDirection.Down, xPos, yPos, 32, 32, p.Y, true);
-
-                    if (ySpeed == 0)
-                    {
-                        yPos = oldYPos;
-                        particleBounce.YBounce();
-                        sparkEffect.Start(xPos, yPos);
-                    }
-
-                    // Keep the parts within the screen bounds, makes for a better effect
-                    if (yPos > gameEngine.GameScreens.ScreenHeight - 32)
-                    {
-                        yPos = gameEngine.GameScreens.ScreenHeight - 32;
-                        particleBounce.YBounce();
-                        sparkEffect.Start(xPos, yPos);
-                    }
-                }
-                else
-                {
-                    // Ensure we don't move more than the size of the collision tilemap
-                    if (p.Y < -32)
-                    {
-                        p.Y = -32;
-                    }
-
-                    // Absolute value used here to convert the negative to positive for col routine
-                    ySpeed = gameEngine.GameScreens.CheckCollision(enDirection.Up, xPos, yPos, 32, 32, Math.Abs(p.Y), true);
-
-                    if (ySpeed == 0)
-                    {
-                        yPos = oldYPos;
-                        particleBounce.YBounce();
-                        sparkEffect.Start(xPos, yPos);
-                    }
-
-                    // Convert back to negative number
-                    ySpeed = -ySpeed;
-
-                    // Keep the parts within the screen bounds, makes for a better effect
-                    if (yPos < 32)
-                    {
-                        yPos = 32;
-                        particleBounce.YBounce();
-                        sparkEffect.Start(xPos, yPos);
-                    }
+                    p.Y = 32;
                 }
 
-                yPos = yPos + ySpeed;
-                oldYPos = yPos;
+                ySpeed = _gameEngine.GameScreens.CheckCollision(enDirection.Down, XPos, YPos, 32, 32, p.Y, true);
 
-                if (p.X > 0)
+                if (ySpeed == 0)
                 {
-                    // Ensure we don't move more than the size of the collision tilemap
-                    if (p.X > 32)
-                    {
-                        p.X = 32;
-                    }
-
-                    xSpeed = gameEngine.GameScreens.CheckCollision(enDirection.Right, xPos, yPos, 32, 32, p.X, true);
-                    if (xSpeed == 0)
-                    {
-                        xPos = oldXPos;
-                        particleBounce.XBounce();
-                        sparkEffect.Start(xPos, yPos);
-                    }
-
-                    // Keep the parts within the screen bounds, makes for a better effect
-                    if (xPos > gameEngine.GameScreens.ScreenWidth - 32)
-                    {
-                        xPos = gameEngine.GameScreens.ScreenWidth - 32;
-                        particleBounce.XBounce();
-                        sparkEffect.Start(xPos, yPos);
-                    }
-                }
-                else
-                {
-                    // Ensure we don't move more than the size of the collision tilemap
-                    if (p.X < -32)
-                    {
-                        p.X = 32;
-                    }
-
-                    // Absolute value used here to convert the negative to positive for col routine
-                    xSpeed = gameEngine.GameScreens.CheckCollision(enDirection.Left, xPos, yPos, 32, 32, Math.Abs(p.X), true);
-                    if (xSpeed == 0)
-                    {
-                        xPos = oldXPos;
-                        particleBounce.XBounce();
-                        sparkEffect.Start(xPos, yPos);
-                    }
-
-                    // Convert back to negative number
-                    xSpeed = -xSpeed;
-
-                    // Keep the parts within the screen bounds, makes for a better effect
-                    if (xPos < 32)
-                    {
-                        xPos = 32;
-                        particleBounce.XBounce();
-                        sparkEffect.Start(xPos, yPos);
-                    }
+                    YPos = _oldYPos;
+                    _particleBounce.YBounce();
+                    _sparkEffect.Start(XPos, YPos);
                 }
 
-                xPos = xPos + xSpeed;
-                oldXPos = xPos;
-
-                fireball.Update(XPos + 20, YPos + 5, gameTime);
+                // Keep the parts within the screen bounds, makes for a better effect
+                if (YPos > _gameEngine.GameScreens.ScreenHeight - 32)
+                {
+                    YPos = _gameEngine.GameScreens.ScreenHeight - 32;
+                    _particleBounce.YBounce();
+                    _sparkEffect.Start(XPos, YPos);
+                }
             }
             else
             {
-                fireball.Reset();
-            }
-        }
-
-        public void Draw(SpriteCollection SpriteToDraw, int SpriteNumber = -1)
-        {
-            if (Triggered)
-            {
-                if (SpriteNumber >= 0 && SpriteToDraw !=null)
+                // Ensure we don't move more than the size of the collision tilemap
+                if (p.Y < -32)
                 {
-                    particleBounce.Draw(SpriteToDraw, xPos + 4, yPos + 4, SpriteNumber);
+                    p.Y = -32;
                 }
 
-                // In addictive mode so draw a few to improve brightness
-                fireball.Draw(particleBounce.Fade);
+                // Absolute value used here to convert the negative to positive for col routine
+                ySpeed = _gameEngine.GameScreens.CheckCollision(enDirection.Up, XPos, YPos, 32, 32, Math.Abs(p.Y),
+                    true);
+
+                if (ySpeed == 0)
+                {
+                    YPos = _oldYPos;
+                    _particleBounce.YBounce();
+                    _sparkEffect.Start(XPos, YPos);
+                }
+
+                // Convert back to negative number
+                ySpeed = -ySpeed;
+
+                // Keep the parts within the screen bounds, makes for a better effect
+                if (YPos < 32)
+                {
+                    YPos = 32;
+                    _particleBounce.YBounce();
+                    _sparkEffect.Start(XPos, YPos);
+                }
             }
+
+            YPos = YPos + ySpeed;
+            _oldYPos = YPos;
+
+            if (p.X > 0)
+            {
+                // Ensure we don't move more than the size of the collision tilemap
+                if (p.X > 32)
+                {
+                    p.X = 32;
+                }
+
+                xSpeed = _gameEngine.GameScreens.CheckCollision(enDirection.Right, XPos, YPos, 32, 32, p.X, true);
+                if (xSpeed == 0)
+                {
+                    XPos = _oldXPos;
+                    _particleBounce.XBounce();
+                    _sparkEffect.Start(XPos, YPos);
+                }
+
+                // Keep the parts within the screen bounds, makes for a better effect
+                if (XPos > _gameEngine.GameScreens.ScreenWidth - 32)
+                {
+                    XPos = _gameEngine.GameScreens.ScreenWidth - 32;
+                    _particleBounce.XBounce();
+                    _sparkEffect.Start(XPos, YPos);
+                }
+            }
+            else
+            {
+                // Ensure we don't move more than the size of the collision tilemap
+                if (p.X < -32)
+                {
+                    p.X = 32;
+                }
+
+                // Absolute value used here to convert the negative to positive for col routine
+                xSpeed = _gameEngine.GameScreens.CheckCollision(enDirection.Left, XPos, YPos, 32, 32, Math.Abs(p.X),
+                    true);
+                if (xSpeed == 0)
+                {
+                    XPos = _oldXPos;
+                    _particleBounce.XBounce();
+                    _sparkEffect.Start(XPos, YPos);
+                }
+
+                // Convert back to negative number
+                xSpeed = -xSpeed;
+
+                // Keep the parts within the screen bounds, makes for a better effect
+                if (XPos < 32)
+                {
+                    XPos = 32;
+                    _particleBounce.XBounce();
+                    _sparkEffect.Start(XPos, YPos);
+                }
+            }
+
+            XPos += xSpeed;
+            _oldXPos = XPos;
+
+            Fireball.Update(XPos + 20, YPos + 5, gameTime);
+        }
+        else
+        {
+            Fireball.Reset();
         }
     }
 
-    public class BlobDeathAnimation : GameComponentBase
+    public void Draw(SpriteCollection SpriteToDraw, int SpriteNumber = -1)
     {
-        List<BouncingParticle> bps;
-        Animation blobDeathParticlesOriginal;
-        bool drawBlobParts;
-
-        //private IStandardParticleEffect blobFragmentFireball;
-        private IPositionalTriggerParticleEffect blobFragmentBounceSparks;
-
-        public List<BouncingParticle> BouncingParticles
+        if (Triggered)
         {
-            get { return bps; }
-        }
-
-        public bool Triggered
-        {
-            get
+            if (SpriteNumber >= 0 && SpriteToDraw != null)
             {
-                for (int a = 0; a < bps.Count; a++)
+                _particleBounce.Draw(SpriteToDraw, XPos + 4, YPos + 4, SpriteNumber);
+            }
+
+            // In addictive mode so draw a few to improve brightness
+            Fireball.Draw(_particleBounce.Fade);
+        }
+    }
+}
+
+public class BlobDeathAnimation : GameComponentBase
+{
+    private readonly List<BouncingParticle> _bouncingParticleSprites;
+    private readonly Animation _blobDeathParticlesOriginal;
+    private bool _drawBlobParts;
+
+    private IPositionalTriggerParticleEffect _blobFragmentBounceSparks;
+
+    public List<BouncingParticle> BouncingParticles => _bouncingParticleSprites;
+
+    public bool Triggered
+    {
+        get
+        {
+            foreach (var bouncingParticle in _bouncingParticleSprites)
+            {
+                if (bouncingParticle.Triggered)
                 {
-                    if (bps[a].Triggered)
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        }
-
-        public BlobDeathAnimation(GameEngine GameEngineReference)
-            : base(GameEngineReference)
-        {
-            bps = new List<BouncingParticle>();
-
-            bps.Add(new BouncingParticle(GameEngineReference, 0));
-            bps.Add(new BouncingParticle(GameEngineReference, 1));
-            bps.Add(new BouncingParticle(GameEngineReference, 1));
-            bps.Add(new BouncingParticle(GameEngineReference, 2));
-            bps.Add(new BouncingParticle(GameEngineReference, 3));
-            bps.Add(new BouncingParticle(GameEngineReference, 5));
-
-            blobDeathParticlesOriginal = new Animation();
-            blobDeathParticlesOriginal = new Animation();
-            blobDeathParticlesOriginal.FirstFrame = 0;
-            blobDeathParticlesOriginal.CurrentFrame = 0;
-            blobDeathParticlesOriginal.LastFrame = 3;
-            blobDeathParticlesOriginal.Yoyo = false;
-            blobDeathParticlesOriginal.Delay = 2;
-            blobDeathParticlesOriginal.Repeat = true;
-            blobDeathParticlesOriginal.AnimateForwards = true;
-        }
-
-        public override void LoadContent()
-        {
-            blobFragmentBounceSparks = gameEngine.ContentResourceManager.GetParticleEffectInstance("FireSparks", enParticleEffectType.TriggeredMultiLocationTimed, null) as IPositionalTriggerParticleEffect;
-
-            for (int a = 0; a < bps.Count; a++)
-            {
-                bps[a].Fireball = gameEngine.ContentResourceManager.GetParticleEffectInstance("BlobFragmentExplosion", enParticleEffectType.Continual, null) as IStandardParticleEffect;
-                bps[a].SparkEffect = blobFragmentBounceSparks;
-            }
-        }
-
-        public void Trigger(int EffectXPosition, int EffectYPosition, bool DrawBlobParts, int EffectMinDuration = 50, int EffectMaxDuration = 100)
-        {
-            drawBlobParts = DrawBlobParts;
-
-            for (int a = 0; a < bps.Count; a++)
-            {
-                bps[a].Trigger(EffectXPosition, EffectYPosition, EffectMinDuration, EffectMaxDuration);
-            }
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-            for (int a = 0; a < bps.Count; a++)
-            {
-                if (bps[a].Triggered)
-                {
-                    bps[a].Update(gameTime);
+                    return true;
                 }
             }
 
-            if (gameEngine.UsingOldGraphics)
-            {
-                blobDeathParticlesOriginal.GetNextFrame();
-            }
+            return false;
+        }
+    }
 
-            if (blobFragmentBounceSparks != null && blobFragmentBounceSparks.EffectActive)
+    public BlobDeathAnimation(GameEngine GameEngineReference)
+        : base(GameEngineReference)
+    {
+        _bouncingParticleSprites =
+        [
+            new BouncingParticle(GameEngineReference, 0),
+            new BouncingParticle(GameEngineReference, 1),
+            new BouncingParticle(GameEngineReference, 1),
+            new BouncingParticle(GameEngineReference, 2),
+            new BouncingParticle(GameEngineReference, 3),
+            new BouncingParticle(GameEngineReference, 5)
+        ];
+
+        _blobDeathParticlesOriginal = new Animation
+        {
+            FirstFrame = 0,
+            CurrentFrame = 0,
+            LastFrame = 3,
+            Yoyo = false,
+            Delay = 2,
+            Repeat = true,
+            AnimateForwards = true
+        };
+    }
+
+    public override void LoadContent()
+    {
+        _blobFragmentBounceSparks =
+            gameEngine.ContentResourceManager.GetParticleEffectInstance("FireSparks",
+                enParticleEffectType.TriggeredMultiLocationTimed, null) as IPositionalTriggerParticleEffect;
+
+        foreach (var t in _bouncingParticleSprites)
+        {
+            t.Fireball =
+                gameEngine.ContentResourceManager.GetParticleEffectInstance("BlobFragmentExplosion",
+                    enParticleEffectType.Continual, null) as IStandardParticleEffect;
+            t.SparkEffect = _blobFragmentBounceSparks;
+        }
+    }
+
+    public void Trigger(int EffectXPosition, int EffectYPosition, bool DrawBlobParts, int EffectMinDuration = 50,
+        int EffectMaxDuration = 100)
+    {
+        _drawBlobParts = DrawBlobParts;
+
+        foreach (var bouncingParticle in _bouncingParticleSprites)
+        {
+            bouncingParticle.Trigger(EffectXPosition, EffectYPosition, EffectMinDuration, EffectMaxDuration);
+        }
+    }
+
+    public void Reset()
+    {
+        foreach (var bouncingParticle in _bouncingParticleSprites)
+        {
+            bouncingParticle.Reset();
+        }
+    }
+    
+    public override void Update(GameTime gameTime)
+    {
+        foreach (var bouncingParticle in _bouncingParticleSprites)
+        {
+            if (bouncingParticle.Triggered)
             {
-                blobFragmentBounceSparks.Update(gameTime);
+                bouncingParticle.Update(gameTime);
             }
         }
 
-        public override void Draw(GameTime gameTime, int screenFade)
+        if (gameEngine.UsingOldGraphics)
         {
-            if (gameEngine.UsingOldGraphics)
+            _blobDeathParticlesOriginal.GetNextFrame();
+        }
+
+        if (_blobFragmentBounceSparks is { EffectActive: true })
+        {
+            _blobFragmentBounceSparks.Update(gameTime);
+        }
+    }
+
+    public override void Draw(GameTime gameTime, int screenFade)
+    {
+        if (gameEngine.UsingOldGraphics)
+        {
+            gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original")
+                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+
+            foreach (var bouncingParticle in _bouncingParticleSprites)
             {
-                gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-
-                for (int a = 0; a < bps.Count; a++)
+                if (bouncingParticle.Triggered)
                 {
-                    if (bps[a].Triggered)
-                    {
-                        bps[a].Draw(gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original"), blobDeathParticlesOriginal.CurrentFrame);
-                    }
+                    bouncingParticle.Draw(gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original"),
+                        _blobDeathParticlesOriginal.CurrentFrame);
                 }
-
-                gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").End();
             }
-            else
+
+            gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").End();
+        }
+        else
+        {
+            foreach (var bouncingParticle in _bouncingParticleSprites)
             {
-                for (int a = 0; a < bps.Count; a++)
+                if (!bouncingParticle.Triggered)
                 {
-                    if (bps[a].Triggered)
-                    {
-                        if (drawBlobParts)
-                        {
-                            gameEngine.ContentResourceManager.GetSpriteCollection("BlobParts").Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                            bps[a].Draw(gameEngine.ContentResourceManager.GetSpriteCollection("BlobParts"));
-                            gameEngine.ContentResourceManager.GetSpriteCollection("BlobParts").End();
-                        }
-                        else
-                        {
-                            bps[a].Draw(null);
-                        }
-                    } 
+                    continue;
                 }
 
-                if (blobFragmentBounceSparks != null && blobFragmentBounceSparks.EffectActive)
+                if (_drawBlobParts)
                 {
-                    blobFragmentBounceSparks.Draw(screenFade);
+                    gameEngine.ContentResourceManager.GetSpriteCollection("BlobParts")
+                        .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+                    bouncingParticle.Draw(gameEngine.ContentResourceManager.GetSpriteCollection("BlobParts"));
+                    gameEngine.ContentResourceManager.GetSpriteCollection("BlobParts").End();
                 }
+                else
+                {
+                    bouncingParticle.Draw(null);
+                }
+            }
+
+            if (_blobFragmentBounceSparks is { EffectActive: true })
+            {
+                _blobFragmentBounceSparks.Draw(screenFade);
             }
         }
     }
