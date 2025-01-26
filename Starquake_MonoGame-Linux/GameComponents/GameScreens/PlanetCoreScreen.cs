@@ -9,6 +9,7 @@ using StarquakeXNA.ContentManagement;
 using SharedLibs;
 using StarquakeXNA.Particles;
 using StarquakeXNA.Helpers;
+using StarquakeXNA.Structure;
 
 namespace StarquakeXNA.GameComponents
 {

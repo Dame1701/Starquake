@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SharedLibs;
 using Starquake_MonoGame.Structure;
+using StarquakeXNA.Structure;
 
 namespace StarquakeXNA
 {

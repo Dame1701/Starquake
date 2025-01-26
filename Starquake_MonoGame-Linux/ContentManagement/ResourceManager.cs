@@ -6,6 +6,8 @@ using System.Threading;
 using MessagePack;
 using SharedLibs;
 using StarquakeXNA.Particles;
+using StarquakeXNA.Sounds;
+using StarquakeXNA.Structure;
 
 namespace StarquakeXNA
 {
@@ -120,7 +122,7 @@ namespace StarquakeXNA
             UpdateStatus(
                "Loading content....",
                0,
-               enGameComponentStatus.Starting);
+               GameEngineStatus.Starting);
 
             backgroundWorker.RunWorkerAsync();
         }
@@ -141,7 +143,7 @@ namespace StarquakeXNA
             UpdateStatus(
                 "Launching Game.....",
                 100,
-                enGameComponentStatus.ContentLoaded);
+                GameEngineStatus.ContentLoaded);
         }
 
         void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
@@ -149,7 +151,7 @@ namespace StarquakeXNA
             UpdateStatus(
                 "Loading content....",
                 0,
-                enGameComponentStatus.Starting);
+                GameEngineStatus.Starting);
 
             var totalComponentsToLoad =
                 spriteDescriptions.Count +
@@ -165,7 +167,7 @@ namespace StarquakeXNA
                 UpdateStatus(
                     "Loading content, sprite set: '" + t.ResourceName + "'",
                     (int)(double)(((double)componentsLoaded / (double)totalComponentsToLoad) * 100),
-                    enGameComponentStatus.Starting);
+                    GameEngineStatus.Starting);
 
                 SpriteCollection sc =
                     new SpriteCollection(
@@ -185,7 +187,7 @@ namespace StarquakeXNA
                 UpdateStatus(
                     "Loading content, anim sprite set: '" + t.ResourceName + "'",
                     (int)(double)(((double)componentsLoaded / (double)totalComponentsToLoad) * 100),
-                    enGameComponentStatus.Starting);
+                    GameEngineStatus.Starting);
 
                 SpriteCollection sc =
                     new SpriteCollection(
@@ -232,7 +234,7 @@ namespace StarquakeXNA
                 UpdateStatus(
                     "Loading content, sound effect: '" + t.ResourceName + "'",
                     (int)(double)(((double)componentsLoaded / (double)totalComponentsToLoad) * 100),
-                    enGameComponentStatus.Starting);
+                    GameEngineStatus.Starting);
 
                 soundEngine.LoadSoundEffect(t);
 
@@ -242,7 +244,7 @@ namespace StarquakeXNA
             UpdateStatus(
                 "Launching Game.....",
                 100,
-                enGameComponentStatus.Starting);
+                GameEngineStatus.Starting);
 
             Thread.Sleep(500);
         }

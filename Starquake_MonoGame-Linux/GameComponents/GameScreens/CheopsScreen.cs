@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using SharedLibs;
+using StarquakeXNA.Structure;
 
 namespace StarquakeXNA.GameComponents
 {
@@ -21,7 +22,7 @@ namespace StarquakeXNA.GameComponents
         bool elementSelectionMode;
         bool soundPlayed = false;
 
-        Item[] itemsToSelect;
+        InteractiveItem[] itemsToSelect;
         int itemToSwap;
 
         public int ScreenFade
@@ -153,14 +154,14 @@ namespace StarquakeXNA.GameComponents
             // Assign 5 elements to choose from, one being a required element, the other beingthe item to swap
             if (codeSucceeded)
             {
-                itemsToSelect = new Item[5];
+                itemsToSelect = new InteractiveItem[5];
                 
                 // Get an element from the core if there is one, if there isn't we've completed the game and this should never happen....
                 List<CoreElement> activeElements = gameEngine.Elements.GetActiveElements();
                 if (activeElements.Count > 0)
                 {
                     itemsToSelect[gameEngine.RandomNumberGenerator.Next(0, 5)] =
-                        new Item(
+                        new InteractiveItem(
                             0,
                             0,
                             activeElements[gameEngine.RandomNumberGenerator.Next(0, activeElements.Count)].CurrentElement);
@@ -176,11 +177,11 @@ namespace StarquakeXNA.GameComponents
                         if (!populatedSwapItem)
                         {
                             populatedSwapItem = true;
-                            itemsToSelect[a] = new Item(0, 0, (int)gameEngine.Player.BlobInventory[itemToSwap]);
+                            itemsToSelect[a] = new InteractiveItem(0, 0, (int)gameEngine.Player.BlobInventory[itemToSwap]);
                         }
                         else
                         {
-                            itemsToSelect[a] = new Item(0, 0, gameEngine.RandomNumberGenerator.Next(0, 28));
+                            itemsToSelect[a] = new InteractiveItem(0, 0, gameEngine.RandomNumberGenerator.Next(0, 28));
                         }
                     }
                 }

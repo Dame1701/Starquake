@@ -1,6 +1,6 @@
 namespace SharedLibs;
 
-public sealed record Item(int XLocation, int YLocation, int Type)
+public sealed record InteractiveItem(int XLocation, int YLocation, int Type)
 {
     public int XLocation { get; } = XLocation;
 

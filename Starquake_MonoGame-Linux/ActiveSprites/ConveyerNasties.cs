@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using StarquakeXNA.Particles;
 using StarquakeXNA.Helpers;
+using StarquakeXNA.Structure;
 
 namespace StarquakeXNA
 {

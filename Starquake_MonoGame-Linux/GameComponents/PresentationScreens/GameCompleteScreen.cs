@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 using StarquakeXNA.Helpers;
 using StarquakeXNA.Fonts;
 using StarquakeXNA.Scoring;
+using StarquakeXNA.Structure;
 
 namespace StarquakeXNA.GameComponents
 {

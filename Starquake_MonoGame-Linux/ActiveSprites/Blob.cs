@@ -10,6 +10,7 @@ using StarquakeXNA.ContentManagement;
 using SharedLibs;
 using StarquakeXNA.Particles;
 using StarquakeXNA.Helpers;
+using StarquakeXNA.Structure;
 
 namespace StarquakeXNA
 {
@@ -581,7 +582,7 @@ namespace StarquakeXNA
                                 inventoryAccessed = true;
 
                                 // Collect powerups
-                                Item itemDropped = null;
+                                InteractiveItem interactiveItemDropped = null;
 
                                 // Pull out the last item and put it on the screen
                                 if (blobInventory[blobInventory.Length - 1] != enCollectables.None)
@@ -590,9 +591,9 @@ namespace StarquakeXNA
                                     int itemXPos = (blobXPos / gameEngine.GameScreens.CollAreaWidth) * gameEngine.GameScreens.CollAreaWidth;
                                     int itemYPos = (blobYPos / gameEngine.GameScreens.CollAreaHeight) * gameEngine.GameScreens.CollAreaHeight;
                                     
-                                    itemDropped = new Item(itemXPos, itemYPos, (int)blobInventory[blobInventory.Length - 1]);
+                                    interactiveItemDropped = new InteractiveItem(itemXPos, itemYPos, (int)blobInventory[blobInventory.Length - 1]);
 
-                                    gameEngine.GameScreens.CurrentGameScreenData.PickUps.Add(itemDropped);
+                                    gameEngine.GameScreens.CurrentGameScreenData.PickUps.Add(interactiveItemDropped);
 
                                     // Nothing held here now
                                     blobInventory[blobInventory.Length - 1] = enCollectables.None;
@@ -623,8 +624,8 @@ namespace StarquakeXNA
                                             // Make sure it's not what we just dropped....
                                             bool pickupItem = true;
 
-                                            if (itemDropped != null &&
-                                                itemDropped == gameEngine.GameScreens.CurrentGameScreenData.PickUps[a])
+                                            if (interactiveItemDropped != null &&
+                                                interactiveItemDropped == gameEngine.GameScreens.CurrentGameScreenData.PickUps[a])
                                             {
                                                 pickupItem = false;
                                             }
@@ -700,7 +701,7 @@ namespace StarquakeXNA
                         
                         if (falling == 0)
                         {
-                            gameEngine.ContentResourceManager.GetSoundFXEngine().StopSound(blobFallsSoundID, enSoundFade.Fast);
+                            gameEngine.ContentResourceManager.GetSoundFXEngine().StopSound(blobFallsSoundID, SoundFade.Fast);
                         }
 
                         // Check to see if Blob can potentially enter a teleport booth, tunnel etc.
@@ -1699,7 +1700,7 @@ namespace StarquakeXNA
                     }
                     else
                     {
-                        gameEngine.ContentResourceManager.GetSoundFXEngine().StopSound(blobTunnelLiftSoundID, enSoundFade.None);
+                        gameEngine.ContentResourceManager.GetSoundFXEngine().StopSound(blobTunnelLiftSoundID, SoundFade.None);
                     }
                 }
 
@@ -2179,9 +2180,9 @@ namespace StarquakeXNA
         /// <summary>
         /// Gets collision objects on the current screen which aren't tiles i.e Cheops Pyramids, CoreElements 
         /// </summary>
-        public List<Item> GetCollisionObjects()
+        public List<InteractiveItem> GetCollisionObjects()
         {
-            List<Item> temp = new List<Item>();
+            List<InteractiveItem> temp = new List<InteractiveItem>();
 
             if (gameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid != null)
             {
@@ -2214,7 +2215,7 @@ namespace StarquakeXNA
         {
             Offset = 0;
 
-            List<Item> screenItems = GetCollisionObjects();
+            List<InteractiveItem> screenItems = GetCollisionObjects();
 
             if (screenItems != null)
             {

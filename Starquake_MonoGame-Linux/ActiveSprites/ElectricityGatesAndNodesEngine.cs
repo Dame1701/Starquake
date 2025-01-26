@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using StarquakeXNA.GameComponents;
 using Microsoft.Xna.Framework;
+using StarquakeXNA.Structure;
 
 namespace StarquakeXNA
 {
@@ -432,7 +433,7 @@ namespace StarquakeXNA
                 // Stop sound
                 if (soundID != Guid.Empty)
                 {
-                    gameEngine.ContentResourceManager.GetSoundFXEngine().StopSound(soundID, enSoundFade.None);
+                    gameEngine.ContentResourceManager.GetSoundFXEngine().StopSound(soundID, SoundFade.None);
                 }
 
                 electricitySoundPlayed = false;

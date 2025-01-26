@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Input;
 using StarquakeXNA.Fonts;
 using StarquakeXNA.Helpers;
 using StarquakeXNA.Scoring;
+using StarquakeXNA.Structure;
 
 namespace StarquakeXNA.GameComponents
 {

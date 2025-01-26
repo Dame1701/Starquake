@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using StarquakeXNA.GameComponents;
+using StarquakeXNA.Structure;
 
 namespace StarquakeXNA
 {

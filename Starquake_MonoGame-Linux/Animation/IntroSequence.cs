@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using StarquakeXNA.Structure;
 
 namespace Starquake_XNA.Animation
 {
@@ -106,7 +107,7 @@ namespace Starquake_XNA.Animation
 
             sequenceCounter = 0;
 
-            gameEngine.ContentResourceManager.GetSoundFXEngine().StopSound(ShipExplosionSound, enSoundFade.None);
+            gameEngine.ContentResourceManager.GetSoundFXEngine().StopSound(ShipExplosionSound, SoundFade.None);
 
             gameEngine.GameScreens.BlobsShipSmoke1.Reset();
             gameEngine.GameScreens.BlobsShipSmoke2.Reset();
@@ -261,7 +262,7 @@ namespace Starquake_XNA.Animation
                     }
                     else
                     {
-                        gameEngine.ContentResourceManager.GetSoundFXEngine().StopSound(RumbleSound, enSoundFade.Fast);
+                        gameEngine.ContentResourceManager.GetSoundFXEngine().StopSound(RumbleSound, SoundFade.Fast);
                         sequenceStage = enIntroSequenceStage.Finished;
                         SequenceRunning = false;
                     }

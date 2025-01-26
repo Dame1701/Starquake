@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StarquakeXNA.Particles;
+using StarquakeXNA.Structure;
 
 namespace StarquakeXNA;
 

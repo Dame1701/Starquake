@@ -12,6 +12,7 @@ using StarquakeXNA.Display;
 using Starquake_XNA;
 using Starquake_XNA.Animation;
 using Starquake_MonoGame.ActiveSprites;
+using StarquakeXNA.Structure;
 
 namespace StarquakeXNA
 {
@@ -319,7 +320,7 @@ namespace StarquakeXNA
             bootProgress = new SpriteCollection(this, this.ContentMgr, @"Graphics\\BootProgress", 1, 24);
             Scanlines = new SpriteCollection(this, this.ContentMgr, @"Graphics\\Scanlines2", 1280, 800);
 
-            status = enGameComponentStatus.StartingGraphicsLoaded;
+            status = GameEngineStatus.StartingGraphicsLoaded;
 
             // Font 1
             Font1 = new BitmapFont(ContentMgr.Load<SpriteFont>("Fonts\\elektoraSmall"), new SpriteBatch(GraphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXNA4Colour(130, 130, 255), 12);
@@ -530,9 +531,9 @@ namespace StarquakeXNA
         }
 
         // Captures all status changes from game components
-        void ContentResourceManager_OnGameComponentStatusChanged(string Message, int PercentComplete, enGameComponentStatus Status)
+        void ContentResourceManager_OnGameComponentStatusChanged(string Message, int PercentComplete, GameEngineStatus Status)
         {
-            if (Status == enGameComponentStatus.Started)
+            if (Status == GameEngineStatus.Started)
             {
                 SQText = new ImageFont(this, ContentMgr);
 
@@ -632,7 +633,7 @@ namespace StarquakeXNA
 
                 ContentResourceManager.Initialise();
 
-                UpdateStatus("Content loaded", 100, enGameComponentStatus.StartGame);
+                UpdateStatus("Content loaded", 100, GameEngineStatus.StartGame);
             }
             else
             {
@@ -666,7 +667,7 @@ namespace StarquakeXNA
                 ScanlinesEnabled = !ScanlinesEnabled;
             }
 
-            if (status == enGameComponentStatus.StartingGraphicsLoaded)
+            if (status == GameEngineStatus.StartingGraphicsLoaded)
             {
                 loadingScreenFade += 4;
 
@@ -677,11 +678,11 @@ namespace StarquakeXNA
 
                 if (loadingScreenFade == 255)
                 {
-                    status = enGameComponentStatus.Starting;
+                    status = GameEngineStatus.Starting;
                     LoadContent();
                 }
             }
-            else if (status == enGameComponentStatus.ContentLoaded)
+            else if (status == GameEngineStatus.ContentLoaded)
             {
                 // Fade out the progress bar background
                 if (bootProgressBackgroundFade > 0)
@@ -697,10 +698,10 @@ namespace StarquakeXNA
                 // Wait for a keypress before leaving the loading screen
                 if (ToggleKeys.GetPressedKey() != Keys.None)
                 {
-                    ContentResourceManager_OnGameComponentStatusChanged("Content loaded", 100, enGameComponentStatus.Started);
+                    ContentResourceManager_OnGameComponentStatusChanged("Content loaded", 100, GameEngineStatus.Started);
                 }
             }
-            else if (status == enGameComponentStatus.StartGame)
+            else if (status == GameEngineStatus.StartGame)
             {
                 if (CurrentGameScreen == enGameScreen.Cheops ||
                     CurrentGameScreen == enGameScreen.MainGame ||
@@ -970,7 +971,7 @@ namespace StarquakeXNA
 
         public void Draw(GameTime gameTime)
         {
-            if (status == enGameComponentStatus.StartGame)
+            if (status == GameEngineStatus.StartGame)
             {
                 // Status panel
                 if (CurrentGameScreen == enGameScreen.Cheops ||
@@ -1007,9 +1008,9 @@ namespace StarquakeXNA
                 GraphicsDeviceMgr.GraphicsDevice.Clear(ScreenClearColour);
 
 
-                if (status == enGameComponentStatus.Starting ||
-                    status == enGameComponentStatus.StartingGraphicsLoaded ||
-                    status == enGameComponentStatus.ContentLoaded)
+                if (status == GameEngineStatus.Starting ||
+                    status == GameEngineStatus.StartingGraphicsLoaded ||
+                    status == GameEngineStatus.ContentLoaded)
                 {
                     bootScreen.Begin(BlendState.Opaque, gameTime);
                     bootScreen.DrawSpriteUnscaled(0, 0, 0, loadingScreenFade);

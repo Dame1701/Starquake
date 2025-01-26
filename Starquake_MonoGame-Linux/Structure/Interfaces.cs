@@ -6,42 +6,35 @@ using StarquakeXNA.GameComponents;
 using Microsoft.Xna.Framework;
 using StarquakeXNA.ContentManagement;
 
-namespace StarquakeXNA
+namespace StarquakeXNA.Structure;
+
+public delegate void RaiseScreenChanged(enGameScreen TriggerScreen);
+
+public interface IGameComponent
 {
-    public delegate void RaiseScreenChanged(enGameScreen TriggerScreen);
-    public interface IGameComponent
-    {
-        event RaiseScreenChanged OnScreenChanged;
-        void LoadContent(ContentList Content);
-        void Initialise();
-        void PerformPostChangeScreenActions();
-        void Draw(GameTime gameTime, int ScreenShakeXOffset, int ScreenShakeYOffset, int ScreenFade);
-    }
+    event RaiseScreenChanged OnScreenChanged;
+    void LoadContent(ContentList Content);
+    void Initialise();
+    void PerformPostChangeScreenActions();
+    void Draw(GameTime gameTime, int ScreenShakeXOffset, int ScreenShakeYOffset, int ScreenFade);
+}
 
-    public interface IGameScreen
-    {
-        int ScreenFade
-        {
-            get;
-            set;
-        }
+public interface IGameScreen
+{
+    int ScreenFade { get; set; }
 
-        bool Success
-        {
-            get;
-        }
+    bool Success { get; }
 
-        void Update(GameTime gameTime);
-        void Reset(object Data);
-        void Draw(GameTime gameTime);
-        void PerformPostScreenChangeActions(enGameScreen TriggeringScreen, object Param);
-    }
+    void Update(GameTime gameTime);
+    void Reset(object Data);
+    void Draw(GameTime gameTime);
+    void PerformPostScreenChangeActions(enGameScreen TriggeringScreen, object Param);
+}
 
-    /// <summary>
-    /// Game screens that need to carry on updating even when they're not active
-    /// </summary>
-    public interface IRealTimeGameScreen : IGameScreen
-    {
-        void UpdateOffScreen(GameTime gameTime);
-    }
+/// <summary>
+/// Game screens that need to carry on updating even when they're not active
+/// </summary>
+public interface IRealTimeGameScreen : IGameScreen
+{
+    void UpdateOffScreen(GameTime gameTime);
 }

@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Content;
 using StarquakeXNA.Helpers;
 using Starquake_MonoGame.Structure;
 
-namespace StarquakeXNA;
+namespace StarquakeXNA.Structure;
 
 [Serializable]
 public class SpriteCollection

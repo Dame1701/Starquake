@@ -15,6 +15,7 @@ namespace StarquakeXNA
     public class GameScreenCollection : GameComponentBase
     {
         private int tilesAcross;
+
         public int TilesAcross
         {
             get { return tilesAcross; }
@@ -22,18 +23,20 @@ namespace StarquakeXNA
         }
 
         private int tilesDown;
+
         public int TilesDown
         {
             get { return tilesDown; }
             set { tilesDown = value; }
         }
 
-        private int[, ,] screenCollisionDataArray;
+        private int[,,] screenCollisionDataArray;
 
         private const int c_maxCheops = 40;
         private const int c_maxCoreElements = 18;
 
         private GameScreenData[] gameScreens;
+
         public GameScreenData CurrentGameScreenData
         {
             get { return gameScreens[ScreenNumber]; }
@@ -46,12 +49,14 @@ namespace StarquakeXNA
 
         private List<CollisionTile> detectedCollisionMap;
         private IStandardParticleEffect blobsShipSmoke1;
+
         public IStandardParticleEffect BlobsShipSmoke1
         {
             get { return blobsShipSmoke1; }
         }
 
         private IStandardParticleEffect blobsShipSmoke2;
+
         public IStandardParticleEffect BlobsShipSmoke2
         {
             get { return blobsShipSmoke2; }
@@ -61,12 +66,20 @@ namespace StarquakeXNA
 
         public int ScreenWidth
         {
-            get { return gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth * tilesAcross; }
+            get
+            {
+                return gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                    .SpriteWidth * tilesAcross;
+            }
         }
 
         public int ScreenHeight
         {
-            get { return gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight * tilesDown; }
+            get
+            {
+                return gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                    .SpriteHeight * tilesDown;
+            }
         }
 
         private int previousScreenNumber = 0;
@@ -77,10 +90,11 @@ namespace StarquakeXNA
         }
 
         private int screenNumber = 0;
+
         public int ScreenNumber
         {
             get { return screenNumber; }
-            set 
+            set
             {
                 previousScreenNumber = screenNumber;
                 screenNumber = value;
@@ -93,12 +107,14 @@ namespace StarquakeXNA
         private int tileHeight;
 
         private int collAreaWidth;
+
         public int CollAreaWidth
         {
             get { return collAreaWidth; }
         }
 
         private int collAreaHeight;
+
         public int CollAreaHeight
         {
             get { return collAreaHeight; }
@@ -108,13 +124,13 @@ namespace StarquakeXNA
         private int oldYoffset;
         private int pickUpCount = 100;
 
-       
 
         // olly
         int ollyEyesX;
         int ollyEyesY;
 
-        public GameScreenCollection(GameEngine GameEngineRef, int TilesAcross, int TilesDown, int XOffset, int YOffset, int CollAreaWidth, int CollAreaHeight) : base(GameEngineRef)
+        public GameScreenCollection(GameEngine GameEngineRef, int TilesAcross, int TilesDown, int XOffset, int YOffset,
+            int CollAreaWidth, int CollAreaHeight) : base(GameEngineRef)
         {
             oldXoffset = XOffset;
             oldYoffset = YOffset;
@@ -132,17 +148,24 @@ namespace StarquakeXNA
         {
             // Load screen data
             gameScreens = (GameScreenData[])gameEngine.ContentResourceManager.GetDataResource("GameScreens");
-            screenCollisionDataArray = (int[, ,])gameEngine.ContentResourceManager.GetDataResource("ScreenCollisionData");
+            screenCollisionDataArray =
+                (int[,,])gameEngine.ContentResourceManager.GetDataResource("ScreenCollisionData");
 
-            blobsShipSmoke1 = gameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume", enParticleEffectType.Continual, null) as IStandardParticleEffect;
-            blobsShipSmoke2 = gameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume2", enParticleEffectType.Continual, null) as IStandardParticleEffect;
+            blobsShipSmoke1 =
+                gameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume",
+                    enParticleEffectType.Continual, null) as IStandardParticleEffect;
+            blobsShipSmoke2 =
+                gameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume2",
+                    enParticleEffectType.Continual, null) as IStandardParticleEffect;
 
-            keyDoorForceFieldNoAccess = gameEngine.ContentResourceManager.GetParticleEffectInstance("ForceField", enParticleEffectType.Continual, null) as IStandardParticleEffect;
+            keyDoorForceFieldNoAccess =
+                gameEngine.ContentResourceManager.GetParticleEffectInstance("ForceField",
+                    enParticleEffectType.Continual, null) as IStandardParticleEffect;
 
             // Make this better in the future...?
             tileWidth = 128;
             tileHeight = 96;
-            
+
             // Save out the data to MessagePack
             //SaveData();
         }
@@ -164,7 +187,7 @@ namespace StarquakeXNA
                     screensVisited++;
                 }
             }
-           
+
             return (int)Math.Ceiling((double)((double)screensVisited / (double)gameScreens.Length) * 100);
         }
 
@@ -183,11 +206,13 @@ namespace StarquakeXNA
                         break;
                     }
                 }
+
                 if (!unique)
                 {
                     break;
                 }
             }
+
             return unique;
         }
 
@@ -203,7 +228,7 @@ namespace StarquakeXNA
                     if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == -1)
                     {
                         bool addLocation = true;
-                        
+
                         // Now check the collision map for this tile
                         for (int y1 = 0; y1 < 3; y1++)
                         {
@@ -211,10 +236,13 @@ namespace StarquakeXNA
                             {
                                 for (int a = 0; a < gameScreens[ScreenNumber].CollisionMap.Count; a++)
                                 {
-                                    if (gameScreens[ScreenNumber].CollisionMap[a].XPos == (x * tileWidth) + (x1 * collAreaWidth) &&
-                                        gameScreens[ScreenNumber].CollisionMap[a].YPos == (y * tileHeight) + (y1 * collAreaHeight))
+                                    if (gameScreens[ScreenNumber].CollisionMap[a].XPos ==
+                                        (x * tileWidth) + (x1 * collAreaWidth) &&
+                                        gameScreens[ScreenNumber].CollisionMap[a].YPos ==
+                                        (y * tileHeight) + (y1 * collAreaHeight))
                                     {
-                                        if (gameScreens[ScreenNumber].CollisionMap[a].CollisionTileType == CollisionTileType.NotBlob)
+                                        if (gameScreens[ScreenNumber].CollisionMap[a].CollisionTileType ==
+                                            CollisionTileType.NotBlob)
                                         {
                                             addLocation = false;
                                             break;
@@ -228,14 +256,14 @@ namespace StarquakeXNA
                         {
                             potentialLocations.Add(ConvertToScreenCoords(x, y));
                         }
-
                     }
                 }
             }
+
             return potentialLocations;
         }
 
-        private Item GetPreferredLocation(int ScreenNumber)
+        private InteractiveItem GetPreferredLocation(int ScreenNumber)
         {
             for (int y = 1; y < gameScreens[ScreenNumber].ScreenTiles.GetLength(1); y++)
             {
@@ -243,8 +271,11 @@ namespace StarquakeXNA
                 {
                     if (gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 392)
                     {
-                        return new Item(((x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth) + 32),
-                                                          ((y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight) + 32), 0);
+                        return new InteractiveItem(
+                            ((x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                                .SpriteWidth) + 32),
+                            ((y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                                .SpriteHeight) + 32), 0);
                     }
                 }
             }
@@ -252,9 +283,9 @@ namespace StarquakeXNA
             return null;
         }
 
-        private List<Item> GetPotentialLocations(int ScreenNumber)
+        private List<InteractiveItem> GetPotentialLocations(int ScreenNumber)
         {
-            List<Item> toReturn = new List<Item>();
+            List<InteractiveItem> toReturn = new List<InteractiveItem>();
 
             for (int y = 1; y < gameScreens[ScreenNumber].ScreenTiles.GetLength(1); y++)
             {
@@ -264,22 +295,28 @@ namespace StarquakeXNA
                     {
                         // Valid tile to place above...?
                         if (
-                            gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.ShuttlePlatform &&
-                            gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.RemovedShuttlePlatform &&
-                            gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.ElectricityNode &&
+                            gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage !=
+                            (int)enActionTiles.ShuttlePlatform &&
+                            gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage !=
+                            (int)enActionTiles.RemovedShuttlePlatform &&
+                            gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage !=
+                            (int)enActionTiles.ElectricityNode &&
                             gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.ShuttleTag1 &&
                             gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.ShuttleTag2 &&
                             gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.ShuttleTag3 &&
                             gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.Spike1 &&
                             gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.Spike2 &&
                             gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.Spike3 &&
-                            gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.ElectricityGate &&
+                            gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage !=
+                            (int)enActionTiles.ElectricityGate &&
                             gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.BlankFiller &&
                             gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.ConveyerNasty &&
-                            gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.BreakableBridges &&
+                            gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage !=
+                            (int)enActionTiles.BreakableBridges &&
                             gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != 120 &&
                             gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != 121 &&
-                            gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.PreferredCoreLocation)
+                            gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage !=
+                            (int)enActionTiles.PreferredCoreLocation)
                         {
                             // Check for powerups in the way - useful for pickup sweep
                             bool powerUpInWay = false;
@@ -302,8 +339,10 @@ namespace StarquakeXNA
 
                                     if (gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage >= 0)
                                     {
-                                        if (screenCollisionDataArray[gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage, 1, 0] == 1 &&
-                                            screenCollisionDataArray[gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage, 2, 0] == 1)
+                                        if (screenCollisionDataArray[
+                                                gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage, 1, 0] == 1 &&
+                                            screenCollisionDataArray[
+                                                gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage, 2, 0] == 1)
                                         {
                                             locationFound = true;
                                         }
@@ -315,8 +354,13 @@ namespace StarquakeXNA
 
                                     if (locationFound)
                                     {
-                                        toReturn.Add(new Item(((x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth) + 32),
-                                                              ((y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight) - 64), 0));
+                                        toReturn.Add(new InteractiveItem(
+                                            ((x * gameEngine.ContentResourceManager
+                                                 .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth) +
+                                             32),
+                                            ((y * gameEngine.ContentResourceManager
+                                                 .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight) -
+                                             64), 0));
                                     }
                                 }
                             }
@@ -324,6 +368,7 @@ namespace StarquakeXNA
                     }
                 }
             }
+
             return toReturn;
         }
 
@@ -331,7 +376,7 @@ namespace StarquakeXNA
         {
             var gameScreensData = MessagePackSerializer.Serialize(gameScreens);
             var collisionData = MessagePackSerializer.Serialize(screenCollisionDataArray);
-            
+
             using (var fs = new FileStream("SQScreenData2.dat", FileMode.Create, FileAccess.Write))
             {
                 // Write the length of the first array
@@ -396,15 +441,19 @@ namespace StarquakeXNA
                         {
                             for (int x1 = 0; x1 < 4; x1++)
                             {
-                                if (screenCollisionDataArray[gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage, x1, y1] == 1)
+                                if (screenCollisionDataArray[gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage, x1,
+                                        y1] == 1)
                                 {
                                     gameScreens[ScreenNumber].CollisionMap.Add(
                                         new CollisionTile(
-                                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage,
-                                        ((x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth) + (x1 * collAreaWidth)),
-                                        ((y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight) + (y1 * collAreaHeight)),
-                                        CollisionTileType.EveryoneHits));
-
+                                            gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage,
+                                            ((x * gameEngine.ContentResourceManager
+                                                 .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth) +
+                                             (x1 * collAreaWidth)),
+                                            ((y * gameEngine.ContentResourceManager
+                                                 .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight) +
+                                             (y1 * collAreaHeight)),
+                                            CollisionTileType.EveryoneHits));
                                 }
                             }
                         }
@@ -432,11 +481,11 @@ namespace StarquakeXNA
                                 for (int b = 0; b < 4; b++)
                                 {
                                     gameScreens[ScreenNumber].CollisionMap.Add(
-                                                    new CollisionTile(
-                                                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                                        (b * 32) + tileX,
-                                                        (a * 32) + tileY,
-                                                        CollisionTileType.NotBlob));
+                                        new CollisionTile(
+                                            (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                                            (b * 32) + tileX,
+                                            (a * 32) + tileY,
+                                            CollisionTileType.NotBlob));
                                 }
                             }
                         }
@@ -450,64 +499,64 @@ namespace StarquakeXNA
                             gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 416)
                         {
                             gameScreens[ScreenNumber].CollisionMap.Add(
-                                                    new CollisionTile(
-                                                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                                        32 + tileX,
-                                                        32 + tileY,
-                                                        CollisionTileType.NotBlob));
+                                new CollisionTile(
+                                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                                    32 + tileX,
+                                    32 + tileY,
+                                    CollisionTileType.NotBlob));
 
                             gameScreens[ScreenNumber].CollisionMap.Add(
-                                                    new CollisionTile(
-                                                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                                        32 + tileX,
-                                                        64 + tileY,
-                                                        CollisionTileType.NotBlob));
+                                new CollisionTile(
+                                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                                    32 + tileX,
+                                    64 + tileY,
+                                    CollisionTileType.NotBlob));
 
                             gameScreens[ScreenNumber].CollisionMap.Add(
-                                                    new CollisionTile(
-                                                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                                        64 + tileX,
-                                                        32 + tileY,
-                                                        CollisionTileType.NotBlob));
+                                new CollisionTile(
+                                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                                    64 + tileX,
+                                    32 + tileY,
+                                    CollisionTileType.NotBlob));
 
                             gameScreens[ScreenNumber].CollisionMap.Add(
-                                                    new CollisionTile(
-                                                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                                        64 + tileX,
-                                                        64 + tileY,
-                                                        CollisionTileType.NotBlob));
+                                new CollisionTile(
+                                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                                    64 + tileX,
+                                    64 + tileY,
+                                    CollisionTileType.NotBlob));
                         }
 
                         // Right side mounted spikey tiles
                         if (gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 404)
                         {
                             gameScreens[ScreenNumber].CollisionMap.Add(
-                                                    new CollisionTile(
-                                                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                                        64 + tileX,
-                                                        tileY,
-                                                        CollisionTileType.NotBlob));
+                                new CollisionTile(
+                                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                                    64 + tileX,
+                                    tileY,
+                                    CollisionTileType.NotBlob));
 
                             gameScreens[ScreenNumber].CollisionMap.Add(
-                                                    new CollisionTile(
-                                                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                                        96 + tileX,
-                                                        tileY,
-                                                        CollisionTileType.NotBlob));
+                                new CollisionTile(
+                                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                                    96 + tileX,
+                                    tileY,
+                                    CollisionTileType.NotBlob));
 
                             gameScreens[ScreenNumber].CollisionMap.Add(
-                                                    new CollisionTile(
-                                                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                                        64 + tileX,
-                                                        32 + tileY,
-                                                        CollisionTileType.NotBlob));
+                                new CollisionTile(
+                                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                                    64 + tileX,
+                                    32 + tileY,
+                                    CollisionTileType.NotBlob));
 
                             gameScreens[ScreenNumber].CollisionMap.Add(
-                                                    new CollisionTile(
-                                                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                                        96 + tileX,
-                                                        32 + tileY,
-                                                        CollisionTileType.NotBlob));
+                                new CollisionTile(
+                                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                                    96 + tileX,
+                                    32 + tileY,
+                                    CollisionTileType.NotBlob));
                         }
 
                         // Add collision map for the secret passages
@@ -525,11 +574,11 @@ namespace StarquakeXNA
                                     for (int b = 0; b < 3; b++)
                                     {
                                         gameScreens[ScreenNumber].CollisionMap.Add(
-                                                        new CollisionTile(
-                                                            (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                                            tileX,
-                                                            (b * 32) + tileY,
-                                                            CollisionTileType.NotBlob));
+                                            new CollisionTile(
+                                                (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                                                tileX,
+                                                (b * 32) + tileY,
+                                                CollisionTileType.NotBlob));
                                     }
                                 }
                             }
@@ -541,11 +590,11 @@ namespace StarquakeXNA
                                     for (int b = 0; b < 3; b++)
                                     {
                                         gameScreens[ScreenNumber].CollisionMap.Add(
-                                                        new CollisionTile(
-                                                            (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                                            tileX + 96,
-                                                            (b * 32) + tileY,
-                                                            CollisionTileType.NotBlob));
+                                            new CollisionTile(
+                                                (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                                                tileX + 96,
+                                                (b * 32) + tileY,
+                                                CollisionTileType.NotBlob));
                                     }
                                 }
                             }
@@ -554,7 +603,6 @@ namespace StarquakeXNA
                 }
             }
 
-           
 
             // Add secondary maps for Cheops pyramids etc.
             if (gameScreens[ScreenNumber].PowerUp != null)
@@ -643,7 +691,7 @@ namespace StarquakeXNA
                     }
                 }
             }
-            
+
             // Check to see if we need to append any special cases
             if (collisionsToAppend != null)
             {
@@ -690,11 +738,11 @@ namespace StarquakeXNA
         }
 
         public int CheckRectangles(
-           int PlayerXPos,
-           int PlayerYPos,
-           int PlayerWidth,
-           int PlayerHeight,
-           bool IsBlob)
+            int PlayerXPos,
+            int PlayerYPos,
+            int PlayerWidth,
+            int PlayerHeight,
+            bool IsBlob)
         {
             bool Collide = false;
 
@@ -702,13 +750,15 @@ namespace StarquakeXNA
             for (int a = 0; a < gameScreens[screenNumber].CollisionMap.Count; a++)
             {
                 Collide =
-                           CollisionDetection.Check(
-                           new Rectangle(PlayerXPos, PlayerYPos, PlayerWidth, PlayerHeight),
-                           new Rectangle(gameScreens[screenNumber].CollisionMap[a].XPos, gameScreens[screenNumber].CollisionMap[a].YPos, collAreaWidth, collAreaHeight));
+                    CollisionDetection.Check(
+                        new Rectangle(PlayerXPos, PlayerYPos, PlayerWidth, PlayerHeight),
+                        new Rectangle(gameScreens[screenNumber].CollisionMap[a].XPos,
+                            gameScreens[screenNumber].CollisionMap[a].YPos, collAreaWidth, collAreaHeight));
 
                 if (Collide)
                 {
-                    if (IsBlob && gameScreens[screenNumber].CollisionMap[a].CollisionTileType == CollisionTileType.NotBlob)
+                    if (IsBlob && gameScreens[screenNumber].CollisionMap[a].CollisionTileType ==
+                        CollisionTileType.NotBlob)
                     {
                         Collide = false;
                     }
@@ -717,46 +767,47 @@ namespace StarquakeXNA
                         return gameScreens[screenNumber].CollisionMap[a].TileImage;
                     }
                 }
-            }  
+            }
+
             return -1;
         }
 
         public int CheckCollision(
-           enDirection PlayerDirection,
-           int PlayerXPos,
-           int PlayerYPos,
-           int PlayerWidth,
-           int PlayerHeight,
-           int Velocity,
-           bool IsBlob)
+            enDirection PlayerDirection,
+            int PlayerXPos,
+            int PlayerYPos,
+            int PlayerWidth,
+            int PlayerHeight,
+            int Velocity,
+            bool IsBlob)
         {
             int CheckMovementAmount = Velocity;
             //int CheckMovementAmount = Velocity;
-            detectedCollisionMap.Clear(); 
+            detectedCollisionMap.Clear();
 
             // Cycle through the collision map
             for (int a = 0; a < gameScreens[screenNumber].CollisionMap.Count; a++)
             {
                 CollisionTile colTile = gameScreens[screenNumber].CollisionMap[a];
                 detectedCollisionMap.Add(colTile);
-            
+
                 int CheckMovementAmountTemp =
-                                       CollisionDetection.CheckDirection(
-                                       PlayerDirection,
-                                       Velocity,
-                                       PlayerXPos,
-                                       PlayerYPos,
-                                       PlayerWidth,
-                                       PlayerHeight,
-                                       colTile.XPos,
-                                       colTile.YPos,
-                                       collAreaWidth,
-                                       collAreaHeight
-                                       );
-               
+                    CollisionDetection.CheckDirection(
+                        PlayerDirection,
+                        Velocity,
+                        PlayerXPos,
+                        PlayerYPos,
+                        PlayerWidth,
+                        PlayerHeight,
+                        colTile.XPos,
+                        colTile.YPos,
+                        collAreaWidth,
+                        collAreaHeight
+                    );
+
 
                 if (colTile.CollisionTileType == CollisionTileType.NotBlob &&
-                        IsBlob)
+                    IsBlob)
                 {
                     CheckMovementAmountTemp = Velocity;
                 }
@@ -764,8 +815,8 @@ namespace StarquakeXNA
                 if (colTile.TileImage > 999 && !IsBlob)
                 {
                     if (CollisionDetection.Check(
-                        new Rectangle(PlayerXPos, PlayerYPos, PlayerWidth, PlayerHeight),
-                        new Rectangle(colTile.XPos, colTile.YPos, 32, 32)))
+                            new Rectangle(PlayerXPos, PlayerYPos, PlayerWidth, PlayerHeight),
+                            new Rectangle(colTile.XPos, colTile.YPos, 32, 32)))
                     {
                         if ((CollisionObjectType)colTile.TileImage == CollisionObjectType.JumpPlatform ||
                             (CollisionObjectType)colTile.TileImage == CollisionObjectType.CoreElement ||
@@ -777,7 +828,7 @@ namespace StarquakeXNA
                         }
                     }
                 }
-                 
+
                 if (CheckMovementAmountTemp <= CheckMovementAmount)
                 {
                     CheckMovementAmount = CheckMovementAmountTemp;
@@ -830,14 +881,17 @@ namespace StarquakeXNA
 
         public Point ConvertToScreenCoords(int tileMapXPos, int tileMapYPos)
         {
-            return new Point((tileMapXPos * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
-                             (tileMapYPos * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight));
+            return new Point(
+                (tileMapXPos * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                    .SpriteWidth),
+                (tileMapYPos * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                    .SpriteHeight));
         }
 
         public List<Point> GetCoordsOfTiles(int TileType)
         {
-            List<Point> ReturnedTiles = null;  
-            
+            List<Point> ReturnedTiles = null;
+
             for (int y = 0; y < tilesDown; y++)
             {
                 for (int x = 0; x < tilesAcross; x++)
@@ -849,7 +903,11 @@ namespace StarquakeXNA
                             ReturnedTiles = new List<Point>();
                         }
 
-                        ReturnedTiles.Add(new Point((x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth), (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight)));
+                        ReturnedTiles.Add(new Point(
+                            (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                                .SpriteWidth),
+                            (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                                .SpriteHeight)));
                     }
                 }
             }
@@ -872,12 +930,16 @@ namespace StarquakeXNA
                             ReturnedTiles = new List<Point>();
                         }
 
-                        ReturnedTiles.Add(new Point((x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth), (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight)));
+                        ReturnedTiles.Add(new Point(
+                            (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                                .SpriteWidth),
+                            (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                                .SpriteHeight)));
                     }
                 }
             }
 
-            if (ReturnedTiles !=null && ReturnedTiles.Count > 0)
+            if (ReturnedTiles != null && ReturnedTiles.Count > 0)
             {
                 return ReturnedTiles.OrderByDescending(rt => rt.Y).ToArray();
             }
@@ -900,7 +962,14 @@ namespace StarquakeXNA
                             ReturnedTiles = new List<KeyLockDoor>();
                         }
 
-                        ReturnedTiles.Add(new KeyLockDoor() { Location = new Point((x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth), (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight)) });
+                        ReturnedTiles.Add(new KeyLockDoor()
+                        {
+                            Location = new Point(
+                                (x * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
+                                (y * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight))
+                        });
                     }
                 }
             }
@@ -923,7 +992,11 @@ namespace StarquakeXNA
                             ReturnedTiles = new List<Point>();
                         }
 
-                        ReturnedTiles.Add(new Point((x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth), (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight)));
+                        ReturnedTiles.Add(new Point(
+                            (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                                .SpriteWidth),
+                            (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                                .SpriteHeight)));
                     }
                 }
             }
@@ -945,7 +1018,15 @@ namespace StarquakeXNA
                 {
                     if (gameScreens[screenNumber].ScreenTiles[x, y].TileImage > -1)
                     {
-                        Rectangle tileRect = new Rectangle((x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth), (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth, gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight);
+                        Rectangle tileRect = new Rectangle(
+                            (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                                .SpriteWidth),
+                            (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                                .SpriteHeight),
+                            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                                .SpriteWidth,
+                            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                                .SpriteHeight);
 
                         int Xpos = 0;
                         int Ypos = 0;
@@ -953,64 +1034,78 @@ namespace StarquakeXNA
                         if (DirectionToCheck == enDirection.Up)
                         {
                             if (CollisionDetection.Check(
-                                new Rectangle(PlayerXPos, PlayerYPos - Velocity, PlayerWidth, PlayerHeight),
-                                tileRect))
+                                    new Rectangle(PlayerXPos, PlayerYPos - Velocity, PlayerWidth, PlayerHeight),
+                                    tileRect))
                             {
-                                Xpos = PlayerXPos - (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth);
-                                Ypos = (PlayerYPos + PlayerHeight) - (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight);
+                                Xpos = PlayerXPos - (x * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth);
+                                Ypos = (PlayerYPos + PlayerHeight) - (y * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight);
 
-                                return new TileDetected(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, Xpos, Ypos, x, y);
+                                return new TileDetected(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, Xpos,
+                                    Ypos, x, y);
                             }
                         }
                         else if (DirectionToCheck == enDirection.Down)
                         {
                             if (CollisionDetection.Check(
-                                new Rectangle(PlayerXPos, PlayerYPos + PlayerHeight, PlayerWidth, Velocity),
-                                tileRect))
+                                    new Rectangle(PlayerXPos, PlayerYPos + PlayerHeight, PlayerWidth, Velocity),
+                                    tileRect))
                             {
-                                Xpos = PlayerXPos - (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth);
-                                Ypos = (PlayerYPos + PlayerHeight) - (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight);
+                                Xpos = PlayerXPos - (x * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth);
+                                Ypos = (PlayerYPos + PlayerHeight) - (y * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight);
 
-                                return new TileDetected(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, Xpos, Ypos, x, y);
+                                return new TileDetected(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, Xpos,
+                                    Ypos, x, y);
                             }
                         }
                         else if (DirectionToCheck == enDirection.Left)
                         {
                             if (CollisionDetection.Check(
-                                new Rectangle(PlayerXPos - Velocity, PlayerYPos, PlayerWidth, PlayerHeight),
-                                tileRect))
+                                    new Rectangle(PlayerXPos - Velocity, PlayerYPos, PlayerWidth, PlayerHeight),
+                                    tileRect))
                             {
-                                Xpos = (PlayerXPos) - (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth);
-                                Ypos = PlayerYPos - (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight);
+                                Xpos = (PlayerXPos) - (x * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth);
+                                Ypos = PlayerYPos - (y * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight);
 
-                                return new TileDetected(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, Xpos, Ypos, x, y);
+                                return new TileDetected(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, Xpos,
+                                    Ypos, x, y);
                             }
                         }
                         else if (DirectionToCheck == enDirection.Right)
                         {
                             if (CollisionDetection.Check(
-                                new Rectangle(PlayerXPos, PlayerYPos, PlayerWidth + Velocity, PlayerHeight),
-                                tileRect))
+                                    new Rectangle(PlayerXPos, PlayerYPos, PlayerWidth + Velocity, PlayerHeight),
+                                    tileRect))
                             {
-                                Xpos = (PlayerXPos) - (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth);
-                                Ypos = PlayerYPos - (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight);
+                                Xpos = (PlayerXPos) - (x * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth);
+                                Ypos = PlayerYPos - (y * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight);
 
-                                return new TileDetected(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, Xpos, Ypos, x, y);
+                                return new TileDetected(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, Xpos,
+                                    Ypos, x, y);
                             }
                         }
                         else if (DirectionToCheck == enDirection.None)
                         {
                             if (CollisionDetection.Check(
-                                new Rectangle(PlayerXPos, PlayerYPos, PlayerWidth, PlayerHeight),
-                                tileRect))
+                                    new Rectangle(PlayerXPos, PlayerYPos, PlayerWidth, PlayerHeight),
+                                    tileRect))
                             {
-                                Xpos = (PlayerXPos) - (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth);
-                                Ypos = PlayerYPos - (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight);
+                                Xpos = (PlayerXPos) - (x * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth);
+                                Ypos = PlayerYPos - (y * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight);
 
-                                return new TileDetected(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, Xpos, Ypos, x, y);
+                                return new TileDetected(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, Xpos,
+                                    Ypos, x, y);
                             }
                         }
-
                     }
                 }
             }
@@ -1026,7 +1121,7 @@ namespace StarquakeXNA
             {
                 keyLockDoors = GetKeyLockDoors();
             }
-            
+
             if (keyLockDoors != null)
             {
                 if (keyDoorForceFieldNoAccess != null)
@@ -1044,10 +1139,10 @@ namespace StarquakeXNA
                             {
                                 keyLockCollisionTile =
                                     new CollisionTile(
-                                    (int)CollisionObjectType.KeyAccessDoor, // Random image that's meaningless
-                                    keyLockDoors[b].Location.X + 48,
-                                    keyLockDoors[b].Location.Y + (c * 32),
-                                    CollisionTileType.None);
+                                        (int)CollisionObjectType.KeyAccessDoor, // Random image that's meaningless
+                                        keyLockDoors[b].Location.X + 48,
+                                        keyLockDoors[b].Location.Y + (c * 32),
+                                        CollisionTileType.None);
 
                                 // Add the tile to the keylock door so we can remove it later
                                 keyLockDoors[b].CollisionTiles.Add(keyLockCollisionTile);
@@ -1055,32 +1150,37 @@ namespace StarquakeXNA
                                 // Add the tile to the collision map
                                 gameScreens[ScreenNumber].CollisionMap.Add(keyLockCollisionTile);
                             }
-
                         }
 
-                        keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseColour = new Color(100,100, 100).ToVector3();
+                        keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseColour =
+                            new Color(100, 100, 100).ToVector3();
                         keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseQuantity = 100;
                         keyDoorForceFieldNoAccess.Effect["Emitter01"].BlendMode = EmitterBlendMode.Alpha;
 
-                        keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseColour = new Color(100,100,100).ToVector3();
+                        keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseColour =
+                            new Color(100, 100, 100).ToVector3();
                         keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseQuantity = 100;
                         keyDoorForceFieldNoAccess.Effect["Emitter05"].BlendMode = EmitterBlendMode.Alpha;
 
                         for (int c = 0; c < 4; c++)
                         {
-                            keyDoorForceFieldNoAccess.Update(keyLockDoors[b].Location.X + 52 + c, keyLockDoors[b].Location.Y + 48, gameTime);
+                            keyDoorForceFieldNoAccess.Update(keyLockDoors[b].Location.X + 52 + c,
+                                keyLockDoors[b].Location.Y + 48, gameTime);
                         }
 
                         for (int c = 0; c < 4; c++)
                         {
-                            keyDoorForceFieldNoAccess.Update(keyLockDoors[b].Location.X + 76 + c, keyLockDoors[b].Location.Y + 48, gameTime);
+                            keyDoorForceFieldNoAccess.Update(keyLockDoors[b].Location.X + 76 + c,
+                                keyLockDoors[b].Location.Y + 48, gameTime);
                         }
 
                         // Change colour of the gate depending on whether blob has the access key or not
                         if (gameEngine.Player.BlobInventory.Contains(enCollectables.Key))
                         {
-                            keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseColour = new Color(0, 255, 0).ToVector3();
-                            keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseColour = new Color(0, 255, 0).ToVector3();
+                            keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseColour =
+                                new Color(0, 255, 0).ToVector3();
+                            keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseColour =
+                                new Color(0, 255, 0).ToVector3();
 
                             // Change collision tiles to anyone but Blob
                             for (int c = 0; c < keyLockDoors[b].CollisionTiles.Count; c++)
@@ -1091,8 +1191,10 @@ namespace StarquakeXNA
                         }
                         else
                         {
-                            keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseColour = new Color(255, 0, 0).ToVector3();
-                            keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseColour = new Color(255, 0, 0).ToVector3();
+                            keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseColour =
+                                new Color(255, 0, 0).ToVector3();
+                            keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseColour =
+                                new Color(255, 0, 0).ToVector3();
 
                             // Change collision tiles to everyone
                             for (int c = 0; c < keyLockDoors[b].CollisionTiles.Count; c++)
@@ -1109,7 +1211,8 @@ namespace StarquakeXNA
 
                         for (int c = 0; c < 12; c++)
                         {
-                            keyDoorForceFieldNoAccess.Update(keyLockDoors[b].Location.X + 60 + c, keyLockDoors[b].Location.Y + 48, gameTime);
+                            keyDoorForceFieldNoAccess.Update(keyLockDoors[b].Location.X + 60 + c,
+                                keyLockDoors[b].Location.Y + 48, gameTime);
                         }
                     }
                 }
@@ -1119,7 +1222,7 @@ namespace StarquakeXNA
             {
                 ollyEyesX = 486;
                 ollyEyesY = 206;
-                
+
                 ollyEyesX = ollyEyesX + ((gameEngine.Player.BlobXPos - 350) / 44);
                 ollyEyesY = ollyEyesY + (gameEngine.Player.BlobYPos / 20);
             }
@@ -1132,80 +1235,109 @@ namespace StarquakeXNA
         {
             int objNo = 0;
 
-            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName)
+                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
             for (int y = 0; y < 3; y++)
             {
                 for (int x = 0; x < 3; x++)
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).DrawSprite(objNo, (x * 64) + XPos, (y * 64) + YPos, Color.White);
+                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName)
+                        .DrawSprite(objNo, (x * 64) + XPos, (y * 64) + YPos, Color.White);
                     objNo++;
                 }
             }
+
             gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).End();
         }
 
-        public void Draw(Color Colour, GameTime gameTime, bool IntroSequenceRunning = false, enIntroSequenceStage IntroSequenceStage = enIntroSequenceStage.None)
+        public void Draw(Color Colour, GameTime gameTime, bool IntroSequenceRunning = false,
+            enIntroSequenceStage IntroSequenceStage = enIntroSequenceStage.None)
         {
             for (int y = 0; y < tilesDown; y++)
             {
                 for (int x = 0; x < tilesAcross; x++)
                 {
                     if (gameScreens[screenNumber].ScreenTiles[x, y].TileImage > -1 &&
-                        gameScreens[screenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.BlankFiller && // The blank spacer tile
-                        gameScreens[screenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.ConveyerNasty && // Tile representing conveyer nasties
+                        gameScreens[screenNumber].ScreenTiles[x, y].TileImage !=
+                        (int)enActionTiles.BlankFiller && // The blank spacer tile
+                        gameScreens[screenNumber].ScreenTiles[x, y].TileImage !=
+                        (int)enActionTiles.ConveyerNasty && // Tile representing conveyer nasties
                         gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.TunnelLiftTile &&
-                        gameScreens[screenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.PreferredCoreLocation) // Tile representing preferred pickup location
+                        gameScreens[screenNumber].ScreenTiles[x, y].TileImage !=
+                        (int)enActionTiles.PreferredCoreLocation) // Tile representing preferred pickup location
 
                     {
                         // Avoid the tunnel tiles
                         if (gameScreens[screenNumber].ScreenTiles[x, y].TileImage < 419)
                         {
-                            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
-                            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).DrawSprite(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, (x * tileWidth), (y * tileHeight), Colour);
-                            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).End();
+                            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                                .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
+                            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                                .DrawSprite(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, (x * tileWidth),
+                                    (y * tileHeight), Colour);
+                            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                                .End();
                         }
 
                         // Draw animation portions
-                        gameEngine.ContentResourceManager.GetAnimationEngine().Draw(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, (x * tileWidth), (y * tileHeight), Colour, gameTime);
+                        gameEngine.ContentResourceManager.GetAnimationEngine().Draw(
+                            gameScreens[screenNumber].ScreenTiles[x, y].TileImage, (x * tileWidth), (y * tileHeight),
+                            Colour, gameTime);
                     }
                 }
             }
-          
+
             // Draw Animation engine normal layer
             gameEngine.ColourAnimationEngine.Draw(gameTime, Colour.A);
 
             // Draw Powerups
-            if ((!IntroSequenceRunning || IntroSequenceStage == enIntroSequenceStage.EndPause) && CurrentGameScreenData.PowerUp != null)
+            if ((!IntroSequenceRunning || IntroSequenceStage == enIntroSequenceStage.EndPause) &&
+                CurrentGameScreenData.PowerUp != null)
             {
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PowerUpsName).Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PowerUpsName).DrawSprite(CurrentGameScreenData.PowerUp.Type, CurrentGameScreenData.PowerUp.XLocation, CurrentGameScreenData.PowerUp.YLocation, Colour);
+                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PowerUpsName)
+                    .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
+                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PowerUpsName).DrawSprite(
+                    CurrentGameScreenData.PowerUp.Type, CurrentGameScreenData.PowerUp.XLocation,
+                    CurrentGameScreenData.PowerUp.YLocation, Colour);
                 gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PowerUpsName).End();
             }
 
             // Draw Pickups
-            if ((!IntroSequenceRunning || IntroSequenceStage == enIntroSequenceStage.EndPause) && CurrentGameScreenData.PickUps != null)
+            if ((!IntroSequenceRunning || IntroSequenceStage == enIntroSequenceStage.EndPause) &&
+                CurrentGameScreenData.PickUps != null)
             {
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
+                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName)
+                    .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
                 for (int a = 0; a < CurrentGameScreenData.PickUps.Count; a++)
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).DrawSprite(CurrentGameScreenData.PickUps[a].Type, CurrentGameScreenData.PickUps[a].XLocation, CurrentGameScreenData.PickUps[a].YLocation, Colour);
+                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).DrawSprite(
+                        CurrentGameScreenData.PickUps[a].Type, CurrentGameScreenData.PickUps[a].XLocation,
+                        CurrentGameScreenData.PickUps[a].YLocation, Colour);
                 }
+
                 gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).End();
             }
 
             // Draw Cheops pyramids
-            if ((!IntroSequenceRunning || IntroSequenceStage == enIntroSequenceStage.EndPause) && CurrentGameScreenData.CheopsPyramid != null)
+            if ((!IntroSequenceRunning || IntroSequenceStage == enIntroSequenceStage.EndPause) &&
+                CurrentGameScreenData.CheopsPyramid != null)
             {
                 if (gameEngine.UsingOldGraphics)
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                    gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").DrawSprite(0, CurrentGameScreenData.CheopsPyramid.XLocation, CurrentGameScreenData.CheopsPyramid.YLocation, Colour);
+                    gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal")
+                        .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+                    gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").DrawSprite(0,
+                        CurrentGameScreenData.CheopsPyramid.XLocation, CurrentGameScreenData.CheopsPyramid.YLocation,
+                        Colour);
                     gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").End();
                 }
                 else
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                    gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").DrawSprite(0, CurrentGameScreenData.CheopsPyramid.XLocation, CurrentGameScreenData.CheopsPyramid.YLocation, Colour);
+                    gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid")
+                        .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+                    gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").DrawSprite(0,
+                        CurrentGameScreenData.CheopsPyramid.XLocation, CurrentGameScreenData.CheopsPyramid.YLocation,
+                        Colour);
                     gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").End();
                 }
             }
@@ -1215,8 +1347,10 @@ namespace StarquakeXNA
             {
                 if (!gameEngine.UsingOldGraphics)
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection("OllyBackground").Begin(BlendState.AlphaBlend, gameTime);
-                    gameEngine.ContentResourceManager.GetSpriteCollection("OllyBackground").DrawSprite(0, 382, 146, Colour);
+                    gameEngine.ContentResourceManager.GetSpriteCollection("OllyBackground")
+                        .Begin(BlendState.AlphaBlend, gameTime);
+                    gameEngine.ContentResourceManager.GetSpriteCollection("OllyBackground")
+                        .DrawSprite(0, 382, 146, Colour);
                     gameEngine.ContentResourceManager.GetSpriteCollection("OllyBackground").End();
                 }
             }
@@ -1238,107 +1372,164 @@ namespace StarquakeXNA
         public void DrawUpperLayer(Color Colour, GameTime gameTime)
         {
             // Draw Tunnel Patches
-           
+
             for (int y = 0; y < TilesDown; y++)
             {
                 for (int x = 0; x < TilesAcross; x++)
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                        .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
                     if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 396)
                     {
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(0, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
-                                                    (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
+                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                            .DrawSprite(0,
+                                (x * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
+                                (y * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
                     else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 407)
                     {
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(0, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
-                                                    (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
+                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                            .DrawSprite(0,
+                                (x * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
+                                (y * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
                     else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 408)
                     {
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(1, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
-                                                    (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
+                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                            .DrawSprite(1,
+                                (x * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
+                                (y * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
                     else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 409)
                     {
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(2, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
-                                                    (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
+                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                            .DrawSprite(2,
+                                (x * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
+                                (y * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
                     else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 412)
                     {
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(3, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
-                                                    (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
+                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                            .DrawSprite(3,
+                                (x * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
+                                (y * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
                     else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 413)
                     {
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(4, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
-                                                    (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
+                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                            .DrawSprite(4,
+                                (x * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
+                                (y * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
                     else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 414)
                     {
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(5, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
-                                                    (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
+                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                            .DrawSprite(5,
+                                (x * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
+                                (y * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
                     else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 415)
                     {
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(6, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
-                                                    (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
+                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                            .DrawSprite(6,
+                                (x * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
+                                (y * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
                     else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 397) // Teleport booths
                     {
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(7, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
-                                                    (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
+                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                            .DrawSprite(7,
+                                (x * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
+                                (y * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
                     else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 377 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 378 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 380 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 381 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 385 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 386 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 388 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 389
-                        ) // Shadows
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 378 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 380 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 381 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 385 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 386 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 388 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 389
+                            ) // Shadows
                     {
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(8, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
-                                                    ((y + 1) * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
+                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                            .DrawSprite(8,
+                                (x * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
+                                ((y + 1) * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
                     else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 399) // Access booth left
                     {
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(9, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
-                                                    (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
+                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                            .DrawSprite(9,
+                                (x * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
+                                (y * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
                     else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 400) // Access booth right
                     {
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(10, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
-                                                    (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
+                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                            .DrawSprite(10,
+                                (x * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
+                                (y * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
                     else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 420 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 422 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 424 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 426 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 428 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 430 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 432 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 434 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 436 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 438)
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 422 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 424 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 426 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 428 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 430 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 432 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 434 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 436 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 438)
                     {
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(11, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
-                                                    (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
+                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                            .DrawSprite(11,
+                                (x * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
+                                (y * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
                     else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 421 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 423 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 425 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 427 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 429 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 431 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 433 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 435 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 437 ||
-                        CurrentGameScreenData.ScreenTiles[x, y].TileImage == 439)
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 423 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 425 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 427 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 429 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 431 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 433 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 435 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 437 ||
+                             CurrentGameScreenData.ScreenTiles[x, y].TileImage == 439)
                     {
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(12, (x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
-                                                    (y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
+                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                            .DrawSprite(12,
+                                (x * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth),
+                                (y * gameEngine.ContentResourceManager
+                                    .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight), Colour);
                     }
 
                     gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).End();
@@ -1346,33 +1537,42 @@ namespace StarquakeXNA
                     // Draw Tunnel entrances
                     if (CurrentGameScreenData.ScreenTiles[x, y].TileImage > 418)
                     {
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).DrawSprite(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, (x * tileWidth), (y * tileHeight), Colour);
+                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                            .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
+                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                            .DrawSprite(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, (x * tileWidth),
+                                (y * tileHeight), Colour);
                         gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).End();
                     }
                 }
             }
-           
+
             // Draw olly
             if (ScreenNumber == 477)
             {
                 if (gameEngine.UsingOldGraphics)
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection("OllyOriginal").Begin(BlendState.AlphaBlend, gameTime);
-                    gameEngine.ContentResourceManager.GetSpriteCollection("OllyOriginal").DrawSprite(0, 384, 100, Colour);
+                    gameEngine.ContentResourceManager.GetSpriteCollection("OllyOriginal")
+                        .Begin(BlendState.AlphaBlend, gameTime);
+                    gameEngine.ContentResourceManager.GetSpriteCollection("OllyOriginal")
+                        .DrawSprite(0, 384, 100, Colour);
                     gameEngine.ContentResourceManager.GetSpriteCollection("OllyOriginal").End();
                 }
                 else
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection("OllyLower").Begin(BlendState.AlphaBlend, gameTime);
+                    gameEngine.ContentResourceManager.GetSpriteCollection("OllyLower")
+                        .Begin(BlendState.AlphaBlend, gameTime);
                     gameEngine.ContentResourceManager.GetSpriteCollection("OllyLower").DrawSprite(0, 382, 146, Colour);
                     gameEngine.ContentResourceManager.GetSpriteCollection("OllyLower").End();
 
-                    gameEngine.ContentResourceManager.GetSpriteCollection("OllyEyes").Begin(BlendState.AlphaBlend, gameTime);
-                    gameEngine.ContentResourceManager.GetSpriteCollection("OllyEyes").DrawSprite(0, ollyEyesX, ollyEyesY, Colour);
+                    gameEngine.ContentResourceManager.GetSpriteCollection("OllyEyes")
+                        .Begin(BlendState.AlphaBlend, gameTime);
+                    gameEngine.ContentResourceManager.GetSpriteCollection("OllyEyes")
+                        .DrawSprite(0, ollyEyesX, ollyEyesY, Colour);
                     gameEngine.ContentResourceManager.GetSpriteCollection("OllyEyes").End();
 
-                    gameEngine.ContentResourceManager.GetSpriteCollection("OllyUpper").Begin(BlendState.AlphaBlend, gameTime);
+                    gameEngine.ContentResourceManager.GetSpriteCollection("OllyUpper")
+                        .Begin(BlendState.AlphaBlend, gameTime);
                     gameEngine.ContentResourceManager.GetSpriteCollection("OllyUpper").DrawSprite(0, 450, 166, Colour);
                     gameEngine.ContentResourceManager.GetSpriteCollection("OllyUpper").End();
                 }
@@ -1386,7 +1586,7 @@ namespace StarquakeXNA
                     keyDoorForceFieldNoAccess.Draw();
                 }
             }
-            
+
             // Draw Colour Animated Tiles
             gameEngine.ColourAnimationEngine.DrawUpperLayer(gameTime, Colour.A);
         }
@@ -1396,8 +1596,10 @@ namespace StarquakeXNA
             if (!gameEngine.UsingOldGraphics)
             {
                 // Status panel shadow
-                gameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelShadow").Begin(BlendState.AlphaBlend, gameTime);
-                gameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelShadow").DrawSprite(0, 0, 0, Color.White);
+                gameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelShadow")
+                    .Begin(BlendState.AlphaBlend, gameTime);
+                gameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelShadow")
+                    .DrawSprite(0, 0, 0, Color.White);
                 gameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelShadow").End();
             }
         }
@@ -1405,7 +1607,7 @@ namespace StarquakeXNA
         public List<SecondLayerTile> GetListOfSecondLayerTiles()
         {
             List<SecondLayerTile> tilesToReturn = new List<SecondLayerTile>();
-            
+
             for (int y = 0; y < tilesDown; y++)
             {
                 for (int x = 0; x < tilesAcross; x++)
@@ -1419,6 +1621,7 @@ namespace StarquakeXNA
                     }
                 }
             }
+
             return tilesToReturn;
         }
 
@@ -1463,9 +1666,9 @@ namespace StarquakeXNA
                     //
                     // Get a list of potential locations
                     // Start at line 1 - blob can't get stuff above here....
-                    gameScreens[a].PickUps = new List<Item>();
+                    gameScreens[a].PickUps = new List<InteractiveItem>();
 
-                    List<Item> PotentialLocations = GetPotentialLocations(a);
+                    List<InteractiveItem> PotentialLocations = GetPotentialLocations(a);
                     bool placePickup = false;
                     for (int b = 0; b < powerUpScreens.Count; b++)
                     {
@@ -1480,7 +1683,8 @@ namespace StarquakeXNA
                     if (PotentialLocations.Count > 0)
                     {
                         int powerUpToSelect = r.Next(PotentialLocations.Count);
-                        gameScreens[a].PowerUp = new Item(PotentialLocations[powerUpToSelect].XLocation, PotentialLocations[powerUpToSelect].YLocation, r.Next(8));
+                        gameScreens[a].PowerUp = new InteractiveItem(PotentialLocations[powerUpToSelect].XLocation,
+                            PotentialLocations[powerUpToSelect].YLocation, r.Next(8));
 
                         // Take the powerup location out of the list
                         PotentialLocations.Remove(PotentialLocations[powerUpToSelect]);
@@ -1492,7 +1696,7 @@ namespace StarquakeXNA
                             int pickUpToSelect = r.Next(PotentialLocations.Count);
 
                             // Check to see if this screen has a preferred location
-                            Item preferredLocation = GetPreferredLocation(a);
+                            InteractiveItem preferredLocation = GetPreferredLocation(a);
 
                             // Place the item in the preferred locateion
                             if (preferredLocation != null)
@@ -1504,7 +1708,9 @@ namespace StarquakeXNA
                             else
                             {
                                 // Place it in the normal randomly selected place
-                                gameScreens[a].PickUps.Add(new Item(PotentialLocations[pickUpToSelect].XLocation, PotentialLocations[pickUpToSelect].YLocation, r.Next(28)));
+                                gameScreens[a].PickUps.Add(new InteractiveItem(
+                                    PotentialLocations[pickUpToSelect].XLocation,
+                                    PotentialLocations[pickUpToSelect].YLocation, r.Next(28)));
                                 PotentialLocations.Remove(PotentialLocations[pickUpToSelect]);
                             }
                         }
@@ -1516,7 +1722,9 @@ namespace StarquakeXNA
                     if (PotentialLocations.Count > 0)
                     {
                         int cheopsLocationToSelect = r.Next(PotentialLocations.Count);
-                        gameScreens[a].CheopsPyramid = new Item(PotentialLocations[cheopsLocationToSelect].XLocation, PotentialLocations[cheopsLocationToSelect].YLocation, 0);
+                        gameScreens[a].CheopsPyramid = new InteractiveItem(
+                            PotentialLocations[cheopsLocationToSelect].XLocation,
+                            PotentialLocations[cheopsLocationToSelect].YLocation, 0);
 
                         // Setup the access code for the pyramid
                         // Ensure we get a unique code
@@ -1580,7 +1788,9 @@ namespace StarquakeXNA
             while (screensContainingCheopsPyramid.Count > c_maxCheops)
             {
                 // Randomly select a cheops from the list of screens
-                GameScreenData temp = screensContainingCheopsPyramid[gameEngine.RandomNumberGenerator.Next(0, screensContainingCheopsPyramid.Count)];
+                GameScreenData temp =
+                    screensContainingCheopsPyramid[
+                        gameEngine.RandomNumberGenerator.Next(0, screensContainingCheopsPyramid.Count)];
 
                 // Remove it
                 temp.CheopsPyramid = null;
@@ -1593,10 +1803,12 @@ namespace StarquakeXNA
             while (screensContainingCoreElements.Count > c_maxCoreElements)
             {
                 // Randomly select a pickup from the list of screens
-                GameScreenData temp = screensContainingCoreElements[gameEngine.RandomNumberGenerator.Next(0, screensContainingCoreElements.Count)];
+                GameScreenData temp =
+                    screensContainingCoreElements[
+                        gameEngine.RandomNumberGenerator.Next(0, screensContainingCoreElements.Count)];
 
                 // Remove them
-                temp.PickUps = new List<Item>();
+                temp.PickUps = new List<InteractiveItem>();
 
                 // Remove the screen from the list
                 screensContainingCoreElements.Remove(temp);
@@ -1637,6 +1849,7 @@ namespace StarquakeXNA
     public class TileDetected
     {
         private int tileNumber;
+
         public int TileNumber
         {
             get { return tileNumber; }
@@ -1644,6 +1857,7 @@ namespace StarquakeXNA
         }
 
         private int xPosition;
+
         public int XPosition
         {
             get { return xPosition; }
@@ -1651,6 +1865,7 @@ namespace StarquakeXNA
         }
 
         private int yPosition;
+
         public int YPosition
         {
             get { return yPosition; }
@@ -1658,6 +1873,7 @@ namespace StarquakeXNA
         }
 
         private int mapXPosition;
+
         public int MapXPosition
         {
             get { return mapXPosition; }
@@ -1665,6 +1881,7 @@ namespace StarquakeXNA
         }
 
         private int mapYPosition;
+
         public int MapYPosition
         {
             get { return mapYPosition; }
@@ -1682,13 +1899,15 @@ namespace StarquakeXNA
 
         public override string ToString()
         {
-            return "TileNo: " + TileNumber.ToString() + " " + "XPos: " + XPosition.ToString() + " " + "YPos " + YPosition.ToString();
+            return "TileNo: " + TileNumber.ToString() + " " + "XPos: " + XPosition.ToString() + " " + "YPos " +
+                   YPosition.ToString();
         }
     }
 
     public class ResetTile
     {
         private TileDetected m_TileToReset;
+
         public TileDetected TileToReset
         {
             get { return m_TileToReset; }
@@ -1696,6 +1915,7 @@ namespace StarquakeXNA
         }
 
         private int m_ScreenNumber;
+
         public int ScreenNumber
         {
             get { return m_ScreenNumber; }

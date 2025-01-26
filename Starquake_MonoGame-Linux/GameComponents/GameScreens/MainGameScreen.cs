@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using StarquakeXNA.ContentManagement;
 using StarquakeXNA.Helpers;
+using StarquakeXNA.Structure;
 
 namespace StarquakeXNA.GameComponents
 {
@@ -96,7 +97,7 @@ namespace StarquakeXNA.GameComponents
                     if (RumbleSoundID != Guid.Empty)
                     {
                         gameEngine.ContentResourceManager.GetSoundFXEngine()
-                            .StopSound(RumbleSoundID, enSoundFade.Medium);
+                            .StopSound(RumbleSoundID, SoundFade.Medium);
                     }
                 }
 
@@ -121,7 +122,7 @@ namespace StarquakeXNA.GameComponents
                 {
                     for (int a = 0; a < gameEngine.Elements.Elements.Length; a++)
                     {
-                        gameEngine.Elements.Elements[a].ElementState = enElementState.Replaced;
+                        gameEngine.Elements.Elements[a].ElementState = CoreElementState.Replaced;
                     }
                 }
 
@@ -276,7 +277,7 @@ namespace StarquakeXNA.GameComponents
                         }
 
                         gameEngine.ContentResourceManager.GetSoundFXEngine()
-                            .StopSound(rumbleSoundID, enSoundFade.Medium);
+                            .StopSound(rumbleSoundID, SoundFade.Medium);
                     }
 
                     if (YShakeOffset > 0 && XShakeOffset > 0)

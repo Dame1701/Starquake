@@ -7,6 +7,7 @@ using ProjectMercury;
 using StarquakeXNA.ContentManagement;
 using StarquakeXNA.Helpers;
 using StarquakeXNA.Particles;
+using StarquakeXNA.Structure;
 
 namespace StarquakeXNA
 {

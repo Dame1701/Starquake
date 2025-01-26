@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
 using StarquakeXNA.Helpers;
+using StarquakeXNA.Structure;
 
 namespace StarquakeXNA.GameComponents
 {

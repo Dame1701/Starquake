@@ -2,6 +2,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using StarquakeXNA.Structure;
 
 namespace StarquakeXNA
 {
@@ -76,7 +77,7 @@ namespace StarquakeXNA
             graphics.GraphicsDevice.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
 
             // If the game has already started and we're reloading content then it sounds like the graphics device has lost its handle. Time to bail with an error
-            if (gameEngine.Status == enGameComponentStatus.Started)
+            if (gameEngine.Status == GameEngineStatus.Started)
             {
                 throw new Exception("The graphics device was unable to reinitialise. This is usually caused by a faulty video driver or corrupted state. Try rebooting you machine or finding an updated driver.");
             }
@@ -103,10 +104,10 @@ namespace StarquakeXNA
             // Switch to fullscreen if Ctrl and Enter touched
             if (gameEngine != null)
             {
-                if (gameEngine.Status == enGameComponentStatus.StartingGraphicsLoaded || 
-                    gameEngine.Status == enGameComponentStatus.Started ||
-                    gameEngine.Status == enGameComponentStatus.ContentLoaded ||
-                    gameEngine.Status == enGameComponentStatus.StartGame)
+                if (gameEngine.Status == GameEngineStatus.StartingGraphicsLoaded || 
+                    gameEngine.Status == GameEngineStatus.Started ||
+                    gameEngine.Status == GameEngineStatus.ContentLoaded ||
+                    gameEngine.Status == GameEngineStatus.StartGame)
                 {
                     // Allows the game to exit
                     if (ToggleKeys.GetPressedKey() == Keys.Escape)

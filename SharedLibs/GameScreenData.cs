@@ -15,12 +15,12 @@ public sealed class GameScreenData
     public bool KeepNastiesTheSame { get; set; }
     
     [IgnoreMember]
-    public Item? PowerUp { get; set; }
+    public InteractiveItem? PowerUp { get; set; }
 
     [IgnoreMember]
-    public Item? CheopsPyramid { get; set; }
+    public InteractiveItem? CheopsPyramid { get; set; }
 
-    [IgnoreMember] public List<Item> PickUps { get; set; } = [];
+    [IgnoreMember] public List<InteractiveItem> PickUps { get; set; } = [];
 
     [IgnoreMember] public string? AccessCode { get; set; }
 

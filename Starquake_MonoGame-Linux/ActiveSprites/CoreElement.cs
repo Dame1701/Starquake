@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using StarquakeXNA.Particles;
 using Microsoft.Xna.Framework.Graphics;
 using StarquakeXNA.Helpers;
+using StarquakeXNA.Structure;
 
 namespace StarquakeXNA
 {
@@ -29,16 +30,16 @@ namespace StarquakeXNA
         {
             for (int a = 0; a < 9; a++)
             {
-                if (elements[a].ElementState == enElementState.Replacing)
+                if (elements[a].ElementState == CoreElementState.Replacing)
                 {
-                    elements[a].ElementState = enElementState.Replaced;
+                    elements[a].ElementState = CoreElementState.Replaced;
                     if (OnCoreElementReplaced != null)
                     {
                         OnCoreElementReplaced();
                         break;
                     }
                 }
-                else if (elements[a].ElementState == enElementState.Missing)
+                else if (elements[a].ElementState == CoreElementState.Missing)
                 {
                     elements[a].SetFadeToZero();
                 }
@@ -54,7 +55,7 @@ namespace StarquakeXNA
                     // You get a healthy 10,000 points for each element replaced!
                     gameEngine.BlobStatusPanel.PlayerScore = gameEngine.BlobStatusPanel.PlayerScore + 10000;
 
-                    elements[a].ElementState = enElementState.Replacing;
+                    elements[a].ElementState = CoreElementState.Replacing;
                     int test = elements[a].CurrentElement;
                     break;
                 }
@@ -67,7 +68,7 @@ namespace StarquakeXNA
 
             for (int a = 0; a < 9; a++)
             {
-                if (elements[a].ElementState == enElementState.Missing)
+                if (elements[a].ElementState == CoreElementState.Missing)
                 {
                     toReturn.Add(elements[a]);
                 }
@@ -106,7 +107,7 @@ namespace StarquakeXNA
                     elements[counter].LoadContent();
                     elements[counter].OnCoreElementReplaced += new RaiseEffectComplete(CoreElements_OnCoreElementReplaced);
                     elementsToChoose.RemoveAt(randomChoice);
-                    elements[counter].ElementState = enElementState.Missing;
+                    elements[counter].ElementState = CoreElementState.Missing;
                     counter++;
                 }
             }
@@ -118,7 +119,7 @@ namespace StarquakeXNA
 
             for (int a = 0; a < 9; a++)
             {
-                if (elements[a].ElementState == enElementState.Replaced)
+                if (elements[a].ElementState == CoreElementState.Replaced)
                 {
                     elementsReplaced++;
                 }
@@ -239,8 +240,8 @@ namespace StarquakeXNA
             }
         }
 
-        private enElementState elementState;
-        public enElementState ElementState
+        private CoreElementState elementState;
+        public CoreElementState ElementState
         {
             get { return elementState; }
             set { elementState = value; }
@@ -283,7 +284,7 @@ namespace StarquakeXNA
             elementFader = new StarquakeXNA.AnimationHelpers.IntegerSubtractor(255, 0, 8, false);
             screenFlashFader = new StarquakeXNA.AnimationHelpers.IntegerSubtractor(255, 0, 5, true);
 
-            elementState = enElementState.Missing;
+            elementState = CoreElementState.Missing;
             currentElement = CurrentElement;
             finalElement = FinalElement;
             gameEngine = GameEngineInstance;
@@ -337,13 +338,13 @@ namespace StarquakeXNA
 
         public void Update(Microsoft.Xna.Framework.GameTime gameTime)
         {
-            if (elementState == enElementState.Missing)
+            if (elementState == CoreElementState.Missing)
             {
                 fader1.Update();
                 fader2.Update();
                 fader3.Update();
             }
-            else if (elementState == enElementState.Replacing)
+            else if (elementState == CoreElementState.Replacing)
             {
                 if (elementReplacementStarted)
                 {
@@ -352,7 +353,7 @@ namespace StarquakeXNA
                     finalElementUpScaler.Update();
                     if (finalElementUpScaler.Modifier > 0.95)
                     {
-                        if (elementState == enElementState.Replacing)
+                        if (elementState == CoreElementState.Replacing)
                         {
                             if (!coreReplacementEffect.EffectActive)
                             {
@@ -372,7 +373,7 @@ namespace StarquakeXNA
                 screenFlashFader.Update();
             }
 
-            if (elementReplacementStarted && elementState == enElementState.Replacing)
+            if (elementReplacementStarted && elementState == CoreElementState.Replacing)
             {
                 coreReplacementEffect.Update(xPos + 32, yPos + 32, gameTime);
             }
@@ -381,13 +382,13 @@ namespace StarquakeXNA
 
         public void Draw(int XPos, int YPos, int Fade, Microsoft.Xna.Framework.GameTime gameTime)
         {
-            if (elementState == enElementState.Replaced)
+            if (elementState == CoreElementState.Replaced)
             {
                 gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).Begin(BlendState.AlphaBlend, gameTime);
                 gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).DrawSprite(finalElement, XPos, YPos, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)Fade));
                 gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).End();
             }
-            else if (elementState == enElementState.Missing)
+            else if (elementState == CoreElementState.Missing)
             {
                 gameEngine.ContentResourceManager.GetSpriteCollection("AccessCodesGray").Begin(BlendState.AlphaBlend, gameTime);
                 gameEngine.ContentResourceManager.GetSpriteCollection("AccessCodesGray").DrawSprite(currentElement, XPos, YPos, ColourHelper.GetXNA4Colour(255,255,255, (byte)Fade));
@@ -400,7 +401,7 @@ namespace StarquakeXNA
             xPos = XPos;
             yPos = YPos;
 
-            if (elementState == enElementState.Missing)
+            if (elementState == CoreElementState.Missing)
             {
                 if (ReplacingElement)
                 {
@@ -423,7 +424,7 @@ namespace StarquakeXNA
                     gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.AccessCodesPassedName).End();
                 }
             }
-            else if (elementState == enElementState.Replacing)
+            else if (elementState == CoreElementState.Replacing)
             {
                 if (elementReplacementStarted == false)
                 {
@@ -438,7 +439,7 @@ namespace StarquakeXNA
                 gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).DrawSprite(finalElement, XPos, YPos,  ColourHelper.GetXNA4Colour(255, 255, 255, (byte)(255 - elementFader.ByteModifier)), finalElementUpScaler.Modifier, 0);
                 gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).End();
             }
-            else if (elementState == enElementState.Replaced)
+            else if (elementState == CoreElementState.Replaced)
             {
                 if (ReplacingElement)
                 {
@@ -454,7 +455,7 @@ namespace StarquakeXNA
                 }
             }
 
-            if (elementReplacementStarted && elementState == enElementState.Replacing)
+            if (elementReplacementStarted && elementState == CoreElementState.Replacing)
             {
                 coreReplacementEffect.Draw();
             }
