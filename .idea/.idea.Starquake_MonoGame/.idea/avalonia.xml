@@ -3,6 +3,7 @@
   <component name="AvaloniaProject">
     <option name="projectPerEditor">
       <map>
+        <entry key="Starquake_ScreenEditor-Linux/App.axaml" value="Starquake_ScreenEditor-Linux/Starquake_ScreenEditor-Linux.csproj" />
         <entry key="Starquake_ScreenEditor-Linux/MainWindow.axaml" value="Starquake_ScreenEditor-Linux/Starquake_ScreenEditor-Linux.csproj" />
         <entry key="Starquake_ScreenEditor-Linux/TileSelector.axaml" value="Starquake_ScreenEditor-Linux/Starquake_ScreenEditor-Linux.csproj" />
       </map>
