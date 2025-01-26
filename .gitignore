@@ -99,6 +99,9 @@ StyleCopReport.xml
 *.svclog
 *.scc
 
+# Files built by Monogame
+*.mgcontent
+
 # Chutzpah Test files
 _Chutzpah*
 
