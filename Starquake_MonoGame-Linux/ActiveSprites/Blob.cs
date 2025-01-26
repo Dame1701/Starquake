@@ -22,7 +22,7 @@ public class Blob : GameComponentBase
     private int _blobAlarmSoundCounter;
 
     private float _blobScale = 1f;
-    
+
     private int _blobFireFade;
     private const int BlobFireSpeed = 16;
     private int _blobFireCollisionDirection;
@@ -32,7 +32,7 @@ public class Blob : GameComponentBase
     private enDirection _directionGoingThroughTunnel = enDirection.None;
     private bool _inTunnelLift;
     private int _distanceInTunnelLift;
-    
+
     private bool _blobCanFire = true;
     private bool _blobOnShuttlePad;
     private bool _blobOnShuttleCached;
@@ -46,7 +46,7 @@ public class Blob : GameComponentBase
 
     private int _blobEnergyDrainCounter;
     private bool _blobTouched;
-    
+
     private const int BlobMaxItemsHeld = 4;
     private bool _inventoryAccessed;
 
@@ -69,7 +69,7 @@ public class Blob : GameComponentBase
 
     private Animation _blobShuttleAnim;
     private List<ResetTile> _tilesToReset;
-    
+
     private IStandardParticleEffect _blobTeleporterBeam;
     private IStandardParticleEffect _blobFireTrail;
     private IPositionalTriggerParticleEffect _blobFireSparks;
@@ -79,6 +79,7 @@ public class Blob : GameComponentBase
     private Guid _blobTunnelLiftSoundId = Guid.Empty;
 
     private int _blobXPos;
+
     public int BlobXPos
     {
         get => _blobXPos;
@@ -90,6 +91,7 @@ public class Blob : GameComponentBase
     }
 
     private int _blobYPos;
+
     public int BlobYPos
     {
         get => _blobYPos;
@@ -99,9 +101,9 @@ public class Blob : GameComponentBase
             _blobScreenEntryLocation.Y = value;
         }
     }
-    
+
     public enBlobState BlobsState { get; set; }
-    
+
     public bool BlobTouchedByNasty { get; set; }
 
     public int BlobWidth => 64;
@@ -113,13 +115,13 @@ public class Blob : GameComponentBase
     public int BlobHSpeed { get; set; } = 8;
 
     public int BlobVSpeed { get; set; } = 8;
-    
+
     public int BlobFireX { get; private set; }
 
     public int BlobFireY { get; private set; }
-    
+
     public bool BlobHasFired { get; private set; }
-    
+
     public event RaiseScreenChanged OnScreenChanged;
 
     public delegate void RaiseBlobAction(enBlobAction Action, object Data);
@@ -127,7 +129,7 @@ public class Blob : GameComponentBase
     public event RaiseBlobAction OnBlobActionRaised;
 
     public CustomControl BlobsControl { get; }
-    
+
     public Blob(GameEngine GameEngineReference) : base(GameEngineReference)
     {
         _blobJumpPlatformEngine = new JumpPlatforms(gameEngine);
@@ -171,7 +173,7 @@ public class Blob : GameComponentBase
             _blobTeleporterBeam.ParticleEffectComplete += blobTeleporterBeam_ParticleEffectComplete;
         }
     }
-    
+
     public void Initialise()
     {
         // Fire location starts same as Blob's screen location
@@ -1601,32 +1603,27 @@ public class Blob : GameComponentBase
                 if (_inTunnelLift)
                 {
                     var moveBlob = true;
-                    if (_tileAboveBlob != null)
+                    if (_tileAboveBlob?.TileNumber is 409 or 412 or 413)
                     {
-                        if (_tileAboveBlob.TileNumber == 409 ||
-                            _tileAboveBlob.TileNumber == 412 ||
-                            _tileAboveBlob.TileNumber == 413)
+                        if (_tileAboveBlob.YPosition == 96)
                         {
-                            if (_tileAboveBlob.YPosition == 96)
+                            if (BlobsControl.MovedLeft() && gameEngine.GameScreens.CheckCollision(enDirection.Left,
+                                    _blobXPos, _blobYPos, BlobWidth, BlobHeight, BlobHSpeed, true) > 0)
                             {
-                                if (BlobsControl.MovedLeft() && gameEngine.GameScreens.CheckCollision(enDirection.Left,
-                                        _blobXPos, _blobYPos, BlobWidth, BlobHeight, BlobHSpeed, true) > 0)
+                                if (_distanceInTunnelLift > 8)
                                 {
-                                    if (_distanceInTunnelLift > 8)
-                                    {
-                                        _inTunnelLift = false;
-                                        moveBlob = false;
-                                    }
+                                    _inTunnelLift = false;
+                                    moveBlob = false;
                                 }
-                                else if (BlobsControl.MovedRight() &&
-                                         gameEngine.GameScreens.CheckCollision(enDirection.Right, _blobXPos, _blobYPos,
-                                             BlobWidth, BlobHeight, BlobHSpeed, true) > 0)
+                            }
+                            else if (BlobsControl.MovedRight() &&
+                                     gameEngine.GameScreens.CheckCollision(enDirection.Right, _blobXPos, _blobYPos,
+                                         BlobWidth, BlobHeight, BlobHSpeed, true) > 0)
+                            {
+                                if (_distanceInTunnelLift > 8)
                                 {
-                                    if (_distanceInTunnelLift > 8)
-                                    {
-                                        _inTunnelLift = false;
-                                        moveBlob = false;
-                                    }
+                                    _inTunnelLift = false;
+                                    moveBlob = false;
                                 }
                             }
                         }
@@ -2180,7 +2177,7 @@ public class Blob : GameComponentBase
     {
         _blobFireSparks?.Draw(screenFade);
     }
-    
+
     public void Reset()
     {
         // Reset blob's energy drain counter
@@ -2223,7 +2220,7 @@ public class Blob : GameComponentBase
 
         return temp.Count > 0 ? temp : null;
     }
-    
+
     private void blobTeleporterBeam_ParticleEffectComplete()
     {
         _startBlobTeleporting = false;
