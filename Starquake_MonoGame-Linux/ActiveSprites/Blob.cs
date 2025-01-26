@@ -12,43 +12,7 @@ namespace StarquakeXNA;
 
 public class Blob : GameComponentBase
 {
-    private int _blobXPos;
-
-    public int BlobXPos
-    {
-        get => _blobXPos;
-        set
-        {
-            _blobXPos = value;
-            _blobScreenEntryLocation.X = value;
-        }
-    }
-
-    private int _blobYPos;
-
-    public int BlobYPos
-    {
-        get => _blobYPos;
-        set
-        {
-            _blobYPos = value;
-            _blobScreenEntryLocation.Y = value;
-        }
-    }
-
-    public bool BlobTouchedByNasty { get; set; }
-
-    public int BlobWidth => 64;
-
-    public int BlobHeight { get; private set; } = 64;
-
-    public int BlobFrame { get; set; } = 5;
-
     private Guid _blobFallsSoundId;
-
-    public int BlobHSpeed { get; set; } = 8;
-
-    public int BlobVSpeed { get; set; } = 8;
 
     private int _blobFallSpeed = 4;
     private int _blobDistanceFallen;
@@ -58,11 +22,7 @@ public class Blob : GameComponentBase
     private int _blobAlarmSoundCounter;
 
     private float _blobScale = 1f;
-
-    public int BlobFireX { get; private set; }
-
-    public int BlobFireY { get; private set; }
-
+    
     private int _blobFireFade;
     private const int BlobFireSpeed = 16;
     private int _blobFireCollisionDirection;
@@ -72,9 +32,7 @@ public class Blob : GameComponentBase
     private enDirection _directionGoingThroughTunnel = enDirection.None;
     private bool _inTunnelLift;
     private int _distanceInTunnelLift;
-
-    public bool BlobHasFired { get; private set; }
-
+    
     private bool _blobCanFire = true;
     private bool _blobOnShuttlePad;
     private bool _blobOnShuttleCached;
@@ -88,9 +46,7 @@ public class Blob : GameComponentBase
 
     private int _blobEnergyDrainCounter;
     private bool _blobTouched;
-
-    public enBlobState BlobsState { get; set; }
-
+    
     private const int BlobMaxItemsHeld = 4;
     private bool _inventoryAccessed;
 
@@ -113,9 +69,7 @@ public class Blob : GameComponentBase
 
     private Animation _blobShuttleAnim;
     private List<ResetTile> _tilesToReset;
-
-    public CustomControl BlobsControl { get; }
-
+    
     private IStandardParticleEffect _blobTeleporterBeam;
     private IStandardParticleEffect _blobFireTrail;
     private IPositionalTriggerParticleEffect _blobFireSparks;
@@ -124,12 +78,56 @@ public class Blob : GameComponentBase
 
     private Guid _blobTunnelLiftSoundId = Guid.Empty;
 
+    private int _blobXPos;
+    public int BlobXPos
+    {
+        get => _blobXPos;
+        set
+        {
+            _blobXPos = value;
+            _blobScreenEntryLocation.X = value;
+        }
+    }
+
+    private int _blobYPos;
+    public int BlobYPos
+    {
+        get => _blobYPos;
+        set
+        {
+            _blobYPos = value;
+            _blobScreenEntryLocation.Y = value;
+        }
+    }
+    
+    public enBlobState BlobsState { get; set; }
+    
+    public bool BlobTouchedByNasty { get; set; }
+
+    public int BlobWidth => 64;
+
+    public int BlobHeight { get; private set; } = 64;
+
+    public int BlobFrame { get; set; } = 5;
+
+    public int BlobHSpeed { get; set; } = 8;
+
+    public int BlobVSpeed { get; set; } = 8;
+    
+    public int BlobFireX { get; private set; }
+
+    public int BlobFireY { get; private set; }
+    
+    public bool BlobHasFired { get; private set; }
+    
     public event RaiseScreenChanged OnScreenChanged;
 
     public delegate void RaiseBlobAction(enBlobAction Action, object Data);
 
     public event RaiseBlobAction OnBlobActionRaised;
 
+    public CustomControl BlobsControl { get; }
+    
     public Blob(GameEngine GameEngineReference) : base(GameEngineReference)
     {
         _blobJumpPlatformEngine = new JumpPlatforms(gameEngine);
@@ -173,12 +171,7 @@ public class Blob : GameComponentBase
             _blobTeleporterBeam.ParticleEffectComplete += blobTeleporterBeam_ParticleEffectComplete;
         }
     }
-
-    private void blobTeleporterBeam_ParticleEffectComplete()
-    {
-        _startBlobTeleporting = false;
-    }
-
+    
     public void Initialise()
     {
         // Fire location starts same as Blob's screen location
@@ -2187,6 +2180,30 @@ public class Blob : GameComponentBase
     {
         _blobFireSparks?.Draw(screenFade);
     }
+    
+    public void Reset()
+    {
+        // Reset blob's energy drain counter
+        _blobEnergyDrainCounter = 0;
+
+        // Reset Blob's animation frame
+        BlobFrame = 5;
+
+        // Reset Blob's state
+        BlobsState = enBlobState.Normal;
+
+        // Reset Blob's position
+        _blobXPos = 416;
+        _blobYPos = 414;
+
+        // Remove Blob from shuttle pads
+        _blobOnShuttle = false;
+        BlobHeight = 64;
+        gameEngine.GameScreens.ChangeShuttlePlatformState(false);
+
+        // Clear up any rogue collision tiles etc.
+        PerformPostChangeScreenActions();
+    }
 
     /// <summary>
     /// Gets collision objects on the current screen which aren't tiles i.e Cheops Pyramids, CoreElements 
@@ -2205,6 +2222,11 @@ public class Blob : GameComponentBase
         }
 
         return temp.Count > 0 ? temp : null;
+    }
+    
+    private void blobTeleporterBeam_ParticleEffectComplete()
+    {
+        _startBlobTeleporting = false;
     }
 
     private bool CheckForBlobCollisionWithObject(Rectangle BlobsPosition, out int Offset)
@@ -2234,29 +2256,5 @@ public class Blob : GameComponentBase
         }
 
         return false;
-    }
-
-    public void Reset()
-    {
-        // Reset blob's energy drain counter
-        _blobEnergyDrainCounter = 0;
-
-        // Reset Blob's animation frame
-        BlobFrame = 5;
-
-        // Reset Blob's state
-        BlobsState = enBlobState.Normal;
-
-        // Reset Blob's position
-        _blobXPos = 416;
-        _blobYPos = 414;
-
-        // Remove Blob from shuttle pads
-        _blobOnShuttle = false;
-        BlobHeight = 64;
-        gameEngine.GameScreens.ChangeShuttlePlatformState(false);
-
-        // Clear up any rogue collision tiles etc.
-        PerformPostChangeScreenActions();
     }
 }
