@@ -247,9 +247,7 @@ namespace StarquakeXNA
 
         void Swap(List<Nasty> list, int a, int b)
         {
-            Nasty temp = list[a];
-            list[a] = list[b];
-            list[b] = temp;
+            (list[a], list[b]) = (list[b], list[a]);
         }
 
         public void PerformPostChangeScreenActions()
