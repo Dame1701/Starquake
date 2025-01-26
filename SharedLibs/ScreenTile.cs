@@ -3,23 +3,16 @@ using MessagePack;
 namespace SharedLibs;
 
 [MessagePackObject]
-[Serializable]
 public class ScreenTile
 {
-    private int tileImage;
-        
     [Key(0)]
-    public int TileImage
-    {
-        get { return tileImage; }
-        set { tileImage = value; }
-    }
+    public int TileImage { get; set; }
 
     public ScreenTile()
     {
     }
 
-    public ScreenTile(int tileImage, int tileType)
+    public ScreenTile(int tileImage)
     {
         TileImage = tileImage;
     }

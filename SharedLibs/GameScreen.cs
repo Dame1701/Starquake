@@ -115,7 +115,7 @@ namespace SharedLibs;
             {
                 for (int x = 0; x < TilesAcross; x++)
                 {
-                    screenTiles[x, y] = new ScreenTile(-1, 0);
+                    screenTiles[x, y] = new ScreenTile(-1);
                 }
             }
 
