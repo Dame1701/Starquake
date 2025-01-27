@@ -7,6 +7,7 @@
         <entry key="Starquake_ScreenEditor-Linux/MainWindow.axaml" value="Starquake_ScreenEditor-Linux/Starquake_ScreenEditor-Linux.csproj" />
         <entry key="Starquake_ScreenEditor-Linux/TileSelector.axaml" value="Starquake_ScreenEditor-Linux/Starquake_ScreenEditor-Linux.csproj" />
         <entry key="Starquake_ScreenEditor-Linux/Views/MainWindow.axaml" value="Starquake_ScreenEditor-Linux/Starquake_ScreenEditor-Linux.csproj" />
+        <entry key="Starquake_ScreenEditor-Linux/Views/TileCanvas.axaml" value="Starquake_ScreenEditor-Linux/Starquake_ScreenEditor-Linux.csproj" />
         <entry key="Starquake_ScreenEditor-Linux/Views/TileSelector.axaml" value="Starquake_ScreenEditor-Linux/Starquake_ScreenEditor-Linux.csproj" />
       </map>
     </option>

@@ -3,7 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:ScreenEditor.ViewModels"
-        xmlns:sq="clr-namespace:ScreenEditor.Views"
+        xmlns:views="clr-namespace:ScreenEditor.Views"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="ScreenEditor.Views.MainWindow"
         Title="Starquake ScreenEditor">
@@ -36,7 +36,6 @@
                 <MenuItem Header="Show CollisionMap" />
             </MenuItem>
         </Menu>
-        <TextBlock />
-        <sq:TileSelector></sq:TileSelector>
+        <views:TileSelector />
     </DockPanel>
 </Window>
