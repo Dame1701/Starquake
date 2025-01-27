@@ -4,9 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ScreenEditor.Views.TileCanvas"
-             Background="Aqua"
              PointerEntered="InputElement_OnPointerEntered"
              PointerExited="InputElement_OnPointerExited"
              PointerMoved="InputElement_OnPointerMoved"
-             PointerPressed="InputElement_OnPointerPressed">
+             PointerPressed="InputElement_OnPointerPressed"
+             SizeChanged="Control_OnSizeChanged">
 </UserControl>
