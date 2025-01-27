@@ -37,6 +37,6 @@
                 <MenuItem Header="Show CollisionMap" />
             </MenuItem>
         </Menu>
-        <views:TileSelector />
+        <views:TileSelector TileSet="{Binding DataType=vm:MainWindowViewModel, Path =TileSet, Mode=TwoWay }" />
     </DockPanel>
 </Window>

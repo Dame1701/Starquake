@@ -27,6 +27,7 @@ public partial class TileCanvas : UserControl
             _tileSet = value;
             _tileCount = (int)(_tileSet.Size.Width / TileSize.Width * (_tileSet.Size.Height / TileSize.Height));
             SelectedTile = 0;
+            InvalidateVisual();
         }
     }
 
@@ -64,7 +65,7 @@ public partial class TileCanvas : UserControl
     {
         InitializeComponent();
 
-        TileSize = new Size(48, 48);
+        TileSize = new Size(128, 96);
     }
 
     private int _tilesToDrawAcross;

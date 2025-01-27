@@ -1,20 +1,36 @@
 using System;
-using System.IO;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
-using ScreenEditor.Views;
+using ReactiveUI;
 
 namespace ScreenEditor.ViewModels;
 
-using ReactiveUI;
-
-public class MainWindowViewModel : ViewModelBase
+public class MainWindowViewModel : INotifyPropertyChanged
 {
-    private Window _mainWindow;
+    private Bitmap? _tileSet;
+
+    public Bitmap? TileSet
+    {
+        get => _tileSet;
+        set
+        {
+            _tileSet = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
     
     public ICommand NewMapDataCommand { get; }
 
@@ -55,14 +71,12 @@ public class MainWindowViewModel : ViewModelBase
     
     private async Task LoadTileSetAsyncAction()
     {
-        // Get top level from the current control. Alternatively, you can use Window reference instead.
         var applicationLifetime = Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
         if (applicationLifetime?.MainWindow is null)
         {
             throw new Exception("Main Window is null");
         }
         
-        // Start async operation to open the dialog.
         var files = await applicationLifetime.MainWindow.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Open PNG File",
@@ -72,8 +86,8 @@ public class MainWindowViewModel : ViewModelBase
 
         if (files.Count >= 1)
         {
-            var tiles = new Avalonia.Media.Imaging.Bitmap(files[0].Path.ToString());
-            
+            TileSet?.Dispose();
+            TileSet = new Bitmap(files[0].TryGetLocalPath());
         }
     }
     

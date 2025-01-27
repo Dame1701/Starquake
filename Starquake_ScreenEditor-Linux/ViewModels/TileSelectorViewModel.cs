@@ -4,11 +4,6 @@ namespace ScreenEditor.ViewModels;
 
 public class TileSelectorViewModel
 {
-    public Bitmap? TileSet
-    {
-        get; set;
-    }
-    
     //public event RaiseTileChange OnTileChange;
 
     //public int SelectedTile
