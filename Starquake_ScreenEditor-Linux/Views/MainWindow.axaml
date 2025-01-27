@@ -20,7 +20,8 @@
                 <MenuItem Header="Save MapData"
                           Command="{Binding DataType=vm:MainWindowViewModel, Path=SaveMapDataAsyncCommand}" />
                 <Separator />
-                <MenuItem Header="Load TileSet" />
+                <MenuItem Header="Load TileSet"
+                          Command="{Binding DataType=vm:MainWindowViewModel, Path=LoadTileSetAsyncCommand}" />
                 <Separator />
                 <MenuItem Header="Exit" />
             </MenuItem>
