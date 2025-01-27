@@ -73,34 +73,13 @@ public partial class TileCanvas : UserControl
 
     public override void Render(DrawingContext context)
     {
-        ShowSelectedTile(context);
+        HighlightSelectedTile(context);
         DrawTiles(context);
         DrawGrid(context);
 
         base.Render(context);
     }
-
-    private Point GetCoordinatesForTile(int tileNumber)
-    {
-        if (TileSet == null)
-        {
-            return new Point(0, 0);
-        }
-
-        var tilesAcross = (int)(TileSet.Size.Width / TileSize.Width);
-
-        var rowsDown = tileNumber / tilesAcross;
-        var rowsAcross = tileNumber - rowsDown * tilesAcross;
-
-        return new Point(rowsAcross * TileSize.Width, rowsDown * TileSize.Height);
-    }
-
-    protected override void OnPointerMoved(PointerEventArgs e)
-    {
-        _mouseCoords = e.GetPosition(this);
-        InvalidateVisual();
-    }
-
+    
     private void InputElement_OnPointerEntered(object? Sender, PointerEventArgs E)
     {
         _mouseOnCanvas = false;
@@ -119,18 +98,20 @@ public partial class TileCanvas : UserControl
     {
         var point = E.GetCurrentPoint(Sender as Control);
 
-        if (point.Properties.IsLeftButtonPressed)
+        if (!point.Properties.IsLeftButtonPressed)
         {
-            var tileIndexAcross = (int)(point.Position.X / TileSize.Width);
-            var tileIndexDown = (int)(point.Position.Y / TileSize.Height);
-
-            SelectedTile = (tileIndexDown + ScrollValue) * _tilesToDrawAcross + tileIndexAcross;
-
-            //if (OnTileChange != null)
-            //{
-            //    OnTileChange(selectedTile);
-            //}
+            return;
         }
+
+        var tileIndexAcross = (int)(point.Position.X / TileSize.Width);
+        var tileIndexDown = (int)(point.Position.Y / TileSize.Height);
+
+        SelectedTile = (tileIndexDown + ScrollValue) * _tilesToDrawAcross + tileIndexAcross;
+
+        //if (OnTileChange != null)
+        //{
+        //    OnTileChange(selectedTile);
+        //}
     }
 
     private void InputElement_OnPointerExited(object? Sender, PointerEventArgs E)
@@ -144,7 +125,7 @@ public partial class TileCanvas : UserControl
         InvalidateVisual();
     }
     
-    private void ShowSelectedTile(DrawingContext context)
+    private void HighlightSelectedTile(DrawingContext context)
     {
         if (!_mouseOnCanvas)
         {
@@ -156,8 +137,8 @@ public partial class TileCanvas : UserControl
         {
             context.FillRectangle(new SolidColorBrush(Colors.White),
                 new Rect(
-                    _mouseCoords.X / TileSize.Width * TileSize.Width,
-                    _mouseCoords.Y / TileSize.Height * TileSize.Height,
+                    (int)(_mouseCoords.X / TileSize.Width) * TileSize.Width,
+                    (int)(_mouseCoords.Y / TileSize.Height) * TileSize.Height,
                     TileSize.Width,
                     TileSize.Height));
         }
@@ -229,6 +210,21 @@ public partial class TileCanvas : UserControl
                 new Point(x * TileSize.Width, 0),
                 new Point(x * TileSize.Width, Bounds.Size.Height));
         }
+    }
+    
+    private Point GetCoordinatesForTile(int tileNumber)
+    {
+        if (TileSet == null)
+        {
+            return new Point(0, 0);
+        }
+
+        var tilesAcross = (int)(TileSet.Size.Width / TileSize.Width);
+
+        var rowsDown = tileNumber / tilesAcross;
+        var rowsAcross = tileNumber - rowsDown * tilesAcross;
+
+        return new Point(rowsAcross * TileSize.Width, rowsDown * TileSize.Height);
     }
 }
 
