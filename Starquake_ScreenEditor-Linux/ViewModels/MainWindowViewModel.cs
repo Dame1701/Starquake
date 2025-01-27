@@ -1,8 +1,12 @@
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
+using ScreenEditor.Views;
 
 namespace ScreenEditor.ViewModels;
 
@@ -10,6 +14,8 @@ using ReactiveUI;
 
 public class MainWindowViewModel : ViewModelBase
 {
+    private Window _mainWindow;
+    
     public ICommand NewMapDataCommand { get; }
 
     public ICommand LoadMapDataAsyncCommand { get; }
@@ -50,22 +56,24 @@ public class MainWindowViewModel : ViewModelBase
     private async Task LoadTileSetAsyncAction()
     {
         // Get top level from the current control. Alternatively, you can use Window reference instead.
-        var topLevel = TopLevel.GetTopLevel(null);
-
+        var applicationLifetime = Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
+        if (applicationLifetime?.MainWindow is null)
+        {
+            throw new Exception("Main Window is null");
+        }
+        
         // Start async operation to open the dialog.
-        var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        var files = await applicationLifetime.MainWindow.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Open PNG File",
-            AllowMultiple = false
+            AllowMultiple = false, 
+            FileTypeFilter = [FilePickerFileTypes.ImagePng]
         });
 
         if (files.Count >= 1)
         {
-            // Open reading stream from the first file.
-            await using var stream = await files[0].OpenReadAsync();
-            using var streamReader = new StreamReader(stream);
-            // Reads all the content of file as a text.
-            var fileContent = await streamReader.ReadToEndAsync();
+            var tiles = new Avalonia.Media.Imaging.Bitmap(files[0].Path.ToString());
+            
         }
     }
     

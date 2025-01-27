@@ -28,9 +28,9 @@
             <MenuItem Header="Edit">
                 <MenuItem Header="Show Grid">
                     <MenuItem.Icon>
-                        <CheckBox 
-                            Command="{Binding DataType=vm:MainWindowViewModel, Path=ShowGridToggleCommand }" 
-                            CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"/>
+                        <CheckBox
+                            Command="{Binding DataType=vm:MainWindowViewModel, Path=ShowGridToggleCommand }"
+                            CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}" />
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator />
