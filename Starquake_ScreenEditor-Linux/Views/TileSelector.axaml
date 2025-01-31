@@ -5,5 +5,5 @@
              xmlns:views="clr-namespace:ScreenEditor.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ScreenEditor.Views.TileSelector">
-    <views:TileCanvas x:Name="TileCanvas" />
+    <views:TileCanvas x:Name="TileCanvas" Margin="10" />
 </UserControl>

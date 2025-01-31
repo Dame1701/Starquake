@@ -9,4 +9,12 @@
              PointerMoved="InputElement_OnPointerMoved"
              PointerPressed="InputElement_OnPointerPressed"
              SizeChanged="Control_OnSizeChanged">
+    <Border>
+        <ScrollBar Visibility="Visible" 
+                   Orientation="Vertical"
+                   HorizontalAlignment="Right"
+                   Minimum="0"
+                   Maximum="400"/>
+      
+    </Border>
 </UserControl>

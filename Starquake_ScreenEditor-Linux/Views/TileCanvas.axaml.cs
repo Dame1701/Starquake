@@ -74,6 +74,9 @@ public partial class TileCanvas : UserControl
 
     public override void Render(DrawingContext context)
     {
+        _tilesToDrawAcross = (int)(Bounds.Size.Width / TileSize.Width);
+        _tilesToDrawDown = (int)(Bounds.Size.Height / TileSize.Height);
+        
         HighlightSelectedTile(context);
         DrawTiles(context);
         DrawGrid(context);
@@ -147,48 +150,47 @@ public partial class TileCanvas : UserControl
 
     private void DrawTiles(DrawingContext context)
     {
-        _tilesToDrawAcross = (int)(Bounds.Size.Width / TileSize.Width);
-        _tilesToDrawDown = (int)(Bounds.Size.Height / TileSize.Height);
+        if (TileSet == null)
+        {
+            return;
+        }
 
         TilesDown = _tileCount / _tilesToDrawAcross;
+        
+        var tileCounter = ScrollValue * _tilesToDrawAcross;
 
-        if (TileSet != null)
+        for (var y = 0; y < _tilesToDrawDown; y++)
         {
-            var tileCounter = ScrollValue * _tilesToDrawAcross;
-
-            for (var y = 0; y < _tilesToDrawDown; y++)
+            for (var x = 0; x < _tilesToDrawAcross; x++)
             {
-                for (var x = 0; x < _tilesToDrawAcross; x++)
+                if (tileCounter < _tileCount)
                 {
-                    if (tileCounter < _tileCount)
+                    if (SelectedTile == tileCounter)
                     {
-                        if (SelectedTile == tileCounter)
-                        {
-                            context.FillRectangle(
-                                new SolidColorBrush(Colors.White),
-                                new Rect(
-                                    x * TileSize.Width,
-                                    y * TileSize.Height,
-                                    TileSize.Width,
-                                    TileSize.Height));
-                        }
-
-                        var drawPosition = GetCoordinatesForTile(tileCounter);
-
-                        context.DrawImage(TileSet,
+                        context.FillRectangle(
+                            new SolidColorBrush(Colors.White),
                             new Rect(
                                 x * TileSize.Width,
                                 y * TileSize.Height,
                                 TileSize.Width,
-                                TileSize.Height),
-                            new Rect(
-                                drawPosition.X,
-                                drawPosition.Y,
-                                TileSize.Width,
                                 TileSize.Height));
-
-                        tileCounter++;
                     }
+
+                    var offsetOnTileSet = GetCoordinatesForTileIndexFromTileSet(tileCounter);
+
+                    context.DrawImage(TileSet,
+                        new Rect(
+                            x * TileSize.Width,
+                            y * TileSize.Height,
+                            TileSize.Width,
+                            TileSize.Height),
+                        new Rect(
+                            offsetOnTileSet.X,
+                            offsetOnTileSet.Y,
+                            TileSize.Width,
+                            TileSize.Height));
+
+                    tileCounter++;
                 }
             }
         }
@@ -196,24 +198,24 @@ public partial class TileCanvas : UserControl
 
     private void DrawGrid(DrawingContext context)
     {
-        for (var y = 0; y < _tilesToDrawDown + 1; y++)
+        for (var verticalLine = 0; verticalLine < _tilesToDrawAcross + 1; verticalLine++)
         {
             context.DrawLine(
                 new Pen(new SolidColorBrush(Colors.White)),
-                new Point(0, y * TileSize.Height),
-                new Point(Bounds.Size.Width, y * TileSize.Height));
+                new Point(verticalLine * TileSize.Width, 0),
+                new Point(verticalLine * TileSize.Width, Bounds.Size.Height - Bounds.Size.Height % TileSize.Height));
         }
-
-        for (var x = 0; x < _tilesToDrawAcross + 1; x++)
+        
+        for (var horizontalLine = 0; horizontalLine < _tilesToDrawDown + 1; horizontalLine++)
         {
             context.DrawLine(
                 new Pen(new SolidColorBrush(Colors.White)),
-                new Point(x * TileSize.Width, 0),
-                new Point(x * TileSize.Width, Bounds.Size.Height));
+                new Point(0, horizontalLine * TileSize.Height),
+                new Point(Bounds.Size.Width - Bounds.Size.Width % TileSize.Width, horizontalLine * TileSize.Height));
         }
     }
     
-    private Point GetCoordinatesForTile(int tileNumber)
+    private Point GetCoordinatesForTileIndexFromTileSet(int tileNumber)
     {
         if (TileSet == null)
         {
