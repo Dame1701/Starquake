@@ -1,5 +1,7 @@
+using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -9,11 +11,51 @@ namespace ScreenEditor.Views;
 public partial class TileCanvas : UserControl
 {
     private Point _mouseCoords;
-
-    public int SelectedTile { get; set; }
+    
+    private int _scrollValue;
+    
+    private bool _showGrid;
 
     private Bitmap? _tileSet;
+    private int _tileCount;
+    private int _tilesToDrawAcross;
+    private int _tilesToDrawDown;
+    private bool _mouseOnCanvas;
+    
+    public int SelectedTile { get; set; }
 
+    public static readonly DirectProperty<TileCanvas, int> ScrollMaxProperty =
+        AvaloniaProperty.RegisterDirect<TileCanvas, int>(
+            nameof(ScrollMax),
+            o => o.ScrollMax,         
+            (o, v) => o.ScrollMax = v,
+            defaultBindingMode: BindingMode.TwoWay);
+    
+    public static readonly DirectProperty<TileCanvas, int> ScrollValueProperty =
+        AvaloniaProperty.RegisterDirect<TileCanvas, int>(
+            nameof(ScrollValue),
+            o => o.ScrollValue,         
+            (o, v) => o.ScrollValue = v,
+            defaultBindingMode: BindingMode.TwoWay);
+    
+    private int _scrollMax;
+    public int ScrollMax
+    {
+        get => _scrollMax;
+        set => SetAndRaise(ScrollMaxProperty, ref _scrollMax, value);
+    }
+    
+    public int ScrollValue
+    {
+        get => _scrollValue;
+        set
+        {
+            _scrollValue = value;
+            SetAndRaise(ScrollMaxProperty, ref _scrollValue, value);
+            InvalidateVisual();
+        }
+    }
+    
     public Bitmap? TileSet
     {
         get => _tileSet;
@@ -30,23 +72,13 @@ public partial class TileCanvas : UserControl
             InvalidateVisual();
         }
     }
-
-    public Size TileSize { get; set; }
-
-    private int _scrollValue;
-
-    public int ScrollValue
+    
+    public Size TileSize
     {
-        get => _scrollValue;
-        set
-        {
-            _scrollValue = value;
-            InvalidateVisual();
-        }
+        get; 
+        set;
     }
-
-    private bool _showGrid;
-
+    
     public bool ShowGrid
     {
         get => _showGrid;
@@ -58,32 +90,27 @@ public partial class TileCanvas : UserControl
     }
 
     public int TilesDown { get; set; }
-
-    private int _tileCount;
-
+    
     public TileCanvas()
     {
         InitializeComponent();
-
         TileSize = new Size(128, 96);
+        //DataContext = this;
+        ScrollMax = 130;
     }
-
-    private int _tilesToDrawAcross;
-    private int _tilesToDrawDown;
-    private bool _mouseOnCanvas;
 
     public override void Render(DrawingContext context)
     {
         _tilesToDrawAcross = (int)(Bounds.Size.Width / TileSize.Width);
         _tilesToDrawDown = (int)(Bounds.Size.Height / TileSize.Height);
-        
+
         HighlightSelectedTile(context);
         DrawTiles(context);
         DrawGrid(context);
 
         base.Render(context);
     }
-    
+
     private void InputElement_OnPointerEntered(object? Sender, PointerEventArgs E)
     {
         _mouseOnCanvas = false;
@@ -128,14 +155,14 @@ public partial class TileCanvas : UserControl
     {
         InvalidateVisual();
     }
-    
+
     private void HighlightSelectedTile(DrawingContext context)
     {
         if (!_mouseOnCanvas)
         {
             return;
         }
-        
+
         if (_mouseCoords.X >= 0 && _mouseCoords.X <= Bounds.Size.Width &&
             _mouseCoords.Y >= 0 && _mouseCoords.Y <= Bounds.Size.Height)
         {
@@ -156,7 +183,7 @@ public partial class TileCanvas : UserControl
         }
 
         TilesDown = _tileCount / _tilesToDrawAcross;
-        
+
         var tileCounter = ScrollValue * _tilesToDrawAcross;
 
         for (var y = 0; y < _tilesToDrawDown; y++)
@@ -180,13 +207,13 @@ public partial class TileCanvas : UserControl
 
                     context.DrawImage(TileSet,
                         new Rect(
-                            x * TileSize.Width,
-                            y * TileSize.Height,
+                            offsetOnTileSet.X,
+                            offsetOnTileSet.Y,
                             TileSize.Width,
                             TileSize.Height),
                         new Rect(
-                            offsetOnTileSet.X,
-                            offsetOnTileSet.Y,
+                            x * TileSize.Width,
+                            y * TileSize.Height,
                             TileSize.Width,
                             TileSize.Height));
 
@@ -205,7 +232,7 @@ public partial class TileCanvas : UserControl
                 new Point(verticalLine * TileSize.Width, 0),
                 new Point(verticalLine * TileSize.Width, Bounds.Size.Height - Bounds.Size.Height % TileSize.Height));
         }
-        
+
         for (var horizontalLine = 0; horizontalLine < _tilesToDrawDown + 1; horizontalLine++)
         {
             context.DrawLine(
@@ -214,7 +241,7 @@ public partial class TileCanvas : UserControl
                 new Point(Bounds.Size.Width - Bounds.Size.Width % TileSize.Width, horizontalLine * TileSize.Height));
         }
     }
-    
+
     private Point GetCoordinatesForTileIndexFromTileSet(int tileNumber)
     {
         if (TileSet == null)

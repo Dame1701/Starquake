@@ -8,7 +8,7 @@ public partial class TileSelector : UserControl
 {
     public static readonly StyledProperty<Bitmap?> TileSetProperty =
         AvaloniaProperty.Register<TileSelector, Bitmap?>(nameof(TileSet), defaultValue: null);
-
+    
     public Bitmap? TileSet
     {
         get => GetValue(TileSetProperty);
@@ -26,9 +26,6 @@ public partial class TileSelector : UserControl
 
     private void OnTileSetPropertyChanged(AvaloniaPropertyChangedEventArgs<Bitmap?> e)
     {
-        //var oldValue = e.OldValue?.ToString();
-        //var newValue = e.NewValue?.ToString();
-
         TileCanvas.TileSet = e.NewValue.GetValueOrDefault();
     }
 }
