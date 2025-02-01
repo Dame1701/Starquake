@@ -1,19 +1,12 @@
-using System;
-
-namespace StarquakeXNA
+namespace StarquakeXNA;
+internal static class Program
 {
-    static class Program
+    /// <summary>
+    /// The main entry point for the application.
+    /// </summary>
+    private static void Main(string[] args)
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        static void Main(string[] args)
-        {
-            using (Starquake game = new Starquake())
-            {
-                game.Run();
-            }
-        }
+        using var game = new Starquake();
+        game.Run();
     }
 }
-
