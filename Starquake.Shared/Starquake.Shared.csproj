@@ -1,0 +1,111 @@
+<!--
+  The game itself. Every platform builds from these sources; nothing here is allowed to be
+  platform-specific except behind an #if WINDOWS guard.
+
+  MonoGame ships a different flavour of MonoGame.Framework per platform and the flavours
+  share an assembly identity, so they cannot meet in one output folder. Multi-targeting is
+  what lets a single set of sources hand each head the right one: net9.0 builds against
+  DesktopGL for the Linux and macOS heads, net9.0-windows against WindowsDX for the
+  Windows head.
+
+  Program.cs is deliberately excluded: a .NET entry point has to be compiled into the
+  executable itself, so each head links that one file in. See Starquake.Shared.props.
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net9.0;net9.0-windows</TargetFrameworks>
+        <OutputType>Library</OutputType>
+        <RootNamespace>StarquakeXNA</RootNamespace>
+        <AssemblyName>Starquake.Shared</AssemblyName>
+        <TieredCompilation>false</TieredCompilation>
+        <!-- Lets the net9.0-windows target build on Linux and macOS. -->
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
+        <!-- Content.mgcb is named explicitly below; don't glob for it as well. -->
+        <EnableMGCBItems>false</EnableMGCBItems>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- Compiled into each head instead, but kept visible here where it lives. -->
+        <Compile Remove="Program.cs" />
+        <None Include="Program.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Content\Fonts\elektoraSmall.spritefont">
+            <SubType>Designer</SubType>
+        </None>
+        <!-- Screen data is read with a plain FileStream relative to the working directory,
+             which Program.cs pins to the executable's folder. -->
+        <None Update="Data\SQScreenData.dat">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Data\SQScreenData2.dat">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\ProjectMercury\ProjectMercury.csproj" />
+        <ProjectReference Include="..\SharedLibs\SharedLibs.csproj" />
+        <!--
+          The Project Mercury MGCB extension. It is a build-time tool, not a dependency:
+          this reference exists so `dotnet build` on a head restores and builds it, and
+          every asset of it is kept out of the output. BuildContentPipelineExtension below
+          is what actually gets it built early enough for the content build to use.
+        -->
+        <ProjectReference Include="..\ProjectMercury.ContentPipeline\ProjectMercury.ContentPipeline.csproj"
+                          ReferenceOutputAssembly="false"
+                          Private="false"
+                          ExcludeAssets="all" />
+        <PackageReference Include="MessagePack" Version="3.1.1" />
+        <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.4.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!--
+          The content is built here, once, rather than in each head. MGCB keys its output
+          folder off the .mgcb's own location and the platform, so two heads on the same
+          MonoGame platform (Linux and macOS are both DesktopGL) would otherwise race each
+          other writing the same .xnb files. The built content reaches each head's output
+          through the project reference.
+        -->
+        <MonoGameContentReference Include="Content\Content.mgcb" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+        <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4.1" />
+    </ItemGroup>
+
+    <!--
+      The escape hatch for Windows-only code. Nothing uses it today; the one candidate,
+      resizing the window back to its default in GameEngine.cs, is commented out. Turning
+      it on also means adding <UseWindowsForms>true</UseWindowsForms> here and in
+      Starquake.Windows.
+    -->
+    <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0-windows'">
+        <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net9.0-windows'">
+        <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.4.1" />
+    </ItemGroup>
+
+    <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
+        <Message Text="Restoring dotnet tools" Importance="High" />
+        <Exec Command="dotnet tool restore" />
+    </Target>
+
+    <!--
+      Content.mgcb references the Project Mercury pipeline extension so MGCB can compile
+      the ParticleEffects XML. MGCB runs before project references are resolved, so build
+      that extension here rather than relying on reference ordering. It is a net8.0 tool
+      (MGCB's own runtime) and is never referenced by the game.
+    -->
+    <Target Name="BuildContentPipelineExtension" BeforeTargets="RunContentBuilder">
+        <MSBuild Projects="..\ProjectMercury.ContentPipeline\ProjectMercury.ContentPipeline.csproj"
+                 Targets="Build"
+                 Properties="Configuration=$(Configuration);TargetFramework=net8.0" />
+    </Target>
+
+</Project>

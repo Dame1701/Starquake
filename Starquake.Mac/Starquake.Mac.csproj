@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="..\Starquake.Shared\Starquake.Shared.props" />
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <RuntimeIdentifiers>osx-arm64;osx-x64</RuntimeIdentifiers>
+        <RollForward>Major</RollForward>
+        <AppBundleDir>$(MSBuildProjectDirectory)/bin/$(Configuration)/$(TargetFramework)/Starquake.app</AppBundleDir>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4.1" />
+    </ItemGroup>
+
+    <!--
+      Wrap the build output in a Starquake.app bundle so the game launches from Finder with
+      the right icon and menu bar name. The plain executable is still produced alongside it.
+    -->
+    <Target Name="CreateAppBundle" AfterTargets="Build" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+        <PropertyGroup>
+            <AppBundleMacOSDir>$(AppBundleDir)/Contents/MacOS</AppBundleMacOSDir>
+            <AppBundleResourcesDir>$(AppBundleDir)/Contents/Resources</AppBundleResourcesDir>
+        </PropertyGroup>
+
+        <ItemGroup>
+            <!-- Inside a bundle MonoGame resolves content against Contents/Resources, so the
+                 built content goes there. Everything else, Data/*.dat included, goes in
+                 Contents/MacOS: that is where Program.cs pins the working directory, and
+                 the screen data is read with a plain FileStream relative to it. -->
+            <AppBundleContent Include="$(OutputPath)Content\**\*.*" />
+            <AppBundleBinary Include="$(OutputPath)**\*.*"
+                             Exclude="$(OutputPath)Starquake.app\**;$(OutputPath)Content\**" />
+        </ItemGroup>
+
+        <MakeDir Directories="$(AppBundleMacOSDir);$(AppBundleResourcesDir)" />
+        <Copy SourceFiles="@(AppBundleBinary)"
+              DestinationFiles="@(AppBundleBinary->'$(AppBundleMacOSDir)/%(RecursiveDir)%(Filename)%(Extension)')"
+              SkipUnchangedFiles="true" />
+        <Copy SourceFiles="@(AppBundleContent)"
+              DestinationFiles="@(AppBundleContent->'$(AppBundleResourcesDir)/Content/%(RecursiveDir)%(Filename)%(Extension)')"
+              SkipUnchangedFiles="true" />
+        <Copy SourceFiles="Info.plist" DestinationFolder="$(AppBundleDir)/Contents" SkipUnchangedFiles="true" />
+        <Copy SourceFiles="Starquake.icns" DestinationFolder="$(AppBundleResourcesDir)" SkipUnchangedFiles="true" />
+        <Exec Command="chmod +x &quot;$(AppBundleMacOSDir)/Starquake&quot;" />
+        <!-- Ad-hoc signature: unsigned bundles are killed on launch on Apple Silicon. -->
+        <Exec Command="codesign --force --deep --sign - &quot;$(AppBundleDir)&quot;" />
+        <Message Text="Built $(AppBundleDir)" Importance="High" />
+    </Target>
+</Project>

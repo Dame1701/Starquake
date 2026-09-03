@@ -1,0 +1,37 @@
+<!--
+  The Project Mercury particle engine, used by the game at runtime and by MGCB at build
+  time (it has to resolve ProjectMercury.ParticleEffect to compile the ParticleEffects
+  XML into .xnb).
+
+  That second consumer is why this targets net8.0 rather than net9.0 like the game: MGCB
+  is a net8.0 application, and a net9.0 assembly cannot be loaded into it. The game is
+  free to target net9.0 and reference this.
+
+  MonoGame ships a different flavour of MonoGame.Framework per platform and the flavours
+  share an assembly identity, so they cannot meet in one output folder. Multi-targeting is
+  what lets one set of sources hand each head the right one: net8.0 builds against
+  DesktopGL for the Linux and macOS heads, net8.0-windows against WindowsDX for the
+  Windows head.
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net8.0;net8.0-windows</TargetFrameworks>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>ProjectMercury</RootNamespace>
+        <AssemblyName>ProjectMercury</AssemblyName>
+        <!-- Lets the net8.0-windows target build on Linux and macOS. -->
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+        <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4.1" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">
+        <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.4.1" />
+    </ItemGroup>
+
+</Project>

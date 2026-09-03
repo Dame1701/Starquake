@@ -1,4 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<!--
+  Screen data structures shared by the game and the screen editor.
+
+  Unlike ProjectMercury this has no MonoGame dependency, so there is nothing to
+  multi-target for: a single net9.0 build serves every head and the editor.
+-->
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>

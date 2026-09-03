@@ -1,0 +1,35 @@
+<!--
+  Boilerplate shared by every platform head.
+
+  A head is a thin .csproj that imports this file, picks its target framework and MonoGame
+  flavour, and adds whatever packaging that platform wants (an .app bundle on macOS, a
+  manifest and icon on Windows). The game itself is Starquake.Shared.csproj, which this
+  file adds a reference to. Nothing platform-specific belongs in here.
+
+  To add a head:
+    <Import Project="..\Starquake.Shared\Starquake.Shared.props" />
+    plus a TargetFramework and a PackageReference to that platform's MonoGame flavour.
+-->
+<Project>
+
+    <PropertyGroup>
+        <RootNamespace>StarquakeXNA</RootNamespace>
+        <AssemblyName>Starquake</AssemblyName>
+        <OutputType>WinExe</OutputType>
+        <PublishReadyToRun>false</PublishReadyToRun>
+        <TieredCompilation>false</TieredCompilation>
+        <StarquakeSharedDir>$(MSBuildThisFileDirectory)</StarquakeSharedDir>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!--
+          A .NET entry point has to be compiled into the executable itself, so this one file
+          is linked into each head rather than coming from Starquake.Shared.dll. It is still
+          a single source file: Starquake.Shared.csproj excludes it so it is never compiled
+          twice.
+        -->
+        <Compile Include="$(StarquakeSharedDir)Program.cs" Link="Program.cs" />
+        <ProjectReference Include="$(StarquakeSharedDir)Starquake.Shared.csproj" />
+    </ItemGroup>
+
+</Project>
