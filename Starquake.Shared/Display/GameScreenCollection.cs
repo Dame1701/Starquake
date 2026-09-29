@@ -333,7 +333,7 @@ public class GameScreenCollection : GameComponentBase
         var gameScreensData = MessagePackSerializer.Serialize(_gameScreens);
         var collisionData = MessagePackSerializer.Serialize(_screenCollisionDataArray);
 
-        using (var fs = new FileStream("SQScreenData2.dat", FileMode.Create, FileAccess.Write))
+        using (var fs = new FileStream("SQScreenData.dat", FileMode.Create, FileAccess.Write))
         {
             // Write the length of the first array
             fs.Write(BitConverter.GetBytes(gameScreensData.Length), 0, sizeof(int));

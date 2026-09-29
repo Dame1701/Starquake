@@ -358,8 +358,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ContentResourceManager.AddSpriteResource("ProportionalNumbers", "Graphics\\ProportionalNumbers", 27, 26);
 
         // Game data, if these hit the same file they must be presented in order
-        ContentResourceManager.AddDataResource("GameScreens", "Data/SQScreenData2.dat", typeof(GameScreenData[]));
-        ContentResourceManager.AddDataResource("ScreenCollisionData", "Data/SQScreenData2.dat", typeof(int[,,]));
+        ContentResourceManager.AddDataResource("GameScreens", "Data/SQScreenData.dat", typeof(GameScreenData[]));
+        ContentResourceManager.AddDataResource("ScreenCollisionData", "Data/SQScreenData.dat", typeof(int[,,]));
 
         // Option screen graphics
         ContentResourceManager.AddSpriteResource("OptionScreenBackground", "Graphics\\OptionsScreenBackground", 1280, 800);
