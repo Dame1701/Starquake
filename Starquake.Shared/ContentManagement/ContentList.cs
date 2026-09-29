@@ -9,40 +9,40 @@ namespace StarquakeXNA.ContentManagement;
 
 public class ContentList
 {
-    private readonly List<ContentEntry> content;
+    private readonly List<ContentEntry> _content;
 
-    public ContentList(ContentManager ContentMgr)
+    public ContentList(ContentManager contentMgr)
     {
-        content = new List<ContentEntry>();
-        this.ContentMgr = ContentMgr;
+        _content = new List<ContentEntry>();
+        this.ContentMgr = contentMgr;
     }
     public ContentManager ContentMgr { get; }
 
-    public void AddContent(string ContentName, string ContentFilePath)
+    public void AddContent(string contentName, string contentFilePath)
     {
-        content.Add(new ContentEntry(ContentName, ContentFilePath));
+        _content.Add(new ContentEntry(contentName, contentFilePath));
     }
 
-    public string GetContent(string ContentName)
+    public string GetContent(string contentName)
     {
-        for (var a = 0; a < content.Count; a++)
+        for (var a = 0; a < _content.Count; a++)
         {
-            if (content[a].Name == ContentName)
+            if (_content[a].Name == contentName)
             {
-                return content[a].FilePath;
+                return _content[a].FilePath;
             }
         }
 
         return null;
     }
 
-    public void RemoveContent(string ContentName)
+    public void RemoveContent(string contentName)
     {
-        for (var a = 0; a < content.Count; a++)
+        for (var a = 0; a < _content.Count; a++)
         {
-            if (content[a].Name == ContentName)
+            if (_content[a].Name == contentName)
             {
-                content.Remove(content[a]);
+                _content.Remove(_content[a]);
                 break;
             }
         }
@@ -54,9 +54,9 @@ public class ContentEntry
     public string FilePath;
     public string Name;
 
-    public ContentEntry(string ContentName, string ContentFilePath)
+    public ContentEntry(string contentName, string contentFilePath)
     {
-        Name = ContentName;
-        FilePath = ContentFilePath;
+        Name = contentName;
+        FilePath = contentFilePath;
     }
 }

@@ -7,15 +7,15 @@ using StarquakeXNA.ContentManagement;
 
 namespace StarquakeXNA.Structure;
 
-public delegate void RaiseScreenChanged(enGameScreen TriggerScreen);
+public delegate void RaiseScreenChanged(GameScreenType triggerScreen);
 
 public interface IGameComponent
 {
     event RaiseScreenChanged OnScreenChanged;
-    void LoadContent(ContentList Content);
+    void LoadContent(ContentList content);
     void Initialise();
     void PerformPostChangeScreenActions();
-    void Draw(GameTime gameTime, int ScreenShakeXOffset, int ScreenShakeYOffset, int ScreenFade);
+    void Draw(GameTime gameTime, int screenShakeXOffset, int screenShakeYOffset, int screenFade);
 }
 
 public interface IGameScreen
@@ -25,9 +25,9 @@ public interface IGameScreen
     bool Success { get; }
 
     void Update(GameTime gameTime);
-    void Reset(object Data);
+    void Reset(object data);
     void Draw(GameTime gameTime);
-    void PerformPostScreenChangeActions(enGameScreen TriggeringScreen, object Param);
+    void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object param);
 }
 
 /// <summary>

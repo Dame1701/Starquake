@@ -5,80 +5,83 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StarquakeXNA.Animations;
 using StarquakeXNA.ContentManagement;
+using StarquakeXNA.Engines;
+using StarquakeXNA.Structure;
 
-namespace StarquakeXNA;
+namespace StarquakeXNA.Display;
 
 public class StatusPanel : GameComponentBase
 {
 
-    private readonly KeyScanner inventoryScanner;
+    private readonly KeyScanner _inventoryScanner;
 
-    private readonly PanelNumbers panelNumbers;
+    private readonly PanelNumbers _panelNumbers;
 
-    private enCollectables[] blobsInventory;
+    private Collectables[] _blobsInventory;
 
-    private double energyLevel;
-    private DateTime energyTime;
-    private double firePower;
+    private double _energyLevel;
+    private DateTime _energyTime;
+    private double _firePower;
 
-    private double platforms;
+    private double _platforms;
 
-    private bool removeEnergyTimerStarted;
-    private int slotToScan = -1;
+    private bool _removeEnergyTimerStarted;
+    private int _slotToScan = -1;
 
     public double FirePower
     {
-        get => firePower;
+        get => _firePower;
         set
         {
-            firePower = value;
-            if (firePower > 128)
+            _firePower = value;
+            if (_firePower > 128)
             {
-                firePower = 128;
+                _firePower = 128;
             }
 
-            if (firePower < 0)
+            if (_firePower < 0)
             {
-                firePower = 0;
+                _firePower = 0;
             }
         }
     }
 
     public double EnergyLevel
     {
-        get => energyLevel;
+        get => _energyLevel;
         set
         {
-            energyLevel = value;
+            _energyLevel = value;
 
-            if (energyLevel > 128)
+            if (_energyLevel > 128)
             {
-                energyLevel = 128;
+                _energyLevel = 128;
             }
 
-            if (energyLevel < 0)
+            if (_energyLevel < 0)
             {
-                energyLevel = 0;
+                _energyLevel = 0;
             }
         }
     }
 
     public double Platforms
     {
-        get => platforms;
+        get => _platforms;
         set
         {
-            platforms = value;
+            _platforms = value;
 
-            if (platforms > 64)
+            if (_platforms > 64)
             {
-                platforms = 64;
+                _platforms = 64;
             }
 
-            if (platforms < 0)
+            if (_platforms < 0)
             {
-                platforms = 0;
+                _platforms = 0;
             }
         }
     }
@@ -87,20 +90,20 @@ public class StatusPanel : GameComponentBase
 
     public int PlayerScore { get; set; }
 
-    public int Width => gameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelGraphic").SpriteWidth;
+    public int Width => GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelGraphic").SpriteWidth;
 
-    public int Height => gameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelGraphic").SpriteHeight;
+    public int Height => GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelGraphic").SpriteHeight;
 
     #region IGameComponent Members
 
-    public StatusPanel(GameEngine GameEngineRef)
-        : base(GameEngineRef)
+    public StatusPanel(GameEngine gameEngineRef)
+        : base(gameEngineRef)
     {
-        inventoryScanner = new KeyScanner(GameEngineRef, false);
-        panelNumbers = new PanelNumbers();
+        _inventoryScanner = new KeyScanner(gameEngineRef, false);
+        _panelNumbers = new PanelNumbers();
     }
 
-    public void LoadContent(ContentList Content)
+    public void LoadContent(ContentList content)
     {
     }
 
@@ -112,89 +115,89 @@ public class StatusPanel : GameComponentBase
     public void Reset()
     {
         BlobLives = 4;
-        firePower = 128;
-        energyLevel = 128;
-        platforms = 32;
+        _firePower = 128;
+        _energyLevel = 128;
+        _platforms = 32;
         PlayerScore = 0;
     }
 
-    public void BlobHasPerformedAnAction(enBlobAction Action, object Data)
+    public void BlobHasPerformedAnAction(BlobAction action, object data)
     {
-        if (Action == enBlobAction.FiredLazer)
+        if (action == BlobAction.FiredLazer)
         {
             FirePower--;
         }
-        else if (Action == enBlobAction.LaidPlatform)
+        else if (action == BlobAction.LaidPlatform)
         {
             Platforms = Platforms - 1;
         }
-        else if (Action == enBlobAction.GotPowerUp)
+        else if (action == BlobAction.GotPowerUp)
         {
-            var PowerUpType = (int)Data;
+            var powerUpType = (int)data;
 
-            if (PowerUpType == 0)
+            if (powerUpType == 0)
             {
                 EnergyLevel = EnergyLevel + 64;
-                gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("PowerUp2", false);
+                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp2", false);
             }
-            else if (PowerUpType == 1)
+            else if (powerUpType == 1)
             {
                 EnergyLevel = EnergyLevel + 32;
-                gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("PowerUp2", false);
+                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp2", false);
             }
-            else if (PowerUpType == 2)
+            else if (powerUpType == 2)
             {
                 EnergyLevel = EnergyLevel + 128;
-                gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("PowerUp2", false);
+                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp2", false);
             }
-            else if (PowerUpType == 3)
+            else if (powerUpType == 3)
             {
                 FirePower = FirePower + 64;
-                gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("PowerUp3", 0.5f, false);
+                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp3", 0.5f, false);
             }
-            else if (PowerUpType == 4)
+            else if (powerUpType == 4)
             {
                 FirePower = FirePower + 32;
-                gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("PowerUp3", 0.5f, false);
+                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp3", 0.5f, false);
             }
-            else if (PowerUpType == 5)
+            else if (powerUpType == 5)
             {
                 Platforms = Platforms + 32;
-                gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("PowerUp1", false);
+                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp1", false);
             }
-            else if (PowerUpType == 6)
+            else if (powerUpType == 6)
             {
                 if (BlobLives == 0)
                 {
                     BlobLives++;
-                    gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("LifePowerUp", false); // Extra life
+                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("LifePowerUp", false); // Extra life
                 }
                 else if (
                     Platforms * 2 <= EnergyLevel && // Top Up Jump Platforms
                     Platforms * 2 <= FirePower)
                 {
                     Platforms = Platforms + 32;
-                    gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("PowerUp1", false);
+                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp1", false);
                 }
                 else if (
                     FirePower <= Platforms * 2 && // Fire power
                     FirePower <= EnergyLevel)
                 {
                     FirePower = FirePower + 64;
-                    gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("PowerUp3", 0.5f, false);
+                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp3", 0.5f, false);
                 }
                 else if (
                     EnergyLevel <= Platforms * 2 && // Energy
                     EnergyLevel <= FirePower)
                 {
                     EnergyLevel = EnergyLevel + 96;
-                    gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("PowerUp2", false);
+                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp2", false);
                 }
             }
-            else if (PowerUpType == 7)
+            else if (powerUpType == 7)
             {
                 BlobLives++;
-                gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("LifePowerUp", false);
+                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("LifePowerUp", false);
             }
         }
     }
@@ -205,57 +208,57 @@ public class StatusPanel : GameComponentBase
     }
 
 
-    public void Update(enCollectables[] BlobsInventory)
+    public void Update(Collectables[] blobsInventory)
     {
-        if (gameEngine.Player.BlobsState == enBlobState.Normal)
+        if (GameEngine.Player.BlobsState == BlobState.Normal)
         {
-            blobsInventory = BlobsInventory;
+            _blobsInventory = blobsInventory;
 
-            if (!gameEngine.IntroSequence.SequenceRunning || gameEngine.IntroSequence.SequenceStage == enIntroSequenceStage.EndPause)
+            if (!GameEngine.IntroSequence.SequenceRunning || GameEngine.IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
             {
                 // Delete Blob'ss energy one bar every 4 seconds, but only if we're not in a teleporter
-                if (gameEngine.CurrentGameScreen == enGameScreen.MainGame)
+                if (GameEngine.CurrentGameScreen == GameScreenType.MainGame)
                 {
-                    if (!removeEnergyTimerStarted)
+                    if (!_removeEnergyTimerStarted)
                     {
-                        energyTime = DateTime.Now;
-                        removeEnergyTimerStarted = true;
+                        _energyTime = DateTime.Now;
+                        _removeEnergyTimerStarted = true;
                     }
-                    else if (removeEnergyTimerStarted)
+                    else if (_removeEnergyTimerStarted)
                     {
-                        if (DateTime.Now - energyTime > new TimeSpan(0, 0, 4))
+                        if (DateTime.Now - _energyTime > new TimeSpan(0, 0, 4))
                         {
-                            removeEnergyTimerStarted = false;
-                            energyLevel = energyLevel - 1;
+                            _removeEnergyTimerStarted = false;
+                            _energyLevel = _energyLevel - 1;
                         }
                     }
                 }
 
-                if (gameEngine.BlobStatusPanel.EnergyLevel <= 0)
+                if (GameEngine.BlobStatusPanel.EnergyLevel <= 0)
                 {
                     // Lose a life and put us into the overloading state
-                    gameEngine.Player.KillBlob(false, true);
-                    gameEngine.BlobStatusPanel.EnergyLevel = 0;
+                    GameEngine.Player.KillBlob(false, true);
+                    GameEngine.BlobStatusPanel.EnergyLevel = 0;
                 }
             }
 
-            if (inventoryScanner.Scanned)
+            if (_inventoryScanner.Scanned)
             {
-                slotToScan = -1;
+                _slotToScan = -1;
             }
             else
             {
-                inventoryScanner.Update();
+                _inventoryScanner.Update();
             }
         }
-        else if (gameEngine.Player.BlobsState == enBlobState.Dead)
+        else if (GameEngine.Player.BlobsState == BlobState.Dead)
         {
             BlobLives -= 1;
 
             if (BlobLives < 0)
             {
                 // That's all folks
-                gameEngine.Player.BlobsState = enBlobState.Gameover;
+                GameEngine.Player.BlobsState = BlobState.Gameover;
                 BlobLives = 0;
             }
             else
@@ -269,84 +272,84 @@ public class StatusPanel : GameComponentBase
                     Platforms = 8;
                 }
 
-                gameEngine.Player.BlobsState = enBlobState.Normal;
+                GameEngine.Player.BlobsState = BlobState.Normal;
             }
         }
     }
 
-    public void ScanSlot(int SlotNo)
+    public void ScanSlot(int slotNo)
     {
-        if (SlotNo >= 0 && SlotNo <= 3) // && slotToScan == -1)
+        if (slotNo >= 0 && slotNo <= 3) // && slotToScan == -1)
         {
-            if (!inventoryScanner.ScanStarted ||
-                inventoryScanner.Scanned)
+            if (!_inventoryScanner.ScanStarted ||
+                _inventoryScanner.Scanned)
             {
-                inventoryScanner.Reset(true);
-                inventoryScanner.StartScan();
-                slotToScan = SlotNo;
+                _inventoryScanner.Reset(true);
+                _inventoryScanner.StartScan();
+                _slotToScan = slotNo;
             }
         }
     }
 
     public override void Draw(GameTime gameTime)
     {
-        gameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelGraphic").Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-        gameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelGraphic").DrawSprite(0, 0, 0, Color.White);
-        gameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelGraphic").End();
+        GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelGraphic").Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+        GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelGraphic").DrawSprite(0, 0, 0, Color.White);
+        GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelGraphic").End();
 
         // Draw inventory
-        if (blobsInventory != null)
+        if (_blobsInventory != null)
         {
             // Draw items
-            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-            for (var a = 0; a < blobsInventory.Length; a++)
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+            for (var a = 0; a < _blobsInventory.Length; a++)
             {
                 // Draw numbers above object
-                if (blobsInventory[a] == enCollectables.None)
+                if (_blobsInventory[a] == Collectables.None)
                 {
-                    panelNumbers.Draw(78 * a + 700, 37, (a + 1).ToString(), gameEngine, gameTime, Color.White);
+                    _panelNumbers.Draw(78 * a + 700, 37, (a + 1).ToString(), GameEngine, gameTime, Color.White);
                 }
                 else
                 {
-                    panelNumbers.Draw(78 * a + 700, 37, (a + 1).ToString(), gameEngine, gameTime, Color.OrangeRed);
+                    _panelNumbers.Draw(78 * a + 700, 37, (a + 1).ToString(), GameEngine, gameTime, Color.OrangeRed);
 
-                    if (slotToScan != a) // Don't draw the slot being scanned
+                    if (_slotToScan != a) // Don't draw the slot being scanned
                     {
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).DrawSprite((int)blobsInventory[a], 78 * a + 683, 78, Color.White);
+                        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).DrawSprite((int)_blobsInventory[a], 78 * a + 683, 78, Color.White);
                     }
                 }
             }
-            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).End();
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).End();
         }
 
-        if (slotToScan >= 0)
+        if (_slotToScan >= 0)
         {
-            inventoryScanner.Draw((int)blobsInventory[slotToScan], 78 * slotToScan + 681, 72, gameTime);
+            _inventoryScanner.Draw((int)_blobsInventory[_slotToScan], 78 * _slotToScan + 681, 72, gameTime);
         }
 
         // Draw energybars
-        gameEngine.ContentResourceManager.GetSpriteCollection("EnerygyBar").Begin(BlendState.AlphaBlend, gameTime);
-        gameEngine.ContentResourceManager.GetSpriteCollection("EnerygyBar").DrawSprite(0, 408, 45, (int)(energyLevel * 2), 30, Color.White);
-        gameEngine.ContentResourceManager.GetSpriteCollection("EnerygyBar").End();
+        GameEngine.ContentResourceManager.GetSpriteCollection("EnerygyBar").Begin(BlendState.AlphaBlend, gameTime);
+        GameEngine.ContentResourceManager.GetSpriteCollection("EnerygyBar").DrawSprite(0, 408, 45, (int)(_energyLevel * 2), 30, Color.White);
+        GameEngine.ContentResourceManager.GetSpriteCollection("EnerygyBar").End();
 
-        gameEngine.ContentResourceManager.GetSpriteCollection("JumpBar").Begin(BlendState.AlphaBlend, gameTime);
-        gameEngine.ContentResourceManager.GetSpriteCollection("JumpBar").DrawSprite(0, 408, 78, (int)(platforms * 4), 30, Color.White);
-        gameEngine.ContentResourceManager.GetSpriteCollection("JumpBar").End();
+        GameEngine.ContentResourceManager.GetSpriteCollection("JumpBar").Begin(BlendState.AlphaBlend, gameTime);
+        GameEngine.ContentResourceManager.GetSpriteCollection("JumpBar").DrawSprite(0, 408, 78, (int)(_platforms * 4), 30, Color.White);
+        GameEngine.ContentResourceManager.GetSpriteCollection("JumpBar").End();
 
-        gameEngine.ContentResourceManager.GetSpriteCollection("AmmoBar").Begin(BlendState.AlphaBlend, gameTime);
-        gameEngine.ContentResourceManager.GetSpriteCollection("AmmoBar").DrawSprite(0, 408, 110, (int)(firePower * 2), 30, Color.White);
-        gameEngine.ContentResourceManager.GetSpriteCollection("AmmoBar").End();
+        GameEngine.ContentResourceManager.GetSpriteCollection("AmmoBar").Begin(BlendState.AlphaBlend, gameTime);
+        GameEngine.ContentResourceManager.GetSpriteCollection("AmmoBar").DrawSprite(0, 408, 110, (int)(_firePower * 2), 30, Color.White);
+        GameEngine.ContentResourceManager.GetSpriteCollection("AmmoBar").End();
 
         // Draw score
-        panelNumbers.Draw(39, 38, PlayerScore.ToString("000000"), gameEngine, gameTime, Color.White);
+        _panelNumbers.Draw(39, 38, PlayerScore.ToString("000000"), GameEngine, gameTime, Color.White);
 
         // Draw remaining lives
-        panelNumbers.Draw(244, 113, BlobLives.ToString("00"), gameEngine, gameTime, Color.White);
+        _panelNumbers.Draw(244, 113, BlobLives.ToString("00"), GameEngine, gameTime, Color.White);
 
         // draw overlay
-        gameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelOverlay").Begin(BlendState.AlphaBlend, gameTime);
-        gameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelOverlay").DrawSprite(0, 22, 26, Color.White);
-        gameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelOverlay").End();
+        GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelOverlay").Begin(BlendState.AlphaBlend, gameTime);
+        GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelOverlay").DrawSprite(0, 22, 26, Color.White);
+        GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelOverlay").End();
     }
 
     #endregion

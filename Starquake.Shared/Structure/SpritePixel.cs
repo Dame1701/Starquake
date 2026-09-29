@@ -3,9 +3,9 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
-using StarquakeXNA;
+using StarquakeXNA.Engines;
 
-namespace Starquake_MonoGame.Structure;
+namespace StarquakeXNA.Structure;
 
 public class SpritePixel
 {
@@ -22,9 +22,9 @@ public class SpritePixel
 public class SpritePixelMatrix
 {
 
-    public SpritePixelMatrix(int Size)
+    public SpritePixelMatrix(int size)
     {
-        Matrix = new SpritePixel[Size];
+        Matrix = new SpritePixel[size];
 
         for (var a = 0; a < Matrix.Length; a++)
         {
@@ -56,13 +56,13 @@ public class SpritePixelMatrix
         }
     }
 
-    public void SetPixel(int Index, Color Colour)
+    public void SetPixel(int index, Color colour)
     {
-        Matrix[Index].IsOn = false;
-        Matrix[Index].Colour = Colour;
+        Matrix[index].IsOn = false;
+        Matrix[index].Colour = colour;
     }
 
-    public void SetRandomPixel(Color Colour)
+    public void SetRandomPixel(Color colour)
     {
         if (!Finished)
         {
@@ -73,7 +73,7 @@ public class SpritePixelMatrix
                 p = Matrix[GameEngine.GetInstance().RandomNumberGenerator.Next(0, Matrix.Length)];
             } while (p.Colour != Color.White);
 
-            p.Colour = Colour;
+            p.Colour = colour;
             p.IsOn = false;
         }
     }

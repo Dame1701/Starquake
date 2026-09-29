@@ -6,10 +6,12 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StarquakeXNA.Animations;
+using StarquakeXNA.Engines;
 using StarquakeXNA.Particles;
 using StarquakeXNA.Structure;
 
-namespace StarquakeXNA;
+namespace StarquakeXNA.ActiveSprites;
 
 public class BouncingParticle
 {
@@ -20,10 +22,10 @@ public class BouncingParticle
     private int _oldXPos;
     private int _oldYPos;
 
-    public BouncingParticle(GameEngine GameEngineReference, int SpriteNo)
+    public BouncingParticle(GameEngine gameEngineReference, int spriteNo)
     {
-        _gameEngine = GameEngineReference;
-        _particleBounce = new BouncingAnimation(GameEngineReference, SpriteNo);
+        _gameEngine = gameEngineReference;
+        _particleBounce = new BouncingAnimation(gameEngineReference, spriteNo);
     }
 
     public IStandardParticleEffect Fireball { get; set; }
@@ -92,7 +94,7 @@ public class BouncingParticle
                     p.Y = 32;
                 }
 
-                ySpeed = _gameEngine.GameScreens.CheckCollision(enDirection.Down, XPos, YPos, 32, 32, p.Y, true);
+                ySpeed = _gameEngine.GameScreens.CheckCollision(Direction.Down, XPos, YPos, 32, 32, p.Y, true);
 
                 if (ySpeed == 0)
                 {
@@ -118,7 +120,7 @@ public class BouncingParticle
                 }
 
                 // Absolute value used here to convert the negative to positive for col routine
-                ySpeed = _gameEngine.GameScreens.CheckCollision(enDirection.Up, XPos, YPos, 32, 32, Math.Abs(p.Y),
+                ySpeed = _gameEngine.GameScreens.CheckCollision(Direction.Up, XPos, YPos, 32, 32, Math.Abs(p.Y),
                     true);
 
                 if (ySpeed == 0)
@@ -151,7 +153,7 @@ public class BouncingParticle
                     p.X = 32;
                 }
 
-                xSpeed = _gameEngine.GameScreens.CheckCollision(enDirection.Right, XPos, YPos, 32, 32, p.X, true);
+                xSpeed = _gameEngine.GameScreens.CheckCollision(Direction.Right, XPos, YPos, 32, 32, p.X, true);
                 if (xSpeed == 0)
                 {
                     XPos = _oldXPos;
@@ -176,7 +178,7 @@ public class BouncingParticle
                 }
 
                 // Absolute value used here to convert the negative to positive for col routine
-                xSpeed = _gameEngine.GameScreens.CheckCollision(enDirection.Left, XPos, YPos, 32, 32, Math.Abs(p.X),
+                xSpeed = _gameEngine.GameScreens.CheckCollision(Direction.Left, XPos, YPos, 32, 32, Math.Abs(p.X),
                     true);
                 if (xSpeed == 0)
                 {
@@ -208,13 +210,13 @@ public class BouncingParticle
         }
     }
 
-    public void Draw(SpriteCollection SpriteToDraw, int SpriteNumber = -1)
+    public void Draw(SpriteCollection spriteToDraw, int spriteNumber = -1)
     {
         if (Triggered)
         {
-            if (SpriteNumber >= 0 && SpriteToDraw != null)
+            if (spriteNumber >= 0 && spriteToDraw != null)
             {
-                _particleBounce.Draw(SpriteToDraw, XPos + 4, YPos + 4, SpriteNumber);
+                _particleBounce.Draw(spriteToDraw, XPos + 4, YPos + 4, spriteNumber);
             }
 
             // In addictive mode so draw a few to improve brightness
@@ -230,17 +232,17 @@ public class BlobDeathAnimation : GameComponentBase
     private IPositionalTriggerParticleEffect _blobFragmentBounceSparks;
     private bool _drawBlobParts;
 
-    public BlobDeathAnimation(GameEngine GameEngineReference)
-        : base(GameEngineReference)
+    public BlobDeathAnimation(GameEngine gameEngineReference)
+        : base(gameEngineReference)
     {
         BouncingParticles =
         [
-            new BouncingParticle(GameEngineReference, 0),
-            new BouncingParticle(GameEngineReference, 1),
-            new BouncingParticle(GameEngineReference, 1),
-            new BouncingParticle(GameEngineReference, 2),
-            new BouncingParticle(GameEngineReference, 3),
-            new BouncingParticle(GameEngineReference, 5)
+            new BouncingParticle(gameEngineReference, 0),
+            new BouncingParticle(gameEngineReference, 1),
+            new BouncingParticle(gameEngineReference, 1),
+            new BouncingParticle(gameEngineReference, 2),
+            new BouncingParticle(gameEngineReference, 3),
+            new BouncingParticle(gameEngineReference, 5)
         ];
 
         _blobDeathParticlesOriginal = new Animation
@@ -276,26 +278,26 @@ public class BlobDeathAnimation : GameComponentBase
     public override void LoadContent()
     {
         _blobFragmentBounceSparks =
-            gameEngine.ContentResourceManager.GetParticleEffectInstance("FireSparks",
-                enParticleEffectType.TriggeredMultiLocationTimed, null) as IPositionalTriggerParticleEffect;
+            GameEngine.ContentResourceManager.GetParticleEffectInstance("FireSparks",
+                ParticleEffectType.TriggeredMultiLocationTimed, null) as IPositionalTriggerParticleEffect;
 
         foreach (var t in BouncingParticles)
         {
             t.Fireball =
-                gameEngine.ContentResourceManager.GetParticleEffectInstance("BlobFragmentExplosion",
-                    enParticleEffectType.Continual, null) as IStandardParticleEffect;
+                GameEngine.ContentResourceManager.GetParticleEffectInstance("BlobFragmentExplosion",
+                    ParticleEffectType.Continual, null) as IStandardParticleEffect;
             t.SparkEffect = _blobFragmentBounceSparks;
         }
     }
 
-    public void Trigger(int EffectXPosition, int EffectYPosition, bool DrawBlobParts, int EffectMinDuration = 50,
-        int EffectMaxDuration = 100)
+    public void Trigger(int effectXPosition, int effectYPosition, bool drawBlobParts, int effectMinDuration = 50,
+        int effectMaxDuration = 100)
     {
-        _drawBlobParts = DrawBlobParts;
+        _drawBlobParts = drawBlobParts;
 
         foreach (var bouncingParticle in BouncingParticles)
         {
-            bouncingParticle.Trigger(EffectXPosition, EffectYPosition, EffectMinDuration, EffectMaxDuration);
+            bouncingParticle.Trigger(effectXPosition, effectYPosition, effectMinDuration, effectMaxDuration);
         }
     }
 
@@ -317,7 +319,7 @@ public class BlobDeathAnimation : GameComponentBase
             }
         }
 
-        if (gameEngine.UsingOldGraphics)
+        if (GameEngine.UsingOldGraphics)
         {
             _blobDeathParticlesOriginal.GetNextFrame();
         }
@@ -330,21 +332,21 @@ public class BlobDeathAnimation : GameComponentBase
 
     public override void Draw(GameTime gameTime, int screenFade)
     {
-        if (gameEngine.UsingOldGraphics)
+        if (GameEngine.UsingOldGraphics)
         {
-            gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original")
+            GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original")
                 .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
 
             foreach (var bouncingParticle in BouncingParticles)
             {
                 if (bouncingParticle.Triggered)
                 {
-                    bouncingParticle.Draw(gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original"),
+                    bouncingParticle.Draw(GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original"),
                         _blobDeathParticlesOriginal.CurrentFrame);
                 }
             }
 
-            gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").End();
+            GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").End();
         }
         else
         {
@@ -357,10 +359,10 @@ public class BlobDeathAnimation : GameComponentBase
 
                 if (_drawBlobParts)
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection("BlobParts")
+                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobParts")
                         .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                    bouncingParticle.Draw(gameEngine.ContentResourceManager.GetSpriteCollection("BlobParts"));
-                    gameEngine.ContentResourceManager.GetSpriteCollection("BlobParts").End();
+                    bouncingParticle.Draw(GameEngine.ContentResourceManager.GetSpriteCollection("BlobParts"));
+                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobParts").End();
                 }
                 else
                 {

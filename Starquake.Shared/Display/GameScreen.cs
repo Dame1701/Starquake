@@ -11,80 +11,84 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ProjectMercury.Emitters;
 using SharedLibs;
+using StarquakeXNA.ActiveSprites;
+using StarquakeXNA.Collisions;
+using StarquakeXNA.Engines;
 using StarquakeXNA.Particles;
+using StarquakeXNA.Structure;
 
-namespace StarquakeXNA;
+namespace StarquakeXNA.Display;
 
 public class GameScreenCollection : GameComponentBase
 {
 
-    private const int c_maxCheops = 40;
-    private const int c_maxCoreElements = 18;
+    private const int CMaxCheops = 40;
+    private const int CMaxCoreElements = 18;
 
-    private readonly List<CollisionTile> detectedCollisionMap;
-    private readonly int pickUpCount = 100;
+    private readonly List<CollisionTile> _detectedCollisionMap;
+    private readonly int _pickUpCount = 100;
 
-    private GameScreenData[] gameScreens;
+    private GameScreenData[] _gameScreens;
 
-    private IStandardParticleEffect keyDoorForceFieldNoAccess;
+    private IStandardParticleEffect _keyDoorForceFieldNoAccess;
 
-    private List<KeyLockDoor> keyLockDoors;
+    private List<KeyLockDoor> _keyLockDoors;
 
-    private int oldXoffset;
-    private int oldYoffset;
+    private int _oldXoffset;
+    private int _oldYoffset;
 
 
     // olly
-    private int ollyEyesX;
-    private int ollyEyesY;
+    private int _ollyEyesX;
+    private int _ollyEyesY;
 
-    private int[,,] screenCollisionDataArray;
+    private int[,,] _screenCollisionDataArray;
 
-    private int screenNumber;
-    private int tileHeight;
+    private int _screenNumber;
+    private int _tileHeight;
 
-    private int tileWidth;
+    private int _tileWidth;
 
-    public GameScreenCollection(GameEngine GameEngineRef, int TilesAcross, int TilesDown, int XOffset, int YOffset,
-        int CollAreaWidth, int CollAreaHeight) : base(GameEngineRef)
+    public GameScreenCollection(GameEngine gameEngineRef, int tilesAcross, int tilesDown, int xOffset, int yOffset,
+        int collAreaWidth, int collAreaHeight) : base(gameEngineRef)
     {
-        oldXoffset = XOffset;
-        oldYoffset = YOffset;
+        _oldXoffset = xOffset;
+        _oldYoffset = yOffset;
 
-        this.TilesAcross = TilesAcross;
-        this.TilesDown = TilesDown;
+        this.TilesAcross = tilesAcross;
+        this.TilesDown = tilesDown;
 
-        this.CollAreaWidth = CollAreaWidth;
-        this.CollAreaHeight = CollAreaHeight;
+        this.CollAreaWidth = collAreaWidth;
+        this.CollAreaHeight = collAreaHeight;
 
-        detectedCollisionMap = new List<CollisionTile>();
+        _detectedCollisionMap = new List<CollisionTile>();
     }
 
     public int TilesAcross { get; set; }
 
     public int TilesDown { get; set; }
 
-    public GameScreenData CurrentGameScreenData => gameScreens[ScreenNumber];
+    public GameScreenData CurrentGameScreenData => _gameScreens[ScreenNumber];
 
     public IStandardParticleEffect BlobsShipSmoke1 { get; private set; }
 
     public IStandardParticleEffect BlobsShipSmoke2 { get; private set; }
 
-    public int ScreenWidth => gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+    public int ScreenWidth => GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
         .SpriteWidth * TilesAcross;
 
-    public int ScreenHeight => gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+    public int ScreenHeight => GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
         .SpriteHeight * TilesDown;
 
     public int PreviousScreenNumber { get; private set; }
 
     public int ScreenNumber
     {
-        get => screenNumber;
+        get => _screenNumber;
         set
         {
-            PreviousScreenNumber = screenNumber;
-            screenNumber = value;
+            PreviousScreenNumber = _screenNumber;
+            _screenNumber = value;
             BuildScreenCollisionMap(true);
         }
     }
@@ -93,36 +97,36 @@ public class GameScreenCollection : GameComponentBase
 
     public int CollAreaHeight { get; }
 
-    public GameScreenData GetGameScreen(int Number)
-        => gameScreens[Number];
+    public GameScreenData GetGameScreen(int number)
+        => _gameScreens[number];
 
     public new void LoadContent()
     {
         // Load screen data
-        gameScreens = (GameScreenData[])gameEngine.ContentResourceManager.GetDataResource("GameScreens");
-        screenCollisionDataArray =
-            (int[,,])gameEngine.ContentResourceManager.GetDataResource("ScreenCollisionData");
+        _gameScreens = (GameScreenData[])GameEngine.ContentResourceManager.GetDataResource("GameScreens");
+        _screenCollisionDataArray =
+            (int[,,])GameEngine.ContentResourceManager.GetDataResource("ScreenCollisionData");
 
         BlobsShipSmoke1 =
-            gameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume",
-                enParticleEffectType.Continual, null) as IStandardParticleEffect;
+            GameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume",
+                ParticleEffectType.Continual, null) as IStandardParticleEffect;
         BlobsShipSmoke2 =
-            gameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume2",
-                enParticleEffectType.Continual, null) as IStandardParticleEffect;
+            GameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume2",
+                ParticleEffectType.Continual, null) as IStandardParticleEffect;
 
-        keyDoorForceFieldNoAccess =
-            gameEngine.ContentResourceManager.GetParticleEffectInstance("ForceField",
-                enParticleEffectType.Continual, null) as IStandardParticleEffect;
+        _keyDoorForceFieldNoAccess =
+            GameEngine.ContentResourceManager.GetParticleEffectInstance("ForceField",
+                ParticleEffectType.Continual, null) as IStandardParticleEffect;
 
         // Make this better in the future...?
-        tileWidth = 128;
-        tileHeight = 96;
+        _tileWidth = 128;
+        _tileHeight = 96;
 
         // Save out the data to MessagePack
         //SaveData();
     }
 
-    public override void Initialise(object Data)
+    public override void Initialise(object data)
     {
         // Setup Collision map, we're using 8 x 8 blocks for each collision area for improved accuracy
         BuildScreenCollisionMap(true);
@@ -132,26 +136,26 @@ public class GameScreenCollection : GameComponentBase
     {
         var screensVisited = 0;
 
-        for (var a = 0; a < gameScreens.Length; a++)
+        for (var a = 0; a < _gameScreens.Length; a++)
         {
-            if (gameScreens[a].ScreenVisited)
+            if (_gameScreens[a].ScreenVisited)
             {
                 screensVisited++;
             }
         }
 
-        return (int)Math.Ceiling(screensVisited / (double)gameScreens.Length * 100);
+        return (int)Math.Ceiling(screensVisited / (double)_gameScreens.Length * 100);
     }
 
-    private bool CheckAccessCodeValidity(string AccessCode)
+    private bool CheckAccessCodeValidity(string accessCode)
     {
         var unique = true;
 
-        for (var a = 0; a < AccessCode.Length; a++)
+        for (var a = 0; a < accessCode.Length; a++)
         {
-            for (var b = 0; b < AccessCode.Length; b++)
+            for (var b = 0; b < accessCode.Length; b++)
             {
-                if (AccessCode.Substring(b, 1) == AccessCode.Substring(a, 1) &&
+                if (accessCode.Substring(b, 1) == accessCode.Substring(a, 1) &&
                     a != b)
                 {
                     unique = false;
@@ -186,14 +190,14 @@ public class GameScreenCollection : GameComponentBase
                     {
                         for (var x1 = 0; x1 < 4; x1++)
                         {
-                            for (var a = 0; a < gameScreens[ScreenNumber].CollisionMap.Count; a++)
+                            for (var a = 0; a < _gameScreens[ScreenNumber].CollisionMap.Count; a++)
                             {
-                                if (gameScreens[ScreenNumber].CollisionMap[a].XPos ==
-                                    x * tileWidth + x1 * CollAreaWidth &&
-                                    gameScreens[ScreenNumber].CollisionMap[a].YPos ==
-                                    y * tileHeight + y1 * CollAreaHeight)
+                                if (_gameScreens[ScreenNumber].CollisionMap[a].XPos ==
+                                    x * _tileWidth + x1 * CollAreaWidth &&
+                                    _gameScreens[ScreenNumber].CollisionMap[a].YPos ==
+                                    y * _tileHeight + y1 * CollAreaHeight)
                                 {
-                                    if (gameScreens[ScreenNumber].CollisionMap[a].CollisionTileType ==
+                                    if (_gameScreens[ScreenNumber].CollisionMap[a].CollisionTileType ==
                                         CollisionTileType.NotBlob)
                                     {
                                         addLocation = false;
@@ -215,18 +219,18 @@ public class GameScreenCollection : GameComponentBase
         return potentialLocations;
     }
 
-    private InteractiveItem GetPreferredLocation(int ScreenNumber)
+    private InteractiveItem GetPreferredLocation(int screenNumber)
     {
-        for (var y = 1; y < gameScreens[ScreenNumber].ScreenTiles.GetLength(1); y++)
+        for (var y = 1; y < _gameScreens[screenNumber].ScreenTiles.GetLength(1); y++)
         {
-            for (var x = 0; x < gameScreens[ScreenNumber].ScreenTiles.GetLength(0); x++)
+            for (var x = 0; x < _gameScreens[screenNumber].ScreenTiles.GetLength(0); x++)
             {
-                if (gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 392)
+                if (_gameScreens[screenNumber].ScreenTiles[x, y].TileImage == 392)
                 {
                     return new InteractiveItem(
-                        x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                        x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
                             .SpriteWidth + 32,
-                        y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                        y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
                             .SpriteHeight + 32, 0);
                 }
             }
@@ -235,47 +239,47 @@ public class GameScreenCollection : GameComponentBase
         return null;
     }
 
-    private List<InteractiveItem> GetPotentialLocations(int ScreenNumber)
+    private List<InteractiveItem> GetPotentialLocations(int screenNumber)
     {
         var toReturn = new List<InteractiveItem>();
 
-        for (var y = 1; y < gameScreens[ScreenNumber].ScreenTiles.GetLength(1); y++)
+        for (var y = 1; y < _gameScreens[screenNumber].ScreenTiles.GetLength(1); y++)
         {
-            for (var x = 0; x < gameScreens[ScreenNumber].ScreenTiles.GetLength(0); x++)
+            for (var x = 0; x < _gameScreens[screenNumber].ScreenTiles.GetLength(0); x++)
             {
-                if (gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage >= 0)
+                if (_gameScreens[screenNumber].ScreenTiles[x, y].TileImage >= 0)
                 {
                     // Valid tile to place above...?
                     if (
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage !=
-                        (int)enActionTiles.ShuttlePlatform &&
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage !=
-                        (int)enActionTiles.RemovedShuttlePlatform &&
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage !=
-                        (int)enActionTiles.ElectricityNode &&
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.ShuttleTag1 &&
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.ShuttleTag2 &&
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.ShuttleTag3 &&
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.Spike1 &&
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.Spike2 &&
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.Spike3 &&
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage !=
-                        (int)enActionTiles.ElectricityGate &&
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.BlankFiller &&
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.ConveyerNasty &&
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage !=
-                        (int)enActionTiles.BreakableBridges &&
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != 120 &&
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != 121 &&
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage !=
-                        (int)enActionTiles.PreferredCoreLocation)
+                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage !=
+                        (int)ActionTiles.ShuttlePlatform &&
+                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage !=
+                        (int)ActionTiles.RemovedShuttlePlatform &&
+                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage !=
+                        (int)ActionTiles.ElectricityNode &&
+                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage != (int)ActionTiles.ShuttleTag1 &&
+                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage != (int)ActionTiles.ShuttleTag2 &&
+                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage != (int)ActionTiles.ShuttleTag3 &&
+                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage != (int)ActionTiles.Spike1 &&
+                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage != (int)ActionTiles.Spike2 &&
+                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage != (int)ActionTiles.Spike3 &&
+                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage !=
+                        (int)ActionTiles.ElectricityGate &&
+                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage != (int)ActionTiles.BlankFiller &&
+                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage != (int)ActionTiles.ConveyerNasty &&
+                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage !=
+                        (int)ActionTiles.BreakableBridges &&
+                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage != 120 &&
+                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage != 121 &&
+                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage !=
+                        (int)ActionTiles.PreferredCoreLocation)
                     {
                         // Check for powerups in the way - useful for pickup sweep
                         var powerUpInWay = false;
-                        if (gameScreens[screenNumber].PowerUp != null)
+                        if (_gameScreens[_screenNumber].PowerUp != null)
                         {
-                            if (gameScreens[screenNumber].PowerUp.XLocation == x + 32 &&
-                                gameScreens[screenNumber].PowerUp.YLocation == y + 32)
+                            if (_gameScreens[_screenNumber].PowerUp.XLocation == x + 32 &&
+                                _gameScreens[_screenNumber].PowerUp.YLocation == y + 32)
                             {
                                 powerUpInWay = true;
                             }
@@ -284,17 +288,17 @@ public class GameScreenCollection : GameComponentBase
                         if (!powerUpInWay)
                         {
                             // Anything above it....?
-                            if (gameScreens[ScreenNumber].ScreenTiles[x, y - 1].TileImage == -1)
+                            if (_gameScreens[screenNumber].ScreenTiles[x, y - 1].TileImage == -1)
                             {
                                 // now lets check the collision map and only place on tiles with a collision blocks below the powerup
                                 var locationFound = false;
 
-                                if (gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage >= 0)
+                                if (_gameScreens[screenNumber].ScreenTiles[x, y].TileImage >= 0)
                                 {
-                                    if (screenCollisionDataArray[
-                                            gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage, 1, 0] == 1 &&
-                                        screenCollisionDataArray[
-                                            gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage, 2, 0] == 1)
+                                    if (_screenCollisionDataArray[
+                                            _gameScreens[screenNumber].ScreenTiles[x, y].TileImage, 1, 0] == 1 &&
+                                        _screenCollisionDataArray[
+                                            _gameScreens[screenNumber].ScreenTiles[x, y].TileImage, 2, 0] == 1)
                                     {
                                         locationFound = true;
                                     }
@@ -307,11 +311,11 @@ public class GameScreenCollection : GameComponentBase
                                 if (locationFound)
                                 {
                                     toReturn.Add(new InteractiveItem(
-                                        x * gameEngine.ContentResourceManager
-                                            .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth +
+                                        x * GameEngine.ContentResourceManager
+                                            .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth +
                                         32,
-                                        y * gameEngine.ContentResourceManager
-                                            .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight -
+                                        y * GameEngine.ContentResourceManager
+                                            .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight -
                                         64, 0));
                                 }
                             }
@@ -326,8 +330,8 @@ public class GameScreenCollection : GameComponentBase
 
     public void SaveData()
     {
-        var gameScreensData = MessagePackSerializer.Serialize(gameScreens);
-        var collisionData = MessagePackSerializer.Serialize(screenCollisionDataArray);
+        var gameScreensData = MessagePackSerializer.Serialize(_gameScreens);
+        var collisionData = MessagePackSerializer.Serialize(_screenCollisionDataArray);
 
         using (var fs = new FileStream("SQScreenData2.dat", FileMode.Create, FileAccess.Write))
         {
@@ -348,62 +352,62 @@ public class GameScreenCollection : GameComponentBase
         //var newCollisionData = MessagePackSerializer.Deserialize<int[,,]>(collisionData);
     }
 
-    public void UpdateCollisionMap(bool ScreenChanged)
+    public void UpdateCollisionMap(bool screenChanged)
     {
-        BuildScreenCollisionMap(ScreenChanged);
+        BuildScreenCollisionMap(screenChanged);
     }
 
-    private void BuildScreenCollisionMap(bool ScreenChanged)
+    private void BuildScreenCollisionMap(bool screenChanged)
     {
         // Grab any collision tiles that are special cases i.e. Jump Platforms etc.
         List<CollisionTile> collisionsToAppend = null;
 
-        if (ScreenChanged)
+        if (screenChanged)
         {
-            keyLockDoors = null;
+            _keyLockDoors = null;
         }
 
-        if (!ScreenChanged)
+        if (!screenChanged)
         {
             if (collisionsToAppend == null)
             {
                 collisionsToAppend = new List<CollisionTile>();
             }
 
-            for (var a = 0; a < gameScreens[ScreenNumber].CollisionMap.Count; a++)
+            for (var a = 0; a < _gameScreens[ScreenNumber].CollisionMap.Count; a++)
             {
-                if (gameScreens[ScreenNumber].CollisionMap[a].TileImage == (int)CollisionObjectType.GameObject)
+                if (_gameScreens[ScreenNumber].CollisionMap[a].TileImage == (int)CollisionObjectType.GameObject)
                 {
                     // Remove any game object collision tiles becuase we are about to update them
-                    gameScreens[ScreenNumber].CollisionMap.Remove(gameScreens[ScreenNumber].CollisionMap[a]);
+                    _gameScreens[ScreenNumber].CollisionMap.Remove(_gameScreens[ScreenNumber].CollisionMap[a]);
                 }
             }
         }
 
         // Create new collision map
-        gameScreens[ScreenNumber].CollisionMap = new List<CollisionTile>();
+        _gameScreens[ScreenNumber].CollisionMap = new List<CollisionTile>();
 
         for (var y = 0; y < TilesDown; y++)
         {
             for (var x = 0; x < TilesAcross; x++)
             {
-                if (gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage > -1)
+                if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage > -1)
                 {
                     for (var y1 = 0; y1 < 3; y1++)
                     {
                         for (var x1 = 0; x1 < 4; x1++)
                         {
-                            if (screenCollisionDataArray[gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage, x1,
+                            if (_screenCollisionDataArray[_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage, x1,
                                     y1] == 1)
                             {
-                                gameScreens[ScreenNumber].CollisionMap.Add(
+                                _gameScreens[ScreenNumber].CollisionMap.Add(
                                     new CollisionTile(
-                                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage,
-                                        x * gameEngine.ContentResourceManager
-                                            .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth +
+                                        _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage,
+                                        x * GameEngine.ContentResourceManager
+                                            .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth +
                                         x1 * CollAreaWidth,
-                                        y * gameEngine.ContentResourceManager
-                                            .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight +
+                                        y * GameEngine.ContentResourceManager
+                                            .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight +
                                         y1 * CollAreaHeight,
                                         CollisionTileType.EveryoneHits));
                             }
@@ -414,15 +418,15 @@ public class GameScreenCollection : GameComponentBase
                     var tileY = 0;
 
                     // Add collision map for inside of teleporters, access booths and tunnel lifts
-                    if (gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 397 ||
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 399 ||
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 400 ||
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 407 ||
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 409 ||
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 412 ||
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 413 ||
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 414 ||
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 415)
+                    if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 397 ||
+                        _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 399 ||
+                        _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 400 ||
+                        _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 407 ||
+                        _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 409 ||
+                        _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 412 ||
+                        _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 413 ||
+                        _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 414 ||
+                        _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 415)
                     {
                         // Cover the whole tile since it doesn't matter - nasties can't touch any of it anyway
                         tileX = x * 128;
@@ -432,7 +436,7 @@ public class GameScreenCollection : GameComponentBase
                         {
                             for (var b = 0; b < 4; b++)
                             {
-                                gameScreens[ScreenNumber].CollisionMap.Add(
+                                _gameScreens[ScreenNumber].CollisionMap.Add(
                                     new CollisionTile(
                                         (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                         b * 32 + tileX,
@@ -447,31 +451,31 @@ public class GameScreenCollection : GameComponentBase
                     tileY = y * 96;
 
                     // Central spiky tiles and Broken bottle spiky tiles
-                    if (gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 405 ||
-                        gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 416)
+                    if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 405 ||
+                        _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 416)
                     {
-                        gameScreens[ScreenNumber].CollisionMap.Add(
+                        _gameScreens[ScreenNumber].CollisionMap.Add(
                             new CollisionTile(
                                 (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                 32 + tileX,
                                 32 + tileY,
                                 CollisionTileType.NotBlob));
 
-                        gameScreens[ScreenNumber].CollisionMap.Add(
+                        _gameScreens[ScreenNumber].CollisionMap.Add(
                             new CollisionTile(
                                 (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                 32 + tileX,
                                 64 + tileY,
                                 CollisionTileType.NotBlob));
 
-                        gameScreens[ScreenNumber].CollisionMap.Add(
+                        _gameScreens[ScreenNumber].CollisionMap.Add(
                             new CollisionTile(
                                 (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                 64 + tileX,
                                 32 + tileY,
                                 CollisionTileType.NotBlob));
 
-                        gameScreens[ScreenNumber].CollisionMap.Add(
+                        _gameScreens[ScreenNumber].CollisionMap.Add(
                             new CollisionTile(
                                 (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                 64 + tileX,
@@ -480,30 +484,30 @@ public class GameScreenCollection : GameComponentBase
                     }
 
                     // Right side mounted spikey tiles
-                    if (gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 404)
+                    if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == 404)
                     {
-                        gameScreens[ScreenNumber].CollisionMap.Add(
+                        _gameScreens[ScreenNumber].CollisionMap.Add(
                             new CollisionTile(
                                 (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                 64 + tileX,
                                 tileY,
                                 CollisionTileType.NotBlob));
 
-                        gameScreens[ScreenNumber].CollisionMap.Add(
+                        _gameScreens[ScreenNumber].CollisionMap.Add(
                             new CollisionTile(
                                 (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                 96 + tileX,
                                 tileY,
                                 CollisionTileType.NotBlob));
 
-                        gameScreens[ScreenNumber].CollisionMap.Add(
+                        _gameScreens[ScreenNumber].CollisionMap.Add(
                             new CollisionTile(
                                 (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                 64 + tileX,
                                 32 + tileY,
                                 CollisionTileType.NotBlob));
 
-                        gameScreens[ScreenNumber].CollisionMap.Add(
+                        _gameScreens[ScreenNumber].CollisionMap.Add(
                             new CollisionTile(
                                 (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                 96 + tileX,
@@ -521,11 +525,11 @@ public class GameScreenCollection : GameComponentBase
                         if (tunnelTile % 2 == 0)
                         {
                             // Left passages
-                            if (gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == tunnelTile)
+                            if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == tunnelTile)
                             {
                                 for (var b = 0; b < 3; b++)
                                 {
-                                    gameScreens[ScreenNumber].CollisionMap.Add(
+                                    _gameScreens[ScreenNumber].CollisionMap.Add(
                                         new CollisionTile(
                                             (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                             tileX,
@@ -537,11 +541,11 @@ public class GameScreenCollection : GameComponentBase
                         else
                         {
                             // Right passages
-                            if (gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == tunnelTile)
+                            if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == tunnelTile)
                             {
                                 for (var b = 0; b < 3; b++)
                                 {
-                                    gameScreens[ScreenNumber].CollisionMap.Add(
+                                    _gameScreens[ScreenNumber].CollisionMap.Add(
                                         new CollisionTile(
                                             (int)CollisionObjectType.GameObject, // Random image that's meaningless
                                             tileX + 96,
@@ -557,19 +561,19 @@ public class GameScreenCollection : GameComponentBase
 
 
         // Add secondary maps for Cheops pyramids etc.
-        if (gameScreens[ScreenNumber].PowerUp != null)
+        if (_gameScreens[ScreenNumber].PowerUp != null)
         {
             for (var y = 0; y < 2; y++)
             {
                 for (var x = 0; x < 2; x++)
                 {
-                    if (ScreenChanged)
+                    if (screenChanged)
                     {
-                        gameScreens[ScreenNumber].CollisionMap.Add(
+                        _gameScreens[ScreenNumber].CollisionMap.Add(
                             new CollisionTile(
                                 (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                gameScreens[ScreenNumber].PowerUp.XLocation + x * 32,
-                                gameScreens[ScreenNumber].PowerUp.YLocation + y * 32,
+                                _gameScreens[ScreenNumber].PowerUp.XLocation + x * 32,
+                                _gameScreens[ScreenNumber].PowerUp.YLocation + y * 32,
                                 CollisionTileType.NotBlob));
                     }
                     else
@@ -577,29 +581,29 @@ public class GameScreenCollection : GameComponentBase
                         collisionsToAppend.Add(
                             new CollisionTile(
                                 (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                gameScreens[ScreenNumber].PowerUp.XLocation + x * 32,
-                                gameScreens[ScreenNumber].PowerUp.YLocation + y * 32,
+                                _gameScreens[ScreenNumber].PowerUp.XLocation + x * 32,
+                                _gameScreens[ScreenNumber].PowerUp.YLocation + y * 32,
                                 CollisionTileType.NotBlob));
                     }
                 }
             }
         }
 
-        if (gameScreens[ScreenNumber].PickUps != null)
+        if (_gameScreens[ScreenNumber].PickUps != null)
         {
-            for (var a = 0; a < gameScreens[ScreenNumber].PickUps.Count; a++)
+            for (var a = 0; a < _gameScreens[ScreenNumber].PickUps.Count; a++)
             {
                 for (var y = 0; y < 2; y++)
                 {
                     for (var x = 0; x < 2; x++)
                     {
-                        if (ScreenChanged)
+                        if (screenChanged)
                         {
-                            gameScreens[ScreenNumber].CollisionMap.Add(
+                            _gameScreens[ScreenNumber].CollisionMap.Add(
                                 new CollisionTile(
                                     (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                    gameScreens[ScreenNumber].PickUps[a].XLocation + x * 32,
-                                    gameScreens[ScreenNumber].PickUps[a].YLocation + y * 32,
+                                    _gameScreens[ScreenNumber].PickUps[a].XLocation + x * 32,
+                                    _gameScreens[ScreenNumber].PickUps[a].YLocation + y * 32,
                                     CollisionTileType.NotBlob));
                         }
                         else
@@ -607,8 +611,8 @@ public class GameScreenCollection : GameComponentBase
                             collisionsToAppend.Add(
                                 new CollisionTile(
                                     (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                    gameScreens[ScreenNumber].PickUps[a].XLocation + x * 32,
-                                    gameScreens[ScreenNumber].PickUps[a].YLocation + y * 32,
+                                    _gameScreens[ScreenNumber].PickUps[a].XLocation + x * 32,
+                                    _gameScreens[ScreenNumber].PickUps[a].YLocation + y * 32,
                                     CollisionTileType.NotBlob));
                         }
                     }
@@ -616,19 +620,19 @@ public class GameScreenCollection : GameComponentBase
             }
         }
 
-        if (gameScreens[ScreenNumber].CheopsPyramid != null)
+        if (_gameScreens[ScreenNumber].CheopsPyramid != null)
         {
             for (var y = 0; y < 2; y++)
             {
                 for (var x = 0; x < 2; x++)
                 {
-                    if (ScreenChanged)
+                    if (screenChanged)
                     {
-                        gameScreens[ScreenNumber].CollisionMap.Add(
+                        _gameScreens[ScreenNumber].CollisionMap.Add(
                             new CollisionTile(
                                 (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                gameScreens[ScreenNumber].CheopsPyramid.XLocation + x * 32,
-                                gameScreens[ScreenNumber].CheopsPyramid.YLocation + y * 32,
+                                _gameScreens[ScreenNumber].CheopsPyramid.XLocation + x * 32,
+                                _gameScreens[ScreenNumber].CheopsPyramid.YLocation + y * 32,
                                 CollisionTileType.NotBlob));
                     }
                     else
@@ -636,8 +640,8 @@ public class GameScreenCollection : GameComponentBase
                         collisionsToAppend.Add(
                             new CollisionTile(
                                 (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                gameScreens[ScreenNumber].CheopsPyramid.XLocation + x * 32,
-                                gameScreens[ScreenNumber].CheopsPyramid.YLocation + y * 32,
+                                _gameScreens[ScreenNumber].CheopsPyramid.XLocation + x * 32,
+                                _gameScreens[ScreenNumber].CheopsPyramid.YLocation + y * 32,
                                 CollisionTileType.NotBlob));
                     }
                 }
@@ -648,40 +652,40 @@ public class GameScreenCollection : GameComponentBase
         if (collisionsToAppend != null)
         {
             // Add them to the tile map
-            gameScreens[ScreenNumber].CollisionMap.AddRange(collisionsToAppend);
+            _gameScreens[ScreenNumber].CollisionMap.AddRange(collisionsToAppend);
         }
     }
 
-    public void ChangeShuttlePlatformState(bool PadRemoved)
+    public void ChangeShuttlePlatformState(bool padRemoved)
     {
-        for (var a = 0; a < gameScreens.Length; a++)
+        for (var a = 0; a < _gameScreens.Length; a++)
         {
             for (var y = 0; y < TilesDown; y++)
             {
                 for (var x = 0; x < TilesAcross; x++)
                 {
-                    if (PadRemoved)
+                    if (padRemoved)
                     {
-                        if (gameScreens[a].ScreenTiles[x, y].TileImage == (int)enActionTiles.ShuttlePlatform)
+                        if (_gameScreens[a].ScreenTiles[x, y].TileImage == (int)ActionTiles.ShuttlePlatform)
                         {
-                            gameScreens[a].ScreenTiles[x, y].TileImage = (int)enActionTiles.RemovedShuttlePlatform;
+                            _gameScreens[a].ScreenTiles[x, y].TileImage = (int)ActionTiles.RemovedShuttlePlatform;
 
                             // Trigger Colour animation
-                            gameEngine.ColourAnimationEngine.Start(401, -1);
-                            gameEngine.ColourAnimationEngine.Start(417, -1);
-                            gameEngine.ColourAnimationEngine.Start(418, -1);
+                            GameEngine.ColourAnimationEngine.Start(401, -1);
+                            GameEngine.ColourAnimationEngine.Start(417, -1);
+                            GameEngine.ColourAnimationEngine.Start(418, -1);
                         }
                     }
                     else
                     {
-                        if (gameScreens[a].ScreenTiles[x, y].TileImage == (int)enActionTiles.RemovedShuttlePlatform)
+                        if (_gameScreens[a].ScreenTiles[x, y].TileImage == (int)ActionTiles.RemovedShuttlePlatform)
                         {
-                            gameScreens[a].ScreenTiles[x, y].TileImage = (int)enActionTiles.ShuttlePlatform;
+                            _gameScreens[a].ScreenTiles[x, y].TileImage = (int)ActionTiles.ShuttlePlatform;
 
                             // Cancel Colour animation
-                            gameEngine.ColourAnimationEngine.Stop(401);
-                            gameEngine.ColourAnimationEngine.Stop(417);
-                            gameEngine.ColourAnimationEngine.Stop(418);
+                            GameEngine.ColourAnimationEngine.Stop(401);
+                            GameEngine.ColourAnimationEngine.Stop(417);
+                            GameEngine.ColourAnimationEngine.Stop(418);
                         }
                     }
                 }
@@ -690,33 +694,33 @@ public class GameScreenCollection : GameComponentBase
     }
 
     public int CheckRectangles(
-        int PlayerXPos,
-        int PlayerYPos,
-        int PlayerWidth,
-        int PlayerHeight,
-        bool IsBlob)
+        int playerXPos,
+        int playerYPos,
+        int playerWidth,
+        int playerHeight,
+        bool isBlob)
     {
-        var Collide = false;
+        var collide = false;
 
         // Cycle through the collision map
-        for (var a = 0; a < gameScreens[screenNumber].CollisionMap.Count; a++)
+        for (var a = 0; a < _gameScreens[_screenNumber].CollisionMap.Count; a++)
         {
-            Collide =
+            collide =
                 CollisionDetection.Check(
-                    new Rectangle(PlayerXPos, PlayerYPos, PlayerWidth, PlayerHeight),
-                    new Rectangle(gameScreens[screenNumber].CollisionMap[a].XPos,
-                        gameScreens[screenNumber].CollisionMap[a].YPos, CollAreaWidth, CollAreaHeight));
+                    new Rectangle(playerXPos, playerYPos, playerWidth, playerHeight),
+                    new Rectangle(_gameScreens[_screenNumber].CollisionMap[a].XPos,
+                        _gameScreens[_screenNumber].CollisionMap[a].YPos, CollAreaWidth, CollAreaHeight));
 
-            if (Collide)
+            if (collide)
             {
-                if (IsBlob && gameScreens[screenNumber].CollisionMap[a].CollisionTileType ==
+                if (isBlob && _gameScreens[_screenNumber].CollisionMap[a].CollisionTileType ==
                     CollisionTileType.NotBlob)
                 {
-                    Collide = false;
+                    collide = false;
                 }
                 else
                 {
-                    return gameScreens[screenNumber].CollisionMap[a].TileImage;
+                    return _gameScreens[_screenNumber].CollisionMap[a].TileImage;
                 }
             }
         }
@@ -725,32 +729,32 @@ public class GameScreenCollection : GameComponentBase
     }
 
     public int CheckCollision(
-        enDirection PlayerDirection,
-        int PlayerXPos,
-        int PlayerYPos,
-        int PlayerWidth,
-        int PlayerHeight,
-        int Velocity,
-        bool IsBlob)
+        Direction playerDirection,
+        int playerXPos,
+        int playerYPos,
+        int playerWidth,
+        int playerHeight,
+        int velocity,
+        bool isBlob)
     {
-        var CheckMovementAmount = Velocity;
+        var checkMovementAmount = velocity;
         //int CheckMovementAmount = Velocity;
-        detectedCollisionMap.Clear();
+        _detectedCollisionMap.Clear();
 
         // Cycle through the collision map
-        for (var a = 0; a < gameScreens[screenNumber].CollisionMap.Count; a++)
+        for (var a = 0; a < _gameScreens[_screenNumber].CollisionMap.Count; a++)
         {
-            var colTile = gameScreens[screenNumber].CollisionMap[a];
-            detectedCollisionMap.Add(colTile);
+            var colTile = _gameScreens[_screenNumber].CollisionMap[a];
+            _detectedCollisionMap.Add(colTile);
 
-            var CheckMovementAmountTemp =
+            var checkMovementAmountTemp =
                 CollisionDetection.CheckDirection(
-                    PlayerDirection,
-                    Velocity,
-                    PlayerXPos,
-                    PlayerYPos,
-                    PlayerWidth,
-                    PlayerHeight,
+                    playerDirection,
+                    velocity,
+                    playerXPos,
+                    playerYPos,
+                    playerWidth,
+                    playerHeight,
                     colTile.XPos,
                     colTile.YPos,
                     CollAreaWidth,
@@ -759,15 +763,15 @@ public class GameScreenCollection : GameComponentBase
 
 
             if (colTile.CollisionTileType == CollisionTileType.NotBlob &&
-                IsBlob)
+                isBlob)
             {
-                CheckMovementAmountTemp = Velocity;
+                checkMovementAmountTemp = velocity;
             }
 
-            if (colTile.TileImage > 999 && !IsBlob)
+            if (colTile.TileImage > 999 && !isBlob)
             {
                 if (CollisionDetection.Check(
-                        new Rectangle(PlayerXPos, PlayerYPos, PlayerWidth, PlayerHeight),
+                        new Rectangle(playerXPos, playerYPos, playerWidth, playerHeight),
                         new Rectangle(colTile.XPos, colTile.YPos, 32, 32)))
                 {
                     if ((CollisionObjectType)colTile.TileImage == CollisionObjectType.JumpPlatform ||
@@ -776,122 +780,122 @@ public class GameScreenCollection : GameComponentBase
                     {
                         // Now see if it's actually embedded
                         // And if it is, let it out
-                        CheckMovementAmountTemp = Velocity;
+                        checkMovementAmountTemp = velocity;
                     }
                 }
             }
 
-            if (CheckMovementAmountTemp <= CheckMovementAmount)
+            if (checkMovementAmountTemp <= checkMovementAmount)
             {
-                CheckMovementAmount = CheckMovementAmountTemp;
+                checkMovementAmount = checkMovementAmountTemp;
             }
         }
 
         // Check screen bounds, but only for nasties
-        if (!IsBlob)
+        if (!isBlob)
         {
-            if (PlayerDirection == enDirection.Up)
+            if (playerDirection == Direction.Up)
             {
-                var BoundaryDistance = PlayerYPos - CheckMovementAmount;
-                if (BoundaryDistance < 0)
+                var boundaryDistance = playerYPos - checkMovementAmount;
+                if (boundaryDistance < 0)
                 {
                     // if we're blob we can change screens!
-                    CheckMovementAmount = CheckMovementAmount + BoundaryDistance;
+                    checkMovementAmount = checkMovementAmount + boundaryDistance;
                 }
             }
-            else if (PlayerDirection == enDirection.Down)
+            else if (playerDirection == Direction.Down)
             {
-                var BoundaryDistance = PlayerYPos + PlayerHeight + CheckMovementAmount;
-                if (BoundaryDistance > ScreenHeight)
+                var boundaryDistance = playerYPos + playerHeight + checkMovementAmount;
+                if (boundaryDistance > ScreenHeight)
                 {
                     // if we're blob we can change screens!
-                    CheckMovementAmount = CheckMovementAmount - (BoundaryDistance - ScreenHeight);
+                    checkMovementAmount = checkMovementAmount - (boundaryDistance - ScreenHeight);
                 }
             }
-            else if (PlayerDirection == enDirection.Left)
+            else if (playerDirection == Direction.Left)
             {
-                var BoundaryDistance = PlayerXPos - CheckMovementAmount;
-                if (BoundaryDistance < 0)
+                var boundaryDistance = playerXPos - checkMovementAmount;
+                if (boundaryDistance < 0)
                 {
                     // if we're blob we can change screens!
-                    CheckMovementAmount = CheckMovementAmount + BoundaryDistance;
+                    checkMovementAmount = checkMovementAmount + boundaryDistance;
                 }
             }
-            else if (PlayerDirection == enDirection.Right)
+            else if (playerDirection == Direction.Right)
             {
-                var BoundaryDistance = PlayerXPos + PlayerWidth + CheckMovementAmount;
-                if (BoundaryDistance > ScreenWidth)
+                var boundaryDistance = playerXPos + playerWidth + checkMovementAmount;
+                if (boundaryDistance > ScreenWidth)
                 {
                     // if we're blob we can change screens!
-                    CheckMovementAmount = CheckMovementAmount - (BoundaryDistance - ScreenWidth);
+                    checkMovementAmount = checkMovementAmount - (boundaryDistance - ScreenWidth);
                 }
             }
         }
 
-        return CheckMovementAmount;
+        return checkMovementAmount;
     }
 
     public Point ConvertToScreenCoords(int tileMapXPos, int tileMapYPos)
         => new(
-            tileMapXPos * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+            tileMapXPos * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
                 .SpriteWidth,
-            tileMapYPos * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+            tileMapYPos * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
                 .SpriteHeight);
 
-    public List<Point> GetCoordsOfTiles(int TileType)
+    public List<Point> GetCoordsOfTiles(int tileType)
     {
-        List<Point> ReturnedTiles = null;
+        List<Point> returnedTiles = null;
 
         for (var y = 0; y < TilesDown; y++)
         {
             for (var x = 0; x < TilesAcross; x++)
             {
-                if (gameScreens[screenNumber].ScreenTiles[x, y].TileImage == TileType)
+                if (_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage == tileType)
                 {
-                    if (ReturnedTiles == null)
+                    if (returnedTiles == null)
                     {
-                        ReturnedTiles = new List<Point>();
+                        returnedTiles = new List<Point>();
                     }
 
-                    ReturnedTiles.Add(new Point(
-                        x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                    returnedTiles.Add(new Point(
+                        x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
                             .SpriteWidth,
-                        y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                        y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
                             .SpriteHeight));
                 }
             }
         }
 
-        return ReturnedTiles;
+        return returnedTiles;
     }
 
-    public Point[] GetCoordsOfTiles(int[] TileTypes)
+    public Point[] GetCoordsOfTiles(int[] tileTypes)
     {
-        List<Point> ReturnedTiles = null;
+        List<Point> returnedTiles = null;
 
         for (var y = 0; y < TilesDown; y++)
         {
             for (var x = 0; x < TilesAcross; x++)
             {
-                if (TileTypes.Contains(gameScreens[screenNumber].ScreenTiles[x, y].TileImage))
+                if (tileTypes.Contains(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage))
                 {
-                    if (ReturnedTiles == null)
+                    if (returnedTiles == null)
                     {
-                        ReturnedTiles = new List<Point>();
+                        returnedTiles = new List<Point>();
                     }
 
-                    ReturnedTiles.Add(new Point(
-                        x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                    returnedTiles.Add(new Point(
+                        x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
                             .SpriteWidth,
-                        y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                        y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
                             .SpriteHeight));
                 }
             }
         }
 
-        if (ReturnedTiles != null && ReturnedTiles.Count > 0)
+        if (returnedTiles != null && returnedTiles.Count > 0)
         {
-            return ReturnedTiles.OrderByDescending(rt => rt.Y).ToArray();
+            return returnedTiles.OrderByDescending(rt => rt.Y).ToArray();
         }
 
         return null;
@@ -899,161 +903,161 @@ public class GameScreenCollection : GameComponentBase
 
     public List<KeyLockDoor> GetKeyLockDoors()
     {
-        List<KeyLockDoor> ReturnedTiles = null;
+        List<KeyLockDoor> returnedTiles = null;
 
         for (var y = 0; y < TilesDown; y++)
         {
             for (var x = 0; x < TilesAcross; x++)
             {
-                if (gameScreens[screenNumber].ScreenTiles[x, y].TileImage == 419)
+                if (_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage == 419)
                 {
-                    if (ReturnedTiles == null)
+                    if (returnedTiles == null)
                     {
-                        ReturnedTiles = new List<KeyLockDoor>();
+                        returnedTiles = new List<KeyLockDoor>();
                     }
 
-                    ReturnedTiles.Add(new KeyLockDoor
+                    returnedTiles.Add(new KeyLockDoor
                     {
                         Location = new Point(
-                            x * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth,
-                            y * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight)
+                            x * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth,
+                            y * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight)
                     });
                 }
             }
         }
 
-        return ReturnedTiles;
+        return returnedTiles;
     }
 
-    public List<Point> GetCoordsOfTiles(int TileType, int ScreenNumber)
+    public List<Point> GetCoordsOfTiles(int tileType, int screenNumber)
     {
-        List<Point> ReturnedTiles = null;
+        List<Point> returnedTiles = null;
 
         for (var y = 0; y < TilesDown; y++)
         {
             for (var x = 0; x < TilesAcross; x++)
             {
-                if (gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == TileType)
+                if (_gameScreens[screenNumber].ScreenTiles[x, y].TileImage == tileType)
                 {
-                    if (ReturnedTiles == null)
+                    if (returnedTiles == null)
                     {
-                        ReturnedTiles = new List<Point>();
+                        returnedTiles = new List<Point>();
                     }
 
-                    ReturnedTiles.Add(new Point(
-                        x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                    returnedTiles.Add(new Point(
+                        x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
                             .SpriteWidth,
-                        y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                        y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
                             .SpriteHeight));
                 }
             }
         }
 
-        return ReturnedTiles;
+        return returnedTiles;
     }
 
     public TileDetected CheckTileByObject(
-        enDirection DirectionToCheck,
-        int PlayerXPos,
-        int PlayerYPos,
-        int PlayerWidth,
-        int PlayerHeight,
-        int Velocity)
+        Direction directionToCheck,
+        int playerXPos,
+        int playerYPos,
+        int playerWidth,
+        int playerHeight,
+        int velocity)
     {
         for (var y = 0; y < TilesDown; y++)
         {
             for (var x = 0; x < TilesAcross; x++)
             {
-                if (gameScreens[screenNumber].ScreenTiles[x, y].TileImage > -1)
+                if (_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage > -1)
                 {
                     var tileRect = new Rectangle(
-                        x * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                        x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
                             .SpriteWidth,
-                        y * gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                        y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
                             .SpriteHeight,
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
                             .SpriteWidth,
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
                             .SpriteHeight);
 
-                    var Xpos = 0;
-                    var Ypos = 0;
+                    var xpos = 0;
+                    var ypos = 0;
 
-                    if (DirectionToCheck == enDirection.Up)
+                    if (directionToCheck == Direction.Up)
                     {
                         if (CollisionDetection.Check(
-                                new Rectangle(PlayerXPos, PlayerYPos - Velocity, PlayerWidth, PlayerHeight),
+                                new Rectangle(playerXPos, playerYPos - velocity, playerWidth, playerHeight),
                                 tileRect))
                         {
-                            Xpos = PlayerXPos - x * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth;
-                            Ypos = PlayerYPos + PlayerHeight - y * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight;
+                            xpos = playerXPos - x * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth;
+                            ypos = playerYPos + playerHeight - y * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight;
 
-                            return new TileDetected(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, Xpos,
-                                Ypos, x, y);
+                            return new TileDetected(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, xpos,
+                                ypos, x, y);
                         }
                     }
-                    else if (DirectionToCheck == enDirection.Down)
+                    else if (directionToCheck == Direction.Down)
                     {
                         if (CollisionDetection.Check(
-                                new Rectangle(PlayerXPos, PlayerYPos + PlayerHeight, PlayerWidth, Velocity),
+                                new Rectangle(playerXPos, playerYPos + playerHeight, playerWidth, velocity),
                                 tileRect))
                         {
-                            Xpos = PlayerXPos - x * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth;
-                            Ypos = PlayerYPos + PlayerHeight - y * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight;
+                            xpos = playerXPos - x * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth;
+                            ypos = playerYPos + playerHeight - y * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight;
 
-                            return new TileDetected(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, Xpos,
-                                Ypos, x, y);
+                            return new TileDetected(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, xpos,
+                                ypos, x, y);
                         }
                     }
-                    else if (DirectionToCheck == enDirection.Left)
+                    else if (directionToCheck == Direction.Left)
                     {
                         if (CollisionDetection.Check(
-                                new Rectangle(PlayerXPos - Velocity, PlayerYPos, PlayerWidth, PlayerHeight),
+                                new Rectangle(playerXPos - velocity, playerYPos, playerWidth, playerHeight),
                                 tileRect))
                         {
-                            Xpos = PlayerXPos - x * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth;
-                            Ypos = PlayerYPos - y * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight;
+                            xpos = playerXPos - x * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth;
+                            ypos = playerYPos - y * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight;
 
-                            return new TileDetected(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, Xpos,
-                                Ypos, x, y);
+                            return new TileDetected(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, xpos,
+                                ypos, x, y);
                         }
                     }
-                    else if (DirectionToCheck == enDirection.Right)
+                    else if (directionToCheck == Direction.Right)
                     {
                         if (CollisionDetection.Check(
-                                new Rectangle(PlayerXPos, PlayerYPos, PlayerWidth + Velocity, PlayerHeight),
+                                new Rectangle(playerXPos, playerYPos, playerWidth + velocity, playerHeight),
                                 tileRect))
                         {
-                            Xpos = PlayerXPos - x * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth;
-                            Ypos = PlayerYPos - y * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight;
+                            xpos = playerXPos - x * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth;
+                            ypos = playerYPos - y * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight;
 
-                            return new TileDetected(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, Xpos,
-                                Ypos, x, y);
+                            return new TileDetected(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, xpos,
+                                ypos, x, y);
                         }
                     }
-                    else if (DirectionToCheck == enDirection.None)
+                    else if (directionToCheck == Direction.None)
                     {
                         if (CollisionDetection.Check(
-                                new Rectangle(PlayerXPos, PlayerYPos, PlayerWidth, PlayerHeight),
+                                new Rectangle(playerXPos, playerYPos, playerWidth, playerHeight),
                                 tileRect))
                         {
-                            Xpos = PlayerXPos - x * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth;
-                            Ypos = PlayerYPos - y * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight;
+                            xpos = playerXPos - x * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth;
+                            ypos = playerYPos - y * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight;
 
-                            return new TileDetected(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, Xpos,
-                                Ypos, x, y);
+                            return new TileDetected(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, xpos,
+                                ypos, x, y);
                         }
                     }
                 }
@@ -1067,21 +1071,21 @@ public class GameScreenCollection : GameComponentBase
     public override void Update(GameTime gameTime)
     {
         // 419 is the key access door tile
-        if (keyLockDoors == null)
+        if (_keyLockDoors == null)
         {
-            keyLockDoors = GetKeyLockDoors();
+            _keyLockDoors = GetKeyLockDoors();
         }
 
-        if (keyLockDoors != null)
+        if (_keyLockDoors != null)
         {
-            if (keyDoorForceFieldNoAccess != null)
+            if (_keyDoorForceFieldNoAccess != null)
             {
-                keyDoorForceFieldNoAccess.Start();
+                _keyDoorForceFieldNoAccess.Start();
 
-                for (var b = 0; b < keyLockDoors.Count; b++)
+                for (var b = 0; b < _keyLockDoors.Count; b++)
                 {
                     // Create the collision map
-                    if (keyLockDoors[b].CollisionTiles.Count == 0) // If the collision map doesn't exist, create it
+                    if (_keyLockDoors[b].CollisionTiles.Count == 0) // If the collision map doesn't exist, create it
                     {
                         CollisionTile keyLockCollisionTile = null;
 
@@ -1090,79 +1094,79 @@ public class GameScreenCollection : GameComponentBase
                             keyLockCollisionTile =
                                 new CollisionTile(
                                     (int)CollisionObjectType.KeyAccessDoor, // Random image that's meaningless
-                                    keyLockDoors[b].Location.X + 48,
-                                    keyLockDoors[b].Location.Y + c * 32,
+                                    _keyLockDoors[b].Location.X + 48,
+                                    _keyLockDoors[b].Location.Y + c * 32,
                                     CollisionTileType.None);
 
                             // Add the tile to the keylock door so we can remove it later
-                            keyLockDoors[b].CollisionTiles.Add(keyLockCollisionTile);
+                            _keyLockDoors[b].CollisionTiles.Add(keyLockCollisionTile);
 
                             // Add the tile to the collision map
-                            gameScreens[ScreenNumber].CollisionMap.Add(keyLockCollisionTile);
+                            _gameScreens[ScreenNumber].CollisionMap.Add(keyLockCollisionTile);
                         }
                     }
 
-                    keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseColour =
+                    _keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseColour =
                         new Color(100, 100, 100).ToVector3();
-                    keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseQuantity = 100;
-                    keyDoorForceFieldNoAccess.Effect["Emitter01"].BlendMode = EmitterBlendMode.Alpha;
+                    _keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseQuantity = 100;
+                    _keyDoorForceFieldNoAccess.Effect["Emitter01"].BlendMode = EmitterBlendMode.Alpha;
 
-                    keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseColour =
+                    _keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseColour =
                         new Color(100, 100, 100).ToVector3();
-                    keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseQuantity = 100;
-                    keyDoorForceFieldNoAccess.Effect["Emitter05"].BlendMode = EmitterBlendMode.Alpha;
+                    _keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseQuantity = 100;
+                    _keyDoorForceFieldNoAccess.Effect["Emitter05"].BlendMode = EmitterBlendMode.Alpha;
 
                     for (var c = 0; c < 4; c++)
                     {
-                        keyDoorForceFieldNoAccess.Update(keyLockDoors[b].Location.X + 52 + c,
-                            keyLockDoors[b].Location.Y + 48, gameTime);
+                        _keyDoorForceFieldNoAccess.Update(_keyLockDoors[b].Location.X + 52 + c,
+                            _keyLockDoors[b].Location.Y + 48, gameTime);
                     }
 
                     for (var c = 0; c < 4; c++)
                     {
-                        keyDoorForceFieldNoAccess.Update(keyLockDoors[b].Location.X + 76 + c,
-                            keyLockDoors[b].Location.Y + 48, gameTime);
+                        _keyDoorForceFieldNoAccess.Update(_keyLockDoors[b].Location.X + 76 + c,
+                            _keyLockDoors[b].Location.Y + 48, gameTime);
                     }
 
                     // Change colour of the gate depending on whether blob has the access key or not
-                    if (gameEngine.Player.BlobInventory.Contains(enCollectables.Key))
+                    if (GameEngine.Player.BlobInventory.Contains(Collectables.Key))
                     {
-                        keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseColour =
+                        _keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseColour =
                             new Color(0, 255, 0).ToVector3();
-                        keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseColour =
+                        _keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseColour =
                             new Color(0, 255, 0).ToVector3();
 
                         // Change collision tiles to anyone but Blob
-                        for (var c = 0; c < keyLockDoors[b].CollisionTiles.Count; c++)
+                        for (var c = 0; c < _keyLockDoors[b].CollisionTiles.Count; c++)
                         {
                             // Remove the tile from screen and from the key door lock collection
-                            keyLockDoors[b].CollisionTiles[c].CollisionTileType = CollisionTileType.NotBlob;
+                            _keyLockDoors[b].CollisionTiles[c].CollisionTileType = CollisionTileType.NotBlob;
                         }
                     }
                     else
                     {
-                        keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseColour =
+                        _keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseColour =
                             new Color(255, 0, 0).ToVector3();
-                        keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseColour =
+                        _keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseColour =
                             new Color(255, 0, 0).ToVector3();
 
                         // Change collision tiles to everyone
-                        for (var c = 0; c < keyLockDoors[b].CollisionTiles.Count; c++)
+                        for (var c = 0; c < _keyLockDoors[b].CollisionTiles.Count; c++)
                         {
                             // Remove the tile from screen and from the key door lock collection
-                            keyLockDoors[b].CollisionTiles[c].CollisionTileType = CollisionTileType.EveryoneHits;
+                            _keyLockDoors[b].CollisionTiles[c].CollisionTileType = CollisionTileType.EveryoneHits;
                         }
                     }
 
-                    keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseQuantity = 10;
-                    keyDoorForceFieldNoAccess.Effect["Emitter01"].BlendMode = EmitterBlendMode.Add;
-                    keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseQuantity = 10;
-                    keyDoorForceFieldNoAccess.Effect["Emitter05"].BlendMode = EmitterBlendMode.Add;
+                    _keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseQuantity = 10;
+                    _keyDoorForceFieldNoAccess.Effect["Emitter01"].BlendMode = EmitterBlendMode.Add;
+                    _keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseQuantity = 10;
+                    _keyDoorForceFieldNoAccess.Effect["Emitter05"].BlendMode = EmitterBlendMode.Add;
 
                     for (var c = 0; c < 12; c++)
                     {
-                        keyDoorForceFieldNoAccess.Update(keyLockDoors[b].Location.X + 60 + c,
-                            keyLockDoors[b].Location.Y + 48, gameTime);
+                        _keyDoorForceFieldNoAccess.Update(_keyLockDoors[b].Location.X + 60 + c,
+                            _keyLockDoors[b].Location.Y + 48, gameTime);
                     }
                 }
             }
@@ -1170,138 +1174,138 @@ public class GameScreenCollection : GameComponentBase
 
         if (ScreenNumber == 477)
         {
-            ollyEyesX = 486;
-            ollyEyesY = 206;
+            _ollyEyesX = 486;
+            _ollyEyesY = 206;
 
-            ollyEyesX = ollyEyesX + (gameEngine.Player.BlobXPos - 350) / 44;
-            ollyEyesY = ollyEyesY + gameEngine.Player.BlobYPos / 20;
+            _ollyEyesX = _ollyEyesX + (GameEngine.Player.BlobXPos - 350) / 44;
+            _ollyEyesY = _ollyEyesY + GameEngine.Player.BlobYPos / 20;
         }
 
-        gameEngine.ContentResourceManager.GetAnimationEngine().Update(gameTime);
-        gameEngine.ColourAnimationEngine.Update(gameTime);
+        GameEngine.ContentResourceManager.GetAnimationEngine().Update(gameTime);
+        GameEngine.ColourAnimationEngine.Update(gameTime);
     }
 
-    public void DrawCoreElements(int XPos, int YPos, GameTime gameTime)
+    public void DrawCoreElements(int xPos, int yPos, GameTime gameTime)
     {
         var objNo = 0;
 
-        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName)
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName)
             .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
         for (var y = 0; y < 3; y++)
         {
             for (var x = 0; x < 3; x++)
             {
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName)
-                    .DrawSprite(objNo, x * 64 + XPos, y * 64 + YPos, Color.White);
+                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName)
+                    .DrawSprite(objNo, x * 64 + xPos, y * 64 + yPos, Color.White);
                 objNo++;
             }
         }
 
-        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).End();
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).End();
     }
 
-    public void Draw(Color Colour, GameTime gameTime, bool IntroSequenceRunning = false,
-        enIntroSequenceStage IntroSequenceStage = enIntroSequenceStage.None)
+    public void Draw(Color colour, GameTime gameTime, bool introSequenceRunning = false,
+        IntroSequenceStage introSequenceStage = IntroSequenceStage.None)
     {
         for (var y = 0; y < TilesDown; y++)
         {
             for (var x = 0; x < TilesAcross; x++)
             {
-                if (gameScreens[screenNumber].ScreenTiles[x, y].TileImage > -1 &&
-                    gameScreens[screenNumber].ScreenTiles[x, y].TileImage !=
-                    (int)enActionTiles.BlankFiller && // The blank spacer tile
-                    gameScreens[screenNumber].ScreenTiles[x, y].TileImage !=
-                    (int)enActionTiles.ConveyerNasty && // Tile representing conveyer nasties
-                    gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)enActionTiles.TunnelLiftTile &&
-                    gameScreens[screenNumber].ScreenTiles[x, y].TileImage !=
-                    (int)enActionTiles.PreferredCoreLocation) // Tile representing preferred pickup location
+                if (_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage > -1 &&
+                    _gameScreens[_screenNumber].ScreenTiles[x, y].TileImage !=
+                    (int)ActionTiles.BlankFiller && // The blank spacer tile
+                    _gameScreens[_screenNumber].ScreenTiles[x, y].TileImage !=
+                    (int)ActionTiles.ConveyerNasty && // Tile representing conveyer nasties
+                    _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)ActionTiles.TunnelLiftTile &&
+                    _gameScreens[_screenNumber].ScreenTiles[x, y].TileImage !=
+                    (int)ActionTiles.PreferredCoreLocation) // Tile representing preferred pickup location
 
                 {
                     // Avoid the tunnel tiles
-                    if (gameScreens[screenNumber].ScreenTiles[x, y].TileImage < 419)
+                    if (_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage < 419)
                     {
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
                             .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
-                            .DrawSprite(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, x * tileWidth,
-                                y * tileHeight, Colour);
-                        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
+                            .DrawSprite(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, x * _tileWidth,
+                                y * _tileHeight, colour);
+                        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
                             .End();
                     }
 
                     // Draw animation portions
-                    gameEngine.ContentResourceManager.GetAnimationEngine().Draw(
-                        gameScreens[screenNumber].ScreenTiles[x, y].TileImage, x * tileWidth, y * tileHeight,
-                        Colour, gameTime);
+                    GameEngine.ContentResourceManager.GetAnimationEngine().Draw(
+                        _gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, x * _tileWidth, y * _tileHeight,
+                        colour, gameTime);
                 }
             }
         }
 
         // Draw Animation engine normal layer
-        gameEngine.ColourAnimationEngine.Draw(gameTime, Colour.A);
+        GameEngine.ColourAnimationEngine.Draw(gameTime, colour.A);
 
         // Draw Powerups
-        if ((!IntroSequenceRunning || IntroSequenceStage == enIntroSequenceStage.EndPause) &&
+        if ((!introSequenceRunning || introSequenceStage == IntroSequenceStage.EndPause) &&
             CurrentGameScreenData.PowerUp != null)
         {
-            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PowerUpsName)
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PowerUpsName)
                 .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
-            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PowerUpsName).DrawSprite(
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PowerUpsName).DrawSprite(
                 CurrentGameScreenData.PowerUp.Type, CurrentGameScreenData.PowerUp.XLocation,
-                CurrentGameScreenData.PowerUp.YLocation, Colour);
-            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PowerUpsName).End();
+                CurrentGameScreenData.PowerUp.YLocation, colour);
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PowerUpsName).End();
         }
 
         // Draw Pickups
-        if ((!IntroSequenceRunning || IntroSequenceStage == enIntroSequenceStage.EndPause) &&
+        if ((!introSequenceRunning || introSequenceStage == IntroSequenceStage.EndPause) &&
             CurrentGameScreenData.PickUps != null)
         {
-            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName)
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName)
                 .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
             for (var a = 0; a < CurrentGameScreenData.PickUps.Count; a++)
             {
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).DrawSprite(
+                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).DrawSprite(
                     CurrentGameScreenData.PickUps[a].Type, CurrentGameScreenData.PickUps[a].XLocation,
-                    CurrentGameScreenData.PickUps[a].YLocation, Colour);
+                    CurrentGameScreenData.PickUps[a].YLocation, colour);
             }
 
-            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).End();
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).End();
         }
 
         // Draw Cheops pyramids
-        if ((!IntroSequenceRunning || IntroSequenceStage == enIntroSequenceStage.EndPause) &&
+        if ((!introSequenceRunning || introSequenceStage == IntroSequenceStage.EndPause) &&
             CurrentGameScreenData.CheopsPyramid != null)
         {
-            if (gameEngine.UsingOldGraphics)
+            if (GameEngine.UsingOldGraphics)
             {
-                gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal")
+                GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal")
                     .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").DrawSprite(0,
+                GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").DrawSprite(0,
                     CurrentGameScreenData.CheopsPyramid.XLocation, CurrentGameScreenData.CheopsPyramid.YLocation,
-                    Colour);
-                gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").End();
+                    colour);
+                GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").End();
             }
             else
             {
-                gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid")
+                GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid")
                     .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").DrawSprite(0,
+                GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").DrawSprite(0,
                     CurrentGameScreenData.CheopsPyramid.XLocation, CurrentGameScreenData.CheopsPyramid.YLocation,
-                    Colour);
-                gameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").End();
+                    colour);
+                GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").End();
             }
         }
 
         // Draw olly background
         if (ScreenNumber == 477)
         {
-            if (!gameEngine.UsingOldGraphics)
+            if (!GameEngine.UsingOldGraphics)
             {
-                gameEngine.ContentResourceManager.GetSpriteCollection("OllyBackground")
+                GameEngine.ContentResourceManager.GetSpriteCollection("OllyBackground")
                     .Begin(BlendState.AlphaBlend, gameTime);
-                gameEngine.ContentResourceManager.GetSpriteCollection("OllyBackground")
-                    .DrawSprite(0, 382, 146, Colour);
-                gameEngine.ContentResourceManager.GetSpriteCollection("OllyBackground").End();
+                GameEngine.ContentResourceManager.GetSpriteCollection("OllyBackground")
+                    .DrawSprite(0, 382, 146, colour);
+                GameEngine.ContentResourceManager.GetSpriteCollection("OllyBackground").End();
             }
         }
 
@@ -1319,7 +1323,7 @@ public class GameScreenCollection : GameComponentBase
         */
     }
 
-    public void DrawUpperLayer(Color Colour, GameTime gameTime)
+    public void DrawUpperLayer(Color colour, GameTime gameTime)
     {
         // Draw Tunnel Patches
 
@@ -1327,88 +1331,88 @@ public class GameScreenCollection : GameComponentBase
         {
             for (var x = 0; x < TilesAcross; x++)
             {
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName)
                     .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
                 if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 396)
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName)
                         .DrawSprite(0,
-                            x * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth,
-                            y * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight, Colour);
+                            x * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth,
+                            y * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight, colour);
                 }
                 else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 407)
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName)
                         .DrawSprite(0,
-                            x * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth,
-                            y * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight, Colour);
+                            x * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth,
+                            y * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight, colour);
                 }
                 else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 408)
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName)
                         .DrawSprite(1,
-                            x * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth,
-                            y * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight, Colour);
+                            x * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth,
+                            y * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight, colour);
                 }
                 else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 409)
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName)
                         .DrawSprite(2,
-                            x * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth,
-                            y * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight, Colour);
+                            x * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth,
+                            y * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight, colour);
                 }
                 else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 412)
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName)
                         .DrawSprite(3,
-                            x * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth,
-                            y * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight, Colour);
+                            x * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth,
+                            y * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight, colour);
                 }
                 else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 413)
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName)
                         .DrawSprite(4,
-                            x * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth,
-                            y * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight, Colour);
+                            x * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth,
+                            y * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight, colour);
                 }
                 else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 414)
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName)
                         .DrawSprite(5,
-                            x * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth,
-                            y * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight, Colour);
+                            x * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth,
+                            y * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight, colour);
                 }
                 else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 415)
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName)
                         .DrawSprite(6,
-                            x * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth,
-                            y * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight, Colour);
+                            x * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth,
+                            y * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight, colour);
                 }
                 else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 397) // Teleport booths
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName)
                         .DrawSprite(7,
-                            x * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth,
-                            y * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight, Colour);
+                            x * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth,
+                            y * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight, colour);
                 }
                 else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 377 ||
                          CurrentGameScreenData.ScreenTiles[x, y].TileImage == 378 ||
@@ -1420,30 +1424,30 @@ public class GameScreenCollection : GameComponentBase
                          CurrentGameScreenData.ScreenTiles[x, y].TileImage == 389
                         ) // Shadows
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName)
                         .DrawSprite(8,
-                            x * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth,
-                            (y + 1) * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight, Colour);
+                            x * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth,
+                            (y + 1) * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight, colour);
                 }
                 else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 399) // Access booth left
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName)
                         .DrawSprite(9,
-                            x * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth,
-                            y * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight, Colour);
+                            x * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth,
+                            y * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight, colour);
                 }
                 else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 400) // Access booth right
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName)
                         .DrawSprite(10,
-                            x * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth,
-                            y * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight, Colour);
+                            x * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth,
+                            y * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight, colour);
                 }
                 else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 420 ||
                          CurrentGameScreenData.ScreenTiles[x, y].TileImage == 422 ||
@@ -1456,12 +1460,12 @@ public class GameScreenCollection : GameComponentBase
                          CurrentGameScreenData.ScreenTiles[x, y].TileImage == 436 ||
                          CurrentGameScreenData.ScreenTiles[x, y].TileImage == 438)
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName)
                         .DrawSprite(11,
-                            x * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth,
-                            y * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight, Colour);
+                            x * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth,
+                            y * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight, colour);
                 }
                 else if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == 421 ||
                          CurrentGameScreenData.ScreenTiles[x, y].TileImage == 423 ||
@@ -1474,25 +1478,25 @@ public class GameScreenCollection : GameComponentBase
                          CurrentGameScreenData.ScreenTiles[x, y].TileImage == 437 ||
                          CurrentGameScreenData.ScreenTiles[x, y].TileImage == 439)
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName)
+                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName)
                         .DrawSprite(12,
-                            x * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteWidth,
-                            y * gameEngine.ContentResourceManager
-                                .GetSpriteCollection(gameEngine.LowerScreenTilesName).SpriteHeight, Colour);
+                            x * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth,
+                            y * GameEngine.ContentResourceManager
+                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight, colour);
                 }
 
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).End();
+                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).End();
 
                 // Draw Tunnel entrances
                 if (CurrentGameScreenData.ScreenTiles[x, y].TileImage > 418)
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
+                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
                         .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
-                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName)
-                        .DrawSprite(gameScreens[screenNumber].ScreenTiles[x, y].TileImage, x * tileWidth,
-                            y * tileHeight, Colour);
-                    gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).End();
+                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
+                        .DrawSprite(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, x * _tileWidth,
+                            y * _tileHeight, colour);
+                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).End();
                 }
             }
         }
@@ -1500,57 +1504,57 @@ public class GameScreenCollection : GameComponentBase
         // Draw olly
         if (ScreenNumber == 477)
         {
-            if (gameEngine.UsingOldGraphics)
+            if (GameEngine.UsingOldGraphics)
             {
-                gameEngine.ContentResourceManager.GetSpriteCollection("OllyOriginal")
+                GameEngine.ContentResourceManager.GetSpriteCollection("OllyOriginal")
                     .Begin(BlendState.AlphaBlend, gameTime);
-                gameEngine.ContentResourceManager.GetSpriteCollection("OllyOriginal")
-                    .DrawSprite(0, 384, 100, Colour);
-                gameEngine.ContentResourceManager.GetSpriteCollection("OllyOriginal").End();
+                GameEngine.ContentResourceManager.GetSpriteCollection("OllyOriginal")
+                    .DrawSprite(0, 384, 100, colour);
+                GameEngine.ContentResourceManager.GetSpriteCollection("OllyOriginal").End();
             }
             else
             {
-                gameEngine.ContentResourceManager.GetSpriteCollection("OllyLower")
+                GameEngine.ContentResourceManager.GetSpriteCollection("OllyLower")
                     .Begin(BlendState.AlphaBlend, gameTime);
-                gameEngine.ContentResourceManager.GetSpriteCollection("OllyLower").DrawSprite(0, 382, 146, Colour);
-                gameEngine.ContentResourceManager.GetSpriteCollection("OllyLower").End();
+                GameEngine.ContentResourceManager.GetSpriteCollection("OllyLower").DrawSprite(0, 382, 146, colour);
+                GameEngine.ContentResourceManager.GetSpriteCollection("OllyLower").End();
 
-                gameEngine.ContentResourceManager.GetSpriteCollection("OllyEyes")
+                GameEngine.ContentResourceManager.GetSpriteCollection("OllyEyes")
                     .Begin(BlendState.AlphaBlend, gameTime);
-                gameEngine.ContentResourceManager.GetSpriteCollection("OllyEyes")
-                    .DrawSprite(0, ollyEyesX, ollyEyesY, Colour);
-                gameEngine.ContentResourceManager.GetSpriteCollection("OllyEyes").End();
+                GameEngine.ContentResourceManager.GetSpriteCollection("OllyEyes")
+                    .DrawSprite(0, _ollyEyesX, _ollyEyesY, colour);
+                GameEngine.ContentResourceManager.GetSpriteCollection("OllyEyes").End();
 
-                gameEngine.ContentResourceManager.GetSpriteCollection("OllyUpper")
+                GameEngine.ContentResourceManager.GetSpriteCollection("OllyUpper")
                     .Begin(BlendState.AlphaBlend, gameTime);
-                gameEngine.ContentResourceManager.GetSpriteCollection("OllyUpper").DrawSprite(0, 450, 166, Colour);
-                gameEngine.ContentResourceManager.GetSpriteCollection("OllyUpper").End();
+                GameEngine.ContentResourceManager.GetSpriteCollection("OllyUpper").DrawSprite(0, 450, 166, colour);
+                GameEngine.ContentResourceManager.GetSpriteCollection("OllyUpper").End();
             }
         }
 
         // Draw Keydoor forcefields
-        if (keyLockDoors != null)
+        if (_keyLockDoors != null)
         {
-            if (keyDoorForceFieldNoAccess != null)
+            if (_keyDoorForceFieldNoAccess != null)
             {
-                keyDoorForceFieldNoAccess.Draw();
+                _keyDoorForceFieldNoAccess.Draw();
             }
         }
 
         // Draw Colour Animated Tiles
-        gameEngine.ColourAnimationEngine.DrawUpperLayer(gameTime, Colour.A);
+        GameEngine.ColourAnimationEngine.DrawUpperLayer(gameTime, colour.A);
     }
 
     public void DrawShadowing(GameTime gameTime)
     {
-        if (!gameEngine.UsingOldGraphics)
+        if (!GameEngine.UsingOldGraphics)
         {
             // Status panel shadow
-            gameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelShadow")
+            GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelShadow")
                 .Begin(BlendState.AlphaBlend, gameTime);
-            gameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelShadow")
+            GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelShadow")
                 .DrawSprite(0, 0, 0, Color.White);
-            gameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelShadow").End();
+            GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelShadow").End();
         }
     }
 
@@ -1562,10 +1566,10 @@ public class GameScreenCollection : GameComponentBase
         {
             for (var x = 0; x < TilesAcross; x++)
             {
-                var tileType = gameScreens[screenNumber].ScreenTiles[x, y].TileImage;
-                var tiletypeFound = (enTileType)tileType;
+                var tileType = _gameScreens[_screenNumber].ScreenTiles[x, y].TileImage;
+                var tiletypeFound = (TileType)tileType;
 
-                if (Enum.IsDefined(typeof(enTileType), tiletypeFound))
+                if (Enum.IsDefined(typeof(TileType), tiletypeFound))
                 {
                     tilesToReturn.Add(new SecondLayerTile(tiletypeFound, new Point(x * 128, y * 96)));
                 }
@@ -1585,7 +1589,7 @@ public class GameScreenCollection : GameComponentBase
 
         // Select 15 pickups to place on random screens
         var powerUpScreens = new List<int>();
-        for (var a = 0; a < pickUpCount; a++)
+        for (var a = 0; a < _pickUpCount; a++)
         {
             // Only place on screens where we can have more than 1 object
             var screenChosen = -1;
@@ -1608,7 +1612,7 @@ public class GameScreenCollection : GameComponentBase
         }
 
         // Add the access card and key to any screen up to ASCIO
-        for (var a = 0; a < gameScreens.Length; a++)
+        for (var a = 0; a < _gameScreens.Length; a++)
         {
             if (a != 199) // Core Screen
             {
@@ -1616,9 +1620,9 @@ public class GameScreenCollection : GameComponentBase
                 //
                 // Get a list of potential locations
                 // Start at line 1 - blob can't get stuff above here....
-                gameScreens[a].PickUps = new List<InteractiveItem>();
+                _gameScreens[a].PickUps = new List<InteractiveItem>();
 
-                var PotentialLocations = GetPotentialLocations(a);
+                var potentialLocations = GetPotentialLocations(a);
                 var placePickup = false;
                 for (var b = 0; b < powerUpScreens.Count; b++)
                 {
@@ -1630,20 +1634,20 @@ public class GameScreenCollection : GameComponentBase
                     }
                 }
 
-                if (PotentialLocations.Count > 0)
+                if (potentialLocations.Count > 0)
                 {
-                    var powerUpToSelect = r.Next(PotentialLocations.Count);
-                    gameScreens[a].PowerUp = new InteractiveItem(PotentialLocations[powerUpToSelect].XLocation,
-                        PotentialLocations[powerUpToSelect].YLocation, r.Next(8));
+                    var powerUpToSelect = r.Next(potentialLocations.Count);
+                    _gameScreens[a].PowerUp = new InteractiveItem(potentialLocations[powerUpToSelect].XLocation,
+                        potentialLocations[powerUpToSelect].YLocation, r.Next(8));
 
                     // Take the powerup location out of the list
-                    PotentialLocations.Remove(PotentialLocations[powerUpToSelect]);
+                    potentialLocations.Remove(potentialLocations[powerUpToSelect]);
 
                     // Place a pickup
                     if (placePickup)
                     {
                         // Now select another location for our pickup
-                        var pickUpToSelect = r.Next(PotentialLocations.Count);
+                        var pickUpToSelect = r.Next(potentialLocations.Count);
 
                         // Check to see if this screen has a preferred location
                         var preferredLocation = GetPreferredLocation(a);
@@ -1652,16 +1656,16 @@ public class GameScreenCollection : GameComponentBase
                         if (preferredLocation != null)
                         {
                             preferredLocation.Type = r.Next(28);
-                            gameScreens[a].PickUps.Add(preferredLocation);
-                            PotentialLocations.Remove(PotentialLocations[pickUpToSelect]);
+                            _gameScreens[a].PickUps.Add(preferredLocation);
+                            potentialLocations.Remove(potentialLocations[pickUpToSelect]);
                         }
                         else
                         {
                             // Place it in the normal randomly selected place
-                            gameScreens[a].PickUps.Add(new InteractiveItem(
-                                PotentialLocations[pickUpToSelect].XLocation,
-                                PotentialLocations[pickUpToSelect].YLocation, r.Next(28)));
-                            PotentialLocations.Remove(PotentialLocations[pickUpToSelect]);
+                            _gameScreens[a].PickUps.Add(new InteractiveItem(
+                                potentialLocations[pickUpToSelect].XLocation,
+                                potentialLocations[pickUpToSelect].YLocation, r.Next(28)));
+                            potentialLocations.Remove(potentialLocations[pickUpToSelect]);
                         }
                     }
                 }
@@ -1669,19 +1673,19 @@ public class GameScreenCollection : GameComponentBase
                 // Add a cheops pyramid
                 // Note in the final version we'll randomly decide if we are to place one on a particular screeen...
                 // Probably need a system to ensure that we place a minimum amount of these guys....
-                if (PotentialLocations.Count > 0)
+                if (potentialLocations.Count > 0)
                 {
-                    var cheopsLocationToSelect = r.Next(PotentialLocations.Count);
-                    gameScreens[a].CheopsPyramid = new InteractiveItem(
-                        PotentialLocations[cheopsLocationToSelect].XLocation,
-                        PotentialLocations[cheopsLocationToSelect].YLocation, 0);
+                    var cheopsLocationToSelect = r.Next(potentialLocations.Count);
+                    _gameScreens[a].CheopsPyramid = new InteractiveItem(
+                        potentialLocations[cheopsLocationToSelect].XLocation,
+                        potentialLocations[cheopsLocationToSelect].YLocation, 0);
 
                     // Setup the access code for the pyramid
                     // Ensure we get a unique code
                     do
                     {
-                        gameScreens[a].CheopsAccessCode = gameEngine.RandomNumberGenerator.Next(10, 100).ToString();
-                    } while (!CheckAccessCodeValidity(gameScreens[a].CheopsAccessCode));
+                        _gameScreens[a].CheopsAccessCode = GameEngine.RandomNumberGenerator.Next(10, 100).ToString();
+                    } while (!CheckAccessCodeValidity(_gameScreens[a].CheopsAccessCode));
                 }
 
                 // Setup access booth codes
@@ -1700,8 +1704,8 @@ public class GameScreenCollection : GameComponentBase
                     // Ensure we get a unique code
                     do
                     {
-                        gameScreens[a].AccessCode = gameEngine.RandomNumberGenerator.Next(100, 1000).ToString();
-                    } while (!CheckAccessCodeValidity(gameScreens[a].AccessCode));
+                        _gameScreens[a].AccessCode = GameEngine.RandomNumberGenerator.Next(100, 1000).ToString();
+                    } while (!CheckAccessCodeValidity(_gameScreens[a].AccessCode));
                 }
             }
         }
@@ -1710,24 +1714,24 @@ public class GameScreenCollection : GameComponentBase
         var screensContainingCheopsPyramid = new List<GameScreenData>();
         var screensContainingCoreElements = new List<GameScreenData>();
 
-        for (var a = 0; a < gameScreens.Length; a++)
+        for (var a = 0; a < _gameScreens.Length; a++)
         {
             // Only add screens with a cheops pyramid assigned
-            if (gameScreens[a].CheopsPyramid != null)
+            if (_gameScreens[a].CheopsPyramid != null)
             {
-                screensContainingCheopsPyramid.Add(gameScreens[a]);
+                screensContainingCheopsPyramid.Add(_gameScreens[a]);
             }
 
             // Only add screens with a core element assigned
-            if (gameScreens[a].PickUps != null &&
-                gameScreens[a].PickUps.Count > 0)
+            if (_gameScreens[a].PickUps != null &&
+                _gameScreens[a].PickUps.Count > 0)
             {
-                for (var b = 0; b < gameScreens[a].PickUps.Count; b++)
+                for (var b = 0; b < _gameScreens[a].PickUps.Count; b++)
                 {
-                    if ((enCollectables)gameScreens[a].PickUps[b].Type != enCollectables.AccessCard ||
-                        (enCollectables)gameScreens[a].PickUps[b].Type != enCollectables.Key)
+                    if ((Collectables)_gameScreens[a].PickUps[b].Type != Collectables.AccessCard ||
+                        (Collectables)_gameScreens[a].PickUps[b].Type != Collectables.Key)
                     {
-                        screensContainingCoreElements.Add(gameScreens[a]);
+                        screensContainingCoreElements.Add(_gameScreens[a]);
                         break;
                     }
                 }
@@ -1735,12 +1739,12 @@ public class GameScreenCollection : GameComponentBase
         }
 
         // Remove pyramids until we reach the max number we're allowed to have
-        while (screensContainingCheopsPyramid.Count > c_maxCheops)
+        while (screensContainingCheopsPyramid.Count > CMaxCheops)
         {
             // Randomly select a cheops from the list of screens
             var temp =
                 screensContainingCheopsPyramid[
-                    gameEngine.RandomNumberGenerator.Next(0, screensContainingCheopsPyramid.Count)];
+                    GameEngine.RandomNumberGenerator.Next(0, screensContainingCheopsPyramid.Count)];
 
             // Remove it
             temp.CheopsPyramid = null;
@@ -1750,12 +1754,12 @@ public class GameScreenCollection : GameComponentBase
         }
 
         // Remove core elements until we reach the max number we're allowed to have
-        while (screensContainingCoreElements.Count > c_maxCoreElements)
+        while (screensContainingCoreElements.Count > CMaxCoreElements)
         {
             // Randomly select a pickup from the list of screens
             var temp =
                 screensContainingCoreElements[
-                    gameEngine.RandomNumberGenerator.Next(0, screensContainingCoreElements.Count)];
+                    GameEngine.RandomNumberGenerator.Next(0, screensContainingCoreElements.Count)];
 
             // Remove them
             temp.PickUps = new List<InteractiveItem>();
@@ -1767,17 +1771,17 @@ public class GameScreenCollection : GameComponentBase
         // Set some of the core elements to match the core
         var tempElements = new List<CoreElement>();
 
-        for (var a = 0; a < gameEngine.Elements.GetActiveElements().Count; a++)
+        for (var a = 0; a < GameEngine.Elements.GetActiveElements().Count; a++)
         {
-            tempElements.Add(gameEngine.Elements.GetActiveElements()[a]);
+            tempElements.Add(GameEngine.Elements.GetActiveElements()[a]);
         }
 
         // Make a random number of the core elements on the map match what we need
-        var matchNumber = gameEngine.RandomNumberGenerator.Next(2, 6);
+        var matchNumber = GameEngine.RandomNumberGenerator.Next(2, 6);
 
         for (var a = 0; a < matchNumber; a++)
         {
-            var elementIndex = gameEngine.RandomNumberGenerator.Next(0, tempElements.Count);
+            var elementIndex = GameEngine.RandomNumberGenerator.Next(0, tempElements.Count);
             screensContainingCoreElements[a].PickUps[0].Type = tempElements[elementIndex].CurrentElement;
             tempElements.Remove(tempElements[elementIndex]);
         }
@@ -1788,8 +1792,8 @@ public class SecondLayerTile
 {
     public Point TileLocation;
 
-    public enTileType TileType;
-    public SecondLayerTile(enTileType tileType, Point tileLocation)
+    public TileType TileType;
+    public SecondLayerTile(TileType tileType, Point tileLocation)
     {
         TileType = tileType;
         TileLocation = tileLocation;

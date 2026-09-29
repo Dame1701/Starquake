@@ -115,23 +115,23 @@ public partial class TileCanvas : UserControl
         base.Render(context);
     }
 
-    private void InputElement_OnPointerEntered(object? Sender, PointerEventArgs E)
+    private void InputElement_OnPointerEntered(object? sender, PointerEventArgs e)
     {
         _mouseOnCanvas = false;
         InvalidateVisual();
     }
 
-    private void InputElement_OnPointerMoved(object? Sender, PointerEventArgs E)
+    private void InputElement_OnPointerMoved(object? sender, PointerEventArgs e)
     {
-        _mouseCoords = E.GetPosition(this);
+        _mouseCoords = e.GetPosition(this);
         InvalidateVisual();
 
-        base.OnPointerMoved(E);
+        base.OnPointerMoved(e);
     }
 
-    private void InputElement_OnPointerPressed(object? Sender, PointerPressedEventArgs E)
+    private void InputElement_OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        var point = E.GetCurrentPoint(Sender as Control);
+        var point = e.GetCurrentPoint(sender as Control);
 
         if (!point.Properties.IsLeftButtonPressed)
         {
@@ -149,13 +149,13 @@ public partial class TileCanvas : UserControl
         //}
     }
 
-    private void InputElement_OnPointerExited(object? Sender, PointerEventArgs E)
+    private void InputElement_OnPointerExited(object? sender, PointerEventArgs e)
     {
         _mouseOnCanvas = true;
         InvalidateVisual();
     }
 
-    private void Control_OnSizeChanged(object? Sender, SizeChangedEventArgs E)
+    private void Control_OnSizeChanged(object? sender, SizeChangedEventArgs e)
     {
         InvalidateVisual();
     }

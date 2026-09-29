@@ -9,11 +9,13 @@ using System.IO;
 using System.Threading;
 using MessagePack;
 using SharedLibs;
+using StarquakeXNA.Animations;
+using StarquakeXNA.Engines;
 using StarquakeXNA.Particles;
 using StarquakeXNA.Sounds;
 using StarquakeXNA.Structure;
 
-namespace StarquakeXNA;
+namespace StarquakeXNA.ContentManagement;
 
 internal class DataDescription
 {
@@ -68,12 +70,12 @@ internal class AnimSpriteDescription
 public class SoundDescription
 {
     public string FilePath;
-    public enSoundEffectInstanceType InstanceType;
+    public SoundEffectInstanceType InstanceType;
     public bool KillOnScreenChange;
     public int MaxInstances;
     public string ResourceName;
 
-    public SoundDescription(string resourceName, string filePath, enSoundEffectInstanceType instanceType, int maxInstances, bool killOnScreenChange)
+    public SoundDescription(string resourceName, string filePath, SoundEffectInstanceType instanceType, int maxInstances, bool killOnScreenChange)
     {
         ResourceName = resourceName;
         FilePath = filePath;
@@ -86,63 +88,63 @@ public class SoundDescription
 public class ResourceManager : StartableGameComponentBase
 {
 
-    private readonly AnimTileEngine animationTileEngine;
-    private readonly List<AnimSpriteDescription> animSpriteDescriptions;
-    private readonly List<DataDescription> dataDescriptions;
-    private readonly ParticleEngine particleEngine;
+    private readonly AnimTileEngine _animationTileEngine;
+    private readonly List<AnimSpriteDescription> _animSpriteDescriptions;
+    private readonly List<DataDescription> _dataDescriptions;
+    private readonly ParticleEngine _particleEngine;
 
-    private readonly Dictionary<string, object> resources;
-    private readonly List<SoundDescription> soundDescriptions;
+    private readonly Dictionary<string, object> _resources;
+    private readonly List<SoundDescription> _soundDescriptions;
 
     // Sound Engine
-    private readonly SoundEffectEngine soundEngine;
+    private readonly SoundEffectEngine _soundEngine;
 
-    private readonly List<SpriteDescription> spriteDescriptions;
-    private BackgroundWorker backgroundWorker;
+    private readonly List<SpriteDescription> _spriteDescriptions;
+    private BackgroundWorker _backgroundWorker;
 
-    public ResourceManager(GameEngine GameEngineInstance)
-        : base(GameEngineInstance)
+    public ResourceManager(GameEngine gameEngineInstance)
+        : base(gameEngineInstance)
     {
-        particleEngine = new ParticleEngine(gameEngineInstance);
-        animationTileEngine = new AnimTileEngine(gameEngineInstance);
-        soundEngine = new SoundEffectEngine(gameEngineInstance);
+        _particleEngine = new ParticleEngine(GameEngineInstance);
+        _animationTileEngine = new AnimTileEngine(GameEngineInstance);
+        _soundEngine = new SoundEffectEngine(GameEngineInstance);
 
-        spriteDescriptions = new List<SpriteDescription>();
-        animSpriteDescriptions = new List<AnimSpriteDescription>();
-        dataDescriptions = new List<DataDescription>();
-        soundDescriptions = new List<SoundDescription>();
+        _spriteDescriptions = new List<SpriteDescription>();
+        _animSpriteDescriptions = new List<AnimSpriteDescription>();
+        _dataDescriptions = new List<DataDescription>();
+        _soundDescriptions = new List<SoundDescription>();
 
-        resources = new Dictionary<string, object>();
+        _resources = new Dictionary<string, object>();
     }
 
     public void LoadContent()
     {
-        resources.Clear();
+        _resources.Clear();
 
-        backgroundWorker = new BackgroundWorker();
-        backgroundWorker.DoWork += backgroundWorker_DoWork;
-        backgroundWorker.RunWorkerCompleted += backgroundWorker_RunWorkerCompleted;
+        _backgroundWorker = new BackgroundWorker();
+        _backgroundWorker.DoWork += backgroundWorker_DoWork;
+        _backgroundWorker.RunWorkerCompleted += backgroundWorker_RunWorkerCompleted;
 
         UpdateStatus(
             "Loading content....",
             0,
             GameEngineStatus.Starting);
 
-        backgroundWorker.RunWorkerAsync();
+        _backgroundWorker.RunWorkerAsync();
     }
 
     public void Initialise()
     {
-        particleEngine.LoadContent();
+        _particleEngine.LoadContent();
     }
 
     private void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
     {
-        backgroundWorker.DoWork -= backgroundWorker_DoWork;
-        backgroundWorker.RunWorkerCompleted -= backgroundWorker_RunWorkerCompleted;
+        _backgroundWorker.DoWork -= backgroundWorker_DoWork;
+        _backgroundWorker.RunWorkerCompleted -= backgroundWorker_RunWorkerCompleted;
 
-        backgroundWorker.Dispose();
-        backgroundWorker = null;
+        _backgroundWorker.Dispose();
+        _backgroundWorker = null;
 
         UpdateStatus(
             "Launching Game.....",
@@ -158,15 +160,15 @@ public class ResourceManager : StartableGameComponentBase
             GameEngineStatus.Starting);
 
         var totalComponentsToLoad =
-            spriteDescriptions.Count +
-            dataDescriptions.Count +
-            animSpriteDescriptions.Count +
-            soundDescriptions.Count;
+            _spriteDescriptions.Count +
+            _dataDescriptions.Count +
+            _animSpriteDescriptions.Count +
+            _soundDescriptions.Count;
 
         var componentsLoaded = 0;
 
         // Sprite Resources
-        foreach (var t in spriteDescriptions)
+        foreach (var t in _spriteDescriptions)
         {
             UpdateStatus(
                 "Loading content, sprite set: '" + t.ResourceName + "'",
@@ -175,18 +177,18 @@ public class ResourceManager : StartableGameComponentBase
 
             var sc =
                 new SpriteCollection(
-                    gameEngineInstance,
-                    contentManagerInstance,
+                    GameEngineInstance,
+                    ContentManagerInstance,
                     t.FilePath,
                     t.Width,
                     t.Height);
 
-            resources.Add(t.ResourceName, sc);
+            _resources.Add(t.ResourceName, sc);
             componentsLoaded++;
         }
 
         // Anim Sprite Resources
-        foreach (var t in animSpriteDescriptions)
+        foreach (var t in _animSpriteDescriptions)
         {
             UpdateStatus(
                 "Loading content, anim sprite set: '" + t.ResourceName + "'",
@@ -195,21 +197,21 @@ public class ResourceManager : StartableGameComponentBase
 
             var sc =
                 new SpriteCollection(
-                    gameEngineInstance,
-                    contentManagerInstance,
+                    GameEngineInstance,
+                    ContentManagerInstance,
                     t.FilePath,
                     t.Width,
                     t.Height);
 
-            animationTileEngine.AnimTilesList.Add(new AnimTile(gameEngineInstance, t.TileToAnimate, sc, t.Delay));
+            _animationTileEngine.AnimTilesList.Add(new AnimTile(GameEngineInstance, t.TileToAnimate, sc, t.Delay));
             componentsLoaded++;
         }
 
-        particleEngine.LoadContent();
+        _particleEngine.LoadContent();
 
         // Data Resources
         // TODO this is hacked in right now need to improve
-        using (var fs = new FileStream(dataDescriptions[0].FilePath, FileMode.Open, FileAccess.Read))
+        using (var fs = new FileStream(_dataDescriptions[0].FilePath, FileMode.Open, FileAccess.Read))
         {
             // Read the length of the first array
             var lengthBuffer = new byte[sizeof(int)];
@@ -228,19 +230,19 @@ public class ResourceManager : StartableGameComponentBase
             var collisionTilesData = new byte[collisionTilesArraySize];
             fs.ReadExactly(collisionTilesData, 0, collisionTilesArraySize);
 
-            resources.Add(dataDescriptions[0].ResourceName, MessagePackSerializer.Deserialize<GameScreenData[]>(gameScreensData));
-            resources.Add(dataDescriptions[1].ResourceName, MessagePackSerializer.Deserialize<int[,,]>(collisionTilesData));
+            _resources.Add(_dataDescriptions[0].ResourceName, MessagePackSerializer.Deserialize<GameScreenData[]>(gameScreensData));
+            _resources.Add(_dataDescriptions[1].ResourceName, MessagePackSerializer.Deserialize<int[,,]>(collisionTilesData));
         }
 
         // Sound resources
-        foreach (var t in soundDescriptions)
+        foreach (var t in _soundDescriptions)
         {
             UpdateStatus(
                 "Loading content, sound effect: '" + t.ResourceName + "'",
                 (int)(componentsLoaded / (double)totalComponentsToLoad * 100),
                 GameEngineStatus.Starting);
 
-            soundEngine.LoadSoundEffect(t);
+            _soundEngine.LoadSoundEffect(t);
 
             componentsLoaded++;
         }
@@ -253,72 +255,72 @@ public class ResourceManager : StartableGameComponentBase
         Thread.Sleep(500);
     }
 
-    public void AddSpriteResource(string ResourceName, string FilePath, int SpriteWidth, int SpriteHeight)
+    public void AddSpriteResource(string resourceName, string filePath, int spriteWidth, int spriteHeight)
     {
-        spriteDescriptions.Add(new SpriteDescription(ResourceName, FilePath, SpriteWidth, SpriteHeight));
+        _spriteDescriptions.Add(new SpriteDescription(resourceName, filePath, spriteWidth, spriteHeight));
     }
 
-    public void AddAnimatedSpriteResource(string ResourceName, string FilePath, int SpriteWidth, int SpriteHeight, int TileToAnimate, int Delay)
+    public void AddAnimatedSpriteResource(string resourceName, string filePath, int spriteWidth, int spriteHeight, int tileToAnimate, int delay)
     {
-        animSpriteDescriptions.Add(new AnimSpriteDescription(ResourceName, FilePath, SpriteWidth, SpriteHeight, TileToAnimate, Delay));
+        _animSpriteDescriptions.Add(new AnimSpriteDescription(resourceName, filePath, spriteWidth, spriteHeight, tileToAnimate, delay));
     }
 
-    public void AddDataResource(string ResourceName, string FilePath, Type ResourceType)
+    public void AddDataResource(string resourceName, string filePath, Type resourceType)
     {
-        dataDescriptions.Add(new DataDescription(ResourceName, FilePath, ResourceType));
+        _dataDescriptions.Add(new DataDescription(resourceName, filePath, resourceType));
     }
 
-    public void AddParticleResource(string EffectName, string EffectPath)
+    public void AddParticleResource(string effectName, string effectPath)
     {
-        particleEngine.AddEffect(EffectName, EffectPath);
+        _particleEngine.AddEffect(effectName, effectPath);
     }
 
-    public void AddSoundResource(string SoundName, string SoundPath, enSoundEffectInstanceType InstanceType, int MaxInstances, bool KillOnScreenChange)
+    public void AddSoundResource(string soundName, string soundPath, SoundEffectInstanceType instanceType, int maxInstances, bool killOnScreenChange)
     {
-        soundDescriptions.Add(new SoundDescription(SoundName, SoundPath, InstanceType, MaxInstances, KillOnScreenChange));
+        _soundDescriptions.Add(new SoundDescription(soundName, soundPath, instanceType, maxInstances, killOnScreenChange));
     }
 
-    public SpriteCollection GetSpriteCollection(string Name)
+    public SpriteCollection GetSpriteCollection(string name)
     {
-        if (resources.ContainsKey(Name))
+        if (_resources.ContainsKey(name))
         {
-            return resources[Name] as SpriteCollection;
+            return _resources[name] as SpriteCollection;
         }
         return null;
     }
 
-    public IParticleEffect GetParticleEffectInstance(string EffectName, enParticleEffectType EffectType, TimeSpan? Duration)
+    public IParticleEffect GetParticleEffectInstance(string effectName, ParticleEffectType effectType, TimeSpan? duration)
     {
-        if (EffectType == enParticleEffectType.Continual)
+        if (effectType == ParticleEffectType.Continual)
         {
-            return particleEngine.CreateContinualEffectInstance(EffectName, Duration);
+            return _particleEngine.CreateContinualEffectInstance(effectName, duration);
         }
-        if (EffectType == enParticleEffectType.Triggered)
+        if (effectType == ParticleEffectType.Triggered)
         {
-            return particleEngine.CreateSingleTriggerEffectInstance(EffectName);
+            return _particleEngine.CreateSingleTriggerEffectInstance(effectName);
         }
-        if (EffectType == enParticleEffectType.TriggeredMultiLocationTimed)
+        if (effectType == ParticleEffectType.TriggeredMultiLocationTimed)
         {
-            return particleEngine.CreateMultiTriggeredTimeBasedEffectInstance(EffectName);
+            return _particleEngine.CreateMultiTriggeredTimeBasedEffectInstance(effectName);
         }
 
         return null;
     }
 
     public AnimTileEngine GetAnimationEngine()
-        => animationTileEngine;
+        => _animationTileEngine;
 
-    public SoundEffectEngine GetSoundFXEngine()
-        => soundEngine;
+    public SoundEffectEngine GetSoundFxEngine()
+        => _soundEngine;
 
-    public object GetDataResource(string Name)
+    public object GetDataResource(string name)
     {
-        if (resources.ContainsKey(Name))
+        if (_resources.ContainsKey(name))
         {
             // Ensure we don't return a sprite array by mistake!
-            if (!(resources[Name] is SpriteCollection))
+            if (!(_resources[name] is SpriteCollection))
             {
-                return resources[Name];
+                return _resources[name];
             }
         }
 

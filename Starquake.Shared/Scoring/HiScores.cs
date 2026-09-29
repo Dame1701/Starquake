@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StarquakeXNA.Engines;
 using StarquakeXNA.Fonts;
 using StarquakeXNA.Helpers;
 
@@ -12,55 +13,55 @@ namespace StarquakeXNA.Scoring;
 
 public class HiScores
 {
-    private readonly List<HiScore> scores;
+    private readonly List<HiScore> _scores;
 
     public HiScores()
     {
-        scores = new List<HiScore>();
+        _scores = new List<HiScore>();
 
-        scores.Add(new HiScore
+        _scores.Add(new HiScore
         {
             Name = "Damien",
             Score = 55250,
             AdventureScore = 36
         });
-        scores.Add(new HiScore
+        _scores.Add(new HiScore
         {
             Name = "Lucy",
             Score = 40350,
             AdventureScore = 30
         });
-        scores.Add(new HiScore
+        _scores.Add(new HiScore
         {
             Name = "Chris",
             Score = 27150,
             AdventureScore = 26
         });
-        scores.Add(new HiScore
+        _scores.Add(new HiScore
         {
             Name = "Swainy",
             Score = 20750,
             AdventureScore = 20
         });
-        scores.Add(new HiScore
+        _scores.Add(new HiScore
         {
             Name = "Matt",
             Score = 16500,
             AdventureScore = 15
         });
-        scores.Add(new HiScore
+        _scores.Add(new HiScore
         {
             Name = "Glenn",
             Score = 10250,
             AdventureScore = 11
         });
-        scores.Add(new HiScore
+        _scores.Add(new HiScore
         {
             Name = "Andy",
             Score = 5250,
             AdventureScore = 5
         });
-        scores.Add(new HiScore
+        _scores.Add(new HiScore
         {
             Name = "Nick",
             Score = 2150,
@@ -71,13 +72,13 @@ public class HiScores
     /// <summary>
     ///     Checks to see if the player has achieved a score high enough for the table
     /// </summary>
-    /// <param name="Score"></param>
+    /// <param name="score"></param>
     /// <returns></returns>
-    public bool GotHighScore(int Score)
+    public bool GotHighScore(int score)
     {
-        for (var a = 0; a < scores.Count; a++)
+        for (var a = 0; a < _scores.Count; a++)
         {
-            if (Score > scores[a].Score)
+            if (score > _scores[a].Score)
             {
                 return true;
             }
@@ -87,72 +88,72 @@ public class HiScores
     }
 
     // Insert a player into the table
-    public void AddScoreToTable(HiScore ScoreToAdd)
+    public void AddScoreToTable(HiScore scoreToAdd)
     {
-        for (var a = 0; a < scores.Count; a++)
+        for (var a = 0; a < _scores.Count; a++)
         {
-            if (ScoreToAdd.Score > scores[a].Score)
+            if (scoreToAdd.Score > _scores[a].Score)
             {
                 // Insert the score above the one that's less than the new one
-                scores.Insert(a, ScoreToAdd);
+                _scores.Insert(a, scoreToAdd);
 
                 // Remove the score at the bottom of the list
-                scores.RemoveAt(scores.Count - 1);
+                _scores.RemoveAt(_scores.Count - 1);
 
                 break;
             }
         }
     }
 
-    public void Draw(GameEngine gameEngine, GameTime gameTime, int XPos, int YPos, int Fade)
+    public void Draw(GameEngine gameEngine, GameTime gameTime, int xPos, int yPos, int fade)
     {
-        var yPos = YPos;
-        var xPos = XPos;
+        var currentYPos = yPos;
+        var currentXPos = xPos;
 
-        for (var a = 0; a < scores.Count; a++)
+        for (var a = 0; a < _scores.Count; a++)
         {
             if (a % 2 == 0)
             {
-                ProportionalNumbers.Draw(xPos, yPos, (a + 1) + ".", gameEngine, gameTime, ColourHelper.GetXNA4Colour(255, 255, 255, Fade));
+                ProportionalNumbers.Draw(currentXPos, currentYPos, (a + 1) + ".", gameEngine, gameTime, ColourHelper.GetXna4Colour(255, 255, 255, fade));
             }
             else
             {
-                ProportionalNumbers.Draw(xPos, yPos, (a + 1) + ".", gameEngine, gameTime, ColourHelper.GetXNA4Colour(150, 150, 150, Fade));
+                ProportionalNumbers.Draw(currentXPos, currentYPos, (a + 1) + ".", gameEngine, gameTime, ColourHelper.GetXna4Colour(150, 150, 150, fade));
             }
 
-            yPos = yPos + 50;
+            currentYPos = currentYPos + 50;
         }
 
         gameEngine.Font2.Begin(BlendState.AlphaBlend);
-        yPos = YPos;
+        currentYPos = yPos;
 
-        for (var a = 0; a < scores.Count; a++)
+        for (var a = 0; a < _scores.Count; a++)
         {
             if (a % 2 == 0)
             {
-                gameEngine.Font2.WriteText(xPos + 55, yPos, scores[a].Name, 2, new Color(255, 255, 255), (byte)Fade);
+                gameEngine.Font2.WriteText(currentXPos + 55, currentYPos, _scores[a].Name, 2, new Color(255, 255, 255), (byte)fade);
             }
             else
             {
-                gameEngine.Font2.WriteText(xPos + 55, yPos, scores[a].Name, 2, new Color(150, 150, 150), (byte)Fade);
+                gameEngine.Font2.WriteText(currentXPos + 55, currentYPos, _scores[a].Name, 2, new Color(150, 150, 150), (byte)fade);
             }
 
-            yPos = yPos + 50;
+            currentYPos = currentYPos + 50;
         }
 
-        yPos = YPos;
+        currentYPos = yPos;
 
-        for (var a = 0; a < scores.Count; a++)
+        for (var a = 0; a < _scores.Count; a++)
         {
             if (a % 2 == 0)
             {
-                ProportionalNumbers.Draw(xPos + 250, yPos, scores[a].Score.ToString("000000") + " " + scores[a].AdventureScoreString + "%", gameEngine, gameTime, ColourHelper.GetXNA4Colour(255, 255, 255, Fade));
+                ProportionalNumbers.Draw(currentXPos + 250, currentYPos, _scores[a].Score.ToString("000000") + " " + _scores[a].AdventureScoreString + "%", gameEngine, gameTime, ColourHelper.GetXna4Colour(255, 255, 255, fade));
             }
             else
             {
-                ProportionalNumbers.Draw(xPos + 250, yPos, scores[a].Score.ToString("000000") + " " + scores[a].AdventureScoreString + "%", gameEngine, gameTime, ColourHelper.GetXNA4Colour(150, 150, 150, Fade));
+                ProportionalNumbers.Draw(currentXPos + 250, currentYPos, _scores[a].Score.ToString("000000") + " " + _scores[a].AdventureScoreString + "%", gameEngine, gameTime, ColourHelper.GetXna4Colour(150, 150, 150, fade));
             }
-            yPos = yPos + 50;
+            currentYPos = currentYPos + 50;
         }
 
         gameEngine.Font2.End();

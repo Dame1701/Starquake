@@ -3,48 +3,43 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework.Content;
+using StarquakeXNA.Engines;
 
 namespace StarquakeXNA.Structure;
 
 public class StartableGameComponentBase
 {
-    protected ContentManager contentManagerInstance;
-    protected GameEngine gameEngineInstance;
-
-    protected int percentComplete;
-
-    protected GameEngineStatus status;
-
-    protected string statusMessage;
+    protected ContentManager ContentManagerInstance;
+    protected GameEngine GameEngineInstance;
 
     public StartableGameComponentBase()
     {
-        status = GameEngineStatus.NotStarted;
+        Status = GameEngineStatus.NotStarted;
     }
 
-    public StartableGameComponentBase(GameEngine GameEngineInstance)
+    public StartableGameComponentBase(GameEngine gameEngineInstance)
     {
-        gameEngineInstance = GameEngineInstance;
-        contentManagerInstance = GameEngineInstance.ContentMgr;
-        status = GameEngineStatus.NotStarted;
+        GameEngineInstance = gameEngineInstance;
+        ContentManagerInstance = gameEngineInstance.ContentMgr;
+        Status = GameEngineStatus.NotStarted;
     }
 
-    public GameEngineStatus Status => status;
+    public GameEngineStatus Status { get; protected set; }
 
-    public string StatusMessage => statusMessage;
+    public string StatusMessage { get; protected set; }
 
-    public int PercentComplete => percentComplete;
+    public int PercentComplete { get; protected set; }
     public event RaiseEngineComponentStatusChanged OnGameComponentStatusChanged;
 
-    protected void UpdateStatus(string StatusMessage, int PercentComplete, GameEngineStatus Status)
+    protected void UpdateStatus(string statusMessage, int percentComplete, GameEngineStatus status)
     {
-        statusMessage = StatusMessage;
-        percentComplete = PercentComplete;
-        status = Status;
+        StatusMessage = statusMessage;
+        PercentComplete = percentComplete;
+        Status = status;
 
         if (OnGameComponentStatusChanged != null)
         {
-            OnGameComponentStatusChanged(StatusMessage, PercentComplete, Status);
+            OnGameComponentStatusChanged(statusMessage, percentComplete, status);
         }
     }
 }

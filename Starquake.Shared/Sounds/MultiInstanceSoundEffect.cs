@@ -1,10 +1,10 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework.Audio;
 
-namespace StarquakeXNA;
+namespace StarquakeXNA.Sounds;
 
 public class MultiInstanceSoundEffect
 {

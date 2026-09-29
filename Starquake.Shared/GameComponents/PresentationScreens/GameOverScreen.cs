@@ -6,43 +6,46 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using StarquakeXNA.Engines;
 using StarquakeXNA.Fonts;
+using StarquakeXNA.GameComponents.GameScreens;
 using StarquakeXNA.Helpers;
+using StarquakeXNA.Input;
 using StarquakeXNA.Scoring;
 using StarquakeXNA.Structure;
 
-namespace StarquakeXNA.GameComponents;
+namespace StarquakeXNA.GameComponents.PresentationScreens;
 
 public class GameOverScreen : GameScreenBase, IGameScreen
 {
-    private SpriteCollection backgroundImage;
-    private bool fadeComplete;
-    private SpriteCollection foregroundImage;
-    private TimeSpan playTime;
+    private SpriteCollection _backgroundImage;
+    private bool _fadeComplete;
+    private SpriteCollection _foregroundImage;
+    private TimeSpan _playTime;
 
-    public GameOverScreen(GameEngine GameEngineReference)
-        : base(GameEngineReference)
+    public GameOverScreen(GameEngine gameEngineReference)
+        : base(gameEngineReference)
     {
-        screenFade = 0;
-        screenFadeSpeed = 5;
+        ScreenFade = 0;
+        ScreenFadeSpeed = 5;
     }
 
     public bool Success => true;
 
-    public void Reset(object Data)
+    public void Reset(object data)
     {
 
     }
 
-    public void PerformPostScreenChangeActions(enGameScreen TriggeringScreen, object Param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object param)
     {
-        gameEngine.ContentResourceManager.GetSoundFXEngine().DisablePeriodicBackgroundSounds(true);
-        var mainGameScreen = gameEngine.GetGameScreen(enGameScreen.MainGame);
-        playTime = ((MainGameScreen)mainGameScreen).GetPlayTime();
+        GameEngine.ContentResourceManager.GetSoundFxEngine().DisablePeriodicBackgroundSounds(true);
+        var mainGameScreen = GameEngine.GetGameScreen(GameScreenType.MainGame);
+        _playTime = ((MainGameScreen)mainGameScreen).GetPlayTime();
 
-        fadeComplete = false;
-        screenFade = 0;
-        screenFadeSpeed = 5;
+        _fadeComplete = false;
+        ScreenFade = 0;
+        ScreenFadeSpeed = 5;
     }
 
     public override void Update(GameTime gameTime)
@@ -51,74 +54,74 @@ public class GameOverScreen : GameScreenBase, IGameScreen
         {
             var playersScore = new HiScore
             {
-                Score = gameEngine.BlobStatusPanel.PlayerScore,
-                AdventureScore = gameEngine.GameScreens.GetPercentageOfScreensVisited()
+                Score = GameEngine.BlobStatusPanel.PlayerScore,
+                AdventureScore = GameEngine.GameScreens.GetPercentageOfScreensVisited()
             };
 
-            gameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(gameEngine.ScreenClearColour);
-            gameEngine.CurrentGameScreen = enGameScreen.HiScores;
-            gameEngine.GetGameScreen(enGameScreen.HiScores).PerformPostScreenChangeActions(enGameScreen.GameOver, playersScore);
+            GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.ScreenClearColour);
+            GameEngine.CurrentGameScreen = GameScreenType.HiScores;
+            GameEngine.GetGameScreen(GameScreenType.HiScores).PerformPostScreenChangeActions(GameScreenType.GameOver, playersScore);
         }
         base.Update(gameTime);
     }
 
     public override void Draw(GameTime gameTime)
     {
-        gameEngine.ScreenEffctEngine.SelectRenderViewPort("EntireScreen");
-        backgroundImage.Begin(BlendState.AlphaBlend, gameTime);
+        GameEngine.ScreenEffctEngine.SelectRenderViewPort("EntireScreen");
+        _backgroundImage.Begin(BlendState.AlphaBlend, gameTime);
 
-        if (fadeComplete)
+        if (_fadeComplete)
         {
-            backgroundImage.DrawSprite(0, 0, 0, Color.White);
+            _backgroundImage.DrawSprite(0, 0, 0, Color.White);
         }
         else
         {
-            backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)screenFade));
+            _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXna4Colour(255, 255, 255, (byte)ScreenFade));
         }
 
-        backgroundImage.End();
+        _backgroundImage.End();
 
-        gameEngine.Font2.Begin(BlendState.AlphaBlend);
-        gameEngine.Font2.WriteTextCentred(1280, 180, "GAME OVER", 2, ColourHelper.GetXNA4Colour(230, 200, 0), (byte)screenFade);
-        gameEngine.Font2.WriteText(490, 260, "SCORE", 2, Color.Gray, (byte)screenFade);
-        gameEngine.Font2.WriteText(440, 320, "ADVENTURE SCORE", 2, new Color((byte)255, (byte)255, (byte)255, (byte)screenFade), (byte)screenFade);
-        gameEngine.Font2.WriteText(470, 380, "TIME TAKEN", 2, new Color((byte)150, (byte)150, (byte)150, (byte)screenFade), (byte)screenFade);
-        gameEngine.Font2.WriteText(400, 440, "CORE ELEMENTS", 2, new Color((byte)134, (byte)0, (byte)134, (byte)screenFade), (byte)screenFade);
-        gameEngine.Font2.WriteText(460, 500, "REPLACED", 2, new Color(134, 0, 134), (byte)screenFade);
-        gameEngine.Font2.End();
+        GameEngine.Font2.Begin(BlendState.AlphaBlend);
+        GameEngine.Font2.WriteTextCentred(1280, 180, "GAME OVER", 2, ColourHelper.GetXna4Colour(230, 200, 0), (byte)ScreenFade);
+        GameEngine.Font2.WriteText(490, 260, "SCORE", 2, Color.Gray, (byte)ScreenFade);
+        GameEngine.Font2.WriteText(440, 320, "ADVENTURE SCORE", 2, new Color((byte)255, (byte)255, (byte)255, (byte)ScreenFade), (byte)ScreenFade);
+        GameEngine.Font2.WriteText(470, 380, "TIME TAKEN", 2, new Color((byte)150, (byte)150, (byte)150, (byte)ScreenFade), (byte)ScreenFade);
+        GameEngine.Font2.WriteText(400, 440, "CORE ELEMENTS", 2, new Color((byte)134, (byte)0, (byte)134, (byte)ScreenFade), (byte)ScreenFade);
+        GameEngine.Font2.WriteText(460, 500, "REPLACED", 2, new Color(134, 0, 134), (byte)ScreenFade);
+        GameEngine.Font2.End();
 
         // Player Score
-        ProportionalNumbers.Draw(630, 260, gameEngine.BlobStatusPanel.PlayerScore.ToString("000000"), gameEngine, gameTime, ColourHelper.GetXNA4Colour(150, 150, 150, (byte)screenFade));
+        ProportionalNumbers.Draw(630, 260, GameEngine.BlobStatusPanel.PlayerScore.ToString("000000"), GameEngine, gameTime, ColourHelper.GetXna4Colour(150, 150, 150, (byte)ScreenFade));
 
         // Adventure Score
-        ProportionalNumbers.Draw(814, 320, gameEngine.GameScreens.GetPercentageOfScreensVisited() + "%", gameEngine, gameTime, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)screenFade));
+        ProportionalNumbers.Draw(814, 320, GameEngine.GameScreens.GetPercentageOfScreensVisited() + "%", GameEngine, gameTime, ColourHelper.GetXna4Colour(255, 255, 255, (byte)ScreenFade));
 
         // Time Taken
-        ProportionalNumbers.Draw(710, 380, playTime.Minutes + "." + playTime.Seconds.ToString("00"), gameEngine, gameTime, ColourHelper.GetXNA4Colour(150, 150, 150, (byte)screenFade));
+        ProportionalNumbers.Draw(710, 380, _playTime.Minutes + "." + _playTime.Seconds.ToString("00"), GameEngine, gameTime, ColourHelper.GetXna4Colour(150, 150, 150, (byte)ScreenFade));
 
         // Elements replaced
-        ProportionalNumbers.Draw(520, 560, gameEngine.Elements.GetElementsReplacedCount().ToString("00"), gameEngine, gameTime, ColourHelper.GetXNA4Colour(134, 0, 134, (byte)screenFade));
+        ProportionalNumbers.Draw(520, 560, GameEngine.Elements.GetElementsReplacedCount().ToString("00"), GameEngine, gameTime, ColourHelper.GetXna4Colour(134, 0, 134, (byte)ScreenFade));
 
         // Core elements
-        gameEngine.Elements.Draw(gameTime, 820, 446, screenFade);
+        GameEngine.Elements.Draw(gameTime, 820, 446, ScreenFade);
 
-        foregroundImage.Begin(BlendState.AlphaBlend, gameTime);
+        _foregroundImage.Begin(BlendState.AlphaBlend, gameTime);
 
-        if (fadeComplete)
+        if (_fadeComplete)
         {
-            foregroundImage.DrawSprite(0, 230, 120, Color.White);
+            _foregroundImage.DrawSprite(0, 230, 120, Color.White);
         }
         else
         {
-            foregroundImage.DrawSprite(0, 230, 120, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)screenFade));
+            _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.GetXna4Colour(255, 255, 255, (byte)ScreenFade));
         }
 
-        foregroundImage.End();
+        _foregroundImage.End();
     }
 
     public override void LoadContent()
     {
-        backgroundImage = gameEngine.ContentResourceManager.GetSpriteCollection("GameOverScreenBackground");
-        foregroundImage = gameEngine.ContentResourceManager.GetSpriteCollection("GameOverScreenForeground");
+        _backgroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("GameOverScreenBackground");
+        _foregroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("GameOverScreenForeground");
     }
 }

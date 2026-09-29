@@ -10,25 +10,27 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using SharedLibs;
-using Starquake_MonoGame.ActiveSprites;
-using Starquake_XNA;
-using Starquake_XNA.Animation;
+using StarquakeXNA.ActiveSprites;
+using StarquakeXNA.Animations;
 using StarquakeXNA.ContentManagement;
 using StarquakeXNA.Display;
-using StarquakeXNA.GameComponents;
+using StarquakeXNA.Fonts;
+using StarquakeXNA.GameComponents.GameScreens;
+using StarquakeXNA.GameComponents.PresentationScreens;
 using StarquakeXNA.Helpers;
+using StarquakeXNA.Input;
 using StarquakeXNA.Structure;
 
-namespace StarquakeXNA;
+namespace StarquakeXNA.Engines;
 
 public class GameEngine : StartableGameComponentBase, IDisposable
 {
 
-    private static GameEngine s_instance;
+    private static GameEngine _sInstance;
     public string AccessCodesFailedName = "AccessCodesFailed";
     public string AccessCodesGreyName = "AccessCodesGrey";
     public string AccessCodesPassedName = "AccessCodesPassed";
-    private GameComponentBase AccessScreen;
+    private GameComponentBase _accessScreen;
 
     public Color BackgroundColour;
 
@@ -37,29 +39,29 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public string BlobsShipName = "BlobsShip";
 
     public StatusPanel BlobStatusPanel;
-    private SpriteCollection bootProgress;
-    private SpriteCollection bootProgressBackground;
-    private int bootProgressBackgroundFade = 255;
+    private SpriteCollection _bootProgress;
+    private SpriteCollection _bootProgressBackground;
+    private int _bootProgressBackgroundFade = 255;
     // Boot graphics
-    private SpriteCollection bootScreen;
+    private SpriteCollection _bootScreen;
 
     // Animation tiles
     public SpriteCollection BreakableBridgeAnim;
     public BreakableBridges BreakableBridgesEngine;
-    private GameComponentBase CheopsScreen;
+    private GameComponentBase _cheopsScreen;
 
     // Test
     public SpriteCollection CollisionTile;
 
     // Colour Animation Engine
     public ColourAnimationEngine ColourAnimationEngine;
-    private GameComponentBase ComputerReportScreen;
+    private GameComponentBase _computerReportScreen;
     public ContentManager ContentMgr;
 
     public ResourceManager ContentResourceManager;
     public ConveyerNasties ConveyerNastiesInstance;
-    private GameComponentBase CoreScreen;
-    public enGameScreen CurrentGameScreen;
+    private GameComponentBase _coreScreen;
+    public GameScreenType CurrentGameScreen;
 
     public bool DrawBackgrounds = true;
     public ElectricityGatesAndNodesEngine ElectricityNodeGateEngine;
@@ -72,13 +74,13 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     // Font 2
     public BitmapFont Font2;
-    private GameComponentBase GameCompleteScreen;
-    private GameComponentBase GameOverScreen;
+    private GameComponentBase _gameCompleteScreen;
+    private GameComponentBase _gameOverScreen;
     public GameScreenCollection GameScreens;
 
     //public MercuryParticleEngine ParticleEngine;
     public GraphicsDeviceManager GraphicsDeviceMgr;
-    private GameComponentBase HiScoreScreen;
+    private GameComponentBase _hiScoreScreen;
 
     public bool InTestMode = true;
 
@@ -86,28 +88,28 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public IntroSequence IntroSequence;
 
     // Loading screen
-    private int loadingScreenFade;
+    private int _loadingScreenFade;
 
     public string LowerScreenTilesName = "LowerScreenTiles";
 
     // Initialise Game Components
-    private GameComponentBase MainScreen;
+    private GameComponentBase _mainScreen;
     public Nasties Nasties;
 
-    private GameComponentBase OptionsScreen;
+    private GameComponentBase _optionsScreen;
 
-    private GameWindow parentWindow;
-    private bool particleTestTrigger;
+    private GameWindow _parentWindow;
+    private bool _particleTestTrigger;
 
-    private bool paused;
+    private bool _paused;
     public string PickupsIlluminatedName = "PickupsIlluminate";
     public string PickupsName = "Pickups";
     public Blob Player;
 
-    private PlayerKeySet playerKeys;
+    private PlayerKeySet _playerKeys;
     public string PowerUpsName = "PowerUps";
 
-    private int PowerUpType;
+    private int _powerUpType;
 
     /// <summary>
     ///     The game is composed at a fixed <see cref="Starquake.ScreenWidth" /> by
@@ -128,7 +130,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     // Screen Effect engine
     public ScreenEffectEngine ScreenEffctEngine;
-    public Dictionary<enGameScreen, IGameScreen> Screens;
+    public Dictionary<GameScreenType, IGameScreen> Screens;
     public int ScreenXOffset;
     public int ScreenYOffset;
 
@@ -136,13 +138,13 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public Shapes ShapeDrawer;
 
     // Fonts
-    public ImageFont SQText;
-    private GameComponentBase TeleportScreen;
-    public CoreElement testElement1;
-    private GameComponentBase TestScreen;
+    public ImageFont SqText;
+    private GameComponentBase _teleportScreen;
+    public CoreElement TestElement1;
+    private GameComponentBase _testScreen;
 
     // Text output
-    public XNAFont TextWriter;
+    public XnaFont TextWriter;
 
     // Tunnel lift animations
     public TunnelLiftAnimationEngine TunnelAnimations;
@@ -152,29 +154,29 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     // Scaling
     public GameEngine(
-        GameWindow ParentWindow,
-        GraphicsDeviceManager Graphics,
-        ContentManager Content)
+        GameWindow parentWindow,
+        GraphicsDeviceManager graphics,
+        ContentManager content)
     {
-        s_instance = this;
+        _sInstance = this;
 
-        parentWindow = ParentWindow;
+        _parentWindow = parentWindow;
 
         Paused = false;
 
         // Setup graphics device and content management
-        GraphicsDeviceMgr = Graphics;
-        ContentMgr = Content;
+        GraphicsDeviceMgr = graphics;
+        ContentMgr = content;
         BackgroundColour = Color.Black;
 
         ContentResourceManager = new ResourceManager(this);
         ContentResourceManager.OnGameComponentStatusChanged += ContentResourceManager_OnGameComponentStatusChanged;
 
         RandomNumberGenerator = new Random((int)DateTime.Now.Ticks);
-        Screens = new Dictionary<enGameScreen, IGameScreen>();
+        Screens = new Dictionary<GameScreenType, IGameScreen>();
 
         // Starting screen will be the title screen later.....
-        CurrentGameScreen = enGameScreen.Options;
+        CurrentGameScreen = GameScreenType.Options;
 
         // Game Screens
         GameScreens =
@@ -188,20 +190,20 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                 32);
 
         // Player keys
-        playerKeys = new PlayerKeySet();
-        playerKeys.Up = Keys.Up;
-        playerKeys.Down = Keys.Down;
-        playerKeys.Left = Keys.Left;
-        playerKeys.Right = Keys.Right;
-        playerKeys.Fire = Keys.LeftControl;
+        _playerKeys = new PlayerKeySet();
+        _playerKeys.Up = Keys.Up;
+        _playerKeys.Down = Keys.Down;
+        _playerKeys.Left = Keys.Left;
+        _playerKeys.Right = Keys.Right;
+        _playerKeys.Fire = Keys.LeftControl;
     }
 
     public PlayerKeySet PlayerKeys
     {
-        get => playerKeys;
+        get => _playerKeys;
         set
         {
-            playerKeys = value;
+            _playerKeys = value;
             if (Player is { BlobsControl: not null })
             {
                 Player.BlobsControl.PlayerKeySet = value;
@@ -224,43 +226,43 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     public bool Paused
     {
-        get => paused;
+        get => _paused;
         set
         {
-            paused = value;
-            if (paused)
+            _paused = value;
+            if (_paused)
             {
                 if (ContentResourceManager != null)
                 {
-                    ContentResourceManager.GetSoundFXEngine().DisablePeriodicBackgroundSounds(true);
+                    ContentResourceManager.GetSoundFxEngine().DisablePeriodicBackgroundSounds(true);
                 }
             }
             else
             {
                 if (ContentResourceManager != null)
                 {
-                    ContentResourceManager.GetSoundFXEngine().EnablePeriodicBackgroundSounds();
+                    ContentResourceManager.GetSoundFxEngine().EnablePeriodicBackgroundSounds();
                 }
             }
         }
     }
 
     public static GameEngine GetInstance()
-        => s_instance;
+        => _sInstance;
 
-    private void Nasties_OnNastyInteractionWithBlob(enNastyInterationType InteractionType, enNastyType NastyType)
+    private void Nasties_OnNastyInteractionWithBlob(NastyInterationType interactionType, NastyType nastyType)
     {
-        if (InteractionType == enNastyInterationType.BlobShot)
+        if (interactionType == NastyInterationType.BlobShot)
         {
             BlobStatusPanel.PlayerScore = BlobStatusPanel.PlayerScore + 50;
         }
-        else if (InteractionType == enNastyInterationType.HitBlob)
+        else if (interactionType == NastyInterationType.HitBlob)
         {
-            if (NastyType == enNastyType.Spiky)
+            if (nastyType == NastyType.Spiky)
             {
                 Player.KillBlob(false, false);
             }
-            else if (NastyType == enNastyType.Conveyer)
+            else if (nastyType == NastyType.Conveyer)
             {
                 Player.KillBlob(true, false);
             }
@@ -276,19 +278,19 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         Player.KillBlob(false, false);
     }
 
-    private void Player_OnScreenChanged(enGameScreen TriggerScreen)
+    private void Player_OnScreenChanged(GameScreenType triggerScreen)
     {
-        ((MainGameScreen)MainScreen).PerformPostScreenChangeActions(TriggerScreen, null);
+        ((MainGameScreen)_mainScreen).PerformPostScreenChangeActions(triggerScreen, null);
     }
 
-    private void Player_OnBlobActionRaised(enBlobAction Action, object Data)
+    private void Player_OnBlobActionRaised(BlobAction action, object data)
     {
         // inform status panel that something has happened
-        BlobStatusPanel.BlobHasPerformedAnAction(Action, Data);
+        BlobStatusPanel.BlobHasPerformedAnAction(action, data);
 
-        if (Action == enBlobAction.GotPowerUp)
+        if (action == BlobAction.GotPowerUp)
         {
-            PowerUpType = (int)Data;
+            _powerUpType = (int)data;
         }
 
     }
@@ -332,18 +334,18 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public void DefineContent()
     {
         // Load the boot image
-        bootScreen = new SpriteCollection(this, ContentMgr, @"Graphics\\BootScreen2", 1280, 800);
-        bootProgressBackground = new SpriteCollection(this, ContentMgr, @"Graphics\\ProgressBarBackground", 1046, 32);
-        bootProgress = new SpriteCollection(this, ContentMgr, @"Graphics\\BootProgress", 1, 24);
+        _bootScreen = new SpriteCollection(this, ContentMgr, @"Graphics\\BootScreen2", 1280, 800);
+        _bootProgressBackground = new SpriteCollection(this, ContentMgr, @"Graphics\\ProgressBarBackground", 1046, 32);
+        _bootProgress = new SpriteCollection(this, ContentMgr, @"Graphics\\BootProgress", 1, 24);
         Scanlines = new SpriteCollection(this, ContentMgr, @"Graphics\\Scanlines2", 1280, 800);
 
-        status = GameEngineStatus.StartingGraphicsLoaded;
+        Status = GameEngineStatus.StartingGraphicsLoaded;
 
         // Font 1
-        Font1 = new BitmapFont(ContentMgr.Load<SpriteFont>("Fonts\\elektoraSmall"), new SpriteBatch(GraphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXNA4Colour(130, 130, 255), 12);
+        Font1 = new BitmapFont(ContentMgr.Load<SpriteFont>("Fonts\\elektoraSmall"), new SpriteBatch(GraphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, 255), 12);
 
         // Font 2
-        Font2 = new BitmapFont(ContentMgr.Load<SpriteFont>("Fonts\\elektoraMedium"), new SpriteBatch(GraphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXNA4Colour(130, 130, 255), 12);
+        Font2 = new BitmapFont(ContentMgr.Load<SpriteFont>("Fonts\\elektoraMedium"), new SpriteBatch(GraphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, 255), 12);
 
         // Blob's death effect
         BlobKiller = new BlobDeathAnimation(this);
@@ -505,54 +507,54 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ContentResourceManager.AddAnimatedSpriteResource("TeleporterPadsUnoccupied", "Graphics\\TeleporterPadAnimationUnoccupied", 128, 96, 398, 1);
 
         // Sounds
-        ContentResourceManager.AddSoundResource("ScanCode", "Sounds\\ScanCode", enSoundEffectInstanceType.Multi, 4, false);
-        ContentResourceManager.AddSoundResource("AccessSuccess", "Sounds\\AccessSuccess", enSoundEffectInstanceType.Multi, 2, false);
-        ContentResourceManager.AddSoundResource("AccessFailed", "Sounds\\AccessFailed", enSoundEffectInstanceType.Single, 0, false);
-        ContentResourceManager.AddSoundResource("MachineryBackground", "Sounds\\MachineryBackground", enSoundEffectInstanceType.Single, 0, true);
+        ContentResourceManager.AddSoundResource("ScanCode", "Sounds\\ScanCode", SoundEffectInstanceType.Multi, 4, false);
+        ContentResourceManager.AddSoundResource("AccessSuccess", "Sounds\\AccessSuccess", SoundEffectInstanceType.Multi, 2, false);
+        ContentResourceManager.AddSoundResource("AccessFailed", "Sounds\\AccessFailed", SoundEffectInstanceType.Single, 0, false);
+        ContentResourceManager.AddSoundResource("MachineryBackground", "Sounds\\MachineryBackground", SoundEffectInstanceType.Single, 0, true);
 
-        ContentResourceManager.AddSoundResource("Tunnel", "Sounds\\Tunnel", enSoundEffectInstanceType.Single, 0, false);
-        ContentResourceManager.AddSoundResource("TunnelSwish1", "Sounds\\TunnelSwish1", enSoundEffectInstanceType.Single, 0, false);
-        ContentResourceManager.AddSoundResource("TunnelSwish2", "Sounds\\TunnelSwish2", enSoundEffectInstanceType.Single, 0, false);
+        ContentResourceManager.AddSoundResource("Tunnel", "Sounds\\Tunnel", SoundEffectInstanceType.Single, 0, false);
+        ContentResourceManager.AddSoundResource("TunnelSwish1", "Sounds\\TunnelSwish1", SoundEffectInstanceType.Single, 0, false);
+        ContentResourceManager.AddSoundResource("TunnelSwish2", "Sounds\\TunnelSwish2", SoundEffectInstanceType.Single, 0, false);
 
-        ContentResourceManager.AddSoundResource("NastyDeath", "Sounds\\NastyDeath", enSoundEffectInstanceType.Multi, 4, true);
-        ContentResourceManager.AddSoundResource("BlobLazer", "Sounds\\BlobLazer", enSoundEffectInstanceType.Multi, 2, true);
-        ContentResourceManager.AddSoundResource("ElectricityNodes", "Sounds\\ElectricityNodes", enSoundEffectInstanceType.Multi, 4, true);
-        ContentResourceManager.AddSoundResource("BridgeBreak", "Sounds\\BridgeBreak", enSoundEffectInstanceType.Single, 0, true);
-        ContentResourceManager.AddSoundResource("BlobRun", "Sounds\\BlobRun", enSoundEffectInstanceType.Single, 0, false);
-        ContentResourceManager.AddSoundResource("BlobFalls", "Sounds\\BlobFalls", enSoundEffectInstanceType.Single, 0, true);
-        ContentResourceManager.AddSoundResource("TunnelLift", "Sounds\\TunnelLift", enSoundEffectInstanceType.Single, 0, false);
-        ContentResourceManager.AddSoundResource("NastyAppear", "Sounds\\NastyAppear", enSoundEffectInstanceType.Multi, 4, true);
-        ContentResourceManager.AddSoundResource("Rumble", "Sounds\\Rumble", enSoundEffectInstanceType.Single, 0, false);
-        ContentResourceManager.AddSoundResource("BlobJumps", "Sounds\\BlobJump", enSoundEffectInstanceType.Multi, 4, true);
-        ContentResourceManager.AddSoundResource("BlobJumpsNoPlatforms", "Sounds\\BlobJumpNoPlatforms", enSoundEffectInstanceType.Multi, 4, true);
-        ContentResourceManager.AddSoundResource("BlobPickUp", "Sounds\\BlobPickUp", enSoundEffectInstanceType.Multi, 4, true);
-        ContentResourceManager.AddSoundResource("BlobOverloadAlarm", "Sounds\\BlobOverloadAlarm", enSoundEffectInstanceType.Single, 0, false);
-        ContentResourceManager.AddSoundResource("BlobShipFall", "Sounds\\BlobShipFall", enSoundEffectInstanceType.Single, 0, false);
-        ContentResourceManager.AddSoundResource("BlobShipExplodes", "Sounds\\BlobShipExplodes", enSoundEffectInstanceType.Single, 0, false);
+        ContentResourceManager.AddSoundResource("NastyDeath", "Sounds\\NastyDeath", SoundEffectInstanceType.Multi, 4, true);
+        ContentResourceManager.AddSoundResource("BlobLazer", "Sounds\\BlobLazer", SoundEffectInstanceType.Multi, 2, true);
+        ContentResourceManager.AddSoundResource("ElectricityNodes", "Sounds\\ElectricityNodes", SoundEffectInstanceType.Multi, 4, true);
+        ContentResourceManager.AddSoundResource("BridgeBreak", "Sounds\\BridgeBreak", SoundEffectInstanceType.Single, 0, true);
+        ContentResourceManager.AddSoundResource("BlobRun", "Sounds\\BlobRun", SoundEffectInstanceType.Single, 0, false);
+        ContentResourceManager.AddSoundResource("BlobFalls", "Sounds\\BlobFalls", SoundEffectInstanceType.Single, 0, true);
+        ContentResourceManager.AddSoundResource("TunnelLift", "Sounds\\TunnelLift", SoundEffectInstanceType.Single, 0, false);
+        ContentResourceManager.AddSoundResource("NastyAppear", "Sounds\\NastyAppear", SoundEffectInstanceType.Multi, 4, true);
+        ContentResourceManager.AddSoundResource("Rumble", "Sounds\\Rumble", SoundEffectInstanceType.Single, 0, false);
+        ContentResourceManager.AddSoundResource("BlobJumps", "Sounds\\BlobJump", SoundEffectInstanceType.Multi, 4, true);
+        ContentResourceManager.AddSoundResource("BlobJumpsNoPlatforms", "Sounds\\BlobJumpNoPlatforms", SoundEffectInstanceType.Multi, 4, true);
+        ContentResourceManager.AddSoundResource("BlobPickUp", "Sounds\\BlobPickUp", SoundEffectInstanceType.Multi, 4, true);
+        ContentResourceManager.AddSoundResource("BlobOverloadAlarm", "Sounds\\BlobOverloadAlarm", SoundEffectInstanceType.Single, 0, false);
+        ContentResourceManager.AddSoundResource("BlobShipFall", "Sounds\\BlobShipFall", SoundEffectInstanceType.Single, 0, false);
+        ContentResourceManager.AddSoundResource("BlobShipExplodes", "Sounds\\BlobShipExplodes", SoundEffectInstanceType.Single, 0, false);
 
-        ContentResourceManager.AddSoundResource("BlobExplodes", "Sounds\\BlobExplodes", enSoundEffectInstanceType.Multi, 4, false);
-        ContentResourceManager.AddSoundResource("BlobPartClang", "Sounds\\BlobPartClang", enSoundEffectInstanceType.Multi, 8, false);
+        ContentResourceManager.AddSoundResource("BlobExplodes", "Sounds\\BlobExplodes", SoundEffectInstanceType.Multi, 4, false);
+        ContentResourceManager.AddSoundResource("BlobPartClang", "Sounds\\BlobPartClang", SoundEffectInstanceType.Multi, 8, false);
 
-        ContentResourceManager.AddSoundResource("NastyAppears", "Sounds\\BlobExplodes", enSoundEffectInstanceType.Multi, 4, false);
-        ContentResourceManager.AddSoundResource("TeleportKeyClick", "Sounds\\TeleportKeyClick", enSoundEffectInstanceType.Multi, 5, false);
-        ContentResourceManager.AddSoundResource("TeleportInvalidCode", "Sounds\\TeleportInvalidCode", enSoundEffectInstanceType.Single, 0, false);
-        ContentResourceManager.AddSoundResource("Teleport", "Sounds\\Teleport", enSoundEffectInstanceType.Multi, 3, false);
+        ContentResourceManager.AddSoundResource("NastyAppears", "Sounds\\BlobExplodes", SoundEffectInstanceType.Multi, 4, false);
+        ContentResourceManager.AddSoundResource("TeleportKeyClick", "Sounds\\TeleportKeyClick", SoundEffectInstanceType.Multi, 5, false);
+        ContentResourceManager.AddSoundResource("TeleportInvalidCode", "Sounds\\TeleportInvalidCode", SoundEffectInstanceType.Single, 0, false);
+        ContentResourceManager.AddSoundResource("Teleport", "Sounds\\Teleport", SoundEffectInstanceType.Multi, 3, false);
 
-        ContentResourceManager.AddSoundResource("PowerUp1", "Sounds\\PowerUp1", enSoundEffectInstanceType.Multi, 2, false);
-        ContentResourceManager.AddSoundResource("PowerUp2", "Sounds\\PowerUp2", enSoundEffectInstanceType.Multi, 2, false);
-        ContentResourceManager.AddSoundResource("PowerUp3", "Sounds\\PowerUp3", enSoundEffectInstanceType.Multi, 2, false);
-        ContentResourceManager.AddSoundResource("LifePowerUp", "Sounds\\LifePowerUp", enSoundEffectInstanceType.Multi, 2, false);
+        ContentResourceManager.AddSoundResource("PowerUp1", "Sounds\\PowerUp1", SoundEffectInstanceType.Multi, 2, false);
+        ContentResourceManager.AddSoundResource("PowerUp2", "Sounds\\PowerUp2", SoundEffectInstanceType.Multi, 2, false);
+        ContentResourceManager.AddSoundResource("PowerUp3", "Sounds\\PowerUp3", SoundEffectInstanceType.Multi, 2, false);
+        ContentResourceManager.AddSoundResource("LifePowerUp", "Sounds\\LifePowerUp", SoundEffectInstanceType.Multi, 2, false);
 
         // Background sounds
-        ContentResourceManager.AddSoundResource("BackgroundSound1", "Sounds\\BackgroundSound1", enSoundEffectInstanceType.Single, 0, false);
+        ContentResourceManager.AddSoundResource("BackgroundSound1", "Sounds\\BackgroundSound1", SoundEffectInstanceType.Single, 0, false);
     }
 
     // Captures all status changes from game components
-    private void ContentResourceManager_OnGameComponentStatusChanged(string Message, int PercentComplete, GameEngineStatus Status)
+    private void ContentResourceManager_OnGameComponentStatusChanged(string message, int percentComplete, GameEngineStatus status)
     {
-        if (Status == GameEngineStatus.Started)
+        if (status == GameEngineStatus.Started)
         {
-            SQText = new ImageFont(this, ContentMgr);
+            SqText = new ImageFont(this, ContentMgr);
 
             var blobGraphics = new ContentList(ContentMgr);
             Player.LoadContent(blobGraphics);
@@ -631,34 +633,34 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             GameScreens.Initialise(null);
 
             // Setup the presentation screens
-            OptionsScreen = new OptionsScreen(this);
-            ComputerReportScreen = new ComputerReportScreen(this);
-            HiScoreScreen = new HiScoreScreen(this);
-            GameOverScreen = new GameOverScreen(this);
-            GameCompleteScreen = new GameCompleteScreen(this);
-            TestScreen = new TestScreen(this);
+            _optionsScreen = new OptionsScreen(this);
+            _computerReportScreen = new ComputerReportScreen(this);
+            _hiScoreScreen = new HiScoreScreen(this);
+            _gameOverScreen = new GameOverScreen(this);
+            _gameCompleteScreen = new GameCompleteScreen(this);
+            _testScreen = new TestScreen(this);
 
             // Setup the game screens
-            MainScreen = new MainGameScreen(this);
-            TeleportScreen = new TeleportScreen(this);
-            CoreScreen = new PlanetCoreScreen(this);
-            AccessScreen = new AccessBoothScreen(this);
-            CheopsScreen = new CheopsScreen(this);
+            _mainScreen = new MainGameScreen(this);
+            _teleportScreen = new TeleportScreen(this);
+            _coreScreen = new PlanetCoreScreen(this);
+            _accessScreen = new AccessBoothScreen(this);
+            _cheopsScreen = new CheopsScreen(this);
 
-            CoreScreen.Initialise(Elements);
+            _coreScreen.Initialise(Elements);
 
-            Screens.Add(enGameScreen.Options, (IGameScreen)OptionsScreen);
-            Screens.Add(enGameScreen.ComputerReport, (IGameScreen)ComputerReportScreen);
-            Screens.Add(enGameScreen.HiScores, (IGameScreen)HiScoreScreen);
-            Screens.Add(enGameScreen.GameOver, (IGameScreen)GameOverScreen);
-            Screens.Add(enGameScreen.GameComplete, (IGameScreen)GameCompleteScreen);
-            Screens.Add(enGameScreen.TestScreen, (IGameScreen)TestScreen);
+            Screens.Add(GameScreenType.Options, (IGameScreen)_optionsScreen);
+            Screens.Add(GameScreenType.ComputerReport, (IGameScreen)_computerReportScreen);
+            Screens.Add(GameScreenType.HiScores, (IGameScreen)_hiScoreScreen);
+            Screens.Add(GameScreenType.GameOver, (IGameScreen)_gameOverScreen);
+            Screens.Add(GameScreenType.GameComplete, (IGameScreen)_gameCompleteScreen);
+            Screens.Add(GameScreenType.TestScreen, (IGameScreen)_testScreen);
 
-            Screens.Add(enGameScreen.MainGame, (IGameScreen)MainScreen);
-            Screens.Add(enGameScreen.Teleporter, (IGameScreen)TeleportScreen);
-            Screens.Add(enGameScreen.PlanetCore, (IGameScreen)CoreScreen);
-            Screens.Add(enGameScreen.AccessBooth, (IGameScreen)AccessScreen);
-            Screens.Add(enGameScreen.Cheops, (IGameScreen)CheopsScreen);
+            Screens.Add(GameScreenType.MainGame, (IGameScreen)_mainScreen);
+            Screens.Add(GameScreenType.Teleporter, (IGameScreen)_teleportScreen);
+            Screens.Add(GameScreenType.PlanetCore, (IGameScreen)_coreScreen);
+            Screens.Add(GameScreenType.AccessBooth, (IGameScreen)_accessScreen);
+            Screens.Add(GameScreenType.Cheops, (IGameScreen)_cheopsScreen);
 
             // Load the content for the screens
             foreach (var screen in Screens)
@@ -696,7 +698,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         }
         else
         {
-            UpdateStatus(Message, PercentComplete, Status);
+            UpdateStatus(message, percentComplete, status);
         }
     }
 
@@ -709,13 +711,13 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     // Resets the game back to defaults - need to sort all of this out!
     public void Reset()
     {
-        ((IGameScreen)MainScreen).Reset(null);
+        ((IGameScreen)_mainScreen).Reset(null);
     }
 
-    public IGameScreen GetGameScreen(enGameScreen GameScreen)
+    public IGameScreen GetGameScreen(GameScreenType gameScreen)
     {
         IGameScreen screenToGet = null;
-        Screens.TryGetValue(GameScreen, out screenToGet);
+        Screens.TryGetValue(gameScreen, out screenToGet);
         return screenToGet;
     }
 
@@ -726,32 +728,32 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             ScanlinesEnabled = !ScanlinesEnabled;
         }
 
-        if (status == GameEngineStatus.StartingGraphicsLoaded)
+        if (Status == GameEngineStatus.StartingGraphicsLoaded)
         {
-            loadingScreenFade += 4;
+            _loadingScreenFade += 4;
 
-            if (loadingScreenFade > 255)
+            if (_loadingScreenFade > 255)
             {
-                loadingScreenFade = 255;
+                _loadingScreenFade = 255;
             }
 
-            if (loadingScreenFade == 255)
+            if (_loadingScreenFade == 255)
             {
-                status = GameEngineStatus.Starting;
+                Status = GameEngineStatus.Starting;
                 LoadContent();
             }
         }
-        else if (status == GameEngineStatus.ContentLoaded)
+        else if (Status == GameEngineStatus.ContentLoaded)
         {
             // Fade out the progress bar background
-            if (bootProgressBackgroundFade > 0)
+            if (_bootProgressBackgroundFade > 0)
             {
-                bootProgressBackgroundFade -= 4;
+                _bootProgressBackgroundFade -= 4;
             }
 
-            if (bootProgressBackgroundFade < 0)
+            if (_bootProgressBackgroundFade < 0)
             {
-                bootProgressBackgroundFade = 0;
+                _bootProgressBackgroundFade = 0;
             }
 
             // Wait for a keypress before leaving the loading screen
@@ -760,15 +762,15 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                 ContentResourceManager_OnGameComponentStatusChanged("Content loaded", 100, GameEngineStatus.Started);
             }
         }
-        else if (status == GameEngineStatus.StartGame)
+        else if (Status == GameEngineStatus.StartGame)
         {
-            if (CurrentGameScreen == enGameScreen.Cheops ||
-                CurrentGameScreen == enGameScreen.MainGame ||
-                CurrentGameScreen == enGameScreen.PlanetCore ||
-                CurrentGameScreen == enGameScreen.Teleporter ||
-                CurrentGameScreen == enGameScreen.AccessBooth)
+            if (CurrentGameScreen == GameScreenType.Cheops ||
+                CurrentGameScreen == GameScreenType.MainGame ||
+                CurrentGameScreen == GameScreenType.PlanetCore ||
+                CurrentGameScreen == GameScreenType.Teleporter ||
+                CurrentGameScreen == GameScreenType.AccessBooth)
             {
-                if (CurrentGameScreen != enGameScreen.Teleporter)
+                if (CurrentGameScreen != GameScreenType.Teleporter)
                 {
                     if (ToggleKeys.GetPressedKey() == PlayerKeys.Pause)
                     {
@@ -776,7 +778,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
                         if (Paused)
                         {
-                            ContentResourceManager.GetSoundFXEngine().KillSounds(true);
+                            ContentResourceManager.GetSoundFxEngine().KillSounds(true);
                         }
                     }
                 }
@@ -788,10 +790,10 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             // logic frame for as long as the key was held.
             if (ToggleKeys.GetPressedKey() == Keys.F12)
             {
-                if (CurrentGameScreen == enGameScreen.Cheops ||
-                    CurrentGameScreen == enGameScreen.MainGame ||
-                    CurrentGameScreen == enGameScreen.PlanetCore ||
-                    CurrentGameScreen == enGameScreen.AccessBooth)
+                if (CurrentGameScreen == GameScreenType.Cheops ||
+                    CurrentGameScreen == GameScreenType.MainGame ||
+                    CurrentGameScreen == GameScreenType.PlanetCore ||
+                    CurrentGameScreen == GameScreenType.AccessBooth)
                 {
                     // Automatically pause the game after switching to or from fullscreen so the player doesn't die unexpectantly
                     if (!Paused)
@@ -809,7 +811,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
             if (ToggleKeys.GetPressedKey() == Keys.F10)
             {
-                if (CurrentGameScreen == enGameScreen.MainGame)
+                if (CurrentGameScreen == GameScreenType.MainGame)
                 {
                     DrawBackgrounds = !DrawBackgrounds;
                 }
@@ -851,19 +853,19 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                     DrawBackgrounds = true;
                 }
 
-                if (IntroSequence.SequenceStage == enIntroSequenceStage.Finished || IntroSequence.SequenceStage == enIntroSequenceStage.EndPause)
+                if (IntroSequence.SequenceStage == IntroSequenceStage.Finished || IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
                 {
-                    ((MainGameScreen)GetGameScreen(enGameScreen.MainGame)).SpritesChanged();
+                    ((MainGameScreen)GetGameScreen(GameScreenType.MainGame)).SpritesChanged();
                 }
 
-                ContentResourceManager.GetSoundFXEngine().PlaySound("AccessSuccess", 1f, false);
+                ContentResourceManager.GetSoundFxEngine().PlaySound("AccessSuccess", 1f, false);
             }
 
             if (InTestMode)
             {
                 if (Keyboard.GetState().IsKeyDown(Keys.F1))
                 {
-                    if (Player.BlobsState == enBlobState.Normal)
+                    if (Player.BlobsState == BlobState.Normal)
                     {
                         Player.KillBlob(false, false);
                     }
@@ -873,7 +875,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                 if (Keyboard.GetState().IsKeyDown(Keys.F2))
                 {
                     BlobStatusPanel.BlobLives = 5;
-                    Player.BlobsState = enBlobState.Dead;
+                    Player.BlobsState = BlobState.Dead;
                 }
 
                 // Reset screen to it's original dimensions
@@ -899,7 +901,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
                 if (ToggleKeys.GetPressedKey() == Keys.F3)
                 {
-                    ScreenEffctEngine.ExecuteScreenEffect(enScreenEffectType.AddictiveFade, -1, 50, false);
+                    ScreenEffctEngine.ExecuteScreenEffect(ScreenEffectType.AddictiveFade, -1, 50, false);
                 }
                 /*
                 if (ToggleKeys.GetPressedKey() == Keys.S)
@@ -912,7 +914,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                 }
                  */
 
-                if (CurrentGameScreen == enGameScreen.MainGame)
+                if (CurrentGameScreen == GameScreenType.MainGame)
                 {
                     // Change screens
                     if (Keyboard.GetState().IsKeyDown(Keys.NumPad4))
@@ -920,7 +922,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                         if (GameScreens.ScreenNumber > 0)
                         {
                             GameScreens.ScreenNumber--;
-                            GetGameScreen(CurrentGameScreen).PerformPostScreenChangeActions(enGameScreen.MainGame, true);
+                            GetGameScreen(CurrentGameScreen).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
                             Thread.Sleep(100);
                         }
                     }
@@ -930,7 +932,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                         if (GameScreens.ScreenNumber < 511)
                         {
                             GameScreens.ScreenNumber++;
-                            GetGameScreen(CurrentGameScreen).PerformPostScreenChangeActions(enGameScreen.MainGame, true);
+                            GetGameScreen(CurrentGameScreen).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
                             Thread.Sleep(100);
                         }
                     }
@@ -940,7 +942,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                         if (GameScreens.ScreenNumber - 16 >= 0)
                         {
                             GameScreens.ScreenNumber -= 16;
-                            GetGameScreen(CurrentGameScreen).PerformPostScreenChangeActions(enGameScreen.MainGame, true);
+                            GetGameScreen(CurrentGameScreen).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
                             Thread.Sleep(100);
                         }
                     }
@@ -950,7 +952,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                         if (GameScreens.ScreenNumber + 16 <= 512)
                         {
                             GameScreens.ScreenNumber += 16;
-                            GetGameScreen(CurrentGameScreen).PerformPostScreenChangeActions(enGameScreen.MainGame, true);
+                            GetGameScreen(CurrentGameScreen).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
                             Thread.Sleep(100);
                         }
                     }
@@ -977,11 +979,11 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                 Screens.TryGetValue(CurrentGameScreen, out screenToUpdate);
 
                 // Status panel
-                if (CurrentGameScreen == enGameScreen.Cheops ||
-                    CurrentGameScreen == enGameScreen.MainGame ||
-                    CurrentGameScreen == enGameScreen.PlanetCore ||
-                    CurrentGameScreen == enGameScreen.Teleporter ||
-                    CurrentGameScreen == enGameScreen.AccessBooth)
+                if (CurrentGameScreen == GameScreenType.Cheops ||
+                    CurrentGameScreen == GameScreenType.MainGame ||
+                    CurrentGameScreen == GameScreenType.PlanetCore ||
+                    CurrentGameScreen == GameScreenType.Teleporter ||
+                    CurrentGameScreen == GameScreenType.AccessBooth)
                 {
                     BlobStatusPanel.Update(Player.BlobInventory);
                 }
@@ -1019,9 +1021,9 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                     }
                 }
 
-                if (!particleTestTrigger)
+                if (!_particleTestTrigger)
                 {
-                    particleTestTrigger = true;
+                    _particleTestTrigger = true;
                 }
             }
         }
@@ -1081,14 +1083,14 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     {
         CalculatePresentationTransform();
 
-        if (status == GameEngineStatus.StartGame)
+        if (Status == GameEngineStatus.StartGame)
         {
             // Status panel
-            if (CurrentGameScreen == enGameScreen.Cheops ||
-                CurrentGameScreen == enGameScreen.MainGame ||
-                CurrentGameScreen == enGameScreen.PlanetCore ||
-                CurrentGameScreen == enGameScreen.Teleporter ||
-                CurrentGameScreen == enGameScreen.AccessBooth)
+            if (CurrentGameScreen == GameScreenType.Cheops ||
+                CurrentGameScreen == GameScreenType.MainGame ||
+                CurrentGameScreen == GameScreenType.PlanetCore ||
+                CurrentGameScreen == GameScreenType.Teleporter ||
+                CurrentGameScreen == GameScreenType.AccessBooth)
             {
                 ScreenEffctEngine.SelectRenderViewPort("StatusArea"); // StatusPanelArea;
                 BlobStatusPanel.Draw(gameTime);
@@ -1123,28 +1125,28 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             GraphicsDeviceMgr.GraphicsDevice.Clear(ScreenClearColour);
 
 
-            if (status == GameEngineStatus.Starting ||
-                status == GameEngineStatus.StartingGraphicsLoaded ||
-                status == GameEngineStatus.ContentLoaded)
+            if (Status == GameEngineStatus.Starting ||
+                Status == GameEngineStatus.StartingGraphicsLoaded ||
+                Status == GameEngineStatus.ContentLoaded)
             {
-                bootScreen.Begin(BlendState.Opaque, gameTime, PresentationTransform);
-                bootScreen.DrawSpriteUnscaled(0, 0, 0, loadingScreenFade);
-                bootScreen.End();
+                _bootScreen.Begin(BlendState.Opaque, gameTime, PresentationTransform);
+                _bootScreen.DrawSpriteUnscaled(0, 0, 0, _loadingScreenFade);
+                _bootScreen.End();
 
-                bootProgressBackground.Begin(BlendState.AlphaBlend, gameTime, PresentationTransform);
-                bootProgressBackground.DrawSpriteUnscaled(0, 116, 657, bootProgressBackgroundFade);
-                bootProgressBackground.End();
+                _bootProgressBackground.Begin(BlendState.AlphaBlend, gameTime, PresentationTransform);
+                _bootProgressBackground.DrawSpriteUnscaled(0, 116, 657, _bootProgressBackgroundFade);
+                _bootProgressBackground.End();
 
                 // Draw the status percentage
-                bootProgress.Begin(BlendState.AlphaBlend, gameTime, PresentationTransform);
-                var PercentBarWidth = (int)(519 / (double)100 * PercentComplete);
+                _bootProgress.Begin(BlendState.AlphaBlend, gameTime, PresentationTransform);
+                var percentBarWidth = (int)(519 / (double)100 * PercentComplete);
 
-                for (var a = 0; a < PercentBarWidth; a++)
+                for (var a = 0; a < percentBarWidth; a++)
                 {
-                    bootProgress.DrawSpriteUnscaled(0, 122 + a * 2, 661, bootProgressBackgroundFade);
+                    _bootProgress.DrawSpriteUnscaled(0, 122 + a * 2, 661, _bootProgressBackgroundFade);
                 }
 
-                bootProgress.End();
+                _bootProgress.End();
                 //Vector2 statusMessageSize = Font1.MeasureString(statusMessage);
                 //Font1.Begin(BlendState.AlphaBlend);
                 //Font1.WriteText((int)(1280 - statusMessageSize.X) / 2, 620, statusMessage, Color.White, 255);
@@ -1156,18 +1158,18 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     #region IDisposable Members
 
-    private void FreeMem(IDisposable ObjToFree)
+    private void FreeMem(IDisposable objToFree)
     {
-        if (ObjToFree != null)
+        if (objToFree != null)
         {
-            ObjToFree.Dispose();
-            ObjToFree = null;
+            objToFree.Dispose();
+            objToFree = null;
         }
     }
 
     public void Dispose()
     {
-        ContentResourceManager.GetSoundFXEngine().Dispose();
+        ContentResourceManager.GetSoundFxEngine().Dispose();
         //FreeMem(BlobSprites);
         //FreeMem(BlobShuttle);
         //FreeMem(JumpPlatforms);

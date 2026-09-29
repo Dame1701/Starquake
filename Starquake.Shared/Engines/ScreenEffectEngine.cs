@@ -8,28 +8,28 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StarquakeXNA.Structure;
 
-namespace StarquakeXNA;
+namespace StarquakeXNA.Engines;
 
 public class RenderViewPort
 {
-    private readonly GameEngine gameEngine;
+    private readonly GameEngine _gameEngine;
 
-    public RenderViewPort(GameEngine GameEngineReference, string Name, int XPos, int YPos, int Width, int Height)
+    public RenderViewPort(GameEngine gameEngineReference, string name, int xPos, int yPos, int width, int height)
     {
-        gameEngine = GameEngineReference;
+        _gameEngine = gameEngineReference;
 
-        MasterXPos = XPos;
-        MasterYPos = YPos;
+        MasterXPos = xPos;
+        MasterYPos = yPos;
 
-        this.Width = Width;
-        this.Height = Height;
+        this.Width = width;
+        this.Height = height;
 
-        RenderTarget = new RenderTarget2D(gameEngine.GraphicsDeviceMgr.GraphicsDevice, Width, Height, false, SurfaceFormat.Color, DepthFormat.Depth24, 0, RenderTargetUsage.PreserveContents);
+        RenderTarget = new RenderTarget2D(_gameEngine.GraphicsDeviceMgr.GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24, 0, RenderTargetUsage.PreserveContents);
 
 
-        this.XPos = XPos;
-        this.YPos = YPos;
-        this.Name = Name;
+        this.XPos = xPos;
+        this.YPos = yPos;
+        this.Name = name;
         Active = false;
     }
     public RenderTarget2D RenderTarget { get; }
@@ -60,42 +60,42 @@ public class RenderViewPort
 public class ScreenEffectEngine : GameComponentBase
 {
 
-    private readonly SpriteBatch renderer;
-    private readonly List<RenderViewPort> renderViewPorts;
-    private readonly List<ScreenEffectBase> screenEffects;
+    private readonly SpriteBatch _renderer;
+    private readonly List<RenderViewPort> _renderViewPorts;
+    private readonly List<ScreenEffectBase> _screenEffects;
 
-    private RenderViewPort activeViewPort;
+    private RenderViewPort _activeViewPort;
 
 
-    private int screenHeight;
+    private int _screenHeight;
 
-    private int screenWidth;
+    private int _screenWidth;
 
     public ScreenEffectEngine(
-        int ScreenWidth,
-        int ScreenHeight,
-        GameEngine GameEngineReference)
-        : base(GameEngineReference)
+        int screenWidth,
+        int screenHeight,
+        GameEngine gameEngineReference)
+        : base(gameEngineReference)
     {
-        screenWidth = ScreenWidth;
-        screenHeight = ScreenHeight;
+        _screenWidth = screenWidth;
+        _screenHeight = screenHeight;
 
-        renderViewPorts = new List<RenderViewPort>();
-        screenEffects = new List<ScreenEffectBase>();
+        _renderViewPorts = new List<RenderViewPort>();
+        _screenEffects = new List<ScreenEffectBase>();
 
         // Add all of the screen effects we can find - do this eventually through reflection but for now - manually!
-        screenEffects.Add(new LeftTunnelEntryEffect(gameEngine));
-        screenEffects.Add(new RightTunnelEntryEffect(gameEngine));
-        screenEffects.Add(new AddictiveFade(gameEngine));
+        _screenEffects.Add(new LeftTunnelEntryEffect(GameEngine));
+        _screenEffects.Add(new RightTunnelEntryEffect(GameEngine));
+        _screenEffects.Add(new AddictiveFade(GameEngine));
 
-        renderer = new SpriteBatch(gameEngine.GraphicsDeviceMgr.GraphicsDevice);
+        _renderer = new SpriteBatch(GameEngine.GraphicsDeviceMgr.GraphicsDevice);
         HaltBlobAndNasties = false;
     }
     public bool HaltBlobAndNasties { get; private set; }
 
     public ScreenEffectBase ActiveScreenEffect { get; private set; }
 
-    public enScreenEffectType CurrentScreenEffect
+    public ScreenEffectType CurrentScreenEffect
     {
         get
         {
@@ -104,7 +104,7 @@ public class ScreenEffectEngine : GameComponentBase
                 return ActiveScreenEffect.ScreenEffectType;
             }
 
-            return enScreenEffectType.None;
+            return ScreenEffectType.None;
         }
     }
 
@@ -113,15 +113,15 @@ public class ScreenEffectEngine : GameComponentBase
     ///     the location so we can draw correctly
     /// </summary>
     /// <param name="?"></param>
-    public void RegisterViewPort(string Name,
-        int XPosition,
-        int YPosition,
-        int Width,
-        int Height)
+    public void RegisterViewPort(string name,
+        int xPosition,
+        int yPosition,
+        int width,
+        int height)
     {
-        if (GetRenderViewPort(Name) == null)
+        if (GetRenderViewPort(name) == null)
         {
-            renderViewPorts.Add(new RenderViewPort(gameEngine, Name, XPosition, YPosition, Width, Height));
+            _renderViewPorts.Add(new RenderViewPort(GameEngine, name, xPosition, yPosition, width, height));
         }
         else
         {
@@ -129,73 +129,73 @@ public class ScreenEffectEngine : GameComponentBase
         }
     }
 
-    public void SelectRenderViewPort(string Name, bool ClearScreen = true)
+    public void SelectRenderViewPort(string name, bool clearScreen = true)
     {
-        var selectedViewPort = GetRenderViewPort(Name);
+        var selectedViewPort = GetRenderViewPort(name);
 
         if (selectedViewPort != null)
         {
             selectedViewPort.Active = true;
-            activeViewPort = selectedViewPort;
-            gameEngine.GraphicsDeviceMgr.GraphicsDevice.SetRenderTarget(selectedViewPort.RenderTarget);
+            _activeViewPort = selectedViewPort;
+            GameEngine.GraphicsDeviceMgr.GraphicsDevice.SetRenderTarget(selectedViewPort.RenderTarget);
 
-            if (ClearScreen)
+            if (clearScreen)
             {
-                gameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(Color.Transparent);
+                GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(Color.Transparent);
             }
         }
         else
         {
-            throw new Exception("Could not find a RenderViewPort with the same name '" + Name + "'");
+            throw new Exception("Could not find a RenderViewPort with the same name '" + name + "'");
         }
     }
 
-    public void MoveViewPort(string Name, int XOffset, int YOffset)
+    public void MoveViewPort(string name, int xOffset, int yOffset)
     {
-        var viewPort = GetRenderViewPort(Name);
-        viewPort.XPos = viewPort.MasterXPos + XOffset;
-        viewPort.YPos = viewPort.MasterYPos + YOffset;
+        var viewPort = GetRenderViewPort(name);
+        viewPort.XPos = viewPort.MasterXPos + xOffset;
+        viewPort.YPos = viewPort.MasterYPos + yOffset;
     }
 
-    public RenderViewPort GetRenderViewPort(string Name)
+    public RenderViewPort GetRenderViewPort(string name)
     {
-        for (var a = 0; a < renderViewPorts.Count; a++)
+        for (var a = 0; a < _renderViewPorts.Count; a++)
         {
-            if (renderViewPorts[a].Name.ToLower() == Name.ToLower())
+            if (_renderViewPorts[a].Name.ToLower() == name.ToLower())
             {
-                return renderViewPorts[a];
+                return _renderViewPorts[a];
             }
         }
 
         return null;
     }
 
-    public void ExecuteScreenEffect(enScreenEffectType ScreenEffectToExecute, int EffectSpeed, int EffectDuration, bool HaltBlobAndNasties)
+    public void ExecuteScreenEffect(ScreenEffectType screenEffectToExecute, int effectSpeed, int effectDuration, bool haltBlobAndNasties)
     {
         // Only allow one effect to execute at a time - may need to implement an overrride system....
-        for (var a = 0; a < screenEffects.Count; a++)
+        for (var a = 0; a < _screenEffects.Count; a++)
         {
-            screenEffects[a].Reset();
+            _screenEffects[a].Reset();
             ActiveScreenEffect = null;
         }
 
-        for (var a = 0; a < screenEffects.Count; a++)
+        for (var a = 0; a < _screenEffects.Count; a++)
         {
-            if (screenEffects[a].ScreenEffectType == ScreenEffectToExecute)
+            if (_screenEffects[a].ScreenEffectType == screenEffectToExecute)
             {
-                ActiveScreenEffect = screenEffects[a];
-                ActiveScreenEffect.TriggerEffect(GetRenderViewPort("GameArea"), EffectSpeed, EffectDuration);
-                this.HaltBlobAndNasties = HaltBlobAndNasties;
+                ActiveScreenEffect = _screenEffects[a];
+                ActiveScreenEffect.TriggerEffect(GetRenderViewPort("GameArea"), effectSpeed, effectDuration);
+                this.HaltBlobAndNasties = haltBlobAndNasties;
                 break;
             }
         }
     }
 
-    public int GetParticleX(int XPos)
-        => XPos;
+    public int GetParticleX(int xPos)
+        => xPos;
 
-    public int GetParticleY(int YPos)
-        => YPos;
+    public int GetParticleY(int yPos)
+        => yPos;
 
     public void Update()
     {
@@ -214,56 +214,56 @@ public class ScreenEffectEngine : GameComponentBase
     public void Draw()
     {
         // Select the back buffer
-        gameEngine.GraphicsDeviceMgr.GraphicsDevice.SetRenderTarget(null);
+        GameEngine.GraphicsDeviceMgr.GraphicsDevice.SetRenderTarget(null);
 
         // Clear the screen
-        gameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(gameEngine.ScreenClearColour);
+        GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.ScreenClearColour);
 
-        for (var a = 0; a < renderViewPorts.Count; a++)
+        for (var a = 0; a < _renderViewPorts.Count; a++)
         {
-            if (renderViewPorts[a].Active)
+            if (_renderViewPorts[a].Active)
             {
                 // Only apply effects to the game area - might change this so we can apply different ones to different ports...
-                if (renderViewPorts[a].Name.ToLower() == "gamearea")
+                if (_renderViewPorts[a].Name.ToLower() == "gamearea")
                 {
                     // Run the alternative renderer if we need to
                     var useDefaultRenderer = true;
 
                     if (ActiveScreenEffect != null)
                     {
-                        useDefaultRenderer = ActiveScreenEffect.Draw(renderer, renderViewPorts[a]);
+                        useDefaultRenderer = ActiveScreenEffect.Draw(_renderer, _renderViewPorts[a]);
                     }
 
                     // We're using the default renderer so lets render
                     if (useDefaultRenderer)
                     {
-                        renderer.Begin(SpriteSortMode.Deferred, BlendState.Opaque, null, null, null, null,
-                            gameEngine.PresentationTransform);
+                        _renderer.Begin(SpriteSortMode.Deferred, BlendState.Opaque, null, null, null, null,
+                            GameEngine.PresentationTransform);
 
-                        renderer.Draw(renderViewPorts[a].RenderTarget, new Rectangle(
-                            renderViewPorts[a].XPos,
-                            renderViewPorts[a].YPos,
-                            renderViewPorts[a].Width,
-                            renderViewPorts[a].Height), Color.White);
+                        _renderer.Draw(_renderViewPorts[a].RenderTarget, new Rectangle(
+                            _renderViewPorts[a].XPos,
+                            _renderViewPorts[a].YPos,
+                            _renderViewPorts[a].Width,
+                            _renderViewPorts[a].Height), Color.White);
 
-                        renderer.End();
+                        _renderer.End();
                     }
                 }
                 else
                 {
-                    renderer.Begin(SpriteSortMode.Deferred, BlendState.Opaque, null, null, null, null,
-                        gameEngine.PresentationTransform);
+                    _renderer.Begin(SpriteSortMode.Deferred, BlendState.Opaque, null, null, null, null,
+                        GameEngine.PresentationTransform);
 
-                    renderer.Draw(renderViewPorts[a].RenderTarget, new Rectangle(
-                        renderViewPorts[a].XPos,
-                        renderViewPorts[a].YPos,
-                        renderViewPorts[a].Width,
-                        renderViewPorts[a].Height), Color.White);
+                    _renderer.Draw(_renderViewPorts[a].RenderTarget, new Rectangle(
+                        _renderViewPorts[a].XPos,
+                        _renderViewPorts[a].YPos,
+                        _renderViewPorts[a].Width,
+                        _renderViewPorts[a].Height), Color.White);
 
-                    renderer.End();
+                    _renderer.End();
                 }
 
-                renderViewPorts[a].Active = false;
+                _renderViewPorts[a].Active = false;
             }
         }
 

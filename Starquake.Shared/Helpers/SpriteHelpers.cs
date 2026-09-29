@@ -3,8 +3,9 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
+using StarquakeXNA.Structure;
 
-namespace StarquakeXNA;
+namespace StarquakeXNA.Helpers;
 
 public class SpriteHelpers
 {
@@ -12,45 +13,45 @@ public class SpriteHelpers
     ///     Gets a collision offset point for particles based on the direction a sprite is moving, assumes sprite is drawn from
     ///     top left
     /// </summary>
-    /// <param name="Direction">Direction the sprite is moving in</param>
+    /// <param name="direction">Direction the sprite is moving in</param>
     /// <param name="SpriteLocation">The size of the sprite</param>
     /// <returns></returns>
-    public static Point GetSpriteLocationOffset(enDirection Direction, int SpriteWidth, int SpriteHeight)
+    public static Point GetSpriteLocationOffset(Direction direction, int spriteWidth, int spriteHeight)
     {
-        if (Direction == enDirection.UpRight)
+        if (direction == Direction.UpRight)
         {
             return new Point(0, 0);
         }
-        if (Direction == enDirection.Up)
+        if (direction == Direction.Up)
         {
-            return new Point(SpriteWidth / 2, 0);
+            return new Point(spriteWidth / 2, 0);
         }
-        if (Direction == enDirection.UpRight)
+        if (direction == Direction.UpRight)
         {
-            return new Point(SpriteWidth, 0);
+            return new Point(spriteWidth, 0);
         }
-        if (Direction == enDirection.Left)
+        if (direction == Direction.Left)
         {
-            return new Point(0, SpriteHeight / 2);
+            return new Point(0, spriteHeight / 2);
         }
-        if (Direction == enDirection.DownLeft)
+        if (direction == Direction.DownLeft)
         {
-            return new Point(0, SpriteHeight);
+            return new Point(0, spriteHeight);
         }
-        if (Direction == enDirection.Down)
+        if (direction == Direction.Down)
         {
-            return new Point(SpriteWidth / 2, SpriteHeight);
+            return new Point(spriteWidth / 2, spriteHeight);
         }
-        if (Direction == enDirection.DownRight)
+        if (direction == Direction.DownRight)
         {
-            return new Point(SpriteWidth, SpriteHeight);
+            return new Point(spriteWidth, spriteHeight);
         }
-        if (Direction == enDirection.Right)
+        if (direction == Direction.Right)
         {
-            return new Point(SpriteWidth, SpriteHeight / 2);
+            return new Point(spriteWidth, spriteHeight / 2);
         }
 
         // no direction so return the centre of the sprite
-        return new Point(SpriteWidth / 2, SpriteHeight / 2);
+        return new Point(spriteWidth / 2, spriteHeight / 2);
     }
 }

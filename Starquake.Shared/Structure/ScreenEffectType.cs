@@ -4,7 +4,7 @@
 // -
 namespace StarquakeXNA.Structure;
 
-public enum enScreenEffectType
+public enum ScreenEffectType
 {
     None,
     AddictiveFade,

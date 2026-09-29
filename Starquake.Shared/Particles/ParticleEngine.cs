@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using ProjectMercury;
 using ProjectMercury.Renderers;
+using StarquakeXNA.Engines;
+using StarquakeXNA.Structure;
 
 namespace StarquakeXNA.Particles;
 
@@ -25,17 +27,17 @@ public interface IParticleEffect
 public interface IStandardParticleEffect : IParticleEffect
 {
     void Start();
-    void Update(int XPos, int YPos, GameTime GameTime);
+    void Update(int xPos, int yPos, GameTime gameTime);
 }
 
 // A particle effect that can be initialised from multiple positions with their own durational lifetimes, an example are the post fire sparks
 public interface IPositionalTriggerParticleEffect : IParticleEffect
 {
-    void Start(int XPos, int YPos);
+    void Start(int xPos, int yPos);
     void Update(GameTime gameTime);
 }
 
-public enum enParticleEffectType
+public enum ParticleEffectType
 {
     Triggered,
     Continual,
@@ -44,36 +46,36 @@ public enum enParticleEffectType
 
 public class ParticleEngine
 {
-    private readonly GameEngine gameEngineInstance;
-    private readonly Dictionary<string, ParticleEffect> particleEffects;
+    private readonly GameEngine _gameEngineInstance;
+    private readonly Dictionary<string, ParticleEffect> _particleEffects;
 
-    private readonly SpriteBatchRenderer particleRenderer;
+    private readonly SpriteBatchRenderer _particleRenderer;
 
-    public ParticleEngine(GameEngine GameEngineInstance)
+    public ParticleEngine(GameEngine gameEngineInstance)
     {
-        gameEngineInstance = GameEngineInstance;
-        particleRenderer = new SpriteBatchRenderer();
-        particleRenderer.GraphicsDeviceService = gameEngineInstance.GraphicsDeviceMgr;
+        _gameEngineInstance = gameEngineInstance;
+        _particleRenderer = new SpriteBatchRenderer();
+        _particleRenderer.GraphicsDeviceService = _gameEngineInstance.GraphicsDeviceMgr;
 
-        particleEffects = new Dictionary<string, ParticleEffect>();
+        _particleEffects = new Dictionary<string, ParticleEffect>();
     }
 
-    public void AddEffect(string EffectName, string EffectPath)
+    public void AddEffect(string effectName, string effectPath)
     {
-        var temp = gameEngineInstance.ContentMgr.Load<ParticleEffect>(EffectPath);
-        particleEffects.Add(EffectName, temp);
+        var temp = _gameEngineInstance.ContentMgr.Load<ParticleEffect>(effectPath);
+        _particleEffects.Add(effectName, temp);
     }
 
     public void LoadContent()
     {
-        foreach (var pe in particleEffects.Values)
+        foreach (var pe in _particleEffects.Values)
         {
-            pe.LoadContent(gameEngineInstance.ContentMgr);
+            pe.LoadContent(_gameEngineInstance.ContentMgr);
         }
 
-        particleRenderer.LoadContent(gameEngineInstance.ContentMgr);
+        _particleRenderer.LoadContent(_gameEngineInstance.ContentMgr);
 
-        foreach (var pe in particleEffects.Values)
+        foreach (var pe in _particleEffects.Values)
         {
             pe.Initialise();
         }
@@ -82,20 +84,20 @@ public class ParticleEngine
     /// <summary>
     ///     Returns a Particle effect based on the effect name given if it's single trigger it will only trigger once
     /// </summary>
-    /// <param name="EffectName"></param>
+    /// <param name="effectName"></param>
     /// <param name="SingleTrigger"></param>
-    /// <param name="Duration">
+    /// <param name="duration">
     ///     Single trigger how long until we signal the effect is complete, for non single trigger, how long
     ///     we want to play the routine
     /// </param>
-    public ContinuousParticleEffect CreateContinualEffectInstance(string EffectName, TimeSpan? Duration)
+    public ContinuousParticleEffect CreateContinualEffectInstance(string effectName, TimeSpan? duration)
     {
-        if (particleEffects.ContainsKey(EffectName))
+        if (_particleEffects.ContainsKey(effectName))
         {
-            var cpe = new ContinuousParticleEffect(gameEngineInstance);
-            cpe.EffectDuration = Duration;
-            cpe.mercuryParticleEffect = particleEffects[EffectName];
-            cpe.renderer = particleRenderer;
+            var cpe = new ContinuousParticleEffect(_gameEngineInstance);
+            cpe.EffectDuration = duration;
+            cpe.MercuryParticleEffect = _particleEffects[effectName];
+            cpe.Renderer = _particleRenderer;
 
             return cpe;
         }
@@ -104,19 +106,19 @@ public class ParticleEngine
         return null;
     }
 
-    public MultiTriggerTimeBasedParticleEffect CreateMultiTriggeredTimeBasedEffectInstance(string EffectName)
+    public MultiTriggerTimeBasedParticleEffect CreateMultiTriggeredTimeBasedEffectInstance(string effectName)
     {
         // Deep copy the effect
         // Return a class like the above but with the single trigger stuff in it
         // take the single trigger stuff out of the class above to avoid confusiojn
         // DONE :)
-        if (particleEffects.ContainsKey(EffectName))
+        if (_particleEffects.ContainsKey(effectName))
         {
-            var mtpe = new MultiTriggerTimeBasedParticleEffect(gameEngineInstance);
-            mtpe.mercuryParticleEffect = particleEffects[EffectName].DeepCopy();
-            mtpe.mercuryParticleEffect.LoadContent(gameEngineInstance.ContentMgr);
-            mtpe.mercuryParticleEffect.Initialise();
-            mtpe.renderer = particleRenderer;
+            var mtpe = new MultiTriggerTimeBasedParticleEffect(_gameEngineInstance);
+            mtpe.MercuryParticleEffect = _particleEffects[effectName].DeepCopy();
+            mtpe.MercuryParticleEffect.LoadContent(_gameEngineInstance.ContentMgr);
+            mtpe.MercuryParticleEffect.Initialise();
+            mtpe.Renderer = _particleRenderer;
 
             return mtpe;
         }
@@ -125,19 +127,19 @@ public class ParticleEngine
         return null;
     }
 
-    public TriggeredParticleEffect CreateSingleTriggerEffectInstance(string EffectName)
+    public TriggeredParticleEffect CreateSingleTriggerEffectInstance(string effectName)
     {
         // Deep copy the effect
         // Return a class like the above but with the single trigger stuff in it
         // take the single trigger stuff out of the class above to avoid confusiojn
         // DONE :)
-        if (particleEffects.ContainsKey(EffectName))
+        if (_particleEffects.ContainsKey(effectName))
         {
-            var tpe = new TriggeredParticleEffect(gameEngineInstance);
-            tpe.mercuryParticleEffect = particleEffects[EffectName].DeepCopy();
-            tpe.mercuryParticleEffect.LoadContent(gameEngineInstance.ContentMgr);
-            tpe.mercuryParticleEffect.Initialise();
-            tpe.renderer = particleRenderer;
+            var tpe = new TriggeredParticleEffect(_gameEngineInstance);
+            tpe.MercuryParticleEffect = _particleEffects[effectName].DeepCopy();
+            tpe.MercuryParticleEffect.LoadContent(_gameEngineInstance.ContentMgr);
+            tpe.MercuryParticleEffect.Initialise();
+            tpe.Renderer = _particleRenderer;
 
             return tpe;
         }
@@ -148,19 +150,19 @@ public class ParticleEngine
 
     public class ContinuousParticleEffect : IStandardParticleEffect
     {
-        private readonly GameEngine gameEngineReference;
+        private readonly GameEngine _gameEngineReference;
 
-        private DateTime effectLastTriggered;
+        private DateTime _effectLastTriggered;
 
-        private DateTime effectStartTime;
+        private DateTime _effectStartTime;
 
-        internal ParticleEffect mercuryParticleEffect;
+        internal ParticleEffect MercuryParticleEffect;
 
-        internal SpriteBatchRenderer renderer;
+        internal SpriteBatchRenderer Renderer;
 
-        public ContinuousParticleEffect(GameEngine GameEngineReference)
+        public ContinuousParticleEffect(GameEngine gameEngineReference)
         {
-            gameEngineReference = GameEngineReference;
+            _gameEngineReference = gameEngineReference;
             EffectDuration = new TimeSpan(0);
             EffectActive = false;
         }
@@ -169,7 +171,7 @@ public class ParticleEngine
 
         public TimeSpan? TriggerPeriod { get; set; }
 
-        public ParticleEffect Effect => mercuryParticleEffect;
+        public ParticleEffect Effect => MercuryParticleEffect;
         public bool EffectActive { get; private set; }
 
         public event RaiseEffectComplete ParticleEffectComplete;
@@ -182,12 +184,12 @@ public class ParticleEngine
                 EffectActive = true;
                 if (EffectDuration != null)
                 {
-                    effectStartTime = DateTime.Now;
+                    _effectStartTime = DateTime.Now;
                 }
 
                 if (TriggerPeriod != null)
                 {
-                    effectLastTriggered = DateTime.Now;
+                    _effectLastTriggered = DateTime.Now;
                 }
             }
         }
@@ -201,20 +203,20 @@ public class ParticleEngine
         public void Reset()
         {
             EffectActive = false;
-            mercuryParticleEffect.Terminate();
+            MercuryParticleEffect.Terminate();
         }
 
-        public void Update(int XPos, int YPos, GameTime GameTime)
+        public void Update(int xPos, int yPos, GameTime gameTime)
         {
             if (EffectActive)
             {
                 if (EffectDuration != null)
                 {
-                    if (effectStartTime + EffectDuration <
+                    if (_effectStartTime + EffectDuration <
                         DateTime.Now)
                     {
                         // Continual trigger effects need to allow the particle engine to finish drawing
-                        if (mercuryParticleEffect.ActiveParticlesCount == 0)
+                        if (MercuryParticleEffect.ActiveParticlesCount == 0)
                         {
                             if (ParticleEffectComplete != null)
                             {
@@ -227,15 +229,15 @@ public class ParticleEngine
                     {
                         if (TriggerPeriod != null)
                         {
-                            if (DateTime.Now > effectLastTriggered + TriggerPeriod)
+                            if (DateTime.Now > _effectLastTriggered + TriggerPeriod)
                             {
-                                mercuryParticleEffect.Trigger(new Vector2(gameEngineReference.ScreenEffctEngine.GetParticleX(XPos), gameEngineReference.ScreenEffctEngine.GetParticleY(YPos)));
-                                effectLastTriggered = DateTime.Now;
+                                MercuryParticleEffect.Trigger(new Vector2(_gameEngineReference.ScreenEffctEngine.GetParticleX(xPos), _gameEngineReference.ScreenEffctEngine.GetParticleY(yPos)));
+                                _effectLastTriggered = DateTime.Now;
                             }
                         }
                         else
                         {
-                            mercuryParticleEffect.Trigger(new Vector2(gameEngineReference.ScreenEffctEngine.GetParticleX(XPos), gameEngineReference.ScreenEffctEngine.GetParticleY(YPos)));
+                            MercuryParticleEffect.Trigger(new Vector2(_gameEngineReference.ScreenEffctEngine.GetParticleX(xPos), _gameEngineReference.ScreenEffctEngine.GetParticleY(yPos)));
                         }
                     }
                 }
@@ -244,60 +246,60 @@ public class ParticleEngine
                     // Trigger always
                     if (TriggerPeriod != null)
                     {
-                        if (DateTime.Now > effectLastTriggered + TriggerPeriod)
+                        if (DateTime.Now > _effectLastTriggered + TriggerPeriod)
                         {
-                            mercuryParticleEffect.Trigger(new Vector2(gameEngineReference.ScreenEffctEngine.GetParticleX(XPos), gameEngineReference.ScreenEffctEngine.GetParticleY(YPos)));
-                            effectLastTriggered = DateTime.Now;
+                            MercuryParticleEffect.Trigger(new Vector2(_gameEngineReference.ScreenEffctEngine.GetParticleX(xPos), _gameEngineReference.ScreenEffctEngine.GetParticleY(yPos)));
+                            _effectLastTriggered = DateTime.Now;
                         }
                     }
                     else
                     {
-                        mercuryParticleEffect.Trigger(new Vector2(gameEngineReference.ScreenEffctEngine.GetParticleX(XPos), gameEngineReference.ScreenEffctEngine.GetParticleY(YPos)));
+                        MercuryParticleEffect.Trigger(new Vector2(_gameEngineReference.ScreenEffctEngine.GetParticleX(xPos), _gameEngineReference.ScreenEffctEngine.GetParticleY(yPos)));
                     }
                 }
             }
 
             // Mercury must always be updated
-            var deltaSeconds = (float)GameTime.ElapsedGameTime.TotalSeconds;
-            mercuryParticleEffect.Update(deltaSeconds);
+            var deltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            MercuryParticleEffect.Update(deltaSeconds);
         }
 
         public void Draw()
         {
             // We must always call this!
-            if (!gameEngineReference.UsingOldGraphics)
+            if (!_gameEngineReference.UsingOldGraphics)
             {
-                renderer.RenderEffect(mercuryParticleEffect);
+                Renderer.RenderEffect(MercuryParticleEffect);
             }
         }
 
         public void Draw(int screenFade)
         {
-            if (!gameEngineReference.UsingOldGraphics)
+            if (!_gameEngineReference.UsingOldGraphics)
             {
-                renderer.RenderEffect(mercuryParticleEffect, screenFade);
+                Renderer.RenderEffect(MercuryParticleEffect, screenFade);
             }
         }
     }
 
     public class TriggeredParticleEffect : IStandardParticleEffect
     {
-        private readonly GameEngine gameEngineReference;
+        private readonly GameEngine _gameEngineReference;
 
-        internal ParticleEffect mercuryParticleEffect;
-        internal SpriteBatchRenderer renderer;
+        internal ParticleEffect MercuryParticleEffect;
+        internal SpriteBatchRenderer Renderer;
 
-        private bool triggered;
+        private bool _triggered;
 
-        public TriggeredParticleEffect(GameEngine GameEngineReference)
+        public TriggeredParticleEffect(GameEngine gameEngineReference)
         {
-            gameEngineReference = GameEngineReference;
+            _gameEngineReference = gameEngineReference;
             EffectActive = false;
-            triggered = false;
+            _triggered = false;
         }
         public bool EffectActive { get; private set; }
 
-        public ParticleEffect Effect => mercuryParticleEffect;
+        public ParticleEffect Effect => MercuryParticleEffect;
 
         public event RaiseEffectComplete ParticleEffectComplete;
 
@@ -307,52 +309,52 @@ public class ParticleEngine
             if (EffectActive)
             {
                 // Kill the previous effect
-                mercuryParticleEffect.Terminate();
+                MercuryParticleEffect.Terminate();
                 EffectActive = false;
-                triggered = false;
+                _triggered = false;
             }
 
-            triggered = false;
+            _triggered = false;
             EffectActive = true;
         }
 
         // Stops an effect playing
         public void Stop()
         {
-            mercuryParticleEffect.Terminate();
+            MercuryParticleEffect.Terminate();
             EffectActive = false;
-            triggered = false;
+            _triggered = false;
         }
 
         public void Reset()
         {
             EffectActive = false;
-            mercuryParticleEffect.Terminate();
+            MercuryParticleEffect.Terminate();
         }
 
-        public void Update(int XPos, int YPos, GameTime GameTime)
+        public void Update(int xPos, int yPos, GameTime gameTime)
         {
             if (EffectActive)
             {
-                if (!triggered)
+                if (!_triggered)
                 {
-                    var position = new Vector2(gameEngineReference.ScreenEffctEngine.GetParticleX(XPos), gameEngineReference.ScreenEffctEngine.GetParticleY(YPos));
-                    mercuryParticleEffect.Trigger(ref position);
+                    var position = new Vector2(_gameEngineReference.ScreenEffctEngine.GetParticleX(xPos), _gameEngineReference.ScreenEffctEngine.GetParticleY(yPos));
+                    MercuryParticleEffect.Trigger(ref position);
 
                     // Workaround for a bizzare bug that seems to stop the particle from working
                     // unless we trigger until we get an active partical count.....
-                    if (mercuryParticleEffect.ActiveParticlesCount > 0)
+                    if (MercuryParticleEffect.ActiveParticlesCount > 0)
                     {
-                        triggered = true;
+                        _triggered = true;
                     }
                 }
                 else
                 {
-                    if (mercuryParticleEffect.ActiveParticlesCount == 0)
+                    if (MercuryParticleEffect.ActiveParticlesCount == 0)
                     {
-                        triggered = false;
+                        _triggered = false;
                         EffectActive = false;
-                        mercuryParticleEffect.Terminate();
+                        MercuryParticleEffect.Terminate();
 
                         if (ParticleEffectComplete != null)
                         {
@@ -364,54 +366,54 @@ public class ParticleEngine
             }
 
             // Mercury must always be updated
-            var deltaSeconds = (float)GameTime.ElapsedGameTime.TotalSeconds;
-            mercuryParticleEffect.Update(deltaSeconds);
+            var deltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            MercuryParticleEffect.Update(deltaSeconds);
         }
 
         public void Draw()
         {
-            if (!gameEngineReference.UsingOldGraphics)
+            if (!_gameEngineReference.UsingOldGraphics)
             {
                 // We must always call this!
-                renderer.RenderEffect(mercuryParticleEffect);
+                Renderer.RenderEffect(MercuryParticleEffect);
             }
         }
 
         public void Draw(int screenFade)
         {
-            if (!gameEngineReference.UsingOldGraphics)
+            if (!_gameEngineReference.UsingOldGraphics)
             {
-                renderer.RenderEffect(mercuryParticleEffect, screenFade);
+                Renderer.RenderEffect(MercuryParticleEffect, screenFade);
             }
         }
     }
 
     public class MultiTriggerTimeBasedParticleEffect : IPositionalTriggerParticleEffect
     {
-        private readonly GameEngine gameEngineReference;
-        internal ParticleEffect mercuryParticleEffect;
-        internal SpriteBatchRenderer renderer;
+        private readonly GameEngine _gameEngineReference;
+        internal ParticleEffect MercuryParticleEffect;
+        internal SpriteBatchRenderer Renderer;
 
-        public MultiTriggerTimeBasedParticleEffect(GameEngine GameEngineReference)
+        public MultiTriggerTimeBasedParticleEffect(GameEngine gameEngineReference)
         {
-            gameEngineReference = GameEngineReference;
+            _gameEngineReference = gameEngineReference;
         }
         public event RaiseEffectComplete ParticleEffectComplete;
 
-        public ParticleEffect Effect => mercuryParticleEffect;
+        public ParticleEffect Effect => MercuryParticleEffect;
 
-        public void Start(int XPos, int YPos)
+        public void Start(int xPos, int yPos)
         {
-            var position = new Vector2(gameEngineReference.ScreenEffctEngine.GetParticleX(XPos), gameEngineReference.ScreenEffctEngine.GetParticleY(YPos));
-            mercuryParticleEffect.Trigger(ref position);
+            var position = new Vector2(_gameEngineReference.ScreenEffctEngine.GetParticleX(xPos), _gameEngineReference.ScreenEffctEngine.GetParticleY(yPos));
+            MercuryParticleEffect.Trigger(ref position);
         }
 
-        public void Update(GameTime GameTime)
+        public void Update(GameTime gameTime)
         {
-            var deltaSeconds = (float)GameTime.ElapsedGameTime.TotalSeconds;
-            mercuryParticleEffect.Update(deltaSeconds);
+            var deltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            MercuryParticleEffect.Update(deltaSeconds);
 
-            if (mercuryParticleEffect.ActiveParticlesCount == 0)
+            if (MercuryParticleEffect.ActiveParticlesCount == 0)
             {
                 if (ParticleEffectComplete != null)
                 {
@@ -424,7 +426,7 @@ public class ParticleEngine
         {
             get
             {
-                if (mercuryParticleEffect.ActiveParticlesCount > 0)
+                if (MercuryParticleEffect.ActiveParticlesCount > 0)
                 {
                     return true;
                 }
@@ -435,34 +437,34 @@ public class ParticleEngine
 
         public void Stop()
         {
-            mercuryParticleEffect.Terminate();
+            MercuryParticleEffect.Terminate();
         }
 
         public void Reset()
         {
-            mercuryParticleEffect.Terminate();
+            MercuryParticleEffect.Terminate();
         }
 
         public void Draw()
         {
-            if (!gameEngineReference.UsingOldGraphics)
+            if (!_gameEngineReference.UsingOldGraphics)
             {
                 // We must always call this!
-                if (mercuryParticleEffect.ActiveParticlesCount > 0)
+                if (MercuryParticleEffect.ActiveParticlesCount > 0)
                 {
-                    renderer.RenderEffect(mercuryParticleEffect);
+                    Renderer.RenderEffect(MercuryParticleEffect);
                 }
             }
         }
 
         public void Draw(int screenFade)
         {
-            if (!gameEngineReference.UsingOldGraphics)
+            if (!_gameEngineReference.UsingOldGraphics)
             {
                 // We must always call this!
-                if (mercuryParticleEffect.ActiveParticlesCount > 0)
+                if (MercuryParticleEffect.ActiveParticlesCount > 0)
                 {
-                    renderer.RenderEffect(mercuryParticleEffect, screenFade);
+                    Renderer.RenderEffect(MercuryParticleEffect, screenFade);
                 }
             }
         }

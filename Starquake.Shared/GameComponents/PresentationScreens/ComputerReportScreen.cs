@@ -5,59 +5,61 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using StarquakeXNA.Engines;
 using StarquakeXNA.Helpers;
+using StarquakeXNA.Input;
 using StarquakeXNA.Structure;
 
-namespace StarquakeXNA.GameComponents;
+namespace StarquakeXNA.GameComponents.PresentationScreens;
 
 public class ComputerReportScreen : GameScreenBase, IGameScreen
 {
 
     #region IGameScreen Members
 
-    private SpriteCollection backgroundImage;
-    private SpriteCollection foregroundImage;
-    private bool fadeComplete;
+    private SpriteCollection _backgroundImage;
+    private SpriteCollection _foregroundImage;
+    private bool _fadeComplete;
 
     public bool Success => true;
 
-    public ComputerReportScreen(GameEngine GameEngineReference)
-        : base(GameEngineReference)
+    public ComputerReportScreen(GameEngine gameEngineReference)
+        : base(gameEngineReference)
     {
-        screenFade = 0;
-        screenFadeSpeed = 5;
+        ScreenFade = 0;
+        ScreenFadeSpeed = 5;
     }
 
     public override void LoadContent()
     {
-        backgroundImage = gameEngine.ContentResourceManager.GetSpriteCollection("ComputerReportScreenBackground");
-        foregroundImage = gameEngine.ContentResourceManager.GetSpriteCollection("ComputerReportScreenForeground");
+        _backgroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("ComputerReportScreenBackground");
+        _foregroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("ComputerReportScreenForeground");
     }
 
     public override void Update(GameTime gameTime)
     {
         if (ToggleKeys.GetPressedKey() != Keys.None)
         {
-            gameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(gameEngine.ScreenClearColour);
-            gameEngine.CurrentGameScreen = enGameScreen.MainGame;
+            GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.ScreenClearColour);
+            GameEngine.CurrentGameScreen = GameScreenType.MainGame;
 
-            gameEngine.GetGameScreen(enGameScreen.MainGame).Reset(null);
-            gameEngine.GetGameScreen(enGameScreen.MainGame).PerformPostScreenChangeActions(enGameScreen.ComputerReport, false);
+            GameEngine.GetGameScreen(GameScreenType.MainGame).Reset(null);
+            GameEngine.GetGameScreen(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.ComputerReport, false);
         }
 
-        if (screenFade >= 255)
+        if (ScreenFade >= 255)
         {
-            if (!fadeComplete)
+            if (!_fadeComplete)
             {
-                fadeComplete = true;
+                _fadeComplete = true;
             }
 
-            screenFade = gameEngine.RandomNumberGenerator.Next(255);
-            screenFadeSpeed = gameEngine.RandomNumberGenerator.Next(20);
+            ScreenFade = GameEngine.RandomNumberGenerator.Next(255);
+            ScreenFadeSpeed = GameEngine.RandomNumberGenerator.Next(20);
 
-            if (screenFadeSpeed < 4)
+            if (ScreenFadeSpeed < 4)
             {
-                screenFadeSpeed = 4;
+                ScreenFadeSpeed = 4;
             }
         }
 
@@ -66,55 +68,55 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
 
     public override void Draw(GameTime gameTime)
     {
-        gameEngine.ScreenEffctEngine.SelectRenderViewPort("EntireScreen");
-        backgroundImage.Begin(BlendState.AlphaBlend, gameTime);
+        GameEngine.ScreenEffctEngine.SelectRenderViewPort("EntireScreen");
+        _backgroundImage.Begin(BlendState.AlphaBlend, gameTime);
 
-        if (fadeComplete)
+        if (_fadeComplete)
         {
-            backgroundImage.DrawSprite(0, 0, 0, Color.White);
+            _backgroundImage.DrawSprite(0, 0, 0, Color.White);
         }
         else
         {
-            backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)screenFade));
+            _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXna4Colour(255, 255, 255, (byte)ScreenFade));
         }
 
-        backgroundImage.End();
+        _backgroundImage.End();
 
-        gameEngine.Font2.Begin(BlendState.AlphaBlend);
-        gameEngine.Font2.WriteTextCentred(1280, 180, "Flight Computer Report", 2, ColourHelper.GetXNA4Colour(200, 200, 100), (byte)screenFade);
-        gameEngine.Font2.WriteTextCentred(1280, 260, "Touchdown Imminent Prepare", 2, Color.White, (byte)screenFade);
-        gameEngine.Font2.WriteTextCentred(1280, 320, "For Mission Starquake . . .", 2, Color.White, (byte)screenFade);
-        gameEngine.Font2.WriteTextCentred(1280, 380, "Crash . . . Bang . . . Smash . . .", 2, Color.Red, (byte)screenFade);
-        gameEngine.Font2.WriteTextCentred(1280, 440, "Touchdown", 2, Color.White, (byte)screenFade);
-        gameEngine.Font2.WriteTextCentred(1280, 500, "Comthuter Malthunction", 2, Color.Red, (byte)screenFade);
-        gameEngine.Font2.WriteTextCentred(1280, 560, "Malfunnythinkin . . .", 2, Color.Red, (byte)screenFade);
-        gameEngine.Font2.End();
+        GameEngine.Font2.Begin(BlendState.AlphaBlend);
+        GameEngine.Font2.WriteTextCentred(1280, 180, "Flight Computer Report", 2, ColourHelper.GetXna4Colour(200, 200, 100), (byte)ScreenFade);
+        GameEngine.Font2.WriteTextCentred(1280, 260, "Touchdown Imminent Prepare", 2, Color.White, (byte)ScreenFade);
+        GameEngine.Font2.WriteTextCentred(1280, 320, "For Mission Starquake . . .", 2, Color.White, (byte)ScreenFade);
+        GameEngine.Font2.WriteTextCentred(1280, 380, "Crash . . . Bang . . . Smash . . .", 2, Color.Red, (byte)ScreenFade);
+        GameEngine.Font2.WriteTextCentred(1280, 440, "Touchdown", 2, Color.White, (byte)ScreenFade);
+        GameEngine.Font2.WriteTextCentred(1280, 500, "Comthuter Malthunction", 2, Color.Red, (byte)ScreenFade);
+        GameEngine.Font2.WriteTextCentred(1280, 560, "Malfunnythinkin . . .", 2, Color.Red, (byte)ScreenFade);
+        GameEngine.Font2.End();
 
-        foregroundImage.Begin(BlendState.AlphaBlend, gameTime);
+        _foregroundImage.Begin(BlendState.AlphaBlend, gameTime);
 
-        if (fadeComplete)
+        if (_fadeComplete)
         {
-            foregroundImage.DrawSprite(0, 230, 120, Color.White);
+            _foregroundImage.DrawSprite(0, 230, 120, Color.White);
         }
         else
         {
-            foregroundImage.DrawSprite(0, 230, 120, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)screenFade));
+            _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.GetXna4Colour(255, 255, 255, (byte)ScreenFade));
         }
 
-        foregroundImage.End();
+        _foregroundImage.End();
     }
 
 
-    public void Reset(object Data)
+    public void Reset(object data)
     {
 
     }
 
-    public void PerformPostScreenChangeActions(enGameScreen TriggeringScreen, object Param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object param)
     {
-        fadeComplete = false;
-        screenFade = 0;
-        screenFadeSpeed = 5;
+        _fadeComplete = false;
+        ScreenFade = 0;
+        ScreenFadeSpeed = 5;
     }
 
     #endregion

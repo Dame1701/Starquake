@@ -2,22 +2,23 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-namespace StarquakeXNA;
 
-public enum enCollectables
+namespace StarquakeXNA.Structure;
+
+public enum Collectables
 {
     None = 255,
     AccessCard = 28,
     Key = 29
 }
 
-public enum enTileType
+public enum TileType
 {
     ElectricityNode = 394,
     ElectricityGate = 406
 }
 
-public enum enDirection
+public enum Direction
 {
     Up,
     Down,
@@ -30,7 +31,7 @@ public enum enDirection
     None
 }
 
-public enum enNastyType
+public enum NastyType
 {
     CurleyWurley,
     Cushion,
@@ -51,7 +52,7 @@ public enum enNastyType
     Conveyer
 }
 
-public enum enNastyState
+public enum NastyState
 {
     Disabled,
     PreConception,
@@ -62,7 +63,7 @@ public enum enNastyState
     Dead
 }
 
-public enum enBlobState
+public enum BlobState
 {
     Normal,
     Overloading,
@@ -71,18 +72,18 @@ public enum enBlobState
     Gameover
 }
 
-public enum enActionEvent
+public enum ActionEvent
 {
     Teleported
 }
 
-public enum enNastyInterationType
+public enum NastyInterationType
 {
     HitBlob,
     BlobShot
 }
 
-public enum enActionTiles
+public enum ActionTiles
 {
     ShuttlePlatform = 395,
     RemovedShuttlePlatform = 398,
@@ -101,7 +102,7 @@ public enum enActionTiles
     PreferredCoreLocation = 392
 }
 
-public enum enGameScreen
+public enum GameScreenType
 {
     None,
     Teleporter,
@@ -117,20 +118,20 @@ public enum enGameScreen
     GameComplete
 }
 
-public enum enBlobAction
+public enum BlobAction
 {
     LaidPlatform,
     FiredLazer,
     GotPowerUp
 }
 
-public enum enSoundEffectInstanceType
+public enum SoundEffectInstanceType
 {
     Single,
     Multi
 }
 
-public enum enIntroSequenceStage
+public enum IntroSequenceStage
 {
     None,
     InitialPause,

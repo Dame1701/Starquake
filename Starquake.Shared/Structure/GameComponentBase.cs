@@ -3,23 +3,24 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
+using StarquakeXNA.Engines;
 
-namespace StarquakeXNA;
+namespace StarquakeXNA.Structure;
 
 public abstract class GameComponentBase
 {
-    protected GameEngine gameEngine;
+    protected GameEngine GameEngine;
 
-    public GameComponentBase(GameEngine GameEngineReference)
+    public GameComponentBase(GameEngine gameEngineReference)
     {
-        gameEngine = GameEngineReference;
+        GameEngine = gameEngineReference;
     }
 
     public virtual void LoadContent()
     {
     }
 
-    public virtual void Initialise(object Data)
+    public virtual void Initialise(object data)
     {
     }
 
@@ -31,7 +32,7 @@ public abstract class GameComponentBase
     {
     }
 
-    public virtual void Draw(GameTime gameTime, int screenFade, object Parameters)
+    public virtual void Draw(GameTime gameTime, int screenFade, object parameters)
     {
     }
 

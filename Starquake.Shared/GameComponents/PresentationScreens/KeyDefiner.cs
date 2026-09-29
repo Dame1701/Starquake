@@ -6,15 +6,17 @@ using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using StarquakeXNA.Engines;
 using StarquakeXNA.Helpers;
+using StarquakeXNA.Input;
 
-namespace StarquakeXNA.GameComponents;
+namespace StarquakeXNA.GameComponents.PresentationScreens;
 
 public class KeyDefiner
 {
 
-    private readonly GameEngine gameEngine;
-    private readonly string[] KeysToDefine = new[]
+    private readonly GameEngine _gameEngine;
+    private readonly string[] _keysToDefine = new[]
     {
         "UP",
         "DOWN",
@@ -24,13 +26,13 @@ public class KeyDefiner
         "PAUSE",
         "QUIT"
     };
-    private bool Alldone;
+    private bool _alldone;
 
-    private int DefinedKeyIndex;
+    private int _definedKeyIndex;
 
-    public KeyDefiner(GameEngine GameEngineReference)
+    public KeyDefiner(GameEngine gameEngineReference)
     {
-        gameEngine = GameEngineReference;
+        _gameEngine = gameEngineReference;
         DefinedKeys = new[]
         {
             Keys.O,
@@ -48,29 +50,29 @@ public class KeyDefiner
 
     public string GetKeys()
     {
-        var KeyString = string.Empty;
+        var keyString = string.Empty;
 
         for (var a = 0; a < 5; a++)
         {
-            KeyString = KeyString + ToggleKeys.GetFriendlyName(DefinedKeys[a]) + ", ";
+            keyString = keyString + ToggleKeys.GetFriendlyName(DefinedKeys[a]) + ", ";
         }
 
-        return KeyString.Substring(0, KeyString.Length - 2);
+        return keyString.Substring(0, keyString.Length - 2);
     }
 
     public void Reset()
     {
-        DefinedKeyIndex = 0;
-        Alldone = false;
+        _definedKeyIndex = 0;
+        _alldone = false;
         for (var a = 0; a < DefinedKeys.Length; a++)
         {
             DefinedKeys[a] = Keys.None;
         }
     }
 
-    private bool KeyAlreadyUsed(Keys Key)
+    private bool KeyAlreadyUsed(Keys key)
     {
-        if (DefinedKeys.Contains(Key))
+        if (DefinedKeys.Contains(key))
         {
             return true;
         }
@@ -80,35 +82,35 @@ public class KeyDefiner
 
     public void Update(GameTime gameTime)
     {
-        var PressedKey = ToggleKeys.GetPressedKey();
+        var pressedKey = ToggleKeys.GetPressedKey();
 
-        if (!Alldone)
+        if (!_alldone)
         {
-            if (DefinedKeyIndex < DefinedKeys.Length)
+            if (_definedKeyIndex < DefinedKeys.Length)
             {
-                if (PressedKey != Keys.None && !KeyAlreadyUsed(PressedKey))
+                if (pressedKey != Keys.None && !KeyAlreadyUsed(pressedKey))
                 {
-                    gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("BlobPickUp", 0.5f, false);
-                    DefinedKeys[DefinedKeyIndex] = PressedKey;
-                    DefinedKeyIndex++;
+                    _gameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+                    DefinedKeys[_definedKeyIndex] = pressedKey;
+                    _definedKeyIndex++;
                 }
             }
             else
             {
                 if (KeyDefinitionComplete != null)
                 {
-                    Alldone = true;
+                    _alldone = true;
 
                 }
             }
         }
         else
         {
-            if (PressedKey == Keys.Y)
+            if (pressedKey == Keys.Y)
             {
                 KeyDefinitionComplete(this, EventArgs.Empty);
             }
-            else if (PressedKey == Keys.N)
+            else if (pressedKey == Keys.N)
             {
                 Reset();
             }
@@ -117,12 +119,12 @@ public class KeyDefiner
 
     public void Draw(GameTime gameTime, int screenFade)
     {
-        gameEngine.Font2.WriteText(480, 236, "Press a key for:", 2, ColourHelper.GetXNA4Colour(130, 130, 255), (byte)screenFade);
+        _gameEngine.Font2.WriteText(480, 236, "Press a key for:", 2, ColourHelper.GetXna4Colour(130, 130, 255), (byte)screenFade);
 
         var keyDefineYPos = 290;
-        for (var a = 0; a < KeysToDefine.Length; a++)
+        for (var a = 0; a < _keysToDefine.Length; a++)
         {
-            gameEngine.Font2.WriteText(500, keyDefineYPos, KeysToDefine[a] + ":", 2, Color.White, (byte)screenFade);
+            _gameEngine.Font2.WriteText(500, keyDefineYPos, _keysToDefine[a] + ":", 2, Color.White, (byte)screenFade);
             keyDefineYPos += 40;
         }
 
@@ -131,15 +133,15 @@ public class KeyDefiner
         {
             if (DefinedKeys[a] != Keys.None)
             {
-                gameEngine.Font2.WriteText(660, keyDefineYPos, ToggleKeys.GetFriendlyName(DefinedKeys[a]), 2, ColourHelper.GetXNA4Colour(130, 130, 255), (byte)screenFade);
+                _gameEngine.Font2.WriteText(660, keyDefineYPos, ToggleKeys.GetFriendlyName(DefinedKeys[a]), 2, ColourHelper.GetXna4Colour(130, 130, 255), (byte)screenFade);
             }
 
             keyDefineYPos += 40;
         }
 
-        if (Alldone)
+        if (_alldone)
         {
-            gameEngine.Font2.WriteText(540, 590, "OK ?  ( Y / N )", ColourHelper.GetXNA4Colour(130, 130, 255), (byte)screenFade);
+            _gameEngine.Font2.WriteText(540, 590, "OK ?  ( Y / N )", ColourHelper.GetXna4Colour(130, 130, 255), (byte)screenFade);
         }
     }
 }

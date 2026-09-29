@@ -2,12 +2,11 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using StarquakeXNA.Structure;
 
-namespace StarquakeXNA;
+namespace StarquakeXNA.Structure;
 
-public delegate void RaiseEngineComponentStatusChanged(string Message, int PercentComplete, GameEngineStatus Status);
+public delegate void RaiseEngineComponentStatusChanged(string message, int percentComplete, GameEngineStatus status);
 
-public delegate void RaiseInteractionWithBlob(enNastyInterationType InteractionType, enNastyType NastyType);
+public delegate void RaiseInteractionWithBlob(NastyInterationType interactionType, NastyType nastyType);
 
 public delegate void RaiseEffectComplete();

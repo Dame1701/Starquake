@@ -3,8 +3,9 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework.Input;
+using StarquakeXNA.Engines;
 
-namespace StarquakeXNA;
+namespace StarquakeXNA.Input;
 
 public class PlayerKeySet
 {
@@ -24,11 +25,11 @@ public class CustomControl
     //DirectInput directInputInstance;
     //Joystick joystick;
 
-    private readonly GameEngine gameEngine;
+    private readonly GameEngine _gameEngine;
 
-    public CustomControl(PlayerKeySet PlayerKeys, GameEngine GameEngine, bool UseJoyPad = false)
+    public CustomControl(PlayerKeySet playerKeys, GameEngine gameEngine, bool useJoyPad = false)
     {
-        gameEngine = GameEngine;
+        _gameEngine = gameEngine;
         /*
         if (UseJoyPad)
         {
@@ -153,49 +154,49 @@ public class CustomControl
         */
         => Keyboard.GetState().IsKeyDown(PlayerKeySet.Fire);
 
-    private void SetBlobHSpeed(float InputSpeed)
+    private void SetBlobHSpeed(float inputSpeed)
     {
-        if (InputSpeed < 0.2)
+        if (inputSpeed < 0.2)
         {
-            gameEngine.Player.BlobHSpeed = 1;
+            _gameEngine.Player.BlobHSpeed = 1;
         }
-        else if (InputSpeed < 0.4 && InputSpeed >= 0.2)
+        else if (inputSpeed < 0.4 && inputSpeed >= 0.2)
         {
-            gameEngine.Player.BlobHSpeed = 2;
+            _gameEngine.Player.BlobHSpeed = 2;
         }
-        else if (InputSpeed < 0.6 && InputSpeed >= 0.4)
+        else if (inputSpeed < 0.6 && inputSpeed >= 0.4)
         {
         }
-        else if (InputSpeed < 0.8 && InputSpeed >= 0.6)
+        else if (inputSpeed < 0.8 && inputSpeed >= 0.6)
         {
-            gameEngine.Player.BlobHSpeed = 4;
+            _gameEngine.Player.BlobHSpeed = 4;
         }
         else
         {
-            gameEngine.Player.BlobHSpeed = 8;
+            _gameEngine.Player.BlobHSpeed = 8;
         }
     }
 
-    private void SetBlobVSpeed(float InputSpeed)
+    private void SetBlobVSpeed(float inputSpeed)
     {
-        if (InputSpeed < 0.1)
+        if (inputSpeed < 0.1)
         {
-            gameEngine.Player.BlobVSpeed = 1;
+            _gameEngine.Player.BlobVSpeed = 1;
         }
-        else if (InputSpeed < 0.4 && InputSpeed >= 0.2)
+        else if (inputSpeed < 0.4 && inputSpeed >= 0.2)
         {
-            gameEngine.Player.BlobVSpeed = 2;
+            _gameEngine.Player.BlobVSpeed = 2;
         }
-        else if (InputSpeed < 0.6 && InputSpeed >= 0.4)
+        else if (inputSpeed < 0.6 && inputSpeed >= 0.4)
         {
         }
-        else if (InputSpeed < 0.8 && InputSpeed >= 0.6)
+        else if (inputSpeed < 0.8 && inputSpeed >= 0.6)
         {
-            gameEngine.Player.BlobVSpeed = 4;
+            _gameEngine.Player.BlobVSpeed = 4;
         }
         else
         {
-            gameEngine.Player.BlobVSpeed = 8;
+            _gameEngine.Player.BlobVSpeed = 8;
         }
     }
 }

@@ -3,38 +3,35 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
+using StarquakeXNA.Engines;
+using StarquakeXNA.Structure;
 
 namespace StarquakeXNA.GameComponents;
 
 public class GameScreenBase : GameComponentBase
 {
-    protected int screenFade;
-    protected int screenFadeSpeed;
+    protected int ScreenFadeSpeed;
 
-    public GameScreenBase(GameEngine GameEngineReference)
-        : base(GameEngineReference)
+    public GameScreenBase(GameEngine gameEngineReference)
+        : base(gameEngineReference)
     {
-        //screenFade = 0;
+        //ScreenFade = 0;
         // screenFadeSpeed = 5;
     }
 
-    public int ScreenFade
-    {
-        get => screenFade;
-        set => screenFade = value;
-    }
+    public int ScreenFade { get; set; }
 
     public override void Update(GameTime gameTime)
     {
         // Fade screen back up
-        if (screenFade < 255)
+        if (ScreenFade < 255)
         {
-            screenFade = screenFade + screenFadeSpeed;
+            ScreenFade = ScreenFade + ScreenFadeSpeed;
         }
 
-        if (screenFade > 255)
+        if (ScreenFade > 255)
         {
-            screenFade = 255;
+            ScreenFade = 255;
         }
     }
 }

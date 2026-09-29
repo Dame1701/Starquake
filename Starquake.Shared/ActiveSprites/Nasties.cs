@@ -8,36 +8,39 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using ProjectMercury;
+using StarquakeXNA.Animations;
+using StarquakeXNA.Collisions;
 using StarquakeXNA.ContentManagement;
+using StarquakeXNA.Engines;
 using StarquakeXNA.Helpers;
 using StarquakeXNA.Particles;
 using StarquakeXNA.Structure;
 
-namespace StarquakeXNA;
+namespace StarquakeXNA.ActiveSprites;
 
 // This wraps multiple nasties
 public class Nasties : GameComponentBase
 {
-    private readonly List<Nasty> nasties;
-    private readonly int nastyCount = 1;
-    private readonly IPositionalTriggerParticleEffect nastySmokes;
-    private int previousScreenVisited;
+    private readonly List<Nasty> _nasties;
+    private readonly int _nastyCount = 1;
+    private readonly IPositionalTriggerParticleEffect _nastySmokes;
+    private int _previousScreenVisited;
 
-    public Nasties(GameEngine GameEngineReference, int NastyCount)
-        : base(GameEngineReference)
+    public Nasties(GameEngine gameEngineReference, int nastyCount)
+        : base(gameEngineReference)
     {
-        nastyCount = NastyCount;
-        nasties = new List<Nasty>();
-        nastySmokes =
-            gameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume",
-                enParticleEffectType.TriggeredMultiLocationTimed, null) as IPositionalTriggerParticleEffect;
+        _nastyCount = nastyCount;
+        _nasties = new List<Nasty>();
+        _nastySmokes =
+            GameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume",
+                ParticleEffectType.TriggeredMultiLocationTimed, null) as IPositionalTriggerParticleEffect;
 
         // Create double the number needed for screen swap operations
-        for (var a = 0; a < nastyCount * 2; a++)
+        for (var a = 0; a < _nastyCount * 2; a++)
         {
-            nasties.Add(
+            _nasties.Add(
                 new Nasty(
-                    GameEngineReference,
+                    gameEngineReference,
                     0,
                     0,
                     3));
@@ -47,19 +50,19 @@ public class Nasties : GameComponentBase
 
     #region IGameComponent Members
 
-    public void LoadContent(ContentList Content)
+    public void LoadContent(ContentList content)
     {
-        for (var a = 0; a < nastyCount * 2; a++)
+        for (var a = 0; a < _nastyCount * 2; a++)
         {
-            nasties[a].LoadContent(Content);
+            _nasties[a].LoadContent(content);
         }
     }
 
     public void Initialise()
     {
-        for (var a = 0; a < nastyCount * 2; a++)
+        for (var a = 0; a < _nastyCount * 2; a++)
         {
-            nasties[a].Initialise();
+            _nasties[a].Initialise();
         }
 
         // Maybe we should call this on start of the game for all involved....?
@@ -68,9 +71,9 @@ public class Nasties : GameComponentBase
 
     public void Reset()
     {
-        for (var a = 0; a < nastyCount; a++)
+        for (var a = 0; a < _nastyCount; a++)
         {
-            nasties[a].NastyState = enNastyState.PreConception;
+            _nasties[a].NastyState = NastyState.PreConception;
         }
 
         PerformPostChangeScreenActions();
@@ -78,16 +81,16 @@ public class Nasties : GameComponentBase
 
     public override void Update(GameTime gameTime)
     {
-        if (gameEngine.Player.BlobsState == enBlobState.Normal)
+        if (GameEngine.Player.BlobsState == BlobState.Normal)
         {
             // Cancel any nasty collision effect
-            gameEngine.Player.BlobTouchedByNasty = false;
+            GameEngine.Player.BlobTouchedByNasty = false;
 
             if (Keyboard.GetState().IsKeyDown(Keys.R))
             {
-                for (var a = 0; a < nastyCount; a++)
+                for (var a = 0; a < _nastyCount; a++)
                 {
-                    nasties[a].NastyState = enNastyState.Dead;
+                    _nasties[a].NastyState = NastyState.Dead;
                 }
             }
 
@@ -95,34 +98,34 @@ public class Nasties : GameComponentBase
             var nastyInteractingWithBlob = false;
             var nastySpawnedCounter = 0;
 
-            for (var a = 0; a < nastyCount; a++)
+            for (var a = 0; a < _nastyCount; a++)
             {
-                if (nasties[a].NastyState == enNastyState.Normal)
+                if (_nasties[a].NastyState == NastyState.Normal)
                 {
                     nastySpawnedCounter++;
                 }
 
                 // Setting the coordinates to a setting less than 0 will suspect all updates
-                if (nasties[a].XPos > -1000 &&
-                    nasties[a].YPos > -1000)
+                if (_nasties[a].XPos > -1000 &&
+                    _nasties[a].YPos > -1000)
                 {
-                    nasties[a].Update(gameTime);
+                    _nasties[a].Update(gameTime);
 
                     // Check for a collision between a nasty and Blob and raise an event
                     // Since we have a reference to Blob directly, we can send the call to animate contact directly
                     // We raise the event to affect the status panel
                     // Going to move the offsets etc. in a bit so it's not too precise and unfair!
                     if (CollisionDetection.Check(
-                            gameEngine.Player.BlobXPos + 8,
-                            gameEngine.Player.BlobYPos + 8,
-                            gameEngine.Player.BlobWidth - 16,
-                            gameEngine.Player.BlobHeight - 16,
-                            nasties[a].XPos,
-                            nasties[a].YPos,
-                            nasties[a].NastyWidth,
-                            nasties[a].NastyHeight))
+                            GameEngine.Player.BlobXPos + 8,
+                            GameEngine.Player.BlobYPos + 8,
+                            GameEngine.Player.BlobWidth - 16,
+                            GameEngine.Player.BlobHeight - 16,
+                            _nasties[a].XPos,
+                            _nasties[a].YPos,
+                            _nasties[a].NastyWidth,
+                            _nasties[a].NastyHeight))
                     {
-                        if (nasties[a].NastyState == enNastyState.Normal)
+                        if (_nasties[a].NastyState == NastyState.Normal)
                         {
                             // Raise the event
                             if (OnNastyInteractionWithBlob != null)
@@ -130,101 +133,101 @@ public class Nasties : GameComponentBase
                                 if (!nastyInteractingWithBlob)
                                 {
                                     nastyInteractingWithBlob = true;
-                                    OnNastyInteractionWithBlob(enNastyInterationType.HitBlob, nasties[a].NastyType);
+                                    OnNastyInteractionWithBlob(NastyInterationType.HitBlob, _nasties[a].NastyType);
                                 }
                             }
 
                             // Trigger the blob animation
-                            gameEngine.Player.BlobTouchedByNasty = true;
+                            GameEngine.Player.BlobTouchedByNasty = true;
                         }
                     }
 
                     // Has blob shot a nasty
-                    if (gameEngine.Player.BlobHasFired)
+                    if (GameEngine.Player.BlobHasFired)
                     {
                         if (CollisionDetection.Check(
-                                gameEngine.Player.BlobFireX,
-                                gameEngine.Player.BlobFireY,
+                                GameEngine.Player.BlobFireX,
+                                GameEngine.Player.BlobFireY,
                                 32,
                                 32,
-                                nasties[a].XPos,
-                                nasties[a].YPos,
-                                nasties[a].NastyWidth,
-                                nasties[a].NastyHeight))
+                                _nasties[a].XPos,
+                                _nasties[a].YPos,
+                                _nasties[a].NastyWidth,
+                                _nasties[a].NastyHeight))
                         {
-                            if (nasties[a].NastyState == enNastyState.Normal ||
-                                nasties[a].NastyState == enNastyState.Birth)
+                            if (_nasties[a].NastyState == NastyState.Normal ||
+                                _nasties[a].NastyState == NastyState.Birth)
                             {
-                                gameEngine.Player.RegisterFireHit();
-                                nasties[a].NastyState = enNastyState.Shot;
+                                GameEngine.Player.RegisterFireHit();
+                                _nasties[a].NastyState = NastyState.Shot;
 
-                                if (nasties[a].NastyType == enNastyType.Spiky)
+                                if (_nasties[a].NastyType == NastyType.Spiky)
                                 {
-                                    gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("BlobExplodes");
+                                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobExplodes");
                                 }
                                 else
                                 {
-                                    gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("NastyDeath");
+                                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("NastyDeath");
                                 }
 
                                 if (OnNastyInteractionWithBlob != null)
                                 {
-                                    OnNastyInteractionWithBlob(enNastyInterationType.BlobShot,
-                                        nasties[a].NastyType);
+                                    OnNastyInteractionWithBlob(NastyInterationType.BlobShot,
+                                        _nasties[a].NastyType);
                                 }
                             }
                         }
                     }
 
                     // Has the nasty hit an electricity gate...?
-                    nasties[a].Smoking = false;
+                    _nasties[a].Smoking = false;
 
-                    if (gameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers != null)
+                    if (GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers != null)
                     {
                         for (var b = 0;
-                             b < gameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers.Length;
+                             b < GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers.Length;
                              b++)
                         {
-                            if (gameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].ElectricityOn)
+                            if (GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].ElectricityOn)
                             {
                                 if (CollisionDetection.Check(
-                                        gameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
+                                        GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
                                             .X,
-                                        gameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
+                                        GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
                                             .Y,
                                         128,
                                         32,
-                                        nasties[a].XPos,
-                                        nasties[a].YPos,
-                                        nasties[a].NastyWidth,
-                                        nasties[a].NastyHeight))
+                                        _nasties[a].XPos,
+                                        _nasties[a].YPos,
+                                        _nasties[a].NastyWidth,
+                                        _nasties[a].NastyHeight))
                                 {
-                                    var NastyTravelDirection = CollisionDetection.CheckCollisionDirection(
-                                        nasties[a].Speed,
-                                        nasties[a].XPos,
-                                        nasties[a].YPos,
-                                        nasties[a].NastyWidth,
-                                        nasties[a].NastyHeight,
-                                        gameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
+                                    var nastyTravelDirection = CollisionDetection.CheckCollisionDirection(
+                                        _nasties[a].Speed,
+                                        _nasties[a].XPos,
+                                        _nasties[a].YPos,
+                                        _nasties[a].NastyWidth,
+                                        _nasties[a].NastyHeight,
+                                        GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
                                             .X,
-                                        gameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
+                                        GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
                                             .Y,
                                         128,
                                         32);
 
-                                    if (NastyTravelDirection != enDirection.None &&
-                                        nasties[a].NastyState == enNastyState.Normal)
+                                    if (nastyTravelDirection != Direction.None &&
+                                        _nasties[a].NastyState == NastyState.Normal)
                                     {
-                                        if (nastySmokes != null)
+                                        if (_nastySmokes != null)
                                         {
-                                            nasties[a].Smoking = true;
-                                            nastySmokes.Start(
-                                                SpriteHelpers.GetSpriteLocationOffset(nasties[a].Direction,
-                                                    nasties[a].NastyWidth, nasties[a].NastyHeight).X +
-                                                nasties[a].XPos,
-                                                SpriteHelpers.GetSpriteLocationOffset(nasties[a].Direction,
-                                                    nasties[a].NastyWidth, nasties[a].NastyHeight).Y +
-                                                nasties[a].YPos);
+                                            _nasties[a].Smoking = true;
+                                            _nastySmokes.Start(
+                                                SpriteHelpers.GetSpriteLocationOffset(_nasties[a].Direction,
+                                                    _nasties[a].NastyWidth, _nasties[a].NastyHeight).X +
+                                                _nasties[a].XPos,
+                                                SpriteHelpers.GetSpriteLocationOffset(_nasties[a].Direction,
+                                                    _nasties[a].NastyWidth, _nasties[a].NastyHeight).Y +
+                                                _nasties[a].YPos);
                                         }
                                     }
                                 }
@@ -234,14 +237,14 @@ public class Nasties : GameComponentBase
                 }
             }
 
-            if (nastySpawnedCounter == nastyCount)
+            if (nastySpawnedCounter == _nastyCount)
             {
-                gameEngine.ContentResourceManager.GetSoundFXEngine().EnablePeriodicBackgroundSounds();
+                GameEngine.ContentResourceManager.GetSoundFxEngine().EnablePeriodicBackgroundSounds();
             }
 
-            if (nastySmokes != null)
+            if (_nastySmokes != null)
             {
-                nastySmokes.Update(gameTime);
+                _nastySmokes.Update(gameTime);
             }
         }
         else
@@ -257,104 +260,104 @@ public class Nasties : GameComponentBase
 
     public void PerformPostChangeScreenActions()
     {
-        if (gameEngine.GameScreens.ScreenNumber != previousScreenVisited)
+        if (GameEngine.GameScreens.ScreenNumber != _previousScreenVisited)
         {
             // Save the nasties on the screen we have left into the previous screen array
-            for (var a = 0; a < nastyCount; a++)
+            for (var a = 0; a < _nastyCount; a++)
             {
                 // Make sure they don't stay dead when we leave
-                if (nasties[a].NastyState == enNastyState.Dead ||
-                    nasties[a].NastyState == enNastyState.Shot)
+                if (_nasties[a].NastyState == NastyState.Dead ||
+                    _nasties[a].NastyState == NastyState.Shot)
                 {
-                    nasties[a].NastyState = enNastyState.PreConception;
+                    _nasties[a].NastyState = NastyState.PreConception;
                 }
 
-                nasties[a + nastyCount].CopyFromSource(nasties[a]);
+                _nasties[a + _nastyCount].CopyFromSource(_nasties[a]);
             }
         }
 
         // Do we have nasties from the previous screen...?
-        if (gameEngine.GameScreens.ScreenNumber == previousScreenVisited)
+        if (GameEngine.GameScreens.ScreenNumber == _previousScreenVisited)
         {
             // Swap them all around
-            for (var a = 0; a < nastyCount; a++)
+            for (var a = 0; a < _nastyCount; a++)
             {
-                Swap(nasties, a, a + nastyCount);
+                Swap(_nasties, a, a + _nastyCount);
             }
         }
 
         // Nope so we are going to create a batch from scratch
-        if (gameEngine.GameScreens.ScreenNumber != previousScreenVisited)
+        if (GameEngine.GameScreens.ScreenNumber != _previousScreenVisited)
         {
             // Do we generate all nasties the same
-            if (gameEngine.RandomNumberGenerator.Next(0, 4) == 0)
+            if (GameEngine.RandomNumberGenerator.Next(0, 4) == 0)
             {
-                gameEngine.GameScreens.CurrentGameScreenData.KeepNastiesTheSame = true;
+                GameEngine.GameScreens.CurrentGameScreenData.KeepNastiesTheSame = true;
             }
             else
             {
-                gameEngine.GameScreens.CurrentGameScreenData.KeepNastiesTheSame = false;
+                GameEngine.GameScreens.CurrentGameScreenData.KeepNastiesTheSame = false;
             }
 
-            var nastyType = enNastyType.Ghost;
-            if (gameEngine.GameScreens.CurrentGameScreenData.KeepNastiesTheSame)
+            var nastyType = NastyType.Ghost;
+            if (GameEngine.GameScreens.CurrentGameScreenData.KeepNastiesTheSame)
             {
-                nastyType = Nasty.GetRandomNastyType(gameEngine, true);
+                nastyType = Nasty.GetRandomNastyType(GameEngine, true);
             }
 
             // Reset the nasties
-            for (var a = 0; a < nastyCount; a++)
+            for (var a = 0; a < _nastyCount; a++)
             {
-                nasties[a].KeepNastyTheSame = gameEngine.GameScreens.CurrentGameScreenData.KeepNastiesTheSame;
-                nasties[a].NastyState = enNastyState.PreConception;
+                _nasties[a].KeepNastyTheSame = GameEngine.GameScreens.CurrentGameScreenData.KeepNastiesTheSame;
+                _nasties[a].NastyState = NastyState.PreConception;
 
-                if (gameEngine.GameScreens.CurrentGameScreenData.KeepNastiesTheSame)
+                if (GameEngine.GameScreens.CurrentGameScreenData.KeepNastiesTheSame)
                 {
-                    nasties[a].KeepNastyTheSame = true;
-                    nasties[a].NastyType = nastyType;
+                    _nasties[a].KeepNastyTheSame = true;
+                    _nasties[a].NastyType = nastyType;
                 }
             }
         }
 
-        for (var a = 0; a < nastyCount; a++)
+        for (var a = 0; a < _nastyCount; a++)
         {
-            nasties[a].PerformPostChangeScreenActions();
+            _nasties[a].PerformPostChangeScreenActions();
         }
 
         // Deactivate some nasties if we have conveyer nasties on screen
-        if (gameEngine.ConveyerNastiesInstance.NastiesActive > 0)
+        if (GameEngine.ConveyerNastiesInstance.NastiesActive > 0)
         {
-            for (var a = 0; a < gameEngine.ConveyerNastiesInstance.NastiesActive; a++)
+            for (var a = 0; a < GameEngine.ConveyerNastiesInstance.NastiesActive; a++)
             {
-                nasties[a].NastyState = enNastyState.Disabled;
+                _nasties[a].NastyState = NastyState.Disabled;
             }
         }
 
         // Reset the nasty smoke effect
-        if (nastySmokes != null)
+        if (_nastySmokes != null)
         {
-            nastySmokes.Reset();
+            _nastySmokes.Reset();
         }
 
-        previousScreenVisited = gameEngine.GameScreens.PreviousScreenNumber;
+        _previousScreenVisited = GameEngine.GameScreens.PreviousScreenNumber;
     }
 
-    public override void Draw(GameTime gameTime, int ScreenFade)
+    public override void Draw(GameTime gameTime, int screenFade)
     {
-        if (gameEngine.Player.BlobsState == enBlobState.Normal)
+        if (GameEngine.Player.BlobsState == BlobState.Normal)
         {
-            for (var a = 0; a < nastyCount; a++)
+            for (var a = 0; a < _nastyCount; a++)
             {
-                if (nasties[a].XPos > -1000 &&
-                    nasties[a].YPos > -1000)
+                if (_nasties[a].XPos > -1000 &&
+                    _nasties[a].YPos > -1000)
                 {
-                    nasties[a].Draw(gameTime, ScreenFade);
+                    _nasties[a].Draw(gameTime, screenFade);
                 }
             }
 
-            if (nastySmokes != null)
+            if (_nastySmokes != null)
             {
-                nastySmokes.Draw(ScreenFade);
+                _nastySmokes.Draw(screenFade);
             }
         }
     }
@@ -367,116 +370,116 @@ public class Nasty : GameComponentBase
 {
 
     // The number of frames for the birth to appear (60 frames = 1 second)
-    private const int birthPeriod = 60;
+    private const int BirthPeriod = 60;
 
     // Animation
-    private readonly Animation nastyAnim;
+    private readonly Animation _nastyAnim;
 
-    private bool attractedToBlob; // They got through phases of being attracted to Blob
-    private int birthColourLevel;
+    private bool _attractedToBlob; // They got through phases of being attracted to Blob
+    private int _birthColourLevel;
 
     // Birth stuff
-    private int birthFadeLevel;
-    private float birthRotateSpeed = 8.0f;
+    private int _birthFadeLevel;
+    private float _birthRotateSpeed = 8.0f;
 
-    private float birthScale;
-    private int birthTimer;
+    private float _birthScale;
+    private int _birthTimer;
 
     // Counters
-    private int conceptionwaitCounter;
+    private int _conceptionwaitCounter;
 
-    private bool constantMovement; // Movement type that doesn't rely on a number of steps
-    private bool deathAnticlockwise;
+    private bool _constantMovement; // Movement type that doesn't rely on a number of steps
+    private bool _deathAnticlockwise;
 
     // Death stuff
-    private int deathFadeLevel = 255;
-    private float deathScale = 1f;
-    private bool firstMovement;
+    private int _deathFadeLevel = 255;
+    private float _deathScale = 1f;
+    private bool _firstMovement;
 
-    private enDirection lastCollisionDirection;
-    private int movementChangeCount;
-    private int movementChangeCounter;
+    private Direction _lastCollisionDirection;
+    private int _movementChangeCount;
+    private int _movementChangeCounter;
 
     // Behaviour
 
-    private int nastyDeadPauseCounter;
-    private IStandardParticleEffect nastyDies;
+    private int _nastyDeadPauseCounter;
+    private IStandardParticleEffect _nastyDies;
 
-    private Animation nastyDiesAnimation;
-    private IStandardParticleEffect nastyDiesType2;
+    private Animation _nastyDiesAnimation;
+    private IStandardParticleEffect _nastyDiesType2;
     //bool attractedToBlobFlag;
 
 
     // When shot monsters usually dissappear for good but there is a small chance they'll regenerate
     // Tech stuff
-    private SpriteCollection nastySprite;
+    private SpriteCollection _nastySprite;
 
-    private SpriteCollection nastySpriteNew;
-    private SpriteCollection nastySpriteOriginal;
+    private SpriteCollection _nastySpriteNew;
+    private SpriteCollection _nastySpriteOriginal;
 
     /// <summary>
     ///     If the nasty is attracted to blob but something is in the way it won't be able to move
     ///     So this records such an instance and releases it after a number of frames
     /// </summary>
-    private int nastyStuckCounter;
+    private int _nastyStuckCounter;
 
-    private enNastyType nastyType;
+    private NastyType _nastyType;
 
-    private int prevXpos;
-    private int prevYpos;
+    private int _prevXpos;
+    private int _prevYpos;
 
-    private bool spikeyPause;
-    private int stepsMovedCounter;
-    private int stepsToMove;
+    private bool _spikeyPause;
+    private int _stepsMovedCounter;
+    private int _stepsToMove;
 
     // Position
 
     public Nasty(
-        GameEngine GameEngineReference,
-        int Xposition,
-        int Yposition,
-        int MoveSpeed)
-        : base(GameEngineReference)
+        GameEngine gameEngineReference,
+        int xposition,
+        int yposition,
+        int moveSpeed)
+        : base(gameEngineReference)
     {
-        XPos = Xposition;
-        YPos = Yposition;
-        moveSpeed = MoveSpeed;
+        XPos = xposition;
+        YPos = yposition;
+        MoveSpeed = moveSpeed;
 
         // Randomly assign some shit....
-        movementChangeCount = 0;
+        _movementChangeCount = 0;
 
-        nastyAnim = new Animation();
-        nastyAnim.FirstFrame = 0;
-        nastyAnim.LastFrame = 3;
-        nastyAnim.Repeat = true;
-        nastyAnim.AnimateForwards = true;
-        nastyAnim.Yoyo = true;
-        nastyAnim.Delay = 4;
+        _nastyAnim = new Animation();
+        _nastyAnim.FirstFrame = 0;
+        _nastyAnim.LastFrame = 3;
+        _nastyAnim.Repeat = true;
+        _nastyAnim.AnimateForwards = true;
+        _nastyAnim.Yoyo = true;
+        _nastyAnim.Delay = 4;
     }
 
-    private MoveType movementType
+    private MoveType MovementType
     {
         get;
         set;
         //movementTypeInternal = MoveType.DiagonalBouncing;
     }
 
-    public enDirection Direction { get; private set; }
+    public Direction Direction { get; private set; }
 
-    private int moveSpeed
+    private int MoveSpeed
     {
         get;
         set;
         //moveSpeedInternal = 40;
     }
 
-    public int Speed => moveSpeed;
+    public int Speed => MoveSpeed;
 
     public bool KeepNastyTheSame { get; set; }
 
     public int NastyWidth { get; set; } = 64;
 
-    public enNastyState NastyState { get; set; }
+    public NastyState NastyState { get; set; }
 
     public int NastyHeight { get; set; } = 64;
 
@@ -486,63 +489,63 @@ public class Nasty : GameComponentBase
 
     public int YPos { get; set; }
 
-    public enNastyType NastyType
+    public NastyType NastyType
     {
-        get => nastyType;
+        get => _nastyType;
         set
         {
-            nastyType = value;
-            if (nastyType == enNastyType.CoreGuardian)
+            _nastyType = value;
+            if (_nastyType == NastyType.CoreGuardian)
             {
-                movementType = MoveType.DiagonalBouncing;
+                MovementType = MoveType.DiagonalBouncing;
             }
-            else if (nastyType == enNastyType.Spiky)
+            else if (_nastyType == NastyType.Spiky)
             {
-                movementType = MoveType.SpikeyMovement;
+                MovementType = MoveType.SpikeyMovement;
             }
             else
             {
-                movementType =
-                    (MoveType)gameEngine.RandomNumberGenerator.Next(0,
+                MovementType =
+                    (MoveType)GameEngine.RandomNumberGenerator.Next(0,
                         Enum.GetValues(typeof(MoveType)).Length - 1);
             }
         }
     }
 
-    public void CopyFromSource(Nasty CopySource)
+    public void CopyFromSource(Nasty copySource)
     {
-        movementType = CopySource.movementType;
-        attractedToBlob = CopySource.attractedToBlob;
-        Direction = CopySource.Direction;
-        stepsMovedCounter = CopySource.stepsMovedCounter;
-        Direction = CopySource.Direction;
-        stepsMovedCounter = CopySource.stepsMovedCounter;
-        stepsToMove = CopySource.stepsToMove;
-        constantMovement = CopySource.constantMovement;
-        moveSpeed = CopySource.moveSpeed;
-        lastCollisionDirection = CopySource.lastCollisionDirection;
-        movementChangeCounter = CopySource.movementChangeCounter;
-        movementChangeCount = CopySource.movementChangeCount;
-        KeepNastyTheSame = CopySource.KeepNastyTheSame;
-        nastyType = CopySource.nastyType;
-        XPos = CopySource.XPos;
-        YPos = CopySource.YPos;
-        nastyDeadPauseCounter = CopySource.nastyDeadPauseCounter;
+        MovementType = copySource.MovementType;
+        _attractedToBlob = copySource._attractedToBlob;
+        Direction = copySource.Direction;
+        _stepsMovedCounter = copySource._stepsMovedCounter;
+        Direction = copySource.Direction;
+        _stepsMovedCounter = copySource._stepsMovedCounter;
+        _stepsToMove = copySource._stepsToMove;
+        _constantMovement = copySource._constantMovement;
+        MoveSpeed = copySource.MoveSpeed;
+        _lastCollisionDirection = copySource._lastCollisionDirection;
+        _movementChangeCounter = copySource._movementChangeCounter;
+        _movementChangeCount = copySource._movementChangeCount;
+        KeepNastyTheSame = copySource.KeepNastyTheSame;
+        _nastyType = copySource._nastyType;
+        XPos = copySource.XPos;
+        YPos = copySource.YPos;
+        _nastyDeadPauseCounter = copySource._nastyDeadPauseCounter;
 
         // If the basty is dead reset it to conceptive state
-        if (CopySource.NastyState == enNastyState.Dead)
+        if (copySource.NastyState == NastyState.Dead)
         {
-            NastyState = enNastyState.PreConception;
+            NastyState = NastyState.PreConception;
         }
 
         // Ensure that we don't carry on generating after moving screens
-        if (CopySource.NastyState == enNastyState.Birth)
+        if (copySource.NastyState == NastyState.Birth)
         {
-            NastyState = enNastyState.Normal;
+            NastyState = NastyState.Normal;
         }
         else
         {
-            NastyState = CopySource.NastyState;
+            NastyState = copySource.NastyState;
         }
     }
 
@@ -561,11 +564,11 @@ public class Nasty : GameComponentBase
     private Point GetNastySpawnLocation()
     {
         // Get all locations where we can have nasties from the current game screen
-        var potentialLocations = gameEngine.GameScreens.GetNastyPotentialLocations();
+        var potentialLocations = GameEngine.GameScreens.GetNastyPotentialLocations();
 
         if (potentialLocations.Count > 0)
         {
-            var nastyLocationIndex = gameEngine.RandomNumberGenerator.Next(0, potentialLocations.Count);
+            var nastyLocationIndex = GameEngine.RandomNumberGenerator.Next(0, potentialLocations.Count);
 
             // Return a location
             return new Point(potentialLocations[nastyLocationIndex].X + 32,
@@ -576,360 +579,360 @@ public class Nasty : GameComponentBase
         return new Point(0, 0);
     }
 
-    public void LoadContent(ContentList Content)
+    public void LoadContent(ContentList content)
     {
-        nastyDiesAnimation = new Animation();
-        nastyDiesAnimation.FirstFrame = 0;
-        nastyDiesAnimation.CurrentFrame = 0;
-        nastyDiesAnimation.LastFrame = 3;
-        nastyDiesAnimation.Yoyo = false;
-        nastyDiesAnimation.Delay = 2;
-        nastyDiesAnimation.Repeat = true;
-        nastyDiesAnimation.AnimateForwards = true;
+        _nastyDiesAnimation = new Animation();
+        _nastyDiesAnimation.FirstFrame = 0;
+        _nastyDiesAnimation.CurrentFrame = 0;
+        _nastyDiesAnimation.LastFrame = 3;
+        _nastyDiesAnimation.Yoyo = false;
+        _nastyDiesAnimation.Delay = 2;
+        _nastyDiesAnimation.Repeat = true;
+        _nastyDiesAnimation.AnimateForwards = true;
 
-        nastySpriteOriginal = gameEngine.ContentResourceManager.GetSpriteCollection("NastiesOriginal")
-            .Clone(gameEngine);
-        nastySpriteNew = gameEngine.ContentResourceManager.GetSpriteCollection("Nasties").Clone(gameEngine);
+        _nastySpriteOriginal = GameEngine.ContentResourceManager.GetSpriteCollection("NastiesOriginal")
+            .Clone(GameEngine);
+        _nastySpriteNew = GameEngine.ContentResourceManager.GetSpriteCollection("Nasties").Clone(GameEngine);
 
         CheckSpritesInUse();
 
-        nastyDies = gameEngine.ContentResourceManager.GetParticleEffectInstance("NastyDies",
-            enParticleEffectType.Triggered, null) as IStandardParticleEffect;
-        nastyDies.ParticleEffectComplete += nastyDies_ParticleEffectComplete;
+        _nastyDies = GameEngine.ContentResourceManager.GetParticleEffectInstance("NastyDies",
+            ParticleEffectType.Triggered, null) as IStandardParticleEffect;
+        _nastyDies.ParticleEffectComplete += nastyDies_ParticleEffectComplete;
 
-        nastyDiesType2 =
-            gameEngine.ContentResourceManager.GetParticleEffectInstance("NastySplat",
-                enParticleEffectType.Triggered, null) as IStandardParticleEffect;
-        nastyDiesType2.ParticleEffectComplete += nastyDies_ParticleEffectComplete;
+        _nastyDiesType2 =
+            GameEngine.ContentResourceManager.GetParticleEffectInstance("NastySplat",
+                ParticleEffectType.Triggered, null) as IStandardParticleEffect;
+        _nastyDiesType2.ParticleEffectComplete += nastyDies_ParticleEffectComplete;
     }
 
     private void CheckSpritesInUse()
     {
-        if (gameEngine.UsingOldGraphics)
+        if (GameEngine.UsingOldGraphics)
         {
-            nastySprite = nastySpriteOriginal;
+            _nastySprite = _nastySpriteOriginal;
         }
         else
         {
-            nastySprite = nastySpriteNew;
+            _nastySprite = _nastySpriteNew;
         }
     }
 
     private void nastyDies_ParticleEffectComplete()
     {
-        if (NastyState == enNastyState.Dead)
+        if (NastyState == NastyState.Dead)
         {
             // Extend this to pause for random time before bringing a nasty back to life
-            nastyDeadPauseCounter = 0;
-            NastyState = enNastyState.PreConception;
-            conceptionwaitCounter = gameEngine.RandomNumberGenerator.Next(0, 500);
+            _nastyDeadPauseCounter = 0;
+            NastyState = NastyState.PreConception;
+            _conceptionwaitCounter = GameEngine.RandomNumberGenerator.Next(0, 500);
         }
     }
 
     public void Initialise()
     {
-        stepsMovedCounter = 0;
-        stepsToMove = 0;
+        _stepsMovedCounter = 0;
+        _stepsToMove = 0;
 
-        if (movementType == MoveType.DiagonalBouncing)
+        if (MovementType == MoveType.DiagonalBouncing)
         {
-            Direction = (enDirection)gameEngine.RandomNumberGenerator.Next(4, 8); // select from 2nd four
+            Direction = (Direction)GameEngine.RandomNumberGenerator.Next(4, 8); // select from 2nd four
         }
-        else if (movementType == MoveType.RandomMovement ||
-                 movementType == MoveType.RandomUpDownLeftRight)
+        else if (MovementType == MoveType.RandomMovement ||
+                 MovementType == MoveType.RandomUpDownLeftRight)
         {
-            Direction = (enDirection)gameEngine.RandomNumberGenerator.Next(0, 4); // select from 1st four
+            Direction = (Direction)GameEngine.RandomNumberGenerator.Next(0, 4); // select from 1st four
         }
     }
 
-    public static enNastyType GetRandomNastyType(GameEngine GameEngineReference, bool KeepNastiesTheSame)
+    public static NastyType GetRandomNastyType(GameEngine gameEngineReference, bool keepNastiesTheSame)
     {
         //NastyType = (enNastyType)gameEngine.RandomNumberGenerator.Next(0, 15); // Pick from first 15 types
 
         var temp = 0;
 
         // Go to more than max nasty types to increase chance of four spiky nasties
-        if (KeepNastiesTheSame)
+        if (keepNastiesTheSame)
         {
             // Add an extra 5 onto final nasty number when all anims done
-            temp = GameEngineReference.RandomNumberGenerator.Next(0, 16);
+            temp = gameEngineReference.RandomNumberGenerator.Next(0, 16);
         }
         else
         {
-            temp = GameEngineReference.RandomNumberGenerator.Next(0, 16);
+            temp = gameEngineReference.RandomNumberGenerator.Next(0, 16);
         }
 
         if (temp == 0)
         {
-            return enNastyType.Bird;
+            return NastyType.Bird;
         }
         if (temp == 1)
         {
-            return enNastyType.Helmet;
+            return NastyType.Helmet;
         }
         if (temp == 2)
         {
-            return enNastyType.FriedEgg;
+            return NastyType.FriedEgg;
         }
         if (temp == 3)
         {
-            return enNastyType.CurleyWurley;
+            return NastyType.CurleyWurley;
         }
         if (temp == 4)
         {
-            return enNastyType.Shellfish;
+            return NastyType.Shellfish;
         }
         if (temp == 5)
         {
-            return enNastyType.Cushion;
+            return NastyType.Cushion;
         }
         if (temp == 6)
         {
-            return enNastyType.Gonzo;
+            return NastyType.Gonzo;
         }
         if (temp == 7)
         {
-            return enNastyType.Snail;
+            return NastyType.Snail;
         }
         if (temp == 8)
         {
-            return enNastyType.Ghost;
+            return NastyType.Ghost;
         }
         if (temp == 9)
         {
-            return enNastyType.Centipede;
+            return NastyType.Centipede;
         }
         if (temp == 10)
         {
-            return enNastyType.Scorpian;
+            return NastyType.Scorpian;
         }
         if (temp == 11)
         {
-            return enNastyType.DragonFly;
+            return NastyType.DragonFly;
         }
         if (temp == 12)
         {
-            return enNastyType.Hippo;
+            return NastyType.Hippo;
         }
         if (temp == 13)
         {
-            return enNastyType.Helicopter;
+            return NastyType.Helicopter;
         }
         if (temp == 14)
         {
-            return enNastyType.Bird;
+            return NastyType.Bird;
         }
-        return enNastyType.Spiky;
+        return NastyType.Spiky;
     }
 
     public override void Update(GameTime gameTime)
     {
-        if (gameEngine.GameScreens.ScreenNumber == 198)
+        if (GameEngine.GameScreens.ScreenNumber == 198)
         {
-            NastyState = enNastyState.Disabled;
+            NastyState = NastyState.Disabled;
         }
 
-        if (gameEngine.GameScreens.ScreenNumber == 199)
+        if (GameEngine.GameScreens.ScreenNumber == 199)
         {
-            nastyType = enNastyType.CoreGuardian;
-            attractedToBlob = false;
+            _nastyType = NastyType.CoreGuardian;
+            _attractedToBlob = false;
         }
 
         // Reset conception variables
-        if (NastyState == enNastyState.PreConception)
+        if (NastyState == NastyState.PreConception)
         {
-            conceptionwaitCounter = gameEngine.RandomNumberGenerator.Next(0, 60);
-            NastyState = enNastyState.Conception;
+            _conceptionwaitCounter = GameEngine.RandomNumberGenerator.Next(0, 60);
+            NastyState = NastyState.Conception;
 
             if (!KeepNastyTheSame)
             {
-                nastyType = GetRandomNastyType(gameEngine, false);
+                _nastyType = GetRandomNastyType(GameEngine, false);
             }
 
-            if (nastyType != enNastyType.Spiky)
+            if (_nastyType != NastyType.Spiky)
             {
-                movementType = MoveType.RandomMovement;
+                MovementType = MoveType.RandomMovement;
             }
             else
             {
-                movementType = MoveType.SpikeyMovement;
-                spikeyPause = true;
+                MovementType = MoveType.SpikeyMovement;
+                _spikeyPause = true;
             }
         }
-        else if (NastyState == enNastyState.Conception)
+        else if (NastyState == NastyState.Conception)
         {
-            if (conceptionwaitCounter > 0)
+            if (_conceptionwaitCounter > 0)
             {
-                conceptionwaitCounter--;
+                _conceptionwaitCounter--;
             }
             else
             {
-                gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("NastyAppear", 0.1F, false);
-                movementChangeCounter = 0;
-                movementChangeCount = 0;
-                firstMovement = true;
-                deathFadeLevel = 255;
-                deathScale = 1f;
-                birthFadeLevel = 0;
-                birthScale = 0f;
-                birthColourLevel = 0;
-                birthRotateSpeed = 32.0f;
-                birthTimer = 0;
+                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("NastyAppear", 0.1F, false);
+                _movementChangeCounter = 0;
+                _movementChangeCount = 0;
+                _firstMovement = true;
+                _deathFadeLevel = 255;
+                _deathScale = 1f;
+                _birthFadeLevel = 0;
+                _birthScale = 0f;
+                _birthColourLevel = 0;
+                _birthRotateSpeed = 32.0f;
+                _birthTimer = 0;
 
                 // Select a new location to spawn
-                var NewPosition = GetNastySpawnLocation();
-                if (NewPosition == new Point(0, 0))
+                var newPosition = GetNastySpawnLocation();
+                if (newPosition == new Point(0, 0))
                 {
-                    NastyState = enNastyState.Disabled;
+                    NastyState = NastyState.Disabled;
                 }
                 else
                 {
-                    XPos = NewPosition.X;
-                    YPos = NewPosition.Y;
+                    XPos = newPosition.X;
+                    YPos = newPosition.Y;
                 }
 
-                NastyState = enNastyState.Birth;
+                NastyState = NastyState.Birth;
             }
         }
-        else if (NastyState == enNastyState.Birth)
+        else if (NastyState == NastyState.Birth)
         {
-            if (birthScale < 1.0f)
+            if (_birthScale < 1.0f)
             {
-                birthScale = birthScale + 1f / birthPeriod;
+                _birthScale = _birthScale + 1f / BirthPeriod;
             }
 
-            if (birthScale > 1.0f)
+            if (_birthScale > 1.0f)
             {
-                birthScale = 1.0f;
+                _birthScale = 1.0f;
             }
 
 
             // Fade the nasty in
-            if (birthFadeLevel < 255)
+            if (_birthFadeLevel < 255)
             {
-                birthFadeLevel =
-                    birthFadeLevel +
+                _birthFadeLevel =
+                    _birthFadeLevel +
                     (int)(255 /
-                          ((double)birthPeriod /
+                          ((double)BirthPeriod /
                            2)); // We only have half the time to do the colour fade in 
             }
 
 
             // Once we're halfway through fade in the colours
-            if (birthTimer > birthPeriod / 2)
+            if (_birthTimer > BirthPeriod / 2)
             {
-                if (birthColourLevel < 255)
+                if (_birthColourLevel < 255)
                 {
-                    birthColourLevel =
-                        birthColourLevel +
+                    _birthColourLevel =
+                        _birthColourLevel +
                         (int)(255 /
-                              ((double)birthPeriod /
+                              ((double)BirthPeriod /
                                2)); // We only have half the time to do the colour fade in 
                 }
 
-                if (birthRotateSpeed > 16)
+                if (_birthRotateSpeed > 16)
                 {
-                    birthRotateSpeed = birthRotateSpeed - 16f / ((float)birthPeriod / 2);
+                    _birthRotateSpeed = _birthRotateSpeed - 16f / ((float)BirthPeriod / 2);
                 }
             }
 
-            if (birthFadeLevel > 255)
+            if (_birthFadeLevel > 255)
             {
-                birthFadeLevel = 255;
+                _birthFadeLevel = 255;
             }
 
-            if (birthColourLevel > 255)
+            if (_birthColourLevel > 255)
             {
-                birthColourLevel = 255;
+                _birthColourLevel = 255;
             }
 
-            if (birthTimer > birthPeriod)
+            if (_birthTimer > BirthPeriod)
             {
-                if (nastySprite.SpriteRotation == 0)
+                if (_nastySprite.SpriteRotation == 0)
                 {
-                    NastyState = enNastyState.Normal;
-                    birthTimer = 0;
+                    NastyState = NastyState.Normal;
+                    _birthTimer = 0;
                 }
             }
 
-            birthTimer++;
+            _birthTimer++;
         }
-        else if (NastyState == enNastyState.Shot)
+        else if (NastyState == NastyState.Shot)
         {
-            deathFadeLevel = 255;
-            deathScale = 1.0f;
+            _deathFadeLevel = 255;
+            _deathScale = 1.0f;
 
-            if (nastyType == enNastyType.Spiky ||
-                nastyType == enNastyType.Conveyer)
+            if (_nastyType == NastyType.Spiky ||
+                _nastyType == NastyType.Conveyer)
             {
-                if (nastyDies != null)
+                if (_nastyDies != null)
                 {
-                    nastyDies.Start();
+                    _nastyDies.Start();
                 }
             }
             else
             {
-                if (nastyDiesType2 != null)
+                if (_nastyDiesType2 != null)
                 {
-                    NastyHelpers.ApplyNastyColours(nastyType, nastyDiesType2.Effect);
-                    nastyDiesType2.Start();
+                    NastyHelpers.ApplyNastyColours(_nastyType, _nastyDiesType2.Effect);
+                    _nastyDiesType2.Start();
                 }
             }
 
-            NastyState = enNastyState.Dead;
+            NastyState = NastyState.Dead;
 
-            if (gameEngine.RandomNumberGenerator.Next(0, 2) == 0)
+            if (GameEngine.RandomNumberGenerator.Next(0, 2) == 0)
             {
-                deathAnticlockwise = true;
+                _deathAnticlockwise = true;
             }
             else
             {
-                deathAnticlockwise = false;
+                _deathAnticlockwise = false;
             }
         }
-        else if (NastyState == enNastyState.Dead)
+        else if (NastyState == NastyState.Dead)
         {
-            if (gameEngine.UsingOldGraphics)
+            if (GameEngine.UsingOldGraphics)
             {
-                nastyDiesAnimation.GetNextFrame();
+                _nastyDiesAnimation.GetNextFrame();
 
-                if (nastyDeadPauseCounter < 50)
+                if (_nastyDeadPauseCounter < 50)
                 {
-                    nastyDeadPauseCounter++;
+                    _nastyDeadPauseCounter++;
                 }
                 else
                 {
-                    NastyState = enNastyState.PreConception;
-                    conceptionwaitCounter = gameEngine.RandomNumberGenerator.Next(0, 500);
-                    nastyDeadPauseCounter = 0;
+                    NastyState = NastyState.PreConception;
+                    _conceptionwaitCounter = GameEngine.RandomNumberGenerator.Next(0, 500);
+                    _nastyDeadPauseCounter = 0;
                 }
             }
         }
 
-        if (nastyDies != null)
+        if (_nastyDies != null)
         {
             // Update the explosion
-            nastyDies.Update(XPos + 32, YPos + 32, gameTime);
+            _nastyDies.Update(XPos + 32, YPos + 32, gameTime);
         }
 
-        if (nastyDiesType2 != null)
+        if (_nastyDiesType2 != null)
         {
             // Update the splat
-            nastyDiesType2.Update(XPos + 32, YPos + 32, gameTime);
+            _nastyDiesType2.Update(XPos + 32, YPos + 32, gameTime);
         }
 
         var updateAnimation = false;
 
-        if (NastyState != enNastyState.Disabled &&
-            NastyState != enNastyState.PreConception &&
-            NastyState != enNastyState.Conception &&
-            NastyState != enNastyState.Birth)
+        if (NastyState != NastyState.Disabled &&
+            NastyState != NastyState.PreConception &&
+            NastyState != NastyState.Conception &&
+            NastyState != NastyState.Birth)
         {
             updateAnimation = true;
         }
 
-        if (NastyState == enNastyState.Birth &&
-            birthTimer > birthPeriod / 4)
+        if (NastyState == NastyState.Birth &&
+            _birthTimer > BirthPeriod / 4)
         {
             updateAnimation = true;
         }
@@ -937,32 +940,32 @@ public class Nasty : GameComponentBase
         if (updateAnimation)
         {
             // Animate
-            nastyAnim.GetNextFrame();
+            _nastyAnim.GetNextFrame();
 
-            if (nastyType != enNastyType.CoreGuardian)
+            if (_nastyType != NastyType.CoreGuardian)
             {
-                if (attractedToBlob && nastyType != enNastyType.Spiky)
+                if (_attractedToBlob && _nastyType != NastyType.Spiky)
                 {
-                    if (prevXpos == XPos &&
-                        prevYpos == YPos)
+                    if (_prevXpos == XPos &&
+                        _prevYpos == YPos)
                     {
-                        nastyStuckCounter++;
+                        _nastyStuckCounter++;
                     }
                     else
                     {
-                        nastyStuckCounter = 0;
+                        _nastyStuckCounter = 0;
                     }
 
                     // Has nasty been stuck for 1/4 of a second...?
-                    if (nastyStuckCounter > 15)
+                    if (_nastyStuckCounter > 15)
                     {
                         // Unattract blob
-                        attractedToBlob = false;
-                        nastyStuckCounter = 0;
+                        _attractedToBlob = false;
+                        _nastyStuckCounter = 0;
                     }
 
-                    prevXpos = XPos;
-                    prevYpos = YPos;
+                    _prevXpos = XPos;
+                    _prevYpos = YPos;
                 }
             }
 
@@ -970,21 +973,21 @@ public class Nasty : GameComponentBase
             var amountToMoveY = 0;
 
             // Do the movement
-            if (nastyType == enNastyType.CoreGuardian)
+            if (_nastyType == NastyType.CoreGuardian)
             {
                 MoveNastyOneStep(ref amountToMoveX, ref amountToMoveY);
                 DiagonalBouncing(0, 0);
             }
             else
             {
-                if (stepsMovedCounter < stepsToMove)
+                if (_stepsMovedCounter < _stepsToMove)
                 {
                     var moveOneStep = true;
 
-                    if (movementType == MoveType.SpikeyMovement && spikeyPause)
+                    if (MovementType == MoveType.SpikeyMovement && _spikeyPause)
                     {
                         moveOneStep = false;
-                        stepsMovedCounter++;
+                        _stepsMovedCounter++;
                     }
 
                     if (moveOneStep)
@@ -994,1192 +997,1192 @@ public class Nasty : GameComponentBase
                 }
                 else
                 {
-                    Direction = enDirection.None;
-                    stepsMovedCounter = 0;
+                    Direction = Direction.None;
+                    _stepsMovedCounter = 0;
 
-                    if (movementType == MoveType.RandomMovement)
+                    if (MovementType == MoveType.RandomMovement)
                     {
-                        constantMovement = false;
-                        RandomMovement(gameEngine.Player.BlobXPos, gameEngine.Player.BlobYPos);
+                        _constantMovement = false;
+                        RandomMovement(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos);
                     }
-                    else if (movementType == MoveType.RandomUpDownLeftRight)
+                    else if (MovementType == MoveType.RandomUpDownLeftRight)
                     {
-                        constantMovement = false;
-                        RandomUpDownLeftRight(gameEngine.Player.BlobXPos, gameEngine.Player.BlobYPos);
+                        _constantMovement = false;
+                        RandomUpDownLeftRight(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos);
                     }
-                    else if (movementType == MoveType.DiagonalBouncing)
+                    else if (MovementType == MoveType.DiagonalBouncing)
                     {
-                        constantMovement = true;
-                        if (gameEngine.Player != null)
+                        _constantMovement = true;
+                        if (GameEngine.Player != null)
                         {
-                            DiagonalBouncing(gameEngine.Player.BlobXPos, gameEngine.Player.BlobYPos);
+                            DiagonalBouncing(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos);
                         }
                         else
                         {
                             DiagonalBouncing(0, 0);
                         }
                     }
-                    else if (movementType == MoveType.DiagonalBouncingInSteps)
+                    else if (MovementType == MoveType.DiagonalBouncingInSteps)
                     {
-                        constantMovement = false;
-                        DiagonalBouncingInSteps(gameEngine.Player.BlobXPos, gameEngine.Player.BlobYPos);
+                        _constantMovement = false;
+                        DiagonalBouncingInSteps(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos);
                     }
-                    else if (movementType == MoveType.RandomMovementsAllDirections)
+                    else if (MovementType == MoveType.RandomMovementsAllDirections)
                     {
-                        constantMovement = false;
-                        RandomMovementsAllDirections(gameEngine.Player.BlobXPos, gameEngine.Player.BlobYPos);
+                        _constantMovement = false;
+                        RandomMovementsAllDirections(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos);
                     }
-                    else if (movementType == MoveType.SpikeyMovement)
+                    else if (MovementType == MoveType.SpikeyMovement)
                     {
-                        spikeyPause = !spikeyPause;
-                        constantMovement = false;
-                        SpikeyMovement(gameEngine.Player.BlobXPos, gameEngine.Player.BlobYPos);
+                        _spikeyPause = !_spikeyPause;
+                        _constantMovement = false;
+                        SpikeyMovement(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos);
                     }
                 }
             }
 
             // increment the movement change counter
-            if (nastyType != enNastyType.CoreGuardian)
+            if (_nastyType != NastyType.CoreGuardian)
             {
-                if (movementChangeCounter < movementChangeCount)
+                if (_movementChangeCounter < _movementChangeCount)
                 {
-                    movementChangeCounter++;
+                    _movementChangeCounter++;
                 }
                 else
                 {
-                    var attractionFlag = gameEngine.RandomNumberGenerator.Next(0, 2);
+                    var attractionFlag = GameEngine.RandomNumberGenerator.Next(0, 2);
 
                     if (attractionFlag == 0)
                     {
-                        movementChangeCount = gameEngine.RandomNumberGenerator.Next(200, 500);
-                        attractedToBlob = false;
+                        _movementChangeCount = GameEngine.RandomNumberGenerator.Next(200, 500);
+                        _attractedToBlob = false;
                     }
                     else
                     {
-                        movementChangeCount = gameEngine.RandomNumberGenerator.Next(400, 700);
-                        attractedToBlob = true;
+                        _movementChangeCount = GameEngine.RandomNumberGenerator.Next(400, 700);
+                        _attractedToBlob = true;
                     }
 
-                    movementChangeCounter = 0;
+                    _movementChangeCounter = 0;
 
-                    if (nastyType == enNastyType.Spiky)
+                    if (_nastyType == NastyType.Spiky)
                     {
-                        attractedToBlob = true; // Spiky nasties are always attracted to blob
-                        movementType = MoveType.SpikeyMovement;
+                        _attractedToBlob = true; // Spiky nasties are always attracted to blob
+                        MovementType = MoveType.SpikeyMovement;
                     }
                     else
                     {
-                        if (attractedToBlob)
+                        if (_attractedToBlob)
                         {
                             // just choose from the attraction modes....
-                            movementType = (MoveType)gameEngine.RandomNumberGenerator.Next(0, 2);
+                            MovementType = (MoveType)GameEngine.RandomNumberGenerator.Next(0, 2);
                         }
                         else
                         {
-                            movementType = (MoveType)gameEngine.RandomNumberGenerator.Next(0,
+                            MovementType = (MoveType)GameEngine.RandomNumberGenerator.Next(0,
                                 Enum.GetValues(typeof(MoveType)).Length - 1);
                         }
 
-                        if (movementType == MoveType.DiagonalBouncing)
+                        if (MovementType == MoveType.DiagonalBouncing)
                         {
                             Direction =
-                                (enDirection)gameEngine.RandomNumberGenerator.Next(4, 8); // select from 2nd four
+                                (Direction)GameEngine.RandomNumberGenerator.Next(4, 8); // select from 2nd four
                         }
-                        else if (movementType == MoveType.RandomMovement ||
-                                 movementType == MoveType.RandomUpDownLeftRight)
+                        else if (MovementType == MoveType.RandomMovement ||
+                                 MovementType == MoveType.RandomUpDownLeftRight)
                         {
                             Direction =
-                                (enDirection)gameEngine.RandomNumberGenerator.Next(0, 4); // select from 1st four
+                                (Direction)GameEngine.RandomNumberGenerator.Next(0, 4); // select from 1st four
                         }
-                        else if (movementType == MoveType.DiagonalBouncingInSteps)
+                        else if (MovementType == MoveType.DiagonalBouncingInSteps)
                         {
                             Direction =
-                                (enDirection)gameEngine.RandomNumberGenerator.Next(4, 8); // select from 2nd four
-                            stepsToMove = gameEngine.RandomNumberGenerator.Next(8, 16);
+                                (Direction)GameEngine.RandomNumberGenerator.Next(4, 8); // select from 2nd four
+                            _stepsToMove = GameEngine.RandomNumberGenerator.Next(8, 16);
                         }
 
                         // Create a random speed for the nasty to move
-                        if (!attractedToBlob)
+                        if (!_attractedToBlob)
                         {
-                            if (movementType == MoveType.DiagonalBouncing ||
-                                movementType == MoveType.DiagonalBouncingInSteps ||
-                                movementType == MoveType.RandomUpDownLeftRight)
+                            if (MovementType == MoveType.DiagonalBouncing ||
+                                MovementType == MoveType.DiagonalBouncingInSteps ||
+                                MovementType == MoveType.RandomUpDownLeftRight)
                             {
-                                moveSpeed = gameEngine.RandomNumberGenerator.Next(6, 8);
+                                MoveSpeed = GameEngine.RandomNumberGenerator.Next(6, 8);
                             }
-                            else if (movementType == MoveType.RandomMovement ||
-                                     movementType == MoveType.RandomMovementsAllDirections)
+                            else if (MovementType == MoveType.RandomMovement ||
+                                     MovementType == MoveType.RandomMovementsAllDirections)
                             {
-                                moveSpeed = gameEngine.RandomNumberGenerator.Next(2, 4);
+                                MoveSpeed = GameEngine.RandomNumberGenerator.Next(2, 4);
                             }
                             else
                             {
-                                moveSpeed = gameEngine.RandomNumberGenerator.Next(6, 8);
+                                MoveSpeed = GameEngine.RandomNumberGenerator.Next(6, 8);
                             }
                         }
                         else
                         {
-                            if (movementType == MoveType.RandomMovement ||
-                                movementType == MoveType.RandomMovementsAllDirections)
+                            if (MovementType == MoveType.RandomMovement ||
+                                MovementType == MoveType.RandomMovementsAllDirections)
                             {
-                                moveSpeed = gameEngine.RandomNumberGenerator.Next(4, 6);
+                                MoveSpeed = GameEngine.RandomNumberGenerator.Next(4, 6);
                             }
-                            else if (movementType == MoveType.RandomUpDownLeftRight ||
-                                     movementType == MoveType.DiagonalBouncing ||
-                                     movementType == MoveType.DiagonalBouncingInSteps)
+                            else if (MovementType == MoveType.RandomUpDownLeftRight ||
+                                     MovementType == MoveType.DiagonalBouncing ||
+                                     MovementType == MoveType.DiagonalBouncingInSteps)
                             {
-                                moveSpeed = gameEngine.RandomNumberGenerator.Next(8, 10);
+                                MoveSpeed = GameEngine.RandomNumberGenerator.Next(8, 10);
                             }
-                            else if (movementType == MoveType.SpikeyMovement)
+                            else if (MovementType == MoveType.SpikeyMovement)
                             {
-                                moveSpeed = gameEngine.RandomNumberGenerator.Next(4, 6);
+                                MoveSpeed = GameEngine.RandomNumberGenerator.Next(4, 6);
                             }
                             else
                             {
-                                moveSpeed = gameEngine.RandomNumberGenerator.Next(8, 10);
+                                MoveSpeed = GameEngine.RandomNumberGenerator.Next(8, 10);
                             }
                         }
 
                         // Change movespeed to 1 if this is the first movement - allows the nasties to sppear moving slowly
-                        if (firstMovement)
+                        if (_firstMovement)
                         {
-                            moveSpeed = 1;
-                            movementChangeCount = 90;
-                            firstMovement = false;
+                            MoveSpeed = 1;
+                            _movementChangeCount = 90;
+                            _firstMovement = false;
                         }
                     }
                 }
             }
             else
             {
-                attractedToBlob = false;
-                constantMovement = true;
-                movementType = MoveType.DiagonalBouncing;
-                moveSpeed = 8;
+                _attractedToBlob = false;
+                _constantMovement = true;
+                MovementType = MoveType.DiagonalBouncing;
+                MoveSpeed = 8;
             }
         }
     }
 
-    private void DiagonalBouncingInSteps(int BlobsXPosition, int BlobsYPosition)
+    private void DiagonalBouncingInSteps(int blobsXPosition, int blobsYPosition)
     {
-        if (lastCollisionDirection == enDirection.None || Direction == enDirection.None)
+        if (_lastCollisionDirection == Direction.None || Direction == Direction.None)
         {
-            Direction = (enDirection)gameEngine.RandomNumberGenerator.Next(4, 8); // Select from last 4
+            Direction = (Direction)GameEngine.RandomNumberGenerator.Next(4, 8); // Select from last 4
         }
 
-        if (Direction == enDirection.UpLeft)
+        if (Direction == Direction.UpLeft)
         {
-            if (lastCollisionDirection == enDirection.UpLeft)
+            if (_lastCollisionDirection == Direction.UpLeft)
             {
-                Direction = enDirection.DownRight;
+                Direction = Direction.DownRight;
             }
-            else if (lastCollisionDirection == enDirection.Left)
+            else if (_lastCollisionDirection == Direction.Left)
             {
-                Direction = enDirection.UpRight;
+                Direction = Direction.UpRight;
             }
-            else if (lastCollisionDirection == enDirection.Up)
+            else if (_lastCollisionDirection == Direction.Up)
             {
-                Direction = enDirection.DownLeft;
+                Direction = Direction.DownLeft;
             }
             else
             {
-                Direction = enDirection.DownLeft; // Didn't hit anything, just change direction
+                Direction = Direction.DownLeft; // Didn't hit anything, just change direction
             }
         }
-        else if (Direction == enDirection.UpRight)
+        else if (Direction == Direction.UpRight)
         {
-            if (lastCollisionDirection == enDirection.UpRight)
+            if (_lastCollisionDirection == Direction.UpRight)
             {
-                Direction = enDirection.DownLeft;
+                Direction = Direction.DownLeft;
             }
-            else if (lastCollisionDirection == enDirection.Right)
+            else if (_lastCollisionDirection == Direction.Right)
             {
-                Direction = enDirection.UpLeft;
+                Direction = Direction.UpLeft;
             }
-            else if (lastCollisionDirection == enDirection.Up)
+            else if (_lastCollisionDirection == Direction.Up)
             {
-                Direction = enDirection.DownRight;
+                Direction = Direction.DownRight;
             }
             else
             {
-                Direction = enDirection.DownRight; // Didn't hit anything, just change direction
+                Direction = Direction.DownRight; // Didn't hit anything, just change direction
             }
         }
-        else if (Direction == enDirection.DownLeft)
+        else if (Direction == Direction.DownLeft)
         {
-            if (lastCollisionDirection == enDirection.DownLeft)
+            if (_lastCollisionDirection == Direction.DownLeft)
             {
-                Direction = enDirection.UpRight;
+                Direction = Direction.UpRight;
             }
-            else if (lastCollisionDirection == enDirection.Left)
+            else if (_lastCollisionDirection == Direction.Left)
             {
-                Direction = enDirection.DownRight;
+                Direction = Direction.DownRight;
             }
-            else if (lastCollisionDirection == enDirection.Down)
+            else if (_lastCollisionDirection == Direction.Down)
             {
-                Direction = enDirection.UpLeft;
+                Direction = Direction.UpLeft;
             }
             else
             {
-                Direction = enDirection.UpLeft; // Didn't hit anything, just change direction
+                Direction = Direction.UpLeft; // Didn't hit anything, just change direction
             }
         }
-        else if (Direction == enDirection.DownRight)
+        else if (Direction == Direction.DownRight)
         {
-            if (lastCollisionDirection == enDirection.DownRight)
+            if (_lastCollisionDirection == Direction.DownRight)
             {
-                Direction = enDirection.UpLeft;
+                Direction = Direction.UpLeft;
             }
-            else if (lastCollisionDirection == enDirection.Right)
+            else if (_lastCollisionDirection == Direction.Right)
             {
-                Direction = enDirection.DownLeft;
+                Direction = Direction.DownLeft;
             }
-            else if (lastCollisionDirection == enDirection.Down)
+            else if (_lastCollisionDirection == Direction.Down)
             {
-                Direction = enDirection.UpRight;
+                Direction = Direction.UpRight;
             }
             else
             {
-                Direction = enDirection.UpRight; // Didn't hit anything, just change direction
+                Direction = Direction.UpRight; // Didn't hit anything, just change direction
             }
         }
     }
 
-    private void DiagonalBouncing(int BlobsXPosition, int BlobsYPosition)
+    private void DiagonalBouncing(int blobsXPosition, int blobsYPosition)
     {
-        if (Direction == enDirection.None)
+        if (Direction == Direction.None)
         {
-            Direction = (enDirection)gameEngine.RandomNumberGenerator.Next(4, 8); // Select from last 4
+            Direction = (Direction)GameEngine.RandomNumberGenerator.Next(4, 8); // Select from last 4
         }
 
-        if (Direction == enDirection.UpLeft)
+        if (Direction == Direction.UpLeft)
         {
-            if (lastCollisionDirection == enDirection.UpLeft)
+            if (_lastCollisionDirection == Direction.UpLeft)
             {
-                Direction = enDirection.DownRight;
+                Direction = Direction.DownRight;
             }
-            else if (lastCollisionDirection == enDirection.Left)
+            else if (_lastCollisionDirection == Direction.Left)
             {
-                Direction = enDirection.UpRight;
+                Direction = Direction.UpRight;
             }
-            else if (lastCollisionDirection == enDirection.Up)
+            else if (_lastCollisionDirection == Direction.Up)
             {
-                Direction = enDirection.DownLeft;
+                Direction = Direction.DownLeft;
             }
         }
-        else if (Direction == enDirection.UpRight)
+        else if (Direction == Direction.UpRight)
         {
-            if (lastCollisionDirection == enDirection.UpRight)
+            if (_lastCollisionDirection == Direction.UpRight)
             {
-                Direction = enDirection.DownLeft;
+                Direction = Direction.DownLeft;
             }
-            else if (lastCollisionDirection == enDirection.Right)
+            else if (_lastCollisionDirection == Direction.Right)
             {
-                Direction = enDirection.UpLeft;
+                Direction = Direction.UpLeft;
             }
-            else if (lastCollisionDirection == enDirection.Up)
+            else if (_lastCollisionDirection == Direction.Up)
             {
-                Direction = enDirection.DownRight;
+                Direction = Direction.DownRight;
             }
         }
-        else if (Direction == enDirection.DownLeft)
+        else if (Direction == Direction.DownLeft)
         {
-            if (lastCollisionDirection == enDirection.DownLeft)
+            if (_lastCollisionDirection == Direction.DownLeft)
             {
-                Direction = enDirection.UpRight;
+                Direction = Direction.UpRight;
             }
-            else if (lastCollisionDirection == enDirection.Left)
+            else if (_lastCollisionDirection == Direction.Left)
             {
-                Direction = enDirection.DownRight;
+                Direction = Direction.DownRight;
             }
-            else if (lastCollisionDirection == enDirection.Down)
+            else if (_lastCollisionDirection == Direction.Down)
             {
-                Direction = enDirection.UpLeft;
+                Direction = Direction.UpLeft;
             }
         }
-        else if (Direction == enDirection.DownRight)
+        else if (Direction == Direction.DownRight)
         {
-            if (lastCollisionDirection == enDirection.DownRight)
+            if (_lastCollisionDirection == Direction.DownRight)
             {
-                Direction = enDirection.UpLeft;
+                Direction = Direction.UpLeft;
             }
-            else if (lastCollisionDirection == enDirection.Right)
+            else if (_lastCollisionDirection == Direction.Right)
             {
-                Direction = enDirection.DownLeft;
+                Direction = Direction.DownLeft;
             }
-            else if (lastCollisionDirection == enDirection.Down)
+            else if (_lastCollisionDirection == Direction.Down)
             {
-                Direction = enDirection.UpRight;
+                Direction = Direction.UpRight;
             }
         }
 
-        stepsToMove = gameEngine.RandomNumberGenerator.Next(8, 40);
+        _stepsToMove = GameEngine.RandomNumberGenerator.Next(8, 40);
     }
 
-    private void RandomUpDownLeftRight(int BlobsXPosition, int BlobsYPosition)
+    private void RandomUpDownLeftRight(int blobsXPosition, int blobsYPosition)
     {
-        if (lastCollisionDirection == enDirection.None || Direction == enDirection.None)
+        if (_lastCollisionDirection == Direction.None || Direction == Direction.None)
         {
-            Direction = (enDirection)gameEngine.RandomNumberGenerator.Next(0, 4); // Only select fron first 4
+            Direction = (Direction)GameEngine.RandomNumberGenerator.Next(0, 4); // Only select fron first 4
         }
 
-        if (lastCollisionDirection == enDirection.Up)
+        if (_lastCollisionDirection == Direction.Up)
         {
-            Direction = enDirection.Down;
+            Direction = Direction.Down;
         }
-        else if (lastCollisionDirection == enDirection.Down)
+        else if (_lastCollisionDirection == Direction.Down)
         {
-            Direction = enDirection.Up;
+            Direction = Direction.Up;
         }
-        else if (lastCollisionDirection == enDirection.Left)
+        else if (_lastCollisionDirection == Direction.Left)
         {
-            Direction = enDirection.Right;
+            Direction = Direction.Right;
         }
-        else if (lastCollisionDirection == enDirection.Right)
+        else if (_lastCollisionDirection == Direction.Right)
         {
-            Direction = enDirection.Left;
+            Direction = Direction.Left;
         }
 
         // If attracted to blob is turned on
-        if (attractedToBlob)
+        if (_attractedToBlob)
         {
-            if (XPos < BlobsXPosition)
+            if (XPos < blobsXPosition)
             {
-                if (lastCollisionDirection != enDirection.Right)
+                if (_lastCollisionDirection != Direction.Right)
                 {
-                    Direction = enDirection.Right;
+                    Direction = Direction.Right;
                 }
             }
-            else if (XPos > BlobsXPosition)
+            else if (XPos > blobsXPosition)
             {
-                if (lastCollisionDirection != enDirection.Left)
+                if (_lastCollisionDirection != Direction.Left)
                 {
-                    Direction = enDirection.Left;
+                    Direction = Direction.Left;
                 }
             }
 
 
-            if (YPos < BlobsYPosition)
+            if (YPos < blobsYPosition)
             {
-                if (lastCollisionDirection != enDirection.Down)
+                if (_lastCollisionDirection != Direction.Down)
                 {
-                    if (Direction == enDirection.Left)
+                    if (Direction == Direction.Left)
                     {
-                        Direction = enDirection.DownLeft;
+                        Direction = Direction.DownLeft;
                     }
-                    else if (Direction == enDirection.Right)
+                    else if (Direction == Direction.Right)
                     {
-                        Direction = enDirection.DownRight;
+                        Direction = Direction.DownRight;
                     }
                     else
                     {
-                        Direction = enDirection.Down;
+                        Direction = Direction.Down;
                     }
                 }
             }
-            else if (YPos > BlobsYPosition)
+            else if (YPos > blobsYPosition)
             {
-                if (lastCollisionDirection != enDirection.Up)
+                if (_lastCollisionDirection != Direction.Up)
                 {
-                    if (Direction == enDirection.Left)
+                    if (Direction == Direction.Left)
                     {
-                        Direction = enDirection.UpLeft;
+                        Direction = Direction.UpLeft;
                     }
-                    else if (Direction == enDirection.Right)
+                    else if (Direction == Direction.Right)
                     {
-                        Direction = enDirection.UpRight;
+                        Direction = Direction.UpRight;
                     }
                     else
                     {
-                        Direction = enDirection.Up;
+                        Direction = Direction.Up;
                     }
                 }
             }
         }
 
-        stepsToMove = gameEngine.RandomNumberGenerator.Next(8, 40);
+        _stepsToMove = GameEngine.RandomNumberGenerator.Next(8, 40);
     }
 
-    private void RandomMovement(int BlobsXPosition, int BlobsYPosition)
+    private void RandomMovement(int blobsXPosition, int blobsYPosition)
     {
-        if (lastCollisionDirection == enDirection.None || Direction == enDirection.None)
+        if (_lastCollisionDirection == Direction.None || Direction == Direction.None)
         {
-            Direction = (enDirection)gameEngine.RandomNumberGenerator.Next(0, 4); // Only select fron first 4
+            Direction = (Direction)GameEngine.RandomNumberGenerator.Next(0, 4); // Only select fron first 4
         }
 
-        if (lastCollisionDirection == enDirection.Up)
+        if (_lastCollisionDirection == Direction.Up)
         {
-            Direction = enDirection.Down;
+            Direction = Direction.Down;
         }
-        else if (lastCollisionDirection == enDirection.Down)
+        else if (_lastCollisionDirection == Direction.Down)
         {
-            Direction = enDirection.Up;
+            Direction = Direction.Up;
         }
-        else if (lastCollisionDirection == enDirection.Left)
+        else if (_lastCollisionDirection == Direction.Left)
         {
-            Direction = enDirection.Right;
+            Direction = Direction.Right;
         }
-        else if (lastCollisionDirection == enDirection.Right)
+        else if (_lastCollisionDirection == Direction.Right)
         {
-            Direction = enDirection.Left;
+            Direction = Direction.Left;
         }
 
         // If attracted to blob is turned on
-        if (attractedToBlob)
+        if (_attractedToBlob)
         {
-            Direction = enDirection.None;
+            Direction = Direction.None;
 
-            if (XPos < BlobsXPosition)
+            if (XPos < blobsXPosition)
             {
-                if (lastCollisionDirection != enDirection.Right)
+                if (_lastCollisionDirection != Direction.Right)
                 {
-                    Direction = enDirection.Right;
+                    Direction = Direction.Right;
                 }
             }
-            else if (XPos > BlobsXPosition)
+            else if (XPos > blobsXPosition)
             {
-                if (lastCollisionDirection != enDirection.Left)
+                if (_lastCollisionDirection != Direction.Left)
                 {
-                    Direction = enDirection.Left;
+                    Direction = Direction.Left;
                 }
             }
 
 
-            if (YPos < BlobsYPosition)
+            if (YPos < blobsYPosition)
             {
-                if (lastCollisionDirection != enDirection.Down)
+                if (_lastCollisionDirection != Direction.Down)
                 {
-                    if (Direction == enDirection.Left)
+                    if (Direction == Direction.Left)
                     {
-                        Direction = enDirection.DownLeft;
+                        Direction = Direction.DownLeft;
                     }
-                    else if (Direction == enDirection.Right)
+                    else if (Direction == Direction.Right)
                     {
-                        Direction = enDirection.DownRight;
+                        Direction = Direction.DownRight;
                     }
                     else
                     {
-                        Direction = enDirection.Down;
+                        Direction = Direction.Down;
                     }
                 }
             }
-            else if (YPos > BlobsYPosition)
+            else if (YPos > blobsYPosition)
             {
-                if (lastCollisionDirection != enDirection.Up)
+                if (_lastCollisionDirection != Direction.Up)
                 {
-                    if (Direction == enDirection.Left)
+                    if (Direction == Direction.Left)
                     {
-                        Direction = enDirection.UpLeft;
+                        Direction = Direction.UpLeft;
                     }
-                    else if (Direction == enDirection.Right)
+                    else if (Direction == Direction.Right)
                     {
-                        Direction = enDirection.UpRight;
+                        Direction = Direction.UpRight;
                     }
                     else
                     {
-                        Direction = enDirection.Up;
+                        Direction = Direction.Up;
                     }
                 }
             }
         }
 
-        stepsToMove = gameEngine.RandomNumberGenerator.Next(1, 4);
+        _stepsToMove = GameEngine.RandomNumberGenerator.Next(1, 4);
     }
 
-    private void RandomMovementsAllDirections(int BlobsXPosition, int BlobsYPosition)
+    private void RandomMovementsAllDirections(int blobsXPosition, int blobsYPosition)
     {
-        if (lastCollisionDirection == enDirection.None || Direction == enDirection.None)
+        if (_lastCollisionDirection == Direction.None || Direction == Direction.None)
         {
             Direction =
-                (enDirection)gameEngine.RandomNumberGenerator.Next(0, 8); // Select from all movement directions
+                (Direction)GameEngine.RandomNumberGenerator.Next(0, 8); // Select from all movement directions
         }
 
-        if (!attractedToBlob)
+        if (!_attractedToBlob)
         {
-            if (lastCollisionDirection == enDirection.Up)
+            if (_lastCollisionDirection == Direction.Up)
             {
-                var newDirection = gameEngine.RandomNumberGenerator.Next(0, 2);
+                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 2);
 
                 if (newDirection == 0)
                 {
-                    Direction = enDirection.Down;
+                    Direction = Direction.Down;
                 }
                 else if (newDirection == 1)
                 {
-                    Direction = enDirection.DownLeft;
+                    Direction = Direction.DownLeft;
                 }
                 else
                 {
-                    Direction = enDirection.DownRight;
+                    Direction = Direction.DownRight;
                 }
             }
-            else if (lastCollisionDirection == enDirection.Down)
+            else if (_lastCollisionDirection == Direction.Down)
             {
-                var newDirection = gameEngine.RandomNumberGenerator.Next(0, 3);
+                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
 
                 if (newDirection == 0)
                 {
-                    Direction = enDirection.Up;
+                    Direction = Direction.Up;
                 }
                 else if (newDirection == 1)
                 {
-                    Direction = enDirection.UpLeft;
+                    Direction = Direction.UpLeft;
                 }
                 else
                 {
-                    Direction = enDirection.UpRight;
+                    Direction = Direction.UpRight;
                 }
             }
-            else if (lastCollisionDirection == enDirection.Left)
+            else if (_lastCollisionDirection == Direction.Left)
             {
-                var newDirection = gameEngine.RandomNumberGenerator.Next(0, 3);
+                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
 
                 if (newDirection == 0)
                 {
-                    Direction = enDirection.Right;
+                    Direction = Direction.Right;
                 }
                 else if (newDirection == 1)
                 {
-                    Direction = enDirection.DownRight;
+                    Direction = Direction.DownRight;
                 }
                 else
                 {
-                    Direction = enDirection.UpRight;
+                    Direction = Direction.UpRight;
                 }
             }
-            else if (lastCollisionDirection == enDirection.Right)
+            else if (_lastCollisionDirection == Direction.Right)
             {
-                var newDirection = gameEngine.RandomNumberGenerator.Next(0, 3);
+                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
 
                 if (newDirection == 0)
                 {
-                    Direction = enDirection.Left;
+                    Direction = Direction.Left;
                 }
                 else if (newDirection == 1)
                 {
-                    Direction = enDirection.DownLeft;
+                    Direction = Direction.DownLeft;
                 }
                 else
                 {
-                    Direction = enDirection.UpLeft;
+                    Direction = Direction.UpLeft;
                 }
             }
-            else if (lastCollisionDirection == enDirection.UpLeft)
+            else if (_lastCollisionDirection == Direction.UpLeft)
             {
-                var newDirection = gameEngine.RandomNumberGenerator.Next(0, 3);
+                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
 
                 if (newDirection == 0)
                 {
-                    Direction = enDirection.Down;
+                    Direction = Direction.Down;
                 }
                 else if (newDirection == 1)
                 {
-                    Direction = enDirection.DownLeft;
+                    Direction = Direction.DownLeft;
                 }
                 else
                 {
-                    Direction = enDirection.DownRight;
+                    Direction = Direction.DownRight;
                 }
             }
-            else if (lastCollisionDirection == enDirection.UpRight)
+            else if (_lastCollisionDirection == Direction.UpRight)
             {
-                var newDirection = gameEngine.RandomNumberGenerator.Next(0, 3);
+                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
 
                 if (newDirection == 0)
                 {
-                    Direction = enDirection.Down;
+                    Direction = Direction.Down;
                 }
                 else if (newDirection == 1)
                 {
-                    Direction = enDirection.DownRight;
+                    Direction = Direction.DownRight;
                 }
                 else
                 {
-                    Direction = enDirection.DownLeft;
+                    Direction = Direction.DownLeft;
                 }
             }
-            else if (lastCollisionDirection == enDirection.DownLeft)
+            else if (_lastCollisionDirection == Direction.DownLeft)
             {
-                var newDirection = gameEngine.RandomNumberGenerator.Next(0, 3);
+                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
 
                 if (newDirection == 0)
                 {
-                    Direction = enDirection.Up;
+                    Direction = Direction.Up;
                 }
                 else if (newDirection == 1)
                 {
-                    Direction = enDirection.UpLeft;
+                    Direction = Direction.UpLeft;
                 }
                 else
                 {
-                    Direction = enDirection.UpRight;
+                    Direction = Direction.UpRight;
                 }
             }
-            else if (lastCollisionDirection == enDirection.DownRight)
+            else if (_lastCollisionDirection == Direction.DownRight)
             {
-                var newDirection = gameEngine.RandomNumberGenerator.Next(0, 3);
+                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
 
                 if (newDirection == 0)
                 {
-                    Direction = enDirection.Up;
+                    Direction = Direction.Up;
                 }
                 else if (newDirection == 1)
                 {
-                    Direction = enDirection.UpRight;
+                    Direction = Direction.UpRight;
                 }
                 else
                 {
-                    Direction = enDirection.UpLeft;
+                    Direction = Direction.UpLeft;
                 }
             }
         }
         else // Attracted to Blob
         {
-            if (XPos <= BlobsXPosition && YPos <= BlobsYPosition)
+            if (XPos <= blobsXPosition && YPos <= blobsYPosition)
             {
-                var newDirection = gameEngine.RandomNumberGenerator.Next(0, 3);
+                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
 
                 if (newDirection == 0)
                 {
-                    Direction = enDirection.Right;
+                    Direction = Direction.Right;
                 }
                 else if (newDirection == 1)
                 {
-                    Direction = enDirection.Down;
+                    Direction = Direction.Down;
                 }
                 else
                 {
-                    Direction = enDirection.DownRight;
+                    Direction = Direction.DownRight;
                 }
             }
-            else if (XPos <= BlobsXPosition && YPos >= BlobsYPosition)
+            else if (XPos <= blobsXPosition && YPos >= blobsYPosition)
             {
-                var newDirection = gameEngine.RandomNumberGenerator.Next(0, 3);
+                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
 
                 if (newDirection == 0)
                 {
-                    Direction = enDirection.Right;
+                    Direction = Direction.Right;
                 }
                 else if (newDirection == 1)
                 {
-                    Direction = enDirection.Up;
+                    Direction = Direction.Up;
                 }
                 else
                 {
-                    Direction = enDirection.UpRight;
+                    Direction = Direction.UpRight;
                 }
             }
-            else if (XPos >= BlobsXPosition && YPos >= BlobsYPosition)
+            else if (XPos >= blobsXPosition && YPos >= blobsYPosition)
             {
-                var newDirection = gameEngine.RandomNumberGenerator.Next(0, 3);
+                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
 
                 if (newDirection == 0)
                 {
-                    Direction = enDirection.Left;
+                    Direction = Direction.Left;
                 }
                 else if (newDirection == 1)
                 {
-                    Direction = enDirection.Up;
+                    Direction = Direction.Up;
                 }
                 else
                 {
-                    Direction = enDirection.UpLeft;
+                    Direction = Direction.UpLeft;
                 }
             }
-            else if (XPos >= BlobsXPosition && YPos <= BlobsYPosition)
+            else if (XPos >= blobsXPosition && YPos <= blobsYPosition)
             {
-                var newDirection = gameEngine.RandomNumberGenerator.Next(0, 3);
+                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
 
                 if (newDirection == 0)
                 {
-                    Direction = enDirection.Left;
+                    Direction = Direction.Left;
                 }
                 else if (newDirection == 1)
                 {
-                    Direction = enDirection.Down;
+                    Direction = Direction.Down;
                 }
                 else
                 {
-                    Direction = enDirection.DownLeft;
+                    Direction = Direction.DownLeft;
                 }
             }
         }
 
-        stepsToMove = gameEngine.RandomNumberGenerator.Next(10, 40);
+        _stepsToMove = GameEngine.RandomNumberGenerator.Next(10, 40);
     }
 
-    private void SpikeyMovement(int BlobsXPosition, int BlobsYPosition)
+    private void SpikeyMovement(int blobsXPosition, int blobsYPosition)
     {
         var stepsFromBlob = 0;
 
-        if (!spikeyPause)
+        if (!_spikeyPause)
         {
-            if (XPos <= BlobsXPosition && YPos <= BlobsYPosition)
+            if (XPos <= blobsXPosition && YPos <= blobsYPosition)
             {
-                var distanceX = BlobsXPosition - XPos;
-                var distanceY = BlobsYPosition - YPos;
+                var distanceX = blobsXPosition - XPos;
+                var distanceY = blobsYPosition - YPos;
 
                 if (distanceX > distanceY)
                 {
-                    Direction = enDirection.Right;
-                    stepsFromBlob = BlobsXPosition - XPos;
+                    Direction = Direction.Right;
+                    stepsFromBlob = blobsXPosition - XPos;
                 }
                 else if (distanceY > distanceX)
                 {
-                    Direction = enDirection.Down;
-                    stepsFromBlob = BlobsYPosition - YPos;
+                    Direction = Direction.Down;
+                    stepsFromBlob = blobsYPosition - YPos;
                 }
 
-                if (gameEngine.RandomNumberGenerator.Next(0, 2) == 0)
+                if (GameEngine.RandomNumberGenerator.Next(0, 2) == 0)
                 {
-                    if (Direction == enDirection.Down)
+                    if (Direction == Direction.Down)
                     {
-                        Direction = enDirection.DownRight;
-                        stepsFromBlob = BlobsYPosition - YPos;
+                        Direction = Direction.DownRight;
+                        stepsFromBlob = blobsYPosition - YPos;
                     }
-                    else if (Direction == enDirection.Right)
+                    else if (Direction == Direction.Right)
                     {
-                        Direction = enDirection.DownRight;
-                        stepsFromBlob = BlobsXPosition - XPos;
+                        Direction = Direction.DownRight;
+                        stepsFromBlob = blobsXPosition - XPos;
                     }
                 }
 
-                if (lastCollisionDirection == enDirection.Right)
+                if (_lastCollisionDirection == Direction.Right)
                 {
-                    Direction = enDirection.Down;
-                    stepsFromBlob = BlobsYPosition - YPos;
+                    Direction = Direction.Down;
+                    stepsFromBlob = blobsYPosition - YPos;
                 }
-                else if (lastCollisionDirection == enDirection.Down)
+                else if (_lastCollisionDirection == Direction.Down)
                 {
-                    Direction = enDirection.Right;
-                    stepsFromBlob = BlobsXPosition - XPos;
+                    Direction = Direction.Right;
+                    stepsFromBlob = blobsXPosition - XPos;
                 }
-                else if (lastCollisionDirection == enDirection.DownRight)
+                else if (_lastCollisionDirection == Direction.DownRight)
                 {
-                    if (gameEngine.RandomNumberGenerator.Next(0, 2) == 0)
+                    if (GameEngine.RandomNumberGenerator.Next(0, 2) == 0)
                     {
-                        Direction = enDirection.Right;
-                        stepsFromBlob = BlobsXPosition - XPos;
+                        Direction = Direction.Right;
+                        stepsFromBlob = blobsXPosition - XPos;
                     }
                     else
                     {
-                        Direction = enDirection.Down;
-                        stepsFromBlob = BlobsYPosition - YPos;
+                        Direction = Direction.Down;
+                        stepsFromBlob = blobsYPosition - YPos;
                     }
                 }
             }
-            else if (XPos <= BlobsXPosition && YPos >= BlobsYPosition)
+            else if (XPos <= blobsXPosition && YPos >= blobsYPosition)
             {
-                var distanceX = BlobsXPosition - XPos;
-                var distanceY = YPos - BlobsYPosition;
+                var distanceX = blobsXPosition - XPos;
+                var distanceY = YPos - blobsYPosition;
 
                 if (distanceX > distanceY)
                 {
-                    Direction = enDirection.Right;
-                    stepsFromBlob = BlobsXPosition - XPos;
+                    Direction = Direction.Right;
+                    stepsFromBlob = blobsXPosition - XPos;
                 }
                 else if (distanceY > distanceX)
                 {
-                    Direction = enDirection.Up;
-                    stepsFromBlob = YPos - BlobsYPosition;
+                    Direction = Direction.Up;
+                    stepsFromBlob = YPos - blobsYPosition;
                 }
 
-                if (gameEngine.RandomNumberGenerator.Next(0, 2) == 0)
+                if (GameEngine.RandomNumberGenerator.Next(0, 2) == 0)
                 {
-                    if (Direction == enDirection.Right)
+                    if (Direction == Direction.Right)
                     {
-                        Direction = enDirection.UpRight;
-                        stepsFromBlob = BlobsXPosition - XPos;
+                        Direction = Direction.UpRight;
+                        stepsFromBlob = blobsXPosition - XPos;
                     }
-                    else if (Direction == enDirection.Up)
+                    else if (Direction == Direction.Up)
                     {
-                        Direction = enDirection.UpRight;
-                        stepsFromBlob = YPos - BlobsYPosition;
+                        Direction = Direction.UpRight;
+                        stepsFromBlob = YPos - blobsYPosition;
                     }
                 }
 
-                if (lastCollisionDirection == enDirection.Up)
+                if (_lastCollisionDirection == Direction.Up)
                 {
-                    Direction = enDirection.Right;
-                    stepsFromBlob = BlobsXPosition - XPos;
+                    Direction = Direction.Right;
+                    stepsFromBlob = blobsXPosition - XPos;
                 }
-                else if (lastCollisionDirection == enDirection.Right)
+                else if (_lastCollisionDirection == Direction.Right)
                 {
-                    Direction = enDirection.Up;
-                    stepsFromBlob = YPos - BlobsYPosition;
+                    Direction = Direction.Up;
+                    stepsFromBlob = YPos - blobsYPosition;
                 }
-                else if (lastCollisionDirection == enDirection.UpRight)
+                else if (_lastCollisionDirection == Direction.UpRight)
                 {
-                    if (gameEngine.RandomNumberGenerator.Next(0, 2) == 0)
+                    if (GameEngine.RandomNumberGenerator.Next(0, 2) == 0)
                     {
-                        Direction = enDirection.Right;
-                        stepsFromBlob = BlobsXPosition - XPos;
+                        Direction = Direction.Right;
+                        stepsFromBlob = blobsXPosition - XPos;
                     }
                     else
                     {
-                        Direction = enDirection.Up;
-                        stepsFromBlob = YPos - BlobsYPosition;
+                        Direction = Direction.Up;
+                        stepsFromBlob = YPos - blobsYPosition;
                     }
                 }
             }
-            else if (XPos >= BlobsXPosition && YPos >= BlobsYPosition)
+            else if (XPos >= blobsXPosition && YPos >= blobsYPosition)
             {
-                var distanceX = XPos - BlobsXPosition;
-                var distanceY = YPos - BlobsYPosition;
+                var distanceX = XPos - blobsXPosition;
+                var distanceY = YPos - blobsYPosition;
 
                 if (distanceX > distanceY)
                 {
-                    Direction = enDirection.Left;
-                    stepsFromBlob = XPos - BlobsXPosition;
+                    Direction = Direction.Left;
+                    stepsFromBlob = XPos - blobsXPosition;
                 }
                 else if (distanceY > distanceX)
                 {
-                    Direction = enDirection.Up;
-                    stepsFromBlob = YPos - BlobsYPosition;
+                    Direction = Direction.Up;
+                    stepsFromBlob = YPos - blobsYPosition;
                 }
 
-                if (gameEngine.RandomNumberGenerator.Next(0, 2) == 0)
+                if (GameEngine.RandomNumberGenerator.Next(0, 2) == 0)
                 {
-                    if (Direction == enDirection.Left)
+                    if (Direction == Direction.Left)
                     {
-                        Direction = enDirection.UpLeft;
-                        stepsFromBlob = XPos - BlobsXPosition;
+                        Direction = Direction.UpLeft;
+                        stepsFromBlob = XPos - blobsXPosition;
                     }
-                    else if (Direction == enDirection.Up)
+                    else if (Direction == Direction.Up)
                     {
-                        Direction = enDirection.UpLeft;
-                        stepsFromBlob = YPos - BlobsYPosition;
+                        Direction = Direction.UpLeft;
+                        stepsFromBlob = YPos - blobsYPosition;
                     }
                 }
 
-                if (lastCollisionDirection == enDirection.Up)
+                if (_lastCollisionDirection == Direction.Up)
                 {
-                    Direction = enDirection.Left;
-                    stepsFromBlob = XPos - BlobsXPosition;
+                    Direction = Direction.Left;
+                    stepsFromBlob = XPos - blobsXPosition;
                 }
-                else if (lastCollisionDirection == enDirection.Left)
+                else if (_lastCollisionDirection == Direction.Left)
                 {
-                    Direction = enDirection.Up;
-                    stepsFromBlob = YPos - BlobsYPosition;
+                    Direction = Direction.Up;
+                    stepsFromBlob = YPos - blobsYPosition;
                 }
-                else if (lastCollisionDirection == enDirection.UpLeft)
+                else if (_lastCollisionDirection == Direction.UpLeft)
                 {
-                    if (gameEngine.RandomNumberGenerator.Next(0, 2) == 0)
+                    if (GameEngine.RandomNumberGenerator.Next(0, 2) == 0)
                     {
-                        Direction = enDirection.Left;
-                        stepsFromBlob = XPos - BlobsXPosition;
+                        Direction = Direction.Left;
+                        stepsFromBlob = XPos - blobsXPosition;
                     }
                     else
                     {
-                        Direction = enDirection.Up;
-                        stepsFromBlob = YPos - BlobsYPosition;
+                        Direction = Direction.Up;
+                        stepsFromBlob = YPos - blobsYPosition;
                     }
                 }
             }
-            else if (XPos >= BlobsXPosition && YPos <= BlobsYPosition)
+            else if (XPos >= blobsXPosition && YPos <= blobsYPosition)
             {
-                var distanceX = XPos - BlobsXPosition;
-                var distanceY = BlobsYPosition - YPos;
+                var distanceX = XPos - blobsXPosition;
+                var distanceY = blobsYPosition - YPos;
 
                 if (distanceX > distanceY)
                 {
-                    Direction = enDirection.Left;
-                    stepsFromBlob = XPos - BlobsXPosition;
+                    Direction = Direction.Left;
+                    stepsFromBlob = XPos - blobsXPosition;
                 }
                 else if (distanceY > distanceX)
                 {
-                    Direction = enDirection.Down;
-                    stepsFromBlob = BlobsYPosition - YPos;
+                    Direction = Direction.Down;
+                    stepsFromBlob = blobsYPosition - YPos;
                 }
 
-                if (gameEngine.RandomNumberGenerator.Next(0, 2) == 0)
+                if (GameEngine.RandomNumberGenerator.Next(0, 2) == 0)
                 {
-                    if (Direction == enDirection.Left)
+                    if (Direction == Direction.Left)
                     {
-                        Direction = enDirection.DownLeft;
-                        stepsFromBlob = XPos - BlobsXPosition;
+                        Direction = Direction.DownLeft;
+                        stepsFromBlob = XPos - blobsXPosition;
                     }
-                    else if (Direction == enDirection.Down)
+                    else if (Direction == Direction.Down)
                     {
-                        Direction = enDirection.DownLeft;
-                        stepsFromBlob = BlobsYPosition - YPos;
+                        Direction = Direction.DownLeft;
+                        stepsFromBlob = blobsYPosition - YPos;
                     }
                 }
 
-                if (lastCollisionDirection == enDirection.Down)
+                if (_lastCollisionDirection == Direction.Down)
                 {
-                    Direction = enDirection.Left;
-                    stepsFromBlob = XPos - BlobsXPosition;
+                    Direction = Direction.Left;
+                    stepsFromBlob = XPos - blobsXPosition;
                 }
-                else if (lastCollisionDirection == enDirection.Left)
+                else if (_lastCollisionDirection == Direction.Left)
                 {
-                    Direction = enDirection.Down;
-                    stepsFromBlob = BlobsYPosition - YPos;
+                    Direction = Direction.Down;
+                    stepsFromBlob = blobsYPosition - YPos;
                 }
-                else if (lastCollisionDirection == enDirection.DownLeft)
+                else if (_lastCollisionDirection == Direction.DownLeft)
                 {
-                    if (gameEngine.RandomNumberGenerator.Next(0, 2) == 0)
+                    if (GameEngine.RandomNumberGenerator.Next(0, 2) == 0)
                     {
-                        Direction = enDirection.Left;
-                        stepsFromBlob = XPos - BlobsXPosition;
+                        Direction = Direction.Left;
+                        stepsFromBlob = XPos - blobsXPosition;
                     }
                     else
                     {
-                        Direction = enDirection.Down;
-                        stepsFromBlob = BlobsYPosition - YPos;
+                        Direction = Direction.Down;
+                        stepsFromBlob = blobsYPosition - YPos;
                     }
                 }
             }
         }
         else
         {
-            Direction = enDirection.None;
+            Direction = Direction.None;
         }
 
-        if (!spikeyPause)
+        if (!_spikeyPause)
         {
-            stepsToMove = gameEngine.RandomNumberGenerator.Next(
-                              (int)(stepsFromBlob / (double)moveSpeed / 2),
-                              (int)(stepsFromBlob / (double)moveSpeed)) +
+            _stepsToMove = GameEngine.RandomNumberGenerator.Next(
+                              (int)(stepsFromBlob / (double)MoveSpeed / 2),
+                              (int)(stepsFromBlob / (double)MoveSpeed)) +
                           10; // An additional 10 to stop the spiky lads from getting stuck on scenary
         }
         else
         {
-            stepsToMove = gameEngine.RandomNumberGenerator.Next(40, 80);
+            _stepsToMove = GameEngine.RandomNumberGenerator.Next(40, 80);
         }
     }
 
     private void MoveNastyOneStep(ref int amountToMoveX, ref int amountToMoveY)
     {
-        lastCollisionDirection = enDirection.None;
+        _lastCollisionDirection = Direction.None;
 
-        if (Direction == enDirection.Down)
+        if (Direction == Direction.Down)
         {
-            amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Down, XPos, YPos, NastyWidth,
-                NastyHeight, moveSpeed, false);
+            amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Down, XPos, YPos, NastyWidth,
+                NastyHeight, MoveSpeed, false);
 
             if (amountToMoveY == 0)
             {
-                stepsMovedCounter = stepsToMove;
+                _stepsMovedCounter = _stepsToMove;
             }
 
             YPos = YPos + amountToMoveY;
         }
-        else if (Direction == enDirection.Up)
+        else if (Direction == Direction.Up)
         {
-            amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Up, XPos, YPos, NastyWidth,
-                NastyHeight, moveSpeed, false);
+            amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Up, XPos, YPos, NastyWidth,
+                NastyHeight, MoveSpeed, false);
 
             if (amountToMoveY == 0)
             {
-                stepsMovedCounter = stepsToMove;
+                _stepsMovedCounter = _stepsToMove;
             }
 
             YPos = YPos - amountToMoveY;
         }
-        else if (Direction == enDirection.Left)
+        else if (Direction == Direction.Left)
         {
-            amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Left, XPos, YPos, NastyWidth,
-                NastyHeight, moveSpeed, false);
+            amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Left, XPos, YPos, NastyWidth,
+                NastyHeight, MoveSpeed, false);
 
             if (amountToMoveX == 0)
             {
-                stepsMovedCounter = stepsToMove;
+                _stepsMovedCounter = _stepsToMove;
             }
 
             XPos = XPos - amountToMoveX;
         }
-        else if (Direction == enDirection.Right)
+        else if (Direction == Direction.Right)
         {
-            amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Right, XPos, YPos, NastyWidth,
-                NastyHeight, moveSpeed, false);
+            amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Right, XPos, YPos, NastyWidth,
+                NastyHeight, MoveSpeed, false);
 
             if (amountToMoveX == 0)
             {
-                stepsMovedCounter = stepsToMove;
+                _stepsMovedCounter = _stepsToMove;
             }
 
             XPos = XPos + amountToMoveX;
         }
-        else if (Direction == enDirection.UpLeft)
+        else if (Direction == Direction.UpLeft)
         {
-            amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Up, XPos, YPos, NastyWidth,
-                NastyHeight, moveSpeed, false);
-            amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Left, XPos, YPos - amountToMoveY,
-                NastyWidth, NastyHeight, moveSpeed, false);
+            amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Up, XPos, YPos, NastyWidth,
+                NastyHeight, MoveSpeed, false);
+            amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Left, XPos, YPos - amountToMoveY,
+                NastyWidth, NastyHeight, MoveSpeed, false);
 
             if (amountToMoveY == 0)
             {
-                stepsMovedCounter = stepsToMove;
+                _stepsMovedCounter = _stepsToMove;
             }
             else if (amountToMoveX == 0)
             {
-                stepsMovedCounter = stepsToMove;
+                _stepsMovedCounter = _stepsToMove;
             }
 
             YPos = YPos - amountToMoveY;
             XPos = XPos - amountToMoveX;
         }
-        else if (Direction == enDirection.DownLeft)
+        else if (Direction == Direction.DownLeft)
         {
-            amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Down, XPos, YPos, NastyWidth,
-                NastyHeight, moveSpeed, false);
-            amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Left, XPos, YPos + amountToMoveY,
-                NastyWidth, NastyHeight, moveSpeed, false);
+            amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Down, XPos, YPos, NastyWidth,
+                NastyHeight, MoveSpeed, false);
+            amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Left, XPos, YPos + amountToMoveY,
+                NastyWidth, NastyHeight, MoveSpeed, false);
 
             if (amountToMoveY == 0)
             {
-                stepsMovedCounter = stepsToMove;
+                _stepsMovedCounter = _stepsToMove;
             }
             else if (amountToMoveX == 0)
             {
-                stepsMovedCounter = stepsToMove;
+                _stepsMovedCounter = _stepsToMove;
             }
 
             YPos = YPos + amountToMoveY;
             XPos = XPos - amountToMoveX;
         }
-        else if (Direction == enDirection.UpRight)
+        else if (Direction == Direction.UpRight)
         {
-            amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Up, XPos, YPos, NastyWidth,
-                NastyHeight, moveSpeed, false);
-            amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Right, XPos, YPos - amountToMoveY,
-                NastyWidth, NastyHeight, moveSpeed, false);
+            amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Up, XPos, YPos, NastyWidth,
+                NastyHeight, MoveSpeed, false);
+            amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Right, XPos, YPos - amountToMoveY,
+                NastyWidth, NastyHeight, MoveSpeed, false);
 
             if (amountToMoveY == 0)
             {
-                stepsMovedCounter = stepsToMove;
+                _stepsMovedCounter = _stepsToMove;
             }
             else if (amountToMoveX == 0)
             {
-                stepsMovedCounter = stepsToMove;
+                _stepsMovedCounter = _stepsToMove;
             }
 
             YPos = YPos - amountToMoveY;
             XPos = XPos + amountToMoveX;
         }
-        else if (Direction == enDirection.DownRight)
+        else if (Direction == Direction.DownRight)
         {
-            amountToMoveY = gameEngine.GameScreens.CheckCollision(enDirection.Down, XPos, YPos, NastyWidth,
-                NastyHeight, moveSpeed, false);
-            amountToMoveX = gameEngine.GameScreens.CheckCollision(enDirection.Right, XPos, YPos + amountToMoveY,
-                NastyWidth, NastyHeight, moveSpeed, false);
+            amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Down, XPos, YPos, NastyWidth,
+                NastyHeight, MoveSpeed, false);
+            amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Right, XPos, YPos + amountToMoveY,
+                NastyWidth, NastyHeight, MoveSpeed, false);
 
             if (amountToMoveY == 0)
             {
-                stepsMovedCounter = stepsToMove;
+                _stepsMovedCounter = _stepsToMove;
             }
             else if (amountToMoveX == 0)
             {
-                stepsMovedCounter = stepsToMove;
+                _stepsMovedCounter = _stepsToMove;
             }
 
             YPos = YPos + amountToMoveY;
             XPos = XPos + amountToMoveX;
         }
 
-        if (Direction == enDirection.Left)
+        if (Direction == Direction.Left)
         {
             if (amountToMoveX == 0)
             {
-                lastCollisionDirection = enDirection.Left;
+                _lastCollisionDirection = Direction.Left;
             }
         }
-        else if (Direction == enDirection.Right)
+        else if (Direction == Direction.Right)
         {
             if (amountToMoveX == 0)
             {
-                lastCollisionDirection = enDirection.Right;
+                _lastCollisionDirection = Direction.Right;
             }
         }
-        else if (Direction == enDirection.Up)
+        else if (Direction == Direction.Up)
         {
             if (amountToMoveY == 0)
             {
-                lastCollisionDirection = enDirection.Up;
+                _lastCollisionDirection = Direction.Up;
             }
         }
-        else if (Direction == enDirection.Down)
+        else if (Direction == Direction.Down)
         {
             if (amountToMoveY == 0)
             {
-                lastCollisionDirection = enDirection.Down;
+                _lastCollisionDirection = Direction.Down;
             }
         }
-        else if (Direction == enDirection.UpLeft)
+        else if (Direction == Direction.UpLeft)
         {
             if (amountToMoveY == 0 &&
                 amountToMoveX == 0)
             {
-                lastCollisionDirection = enDirection.UpLeft;
+                _lastCollisionDirection = Direction.UpLeft;
             }
             else if (amountToMoveY == 0)
             {
-                lastCollisionDirection = enDirection.Up;
+                _lastCollisionDirection = Direction.Up;
             }
             else if (amountToMoveX == 0)
             {
-                lastCollisionDirection = enDirection.Left;
+                _lastCollisionDirection = Direction.Left;
             }
         }
-        else if (Direction == enDirection.UpRight)
+        else if (Direction == Direction.UpRight)
         {
             if (amountToMoveY == 0 &&
                 amountToMoveX == 0)
             {
-                lastCollisionDirection = enDirection.UpRight;
+                _lastCollisionDirection = Direction.UpRight;
             }
             else if (amountToMoveY == 0)
             {
-                lastCollisionDirection = enDirection.Up;
+                _lastCollisionDirection = Direction.Up;
             }
             else if (amountToMoveX == 0)
             {
-                lastCollisionDirection = enDirection.Right;
+                _lastCollisionDirection = Direction.Right;
             }
         }
-        else if (Direction == enDirection.DownLeft)
+        else if (Direction == Direction.DownLeft)
         {
             if (amountToMoveY == 0 &&
                 amountToMoveX == 0)
             {
-                lastCollisionDirection = enDirection.DownLeft;
+                _lastCollisionDirection = Direction.DownLeft;
             }
             else if (amountToMoveY == 0)
             {
-                lastCollisionDirection = enDirection.Down;
+                _lastCollisionDirection = Direction.Down;
             }
             else if (amountToMoveX == 0)
             {
-                lastCollisionDirection = enDirection.Left;
+                _lastCollisionDirection = Direction.Left;
             }
         }
-        else if (Direction == enDirection.DownRight)
+        else if (Direction == Direction.DownRight)
         {
             if (amountToMoveY == 0 &&
                 amountToMoveX == 0)
             {
-                lastCollisionDirection = enDirection.DownRight;
+                _lastCollisionDirection = Direction.DownRight;
             }
             else if (amountToMoveY == 0)
             {
-                lastCollisionDirection = enDirection.Down;
+                _lastCollisionDirection = Direction.Down;
             }
             else if (amountToMoveX == 0)
             {
-                lastCollisionDirection = enDirection.Right;
+                _lastCollisionDirection = Direction.Right;
             }
         }
 
-        if (!constantMovement)
+        if (!_constantMovement)
         {
-            if (lastCollisionDirection != enDirection.None)
+            if (_lastCollisionDirection != Direction.None)
             {
-                stepsMovedCounter = stepsToMove;
+                _stepsMovedCounter = _stepsToMove;
             }
             else
             {
-                stepsMovedCounter++;
+                _stepsMovedCounter++;
             }
         }
     }
@@ -2187,125 +2190,125 @@ public class Nasty : GameComponentBase
     public void PerformPostChangeScreenActions()
     {
         // Stop the explosion effect leaking onto the next screen
-        if (nastyDies != null)
+        if (_nastyDies != null)
         {
-            nastyDies.Stop();
+            _nastyDies.Stop();
         }
 
-        if (nastyDiesType2 != null)
+        if (_nastyDiesType2 != null)
         {
-            nastyDiesType2.Stop();
+            _nastyDiesType2.Stop();
         }
 
-        if (NastyState == enNastyState.Disabled)
+        if (NastyState == NastyState.Disabled)
         {
-            NastyState = enNastyState.Conception;
+            NastyState = NastyState.Conception;
         }
     }
 
-    public override void Draw(GameTime gameTime, int ScreenFade)
+    public override void Draw(GameTime gameTime, int screenFade)
     {
         CheckSpritesInUse();
 
-        var nastyImage = (int)nastyType * 4;
+        var nastyImage = (int)_nastyType * 4;
 
-        if (nastyType == enNastyType.CoreGuardian)
+        if (_nastyType == NastyType.CoreGuardian)
         {
-            nastySprite.Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+            _nastySprite.Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
 
             // Choose the image
-            nastySprite.DrawSprite(nastyImage + nastyAnim.CurrentFrame, XPos, YPos,
-                ColourHelper.GetXNA4Colour(255, 255, 255, (byte)ScreenFade), 1.0f, 4f, true, gameEngine.Paused);
-            nastySprite.End();
+            _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
+                ColourHelper.GetXna4Colour(255, 255, 255, (byte)screenFade), 1.0f, 4f, true, GameEngine.Paused);
+            _nastySprite.End();
         }
         else
         {
-            if (NastyState == enNastyState.Birth)
+            if (NastyState == NastyState.Birth)
             {
-                nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+                _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
 
                 // Choose the image
-                nastySprite.DrawSprite(nastyImage + nastyAnim.CurrentFrame, XPos, YPos,
-                    ColourHelper.GetXNA4Colour((byte)birthColourLevel, (byte)birthColourLevel, 255,
-                        (byte)(255 * ((double)ScreenFade / 255))), birthScale, birthRotateSpeed,
-                    true, gameEngine.Paused);
-                nastySprite.End();
+                _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
+                    ColourHelper.GetXna4Colour((byte)_birthColourLevel, (byte)_birthColourLevel, 255,
+                        (byte)(255 * ((double)screenFade / 255))), _birthScale, _birthRotateSpeed,
+                    true, GameEngine.Paused);
+                _nastySprite.End();
             }
-            else if (NastyState == enNastyState.Normal)
+            else if (NastyState == NastyState.Normal)
             {
                 // Choose the image
                 if (Smoking)
                 {
-                    nastySprite.Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
-                    nastySprite.DrawSprite(nastyImage + nastyAnim.CurrentFrame, XPos, YPos,
-                        ColourHelper.GetXNA4Colour(50, 50, 50, (byte)ScreenFade));
-                    nastySprite.DrawSprite(nastyImage + nastyAnim.CurrentFrame, XPos, YPos,
-                        ColourHelper.GetXNA4Colour(255, 0, 0, (byte)ScreenFade));
-                    nastySprite.DrawSprite(nastyImage + nastyAnim.CurrentFrame, XPos, YPos,
-                        ColourHelper.GetXNA4Colour(0, 100, 0, (byte)ScreenFade));
+                    _nastySprite.Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+                    _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
+                        ColourHelper.GetXna4Colour(50, 50, 50, (byte)screenFade));
+                    _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
+                        ColourHelper.GetXna4Colour(255, 0, 0, (byte)screenFade));
+                    _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
+                        ColourHelper.GetXna4Colour(0, 100, 0, (byte)screenFade));
                 }
                 else
                 {
-                    nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                    nastySprite.DrawSprite(nastyImage + nastyAnim.CurrentFrame, XPos, YPos,
-                        ColourHelper.GetXNA4Colour(255, 255, 255, (byte)ScreenFade));
+                    _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+                    _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
+                        ColourHelper.GetXna4Colour(255, 255, 255, (byte)screenFade));
                 }
 
-                nastySprite.End();
+                _nastySprite.End();
             }
-            else if (NastyState == enNastyState.Dead)
+            else if (NastyState == NastyState.Dead)
             {
                 // Draw the explosion
-                if (nastyDies != null)
+                if (_nastyDies != null)
                 {
-                    nastyDies.Draw();
+                    _nastyDies.Draw();
                 }
 
-                if (nastyDiesType2 != null)
+                if (_nastyDiesType2 != null)
                 {
-                    nastyDiesType2.Draw();
+                    _nastyDiesType2.Draw();
                 }
 
                 // Fade the nasty out as it explodes
-                if (deathFadeLevel > 0)
+                if (_deathFadeLevel > 0)
                 {
-                    deathFadeLevel = deathFadeLevel - 20;
+                    _deathFadeLevel = _deathFadeLevel - 20;
                 }
 
-                if (deathFadeLevel < 0)
+                if (_deathFadeLevel < 0)
                 {
-                    deathFadeLevel = 0;
+                    _deathFadeLevel = 0;
                 }
 
                 // Shrink the nasty as it explodes
-                if (deathScale > 0)
+                if (_deathScale > 0)
                 {
-                    deathScale = deathScale - 0.01f;
+                    _deathScale = _deathScale - 0.01f;
                 }
 
-                if (deathScale < 0)
+                if (_deathScale < 0)
                 {
-                    deathScale = 0;
+                    _deathScale = 0;
                 }
 
-                if (deathFadeLevel > 0)
+                if (_deathFadeLevel > 0)
                 {
-                    nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                    nastySprite.DrawSprite(nastyImage + nastyAnim.CurrentFrame, XPos, YPos,
-                        ColourHelper.GetXNA4Colour(255, 255, 255,
-                            (byte)(deathFadeLevel * ((double)ScreenFade / 255))), deathScale, 16f,
-                        deathAnticlockwise, gameEngine.Paused);
-                    nastySprite.End();
+                    _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+                    _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
+                        ColourHelper.GetXna4Colour(255, 255, 255,
+                            (byte)(_deathFadeLevel * ((double)screenFade / 255))), _deathScale, 16f,
+                        _deathAnticlockwise, GameEngine.Paused);
+                    _nastySprite.End();
                 }
 
-                if (gameEngine.UsingOldGraphics)
+                if (GameEngine.UsingOldGraphics)
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original")
+                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original")
                         .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                    gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").DrawSprite(
-                        nastyDiesAnimation.CurrentFrame, XPos, YPos,
-                        ColourHelper.GetXNA4Colour(255, 255, 255, ScreenFade), 1f, 0f);
-                    gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").End();
+                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").DrawSprite(
+                        _nastyDiesAnimation.CurrentFrame, XPos, YPos,
+                        ColourHelper.GetXna4Colour(255, 255, 255, screenFade), 1f, 0f);
+                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").End();
                 }
             }
         }
@@ -2317,91 +2320,91 @@ public class Nasty : GameComponentBase
 
 public class NastyHelpers
 {
-    public static void ApplyNastyColours(enNastyType NastyType, ParticleEffect Effect)
+    public static void ApplyNastyColours(NastyType nastyType, ParticleEffect effect)
     {
-        if (NastyType == enNastyType.FriedEgg)
+        if (nastyType == NastyType.FriedEgg)
         {
-            Effect["Copy of Left Splat"].ReleaseColour.Value = new Color(125, 62, 62).ToVector3();
-            Effect["Copy of Right Splat"].ReleaseColour.Value = new Color(0, 182, 0).ToVector3();
-            Effect["Copy of Splodges"].ReleaseColour.Value = new Color(255, 255, 255).ToVector3();
+            effect["Copy of Left Splat"].ReleaseColour.Value = new Color(125, 62, 62).ToVector3();
+            effect["Copy of Right Splat"].ReleaseColour.Value = new Color(0, 182, 0).ToVector3();
+            effect["Copy of Splodges"].ReleaseColour.Value = new Color(255, 255, 255).ToVector3();
         }
-        else if (NastyType == enNastyType.Gonzo)
+        else if (nastyType == NastyType.Gonzo)
         {
-            Effect["Copy of Left Splat"].ReleaseColour.Value = new Color(4, 82, 184).ToVector3();
-            Effect["Copy of Right Splat"].ReleaseColour.Value = new Color(182, 103, 10).ToVector3();
-            Effect["Copy of Splodges"].ReleaseColour.Value = new Color(255, 255, 255).ToVector3();
+            effect["Copy of Left Splat"].ReleaseColour.Value = new Color(4, 82, 184).ToVector3();
+            effect["Copy of Right Splat"].ReleaseColour.Value = new Color(182, 103, 10).ToVector3();
+            effect["Copy of Splodges"].ReleaseColour.Value = new Color(255, 255, 255).ToVector3();
         }
-        else if (NastyType == enNastyType.Cushion)
+        else if (nastyType == NastyType.Cushion)
         {
-            Effect["Copy of Left Splat"].ReleaseColour.Value = new Color(59, 194, 42).ToVector3();
-            Effect["Copy of Right Splat"].ReleaseColour.Value = new Color(227, 66, 19).ToVector3();
-            Effect["Copy of Splodges"].ReleaseColour.Value = new Color(255, 255, 255).ToVector3();
+            effect["Copy of Left Splat"].ReleaseColour.Value = new Color(59, 194, 42).ToVector3();
+            effect["Copy of Right Splat"].ReleaseColour.Value = new Color(227, 66, 19).ToVector3();
+            effect["Copy of Splodges"].ReleaseColour.Value = new Color(255, 255, 255).ToVector3();
         }
-        else if (NastyType == enNastyType.Helmet)
+        else if (nastyType == NastyType.Helmet)
         {
-            Effect["Copy of Left Splat"].ReleaseColour.Value = new Color(202, 109, 17).ToVector3();
-            Effect["Copy of Right Splat"].ReleaseColour.Value = new Color(137, 137, 137).ToVector3();
-            Effect["Copy of Splodges"].ReleaseColour.Value = new Color(255, 255, 255).ToVector3();
+            effect["Copy of Left Splat"].ReleaseColour.Value = new Color(202, 109, 17).ToVector3();
+            effect["Copy of Right Splat"].ReleaseColour.Value = new Color(137, 137, 137).ToVector3();
+            effect["Copy of Splodges"].ReleaseColour.Value = new Color(255, 255, 255).ToVector3();
         }
-        else if (NastyType == enNastyType.Shellfish)
+        else if (nastyType == NastyType.Shellfish)
         {
-            Effect["Copy of Left Splat"].ReleaseColour.Value = new Color(239, 238, 0).ToVector3();
-            Effect["Copy of Right Splat"].ReleaseColour.Value = new Color(198, 99, 0).ToVector3();
-            Effect["Copy of Splodges"].ReleaseColour.Value = new Color(255, 255, 255).ToVector3();
+            effect["Copy of Left Splat"].ReleaseColour.Value = new Color(239, 238, 0).ToVector3();
+            effect["Copy of Right Splat"].ReleaseColour.Value = new Color(198, 99, 0).ToVector3();
+            effect["Copy of Splodges"].ReleaseColour.Value = new Color(255, 255, 255).ToVector3();
         }
-        else if (NastyType == enNastyType.Snail)
+        else if (nastyType == NastyType.Snail)
         {
-            Effect["Copy of Left Splat"].ReleaseColour.Value = new Color(0, 124, 0).ToVector3();
-            Effect["Copy of Right Splat"].ReleaseColour.Value = new Color(141, 141, 141).ToVector3();
-            Effect["Copy of Splodges"].ReleaseColour.Value = new Color(166, 198, 0).ToVector3();
+            effect["Copy of Left Splat"].ReleaseColour.Value = new Color(0, 124, 0).ToVector3();
+            effect["Copy of Right Splat"].ReleaseColour.Value = new Color(141, 141, 141).ToVector3();
+            effect["Copy of Splodges"].ReleaseColour.Value = new Color(166, 198, 0).ToVector3();
         }
-        else if (NastyType == enNastyType.CurleyWurley)
+        else if (nastyType == NastyType.CurleyWurley)
         {
-            Effect["Copy of Left Splat"].ReleaseColour.Value = new Color(168, 163, 252).ToVector3();
-            Effect["Copy of Right Splat"].ReleaseColour.Value = new Color(109, 109, 253).ToVector3();
-            Effect["Copy of Splodges"].ReleaseColour.Value = new Color(255, 255, 255).ToVector3();
+            effect["Copy of Left Splat"].ReleaseColour.Value = new Color(168, 163, 252).ToVector3();
+            effect["Copy of Right Splat"].ReleaseColour.Value = new Color(109, 109, 253).ToVector3();
+            effect["Copy of Splodges"].ReleaseColour.Value = new Color(255, 255, 255).ToVector3();
         }
-        else if (NastyType == enNastyType.Bird)
+        else if (nastyType == NastyType.Bird)
         {
-            Effect["Copy of Left Splat"].ReleaseColour.Value = new Color(0, 0, 211).ToVector3();
-            Effect["Copy of Right Splat"].ReleaseColour.Value = new Color(148, 148, 217).ToVector3();
-            Effect["Copy of Splodges"].ReleaseColour.Value = new Color(188, 62, 0).ToVector3();
+            effect["Copy of Left Splat"].ReleaseColour.Value = new Color(0, 0, 211).ToVector3();
+            effect["Copy of Right Splat"].ReleaseColour.Value = new Color(148, 148, 217).ToVector3();
+            effect["Copy of Splodges"].ReleaseColour.Value = new Color(188, 62, 0).ToVector3();
         }
-        else if (NastyType == enNastyType.Ghost)
+        else if (nastyType == NastyType.Ghost)
         {
-            Effect["Copy of Left Splat"].ReleaseColour.Value = new Color(0, 151, 43).ToVector3();
-            Effect["Copy of Right Splat"].ReleaseColour.Value = new Color(88, 0, 88).ToVector3();
-            Effect["Copy of Splodges"].ReleaseColour.Value = new Color(255, 255, 255).ToVector3();
+            effect["Copy of Left Splat"].ReleaseColour.Value = new Color(0, 151, 43).ToVector3();
+            effect["Copy of Right Splat"].ReleaseColour.Value = new Color(88, 0, 88).ToVector3();
+            effect["Copy of Splodges"].ReleaseColour.Value = new Color(255, 255, 255).ToVector3();
         }
-        else if (NastyType == enNastyType.Scorpian)
+        else if (nastyType == NastyType.Scorpian)
         {
-            Effect["Copy of Left Splat"].ReleaseColour.Value = new Color(177, 8, 8).ToVector3();
-            Effect["Copy of Right Splat"].ReleaseColour.Value = new Color(130, 2, 2).ToVector3();
-            Effect["Copy of Splodges"].ReleaseColour.Value = new Color(230, 230, 230).ToVector3();
+            effect["Copy of Left Splat"].ReleaseColour.Value = new Color(177, 8, 8).ToVector3();
+            effect["Copy of Right Splat"].ReleaseColour.Value = new Color(130, 2, 2).ToVector3();
+            effect["Copy of Splodges"].ReleaseColour.Value = new Color(230, 230, 230).ToVector3();
         }
-        else if (NastyType == enNastyType.DragonFly)
+        else if (nastyType == NastyType.DragonFly)
         {
-            Effect["Copy of Left Splat"].ReleaseColour.Value = new Color(8, 150, 219).ToVector3();
-            Effect["Copy of Right Splat"].ReleaseColour.Value = new Color(50, 111, 85).ToVector3();
-            Effect["Copy of Splodges"].ReleaseColour.Value = new Color(76, 191, 142).ToVector3();
+            effect["Copy of Left Splat"].ReleaseColour.Value = new Color(8, 150, 219).ToVector3();
+            effect["Copy of Right Splat"].ReleaseColour.Value = new Color(50, 111, 85).ToVector3();
+            effect["Copy of Splodges"].ReleaseColour.Value = new Color(76, 191, 142).ToVector3();
         }
-        else if (NastyType == enNastyType.Helicopter)
+        else if (nastyType == NastyType.Helicopter)
         {
-            Effect["Copy of Left Splat"].ReleaseColour.Value = new Color(177, 8, 8).ToVector3();
-            Effect["Copy of Right Splat"].ReleaseColour.Value = new Color(130, 2, 2).ToVector3();
-            Effect["Copy of Splodges"].ReleaseColour.Value = new Color(230, 230, 230).ToVector3();
+            effect["Copy of Left Splat"].ReleaseColour.Value = new Color(177, 8, 8).ToVector3();
+            effect["Copy of Right Splat"].ReleaseColour.Value = new Color(130, 2, 2).ToVector3();
+            effect["Copy of Splodges"].ReleaseColour.Value = new Color(230, 230, 230).ToVector3();
         }
-        else if (NastyType == enNastyType.Hippo)
+        else if (nastyType == NastyType.Hippo)
         {
-            Effect["Copy of Left Splat"].ReleaseColour.Value = new Color(229, 120, 252).ToVector3();
-            Effect["Copy of Right Splat"].ReleaseColour.Value = new Color(137, 115, 251).ToVector3();
-            Effect["Copy of Splodges"].ReleaseColour.Value = new Color(145, 49, 50).ToVector3();
+            effect["Copy of Left Splat"].ReleaseColour.Value = new Color(229, 120, 252).ToVector3();
+            effect["Copy of Right Splat"].ReleaseColour.Value = new Color(137, 115, 251).ToVector3();
+            effect["Copy of Splodges"].ReleaseColour.Value = new Color(145, 49, 50).ToVector3();
         }
-        else if (NastyType == enNastyType.Centipede)
+        else if (nastyType == NastyType.Centipede)
         {
-            Effect["Copy of Left Splat"].ReleaseColour.Value = new Color(87, 165, 28).ToVector3();
-            Effect["Copy of Right Splat"].ReleaseColour.Value = new Color(110, 6, 124).ToVector3();
-            Effect["Copy of Splodges"].ReleaseColour.Value = new Color(221, 134, 38).ToVector3();
+            effect["Copy of Left Splat"].ReleaseColour.Value = new Color(87, 165, 28).ToVector3();
+            effect["Copy of Right Splat"].ReleaseColour.Value = new Color(110, 6, 124).ToVector3();
+            effect["Copy of Splodges"].ReleaseColour.Value = new Color(221, 134, 38).ToVector3();
         }
     }
 }

@@ -7,29 +7,30 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using SharedLibs;
-using Starquake_MonoGame.Structure;
+using StarquakeXNA.Display;
+using StarquakeXNA.Engines;
 using StarquakeXNA.Structure;
 
-namespace StarquakeXNA;
+namespace StarquakeXNA.ActiveSprites;
 
 public class JumpPlatforms
 {
-    private readonly GameEngine gameEngine;
-    private readonly List<JumpPlatform> platforms;
+    private readonly GameEngine _gameEngine;
+    private readonly List<JumpPlatform> _platforms;
 
-    public JumpPlatforms(GameEngine GameEngineRef)
+    public JumpPlatforms(GameEngine gameEngineRef)
     {
-        gameEngine = GameEngineRef;
-        platforms = new List<JumpPlatform>();
+        _gameEngine = gameEngineRef;
+        _platforms = new List<JumpPlatform>();
     }
 
-    public int GetNewJumpPlatform(int XPos, int YPos, int Width, int Height, bool CheckCollision)
+    public int GetNewJumpPlatform(int xPos, int yPos, int width, int height, bool checkCollision)
     {
-        var position = JumpPlatform.GetJumpPlatformCoords(XPos, YPos, gameEngine.GameScreens);
+        var position = JumpPlatform.GetJumpPlatformCoords(xPos, yPos, _gameEngine.GameScreens);
 
-        if (CheckCollision)
+        if (checkCollision)
         {
-            if (gameEngine.GameScreens.CheckRectangles(XPos, position.Y - 64, Width, Height, true) >= 0)
+            if (_gameEngine.GameScreens.CheckRectangles(xPos, position.Y - 64, width, height, true) >= 0)
             {
                 // If there is a collision, return a failure int i.e. -1000, needs to be a big number because we can have minus amounts when changing screen
                 return -1000;
@@ -38,11 +39,11 @@ public class JumpPlatforms
 
         JumpPlatform newPlatform = null;
 
-        for (var a = 0; a < platforms.Count; a++)
+        for (var a = 0; a < _platforms.Count; a++)
         {
-            if (platforms[a].ReadyToAllocate)
+            if (_platforms[a].ReadyToAllocate)
             {
-                newPlatform = platforms[a];
+                newPlatform = _platforms[a];
                 newPlatform.Reset();
                 newPlatform.XPos = position.X;
                 newPlatform.YPos = position.Y;
@@ -52,8 +53,8 @@ public class JumpPlatforms
 
         if (newPlatform == null)
         {
-            newPlatform = new JumpPlatform(gameEngine, gameEngine.ContentMgr, position);
-            platforms.Add(newPlatform);
+            newPlatform = new JumpPlatform(_gameEngine, _gameEngine.ContentMgr, position);
+            _platforms.Add(newPlatform);
         }
 
         newPlatform.LeftCollisionTile = new CollisionTile((int)CollisionObjectType.JumpPlatform, newPlatform.XPos, newPlatform.YPos, CollisionTileType.EveryoneHits);
@@ -61,8 +62,8 @@ public class JumpPlatforms
         newPlatform.PlatformActive = true;
         newPlatform.ReadyToAllocate = false;
 
-        gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.Add(newPlatform.LeftCollisionTile);
-        gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.Add(newPlatform.RightCollisionTile);
+        _gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.Add(newPlatform.LeftCollisionTile);
+        _gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.Add(newPlatform.RightCollisionTile);
 
         // Returns blob's new YPosition
         return newPlatform.YPos - 64;
@@ -70,32 +71,32 @@ public class JumpPlatforms
 
     public void ResetPlatforms()
     {
-        for (var a = 0; a < platforms.Count; a++)
+        for (var a = 0; a < _platforms.Count; a++)
         {
-            gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.Remove(platforms[a].LeftCollisionTile);
-            gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.Remove(platforms[a].RightCollisionTile);
-            platforms[a].Reset();
+            _gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.Remove(_platforms[a].LeftCollisionTile);
+            _gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.Remove(_platforms[a].RightCollisionTile);
+            _platforms[a].Reset();
         }
     }
 
-    public void Update(GameScreenCollection GameScreensReference)
+    public void Update(GameScreenCollection gameScreensReference)
     {
         // Update jumpplatform lifetime
-        if (platforms.Count > 0)
+        if (_platforms.Count > 0)
         {
-            for (var a = 0; a < platforms.Count; a++)
+            for (var a = 0; a < _platforms.Count; a++)
             {
-                if (platforms[a].LeftCollisionTile != null && platforms[a].RightCollisionTile != null)
+                if (_platforms[a].LeftCollisionTile != null && _platforms[a].RightCollisionTile != null)
                 {
-                    if (platforms[a].Finished)
+                    if (_platforms[a].Finished)
                     {
-                        GameScreensReference.CurrentGameScreenData.CollisionMap.Remove(platforms[a].LeftCollisionTile);
-                        GameScreensReference.CurrentGameScreenData.CollisionMap.Remove(platforms[a].RightCollisionTile);
-                        platforms[a].Reset();
+                        gameScreensReference.CurrentGameScreenData.CollisionMap.Remove(_platforms[a].LeftCollisionTile);
+                        gameScreensReference.CurrentGameScreenData.CollisionMap.Remove(_platforms[a].RightCollisionTile);
+                        _platforms[a].Reset();
                     }
                     else
                     {
-                        platforms[a].Update();
+                        _platforms[a].Update();
                     }
                 }
             }
@@ -104,37 +105,37 @@ public class JumpPlatforms
 
     public void Draw(GameTime gameTime)
     {
-        for (var a = 0; a < platforms.Count; a++)
+        for (var a = 0; a < _platforms.Count; a++)
         {
-            platforms[a].Draw(gameTime);
+            _platforms[a].Draw(gameTime);
         }
     }
 
     internal class JumpPlatform
     {
 
-        private readonly GameEngine gameEngine;
+        private readonly GameEngine _gameEngine;
 
-        private readonly SpriteCollection jumpPlatform;
-        private readonly SpriteCollection jumpPlatformOriginal;
-        private readonly SpriteBatch textureDrawer;
+        private readonly SpriteCollection _jumpPlatform;
+        private readonly SpriteCollection _jumpPlatformOriginal;
+        private readonly SpriteBatch _textureDrawer;
 
-        private int dissolveTime;
+        private int _dissolveTime;
 
-        private SpritePixelMatrix matrix;
+        private SpritePixelMatrix _matrix;
 
-        private RenderTarget2D renderTarget;
+        private RenderTarget2D _renderTarget;
 
-        public JumpPlatform(GameEngine GameEngineRef, ContentManager Content, Point Position)
+        public JumpPlatform(GameEngine gameEngineRef, ContentManager content, Point position)
         {
-            textureDrawer = new SpriteBatch(GameEngine.GetInstance().GraphicsDeviceMgr.GraphicsDevice);
-            gameEngine = GameEngineRef;
+            _textureDrawer = new SpriteBatch(GameEngine.GetInstance().GraphicsDeviceMgr.GraphicsDevice);
+            _gameEngine = gameEngineRef;
 
-            jumpPlatform = GameEngineRef.ContentResourceManager.GetSpriteCollection("JumpPlatforms").Clone(gameEngine);
-            jumpPlatformOriginal = GameEngineRef.ContentResourceManager.GetSpriteCollection("JumpPlatformsOriginal").Clone(gameEngine);
+            _jumpPlatform = gameEngineRef.ContentResourceManager.GetSpriteCollection("JumpPlatforms").Clone(_gameEngine);
+            _jumpPlatformOriginal = gameEngineRef.ContentResourceManager.GetSpriteCollection("JumpPlatformsOriginal").Clone(_gameEngine);
 
-            XPos = Position.X;
-            YPos = Position.Y;
+            XPos = position.X;
+            YPos = position.Y;
 
             Reset();
         }
@@ -149,27 +150,27 @@ public class JumpPlatforms
 
         public bool PlatformActive { get; set; }
 
-        public bool Finished => dissolveTime == 0;
+        public bool Finished => _dissolveTime == 0;
 
         public bool ReadyToAllocate { get; set; }
 
-        public static Point GetJumpPlatformCoords(int BlobXPos, int BlobYPos, GameScreenCollection GSC)
+        public static Point GetJumpPlatformCoords(int blobXPos, int blobYPos, GameScreenCollection gsc)
         {
-            var ReturnValue = new Point();
-            ReturnValue.X = BlobXPos;
-            var PositionOnScreen = BlobYPos;
-            ReturnValue.Y = (PositionOnScreen / 32 + 1) * 32;
+            var returnValue = new Point();
+            returnValue.X = blobXPos;
+            var positionOnScreen = blobYPos;
+            returnValue.Y = (positionOnScreen / 32 + 1) * 32;
 
-            return ReturnValue;
+            return returnValue;
         }
 
         public void Reset()
         {
-            matrix = new SpritePixelMatrix(jumpPlatform.SpriteWidth * jumpPlatform.SpriteHeight);
-            renderTarget = new RenderTarget2D(GameEngine.GetInstance().GraphicsDeviceMgr.GraphicsDevice, jumpPlatform.SpriteWidth, jumpPlatform.SpriteHeight);
+            _matrix = new SpritePixelMatrix(_jumpPlatform.SpriteWidth * _jumpPlatform.SpriteHeight);
+            _renderTarget = new RenderTarget2D(GameEngine.GetInstance().GraphicsDeviceMgr.GraphicsDevice, _jumpPlatform.SpriteWidth, _jumpPlatform.SpriteHeight);
             PlatformActive = false;
             ReadyToAllocate = true;
-            dissolveTime = 100;
+            _dissolveTime = 100;
         }
 
         public void Update()
@@ -177,17 +178,17 @@ public class JumpPlatforms
             if (PlatformActive)
             {
                 // Only disintegrate after a while
-                if (dissolveTime < 50)
+                if (_dissolveTime < 50)
                 {
                     for (var a = 0; a < 50; a++)
                     {
-                        matrix.SetRandomPixel(Color.Transparent);
+                        _matrix.SetRandomPixel(Color.Transparent);
                     }
                 }
 
-                if (dissolveTime > 0)
+                if (_dissolveTime > 0)
                 {
-                    dissolveTime--;
+                    _dissolveTime--;
                 }
             }
         }
@@ -197,42 +198,42 @@ public class JumpPlatforms
             if (PlatformActive)
             {
                 // The render target is a texture that we draw directly to
-                gameEngine.GraphicsDeviceMgr.GraphicsDevice.SetRenderTarget(renderTarget);
-                gameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(Color.Transparent);
+                _gameEngine.GraphicsDeviceMgr.GraphicsDevice.SetRenderTarget(_renderTarget);
+                _gameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(Color.Transparent);
 
-                if (gameEngine.UsingOldGraphics)
+                if (_gameEngine.UsingOldGraphics)
                 {
-                    jumpPlatformOriginal.Begin(BlendState.AlphaBlend, gameTime);
-                    jumpPlatformOriginal.DrawSprite(0, 0, 0, Color.White, matrix.Matrix);
-                    jumpPlatformOriginal.End();
+                    _jumpPlatformOriginal.Begin(BlendState.AlphaBlend, gameTime);
+                    _jumpPlatformOriginal.DrawSprite(0, 0, 0, Color.White, _matrix.Matrix);
+                    _jumpPlatformOriginal.End();
                 }
                 else
                 {
-                    jumpPlatform.Begin(BlendState.AlphaBlend, gameTime);
-                    jumpPlatform.DrawSprite(0, 0, 0, Color.White, matrix.Matrix);
-                    jumpPlatform.End();
+                    _jumpPlatform.Begin(BlendState.AlphaBlend, gameTime);
+                    _jumpPlatform.DrawSprite(0, 0, 0, Color.White, _matrix.Matrix);
+                    _jumpPlatform.End();
                 }
 
 
                 // Set the render targer back to the screen
-                gameEngine.ScreenEffctEngine.SelectRenderViewPort("GameArea", false);
+                _gameEngine.ScreenEffctEngine.SelectRenderViewPort("GameArea", false);
 
-                if (dissolveTime > 0)
+                if (_dissolveTime > 0)
                 {
-                    textureDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+                    _textureDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
 
-                    textureDrawer.Draw(
-                        renderTarget,
-                        new Rectangle(XPos + jumpPlatformOriginal.SpriteWidth / 2, YPos + jumpPlatformOriginal.SpriteHeight / 2,
-                            jumpPlatformOriginal.SpriteWidth,
-                            jumpPlatformOriginal.SpriteHeight),
+                    _textureDrawer.Draw(
+                        _renderTarget,
+                        new Rectangle(XPos + _jumpPlatformOriginal.SpriteWidth / 2, YPos + _jumpPlatformOriginal.SpriteHeight / 2,
+                            _jumpPlatformOriginal.SpriteWidth,
+                            _jumpPlatformOriginal.SpriteHeight),
                         null,
                         Color.White,
                         0,
-                        new Vector2(jumpPlatformOriginal.SpriteWidth / 2, jumpPlatformOriginal.SpriteHeight / 2),
+                        new Vector2(_jumpPlatformOriginal.SpriteWidth / 2, _jumpPlatformOriginal.SpriteHeight / 2),
                         SpriteEffects.None, 0);
 
-                    textureDrawer.End();
+                    _textureDrawer.End();
                 }
             }
         }

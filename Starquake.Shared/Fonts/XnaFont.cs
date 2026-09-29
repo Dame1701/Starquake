@@ -10,49 +10,49 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace StarquakeXNA;
+namespace StarquakeXNA.Fonts;
 
 [Serializable]
 [XmlRoot]
-public class XNAFont : IDisposable
+public class XnaFont : IDisposable
 {
 
-    private string fontFamily;
+    private string _fontFamily;
 
-    [XmlIgnore] private SpriteBatch fontRenderer;
+    [XmlIgnore] private SpriteBatch _fontRenderer;
 
-    private int height;
+    private int _height;
 
-    private int kerning;
+    private int _kerning;
 
     [XmlIgnore]
-    public Effect refractionEffect;
+    public Effect RefractionEffect;
     [XmlIgnore]
     public Texture2D Texture;
 
     [XmlIgnore]
-    public Dictionary<char, XNAFontUV> UVData = new();
+    public Dictionary<char, XnaFontUv> UvData = new();
 
-    public List<XNAFontUV> UVList;
+    public List<XnaFontUv> UvList;
 
-    public Texture2D waterFall;
+    public Texture2D WaterFall;
 
     public string FontFamily
     {
-        get => fontFamily;
-        set => fontFamily = value;
+        get => _fontFamily;
+        set => _fontFamily = value;
     }
 
     public int Height
     {
-        get => height;
-        set => height = value;
+        get => _height;
+        set => _height = value;
     }
 
     public int Kerning
     {
-        get => kerning;
-        set => kerning = value;
+        get => _kerning;
+        set => _kerning = value;
     }
 
     #region IDisposable Members
@@ -62,11 +62,11 @@ public class XNAFont : IDisposable
         if (Texture != null)
             Texture.Dispose();
 
-        if (fontRenderer != null)
-            fontRenderer.Dispose();
+        if (_fontRenderer != null)
+            _fontRenderer.Dispose();
 
         Texture = null;
-        fontRenderer = null;
+        _fontRenderer = null;
     }
 
     #endregion
@@ -82,35 +82,35 @@ public class XNAFont : IDisposable
         var iCurrentY = y;
 
         // Draw the sprite.
-        fontRenderer.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+        _fontRenderer.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
 
         if (gameTime != null)
         {
-            refractionEffect.Parameters["DisplacementScroll"].SetValue(MoveInCircle(gameTime, 0.1f));
+            RefractionEffect.Parameters["DisplacementScroll"].SetValue(MoveInCircle(gameTime, 0.1f));
 
             // Begin the custom effect.
-            refractionEffect.CurrentTechnique.Passes[0].Apply();
+            RefractionEffect.CurrentTechnique.Passes[0].Apply();
         }
 
 
         foreach (var c in str)
         {
-            var uv = UVData[c];
+            var uv = UvData[c];
 
             if (c != ' ')
             {
-                fontRenderer.Draw(Texture,
+                _fontRenderer.Draw(Texture,
                     new Rectangle(iCurrentX, iCurrentY,
-                        uv.Width, height),
+                        uv.Width, _height),
                     new Rectangle(uv.V - 2,
                         uv.U,
-                        uv.Width, height),
+                        uv.Width, _height),
                     col);
             }
 
-            iCurrentX += uv.Width - kerning;
+            iCurrentX += uv.Width - _kerning;
         }
-        fontRenderer.End();
+        _fontRenderer.End();
     }
 
     /// <summary>
@@ -126,36 +126,36 @@ public class XNAFont : IDisposable
         return new Vector2(x, y);
     }
 
-    public static XNAFont LoadFont(GraphicsDevice device, string strXML, Texture2D tex, ContentManager Content)
+    public static XnaFont LoadFont(GraphicsDevice device, string strXml, Texture2D tex, ContentManager content)
     {
-        var fontLoader = new XmlSerializer(typeof(XNAFont));
+        var fontLoader = new XmlSerializer(typeof(XnaFont));
 
-        Stream reader = new FileStream(strXML, FileMode.Open);
+        Stream reader = new FileStream(strXml, FileMode.Open);
 
-        var ret = (XNAFont)fontLoader.Deserialize(reader);
-        ret.waterFall = Content.Load<Texture2D>("Graphics\\waterfall");
+        var ret = (XnaFont)fontLoader.Deserialize(reader);
+        ret.WaterFall = content.Load<Texture2D>("Graphics\\waterfall");
 
-        device.Textures[1] = ret.waterFall;
+        device.Textures[1] = ret.WaterFall;
 
         reader.Close();
 
-        ret.refractionEffect = Content.Load<Effect>("Shaders\\refraction");
-        ret.UVData = new Dictionary<char, XNAFontUV>();
-        foreach (var uv in ret.UVList)
+        ret.RefractionEffect = content.Load<Effect>("Shaders\\refraction");
+        ret.UvData = new Dictionary<char, XnaFontUv>();
+        foreach (var uv in ret.UvList)
         {
-            ret.UVData.Add(uv.C, uv);
+            ret.UvData.Add(uv.C, uv);
         }
 
-        ret.UVList = null;
+        ret.UvList = null;
 
         ret.Texture = tex;
-        ret.fontRenderer = new SpriteBatch(device);
+        ret._fontRenderer = new SpriteBatch(device);
 
         return ret;
     }
 
     [Serializable]
-    public class XNAFontUV
+    public class XnaFontUv
     {
 
         [XmlAttribute]
@@ -169,7 +169,7 @@ public class XNAFont : IDisposable
         [XmlAttribute]
         public int Width;
 
-        public XNAFontUV()
+        public XnaFontUv()
         {
             U = 0;
             V = 0;
@@ -177,12 +177,12 @@ public class XNAFont : IDisposable
             C = (char)0;
         }
 
-        public XNAFontUV(int u, int v, char c, int Width)
+        public XnaFontUv(int u, int v, char c, int width)
         {
             U = u;
             V = v;
             C = c;
-            this.Width = Width;
+            this.Width = width;
         }
     }
 }

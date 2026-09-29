@@ -7,16 +7,16 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SharedLibs;
-using StarquakeXNA.AnimationHelpers;
+using StarquakeXNA.Engines;
 using StarquakeXNA.Helpers;
 using StarquakeXNA.Particles;
 using StarquakeXNA.Structure;
 
-namespace StarquakeXNA;
+namespace StarquakeXNA.ActiveSprites;
 
 public class CoreElements : GameComponentBase
 {
-    public CoreElements(GameEngine GameEngineReference) : base(GameEngineReference)
+    public CoreElements(GameEngine gameEngineReference) : base(gameEngineReference)
     {
         Elements = new CoreElement[9];
         Reset();
@@ -45,14 +45,14 @@ public class CoreElements : GameComponentBase
         }
     }
 
-    public void ReplaceElement(int ElementNoToReplace)
+    public void ReplaceElement(int elementNoToReplace)
     {
         for (var a = 0; a < 9; a++)
         {
-            if (Elements[a].CurrentElement == ElementNoToReplace)
+            if (Elements[a].CurrentElement == elementNoToReplace)
             {
                 // You get a healthy 10,000 points for each element replaced!
-                gameEngine.BlobStatusPanel.PlayerScore = gameEngine.BlobStatusPanel.PlayerScore + 10000;
+                GameEngine.BlobStatusPanel.PlayerScore = GameEngine.BlobStatusPanel.PlayerScore + 10000;
 
                 Elements[a].ElementState = CoreElementState.Replacing;
                 var test = Elements[a].CurrentElement;
@@ -101,8 +101,8 @@ public class CoreElements : GameComponentBase
                 {
                     fadeUp = false;
                 }
-                var randomChoice = gameEngine.RandomNumberGenerator.Next(0, elementsToChoose.Count);
-                Elements[counter] = new CoreElement(gameEngine, elementsToChoose[randomChoice], counter, 6, fadeUp);
+                var randomChoice = GameEngine.RandomNumberGenerator.Next(0, elementsToChoose.Count);
+                Elements[counter] = new CoreElement(GameEngine, elementsToChoose[randomChoice], counter, 6, fadeUp);
                 Elements[counter].LoadContent();
                 Elements[counter].OnCoreElementReplaced += CoreElements_OnCoreElementReplaced;
                 elementsToChoose.RemoveAt(randomChoice);
@@ -155,7 +155,7 @@ public class CoreElements : GameComponentBase
         }
     }
 
-    public void Draw(GameTime gameTime, bool ReplacingElement)
+    public void Draw(GameTime gameTime, bool replacingElement)
     {
         var coreX = 416;
         var coreY = 192;
@@ -165,14 +165,14 @@ public class CoreElements : GameComponentBase
         {
             for (var x = 0; x < 3; x++)
             {
-                Elements[counter].Draw(coreX + x * 64, coreY + y * 64, gameTime, ReplacingElement);
+                Elements[counter].Draw(coreX + x * 64, coreY + y * 64, gameTime, replacingElement);
                 counter++;
             }
         }
 
     }
 
-    public void Draw(GameTime gameTime, int XPos, int YPos, int Fade)
+    public void Draw(GameTime gameTime, int xPos, int yPos, int fade)
     {
 
         var counter = 0;
@@ -180,7 +180,7 @@ public class CoreElements : GameComponentBase
         {
             for (var x = 0; x < 3; x++)
             {
-                Elements[counter].Draw(XPos + x * 64, YPos + y * 64, Fade, gameTime);
+                Elements[counter].Draw(xPos + x * 64, yPos + y * 64, fade, gameTime);
                 counter++;
             }
         }
@@ -191,47 +191,47 @@ public class CoreElements : GameComponentBase
 public class CoreElement
 {
 
-    private readonly FloatSubtractor currentElementDownScaler;
-    private readonly IntegerSubtractor elementFader;
+    private readonly FloatSubtractor _currentElementDownScaler;
+    private readonly IntegerSubtractor _elementFader;
 
-    private readonly ElementFader fader1;
-    private readonly ElementFader fader2;
-    private readonly ElementFader fader3;
+    private readonly ElementFader _fader1;
+    private readonly ElementFader _fader2;
+    private readonly ElementFader _fader3;
 
-    private readonly FloatAdder finalElementUpScaler;
+    private readonly FloatAdder _finalElementUpScaler;
 
-    private readonly GameEngine gameEngine;
-    private readonly IntegerSubtractor screenFlashFader;
-    private IStandardParticleEffect coreReplacementEffect;
+    private readonly GameEngine _gameEngine;
+    private readonly IntegerSubtractor _screenFlashFader;
+    private IStandardParticleEffect _coreReplacementEffect;
 
-    private bool elementReplacementStarted;
+    private bool _elementReplacementStarted;
 
-    private int xPos;
-    private int yPos;
+    private int _xPos;
+    private int _yPos;
 
-    public CoreElement(GameEngine GameEngineInstance, int CurrentElement, int FinalElement, int FadeSpeed, bool StartFadeUp)
+    public CoreElement(GameEngine gameEngineInstance, int currentElement, int finalElement, int fadeSpeed, bool startFadeUp)
     {
-        currentElementDownScaler = new FloatSubtractor(3, 1, 0.1f, false);
-        finalElementUpScaler = new FloatAdder(0, 1, 0.05f, false);
-        elementFader = new IntegerSubtractor(255, 0, 8, false);
-        screenFlashFader = new IntegerSubtractor(255, 0, 5, true);
+        _currentElementDownScaler = new FloatSubtractor(3, 1, 0.1f, false);
+        _finalElementUpScaler = new FloatAdder(0, 1, 0.05f, false);
+        _elementFader = new IntegerSubtractor(255, 0, 8, false);
+        _screenFlashFader = new IntegerSubtractor(255, 0, 5, true);
 
         ElementState = CoreElementState.Missing;
-        this.CurrentElement = CurrentElement;
-        this.FinalElement = FinalElement;
-        gameEngine = GameEngineInstance;
+        this.CurrentElement = currentElement;
+        this.FinalElement = finalElement;
+        _gameEngine = gameEngineInstance;
 
-        if (StartFadeUp)
+        if (startFadeUp)
         {
-            fader1 = new ElementFader(gameEngine, enDirection.Up);
-            fader2 = new ElementFader(gameEngine, enDirection.Down);
-            fader3 = new ElementFader(gameEngine, enDirection.Up);
+            _fader1 = new ElementFader(_gameEngine, Direction.Up);
+            _fader2 = new ElementFader(_gameEngine, Direction.Down);
+            _fader3 = new ElementFader(_gameEngine, Direction.Up);
         }
         else
         {
-            fader1 = new ElementFader(gameEngine, enDirection.Down);
-            fader2 = new ElementFader(gameEngine, enDirection.Up);
-            fader3 = new ElementFader(gameEngine, enDirection.Down);
+            _fader1 = new ElementFader(_gameEngine, Direction.Down);
+            _fader2 = new ElementFader(_gameEngine, Direction.Up);
+            _fader3 = new ElementFader(_gameEngine, Direction.Down);
         }
 
     }
@@ -246,15 +246,15 @@ public class CoreElement
 
     public void SetFadeToZero()
     {
-        fader1.SetFadeToZero();
-        fader2.SetFadeToZero();
-        fader3.SetFadeToZero();
+        _fader1.SetFadeToZero();
+        _fader2.SetFadeToZero();
+        _fader3.SetFadeToZero();
     }
 
     public void LoadContent()
     {
-        coreReplacementEffect = gameEngine.ContentResourceManager.GetParticleEffectInstance("CoreReplacementParticleEffect", enParticleEffectType.Continual, new TimeSpan(0, 0, 0, 0, 200)) as IStandardParticleEffect;
-        coreReplacementEffect.ParticleEffectComplete += coreReplacementEffect_ParticleEffectComplete;
+        _coreReplacementEffect = _gameEngine.ContentResourceManager.GetParticleEffectInstance("CoreReplacementParticleEffect", ParticleEffectType.Continual, new TimeSpan(0, 0, 0, 0, 200)) as IStandardParticleEffect;
+        _coreReplacementEffect.ParticleEffectComplete += coreReplacementEffect_ParticleEffectComplete;
     }
 
     private void coreReplacementEffect_ParticleEffectComplete()
@@ -280,167 +280,167 @@ public class CoreElement
     {
         if (ElementState == CoreElementState.Missing)
         {
-            fader1.Update();
-            fader2.Update();
-            fader3.Update();
+            _fader1.Update();
+            _fader2.Update();
+            _fader3.Update();
         }
         else if (ElementState == CoreElementState.Replacing)
         {
-            if (elementReplacementStarted)
+            if (_elementReplacementStarted)
             {
                 // Scale current element down
-                currentElementDownScaler.Update();
-                finalElementUpScaler.Update();
-                if (finalElementUpScaler.Modifier > 0.95)
+                _currentElementDownScaler.Update();
+                _finalElementUpScaler.Update();
+                if (_finalElementUpScaler.Modifier > 0.95)
                 {
                     if (ElementState == CoreElementState.Replacing)
                     {
-                        if (!coreReplacementEffect.EffectActive)
+                        if (!_coreReplacementEffect.EffectActive)
                         {
-                            coreReplacementEffect.Start();
+                            _coreReplacementEffect.Start();
                         }
                     }
 
                     // Flash the screen white then fade out
-                    screenFlashFader.Trigger();
+                    _screenFlashFader.Trigger();
                 }
-                elementFader.Update();
+                _elementFader.Update();
             }
         }
-        if (screenFlashFader.Triggered)
+        if (_screenFlashFader.Triggered)
         {
-            gameEngine.BackgroundColour = ColourHelper.GetXNA4Colour(screenFlashFader.ByteModifier, screenFlashFader.ByteModifier, screenFlashFader.ByteModifier);
-            screenFlashFader.Update();
+            _gameEngine.BackgroundColour = ColourHelper.GetXna4Colour(_screenFlashFader.ByteModifier, _screenFlashFader.ByteModifier, _screenFlashFader.ByteModifier);
+            _screenFlashFader.Update();
         }
 
-        if (elementReplacementStarted && ElementState == CoreElementState.Replacing)
+        if (_elementReplacementStarted && ElementState == CoreElementState.Replacing)
         {
-            coreReplacementEffect.Update(xPos + 32, yPos + 32, gameTime);
+            _coreReplacementEffect.Update(_xPos + 32, _yPos + 32, gameTime);
         }
 
     }
 
-    public void Draw(int XPos, int YPos, int Fade, GameTime gameTime)
+    public void Draw(int xPos, int yPos, int fade, GameTime gameTime)
     {
         if (ElementState == CoreElementState.Replaced)
         {
-            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).Begin(BlendState.AlphaBlend, gameTime);
-            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).DrawSprite(FinalElement, XPos, YPos, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)Fade));
-            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).End();
+            _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).Begin(BlendState.AlphaBlend, gameTime);
+            _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).DrawSprite(FinalElement, xPos, yPos, ColourHelper.GetXna4Colour(255, 255, 255, (byte)fade));
+            _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).End();
         }
         else if (ElementState == CoreElementState.Missing)
         {
-            gameEngine.ContentResourceManager.GetSpriteCollection("AccessCodesGray").Begin(BlendState.AlphaBlend, gameTime);
-            gameEngine.ContentResourceManager.GetSpriteCollection("AccessCodesGray").DrawSprite(CurrentElement, XPos, YPos, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)Fade));
-            gameEngine.ContentResourceManager.GetSpriteCollection("AccessCodesGray").End();
+            _gameEngine.ContentResourceManager.GetSpriteCollection("AccessCodesGray").Begin(BlendState.AlphaBlend, gameTime);
+            _gameEngine.ContentResourceManager.GetSpriteCollection("AccessCodesGray").DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(255, 255, 255, (byte)fade));
+            _gameEngine.ContentResourceManager.GetSpriteCollection("AccessCodesGray").End();
         }
     }
 
-    public void Draw(int XPos, int YPos, GameTime gameTime, bool ReplacingElement)
+    public void Draw(int xPos, int yPos, GameTime gameTime, bool replacingElement)
     {
-        xPos = XPos;
-        yPos = YPos;
+        _xPos = xPos;
+        _yPos = yPos;
 
         if (ElementState == CoreElementState.Missing)
         {
-            if (ReplacingElement)
+            if (replacingElement)
             {
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).Begin(BlendState.Additive, gameTime);
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).DrawSprite(CurrentElement, XPos, YPos, ColourHelper.GetXNA4Colour(255, 255, 255, 50));
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).End();
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).Begin(BlendState.Additive, gameTime);
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(255, 255, 255, 50));
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).End();
             }
             else
             {
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).Begin(BlendState.Additive, gameTime);
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).DrawSprite(CurrentElement, XPos, YPos, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)fader1.FadeLevel));
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).End();
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).Begin(BlendState.Additive, gameTime);
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(255, 255, 255, (byte)_fader1.FadeLevel));
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).End();
 
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.AccessCodesFailedName).Begin(BlendState.AlphaBlend, gameTime);
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.AccessCodesFailedName).DrawSprite(CurrentElement, XPos, YPos, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)fader2.FadeLevel));
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.AccessCodesFailedName).End();
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.AccessCodesFailedName).Begin(BlendState.AlphaBlend, gameTime);
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.AccessCodesFailedName).DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(255, 255, 255, (byte)_fader2.FadeLevel));
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.AccessCodesFailedName).End();
 
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.AccessCodesPassedName).Begin(BlendState.AlphaBlend, gameTime);
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.AccessCodesPassedName).DrawSprite(CurrentElement, XPos, YPos, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)fader3.FadeLevel));
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.AccessCodesPassedName).End();
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.AccessCodesPassedName).Begin(BlendState.AlphaBlend, gameTime);
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.AccessCodesPassedName).DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(255, 255, 255, (byte)_fader3.FadeLevel));
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.AccessCodesPassedName).End();
             }
         }
         else if (ElementState == CoreElementState.Replacing)
         {
-            if (!elementReplacementStarted)
+            if (!_elementReplacementStarted)
             {
-                elementReplacementStarted = true;
+                _elementReplacementStarted = true;
             }
 
-            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsIlluminatedName).Begin(BlendState.Additive, gameTime);
-            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsIlluminatedName).DrawSprite(CurrentElement, XPos, YPos, ColourHelper.GetXNA4Colour(255, 255, 255, elementFader.ByteModifier), currentElementDownScaler.Modifier, 0);
-            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsIlluminatedName).End();
+            _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsIlluminatedName).Begin(BlendState.Additive, gameTime);
+            _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsIlluminatedName).DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(255, 255, 255, _elementFader.ByteModifier), _currentElementDownScaler.Modifier, 0);
+            _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsIlluminatedName).End();
 
-            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).Begin(BlendState.Additive, gameTime);
-            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).DrawSprite(FinalElement, XPos, YPos, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)(255 - elementFader.ByteModifier)), finalElementUpScaler.Modifier, 0);
-            gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).End();
+            _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).Begin(BlendState.Additive, gameTime);
+            _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).DrawSprite(FinalElement, xPos, yPos, ColourHelper.GetXna4Colour(255, 255, 255, (byte)(255 - _elementFader.ByteModifier)), _finalElementUpScaler.Modifier, 0);
+            _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).End();
         }
         else if (ElementState == CoreElementState.Replaced)
         {
-            if (ReplacingElement)
+            if (replacingElement)
             {
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).Begin(BlendState.Additive, gameTime);
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).DrawSprite(FinalElement, XPos, YPos, ColourHelper.GetXNA4Colour(255, 255, 255, 50));
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).End();
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).Begin(BlendState.Additive, gameTime);
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).DrawSprite(FinalElement, xPos, yPos, ColourHelper.GetXna4Colour(255, 255, 255, 50));
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).End();
             }
             else
             {
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).Begin(BlendState.Additive, gameTime);
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).DrawSprite(FinalElement, XPos, YPos, ColourHelper.GetXNA4Colour(255, 255, 255, 255));
-                gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.PickupsName).End();
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).Begin(BlendState.Additive, gameTime);
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).DrawSprite(FinalElement, xPos, yPos, ColourHelper.GetXna4Colour(255, 255, 255, 255));
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).End();
             }
         }
 
-        if (elementReplacementStarted && ElementState == CoreElementState.Replacing)
+        if (_elementReplacementStarted && ElementState == CoreElementState.Replacing)
         {
-            coreReplacementEffect.Draw();
+            _coreReplacementEffect.Draw();
         }
     }
 
     internal class ElementFader
     {
 
-        private readonly int fadeSpeed;
-        private enDirection fadeDirection;
+        private readonly int _fadeSpeed;
+        private Direction _fadeDirection;
 
-        public ElementFader(GameEngine GameEngineInstance, enDirection FadeDirection)
+        public ElementFader(GameEngine gameEngineInstance, Direction fadeDirection)
         {
-            fadeDirection = FadeDirection;
-            fadeSpeed = GameEngineInstance.RandomNumberGenerator.Next(8, 16);
-            FadeLevel = GameEngineInstance.RandomNumberGenerator.Next(50, 200);
+            _fadeDirection = fadeDirection;
+            _fadeSpeed = gameEngineInstance.RandomNumberGenerator.Next(8, 16);
+            FadeLevel = gameEngineInstance.RandomNumberGenerator.Next(50, 200);
         }
         public int FadeLevel { get; private set; }
 
         public void SetFadeToZero()
         {
             FadeLevel = 0;
-            fadeDirection = enDirection.Up;
+            _fadeDirection = Direction.Up;
         }
 
         public void Update()
         {
-            if (fadeDirection == enDirection.Up)
+            if (_fadeDirection == Direction.Up)
             {
-                FadeLevel = FadeLevel + fadeSpeed;
+                FadeLevel = FadeLevel + _fadeSpeed;
             }
-            else if (fadeDirection == enDirection.Down)
+            else if (_fadeDirection == Direction.Down)
             {
-                FadeLevel = FadeLevel - fadeSpeed;
+                FadeLevel = FadeLevel - _fadeSpeed;
             }
 
             if (FadeLevel > 255)
             {
                 FadeLevel = 255;
-                fadeDirection = enDirection.Down;
+                _fadeDirection = Direction.Down;
             }
             else if (FadeLevel < 0)
             {
                 FadeLevel = 0;
-                fadeDirection = enDirection.Up;
+                _fadeDirection = Direction.Up;
             }
 
         }

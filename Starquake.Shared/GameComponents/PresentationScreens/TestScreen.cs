@@ -5,9 +5,11 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using StarquakeXNA.ActiveSprites;
+using StarquakeXNA.Engines;
 using StarquakeXNA.Structure;
 
-namespace StarquakeXNA.GameComponents;
+namespace StarquakeXNA.GameComponents.PresentationScreens;
 // This will be used for both blob and the nastie's death routines - except for the spiky bugger which will still use the explosion with some bits
 // Nasties will have a new mercury spat effect or just some smoke to enhance the death ray
 
@@ -18,75 +20,75 @@ public class TestScreen : GameScreenBase, IGameScreen
 
     #region IGameScreen Members
 
-    private bool keyDown;
-    private readonly BlobDeathAnimation bda;
+    private bool _keyDown;
+    private readonly BlobDeathAnimation _bda;
     public bool Success => true;
 
-    public TestScreen(GameEngine GameEngineReference)
-        : base(GameEngineReference)
+    public TestScreen(GameEngine gameEngineReference)
+        : base(gameEngineReference)
     {
-        screenFade = 0;
+        ScreenFade = 0;
 
-        bda = new BlobDeathAnimation(GameEngineReference);
+        _bda = new BlobDeathAnimation(gameEngineReference);
     }
 
     public override void Update(GameTime gameTime)
     {
-        gameEngine.GameScreens.ScreenNumber = 3;
+        GameEngine.GameScreens.ScreenNumber = 3;
 
-        if (Keyboard.GetState().IsKeyDown(Keys.F) && !keyDown)
+        if (Keyboard.GetState().IsKeyDown(Keys.F) && !_keyDown)
         {
-            keyDown = true;
+            _keyDown = true;
         }
 
-        if (Keyboard.GetState().IsKeyUp(Keys.F) && keyDown)
+        if (Keyboard.GetState().IsKeyUp(Keys.F) && _keyDown)
         {
-            bda.Trigger(300, 250, true);
+            _bda.Trigger(300, 250, true);
 
-            keyDown = false;
+            _keyDown = false;
         }
 
-        if (bda.Triggered)
+        if (_bda.Triggered)
         {
-            for (var a = 0; a < bda.BouncingParticles.Count; a++)
+            for (var a = 0; a < _bda.BouncingParticles.Count; a++)
             {
-                if (bda.BouncingParticles[a].YPos > 700)
+                if (_bda.BouncingParticles[a].YPos > 700)
                 {
-                    bda.BouncingParticles[a].YBounce();
+                    _bda.BouncingParticles[a].YBounce();
                 }
 
-                if (bda.BouncingParticles[a].YPos < 500)
+                if (_bda.BouncingParticles[a].YPos < 500)
                 {
-                    bda.BouncingParticles[a].YBounce();
+                    _bda.BouncingParticles[a].YBounce();
                 }
 
-                if (bda.BouncingParticles[a].XPos < 400)
+                if (_bda.BouncingParticles[a].XPos < 400)
                 {
-                    bda.BouncingParticles[a].XBounce();
+                    _bda.BouncingParticles[a].XBounce();
                 }
 
-                if (bda.BouncingParticles[a].XPos > 800)
+                if (_bda.BouncingParticles[a].XPos > 800)
                 {
-                    bda.BouncingParticles[a].XBounce();
+                    _bda.BouncingParticles[a].XBounce();
                 }
             }
         }
 
-        bda.Update(gameTime);
+        _bda.Update(gameTime);
     }
 
-    void IGameScreen.Reset(object Data)
+    void IGameScreen.Reset(object data)
     {
 
     }
 
     public override void Draw(GameTime gameTime)
     {
-        gameEngine.ScreenEffctEngine.SelectRenderViewPort("EntireScreen");
+        GameEngine.ScreenEffctEngine.SelectRenderViewPort("EntireScreen");
 
-        var triggered = bda.Triggered;
+        var triggered = _bda.Triggered;
 
-        if (keyDown && !triggered)
+        if (_keyDown && !triggered)
         {
             // gameEngine.ContentResourceManager.GetSpriteCollection("BlobSprites").Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, SaveStateMode.None, gameTime);
             // gameEngine.ContentResourceManager.GetSpriteCollection("BlobSprites").DrawSprite(0, 600, 500);
@@ -94,26 +96,26 @@ public class TestScreen : GameScreenBase, IGameScreen
         }
 
 
-        gameEngine.GameScreens.Draw(Color.White, gameTime);
+        GameEngine.GameScreens.Draw(Color.White, gameTime);
 
         if (triggered)
         {
-            bda.Draw(gameTime);
+            _bda.Draw(gameTime);
         }
         else
         {
-            gameEngine.ContentResourceManager.GetSpriteCollection("BlobSprites").Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-            gameEngine.ContentResourceManager.GetSpriteCollection("BlobSprites").DrawSprite(0, 300, 250);
-            gameEngine.ContentResourceManager.GetSpriteCollection("BlobSprites").End();
+            GameEngine.ContentResourceManager.GetSpriteCollection("BlobSprites").Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+            GameEngine.ContentResourceManager.GetSpriteCollection("BlobSprites").DrawSprite(0, 300, 250);
+            GameEngine.ContentResourceManager.GetSpriteCollection("BlobSprites").End();
         }
 
-        gameEngine.Font1.Begin(BlendState.Opaque);
+        GameEngine.Font1.Begin(BlendState.Opaque);
         //gameEngine.Font1.WriteText(10,10, bp.XPos.ToString(), Color.White, 255);
         //gameEngine.Font1.WriteText(100, 10, bp.YPos.ToString(), Color.White, 255);
-        gameEngine.Font1.End();
+        GameEngine.Font1.End();
     }
 
-    void IGameScreen.PerformPostScreenChangeActions(enGameScreen TriggeringScreen, object Param)
+    void IGameScreen.PerformPostScreenChangeActions(GameScreenType triggeringScreen, object param)
     {
 
     }

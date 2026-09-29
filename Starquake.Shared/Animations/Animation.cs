@@ -2,14 +2,15 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-namespace StarquakeXNA;
+
+namespace StarquakeXNA.Animations;
 
 public class Animation
 {
 
-    private int currentFrame;
+    private int _currentFrame;
 
-    private int delayCounter;
+    private int _delayCounter;
 
     public int FirstFrame { get; set; }
 
@@ -27,25 +28,25 @@ public class Animation
 
     public int CurrentFrame
     {
-        get => currentFrame;
+        get => _currentFrame;
         set
         {
-            currentFrame = value;
-            delayCounter = 0;
+            _currentFrame = value;
+            _delayCounter = 0;
         }
     }
 
     public void GetNextFrame()
     {
-        if (delayCounter > Delay)
+        if (_delayCounter > Delay)
         {
-            delayCounter = 0;
+            _delayCounter = 0;
 
             if (AnimateForwards)
             {
-                if (currentFrame < LastFrame)
+                if (_currentFrame < LastFrame)
                 {
-                    currentFrame++;
+                    _currentFrame++;
                 }
                 else
                 {
@@ -58,7 +59,7 @@ public class Animation
                         }
                         else
                         {
-                            currentFrame = FirstFrame;
+                            _currentFrame = FirstFrame;
                         }
                     }
                     else
@@ -69,9 +70,9 @@ public class Animation
             }
             else
             {
-                if (currentFrame > FirstFrame)
+                if (_currentFrame > FirstFrame)
                 {
-                    currentFrame--;
+                    _currentFrame--;
                 }
                 else
                 {
@@ -84,7 +85,7 @@ public class Animation
                         }
                         else
                         {
-                            currentFrame = LastFrame;
+                            _currentFrame = LastFrame;
                         }
                     }
                     else
@@ -96,7 +97,7 @@ public class Animation
         }
         else
         {
-            delayCounter++;
+            _delayCounter++;
         }
     }
 }

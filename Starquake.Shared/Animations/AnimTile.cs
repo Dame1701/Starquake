@@ -5,25 +5,26 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StarquakeXNA.Engines;
 using StarquakeXNA.Structure;
 
-namespace StarquakeXNA;
+namespace StarquakeXNA.Animations;
 
 public class AnimTileEngine : GameComponentBase
 {
 
-    public AnimTileEngine(GameEngine GameEngineReference)
-        : base(GameEngineReference)
+    public AnimTileEngine(GameEngine gameEngineReference)
+        : base(gameEngineReference)
     {
         AnimTilesList = new List<AnimTile>();
     }
     public List<AnimTile> AnimTilesList { get; }
 
-    public bool ContainsTile(int TileNumber)
+    public bool ContainsTile(int tileNumber)
     {
         for (var a = 0; a < AnimTilesList.Count; a++)
         {
-            if (AnimTilesList[a].ScreenTileRef == TileNumber)
+            if (AnimTilesList[a].ScreenTileRef == tileNumber)
             {
                 return true;
             }
@@ -40,13 +41,13 @@ public class AnimTileEngine : GameComponentBase
         }
     }
 
-    public void Draw(int TileNumber, int XPos, int YPos, Color Colour, GameTime gameTime)
+    public void Draw(int tileNumber, int xPos, int yPos, Color colour, GameTime gameTime)
     {
         for (var a = 0; a < AnimTilesList.Count; a++)
         {
-            if (AnimTilesList[a].ScreenTileRef == TileNumber)
+            if (AnimTilesList[a].ScreenTileRef == tileNumber)
             {
-                AnimTilesList[a].Draw(XPos, YPos, Colour, gameTime);
+                AnimTilesList[a].Draw(xPos, yPos, colour, gameTime);
             }
         }
     }
@@ -55,21 +56,21 @@ public class AnimTileEngine : GameComponentBase
 public class AnimTile : GameComponentBase
 {
 
-    private readonly SpriteCollection tileAnimationSpriteSet;
+    private readonly SpriteCollection _tileAnimationSpriteSet;
 
-    public AnimTile(GameEngine GameEngineReference, int ScreenTileRef, SpriteCollection TileAnimationSpriteSet, int Delay) : base(GameEngineReference)
+    public AnimTile(GameEngine gameEngineReference, int screenTileRef, SpriteCollection tileAnimationSpriteSet, int delay) : base(gameEngineReference)
     {
-        this.ScreenTileRef = ScreenTileRef;
-        tileAnimationSpriteSet = TileAnimationSpriteSet;
+        this.ScreenTileRef = screenTileRef;
+        _tileAnimationSpriteSet = tileAnimationSpriteSet;
 
         TileAnimation = new Animation();
         TileAnimation.FirstFrame = 0;
 
-        TileAnimation.LastFrame = tileAnimationSpriteSet.SpriteCount - 1;
+        TileAnimation.LastFrame = _tileAnimationSpriteSet.SpriteCount - 1;
         TileAnimation.AnimateForwards = true;
         TileAnimation.Repeat = true;
         TileAnimation.CurrentFrame = 0;
-        TileAnimation.Delay = Delay;
+        TileAnimation.Delay = delay;
         TileAnimation.Yoyo = true;
     }
     public int ScreenTileRef { get; }
@@ -81,13 +82,13 @@ public class AnimTile : GameComponentBase
         TileAnimation.GetNextFrame();
     }
 
-    public void Draw(int XPos, int YPos, Color Colour, GameTime gameTime)
+    public void Draw(int xPos, int yPos, Color colour, GameTime gameTime)
     {
-        if (!gameEngine.UsingOldGraphics)
+        if (!GameEngine.UsingOldGraphics)
         {
-            tileAnimationSpriteSet.Begin(BlendState.AlphaBlend, gameTime);
-            tileAnimationSpriteSet.DrawSprite(TileAnimation.CurrentFrame, XPos, YPos, Colour);
-            tileAnimationSpriteSet.End();
+            _tileAnimationSpriteSet.Begin(BlendState.AlphaBlend, gameTime);
+            _tileAnimationSpriteSet.DrawSprite(TileAnimation.CurrentFrame, xPos, yPos, colour);
+            _tileAnimationSpriteSet.End();
         }
     }
 }

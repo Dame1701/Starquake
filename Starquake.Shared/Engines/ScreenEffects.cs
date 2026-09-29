@@ -6,31 +6,29 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StarquakeXNA.Structure;
 
-namespace StarquakeXNA;
+namespace StarquakeXNA.Engines;
 
 public abstract class ScreenEffectBase
 {
-    protected int effectDuration;
-    protected bool effectFinished = true;
-    protected int effectSpeed;
+    protected int EffectDuration;
+    protected int EffectSpeed;
 
-    protected RenderViewPort effectSurface;
-    protected GameEngine gameEngine;
-    protected enScreenEffectType screenEffectType;
+    protected RenderViewPort EffectSurface;
+    protected GameEngine GameEngine;
 
-    public ScreenEffectBase(GameEngine GameEngineReference)
+    public ScreenEffectBase(GameEngine gameEngineReference)
     {
-        gameEngine = GameEngineReference;
+        GameEngine = gameEngineReference;
     }
-    public enScreenEffectType ScreenEffectType => screenEffectType;
-    public bool EffectFinished => effectFinished;
+    public ScreenEffectType ScreenEffectType { get; protected set; }
+    public bool EffectFinished { get; protected set; } = true;
 
-    public virtual void TriggerEffect(RenderViewPort EffectSurface, int EffectSpeed, int EffectDuration)
+    public virtual void TriggerEffect(RenderViewPort effectSurface, int effectSpeed, int effectDuration)
     {
-        effectSpeed = EffectSpeed;
-        effectDuration = EffectDuration;
-        effectFinished = false;
-        effectSurface = EffectSurface;
+        EffectSpeed = effectSpeed;
+        EffectDuration = effectDuration;
+        EffectFinished = false;
+        EffectSurface = effectSurface;
     }
 
     public abstract void Reset();
@@ -38,58 +36,58 @@ public abstract class ScreenEffectBase
     public abstract void Update();
 
     // If this returns true the we want to use the default renderer
-    public virtual bool Draw(SpriteBatch Renderer, RenderViewPort RenderViewPortToUse)
+    public virtual bool Draw(SpriteBatch renderer, RenderViewPort renderViewPortToUse)
         => true;
 }
 
 public class LeftTunnelEntryEffect : ScreenEffectBase
 {
-    private int effectState;
+    private int _effectState;
 
-    public LeftTunnelEntryEffect(GameEngine GameEngineReference) : base(GameEngineReference)
+    public LeftTunnelEntryEffect(GameEngine gameEngineReference) : base(gameEngineReference)
     {
-        screenEffectType = enScreenEffectType.LeftTunnelEntry;
+        ScreenEffectType = ScreenEffectType.LeftTunnelEntry;
     }
 
-    public override void TriggerEffect(RenderViewPort EffectSurface, int EffectSpeed, int EffectDuration)
+    public override void TriggerEffect(RenderViewPort effectSurface, int effectSpeed, int effectDuration)
     {
-        base.TriggerEffect(EffectSurface, EffectSpeed, -1);
-        effectState = 0;
+        base.TriggerEffect(effectSurface, effectSpeed, -1);
+        _effectState = 0;
     }
 
     public override void Update()
     {
-        if (effectSurface != null)
+        if (EffectSurface != null)
         {
-            if (!effectFinished)
+            if (!EffectFinished)
             {
-                if (effectState == 0)
+                if (_effectState == 0)
                 {
-                    if (effectSurface.Width > 0)
+                    if (EffectSurface.Width > 0)
                     {
-                        effectSurface.Width = effectSurface.Width - effectSpeed;
+                        EffectSurface.Width = EffectSurface.Width - EffectSpeed;
                     }
 
-                    if (effectSurface.Width <= 0)
+                    if (EffectSurface.Width <= 0)
                     {
-                        effectState = 1;
-                        effectSurface.Width = 0;
+                        _effectState = 1;
+                        EffectSurface.Width = 0;
                     }
                 }
-                else if (effectState == 1)
+                else if (_effectState == 1)
                 {
-                    if (effectSurface.Width < effectSurface.MasterWidth)
+                    if (EffectSurface.Width < EffectSurface.MasterWidth)
                     {
-                        effectSurface.Width = effectSurface.Width + effectSpeed;
-                        effectSurface.XPos = effectSurface.MasterXPos + effectSurface.MasterWidth - effectSurface.Width;
+                        EffectSurface.Width = EffectSurface.Width + EffectSpeed;
+                        EffectSurface.XPos = EffectSurface.MasterXPos + EffectSurface.MasterWidth - EffectSurface.Width;
                     }
 
-                    if (effectSurface.Width >= effectSurface.MasterWidth)
+                    if (EffectSurface.Width >= EffectSurface.MasterWidth)
                     {
-                        effectState = 2;
-                        effectSurface.Width = effectSurface.MasterWidth;
+                        _effectState = 2;
+                        EffectSurface.Width = EffectSurface.MasterWidth;
 
-                        effectFinished = true;
+                        EffectFinished = true;
                     }
                 }
             }
@@ -98,60 +96,60 @@ public class LeftTunnelEntryEffect : ScreenEffectBase
 
     public override void Reset()
     {
-        effectFinished = true;
-        effectState = 0;
+        EffectFinished = true;
+        _effectState = 0;
     }
 }
 
 public class RightTunnelEntryEffect : ScreenEffectBase
 {
-    private int effectState;
+    private int _effectState;
 
-    public RightTunnelEntryEffect(GameEngine GameEngineReference) : base(GameEngineReference)
+    public RightTunnelEntryEffect(GameEngine gameEngineReference) : base(gameEngineReference)
     {
-        screenEffectType = enScreenEffectType.RightTunnelEntry;
+        ScreenEffectType = ScreenEffectType.RightTunnelEntry;
     }
 
-    public override void TriggerEffect(RenderViewPort EffectSurface, int EffectSpeed, int EffectDuration)
+    public override void TriggerEffect(RenderViewPort effectSurface, int effectSpeed, int effectDuration)
     {
-        base.TriggerEffect(EffectSurface, EffectSpeed, -1);
-        effectState = 0;
+        base.TriggerEffect(effectSurface, effectSpeed, -1);
+        _effectState = 0;
     }
 
     public override void Update()
     {
-        if (effectSurface != null)
+        if (EffectSurface != null)
         {
-            if (!effectFinished)
+            if (!EffectFinished)
             {
-                if (effectState == 0)
+                if (_effectState == 0)
                 {
-                    if (effectSurface.Width > 0)
+                    if (EffectSurface.Width > 0)
                     {
-                        effectSurface.Width = effectSurface.Width - effectSpeed;
-                        effectSurface.XPos = effectSurface.MasterXPos + effectSurface.MasterWidth - effectSurface.Width;
+                        EffectSurface.Width = EffectSurface.Width - EffectSpeed;
+                        EffectSurface.XPos = EffectSurface.MasterXPos + EffectSurface.MasterWidth - EffectSurface.Width;
                     }
 
-                    if (effectSurface.Width <= 0)
+                    if (EffectSurface.Width <= 0)
                     {
-                        effectState = 1;
-                        effectSurface.XPos = effectSurface.MasterXPos;
-                        effectSurface.Width = 0;
+                        _effectState = 1;
+                        EffectSurface.XPos = EffectSurface.MasterXPos;
+                        EffectSurface.Width = 0;
                     }
                 }
-                else if (effectState == 1)
+                else if (_effectState == 1)
                 {
-                    if (effectSurface.Width < effectSurface.MasterWidth)
+                    if (EffectSurface.Width < EffectSurface.MasterWidth)
                     {
-                        effectSurface.Width = effectSurface.Width + effectSpeed;
+                        EffectSurface.Width = EffectSurface.Width + EffectSpeed;
                     }
 
-                    if (effectSurface.Width >= effectSurface.MasterWidth)
+                    if (EffectSurface.Width >= EffectSurface.MasterWidth)
                     {
-                        effectState = 2;
-                        effectSurface.Width = effectSurface.MasterWidth;
+                        _effectState = 2;
+                        EffectSurface.Width = EffectSurface.MasterWidth;
 
-                        effectFinished = true;
+                        EffectFinished = true;
                     }
                 }
             }
@@ -160,63 +158,63 @@ public class RightTunnelEntryEffect : ScreenEffectBase
 
     public override void Reset()
     {
-        effectFinished = true;
-        effectState = 0;
+        EffectFinished = true;
+        _effectState = 0;
     }
 }
 
 public class AddictiveFade : ScreenEffectBase
 {
-    private int effectDurationCounter;
+    private int _effectDurationCounter;
 
-    public AddictiveFade(GameEngine GameEngineReference)
-        : base(GameEngineReference)
+    public AddictiveFade(GameEngine gameEngineReference)
+        : base(gameEngineReference)
     {
-        screenEffectType = enScreenEffectType.AddictiveFade;
+        ScreenEffectType = ScreenEffectType.AddictiveFade;
     }
 
-    public override void TriggerEffect(RenderViewPort EffectSurface, int EffectSpeed, int EffectDuration)
+    public override void TriggerEffect(RenderViewPort effectSurface, int effectSpeed, int effectDuration)
     {
-        base.TriggerEffect(EffectSurface, -1, EffectDuration);
-        effectDurationCounter = 0;
+        base.TriggerEffect(effectSurface, -1, effectDuration);
+        _effectDurationCounter = 0;
     }
 
     public override void Update()
     {
-        if (effectSurface != null)
+        if (EffectSurface != null)
         {
-            if (!effectFinished)
+            if (!EffectFinished)
             {
-                if (effectDurationCounter >= effectDuration)
+                if (_effectDurationCounter >= EffectDuration)
                 {
-                    effectFinished = true;
+                    EffectFinished = true;
                 }
 
-                effectDurationCounter++;
+                _effectDurationCounter++;
             }
         }
     }
 
     // We're going to override the default renderer
-    public override bool Draw(SpriteBatch Renderer, RenderViewPort RenderViewPortToUse)
+    public override bool Draw(SpriteBatch renderer, RenderViewPort renderViewPortToUse)
     {
-        Renderer.Begin(SpriteSortMode.Deferred, BlendState.Additive, null, null, null, null,
-            gameEngine.PresentationTransform);
+        renderer.Begin(SpriteSortMode.Deferred, BlendState.Additive, null, null, null, null,
+            GameEngine.PresentationTransform);
 
         for (var a = 0; a < 10; a++)
         {
-            Renderer.Draw(
-                RenderViewPortToUse.RenderTarget,
+            renderer.Draw(
+                renderViewPortToUse.RenderTarget,
                 new Rectangle(
-                    RenderViewPortToUse.XPos,
-                    RenderViewPortToUse.YPos,
-                    RenderViewPortToUse.Width,
-                    RenderViewPortToUse.Height),
+                    renderViewPortToUse.XPos,
+                    renderViewPortToUse.YPos,
+                    renderViewPortToUse.Width,
+                    renderViewPortToUse.Height),
                 new Rectangle(
                     0,
                     0,
-                    RenderViewPortToUse.RenderTarget.Width,
-                    RenderViewPortToUse.RenderTarget.Height
+                    renderViewPortToUse.RenderTarget.Width,
+                    renderViewPortToUse.RenderTarget.Height
                 ),
                 Color.White,
                 0f,
@@ -225,7 +223,7 @@ public class AddictiveFade : ScreenEffectBase
                 0f);
         }
 
-        Renderer.End();
+        renderer.End();
 
         // No need to run the default renderer
         return false;
@@ -233,6 +231,6 @@ public class AddictiveFade : ScreenEffectBase
 
     public override void Reset()
     {
-        effectFinished = true;
+        EffectFinished = true;
     }
 }

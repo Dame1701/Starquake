@@ -8,12 +8,12 @@ namespace StarquakeXNA.Helpers;
 
 public class TextHelper
 {
-    public static int GetAsciiCode(string Character)
+    public static int GetAsciiCode(string character)
     {
-        if (Character.Length == 1)
+        if (character.Length == 1)
         {
             var ascii = Encoding.ASCII;
-            var encodedBytes = ascii.GetBytes(Character);
+            var encodedBytes = ascii.GetBytes(character);
 
             return encodedBytes[0];
         }

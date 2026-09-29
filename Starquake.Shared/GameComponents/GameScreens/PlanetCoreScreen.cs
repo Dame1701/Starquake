@@ -6,37 +6,40 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StarquakeXNA.ActiveSprites;
 using StarquakeXNA.ContentManagement;
+using StarquakeXNA.Display;
+using StarquakeXNA.Engines;
 using StarquakeXNA.Helpers;
 using StarquakeXNA.Particles;
 using StarquakeXNA.Structure;
 
-namespace StarquakeXNA.GameComponents;
+namespace StarquakeXNA.GameComponents.GameScreens;
 
 public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
 {
-    private int blankingTilesOpacity;
-    private int coreAlienCount = 4;
+    private int _blankingTilesOpacity;
+    private int _coreAlienCount = 4;
 
-    private List<Nasty> coreAliens;
-    private IStandardParticleEffect coreComputationEffect;
+    private List<Nasty> _coreAliens;
+    private IStandardParticleEffect _coreComputationEffect;
 
     //private MercuryParticleEngine.MercuryParticleEffect coreVortex;
-    private IStandardParticleEffect coreSparks;
+    private IStandardParticleEffect _coreSparks;
 
-    private CoreElements elements;
+    private CoreElements _elements;
 
-    private Queue<int> elementsToReplace;
-    private int entryTime;
+    private Queue<int> _elementsToReplace;
+    private int _entryTime;
 
-    private bool justEnteredCore = true;
-    private Random randomNumberGenerator;
+    private bool _justEnteredCore = true;
+    private Random _randomNumberGenerator;
 
-    private bool replacingElements;
+    private bool _replacingElements;
 
 
-    public PlanetCoreScreen(GameEngine GameEngineReference)
-        : base(GameEngineReference)
+    public PlanetCoreScreen(GameEngine gameEngineReference)
+        : base(gameEngineReference)
     {
 
     }
@@ -45,7 +48,7 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
 
     public bool Success => true;
 
-    public void Reset(object Data)
+    public void Reset(object data)
     {
     }
 
@@ -55,59 +58,59 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
     /// <param name="gameTime"></param>
     public void UpdateOffScreen(GameTime gameTime)
     {
-        for (var a = 0; a < coreAlienCount; a++)
+        for (var a = 0; a < _coreAlienCount; a++)
         {
-            coreAliens[a].Update(gameTime);
+            _coreAliens[a].Update(gameTime);
         }
 
-        elements.Update(gameTime);
+        _elements.Update(gameTime);
 
-        if (coreSparks != null)
+        if (_coreSparks != null)
         {
-            coreSparks.Start();
-            coreSparks.Update(512, 288, gameTime);
+            _coreSparks.Start();
+            _coreSparks.Update(512, 288, gameTime);
         }
 
-        if (coreComputationEffect != null)
+        if (_coreComputationEffect != null)
         {
-            coreComputationEffect.Start();
-            coreComputationEffect.Update(512, 288, gameTime);
+            _coreComputationEffect.Start();
+            _coreComputationEffect.Update(512, 288, gameTime);
         }
     }
 
     public override void Update(GameTime gameTime)
     {
-        if (justEnteredCore)
+        if (_justEnteredCore)
         {
-            blankingTilesOpacity = 255;
-            replacingElements = false;
+            _blankingTilesOpacity = 255;
+            _replacingElements = false;
             Initialise(null);
-            justEnteredCore = false;
+            _justEnteredCore = false;
 
             CalculateCoreAlienCount();
 
-            elementsToReplace = new Queue<int>();
+            _elementsToReplace = new Queue<int>();
 
             // Check to see if blob is carrying any elements to replace
-            var activeElements = elements.GetActiveElements();
+            var activeElements = _elements.GetActiveElements();
 
-            for (var a = 0; a < gameEngine.Player.BlobInventory.Length; a++)
+            for (var a = 0; a < GameEngine.Player.BlobInventory.Length; a++)
             {
                 for (var b = 0; b < activeElements.Count; b++)
                 {
-                    if ((int)gameEngine.Player.BlobInventory[a] == activeElements[b].CurrentElement)
+                    if ((int)GameEngine.Player.BlobInventory[a] == activeElements[b].CurrentElement)
                     {
-                        gameEngine.Player.BlobInventory[a] = enCollectables.None;
-                        elementsToReplace.Enqueue(activeElements[b].CurrentElement);
-                        replacingElements = true;
+                        GameEngine.Player.BlobInventory[a] = Collectables.None;
+                        _elementsToReplace.Enqueue(activeElements[b].CurrentElement);
+                        _replacingElements = true;
 
                     }
                 }
             }
 
-            if (!replacingElements)
+            if (!_replacingElements)
             {
-                entryTime = 0;
+                _entryTime = 0;
             }
             else
             {
@@ -115,84 +118,84 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
             }
         }
 
-        if (!replacingElements)
+        if (!_replacingElements)
         {
-            if (blankingTilesOpacity > 0)
+            if (_blankingTilesOpacity > 0)
             {
-                blankingTilesOpacity = blankingTilesOpacity - 16;
+                _blankingTilesOpacity = _blankingTilesOpacity - 16;
             }
 
-            if (blankingTilesOpacity < 0)
+            if (_blankingTilesOpacity < 0)
             {
-                blankingTilesOpacity = 0;
+                _blankingTilesOpacity = 0;
             }
         }
 
         // Leave the core room
-        if (!replacingElements && entryTime > 240)
+        if (!_replacingElements && _entryTime > 240)
         {
-            gameEngine.GameScreens.ScreenNumber = 198;
-            gameEngine.CurrentGameScreen = enGameScreen.MainGame;
-            gameEngine.Player.BlobXPos = gameEngine.GameScreens.ScreenWidth - gameEngine.Player.BlobWidth;
-            gameEngine.GetGameScreen(enGameScreen.MainGame).PerformPostScreenChangeActions(enGameScreen.PlanetCore, null);
+            GameEngine.GameScreens.ScreenNumber = 198;
+            GameEngine.CurrentGameScreen = GameScreenType.MainGame;
+            GameEngine.Player.BlobXPos = GameEngine.GameScreens.ScreenWidth - GameEngine.Player.BlobWidth;
+            GameEngine.GetGameScreen(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.PlanetCore, null);
 
-            justEnteredCore = true;
-            gameEngine.BackgroundColour = Color.Black;
+            _justEnteredCore = true;
+            GameEngine.BackgroundColour = Color.Black;
         }
-        else if (!replacingElements && gameEngine.Elements.GetElementsReplacedCount() == 9)
+        else if (!_replacingElements && GameEngine.Elements.GetElementsReplacedCount() == 9)
         {
             // Finished the game!
-            gameEngine.CurrentGameScreen = enGameScreen.GameComplete;
-            gameEngine.GetGameScreen(enGameScreen.GameComplete).PerformPostScreenChangeActions(enGameScreen.MainGame, null);
+            GameEngine.CurrentGameScreen = GameScreenType.GameComplete;
+            GameEngine.GetGameScreen(GameScreenType.GameComplete).PerformPostScreenChangeActions(GameScreenType.MainGame, null);
         }
         else
         {
             UpdateOffScreen(gameTime);
         }
 
-        entryTime++;
+        _entryTime++;
     }
 
     public override void Draw(GameTime gameTime)
     {
-        if (!replacingElements)
+        if (!_replacingElements)
         {
-            if (coreComputationEffect != null)
+            if (_coreComputationEffect != null)
             {
-                coreComputationEffect.Draw();
+                _coreComputationEffect.Draw();
             }
 
-            if (coreSparks != null)
+            if (_coreSparks != null)
             {
-                coreSparks.Draw();
+                _coreSparks.Draw();
             }
         }
 
-        if (!replacingElements)
+        if (!_replacingElements)
         {
-            gameEngine.ContentResourceManager.GetSpriteCollection("BlankingTile").Begin(BlendState.AlphaBlend, gameTime);
+            GameEngine.ContentResourceManager.GetSpriteCollection("BlankingTile").Begin(BlendState.AlphaBlend, gameTime);
             for (var a = 0; a < 6; a++)
             {
                 for (var b = 0; b < 6; b++)
                 {
-                    gameEngine.ContentResourceManager.GetSpriteCollection("BlankingTile").DrawSprite(0, b * 128 + 128, a * 96, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)blankingTilesOpacity));
+                    GameEngine.ContentResourceManager.GetSpriteCollection("BlankingTile").DrawSprite(0, b * 128 + 128, a * 96, ColourHelper.GetXna4Colour(255, 255, 255, (byte)_blankingTilesOpacity));
                 }
             }
-            gameEngine.ContentResourceManager.GetSpriteCollection("BlankingTile").End();
+            GameEngine.ContentResourceManager.GetSpriteCollection("BlankingTile").End();
         }
 
-        gameEngine.GameScreens.Draw(Color.White, gameTime);
+        GameEngine.GameScreens.Draw(Color.White, gameTime);
 
         // Draw the core aliens
-        if (!replacingElements)
+        if (!_replacingElements)
         {
-            for (var a = 0; a < coreAlienCount; a++)
+            for (var a = 0; a < _coreAlienCount; a++)
             {
-                coreAliens[a].Draw(gameTime, (byte)(255 - blankingTilesOpacity));
+                _coreAliens[a].Draw(gameTime, (byte)(255 - _blankingTilesOpacity));
             }
         }
 
-        elements.Draw(gameTime, replacingElements);
+        _elements.Draw(gameTime, _replacingElements);
     }
 
     #region IGameScreen Members
@@ -207,7 +210,7 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
 
     #region IGameScreen Members
 
-    public void PerformPostScreenChangeActions(enGameScreen TriggeringScreen, object Param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object param)
     {
         throw new NotImplementedException();
     }
@@ -216,70 +219,70 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
 
     public override void LoadContent()
     {
-        elements.LoadContent();
-        coreAliens = new List<Nasty>();
-        var nastyGraphics = new ContentList(gameEngine.ContentMgr);
+        _elements.LoadContent();
+        _coreAliens = new List<Nasty>();
+        var nastyGraphics = new ContentList(GameEngine.ContentMgr);
         nastyGraphics.AddContent("nastySprite", "Graphics\\nastiesNew");
-        randomNumberGenerator = new Random((int)DateTime.Now.Ticks);
+        _randomNumberGenerator = new Random((int)DateTime.Now.Ticks);
 
-        for (var a = 0; a < coreAlienCount; a++)
+        for (var a = 0; a < _coreAlienCount; a++)
         {
             var coreAlien = new Nasty(
-                gameEngine,
+                GameEngine,
                 0,
                 0,
                 9);
 
             coreAlien.LoadContent(nastyGraphics);
-            coreAlien.NastyType = enNastyType.CoreGuardian;
+            coreAlien.NastyType = NastyType.CoreGuardian;
             coreAlien.Initialise(null);
-            coreAliens.Add(coreAlien);
+            _coreAliens.Add(coreAlien);
         }
-        coreComputationEffect = gameEngine.ContentResourceManager.GetParticleEffectInstance("BinaryEffect", enParticleEffectType.Continual, null) as IStandardParticleEffect;
-        coreSparks = gameEngine.ContentResourceManager.GetParticleEffectInstance("CoreSparks", enParticleEffectType.Continual, null) as IStandardParticleEffect;
+        _coreComputationEffect = GameEngine.ContentResourceManager.GetParticleEffectInstance("BinaryEffect", ParticleEffectType.Continual, null) as IStandardParticleEffect;
+        _coreSparks = GameEngine.ContentResourceManager.GetParticleEffectInstance("CoreSparks", ParticleEffectType.Continual, null) as IStandardParticleEffect;
     }
 
-    public override void Initialise(object Data)
+    public override void Initialise(object data)
     {
-        if (Data != null)
+        if (data != null)
         {
-            elements = Data as CoreElements;
-            elements.OnCoreElementReplaced += elements_OnCoreElementReplaced;
+            _elements = data as CoreElements;
+            _elements.OnCoreElementReplaced += elements_OnCoreElementReplaced;
         }
         else
         {
-            gameEngine.GameScreens.ScreenNumber = 199;
+            GameEngine.GameScreens.ScreenNumber = 199;
 
             // Add the collision map for the core elements
-            gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.AddRange(elements.GetCollisionMap());
+            GameEngine.GameScreens.CurrentGameScreenData.CollisionMap.AddRange(_elements.GetCollisionMap());
 
-            var potentialLocations = gameEngine.GameScreens.GetNastyPotentialLocations();
-            if (potentialLocations.Count < coreAlienCount)
+            var potentialLocations = GameEngine.GameScreens.GetNastyPotentialLocations();
+            if (potentialLocations.Count < _coreAlienCount)
             {
-                coreAlienCount = potentialLocations.Count;
+                _coreAlienCount = potentialLocations.Count;
             }
 
-            for (var a = 0; a < coreAlienCount; a++)
+            for (var a = 0; a < _coreAlienCount; a++)
             {
-                coreAliens[a].XPos = potentialLocations[a].X;
-                coreAliens[a].YPos = potentialLocations[a].Y;
-                coreAliens[a].NastyType = enNastyType.CoreGuardian;
-                coreAliens[a].NastyState = enNastyState.Normal;
+                _coreAliens[a].XPos = potentialLocations[a].X;
+                _coreAliens[a].YPos = potentialLocations[a].Y;
+                _coreAliens[a].NastyType = NastyType.CoreGuardian;
+                _coreAliens[a].NastyState = NastyState.Normal;
             }
         }
     }
 
     private void elements_OnCoreElementReplaced()
     {
-        if (elementsToReplace != null &&
-            elementsToReplace.Count > 0)
+        if (_elementsToReplace != null &&
+            _elementsToReplace.Count > 0)
         {
-            elements.ReplaceElement(elementsToReplace.Dequeue());
+            _elements.ReplaceElement(_elementsToReplace.Dequeue());
         }
         else
         {
-            entryTime = 0;
-            replacingElements = false;
+            _entryTime = 0;
+            _replacingElements = false;
             CalculateCoreAlienCount();
         }
     }
@@ -287,26 +290,26 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
     private void CalculateCoreAlienCount()
     {
         // Figure out how many core aliens to display
-        var elementsLeftToReplace = elements.GetActiveElements().Count;
+        var elementsLeftToReplace = _elements.GetActiveElements().Count;
         if (elementsLeftToReplace > 8)
         {
-            coreAlienCount = 0;
+            _coreAlienCount = 0;
         }
         else if (elementsLeftToReplace <= 8 && elementsLeftToReplace > 6)
         {
-            coreAlienCount = 1;
+            _coreAlienCount = 1;
         }
         else if (elementsLeftToReplace <= 6 && elementsLeftToReplace > 4)
         {
-            coreAlienCount = 2;
+            _coreAlienCount = 2;
         }
         else if (elementsLeftToReplace <= 4 && elementsLeftToReplace > 2)
         {
-            coreAlienCount = 3;
+            _coreAlienCount = 3;
         }
         else if (elementsLeftToReplace < 2)
         {
-            coreAlienCount = 4;
+            _coreAlienCount = 4;
         }
     }
 }

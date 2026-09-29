@@ -5,52 +5,54 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using StarquakeXNA.Engines;
 using StarquakeXNA.Helpers;
+using StarquakeXNA.Input;
 using StarquakeXNA.Scoring;
 using StarquakeXNA.Structure;
 
-namespace StarquakeXNA.GameComponents;
+namespace StarquakeXNA.GameComponents.PresentationScreens;
 
 public class HiScoreScreen : GameScreenBase, IGameScreen
 {
-    private readonly HiScores hiscoreList;
-    private SpriteCollection backgroundImage;
-    private bool fadeComplete;
-    private SpriteCollection foregroundImage;
-    private bool gotHighScore;
-    private HiScore playersHighScore;
+    private readonly HiScores _hiscoreList;
+    private SpriteCollection _backgroundImage;
+    private bool _fadeComplete;
+    private SpriteCollection _foregroundImage;
+    private bool _gotHighScore;
+    private HiScore _playersHighScore;
 
-    public HiScoreScreen(GameEngine GameEngineReference)
-        : base(GameEngineReference)
+    public HiScoreScreen(GameEngine gameEngineReference)
+        : base(gameEngineReference)
     {
-        screenFade = 0;
-        screenFadeSpeed = 5;
-        hiscoreList = new HiScores();
+        ScreenFade = 0;
+        ScreenFadeSpeed = 5;
+        _hiscoreList = new HiScores();
     }
 
     public bool Success => true;
 
-    public void Reset(object Data)
+    public void Reset(object data)
     {
 
     }
 
-    public void PerformPostScreenChangeActions(enGameScreen TriggeringScreen, object Param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object param)
     {
-        fadeComplete = false;
-        screenFade = 0;
-        screenFadeSpeed = 5;
-        playersHighScore = null;
+        _fadeComplete = false;
+        ScreenFade = 0;
+        ScreenFadeSpeed = 5;
+        _playersHighScore = null;
 
         // Lets see if we have a place in the high score table
-        gotHighScore = hiscoreList.GotHighScore(gameEngine.BlobStatusPanel.PlayerScore);
+        _gotHighScore = _hiscoreList.GotHighScore(GameEngine.BlobStatusPanel.PlayerScore);
 
-        if (gotHighScore)
+        if (_gotHighScore)
         {
-            playersHighScore = (HiScore)Param;
-            playersHighScore.Name = "";
+            _playersHighScore = (HiScore)param;
+            _playersHighScore.Name = "";
 
-            hiscoreList.AddScoreToTable(playersHighScore);
+            _hiscoreList.AddScoreToTable(_playersHighScore);
 
             // Reset the flag so we can display the table
             //gotHighScore = false;
@@ -59,13 +61,13 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
 
     public override void Update(GameTime gameTime)
     {
-        if (!gotHighScore)
+        if (!_gotHighScore)
         {
             if (ToggleKeys.GetPressedKey() != Keys.None)
             {
-                gameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(gameEngine.ScreenClearColour);
-                gameEngine.CurrentGameScreen = enGameScreen.Options;
-                gameEngine.GetGameScreen(enGameScreen.Options).PerformPostScreenChangeActions(enGameScreen.HiScores, null);
+                GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.ScreenClearColour);
+                GameEngine.CurrentGameScreen = GameScreenType.Options;
+                GameEngine.GetGameScreen(GameScreenType.Options).PerformPostScreenChangeActions(GameScreenType.HiScores, null);
             }
         }
         else
@@ -77,31 +79,31 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
                 var keyPressedString = ToggleKeys.GetPressedKey().ToString().ToUpper();
                 var keyPressed = TextHelper.GetAsciiCode(keyPressedString);
 
-                if (playersHighScore.Name.Length < 6)
+                if (_playersHighScore.Name.Length < 6)
                 {
                     if (keyPressed > 64 &&
                         keyPressed < 91)
                     {
-                        playersHighScore.Name = playersHighScore.Name + keyPressedString;
+                        _playersHighScore.Name = _playersHighScore.Name + keyPressedString;
                     }
 
                     if (ToggleKeys.GetPressedKey() == Keys.Space)
                     {
-                        playersHighScore.Name = playersHighScore.Name + " ";
+                        _playersHighScore.Name = _playersHighScore.Name + " ";
                     }
                 }
 
                 if (ToggleKeys.GetPressedKey() == Keys.Enter)
                 {
-                    gotHighScore = false;
+                    _gotHighScore = false;
                 }
 
 
                 if (ToggleKeys.GetPressedKey() == Keys.Back)
                 {
-                    if (playersHighScore.Name.Length > 0)
+                    if (_playersHighScore.Name.Length > 0)
                     {
-                        playersHighScore.Name = playersHighScore.Name.Substring(0, playersHighScore.Name.Length - 1);
+                        _playersHighScore.Name = _playersHighScore.Name.Substring(0, _playersHighScore.Name.Length - 1);
                     }
                 }
             }
@@ -113,59 +115,59 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
 
     public override void Draw(GameTime gameTime)
     {
-        gameEngine.ScreenEffctEngine.SelectRenderViewPort("EntireScreen");
-        backgroundImage.Begin(BlendState.AlphaBlend, gameTime);
+        GameEngine.ScreenEffctEngine.SelectRenderViewPort("EntireScreen");
+        _backgroundImage.Begin(BlendState.AlphaBlend, gameTime);
 
-        if (fadeComplete)
+        if (_fadeComplete)
         {
-            backgroundImage.DrawSprite(0, 0, 0, Color.White);
+            _backgroundImage.DrawSprite(0, 0, 0, Color.White);
         }
         else
         {
-            backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)screenFade));
+            _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXna4Colour(255, 255, 255, (byte)ScreenFade));
         }
 
-        backgroundImage.End();
+        _backgroundImage.End();
 
         // Draw the high score entry bit if the player has got a high score
-        if (gotHighScore)
+        if (_gotHighScore)
         {
 
-            gameEngine.Font2.Begin(BlendState.AlphaBlend);
-            gameEngine.Font2.WriteTextCentred(1280, 180, "ENCODE YOUR NAME", 2, ColourHelper.GetXNA4Colour(9, 132, 255), (byte)screenFade);
-            gameEngine.Font2.WriteTextCentred(1280, 240, "INTO THE CORE", 2, ColourHelper.GetXNA4Colour(255, 255, 255), (byte)screenFade);
-            gameEngine.Font2.WriteTextCentred(1280, 300, "FOR YOU HAVE ACHIEVED", 2, ColourHelper.GetXNA4Colour(255, 255, 255), (byte)screenFade);
-            gameEngine.Font2.WriteTextCentred(1280, 360, "A HERO'S SCORE", 2, ColourHelper.GetXNA4Colour(255, 255, 255), (byte)screenFade);
+            GameEngine.Font2.Begin(BlendState.AlphaBlend);
+            GameEngine.Font2.WriteTextCentred(1280, 180, "ENCODE YOUR NAME", 2, ColourHelper.GetXna4Colour(9, 132, 255), (byte)ScreenFade);
+            GameEngine.Font2.WriteTextCentred(1280, 240, "INTO THE CORE", 2, ColourHelper.GetXna4Colour(255, 255, 255), (byte)ScreenFade);
+            GameEngine.Font2.WriteTextCentred(1280, 300, "FOR YOU HAVE ACHIEVED", 2, ColourHelper.GetXna4Colour(255, 255, 255), (byte)ScreenFade);
+            GameEngine.Font2.WriteTextCentred(1280, 360, "A HERO'S SCORE", 2, ColourHelper.GetXna4Colour(255, 255, 255), (byte)ScreenFade);
 
-            gameEngine.Font2.WriteTextCentred(1280, 420, playersHighScore.Name, 2, ColourHelper.GetXNA4Colour(9, 132, 255), (byte)screenFade);
-            gameEngine.Font2.End();
+            GameEngine.Font2.WriteTextCentred(1280, 420, _playersHighScore.Name, 2, ColourHelper.GetXna4Colour(9, 132, 255), (byte)ScreenFade);
+            GameEngine.Font2.End();
         }
         else
         {
-            gameEngine.Font2.Begin(BlendState.AlphaBlend);
-            gameEngine.Font2.WriteTextCentred(1280, 180, "CORE OF HEROES", 2, ColourHelper.GetXNA4Colour(9, 132, 255), (byte)screenFade);
-            gameEngine.Font2.End();
+            GameEngine.Font2.Begin(BlendState.AlphaBlend);
+            GameEngine.Font2.WriteTextCentred(1280, 180, "CORE OF HEROES", 2, ColourHelper.GetXna4Colour(9, 132, 255), (byte)ScreenFade);
+            GameEngine.Font2.End();
 
-            hiscoreList.Draw(gameEngine, gameTime, 380, 250, screenFade);
+            _hiscoreList.Draw(GameEngine, gameTime, 380, 250, ScreenFade);
         }
 
-        foregroundImage.Begin(BlendState.AlphaBlend, gameTime);
+        _foregroundImage.Begin(BlendState.AlphaBlend, gameTime);
 
-        if (fadeComplete)
+        if (_fadeComplete)
         {
-            foregroundImage.DrawSprite(0, 230, 120, Color.White);
+            _foregroundImage.DrawSprite(0, 230, 120, Color.White);
         }
         else
         {
-            foregroundImage.DrawSprite(0, 230, 120, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)screenFade));
+            _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.GetXna4Colour(255, 255, 255, (byte)ScreenFade));
         }
 
-        foregroundImage.End();
+        _foregroundImage.End();
     }
 
     public override void LoadContent()
     {
-        backgroundImage = gameEngine.ContentResourceManager.GetSpriteCollection("HiScoreScreenBackground");
-        foregroundImage = gameEngine.ContentResourceManager.GetSpriteCollection("HiScoreScreenForeground");
+        _backgroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("HiScoreScreenBackground");
+        _foregroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("HiScoreScreenForeground");
     }
 }

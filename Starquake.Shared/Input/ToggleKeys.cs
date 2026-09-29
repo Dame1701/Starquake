@@ -4,7 +4,7 @@
 // -
 using Microsoft.Xna.Framework.Input;
 
-namespace StarquakeXNA;
+namespace StarquakeXNA.Input;
 
 /// <summary>
 ///     This class allows checking for keys that have been pressed down and then released. This is useful for when we don't
@@ -13,264 +13,264 @@ namespace StarquakeXNA;
 /// </summary>
 public static class ToggleKeys
 {
-    private static Keys pressedKey = Keys.None;
-    private static Keys toggledKey = Keys.None;
+    private static Keys _pressedKey = Keys.None;
+    private static Keys _toggledKey = Keys.None;
 
     public static Keys GetPressedKey()
     {
-        var temp = toggledKey;
+        var temp = _toggledKey;
         return temp;
     }
 
     public static void Update()
     {
-        toggledKey = Keys.None;
+        _toggledKey = Keys.None;
 
         if (Keyboard.GetState().GetPressedKeys().Length == 1)
         {
-            pressedKey = Keyboard.GetState().GetPressedKeys()[0];
+            _pressedKey = Keyboard.GetState().GetPressedKeys()[0];
         }
 
-        if (pressedKey != Keys.None)
+        if (_pressedKey != Keys.None)
         {
-            if (Keyboard.GetState().IsKeyUp(pressedKey))
+            if (Keyboard.GetState().IsKeyUp(_pressedKey))
             {
-                toggledKey = pressedKey;
-                pressedKey = Keys.None;
+                _toggledKey = _pressedKey;
+                _pressedKey = Keys.None;
             }
         }
     }
 
-    public static string GetFriendlyName(Keys Key)
+    public static string GetFriendlyName(Keys key)
     {
-        if (Key == Keys.NumPad0)
+        if (key == Keys.NumPad0)
         {
             return "N0";
         }
-        if (Key == Keys.NumPad1)
+        if (key == Keys.NumPad1)
         {
             return "N1";
         }
-        if (Key == Keys.NumPad2)
+        if (key == Keys.NumPad2)
         {
             return "N2";
         }
-        if (Key == Keys.NumPad3)
+        if (key == Keys.NumPad3)
         {
             return "N3";
         }
-        if (Key == Keys.NumPad4)
+        if (key == Keys.NumPad4)
         {
             return "N4";
         }
-        if (Key == Keys.NumPad5)
+        if (key == Keys.NumPad5)
         {
             return "N5";
         }
-        if (Key == Keys.NumPad6)
+        if (key == Keys.NumPad6)
         {
             return "N6";
         }
-        if (Key == Keys.NumPad7)
+        if (key == Keys.NumPad7)
         {
             return "N7";
         }
-        if (Key == Keys.NumPad8)
+        if (key == Keys.NumPad8)
         {
             return "N8";
         }
-        if (Key == Keys.NumPad9)
+        if (key == Keys.NumPad9)
         {
             return "N9";
         }
-        if (Key == Keys.Down)
+        if (key == Keys.Down)
         {
             return "DN";
         }
-        if (Key == Keys.Left)
+        if (key == Keys.Left)
         {
             return "LF";
         }
-        if (Key == Keys.Right)
+        if (key == Keys.Right)
         {
             return "RT";
         }
-        if (Key == Keys.RightAlt)
+        if (key == Keys.RightAlt)
         {
             return "RA";
         }
-        if (Key == Keys.LeftAlt)
+        if (key == Keys.LeftAlt)
         {
             return "LA";
         }
-        if (Key == Keys.Space)
+        if (key == Keys.Space)
         {
             return "SP";
         }
-        if (Key == Keys.Subtract)
+        if (key == Keys.Subtract)
         {
             return "-";
         }
-        if (Key == Keys.Add)
+        if (key == Keys.Add)
         {
             return "+";
         }
-        if (Key == Keys.CapsLock)
+        if (key == Keys.CapsLock)
         {
             return "CL";
         }
-        if (Key == Keys.Decimal)
+        if (key == Keys.Decimal)
         {
             return ".";
         }
-        if (Key == Keys.Delete)
+        if (key == Keys.Delete)
         {
             return "DL";
         }
-        if (Key == Keys.Divide)
+        if (key == Keys.Divide)
         {
             return "/";
         }
-        if (Key == Keys.LeftControl)
+        if (key == Keys.LeftControl)
         {
             return "LC";
         }
-        if (Key == Keys.RightControl)
+        if (key == Keys.RightControl)
         {
             return "RC";
         }
-        if (Key == Keys.RightShift)
+        if (key == Keys.RightShift)
         {
             return "RS";
         }
-        if (Key == Keys.LeftShift)
+        if (key == Keys.LeftShift)
         {
             return "LS";
         }
-        if (Key == Keys.LeftWindows)
+        if (key == Keys.LeftWindows)
         {
             return "LW";
         }
-        if (Key == Keys.RightWindows)
+        if (key == Keys.RightWindows)
         {
             return "RW";
         }
-        if (Key == Keys.Enter)
+        if (key == Keys.Enter)
         {
             return "RT";
         }
-        if (Key == Keys.Back)
+        if (key == Keys.Back)
         {
             return "BK";
         }
-        if (Key == Keys.BrowserBack)
+        if (key == Keys.BrowserBack)
         {
             return "BB";
         }
-        if (Key == Keys.BrowserFavorites)
+        if (key == Keys.BrowserFavorites)
         {
             return "BF";
         }
-        if (Key == Keys.BrowserHome)
+        if (key == Keys.BrowserHome)
         {
             return "BH";
         }
-        if (Key == Keys.BrowserRefresh)
+        if (key == Keys.BrowserRefresh)
         {
             return "BR";
         }
-        if (Key == Keys.BrowserSearch)
+        if (key == Keys.BrowserSearch)
         {
             return "BS";
         }
-        if (Key == Keys.BrowserStop)
+        if (key == Keys.BrowserStop)
         {
             return "BS";
         }
-        if (Key == Keys.Escape)
+        if (key == Keys.Escape)
         {
             return "ES";
         }
-        if (Key == Keys.Tab)
+        if (key == Keys.Tab)
         {
             return "TB";
         }
-        if (Key == Keys.Help)
+        if (key == Keys.Help)
         {
             return "HP";
         }
-        if (Key == Keys.Home)
+        if (key == Keys.Home)
         {
             return "HM";
         }
-        if (Key == Keys.Insert)
+        if (key == Keys.Insert)
         {
             return "IN";
         }
-        if (Key == Keys.MediaNextTrack)
+        if (key == Keys.MediaNextTrack)
         {
             return "MN";
         }
-        if (Key == Keys.MediaPreviousTrack)
+        if (key == Keys.MediaPreviousTrack)
         {
             return "MP";
         }
-        if (Key == Keys.MediaStop)
+        if (key == Keys.MediaStop)
         {
             return "MS";
         }
-        if (Key == Keys.Multiply)
+        if (key == Keys.Multiply)
         {
             return "*";
         }
-        if (Key == Keys.PageUp)
+        if (key == Keys.PageUp)
         {
             return "PU";
         }
-        if (Key == Keys.PageDown)
+        if (key == Keys.PageDown)
         {
             return "PD";
         }
-        if (Key == Keys.End)
+        if (key == Keys.End)
         {
             return "ED";
         }
-        if (Key == Keys.OemBackslash)
+        if (key == Keys.OemBackslash)
         {
             return @"\";
         }
-        if (Key == Keys.OemClear)
+        if (key == Keys.OemClear)
         {
             return "CL";
         }
-        if (Key == Keys.OemComma)
+        if (key == Keys.OemComma)
         {
             return ",";
         }
-        if (Key == Keys.OemQuestion)
+        if (key == Keys.OemQuestion)
         {
             return "?";
         }
-        if (Key == Keys.OemQuotes)
+        if (key == Keys.OemQuotes)
         {
             return "\"";
         }
-        if (Key == Keys.OemPeriod)
+        if (key == Keys.OemPeriod)
         {
             return ".";
         }
-        if (Key == Keys.OemOpenBrackets)
+        if (key == Keys.OemOpenBrackets)
         {
             return "{";
         }
-        if (Key == Keys.OemCloseBrackets)
+        if (key == Keys.OemCloseBrackets)
         {
             return "}";
         }
-        if (Key == Keys.OemTilde)
+        if (key == Keys.OemTilde)
         {
             return "@";
         }
-        return Key.ToString();
+        return key.ToString();
     }
 }

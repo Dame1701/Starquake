@@ -7,34 +7,34 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StarquakeXNA.Helpers;
 
-namespace StarquakeXNA;
+namespace StarquakeXNA.Fonts;
 
 public class BitmapFont : IDisposable
 {
-    private readonly SpriteFont font;
+    private readonly SpriteFont _font;
 
-    private Color flashColour;
+    private Color _flashColour;
 
-    private int flashCounter;
+    private int _flashCounter;
 
-    private SpriteBatch fontSpriteBatch;
+    private SpriteBatch _fontSpriteBatch;
 
-    public BitmapFont(SpriteFont Font, SpriteBatch FontSpriteBatch)
+    public BitmapFont(SpriteFont font, SpriteBatch fontSpriteBatch)
     {
-        font = Font;
-        fontSpriteBatch = FontSpriteBatch;
+        _font = font;
+        _fontSpriteBatch = fontSpriteBatch;
     }
 
-    public BitmapFont(SpriteFont Font, SpriteBatch FontSpriteBatch, Color Colour1, Color Colour2, int FlashInterval)
+    public BitmapFont(SpriteFont font, SpriteBatch fontSpriteBatch, Color colour1, Color colour2, int flashInterval)
     {
-        font = Font;
-        fontSpriteBatch = FontSpriteBatch;
-        this.FlashInterval = FlashInterval;
+        _font = font;
+        _fontSpriteBatch = fontSpriteBatch;
+        this.FlashInterval = flashInterval;
 
-        this.Colour1 = Colour1;
-        this.Colour2 = Colour2;
+        this.Colour1 = colour1;
+        this.Colour2 = colour2;
 
-        flashColour = this.Colour1;
+        _flashColour = this.Colour1;
     }
 
     public Color Colour1 { get; set; }
@@ -49,10 +49,10 @@ public class BitmapFont : IDisposable
 
     public void Dispose()
     {
-        if (fontSpriteBatch != null)
+        if (_fontSpriteBatch != null)
         {
-            fontSpriteBatch.Dispose();
-            fontSpriteBatch = null;
+            _fontSpriteBatch.Dispose();
+            _fontSpriteBatch = null;
         }
     }
 
@@ -62,134 +62,134 @@ public class BitmapFont : IDisposable
     {
         if (Flash)
         {
-            if (flashCounter > FlashInterval)
+            if (_flashCounter > FlashInterval)
             {
-                flashCounter = 0;
+                _flashCounter = 0;
 
-                if (flashColour == Colour1)
+                if (_flashColour == Colour1)
                 {
-                    flashColour = Colour2;
+                    _flashColour = Colour2;
                 }
-                else if (flashColour == Colour2)
+                else if (_flashColour == Colour2)
                 {
-                    flashColour = Colour1;
+                    _flashColour = Colour1;
                 }
             }
 
-            flashCounter++;
+            _flashCounter++;
         }
     }
 
-    public void Begin(BlendState BlendState)
+    public void Begin(BlendState blendState)
     {
-        fontSpriteBatch.Begin(SpriteSortMode.Deferred, BlendState);
+        _fontSpriteBatch.Begin(SpriteSortMode.Deferred, blendState);
     }
 
-    public void WriteText(int XPos, int YPos, string Text, Color Colour, byte ScreenFade)
+    public void WriteText(int xPos, int yPos, string text, Color colour, byte screenFade)
     {
-        fontSpriteBatch.DrawString(font, Text, new Vector2(XPos, YPos), ColourHelper.GetXNA4Colour(Colour.R, Colour.G, Colour.B, ScreenFade));
+        _fontSpriteBatch.DrawString(_font, text, new Vector2(xPos, yPos), ColourHelper.GetXna4Colour(colour.R, colour.G, colour.B, screenFade));
     }
 
     // Write spome text with a predefined leading
-    public void WriteText(int XPos, int YPos, string Text, int Leading, Color Colour, byte ScreenFade)
+    public void WriteText(int xPos, int yPos, string text, int leading, Color colour, byte screenFade)
     {
-        for (var a = 0; a < Text.Length; a++)
+        for (var a = 0; a < text.Length; a++)
         {
-            var letterToDraw = Text.Substring(a, 1);
+            var letterToDraw = text.Substring(a, 1);
             var letterLength = MeasureString(letterToDraw);
-            fontSpriteBatch.DrawString(font, letterToDraw, new Vector2(XPos, YPos), ColourHelper.GetXNA4Colour(Colour.R, Colour.G, Colour.B, ScreenFade));
-            XPos = XPos + (int)letterLength.X + Leading;
+            _fontSpriteBatch.DrawString(_font, letterToDraw, new Vector2(xPos, yPos), ColourHelper.GetXna4Colour(colour.R, colour.G, colour.B, screenFade));
+            xPos = xPos + (int)letterLength.X + leading;
         }
     }
 
-    public void WriteText(int XPos, int YPos, string Text, int Leading, Color Colour, byte ScreenFade, float Scale)
+    public void WriteText(int xPos, int yPos, string text, int leading, Color colour, byte screenFade, float scale)
     {
-        for (var a = 0; a < Text.Length; a++)
+        for (var a = 0; a < text.Length; a++)
         {
-            var letterToDraw = Text.Substring(a, 1);
+            var letterToDraw = text.Substring(a, 1);
             var letterLength = MeasureString(letterToDraw);
-            fontSpriteBatch.DrawString(font, letterToDraw, new Vector2(XPos, YPos), ColourHelper.GetXNA4Colour(Colour.R, Colour.G, Colour.B, ScreenFade), 0, new Vector2(0, 0), Scale, SpriteEffects.None, 0);
-            XPos = XPos + (int)letterLength.X + Leading;
+            _fontSpriteBatch.DrawString(_font, letterToDraw, new Vector2(xPos, yPos), ColourHelper.GetXna4Colour(colour.R, colour.G, colour.B, screenFade), 0, new Vector2(0, 0), scale, SpriteEffects.None, 0);
+            xPos = xPos + (int)letterLength.X + leading;
         }
     }
 
-    public void WriteText(int XPos, int YPos, string Text, int Leading, Color Colour, byte ScreenFade, Vector2 Scale, SpriteEffects SpriteEffect)
+    public void WriteText(int xPos, int yPos, string text, int leading, Color colour, byte screenFade, Vector2 scale, SpriteEffects spriteEffect)
     {
-        for (var a = 0; a < Text.Length; a++)
+        for (var a = 0; a < text.Length; a++)
         {
-            var letterToDraw = Text.Substring(a, 1);
+            var letterToDraw = text.Substring(a, 1);
             var letterLength = MeasureString(letterToDraw);
-            fontSpriteBatch.DrawString(font, letterToDraw, new Vector2(XPos, YPos), ColourHelper.GetXNA4Colour(Colour.R, Colour.G, Colour.B, ScreenFade), 0, new Vector2(0, 0), Scale, SpriteEffect, 0);
-            XPos = XPos + (int)letterLength.X + Leading;
+            _fontSpriteBatch.DrawString(_font, letterToDraw, new Vector2(xPos, yPos), ColourHelper.GetXna4Colour(colour.R, colour.G, colour.B, screenFade), 0, new Vector2(0, 0), scale, spriteEffect, 0);
+            xPos = xPos + (int)letterLength.X + leading;
         }
     }
 
-    public void WriteTextCentred(int HorizontalWidth, int YPos, string Text, int Leading, Color Colour, byte ScreenFade)
+    public void WriteTextCentred(int horizontalWidth, int yPos, string text, int leading, Color colour, byte screenFade)
     {
-        var stringSize = MeasureString(Text, Leading);
+        var stringSize = MeasureString(text, leading);
 
-        var indent = (HorizontalWidth - (int)stringSize.X) / 2;
+        var indent = (horizontalWidth - (int)stringSize.X) / 2;
 
-        WriteText(indent, YPos, Text, Leading, Colour, ScreenFade);
+        WriteText(indent, yPos, text, leading, colour, screenFade);
     }
 
-    public void WriteTextAltColours(int XPos, int YPos, string Text, Color Colour1, Color Colour2, byte ScreenFade)
+    public void WriteTextAltColours(int xPos, int yPos, string text, Color colour1, Color colour2, byte screenFade)
     {
-        for (var a = 0; a < Text.Length; a++)
+        for (var a = 0; a < text.Length; a++)
         {
-            var letterToDraw = Text.Substring(a, 1);
+            var letterToDraw = text.Substring(a, 1);
             var letterLength = MeasureString(letterToDraw);
 
             if (a % 2 == 0)
             {
-                fontSpriteBatch.DrawString(font, letterToDraw, new Vector2(XPos, YPos), ColourHelper.GetXNA4Colour(Colour1.R, Colour1.G, Colour1.B, ScreenFade));
+                _fontSpriteBatch.DrawString(_font, letterToDraw, new Vector2(xPos, yPos), ColourHelper.GetXna4Colour(colour1.R, colour1.G, colour1.B, screenFade));
             }
             else
             {
-                fontSpriteBatch.DrawString(font, letterToDraw, new Vector2(XPos, YPos), ColourHelper.GetXNA4Colour(Colour2.R, Colour2.G, Colour2.B, ScreenFade));
+                _fontSpriteBatch.DrawString(_font, letterToDraw, new Vector2(xPos, yPos), ColourHelper.GetXna4Colour(colour2.R, colour2.G, colour2.B, screenFade));
             }
 
-            XPos = XPos + (int)letterLength.X;
+            xPos = xPos + (int)letterLength.X;
         }
     }
 
-    public void WriteText(int XPos, int YPos, string Text, byte ScreenFade)
+    public void WriteText(int xPos, int yPos, string text, byte screenFade)
     {
         if (!Flash)
         {
-            fontSpriteBatch.DrawString(font, Text, new Vector2(XPos, YPos), ColourHelper.GetXNA4Colour(Colour1.R, Colour1.G, Colour1.B, ScreenFade));
+            _fontSpriteBatch.DrawString(_font, text, new Vector2(xPos, yPos), ColourHelper.GetXna4Colour(Colour1.R, Colour1.G, Colour1.B, screenFade));
         }
         else
         {
-            fontSpriteBatch.DrawString(font, Text, new Vector2(XPos, YPos), ColourHelper.GetXNA4Colour(flashColour.R, flashColour.G, flashColour.B, ScreenFade));
+            _fontSpriteBatch.DrawString(_font, text, new Vector2(xPos, yPos), ColourHelper.GetXna4Colour(_flashColour.R, _flashColour.G, _flashColour.B, screenFade));
         }
     }
 
-    public void WriteText(int XPos, int YPos, string Text, int Leading, byte ScreenFade)
+    public void WriteText(int xPos, int yPos, string text, int leading, byte screenFade)
     {
         if (!Flash)
         {
-            WriteText(XPos, YPos, Text, Leading, Colour1, ScreenFade);
+            WriteText(xPos, yPos, text, leading, Colour1, screenFade);
         }
         else
         {
-            WriteText(XPos, YPos, Text, Leading, flashColour, ScreenFade);
+            WriteText(xPos, yPos, text, leading, _flashColour, screenFade);
         }
     }
 
     public void End()
     {
-        fontSpriteBatch.End();
+        _fontSpriteBatch.End();
     }
 
-    public Vector2 MeasureString(string Text)
-        => font.MeasureString(Text);
+    public Vector2 MeasureString(string text)
+        => _font.MeasureString(text);
 
     // Measure the string and take into account horizontal leading
-    public Vector2 MeasureString(string Text, int Leading)
+    public Vector2 MeasureString(string text, int leading)
     {
-        var temp = font.MeasureString(Text);
-        temp.X = temp.X + (float)Text.Length * Leading;
+        var temp = _font.MeasureString(text);
+        temp.X = temp.X + (float)text.Length * leading;
 
         return temp;
     }

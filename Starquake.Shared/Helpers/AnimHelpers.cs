@@ -2,41 +2,40 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-namespace StarquakeXNA.AnimationHelpers;
+
+namespace StarquakeXNA.Helpers;
 
 public class AnimationTrigger
 {
-    protected bool triggered;
+    protected bool UseTrigger;
 
-    protected bool useTrigger;
-
-    public AnimationTrigger(bool UseTrigger)
+    public AnimationTrigger(bool useTrigger)
     {
-        useTrigger = UseTrigger;
+        UseTrigger = useTrigger;
     }
-    public bool Triggered => triggered;
+    public bool Triggered { get; protected set; }
 
     public void Trigger()
     {
-        triggered = true;
+        Triggered = true;
     }
 }
 
 public class IntegerSubtractor : AnimationTrigger
 {
-    private readonly int finalValue;
-    private readonly int initialValue;
-    private readonly int stepSize;
+    private readonly int _finalValue;
+    private readonly int _initialValue;
+    private readonly int _stepSize;
 
     public IntegerSubtractor(
-        int InitialValue,
-        int FinalValue,
-        int StepSize,
-        bool UseTrigger) : base(UseTrigger)
+        int initialValue,
+        int finalValue,
+        int stepSize,
+        bool useTrigger) : base(useTrigger)
     {
-        initialValue = InitialValue;
-        finalValue = FinalValue;
-        stepSize = StepSize;
+        _initialValue = initialValue;
+        _finalValue = finalValue;
+        _stepSize = stepSize;
 
         Reset();
     }
@@ -61,23 +60,23 @@ public class IntegerSubtractor : AnimationTrigger
 
     public void Reset()
     {
-        Modifier = initialValue;
-        triggered = !useTrigger;
+        Modifier = _initialValue;
+        Triggered = !UseTrigger;
     }
 
 
     public void Update()
     {
-        if (triggered)
+        if (Triggered)
         {
-            if (Modifier > finalValue)
+            if (Modifier > _finalValue)
             {
-                Modifier = Modifier - stepSize;
+                Modifier = Modifier - _stepSize;
             }
 
-            if (Modifier <= finalValue)
+            if (Modifier <= _finalValue)
             {
-                Modifier = finalValue;
+                Modifier = _finalValue;
             }
         }
     }
@@ -85,19 +84,19 @@ public class IntegerSubtractor : AnimationTrigger
 
 public class IntegerAdder : AnimationTrigger
 {
-    private readonly int finalValue;
-    private readonly int initialValue;
-    private readonly int stepSize;
+    private readonly int _finalValue;
+    private readonly int _initialValue;
+    private readonly int _stepSize;
 
     public IntegerAdder(
-        int InitialValue,
-        int FinalValue,
-        int StepSize,
-        bool UseTrigger) : base(UseTrigger)
+        int initialValue,
+        int finalValue,
+        int stepSize,
+        bool useTrigger) : base(useTrigger)
     {
-        initialValue = InitialValue;
-        finalValue = FinalValue;
-        stepSize = StepSize;
+        _initialValue = initialValue;
+        _finalValue = finalValue;
+        _stepSize = stepSize;
 
         Reset();
     }
@@ -122,23 +121,23 @@ public class IntegerAdder : AnimationTrigger
 
     public void Reset()
     {
-        Modifier = initialValue;
-        triggered = !useTrigger;
+        Modifier = _initialValue;
+        Triggered = !UseTrigger;
     }
 
 
     public void Update()
     {
-        if (triggered)
+        if (Triggered)
         {
-            if (Modifier < finalValue)
+            if (Modifier < _finalValue)
             {
-                Modifier = Modifier + stepSize;
+                Modifier = Modifier + _stepSize;
             }
 
-            if (Modifier >= finalValue)
+            if (Modifier >= _finalValue)
             {
-                Modifier = finalValue;
+                Modifier = _finalValue;
             }
         }
     }
@@ -146,19 +145,19 @@ public class IntegerAdder : AnimationTrigger
 
 public class FloatSubtractor : AnimationTrigger
 {
-    private readonly float finalValue;
-    private readonly float initialValue;
-    private readonly float stepSize;
+    private readonly float _finalValue;
+    private readonly float _initialValue;
+    private readonly float _stepSize;
 
     public FloatSubtractor(
-        float InitialValue,
-        float FinalValue,
-        float StepSize,
-        bool UseTrigger) : base(UseTrigger)
+        float initialValue,
+        float finalValue,
+        float stepSize,
+        bool useTrigger) : base(useTrigger)
     {
-        initialValue = InitialValue;
-        finalValue = FinalValue;
-        stepSize = StepSize;
+        _initialValue = initialValue;
+        _finalValue = finalValue;
+        _stepSize = stepSize;
 
         Reset();
     }
@@ -166,23 +165,23 @@ public class FloatSubtractor : AnimationTrigger
 
     public void Reset()
     {
-        Modifier = initialValue;
-        triggered = !useTrigger;
+        Modifier = _initialValue;
+        Triggered = !UseTrigger;
     }
 
 
     public void Update()
     {
-        if (triggered)
+        if (Triggered)
         {
-            if (Modifier > finalValue)
+            if (Modifier > _finalValue)
             {
-                Modifier = Modifier - stepSize;
+                Modifier = Modifier - _stepSize;
             }
 
-            if (Modifier <= finalValue)
+            if (Modifier <= _finalValue)
             {
-                Modifier = finalValue;
+                Modifier = _finalValue;
             }
         }
     }
@@ -190,19 +189,19 @@ public class FloatSubtractor : AnimationTrigger
 
 public class FloatAdder : AnimationTrigger
 {
-    private readonly float finalValue;
-    private readonly float initialValue;
-    private readonly float stepSize;
+    private readonly float _finalValue;
+    private readonly float _initialValue;
+    private readonly float _stepSize;
 
     public FloatAdder(
-        float InitialValue,
-        float FinalValue,
-        float StepSize,
-        bool UseTrigger) : base(UseTrigger)
+        float initialValue,
+        float finalValue,
+        float stepSize,
+        bool useTrigger) : base(useTrigger)
     {
-        initialValue = InitialValue;
-        finalValue = FinalValue;
-        stepSize = StepSize;
+        _initialValue = initialValue;
+        _finalValue = finalValue;
+        _stepSize = stepSize;
 
         Reset();
     }
@@ -210,23 +209,23 @@ public class FloatAdder : AnimationTrigger
 
     public void Reset()
     {
-        Modifier = initialValue;
-        triggered = !useTrigger;
+        Modifier = _initialValue;
+        Triggered = !UseTrigger;
     }
 
 
     public void Update()
     {
-        if (triggered)
+        if (Triggered)
         {
-            if (Modifier < finalValue)
+            if (Modifier < _finalValue)
             {
-                Modifier = Modifier + stepSize;
+                Modifier = Modifier + _stepSize;
             }
 
-            if (Modifier >= finalValue)
+            if (Modifier >= _finalValue)
             {
-                Modifier = finalValue;
+                Modifier = _finalValue;
             }
         }
     }

@@ -5,44 +5,46 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StarquakeXNA.Animations;
+using StarquakeXNA.Engines;
 using StarquakeXNA.Structure;
 
-namespace StarquakeXNA.GameComponents;
+namespace StarquakeXNA.GameComponents.GameScreens;
 
 public class AccessBoothScreen : GameComponentBase, IGameScreen
 {
 
-    private readonly int[] accessCode;
+    private readonly int[] _accessCode;
 
-    private readonly KeyScanner[] accessCodes;
+    private readonly KeyScanner[] _accessCodes;
 
-    private readonly BlobAccessBoothAnim blobAnim1;
-    private readonly BlobAccessBoothAnim blobAnim2;
-    private readonly int[] inventorySlotToScan;
+    private readonly BlobAccessBoothAnim _blobAnim1;
+    private readonly BlobAccessBoothAnim _blobAnim2;
+    private readonly int[] _inventorySlotToScan;
 
-    private int resultMessageFade;
-    private DateTime screenReadWait;
-    private bool soundPlayed;
+    private int _resultMessageFade;
+    private DateTime _screenReadWait;
+    private bool _soundPlayed;
 
-    public AccessBoothScreen(GameEngine GameEngineReference)
-        : base(GameEngineReference)
+    public AccessBoothScreen(GameEngine gameEngineReference)
+        : base(gameEngineReference)
     {
-        accessCode = new int[3]
+        _accessCode = new int[3]
         {
             -1,
             -1,
             -1
         };
-        accessCodes = new KeyScanner[3];
-        inventorySlotToScan = new int[3];
+        _accessCodes = new KeyScanner[3];
+        _inventorySlotToScan = new int[3];
 
-        for (var a = 0; a < accessCodes.Length; a++)
+        for (var a = 0; a < _accessCodes.Length; a++)
         {
-            accessCodes[a] = new KeyScanner(gameEngine, true);
+            _accessCodes[a] = new KeyScanner(GameEngine, true);
         }
 
-        blobAnim1 = new BlobAccessBoothAnim(GameEngineReference, 164, 800);
-        blobAnim2 = new BlobAccessBoothAnim(GameEngineReference, 164, 800);
+        _blobAnim1 = new BlobAccessBoothAnim(gameEngineReference, 164, 800);
+        _blobAnim2 = new BlobAccessBoothAnim(gameEngineReference, 164, 800);
 
         Reset(null);
     }
@@ -53,170 +55,170 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
 
     public override void Update(GameTime gameTime)
     {
-        gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("MachineryBackground", 0.5f, true);
+        GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("MachineryBackground", 0.5f, true);
 
-        blobAnim1.Update();
-        blobAnim2.Update();
+        _blobAnim1.Update();
+        _blobAnim2.Update();
 
         // Start first scan off....
-        if (!accessCodes[0].Scanned)
+        if (!_accessCodes[0].Scanned)
         {
-            accessCodes[0].StartScan();
-            gameEngine.BlobStatusPanel.ScanSlot(inventorySlotToScan[0]);
+            _accessCodes[0].StartScan();
+            GameEngine.BlobStatusPanel.ScanSlot(_inventorySlotToScan[0]);
         }
 
         // Follow with the subsequent ones...
-        for (var a = 0; a < accessCodes.Length; a++)
+        for (var a = 0; a < _accessCodes.Length; a++)
         {
-            if (accessCodes[a].Scanned)
+            if (_accessCodes[a].Scanned)
             {
-                if (a < 2 && !accessCodes[a + 1].Scanned)
+                if (a < 2 && !_accessCodes[a + 1].Scanned)
                 {
-                    accessCodes[a + 1].StartScan();
-                    gameEngine.BlobStatusPanel.ScanSlot(inventorySlotToScan[a + 1]);
+                    _accessCodes[a + 1].StartScan();
+                    GameEngine.BlobStatusPanel.ScanSlot(_inventorySlotToScan[a + 1]);
                 }
             }
-            accessCodes[a].Update();
+            _accessCodes[a].Update();
         }
 
-        resultMessageFade = gameEngine.RandomNumberGenerator.Next(200, 256);
+        _resultMessageFade = GameEngine.RandomNumberGenerator.Next(200, 256);
 
-        if (screenReadWait.Ticks > 0)
+        if (_screenReadWait.Ticks > 0)
         {
-            if (screenReadWait + new TimeSpan(0, 0, 1) < DateTime.Now)
+            if (_screenReadWait + new TimeSpan(0, 0, 1) < DateTime.Now)
             {
-                gameEngine.GetGameScreen(enGameScreen.MainGame).ScreenFade = 40;
-                gameEngine.GetGameScreen(enGameScreen.MainGame).PerformPostScreenChangeActions(enGameScreen.AccessBooth, Success);
+                GameEngine.GetGameScreen(GameScreenType.MainGame).ScreenFade = 40;
+                GameEngine.GetGameScreen(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.AccessBooth, Success);
 
-                gameEngine.CurrentGameScreen = enGameScreen.MainGame;
+                GameEngine.CurrentGameScreen = GameScreenType.MainGame;
             }
         }
     }
 
     public override void Draw(GameTime gameTime)
     {
-        gameEngine.Font2.Begin(BlendState.AlphaBlend);
-        gameEngine.Font2.WriteText(350, 100, "SECURITY  DOOR", 2, Color.White, 255);
-        gameEngine.Font2.WriteText(370, 300, "ACCESS CODE", 2, Color.White, 255);
-        gameEngine.Font2.End();
+        GameEngine.Font2.Begin(BlendState.AlphaBlend);
+        GameEngine.Font2.WriteText(350, 100, "SECURITY  DOOR", 2, Color.White, 255);
+        GameEngine.Font2.WriteText(370, 300, "ACCESS CODE", 2, Color.White, 255);
+        GameEngine.Font2.End();
 
         //gameEngine.SQText.WriteText("SECURITY  DOOR", 250, 100, gameTime, Color.White);
         //gameEngine.SQText.WriteText("ACCESS  CODE", 270, 300, gameTime, Color.White);
 
-        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).Begin(BlendState.AlphaBlend, gameTime);
-        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).DrawSprite(399, 380, 160);
-        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).DrawSprite(400, 508, 160);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).Begin(BlendState.AlphaBlend, gameTime);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).DrawSprite(399, 380, 160);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).DrawSprite(400, 508, 160);
 
-        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.LowerScreenTilesName).End();
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).End();
 
-        blobAnim1.Draw(gameTime);
-        blobAnim2.Draw(gameTime);
+        _blobAnim1.Draw(gameTime);
+        _blobAnim2.Draw(gameTime);
 
-        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).Begin(BlendState.AlphaBlend, gameTime);
-        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(9, 380, 160);
-        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).DrawSprite(10, 508, 160);
-        gameEngine.ContentResourceManager.GetSpriteCollection(gameEngine.UpperScreenTilesName).End();
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).Begin(BlendState.AlphaBlend, gameTime);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).DrawSprite(9, 380, 160);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).DrawSprite(10, 508, 160);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).End();
 
         for (var a = 0; a < 3; a++)
         {
-            accessCodes[a].Draw(accessCode[a] + 10, 348 + a * 128, 364, gameTime);
+            _accessCodes[a].Draw(_accessCode[a] + 10, 348 + a * 128, 364, gameTime);
         }
 
         // Draw the result
-        if (accessCodes[2].Scanned)
+        if (_accessCodes[2].Scanned)
         {
             if (Success)
             {
-                gameEngine.ShapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-                gameEngine.ShapeDrawer.FillRectangle(new Rectangle(167, 498, 40, 40), new Color(0, (byte)resultMessageFade, 0));
-                gameEngine.ShapeDrawer.FillRectangle(new Rectangle(215, 500, 36, 36), new Color(0, (byte)resultMessageFade, 0));
-                gameEngine.ShapeDrawer.FillRectangle(new Rectangle(259, 504, 28, 28), new Color(0, (byte)resultMessageFade, 0));
-                gameEngine.ShapeDrawer.End();
+                GameEngine.ShapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(167, 498, 40, 40), new Color(0, (byte)_resultMessageFade, 0));
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(215, 500, 36, 36), new Color(0, (byte)_resultMessageFade, 0));
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(259, 504, 28, 28), new Color(0, (byte)_resultMessageFade, 0));
+                GameEngine.ShapeDrawer.End();
 
-                gameEngine.Font2.Begin(BlendState.AlphaBlend);
-                gameEngine.Font2.WriteText(310, 500, "ACCESS AUTHORISED", 2, new Color(0, 255, 0), (byte)resultMessageFade);
-                gameEngine.Font2.End();
+                GameEngine.Font2.Begin(BlendState.AlphaBlend);
+                GameEngine.Font2.WriteText(310, 500, "ACCESS AUTHORISED", 2, new Color(0, 255, 0), (byte)_resultMessageFade);
+                GameEngine.Font2.End();
 
-                gameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
-                gameEngine.ShapeDrawer.FillRectangle(new Rectangle(756, 504, 28, 28), new Color(0, (byte)resultMessageFade, 0));
-                gameEngine.ShapeDrawer.FillRectangle(new Rectangle(792, 500, 36, 36), new Color(0, (byte)resultMessageFade, 0));
-                gameEngine.ShapeDrawer.FillRectangle(new Rectangle(836, 498, 40, 40), new Color(0, (byte)resultMessageFade, 0));
-                gameEngine.ShapeDrawer.End();
+                GameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(756, 504, 28, 28), new Color(0, (byte)_resultMessageFade, 0));
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(792, 500, 36, 36), new Color(0, (byte)_resultMessageFade, 0));
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(836, 498, 40, 40), new Color(0, (byte)_resultMessageFade, 0));
+                GameEngine.ShapeDrawer.End();
 
                 // Don't allow the sound to be called more than once
-                if (!soundPlayed)
+                if (!_soundPlayed)
                 {
-                    gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("AccessSuccess", 1f, false);
-                    soundPlayed = true;
+                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("AccessSuccess", 1f, false);
+                    _soundPlayed = true;
                 }
             }
             else
             {
-                gameEngine.ShapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-                gameEngine.ShapeDrawer.FillRectangle(new Rectangle(157, 498, 40, 40), new Color(resultMessageFade, 0, 0, 0));
-                gameEngine.ShapeDrawer.FillRectangle(new Rectangle(205, 500, 36, 36), new Color(resultMessageFade, 0, 0, 0));
-                gameEngine.ShapeDrawer.FillRectangle(new Rectangle(249, 504, 28, 28), new Color(resultMessageFade, 0, 0, 0));
-                gameEngine.ShapeDrawer.End();
+                GameEngine.ShapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(157, 498, 40, 40), new Color(_resultMessageFade, 0, 0, 0));
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(205, 500, 36, 36), new Color(_resultMessageFade, 0, 0, 0));
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(249, 504, 28, 28), new Color(_resultMessageFade, 0, 0, 0));
+                GameEngine.ShapeDrawer.End();
 
-                gameEngine.Font2.Begin(BlendState.AlphaBlend);
-                gameEngine.Font2.WriteText(300, 500, "ACCESS CODE INVALID", 2, Color.Red, (byte)resultMessageFade);
-                gameEngine.Font2.End();
+                GameEngine.Font2.Begin(BlendState.AlphaBlend);
+                GameEngine.Font2.WriteText(300, 500, "ACCESS CODE INVALID", 2, Color.Red, (byte)_resultMessageFade);
+                GameEngine.Font2.End();
 
-                gameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
-                gameEngine.ShapeDrawer.FillRectangle(new Rectangle(746, 504, 28, 28), new Color(resultMessageFade, 0, 0, 0));
-                gameEngine.ShapeDrawer.FillRectangle(new Rectangle(782, 500, 36, 36), new Color(resultMessageFade, 0, 0, 0));
-                gameEngine.ShapeDrawer.FillRectangle(new Rectangle(826, 498, 40, 40), new Color(resultMessageFade, 0, 0, 0));
-                gameEngine.ShapeDrawer.End();
+                GameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(746, 504, 28, 28), new Color(_resultMessageFade, 0, 0, 0));
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(782, 500, 36, 36), new Color(_resultMessageFade, 0, 0, 0));
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(826, 498, 40, 40), new Color(_resultMessageFade, 0, 0, 0));
+                GameEngine.ShapeDrawer.End();
 
                 // Don't allow the sound to be called more than once
-                if (!soundPlayed)
+                if (!_soundPlayed)
                 {
-                    gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("AccessFailed", 1f, false);
-                    soundPlayed = true;
+                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("AccessFailed", 1f, false);
+                    _soundPlayed = true;
                 }
             }
 
             // Start the pause timer
-            if (screenReadWait.Ticks == 0)
+            if (_screenReadWait.Ticks == 0)
             {
-                screenReadWait = DateTime.Now;
+                _screenReadWait = DateTime.Now;
             }
 
-            soundPlayed = true;
+            _soundPlayed = true;
         }
     }
 
     #region IGameScreen Members
 
-    public void Reset(object Data)
+    public void Reset(object data)
     {
-        soundPlayed = false;
-        blobAnim1.Reset(enDirection.Left);
-        blobAnim2.Reset(enDirection.Right);
+        _soundPlayed = false;
+        _blobAnim1.Reset(Direction.Left);
+        _blobAnim2.Reset(Direction.Right);
 
-        if (gameEngine.GameScreens.CurrentGameScreenData.AccessCode != null)
+        if (GameEngine.GameScreens.CurrentGameScreenData.AccessCode != null)
         {
-            for (var a = 0; a < accessCode.Length; a++)
+            for (var a = 0; a < _accessCode.Length; a++)
             {
-                accessCode[a] = int.Parse(gameEngine.GameScreens.CurrentGameScreenData.AccessCode.Substring(a, 1));
+                _accessCode[a] = int.Parse(GameEngine.GameScreens.CurrentGameScreenData.AccessCode.Substring(a, 1));
             }
         }
 
-        screenReadWait = new DateTime(0);
-        resultMessageFade = 255;
+        _screenReadWait = new DateTime(0);
+        _resultMessageFade = 255;
 
         // Scan blob's inventory to see if we have the right stuff
         Success = true;
 
-        for (var b = 0; b < accessCode.Length; b++)
+        for (var b = 0; b < _accessCode.Length; b++)
         {
             var match = false;
 
             int a;
-            for (a = 0; a < gameEngine.Player.BlobInventory.Length; a++)
+            for (a = 0; a < GameEngine.Player.BlobInventory.Length; a++)
             {
-                if ((int)gameEngine.Player.BlobInventory[a] - 10 == accessCode[b] ||
-                    gameEngine.Player.BlobInventory[a] == enCollectables.AccessCard)
+                if ((int)GameEngine.Player.BlobInventory[a] - 10 == _accessCode[b] ||
+                    GameEngine.Player.BlobInventory[a] == Collectables.AccessCard)
                 {
                     match = true;
                     break;
@@ -225,11 +227,11 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
 
             if (match)
             {
-                inventorySlotToScan[b] = a;
+                _inventorySlotToScan[b] = a;
             }
             else
             {
-                inventorySlotToScan[b] = -1;
+                _inventorySlotToScan[b] = -1;
             }
 
             // if we don't have a match the shows over!
@@ -238,41 +240,41 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
                 Success = match;
             }
 
-            accessCodes[b].Reset(match);
+            _accessCodes[b].Reset(match);
         }
 
         // Move blob
-        if (Data != null)
+        if (data != null)
         {
-            var temp = Data as object[];
+            var temp = data as object[];
 
             if (temp != null)
             {
 
-                if ((enDirection)temp[0] == enDirection.Left)
+                if ((Direction)temp[0] == Direction.Left)
                 {
                     if (Success)
                     {
-                        gameEngine.Player.BlobXPos = ((int)temp[1] - 1) * 128 + 16;
-                        gameEngine.Player.BlobFrame = 0;
+                        GameEngine.Player.BlobXPos = ((int)temp[1] - 1) * 128 + 16;
+                        GameEngine.Player.BlobFrame = 0;
                     }
                     else
                     {
-                        gameEngine.Player.BlobXPos = (int)temp[1] * 128 + 48;
-                        gameEngine.Player.BlobFrame = 0;
+                        GameEngine.Player.BlobXPos = (int)temp[1] * 128 + 48;
+                        GameEngine.Player.BlobFrame = 0;
                     }
                 }
-                else if ((enDirection)temp[0] == enDirection.Right)
+                else if ((Direction)temp[0] == Direction.Right)
                 {
                     if (Success)
                     {
-                        gameEngine.Player.BlobXPos = ((int)temp[1] + 1) * 128 + 48;
-                        gameEngine.Player.BlobFrame = 10;
+                        GameEngine.Player.BlobXPos = ((int)temp[1] + 1) * 128 + 48;
+                        GameEngine.Player.BlobFrame = 10;
                     }
                     else
                     {
-                        gameEngine.Player.BlobXPos = (int)temp[1] * 128 + 16;
-                        gameEngine.Player.BlobFrame = 10;
+                        GameEngine.Player.BlobXPos = (int)temp[1] * 128 + 16;
+                        GameEngine.Player.BlobFrame = 10;
                     }
                 }
             }
@@ -280,7 +282,7 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
         }
     }
 
-    public void PerformPostScreenChangeActions(enGameScreen TriggeringScreen, object Param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object param)
     {
         //throw new NotImplementedException();
     }
