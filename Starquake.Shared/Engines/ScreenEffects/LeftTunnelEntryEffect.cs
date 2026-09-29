@@ -4,7 +4,7 @@
 // -
 using Starquake.Structure;
 
-namespace Starquake.Engines;
+namespace Starquake.Engines.ScreenEffects;
 
 public class LeftTunnelEntryEffect : ScreenEffectBase
 {

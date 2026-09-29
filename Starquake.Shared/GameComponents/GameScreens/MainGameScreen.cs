@@ -10,6 +10,7 @@ using Starquake.ContentManagement;
 using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Input;
+using Starquake.Sounds;
 using Starquake.Structure;
 
 namespace Starquake.GameComponents.GameScreens;
@@ -58,7 +59,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         if (triggeringScreen == GameScreenType.MainGame)
         {
             // Reset viewport back to game area
-            GameEngine.ScreenEffctEngine.SelectRenderViewPort("GameArea");
+            GameEngine.ScreenEffectEngine.SelectRenderViewPort("GameArea");
         }
 
         // Update score for each new screen visited
@@ -224,13 +225,13 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         }
 
         // Update the screen effect engine
-        GameEngine.ScreenEffctEngine.Update();
+        GameEngine.ScreenEffectEngine.Update();
         GameEngine.GameScreens.Update(gameTime);
 
         if (!GameEngine.IntroSequence.SequenceRunning ||
             GameEngine.IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
         {
-            if (!GameEngine.ScreenEffctEngine.HaltBlobAndNasties)
+            if (!GameEngine.ScreenEffectEngine.HaltBlobAndNasties)
             {
                 GameEngine.Player.Update(gameTime);
             }
@@ -268,7 +269,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
             // Put the delay stuff in here
             if (!GameEngine.IntroSequence.SequenceRunning)
             {
-                if (!GameEngine.ScreenEffctEngine.HaltBlobAndNasties)
+                if (!GameEngine.ScreenEffectEngine.HaltBlobAndNasties)
                 {
                     GameEngine.Nasties.Update(gameTime);
                 }
@@ -315,7 +316,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
             }
 
             // Shake the screen, but only if a screen effect is not active
-            if (GameEngine.ScreenEffctEngine.ActiveScreenEffect == null)
+            if (GameEngine.ScreenEffectEngine.ActiveScreenEffect == null)
             {
                 if (_shakingScreen)
                 {
@@ -351,7 +352,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
 
                 if (yShakeOffset > 0 && xShakeOffset > 0)
                 {
-                    GameEngine.ScreenEffctEngine.MoveViewPort("GameArea", xShakeOffset, yShakeOffset);
+                    GameEngine.ScreenEffectEngine.MoveViewPort("GameArea", xShakeOffset, yShakeOffset);
                 }
             }
         }

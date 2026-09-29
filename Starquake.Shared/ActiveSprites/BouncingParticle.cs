@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Starquake.Animations;
 using Starquake.Engines;
 using Starquake.Particles;
+using Starquake.Sprites;
 using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
@@ -217,7 +218,7 @@ public class BouncingParticle
                 _particleBounce.Draw(spriteToDraw, XPos + 4, YPos + 4, spriteNumber);
             }
 
-            // In addictive mode so draw a few to improve brightness
+            // In additive mode so draw a few to improve brightness
             Fireball.Draw(_particleBounce.Fade);
         }
     }

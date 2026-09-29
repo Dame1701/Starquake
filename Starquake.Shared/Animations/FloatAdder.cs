@@ -2,18 +2,18 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-namespace Starquake.Helpers;
+namespace Starquake.Animations;
 
-public class IntegerAdder : AnimationTrigger
+public class FloatAdder : AnimationTrigger
 {
-    private readonly int _finalValue;
-    private readonly int _initialValue;
-    private readonly int _stepSize;
+    private readonly float _finalValue;
+    private readonly float _initialValue;
+    private readonly float _stepSize;
 
-    public IntegerAdder(
-        int initialValue,
-        int finalValue,
-        int stepSize,
+    public FloatAdder(
+        float initialValue,
+        float finalValue,
+        float stepSize,
         bool useTrigger) : base(useTrigger)
     {
         _initialValue = initialValue;
@@ -22,24 +22,7 @@ public class IntegerAdder : AnimationTrigger
 
         Reset();
     }
-    public int Modifier { get; private set; }
-
-    public byte ByteModifier
-    {
-        get
-        {
-            if (Modifier > 255)
-            {
-                return 255;
-            }
-            if (Modifier < 0)
-            {
-                return 0;
-            }
-
-            return (byte)Modifier;
-        }
-    }
+    public float Modifier { get; private set; }
 
     public void Reset()
     {

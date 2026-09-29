@@ -3,9 +3,8 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
-using Starquake.Structure;
 
-namespace Starquake.Display;
+namespace Starquake.Structure;
 
 public class SecondLayerTile
 {

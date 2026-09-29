@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Engines;
 using Starquake.GameComponents.GameScreens;
+using Starquake.Sounds;
 using Starquake.Structure;
 
 namespace Starquake.Animations;
@@ -198,7 +199,7 @@ public class IntroSequence : GameComponentBase
 
                 _rumbleAmount = _rumbleAmount - 0.5;
 
-                GameEngine.ScreenEffctEngine.MoveViewPort("GameArea", xShakeOffset, yShakeOffset);
+                GameEngine.ScreenEffectEngine.MoveViewPort("GameArea", xShakeOffset, yShakeOffset);
 
                 // Play rumble sound
                 _rumbleSound = GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("Rumble", true);

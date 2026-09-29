@@ -3,7 +3,7 @@
 // ---------------------------------------------------------
 // -
 
-namespace Starquake.Structure;
+namespace Starquake.Sounds;
 
 public enum SoundFade
 {

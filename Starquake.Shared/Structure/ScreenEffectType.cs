@@ -8,7 +8,7 @@ namespace Starquake.Structure;
 public enum ScreenEffectType
 {
     None,
-    AddictiveFade,
+    AdditiveFade,
     LeftTunnelEntry,
     RightTunnelEntry
 }

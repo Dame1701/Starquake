@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Structure;
 
-namespace Starquake.Engines;
+namespace Starquake.Engines.ScreenEffects;
 
 public abstract class ScreenEffectBase
 {

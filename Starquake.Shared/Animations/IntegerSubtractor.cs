@@ -2,18 +2,18 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-namespace Starquake.Helpers;
+namespace Starquake.Animations;
 
-public class FloatSubtractor : AnimationTrigger
+public class IntegerSubtractor : AnimationTrigger
 {
-    private readonly float _finalValue;
-    private readonly float _initialValue;
-    private readonly float _stepSize;
+    private readonly int _finalValue;
+    private readonly int _initialValue;
+    private readonly int _stepSize;
 
-    public FloatSubtractor(
-        float initialValue,
-        float finalValue,
-        float stepSize,
+    public IntegerSubtractor(
+        int initialValue,
+        int finalValue,
+        int stepSize,
         bool useTrigger) : base(useTrigger)
     {
         _initialValue = initialValue;
@@ -22,7 +22,24 @@ public class FloatSubtractor : AnimationTrigger
 
         Reset();
     }
-    public float Modifier { get; private set; }
+    public int Modifier { get; private set; }
+
+    public byte ByteModifier
+    {
+        get
+        {
+            if (Modifier > 255)
+            {
+                return 255;
+            }
+            if (Modifier < 0)
+            {
+                return 0;
+            }
+
+            return (byte)Modifier;
+        }
+    }
 
     public void Reset()
     {

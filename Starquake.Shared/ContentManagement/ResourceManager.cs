@@ -13,6 +13,7 @@ using Starquake.Engines;
 using Starquake.Particles;
 using Starquake.SharedLibs;
 using Starquake.Sounds;
+using Starquake.Sprites;
 using Starquake.Structure;
 
 namespace Starquake.ContentManagement;

@@ -6,16 +6,16 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Structure;
 
-namespace Starquake.Engines;
+namespace Starquake.Engines.ScreenEffects;
 
-public class AddictiveFade : ScreenEffectBase
+public class AdditiveFade : ScreenEffectBase
 {
     private int _effectDurationCounter;
 
-    public AddictiveFade(GameEngine gameEngineReference)
+    public AdditiveFade(GameEngine gameEngineReference)
         : base(gameEngineReference)
     {
-        ScreenEffectType = ScreenEffectType.AddictiveFade;
+        ScreenEffectType = ScreenEffectType.AdditiveFade;
     }
 
     public override void TriggerEffect(RenderViewPort effectSurface, int effectSpeed, int effectDuration)

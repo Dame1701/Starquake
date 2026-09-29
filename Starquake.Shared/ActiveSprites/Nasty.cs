@@ -10,6 +10,7 @@ using Starquake.ContentManagement;
 using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Particles;
+using Starquake.Sprites;
 using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;

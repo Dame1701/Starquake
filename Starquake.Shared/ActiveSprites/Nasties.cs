@@ -129,7 +129,7 @@ public class Nasties : GameComponentBase
                                 if (!nastyInteractingWithBlob)
                                 {
                                     nastyInteractingWithBlob = true;
-                                    OnNastyInteractionWithBlob(NastyInterationType.HitBlob, _nasties[a].NastyType);
+                                    OnNastyInteractionWithBlob(NastyInteractionType.HitBlob, _nasties[a].NastyType);
                                 }
                             }
 
@@ -168,7 +168,7 @@ public class Nasties : GameComponentBase
 
                                 if (OnNastyInteractionWithBlob != null)
                                 {
-                                    OnNastyInteractionWithBlob(NastyInterationType.BlobShot,
+                                    OnNastyInteractionWithBlob(NastyInteractionType.BlobShot,
                                         _nasties[a].NastyType);
                                 }
                             }

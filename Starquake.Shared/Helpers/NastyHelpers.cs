@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 using ProjectMercury;
 using Starquake.Structure;
 
-namespace Starquake.ActiveSprites;
+namespace Starquake.Helpers;
 
 public class NastyHelpers
 {

@@ -125,7 +125,7 @@ public class ConveyerNasties : GameComponentBase
                     {
                         if (OnNastyInteractionWithBlob != null)
                         {
-                            OnNastyInteractionWithBlob(NastyInterationType.HitBlob, NastyType.Conveyer);
+                            OnNastyInteractionWithBlob(NastyInteractionType.HitBlob, NastyType.Conveyer);
                         }
 
                         // Trigger the blob animation
@@ -155,7 +155,7 @@ public class ConveyerNasties : GameComponentBase
 
                             if (OnNastyInteractionWithBlob != null)
                             {
-                                OnNastyInteractionWithBlob(NastyInterationType.BlobShot, NastyType.Conveyer);
+                                OnNastyInteractionWithBlob(NastyInteractionType.BlobShot, NastyType.Conveyer);
                             }
                         }
                     }

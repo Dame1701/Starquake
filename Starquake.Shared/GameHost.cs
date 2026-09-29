@@ -221,9 +221,9 @@ public class GameHost : Game
         {
             _gameEngine.Draw(gameTime);
 
-            if (_gameEngine.ScreenEffctEngine != null)
+            if (_gameEngine.ScreenEffectEngine != null)
             {
-                _gameEngine.ScreenEffctEngine.Draw();
+                _gameEngine.ScreenEffectEngine.Draw();
             }
 
             if (_gameEngine.ScanlinesEnabled)

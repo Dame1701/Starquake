@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-namespace Starquake.Helpers;
+namespace Starquake.Animations;
 
 public class AnimationTrigger
 {

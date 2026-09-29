@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using Starquake.Engines;
 using Starquake.Helpers;
-using Starquake.Structure;
+using Starquake.Sprites;
 
 namespace Starquake.Animations;
 

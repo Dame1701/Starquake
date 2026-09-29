@@ -3,7 +3,7 @@
 // ---------------------------------------------------------
 // -
 
-namespace Starquake.Display;
+namespace Starquake.Structure;
 
 public class TileDetected
 {

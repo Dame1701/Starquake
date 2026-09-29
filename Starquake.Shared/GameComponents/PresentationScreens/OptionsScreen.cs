@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Input;
+using Starquake.Sprites;
 using Starquake.Structure;
 
 namespace Starquake.GameComponents.PresentationScreens;
@@ -199,7 +200,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
 
     public override void Draw(GameTime gameTime)
     {
-        GameEngine.ScreenEffctEngine.SelectRenderViewPort("EntireScreen");
+        GameEngine.ScreenEffectEngine.SelectRenderViewPort("EntireScreen");
 
         _backgroundImage.Begin(BlendState.AlphaBlend, gameTime);
         _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXna4Colour(255, 255, 255, (byte)ScreenFade));

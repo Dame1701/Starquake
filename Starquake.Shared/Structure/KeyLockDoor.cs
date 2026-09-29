@@ -2,18 +2,19 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Starquake.SharedLibs;
 
 namespace Starquake.Structure;
 
-public class SpritePixel
+public class KeyLockDoor
 {
-    public SpritePixel()
-    {
-        IsOn = true;
-        Colour = Color.White;
-    }
-    public bool IsOn { get; set; }
+    public List<CollisionTile> CollisionTiles;
+    public Point Location;
 
-    public Color Colour { get; set; }
+    public KeyLockDoor()
+    {
+        CollisionTiles = new List<CollisionTile>();
+    }
 }

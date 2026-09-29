@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Starquake.Engines;
 using Starquake.Helpers;
 
-namespace Starquake.Structure;
+namespace Starquake.Sprites;
 
 [Serializable]
 public class SpriteCollection

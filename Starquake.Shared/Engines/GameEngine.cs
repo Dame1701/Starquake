@@ -13,12 +13,14 @@ using Starquake.ActiveSprites;
 using Starquake.Animations;
 using Starquake.ContentManagement;
 using Starquake.Display;
+using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
 using Starquake.GameComponents.GameScreens;
 using Starquake.GameComponents.PresentationScreens;
 using Starquake.Helpers;
 using Starquake.Input;
 using Starquake.SharedLibs;
+using Starquake.Sprites;
 using Starquake.Structure;
 
 namespace Starquake.Engines;
@@ -129,7 +131,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public Color ScreenClearColour = Color.Black;
 
     // Screen Effect engine
-    public ScreenEffectEngine ScreenEffctEngine;
+    public ScreenEffectEngine ScreenEffectEngine;
     public Dictionary<GameScreenType, IGameScreen> Screens;
     public int ScreenXOffset;
     public int ScreenYOffset;
@@ -250,13 +252,13 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public static GameEngine GetInstance()
         => _sInstance;
 
-    private void Nasties_OnNastyInteractionWithBlob(NastyInterationType interactionType, NastyType nastyType)
+    private void Nasties_OnNastyInteractionWithBlob(NastyInteractionType interactionType, NastyType nastyType)
     {
-        if (interactionType == NastyInterationType.BlobShot)
+        if (interactionType == NastyInteractionType.BlobShot)
         {
             BlobStatusPanel.PlayerScore = BlobStatusPanel.PlayerScore + 50;
         }
-        else if (interactionType == NastyInterationType.HitBlob)
+        else if (interactionType == NastyInteractionType.HitBlob)
         {
             if (nastyType == NastyType.Spiky)
             {
@@ -669,23 +671,23 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             }
 
             // Setup the screen engine
-            ScreenEffctEngine = new ScreenEffectEngine(GameHost.ScreenWidth, GameHost.ScreenHeight, this);
+            ScreenEffectEngine = new ScreenEffectEngine(GameHost.ScreenWidth, GameHost.ScreenHeight, this);
 
-            ScreenEffctEngine.RegisterViewPort(
+            ScreenEffectEngine.RegisterViewPort(
                 "GameArea",
                 ScreenXOffset,
                 ScreenYOffset + BlobStatusPanel.Height + 10,
                 GameScreens.ScreenWidth,
                 GameScreens.ScreenHeight);
 
-            ScreenEffctEngine.RegisterViewPort(
+            ScreenEffectEngine.RegisterViewPort(
                 "StatusArea",
                 ScreenXOffset + 2,
                 ScreenYOffset,
                 BlobStatusPanel.Width,
                 BlobStatusPanel.Height);
 
-            ScreenEffctEngine.RegisterViewPort(
+            ScreenEffectEngine.RegisterViewPort(
                 "EntireScreen",
                 0,
                 0,
@@ -901,16 +903,16 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
                 if (ToggleKeys.GetPressedKey() == Keys.F3)
                 {
-                    ScreenEffctEngine.ExecuteScreenEffect(ScreenEffectType.AddictiveFade, -1, 50, false);
+                    ScreenEffectEngine.ExecuteScreenEffect(ScreenEffectType.AdditiveFade, -1, 50, false);
                 }
                 /*
                 if (ToggleKeys.GetPressedKey() == Keys.S)
                 {
-                    ScreenEffctEngine.ExecuteScreenEffect(enScreenEffectType.LeftTunnelEntry, 80, -1, false);
+                    ScreenEffectEngine.ExecuteScreenEffect(enScreenEffectType.LeftTunnelEntry, 80, -1, false);
                 }
                 else if (ToggleKeys.GetPressedKey() == Keys.D)
                 {
-                    ScreenEffctEngine.ExecuteScreenEffect(enScreenEffectType.RightTunnelEntry, 80, -1, false);
+                    ScreenEffectEngine.ExecuteScreenEffect(enScreenEffectType.RightTunnelEntry, 80, -1, false);
                 }
                  */
 
@@ -1092,11 +1094,11 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                 CurrentGameScreen == GameScreenType.Teleporter ||
                 CurrentGameScreen == GameScreenType.AccessBooth)
             {
-                ScreenEffctEngine.SelectRenderViewPort("StatusArea"); // StatusPanelArea;
+                ScreenEffectEngine.SelectRenderViewPort("StatusArea"); // StatusPanelArea;
                 BlobStatusPanel.Draw(gameTime);
             }
 
-            ScreenEffctEngine.SelectRenderViewPort("GameArea"); // GameArea;
+            ScreenEffectEngine.SelectRenderViewPort("GameArea"); // GameArea;
             GraphicsDeviceMgr.GraphicsDevice.Clear(ScreenClearColour);
 
             Screens.TryGetValue(CurrentGameScreen, out var screenToDraw);

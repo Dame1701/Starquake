@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Structure;
 
-namespace Starquake.Engines;
+namespace Starquake.Engines.ScreenEffects;
 
 public class ScreenEffectEngine : GameComponentBase
 {
@@ -39,7 +39,7 @@ public class ScreenEffectEngine : GameComponentBase
         // Add all of the screen effects we can find - do this eventually through reflection but for now - manually!
         _screenEffects.Add(new LeftTunnelEntryEffect(GameEngine));
         _screenEffects.Add(new RightTunnelEntryEffect(GameEngine));
-        _screenEffects.Add(new AddictiveFade(GameEngine));
+        _screenEffects.Add(new AdditiveFade(GameEngine));
 
         _renderer = new SpriteBatch(GameEngine.GraphicsDeviceMgr.GraphicsDevice);
         HaltBlobAndNasties = false;

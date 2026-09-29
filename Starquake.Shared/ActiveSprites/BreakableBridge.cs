@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Engines;
-using Starquake.Structure;
+using Starquake.Sprites;
 
 namespace Starquake.ActiveSprites;
 
@@ -69,7 +69,7 @@ public class BreakableBridge
             }
 
             // Set the render targer back to the screen
-            _gameEngineReference.ScreenEffctEngine.SelectRenderViewPort("GameArea", false);
+            _gameEngineReference.ScreenEffectEngine.SelectRenderViewPort("GameArea", false);
 
             _textureDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
             _textureDrawer.Draw(

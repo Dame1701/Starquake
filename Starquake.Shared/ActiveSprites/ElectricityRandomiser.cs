@@ -5,7 +5,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Starquake.Engines;
-using Starquake.Structure;
+using Starquake.Sounds;
 
 namespace Starquake.ActiveSprites;
 

@@ -12,6 +12,7 @@ using Starquake.GameComponents.GameScreens;
 using Starquake.Helpers;
 using Starquake.Input;
 using Starquake.Scoring;
+using Starquake.Sprites;
 using Starquake.Structure;
 
 namespace Starquake.GameComponents.PresentationScreens;
@@ -67,7 +68,7 @@ public class GameOverScreen : GameScreenBase, IGameScreen
 
     public override void Draw(GameTime gameTime)
     {
-        GameEngine.ScreenEffctEngine.SelectRenderViewPort("EntireScreen");
+        GameEngine.ScreenEffectEngine.SelectRenderViewPort("EntireScreen");
         _backgroundImage.Begin(BlendState.AlphaBlend, gameTime);
 
         if (_fadeComplete)

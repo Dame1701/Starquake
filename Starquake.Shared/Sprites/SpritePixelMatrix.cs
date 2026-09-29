@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using Starquake.Engines;
 
-namespace Starquake.Structure;
+namespace Starquake.Sprites;
 
 public class SpritePixelMatrix
 {

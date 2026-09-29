@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Input;
 using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Input;
+using Starquake.Sprites;
 using Starquake.Structure;
 
 namespace Starquake.GameComponents.PresentationScreens;
@@ -68,7 +69,7 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
 
     public override void Draw(GameTime gameTime)
     {
-        GameEngine.ScreenEffctEngine.SelectRenderViewPort("EntireScreen");
+        GameEngine.ScreenEffectEngine.SelectRenderViewPort("EntireScreen");
         _backgroundImage.Begin(BlendState.AlphaBlend, gameTime);
 
         if (_fadeComplete)

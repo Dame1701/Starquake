@@ -9,20 +9,18 @@ using Microsoft.Xna.Framework.Graphics;
 using Starquake.Animations;
 using Starquake.Collisions;
 using Starquake.ContentManagement;
-using Starquake.Display;
 using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Input;
 using Starquake.Particles;
 using Starquake.SharedLibs;
+using Starquake.Sounds;
 using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
 
 public class Blob : GameComponentBase
 {
-
-    public delegate void RaiseBlobAction(BlobAction action, object data);
 
     private const int BlobFireSpeed = 16;
 
@@ -1534,7 +1532,7 @@ public class Blob : GameComponentBase
 
                         if (OnScreenChanged != null)
                         {
-                            GameEngine.ScreenEffctEngine.ExecuteScreenEffect(ScreenEffectType.LeftTunnelEntry, 80,
+                            GameEngine.ScreenEffectEngine.ExecuteScreenEffect(ScreenEffectType.LeftTunnelEntry, 80,
                                 -1, true);
                             GameEngine.ContentResourceManager.GetSoundFxEngine()
                                 .PlaySound("TunnelSwish1", 0.8f, false);
@@ -1554,7 +1552,7 @@ public class Blob : GameComponentBase
 
                         if (OnScreenChanged != null)
                         {
-                            GameEngine.ScreenEffctEngine.ExecuteScreenEffect(ScreenEffectType.RightTunnelEntry,
+                            GameEngine.ScreenEffectEngine.ExecuteScreenEffect(ScreenEffectType.RightTunnelEntry,
                                 80, -1, true);
                             GameEngine.ContentResourceManager.GetSoundFxEngine()
                                 .PlaySound("TunnelSwish2", 0.8f, false);

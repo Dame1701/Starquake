@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Starquake.Animations;
 using Starquake.Engines;
+using Starquake.Sprites;
 using Starquake.Structure;
 
 namespace Starquake.GameComponents.GameScreens;

@@ -2,15 +2,15 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-namespace Starquake.Helpers;
+namespace Starquake.Animations;
 
-public class FloatAdder : AnimationTrigger
+public class FloatSubtractor : AnimationTrigger
 {
     private readonly float _finalValue;
     private readonly float _initialValue;
     private readonly float _stepSize;
 
-    public FloatAdder(
+    public FloatSubtractor(
         float initialValue,
         float finalValue,
         float stepSize,
@@ -35,12 +35,12 @@ public class FloatAdder : AnimationTrigger
     {
         if (Triggered)
         {
-            if (Modifier < _finalValue)
+            if (Modifier > _finalValue)
             {
-                Modifier = Modifier + _stepSize;
+                Modifier = Modifier - _stepSize;
             }
 
-            if (Modifier >= _finalValue)
+            if (Modifier <= _finalValue)
             {
                 Modifier = _finalValue;
             }

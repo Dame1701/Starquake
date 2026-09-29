@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Starquake.ActiveSprites;
+using Starquake.Animations;
 using Starquake.Engines;
 using Starquake.Structure;
 
@@ -13,7 +13,7 @@ namespace Starquake.GameComponents.PresentationScreens;
 // This will be used for both blob and the nastie's death routines - except for the spiky bugger which will still use the explosion with some bits
 // Nasties will have a new mercury spat effect or just some smoke to enhance the death ray
 
-// Maybe add an addictive yellow and red effect to blobs sprite to simulate fire....?
+// Maybe add an additive yellow and red effect to blobs sprite to simulate fire....?
 // Need to draw blob's components separately so we can explode them....
 public class TestScreen : GameScreenBase, IGameScreen
 {
@@ -84,7 +84,7 @@ public class TestScreen : GameScreenBase, IGameScreen
 
     public override void Draw(GameTime gameTime)
     {
-        GameEngine.ScreenEffctEngine.SelectRenderViewPort("EntireScreen");
+        GameEngine.ScreenEffectEngine.SelectRenderViewPort("EntireScreen");
 
         var triggered = _bda.Triggered;
 

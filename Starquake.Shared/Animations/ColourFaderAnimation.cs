@@ -12,7 +12,7 @@ public class ColourFaderAnimation
     // Animation direction
     public ColourAnimationDirection Direction;
 
-    // We use addictive blending to build up a more severe shade oif destination colour
+    // We use additive blending to build up a more severe shade of destination colour
     public int Intensity;
 
     // Number of times to loop before stopping

@@ -5,12 +5,12 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Starquake.Animations;
+using Starquake.ActiveSprites;
 using Starquake.Engines;
 using Starquake.Particles;
 using Starquake.Structure;
 
-namespace Starquake.ActiveSprites;
+namespace Starquake.Animations;
 
 public class BlobDeathAnimation : GameComponentBase
 {
