@@ -58,7 +58,7 @@
                           ReferenceOutputAssembly="false"
                           Private="false"
                           ExcludeAssets="all"/>
-        <PackageReference Include="MessagePack" Version="3.1.1"/>
+        <PackageReference Include="MessagePack" Version="3.1.10"/>
         <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.4.1"/>
     </ItemGroup>
 
