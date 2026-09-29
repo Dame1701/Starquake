@@ -99,14 +99,19 @@ public class SpriteCollection
         _fade = 0;
     }
 
-    public void Begin(BlendState blendState, GameTime gameTime)
+    /// <param name="transform">
+    /// Only wanted when drawing straight to the back buffer, where it scales and centres the
+    /// composition - see GameEngine.PresentationTransform. Drawing into a render target the
+    /// game composes at its own fixed size, so there it is left null.
+    /// </param>
+    public void Begin(BlendState blendState, GameTime gameTime, Matrix? transform = null)
     {
-        _sprites.Begin(SpriteSortMode.Deferred, blendState);
+        _sprites.Begin(SpriteSortMode.Deferred, blendState, null, null, null, null, transform);
     }
 
-    public void Begin(BlendState blendState, SpriteSortMode sortMode, GameTime gameTime)
+    public void Begin(BlendState blendState, SpriteSortMode sortMode, GameTime gameTime, Matrix? transform = null)
     {
-        _sprites.Begin(sortMode, blendState);
+        _sprites.Begin(sortMode, blendState, null, null, null, null, transform);
     }
 
     public void DrawSpriteUnscaled(int SpriteNumber, int XPosition, int YPosition)

@@ -144,18 +144,12 @@ namespace StarquakeXNA
         int screenWidth;
         int screenHeight;
 
-        float horizontalScale;
-        float verticalScale;
-
         public ScreenEffectEngine(
             int ScreenWidth,
             int ScreenHeight,
             GameEngine GameEngineReference)
             : base(GameEngineReference)
         {
-            horizontalScale = 1f;
-            verticalScale = 1f;
-
             screenWidth = ScreenWidth;
             screenHeight = ScreenHeight;
 
@@ -277,12 +271,6 @@ namespace StarquakeXNA
             }
         }
 
-        public void CalculateScaling(int Width, int Height)
-        {
-            horizontalScale = (float)Width / (float)screenWidth;
-            verticalScale = (float)Height / (float)screenHeight;
-        }
-
         public void Draw()
         {
             // Select the back buffer
@@ -309,7 +297,8 @@ namespace StarquakeXNA
                         // We're using the default renderer so lets render
                         if (useDefaultRenderer)
                         {
-                            renderer.Begin(SpriteSortMode.Deferred, BlendState.Opaque);
+                            renderer.Begin(SpriteSortMode.Deferred, BlendState.Opaque, null, null, null, null,
+                                gameEngine.PresentationTransform);
 
                             renderer.Draw(renderViewPorts[a].RenderTarget, new Rectangle(
                                     renderViewPorts[a].XPos,
@@ -322,7 +311,8 @@ namespace StarquakeXNA
                     }
                     else
                     {
-                        renderer.Begin(SpriteSortMode.Deferred, BlendState.Opaque);
+                        renderer.Begin(SpriteSortMode.Deferred, BlendState.Opaque, null, null, null, null,
+                            gameEngine.PresentationTransform);
 
                         renderer.Draw(renderViewPorts[a].RenderTarget, new Rectangle(
                                     renderViewPorts[a].XPos,

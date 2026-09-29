@@ -8,11 +8,46 @@ namespace StarquakeXNA;
 
 public class Starquake : Game
 {
+    /// <summary>
+    /// How many times a second the game thinks. This is the speed of the game: the engine moves
+    /// everything by a fixed amount per logic frame and scales nothing by elapsed time, exactly as
+    /// the original did, so this number is the only thing deciding how fast the blob runs.
+    ///
+    /// 50 matches the PAL original. 60 is the NTSC speed and is 20% faster. Anything is allowed -
+    /// it does not have to divide into the monitor's refresh rate, and the game runs at this speed
+    /// on every machine regardless of what the display is doing.
+    /// </summary>
+    public const double LogicFramesPerSecond = 60.0;
+
     private readonly GraphicsDeviceManager _graphics;
     private GameEngine _gameEngine;
 
     public static readonly int ScreenWidth = 1280;
     public static readonly int ScreenHeight = 800;
+
+    private static readonly TimeSpan LogicFrameLength =
+        TimeSpan.FromTicks((long)(TimeSpan.TicksPerSecond / LogicFramesPerSecond));
+
+    /// <summary>
+    /// How far behind we let the logic clock fall before dropping frames instead of catching up.
+    /// A stall - a breakpoint, dragging the window, the machine waking - otherwise leaves a
+    /// backlog that the game fast-forwards through all in one go.
+    /// </summary>
+    private const int MaxCatchUpFrames = 5;
+
+    /// <summary>
+    /// Real time banked since the last logic frame, plus the logic clock the game sees. The game
+    /// is never told the real frame time: every logic frame is exactly one
+    /// <see cref="LogicFramesPerSecond"/>th of a second long, so anything that does work off
+    /// ElapsedGameTime (the particle engine) stays locked to the same clock as everything that
+    /// counts frames.
+    /// </summary>
+    private TimeSpan _logicAccumulator;
+
+    private TimeSpan _logicClock;
+    private readonly GameTime _logicGameTime = new GameTime();
+
+    private bool _resizingBackBuffer;
 
     public Starquake()
     {
@@ -25,18 +60,44 @@ public class Starquake : Game
 
         Window.AllowUserResizing = true;
         Window.ClientSizeChanged += Window_ClientSizeChanged;
+
+        // Draw runs once per vertical retrace so presentation stays smooth and the loop is paced
+        // by the display rather than spinning. Update is left free-running because the fixed
+        // fifty hertz logic step is driven by hand below - MonoGame's own fixed step cannot
+        // subdivide a refresh interval that is not a multiple of the target rate.
         IsFixedTimeStep = false;
         Content.RootDirectory = "Content";
     }
 
+    /// <summary>
+    /// Keep the back buffer the same size as the window the user just dragged, so the picture is
+    /// composed at the resolution it is actually displayed at rather than being stretched up from
+    /// whatever size the window happened to start at. The game itself needs no telling: it always
+    /// composes at its fixed size and GameEngine.PresentationTransform scales that onto whatever
+    /// the back buffer now is.
+    /// </summary>
     void Window_ClientSizeChanged(object sender, EventArgs e)
     {
         if (_graphics == null ||
+            _resizingBackBuffer ||
+            _graphics.IsFullScreen ||
             Window.ClientBounds.Width == 0 ||
             Window.ClientBounds.Height == 0)
             return;
 
-        _gameEngine?.ScreenEffctEngine?.CalculateScaling(Window.ClientBounds.Width, Window.ClientBounds.Height);
+        // ApplyChanges resizes the window, which raises this event straight back at us.
+        _resizingBackBuffer = true;
+
+        try
+        {
+            _graphics.PreferredBackBufferWidth = Window.ClientBounds.Width;
+            _graphics.PreferredBackBufferHeight = Window.ClientBounds.Height;
+            _graphics.ApplyChanges();
+        }
+        finally
+        {
+            _resizingBackBuffer = false;
+        }
     }
 
     /// <summary>
@@ -79,8 +140,9 @@ public class Starquake : Game
     }
 
     /// <summary>
-    /// Allows the game to run logic such as updating the world,
-    /// checking for collisions, gathering input, and playing audio.
+    /// Called once per rendered frame, which on a modern display is far more often than the game
+    /// wants to think. Bank the real time that has passed and run whole logic frames out of it,
+    /// so the game advances at <see cref="LogicFramesPerSecond"/> no matter what the monitor does.
     /// </summary>
     /// <param name="gameTime">Provides a snapshot of timing values.</param>
     protected override void Update(GameTime gameTime)
@@ -90,7 +152,36 @@ public class Starquake : Game
             return;
         }
 
-        // This must happen here, outside of the whole game eco system
+        _logicAccumulator += gameTime.ElapsedGameTime;
+
+        TimeSpan maxBacklog = LogicFrameLength * MaxCatchUpFrames;
+
+        if (_logicAccumulator > maxBacklog)
+        {
+            _logicAccumulator = maxBacklog;
+        }
+
+        while (_logicAccumulator >= LogicFrameLength)
+        {
+            _logicAccumulator -= LogicFrameLength;
+            _logicClock += LogicFrameLength;
+
+            _logicGameTime.ElapsedGameTime = LogicFrameLength;
+            _logicGameTime.TotalGameTime = _logicClock;
+
+            UpdateLogicFrame(_logicGameTime);
+        }
+    }
+
+    /// <summary>
+    /// One logic frame. Everything that counts frames rather than seconds belongs in here.
+    /// </summary>
+    /// <param name="gameTime">The logic clock, always exactly one logic frame elapsed.</param>
+    private void UpdateLogicFrame(GameTime gameTime)
+    {
+        // This must happen here, outside of the whole game eco system. It has to run per logic
+        // frame rather than per rendered frame: a toggled key is only reported for the one call
+        // after the release, so polling it more often than the game reads it swallows keypresses.
         ToggleKeys.Update();
 
         // Switch to fullscreen if Ctrl and Enter touched
@@ -139,7 +230,10 @@ public class Starquake : Game
                 // Draw scanlines
                 if (_gameEngine.Scanlines != null)
                 {
-                    _gameEngine.Scanlines.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+                    // Scanlines overlay the finished picture, so they are scaled and centred
+                    // with it rather than being laid over the letterbox borders as well.
+                    _gameEngine.Scanlines.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime,
+                        _gameEngine.PresentationTransform);
                     _gameEngine.Scanlines.DrawSprite(0, 0, 0, new Color(255, 255, 255, 255));
                     _gameEngine.Scanlines.End();
                 }

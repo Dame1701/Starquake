@@ -49,6 +49,17 @@ namespace StarquakeXNA
         public int ScreenXOffset;
         public int ScreenYOffset;
 
+        /// <summary>
+        /// The game is composed at a fixed <see cref="Starquake.ScreenWidth"/> by
+        /// <see cref="Starquake.ScreenHeight"/> and only scaled onto the back buffer as the very
+        /// last step, so nothing in the game has to know or care whether it is in a small window,
+        /// a dragged-out one, or fullscreen on a 6K display. The scale is uniform so the picture
+        /// is never stretched, and whatever is left over becomes an even border - top and bottom,
+        /// or left and right. Recalculated every frame rather than hung off a resize event, so a
+        /// fullscreen toggle, a window drag and a change of display all just work.
+        /// </summary>
+        public Matrix PresentationTransform = Matrix.Identity;
+
         public Color ScreenClearColour = Color.Black;
 
         public Random RandomNumberGenerator;
@@ -725,7 +736,9 @@ namespace StarquakeXNA
 
                 IGameScreen screenToUpdate = null;
 
-                if (Keyboard.GetState().IsKeyDown(Keys.F12))
+                // A toggle rather than IsKeyDown: held down, that flipped fullscreen once per
+                // logic frame for as long as the key was held.
+                if (ToggleKeys.GetPressedKey() == Keys.F12)
                 {
                     if (CurrentGameScreen == enGameScreen.Cheops ||
                     CurrentGameScreen == enGameScreen.MainGame ||
@@ -741,10 +754,7 @@ namespace StarquakeXNA
 
                     try
                     {
-                        GraphicsDeviceMgr.ToggleFullScreen();
-                        GraphicsDeviceMgr.HardwareModeSwitch = GraphicsDeviceMgr.IsFullScreen;
-                        GraphicsDeviceMgr.PreferredBackBufferWidth = 1920;
-                        GraphicsDeviceMgr.PreferredBackBufferHeight = 1200;
+                        ToggleFullScreen();
                     }
                     catch { }
                 }
@@ -969,8 +979,61 @@ namespace StarquakeXNA
             }
         }
 
+        private void CalculatePresentationTransform()
+        {
+            // The back buffer, not GraphicsDevice.Viewport: the boot screen parks the viewport at
+            // the composition size and the render viewports move it around as they please.
+            PresentationParameters backBuffer = GraphicsDeviceMgr.GraphicsDevice.PresentationParameters;
+
+            float scale = Math.Min(
+                (float)backBuffer.BackBufferWidth / (float)Starquake.ScreenWidth,
+                (float)backBuffer.BackBufferHeight / (float)Starquake.ScreenHeight);
+
+            float borderX = (backBuffer.BackBufferWidth - (Starquake.ScreenWidth * scale)) / 2f;
+            float borderY = (backBuffer.BackBufferHeight - (Starquake.ScreenHeight * scale)) / 2f;
+
+            PresentationTransform =
+                Matrix.CreateScale(scale, scale, 1f) *
+                Matrix.CreateTranslation(borderX, borderY, 0f);
+        }
+
+        /// <summary>
+        /// Go fullscreen at the resolution the desktop is already running at, so the picture is
+        /// composed for the display it lands on instead of being stretched up from the windowed
+        /// size. The game itself never changes size: it always composes at
+        /// <see cref="Starquake.ScreenWidth"/> x <see cref="Starquake.ScreenHeight"/> and
+        /// PresentationTransform scales that onto whatever back buffer we end up with.
+        ///
+        /// HardwareModeSwitch has to be on. Borderless (the false case) looks like the friendlier
+        /// option, but on macOS it produces a window clamped to the desktop area *below* the menu
+        /// bar - a back buffer 39 points short, sat 39 points down the screen, with the picture
+        /// centred inside that rather than inside the display.
+        /// </summary>
+        private void ToggleFullScreen()
+        {
+            GraphicsDeviceMgr.HardwareModeSwitch = true;
+
+            if (GraphicsDeviceMgr.IsFullScreen)
+            {
+                GraphicsDeviceMgr.PreferredBackBufferWidth = Starquake.ScreenWidth;
+                GraphicsDeviceMgr.PreferredBackBufferHeight = Starquake.ScreenHeight;
+            }
+            else
+            {
+                DisplayMode desktop = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
+
+                GraphicsDeviceMgr.PreferredBackBufferWidth = desktop.Width;
+                GraphicsDeviceMgr.PreferredBackBufferHeight = desktop.Height;
+            }
+
+            GraphicsDeviceMgr.IsFullScreen = !GraphicsDeviceMgr.IsFullScreen;
+            GraphicsDeviceMgr.ApplyChanges();
+        }
+
         public void Draw(GameTime gameTime)
         {
+            CalculatePresentationTransform();
+
             if (status == GameEngineStatus.StartGame)
             {
                 // Status panel
@@ -998,11 +1061,16 @@ namespace StarquakeXNA
             else
             {
                 // We're starting up so draw some nice progress bars and graphics etc.
+                // The viewport has to be the whole back buffer, not the composition size: the
+                // boot screen is scaled up into it by PresentationTransform like everything else,
+                // and a viewport any smaller would just clip the result.
+                PresentationParameters backBuffer = GraphicsDeviceMgr.GraphicsDevice.PresentationParameters;
+
                 Viewport vp = new Viewport();
                 vp.X = 0;
                 vp.Y = 0;
-                vp.Width = Starquake.ScreenWidth;
-                vp.Height = Starquake.ScreenHeight;
+                vp.Width = backBuffer.BackBufferWidth;
+                vp.Height = backBuffer.BackBufferHeight;
 
                 GraphicsDeviceMgr.GraphicsDevice.Viewport = vp;
                 GraphicsDeviceMgr.GraphicsDevice.Clear(ScreenClearColour);
@@ -1012,16 +1080,16 @@ namespace StarquakeXNA
                     status == GameEngineStatus.StartingGraphicsLoaded ||
                     status == GameEngineStatus.ContentLoaded)
                 {
-                    bootScreen.Begin(BlendState.Opaque, gameTime);
+                    bootScreen.Begin(BlendState.Opaque, gameTime, PresentationTransform);
                     bootScreen.DrawSpriteUnscaled(0, 0, 0, loadingScreenFade);
                     bootScreen.End();
 
-                    bootProgressBackground.Begin(BlendState.AlphaBlend, gameTime);
+                    bootProgressBackground.Begin(BlendState.AlphaBlend, gameTime, PresentationTransform);
                     bootProgressBackground.DrawSpriteUnscaled(0, 116, 657, bootProgressBackgroundFade);
                     bootProgressBackground.End();
 
                     // Draw the status percentage
-                    bootProgress.Begin(BlendState.AlphaBlend, gameTime);
+                    bootProgress.Begin(BlendState.AlphaBlend, gameTime, PresentationTransform);
                     int PercentBarWidth = (int)((double)519 / (double)100 * (double)PercentComplete);
 
                     for (int a = 0; a < PercentBarWidth; a++)

@@ -208,7 +208,8 @@ namespace StarquakeXNA
         // We're going to override the default renderer
         public override bool Draw(SpriteBatch Renderer, RenderViewPort RenderViewPortToUse)
         {
-            Renderer.Begin(SpriteSortMode.Deferred, BlendState.Additive);
+            Renderer.Begin(SpriteSortMode.Deferred, BlendState.Additive, null, null, null, null,
+                gameEngine.PresentationTransform);
 
             for (int a = 0; a < 10; a++)
             {
