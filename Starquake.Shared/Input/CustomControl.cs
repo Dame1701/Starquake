@@ -7,18 +7,6 @@ using Starquake.Engines;
 
 namespace Starquake.Input;
 
-public class PlayerKeySet
-{
-    public Keys Down;
-    public Keys Fire;
-    public Keys Left;
-
-    public Keys Pause;
-    public Keys Quit;
-    public Keys Right;
-    public Keys Up;
-}
-
 public class CustomControl
 {
 

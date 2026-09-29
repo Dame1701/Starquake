@@ -12,38 +12,6 @@ using Starquake.Structure;
 
 namespace Starquake.Particles;
 
-public interface IParticleEffect
-{
-    ParticleEffect Effect { get; }
-    bool EffectActive { get; }
-    event RaiseEffectComplete ParticleEffectComplete;
-    void Stop();
-    void Reset();
-    void Draw();
-    void Draw(int screenFade);
-}
-
-// All standard triggered and continual with and without duration particle effects
-public interface IStandardParticleEffect : IParticleEffect
-{
-    void Start();
-    void Update(int xPos, int yPos, GameTime gameTime);
-}
-
-// A particle effect that can be initialised from multiple positions with their own durational lifetimes, an example are the post fire sparks
-public interface IPositionalTriggerParticleEffect : IParticleEffect
-{
-    void Start(int xPos, int yPos);
-    void Update(GameTime gameTime);
-}
-
-public enum ParticleEffectType
-{
-    Triggered,
-    Continual,
-    TriggeredMultiLocationTimed
-}
-
 public class ParticleEngine
 {
     private readonly GameEngine _gameEngineInstance;

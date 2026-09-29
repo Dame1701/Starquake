@@ -401,17 +401,3 @@ public class TeleportScreen : GameComponentBase, IGameScreen
     #endregion
 
 }
-
-public class TeleportCodeLetter
-{
-
-    public TeleportCodeLetter(string letter, Point location)
-    {
-        this.Letter = letter;
-        this.Location = location;
-    }
-
-    public string Letter { get; set; }
-
-    public Point Location { get; set; }
-}

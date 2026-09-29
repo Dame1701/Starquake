@@ -1,0 +1,21 @@
+﻿// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
+namespace Starquake.Helpers;
+
+public class AnimationTrigger
+{
+    protected bool UseTrigger;
+
+    public AnimationTrigger(bool useTrigger)
+    {
+        UseTrigger = useTrigger;
+    }
+    public bool Triggered { get; protected set; }
+
+    public void Trigger()
+    {
+        Triggered = true;
+    }
+}
