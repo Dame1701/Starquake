@@ -2,6 +2,11 @@
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
         <TargetFramework>net9.0</TargetFramework>
+        <!--
+          Run on whatever runtime is installed rather than insisting on a 9.x one. The game
+          heads get this from Starquake.Shared.props, which the editor does not import.
+        -->
+        <RollForward>Major</RollForward>
         <Nullable>enable</Nullable>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
