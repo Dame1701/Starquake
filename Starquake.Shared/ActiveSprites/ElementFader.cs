@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+using Starquake.Constants;
 using Starquake.Engines;
 using Starquake.Structure;
 
@@ -38,9 +39,9 @@ internal class ElementFader
             FadeLevel = FadeLevel - _fadeSpeed;
         }
 
-        if (FadeLevel > 255)
+        if (FadeLevel > ColourLevels.Full)
         {
-            FadeLevel = 255;
+            FadeLevel = ColourLevels.Full;
             _fadeDirection = Direction.Down;
         }
         else if (FadeLevel < 0)

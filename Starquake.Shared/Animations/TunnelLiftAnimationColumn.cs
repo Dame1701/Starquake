@@ -4,6 +4,7 @@
 // -
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Starquake.Constants;
 using Starquake.Helpers;
 using Starquake.Sprites;
 
@@ -56,13 +57,13 @@ public class TunnelLiftAnimationColumn
     {
         for (var a = 0; a < _sections.Count; a++)
         {
-            if (_sections[a].Intensity > 255)
+            if (_sections[a].Intensity > ColourLevels.Full)
             {
-                tunnelSprites.DrawSprite(13, _sections[a].X, _sections[a].Y, ColourHelper.GetXna4Colour(255, 255, 255, (byte)screenfade));
+                tunnelSprites.DrawSprite(13, _sections[a].X, _sections[a].Y, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenfade));
             }
             else
             {
-                tunnelSprites.DrawSprite(13, _sections[a].X, _sections[a].Y, ColourHelper.GetXna4Colour(255, 255, 255, _sections[a].Intensity * (byte)screenfade / 255));
+                tunnelSprites.DrawSprite(13, _sections[a].X, _sections[a].Y, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, _sections[a].Intensity * (byte)screenfade / ColourLevels.Full));
             }
         }
     }

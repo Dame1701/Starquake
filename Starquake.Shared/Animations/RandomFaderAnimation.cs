@@ -3,6 +3,7 @@
 // ---------------------------------------------------------
 // -
 using System;
+using Starquake.Constants;
 
 namespace Starquake.Animations;
 
@@ -32,7 +33,7 @@ public class RandomFaderAnimation
         else
         {
             _switchCounter = 0;
-            FadeLevel = _randomGenerator.Next(_minimumFade, 255);
+            FadeLevel = _randomGenerator.Next(_minimumFade, ColourLevels.Full);
         }
     }
 }

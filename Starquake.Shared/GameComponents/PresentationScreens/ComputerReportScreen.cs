@@ -5,6 +5,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Starquake.Constants;
 using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Input;
@@ -48,14 +49,14 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
             GameEngine.GetGameScreen(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.ComputerReport, false);
         }
 
-        if (ScreenFade >= 255)
+        if (ScreenFade >= ColourLevels.Full)
         {
             if (!_fadeComplete)
             {
                 _fadeComplete = true;
             }
 
-            ScreenFade = GameEngine.RandomNumberGenerator.Next(255);
+            ScreenFade = GameEngine.RandomNumberGenerator.Next(ColourLevels.Full);
             ScreenFadeSpeed = GameEngine.RandomNumberGenerator.Next(20);
 
             if (ScreenFadeSpeed < 4)
@@ -78,7 +79,7 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
         }
         else
         {
-            _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXna4Colour(255, 255, 255, (byte)ScreenFade));
+            _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
         }
 
         _backgroundImage.End();
@@ -101,7 +102,7 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
         }
         else
         {
-            _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.GetXna4Colour(255, 255, 255, (byte)ScreenFade));
+            _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
         }
 
         _foregroundImage.End();

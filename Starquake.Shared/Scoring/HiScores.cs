@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Starquake.Constants;
 using Starquake.Engines;
 using Starquake.Fonts;
 using Starquake.Helpers;
@@ -114,7 +115,7 @@ public class HiScores
         {
             if (a % 2 == 0)
             {
-                ProportionalNumbers.Draw(currentXPos, currentYPos, (a + 1) + ".", gameEngine, gameTime, ColourHelper.GetXna4Colour(255, 255, 255, fade));
+                ProportionalNumbers.Draw(currentXPos, currentYPos, (a + 1) + ".", gameEngine, gameTime, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, fade));
             }
             else
             {
@@ -131,7 +132,7 @@ public class HiScores
         {
             if (a % 2 == 0)
             {
-                gameEngine.Font2.WriteText(currentXPos + 55, currentYPos, _scores[a].Name, 2, new Color(255, 255, 255), (byte)fade);
+                gameEngine.Font2.WriteText(currentXPos + 55, currentYPos, _scores[a].Name, 2, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full), (byte)fade);
             }
             else
             {
@@ -147,7 +148,7 @@ public class HiScores
         {
             if (a % 2 == 0)
             {
-                ProportionalNumbers.Draw(currentXPos + 250, currentYPos, _scores[a].Score.ToString("000000") + " " + _scores[a].AdventureScoreString + "%", gameEngine, gameTime, ColourHelper.GetXna4Colour(255, 255, 255, fade));
+                ProportionalNumbers.Draw(currentXPos + 250, currentYPos, _scores[a].Score.ToString("000000") + " " + _scores[a].AdventureScoreString + "%", gameEngine, gameTime, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, fade));
             }
             else
             {

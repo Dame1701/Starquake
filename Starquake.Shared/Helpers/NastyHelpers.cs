@@ -4,6 +4,7 @@
 // -
 using Microsoft.Xna.Framework;
 using ProjectMercury;
+using Starquake.Constants;
 using Starquake.Structure;
 
 namespace Starquake.Helpers;
@@ -16,31 +17,31 @@ public class NastyHelpers
         {
             effect["Copy of Left Splat"].ReleaseColour.Value = new Color(125, 62, 62).ToVector3();
             effect["Copy of Right Splat"].ReleaseColour.Value = new Color(0, 182, 0).ToVector3();
-            effect["Copy of Splodges"].ReleaseColour.Value = new Color(255, 255, 255).ToVector3();
+            effect["Copy of Splodges"].ReleaseColour.Value = new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full).ToVector3();
         }
         else if (nastyType == NastyType.Gonzo)
         {
             effect["Copy of Left Splat"].ReleaseColour.Value = new Color(4, 82, 184).ToVector3();
             effect["Copy of Right Splat"].ReleaseColour.Value = new Color(182, 103, 10).ToVector3();
-            effect["Copy of Splodges"].ReleaseColour.Value = new Color(255, 255, 255).ToVector3();
+            effect["Copy of Splodges"].ReleaseColour.Value = new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full).ToVector3();
         }
         else if (nastyType == NastyType.Cushion)
         {
             effect["Copy of Left Splat"].ReleaseColour.Value = new Color(59, 194, 42).ToVector3();
             effect["Copy of Right Splat"].ReleaseColour.Value = new Color(227, 66, 19).ToVector3();
-            effect["Copy of Splodges"].ReleaseColour.Value = new Color(255, 255, 255).ToVector3();
+            effect["Copy of Splodges"].ReleaseColour.Value = new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full).ToVector3();
         }
         else if (nastyType == NastyType.Helmet)
         {
             effect["Copy of Left Splat"].ReleaseColour.Value = new Color(202, 109, 17).ToVector3();
             effect["Copy of Right Splat"].ReleaseColour.Value = new Color(137, 137, 137).ToVector3();
-            effect["Copy of Splodges"].ReleaseColour.Value = new Color(255, 255, 255).ToVector3();
+            effect["Copy of Splodges"].ReleaseColour.Value = new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full).ToVector3();
         }
         else if (nastyType == NastyType.Shellfish)
         {
             effect["Copy of Left Splat"].ReleaseColour.Value = new Color(239, 238, 0).ToVector3();
             effect["Copy of Right Splat"].ReleaseColour.Value = new Color(198, 99, 0).ToVector3();
-            effect["Copy of Splodges"].ReleaseColour.Value = new Color(255, 255, 255).ToVector3();
+            effect["Copy of Splodges"].ReleaseColour.Value = new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full).ToVector3();
         }
         else if (nastyType == NastyType.Snail)
         {
@@ -52,7 +53,7 @@ public class NastyHelpers
         {
             effect["Copy of Left Splat"].ReleaseColour.Value = new Color(168, 163, 252).ToVector3();
             effect["Copy of Right Splat"].ReleaseColour.Value = new Color(109, 109, 253).ToVector3();
-            effect["Copy of Splodges"].ReleaseColour.Value = new Color(255, 255, 255).ToVector3();
+            effect["Copy of Splodges"].ReleaseColour.Value = new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full).ToVector3();
         }
         else if (nastyType == NastyType.Bird)
         {
@@ -64,7 +65,7 @@ public class NastyHelpers
         {
             effect["Copy of Left Splat"].ReleaseColour.Value = new Color(0, 151, 43).ToVector3();
             effect["Copy of Right Splat"].ReleaseColour.Value = new Color(88, 0, 88).ToVector3();
-            effect["Copy of Splodges"].ReleaseColour.Value = new Color(255, 255, 255).ToVector3();
+            effect["Copy of Splodges"].ReleaseColour.Value = new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full).ToVector3();
         }
         else if (nastyType == NastyType.Scorpian)
         {

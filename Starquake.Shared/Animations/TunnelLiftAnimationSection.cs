@@ -3,6 +3,8 @@
 // ---------------------------------------------------------
 // -
 
+using Starquake.Constants;
+
 namespace Starquake.Animations;
 
 public class TunnelLiftAnimationSection
@@ -32,7 +34,7 @@ public class TunnelLiftAnimationSection
         {
             if (_lightDirection == 0)
             {
-                if (Intensity < 255)
+                if (Intensity < ColourLevels.Full)
                 {
                     Intensity += 8;
                 }

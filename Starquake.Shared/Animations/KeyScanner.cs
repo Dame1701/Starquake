@@ -4,6 +4,7 @@
 // -
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Starquake.Constants;
 using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Structure;
@@ -34,7 +35,7 @@ public class KeyScanner
 
     public void Reset(bool match)
     {
-        _scanLineFade = 255;
+        _scanLineFade = ColourLevels.Full;
         _scanLineY = 0;
         _scanLineFadeDirection = Direction.Down;
         _matched = match;
@@ -69,9 +70,9 @@ public class KeyScanner
             {
                 _scanLineFade = _scanLineFade + 16;
 
-                if (_scanLineFade > 255)
+                if (_scanLineFade > ColourLevels.Full)
                 {
-                    _scanLineFade = 255;
+                    _scanLineFade = ColourLevels.Full;
                     _scanLineFadeDirection = Direction.Down;
                 }
             }
@@ -93,7 +94,7 @@ public class KeyScanner
         }
         else
         {
-            _keyCodeFade = 255;
+            _keyCodeFade = ColourLevels.Full;
         }
     }
 
@@ -101,7 +102,7 @@ public class KeyScanner
     {
         // Draw the code keys
         _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).Begin(BlendState.AlphaBlend, gameTime);
-        _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).DrawSprite(codeNumber, xPos + 2, yPos + 6, ColourHelper.GetXna4Colour(255, 255, 255, (byte)_keyCodeFade));
+        _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).DrawSprite(codeNumber, xPos + 2, yPos + 6, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
         _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).End();
 
         var height = 0;
@@ -120,20 +121,20 @@ public class KeyScanner
             if (_matched)
             {
                 _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.AccessCodesPassedName).Begin(BlendState.AlphaBlend, gameTime);
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.AccessCodesPassedName).DrawSpriteSubSection(codeNumber, xPos + 2, yPos + 6, new Rectangle(0, 0, 64, height), ColourHelper.GetXna4Colour(255, 255, 255, (byte)_keyCodeFade));
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.AccessCodesPassedName).DrawSpriteSubSection(codeNumber, xPos + 2, yPos + 6, new Rectangle(0, 0, 64, height), ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
                 _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.AccessCodesPassedName).End();
 
             }
             else
             {
                 _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.AccessCodesFailedName).Begin(BlendState.AlphaBlend, gameTime);
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.AccessCodesFailedName).DrawSpriteSubSection(codeNumber, xPos + 2, yPos + 6, new Rectangle(0, 0, 64, height), ColourHelper.GetXna4Colour(255, 255, 255, (byte)_keyCodeFade));
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.AccessCodesFailedName).DrawSpriteSubSection(codeNumber, xPos + 2, yPos + 6, new Rectangle(0, 0, 64, height), ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
                 _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.AccessCodesFailedName).End();
             }
 
             // Draw the scanlines
             _gameEngine.ContentResourceManager.GetSpriteCollection("ScanLine").Begin(BlendState.Additive, gameTime);
-            _gameEngine.ContentResourceManager.GetSpriteCollection("ScanLine").DrawSprite(0, xPos - 4, _scanLineY + yPos, ColourHelper.GetXna4Colour(255, 255, 255, (byte)_scanLineFade));
+            _gameEngine.ContentResourceManager.GetSpriteCollection("ScanLine").DrawSprite(0, xPos - 4, _scanLineY + yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_scanLineFade));
             _gameEngine.ContentResourceManager.GetSpriteCollection("ScanLine").End();
         }
     }

@@ -13,6 +13,12 @@ namespace Starquake.Animations;
 
 public class TunnelLiftAnimationEngine : GameComponentBase
 {
+    /// <summary>
+    ///     How far apart the arrow animations of neighbouring lift shafts are started, in logic
+    ///     frames, so that two shafts on the same screen ripple rather than pulsing in step.
+    /// </summary>
+    private const int ColumnStartStagger = 15;
+
     private List<TunnelLiftAnimationColumn> _columns;
 
     public TunnelLiftAnimationEngine(GameEngine engine)
@@ -29,24 +35,24 @@ public class TunnelLiftAnimationEngine : GameComponentBase
         {
             tunnelLiftArrowLocations = GameEngine.GameScreens.GetCoordsOfTiles(new[]
             {
-                396,
-                407,
-                408,
-                409,
-                412,
-                413,
-                414,
-                415
+                (int)ActionTiles.TunnelLiftTopAlternate,
+                (int)ActionTiles.TunnelLiftTop1,
+                (int)ActionTiles.TunnelLiftTile,
+                (int)ActionTiles.TunnelLiftShaft1,
+                (int)ActionTiles.TunnelLiftShaft2,
+                (int)ActionTiles.TunnelLiftShaft3,
+                (int)ActionTiles.TunnelLiftTop2,
+                (int)ActionTiles.TunnelLiftTop3
             });
         }
         else
         {
             tunnelLiftArrowLocations = GameEngine.GameScreens.GetCoordsOfTiles(new[]
             {
-                408,
-                409,
-                412,
-                413
+                (int)ActionTiles.TunnelLiftTile,
+                (int)ActionTiles.TunnelLiftShaft1,
+                (int)ActionTiles.TunnelLiftShaft2,
+                (int)ActionTiles.TunnelLiftShaft3
             });
         }
 
@@ -64,7 +70,7 @@ public class TunnelLiftAnimationEngine : GameComponentBase
                 if (existingColumn == null)
                 {
                     existingColumn = new TunnelLiftAnimationColumn(initialDelayTime);
-                    initialDelayTime += 15;
+                    initialDelayTime += ColumnStartStagger;
                     _columns.Add(existingColumn);
                 }
 

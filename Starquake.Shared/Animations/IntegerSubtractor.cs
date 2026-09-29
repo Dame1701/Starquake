@@ -2,6 +2,8 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+using Starquake.Constants;
+
 namespace Starquake.Animations;
 
 public class IntegerSubtractor : AnimationTrigger
@@ -28,9 +30,9 @@ public class IntegerSubtractor : AnimationTrigger
     {
         get
         {
-            if (Modifier > 255)
+            if (Modifier > ColourLevels.Full)
             {
-                return 255;
+                return ColourLevels.Full;
             }
             if (Modifier < 0)
             {

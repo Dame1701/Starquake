@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Starquake.Constants;
 using Starquake.Engines;
 using Starquake.Sprites;
 using Starquake.Structure;
@@ -226,14 +227,14 @@ public class ColourAnimationEngine : GameComponentBase
             {
                 if (_colourAnimationsRegistered[a].Direction == ColourAnimationDirection.FadeUp)
                 {
-                    if (_colourAnimationsRegistered[a].TransitionColour.A < 255)
+                    if (_colourAnimationsRegistered[a].TransitionColour.A < ColourLevels.Full)
                     {
                         int value = _colourAnimationsRegistered[a].TransitionColour.A;
                         value = value + _colourAnimationsRegistered[a].Speed;
 
-                        if (value > 255)
+                        if (value > ColourLevels.Full)
                         {
-                            value = 255;
+                            value = ColourLevels.Full;
                         }
 
                         _colourAnimationsRegistered[a].TransitionColour.A = (byte)value;

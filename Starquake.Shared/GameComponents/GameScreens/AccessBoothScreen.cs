@@ -6,6 +6,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Animations;
+using Starquake.Constants;
 using Starquake.Engines;
 using Starquake.Structure;
 
@@ -98,8 +99,8 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
     public override void Draw(GameTime gameTime)
     {
         GameEngine.Font2.Begin(BlendState.AlphaBlend);
-        GameEngine.Font2.WriteText(350, 100, "SECURITY  DOOR", 2, Color.White, 255);
-        GameEngine.Font2.WriteText(370, 300, "ACCESS CODE", 2, Color.White, 255);
+        GameEngine.Font2.WriteText(350, 100, "SECURITY  DOOR", 2, Color.White, ColourLevels.Full);
+        GameEngine.Font2.WriteText(370, 300, "ACCESS CODE", 2, Color.White, ColourLevels.Full);
         GameEngine.Font2.End();
 
         //gameEngine.SQText.WriteText("SECURITY  DOOR", 250, 100, gameTime, Color.White);
@@ -136,7 +137,7 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
                 GameEngine.ShapeDrawer.End();
 
                 GameEngine.Font2.Begin(BlendState.AlphaBlend);
-                GameEngine.Font2.WriteText(310, 500, "ACCESS AUTHORISED", 2, new Color(0, 255, 0), (byte)_resultMessageFade);
+                GameEngine.Font2.WriteText(310, 500, "ACCESS AUTHORISED", 2, new Color(0, ColourLevels.Full, 0), (byte)_resultMessageFade);
                 GameEngine.Font2.End();
 
                 GameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
@@ -205,7 +206,7 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
         }
 
         _screenReadWait = new DateTime(0);
-        _resultMessageFade = 255;
+        _resultMessageFade = ColourLevels.Full;
 
         // Scan blob's inventory to see if we have the right stuff
         Success = true;

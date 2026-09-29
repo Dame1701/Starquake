@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Starquake.Animations;
+using Starquake.Constants;
 using Starquake.Engines;
 using Starquake.Structure;
 
@@ -110,8 +111,8 @@ public class TestScreen : GameScreenBase, IGameScreen
         }
 
         GameEngine.Font1.Begin(BlendState.Opaque);
-        //gameEngine.Font1.WriteText(10,10, bp.XPos.ToString(), Color.White, 255);
-        //gameEngine.Font1.WriteText(100, 10, bp.YPos.ToString(), Color.White, 255);
+        //gameEngine.Font1.WriteText(10,10, bp.XPos.ToString(), Color.White, ColourLevels.Full);
+        //gameEngine.Font1.WriteText(100, 10, bp.YPos.ToString(), Color.White, ColourLevels.Full);
         GameEngine.Font1.End();
     }
 

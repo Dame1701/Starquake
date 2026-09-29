@@ -6,6 +6,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Engines;
 using Starquake.Helpers;
@@ -17,6 +18,67 @@ namespace Starquake.GameComponents.GameScreens;
 
 public class MainGameScreen : GameComponentBase, IGameScreen
 {
+
+    /// <summary>
+    ///     How fast a screen fades up when the blob walks onto it, in colour channel levels a frame.
+    /// </summary>
+    private const int ScreenFadeUpSpeed = 32;
+
+    /// <summary>
+    ///     What reaching the planet core is worth.
+    /// </summary>
+    private const int ScoreForReachingCore = 250;
+
+    /// <summary>
+    ///     The stock of platforms and shots the test-mode cheat key hands over.
+    /// </summary>
+    private const int TestModeSuppliesRestored = 60;
+
+    /// <summary>
+    ///     How the background rumble is decided. Each frame one number in
+    ///     <see cref="ShakeOdds" /> is drawn, and drawing <see cref="ShakeTrigger" /> starts a shake
+    ///     lasting somewhere between <see cref="ShakeShortest" /> and <see cref="ShakeLongest" />
+    ///     frames. The quake that ends the intro is held for <see cref="IntroShakeDuration" />.
+    /// </summary>
+    private const int ShakeOdds = 2000;
+
+    /// <inheritdoc cref="ShakeOdds" />
+    private const int ShakeTrigger = 1;
+
+    /// <inheritdoc cref="ShakeOdds" />
+    private const int ShakeShortest = 180;
+
+    /// <inheritdoc cref="ShakeOdds" />
+    private const int ShakeLongest = 300;
+
+    /// <inheritdoc cref="ShakeOdds" />
+    private const int IntroShakeDuration = 500;
+
+    /// <summary>
+    ///     How far the backdrop is slid sideways per column of the map, so that walking east across a
+    ///     row of screens pans the sky behind them rather than repeating it.
+    /// </summary>
+    private const int BackgroundParallaxStep = 16;
+
+    /// <summary>
+    ///     How strongly the backdrop is tinted in behind the screen.
+    /// </summary>
+    private const int BackgroundOpacity = 150;
+
+    /// <summary>
+    ///     The colour animations the access booth tiles are given, and how long each runs for. Green
+    ///     for a booth the blob has the code for, red for one it has not.
+    /// </summary>
+    private const int TeleporterAnimationLoops = 1;
+
+    /// <inheritdoc cref="TeleporterAnimationLoops" />
+    private const int AccessBoothAnimationLoops = 2;
+
+    /// <inheritdoc cref="TeleporterAnimationLoops" />
+    private const int AccessBoothPassedSpeed = 2;
+
+    /// <inheritdoc cref="TeleporterAnimationLoops" />
+    private const int AccessBoothFailedSpeed = 3;
 
     private DateTime _gameStartedTime;
 
@@ -52,7 +114,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         if (param == null)
         {
             ScreenFade = 0;
-            ScreenFadeSpeed = 32;
+            ScreenFadeSpeed = ScreenFadeUpSpeed;
         }
 
         // Clear the viewport
@@ -66,10 +128,10 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         if (!GameEngine.GameScreens.CurrentGameScreenData.ScreenVisited)
         {
             GameEngine.GameScreens.CurrentGameScreenData.ScreenVisited = true;
-            GameEngine.BlobStatusPanel.PlayerScore += 250;
+            GameEngine.BlobStatusPanel.PlayerScore += ScoreForReachingCore;
         }
 
-        if (GameEngine.GameScreens.ScreenNumber == 199)
+        if (GameEngine.GameScreens.ScreenNumber == WorldMap.CoreScreenNumber)
         {
             GameEngine.CurrentGameScreen = GameScreenType.PlanetCore;
         }
@@ -78,7 +140,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         {
             ScreenFadeSpeed = 16;
             GameEngine.Player.TriggerBlobTeleportedAnimation();
-            GameEngine.ColourAnimationEngine.Start(397, 1); // Animate the teleporter colour
+            GameEngine.ColourAnimationEngine.Start((int)ActionTiles.TeleportBooth, TeleporterAnimationLoops); // Animate the teleporter colour
         }
 
         if (triggeringScreen == GameScreenType.AccessBooth)
@@ -90,13 +152,13 @@ public class MainGameScreen : GameComponentBase, IGameScreen
 
                 if (success)
                 {
-                    GameEngine.ColourAnimationEngine.Start(399, 2, new Color(0, 255, 0), 2);
-                    GameEngine.ColourAnimationEngine.Start(400, 2, new Color(0, 255, 0), 2);
+                    GameEngine.ColourAnimationEngine.Start((int)ActionTiles.AccessBoothLeft, AccessBoothAnimationLoops, new Color(0, ColourLevels.Full, 0), AccessBoothPassedSpeed);
+                    GameEngine.ColourAnimationEngine.Start((int)ActionTiles.AccessBoothRight, AccessBoothAnimationLoops, new Color(0, ColourLevels.Full, 0), AccessBoothPassedSpeed);
                 }
                 else
                 {
-                    GameEngine.ColourAnimationEngine.Start(399, 2, new Color(255, 0, 0), 3);
-                    GameEngine.ColourAnimationEngine.Start(400, 2, new Color(255, 0, 0), 3);
+                    GameEngine.ColourAnimationEngine.Start((int)ActionTiles.AccessBoothLeft, AccessBoothAnimationLoops, new Color(ColourLevels.Full, 0, 0), AccessBoothFailedSpeed);
+                    GameEngine.ColourAnimationEngine.Start((int)ActionTiles.AccessBoothRight, AccessBoothAnimationLoops, new Color(ColourLevels.Full, 0, 0), AccessBoothFailedSpeed);
                 }
             }
         }
@@ -119,7 +181,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
     public MainGameScreen(GameEngine gameEngineReference)
         : base(gameEngineReference)
     {
-        ScreenFade = 255;
+        ScreenFade = ColourLevels.Full;
     }
 
     public override void LoadContent()
@@ -154,8 +216,8 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         {
             if (Keyboard.GetState().IsKeyDown(Keys.J))
             {
-                GameEngine.BlobStatusPanel.Platforms = 60;
-                GameEngine.BlobStatusPanel.FirePower = 60;
+                GameEngine.BlobStatusPanel.Platforms = TestModeSuppliesRestored;
+                GameEngine.BlobStatusPanel.FirePower = TestModeSuppliesRestored;
             }
 
             if (Keyboard.GetState().IsKeyDown(Keys.T))
@@ -213,14 +275,14 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         if (!GameEngine.IntroSequence.SequenceRunning ||
             GameEngine.IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
         {
-            if (ScreenFade < 255)
+            if (ScreenFade < ColourLevels.Full)
             {
                 ScreenFade = ScreenFade + ScreenFadeSpeed;
             }
 
-            if (ScreenFade > 255)
+            if (ScreenFade > ColourLevels.Full)
             {
-                ScreenFade = 255;
+                ScreenFade = ColourLevels.Full;
             }
         }
 
@@ -300,18 +362,18 @@ public class MainGameScreen : GameComponentBase, IGameScreen
 
             if (!GameEngine.IntroSequence.SequenceRunning)
             {
-                var shakingScreenTime = GameEngine.RandomNumberGenerator.Next(0, 2000);
+                var shakingScreenTime = GameEngine.RandomNumberGenerator.Next(0, ShakeOdds);
 
-                if (shakingScreenTime == 1 && !_shakingScreen)
+                if (shakingScreenTime == ShakeTrigger && !_shakingScreen)
                 {
-                    _shakingScreenCount = GameEngine.RandomNumberGenerator.Next(180, 300);
+                    _shakingScreenCount = GameEngine.RandomNumberGenerator.Next(ShakeShortest, ShakeLongest);
                     _shakingScreen = true;
                 }
             }
 
             if (GameEngine.IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
             {
-                _shakingScreenCount = 500;
+                _shakingScreenCount = IntroShakeDuration;
                 _shakingScreen = true;
             }
 
@@ -378,12 +440,12 @@ public class MainGameScreen : GameComponentBase, IGameScreen
             // Draw background
             if (GameEngine.DrawBackgrounds)
             {
-                var screenXPos = GameEngine.GameScreens.ScreenNumber % 16;
+                var screenXPos = GameEngine.GameScreens.ScreenNumber % WorldMap.ScreensAcross;
 
                 GameEngine.ContentResourceManager.GetSpriteCollection("Background1")
                     .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                GameEngine.ContentResourceManager.GetSpriteCollection("Background1").DrawSprite(0, screenXPos * 16,
-                    0, new Color((byte)255, (byte)255, (byte)255, (byte)(150 / 255 * ScreenFade)));
+                GameEngine.ContentResourceManager.GetSpriteCollection("Background1").DrawSprite(0, screenXPos * BackgroundParallaxStep,
+                    0, new Color((byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)(BackgroundOpacity / ColourLevels.Full * ScreenFade)));
                 GameEngine.ContentResourceManager.GetSpriteCollection("Background1").End();
             }
 
@@ -392,7 +454,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
 
             // Draw screen
             GameEngine.GameScreens.Draw(
-                ColourHelper.GetXna4Colour(255, 255, 255, (byte)ScreenFade),
+                ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade),
                 gameTime, GameEngine.IntroSequence.SequenceRunning, GameEngine.IntroSequence.SequenceStage);
 
             // Draw breakable bridges
@@ -430,7 +492,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
                 ScreenFade);
 
             GameEngine.GameScreens.DrawUpperLayer(
-                ColourHelper.GetXna4Colour(255, 255, 255, (byte)ScreenFade),
+                ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade),
                 gameTime);
 
             // Draw tunnel animations

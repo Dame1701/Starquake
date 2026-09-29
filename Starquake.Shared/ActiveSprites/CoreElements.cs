@@ -4,6 +4,7 @@
 // -
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Starquake.Constants;
 using Starquake.Engines;
 using Starquake.SharedLibs;
 using Starquake.Structure;
@@ -12,6 +13,26 @@ namespace Starquake.ActiveSprites;
 
 public class CoreElements : GameComponentBase
 {
+    /// <summary>
+    ///     The core is a three by three block of elements sitting in the middle of the core room.
+    ///     Each element is drawn a sprite apart, and the whole block starts here.
+    /// </summary>
+    private const int CoreGridAcross = 3;
+
+    /// <inheritdoc cref="CoreGridAcross" />
+    private const int CoreGridDown = 3;
+
+    /// <inheritdoc cref="CoreGridAcross" />
+    private const int CoreXPos = 416;
+
+    /// <inheritdoc cref="CoreGridAcross" />
+    private const int CoreYPos = 192;
+
+    /// <summary>
+    ///     What finishing the core is worth.
+    /// </summary>
+    private const int ScoreForCompletingCore = 10000;
+
     public CoreElements(GameEngine gameEngineReference) : base(gameEngineReference)
     {
         Elements = new CoreElement[9];
@@ -48,7 +69,7 @@ public class CoreElements : GameComponentBase
             if (Elements[a].CurrentElement == elementNoToReplace)
             {
                 // You get a healthy 10,000 points for each element replaced!
-                GameEngine.BlobStatusPanel.PlayerScore = GameEngine.BlobStatusPanel.PlayerScore + 10000;
+                GameEngine.BlobStatusPanel.PlayerScore = GameEngine.BlobStatusPanel.PlayerScore + ScoreForCompletingCore;
 
                 Elements[a].ElementState = CoreElementState.Replacing;
                 var test = Elements[a].CurrentElement;
@@ -85,9 +106,9 @@ public class CoreElements : GameComponentBase
             elementsToChoose.Add(a);
         }
 
-        for (var y = 0; y < 3; y++)
+        for (var y = 0; y < CoreGridDown; y++)
         {
-            for (var x = 0; x < 3; x++)
+            for (var x = 0; x < CoreGridAcross; x++)
             {
                 if (counter % 2 == 0)
                 {
@@ -126,17 +147,17 @@ public class CoreElements : GameComponentBase
     public List<CollisionTile> GetCollisionMap()
     {
         var toReturn = new List<CollisionTile>();
-        var coreX = 416;
-        var coreY = 192;
+        var coreX = CoreXPos;
+        var coreY = CoreYPos;
 
-        for (var y = 0; y < 3; y++)
+        for (var y = 0; y < CoreGridDown; y++)
         {
-            for (var x = 0; x < 3; x++)
+            for (var x = 0; x < CoreGridAcross; x++)
             {
-                toReturn.Add(new CollisionTile((int)CollisionObjectType.CoreElement, coreX + x * 64, coreY + y * 64, CollisionTileType.NotBlob));
-                toReturn.Add(new CollisionTile((int)CollisionObjectType.CoreElement, coreX + x * 64 + 32, coreY + y * 64, CollisionTileType.NotBlob));
-                toReturn.Add(new CollisionTile((int)CollisionObjectType.CoreElement, coreX + x * 64, coreY + y * 64 + 32, CollisionTileType.NotBlob));
-                toReturn.Add(new CollisionTile((int)CollisionObjectType.CoreElement, coreX + x * 64 + 32, coreY + y * 64 + 32, CollisionTileType.NotBlob));
+                toReturn.Add(new CollisionTile((int)CollisionObjectType.CoreElement, coreX + x * SpriteMetrics.SpriteWidth, coreY + y * SpriteMetrics.SpriteHeight, CollisionTileType.NotBlob));
+                toReturn.Add(new CollisionTile((int)CollisionObjectType.CoreElement, coreX + x * SpriteMetrics.SpriteWidth + SpriteMetrics.HalfSpriteWidth, coreY + y * SpriteMetrics.SpriteHeight, CollisionTileType.NotBlob));
+                toReturn.Add(new CollisionTile((int)CollisionObjectType.CoreElement, coreX + x * SpriteMetrics.SpriteWidth, coreY + y * SpriteMetrics.SpriteHeight + SpriteMetrics.HalfSpriteHeight, CollisionTileType.NotBlob));
+                toReturn.Add(new CollisionTile((int)CollisionObjectType.CoreElement, coreX + x * SpriteMetrics.SpriteWidth + SpriteMetrics.HalfSpriteWidth, coreY + y * SpriteMetrics.SpriteHeight + SpriteMetrics.HalfSpriteHeight, CollisionTileType.NotBlob));
             }
         }
 
@@ -153,15 +174,15 @@ public class CoreElements : GameComponentBase
 
     public void Draw(GameTime gameTime, bool replacingElement)
     {
-        var coreX = 416;
-        var coreY = 192;
+        var coreX = CoreXPos;
+        var coreY = CoreYPos;
         var counter = 0;
 
-        for (var y = 0; y < 3; y++)
+        for (var y = 0; y < CoreGridDown; y++)
         {
-            for (var x = 0; x < 3; x++)
+            for (var x = 0; x < CoreGridAcross; x++)
             {
-                Elements[counter].Draw(coreX + x * 64, coreY + y * 64, gameTime, replacingElement);
+                Elements[counter].Draw(coreX + x * SpriteMetrics.SpriteWidth, coreY + y * SpriteMetrics.SpriteHeight, gameTime, replacingElement);
                 counter++;
             }
         }
@@ -172,11 +193,11 @@ public class CoreElements : GameComponentBase
     {
 
         var counter = 0;
-        for (var y = 0; y < 3; y++)
+        for (var y = 0; y < CoreGridDown; y++)
         {
-            for (var x = 0; x < 3; x++)
+            for (var x = 0; x < CoreGridAcross; x++)
             {
-                Elements[counter].Draw(xPos + x * 64, yPos + y * 64, fade, gameTime);
+                Elements[counter].Draw(xPos + x * SpriteMetrics.SpriteWidth, yPos + y * SpriteMetrics.SpriteHeight, fade, gameTime);
                 counter++;
             }
         }

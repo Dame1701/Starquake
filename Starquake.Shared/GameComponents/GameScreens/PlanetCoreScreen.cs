@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.ActiveSprites;
+using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Engines;
@@ -18,8 +19,65 @@ namespace Starquake.GameComponents.GameScreens;
 
 public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
 {
+    /// <summary>
+    ///     The most aliens the core room ever holds, which is also how many it holds once the blob
+    ///     has nearly finished repairing it - the fuller the core, the busier its guards.
+    /// </summary>
+    private const int MaxCoreAliens = 4;
+
+    /// <summary>
+    ///     How many core elements there are to replace. Putting the last one back finishes the game.
+    /// </summary>
+    private const int CoreElementsToReplace = 9;
+
+    /// <summary>
+    ///     How busy the core room gets as it is repaired. The guards arrive as the number of elements
+    ///     still missing falls past each of these, so an untouched core is unguarded and a nearly
+    ///     finished one has all <see cref="MaxCoreAliens" /> of them.
+    /// </summary>
+    private const int OneAlienFrom = 8;
+
+    /// <inheritdoc cref="OneAlienFrom" />
+    private const int TwoAliensFrom = 6;
+
+    /// <inheritdoc cref="OneAlienFrom" />
+    private const int ThreeAliensFrom = 4;
+
+    /// <inheritdoc cref="OneAlienFrom" />
+    private const int FourAliensFrom = 2;
+
+    /// <summary>
+    ///     How long the blob is held in the core room before being put back outside, in logic frames.
+    /// </summary>
+    private const int CoreVisitFrames = 240;
+
+    /// <summary>
+    ///     How fast the tiles that blank out the room fade away as the core is revealed.
+    /// </summary>
+    private const int BlankingTilesFadeStep = 16;
+
+    /// <summary>
+    ///     The blanking tiles cover the room from the second column onwards, and run
+    ///     <see cref="BlankingTilesAcross" /> by <see cref="BlankingTilesDown" />.
+    /// </summary>
+    private const int BlankingTilesAcross = 6;
+
+    /// <inheritdoc cref="BlankingTilesAcross" />
+    private const int BlankingTilesDown = 6;
+
+    /// <inheritdoc cref="BlankingTilesAcross" />
+    private const int BlankingTilesFirstColumn = TileMetrics.TileWidth;
+
+    /// <summary>
+    ///     Where in the room the core's own particle effects are emitted from: the middle of the
+    ///     playfield.
+    /// </summary>
+    private const int CoreCentreX = TileMetrics.PlayAreaWidth / 2;
+
+    /// <inheritdoc cref="CoreCentreX" />
+    private const int CoreCentreY = TileMetrics.PlayAreaHeight / 2;
     private int _blankingTilesOpacity;
-    private int _coreAlienCount = 4;
+    private int _coreAlienCount = MaxCoreAliens;
 
     private List<Nasty> _coreAliens;
     private IStandardParticleEffect _coreComputationEffect;
@@ -68,13 +126,13 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
         if (_coreSparks != null)
         {
             _coreSparks.Start();
-            _coreSparks.Update(512, 288, gameTime);
+            _coreSparks.Update(CoreCentreX, CoreCentreY, gameTime);
         }
 
         if (_coreComputationEffect != null)
         {
             _coreComputationEffect.Start();
-            _coreComputationEffect.Update(512, 288, gameTime);
+            _coreComputationEffect.Update(CoreCentreX, CoreCentreY, gameTime);
         }
     }
 
@@ -82,7 +140,7 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
     {
         if (_justEnteredCore)
         {
-            _blankingTilesOpacity = 255;
+            _blankingTilesOpacity = ColourLevels.Full;
             _replacingElements = false;
             Initialise(null);
             _justEnteredCore = false;
@@ -122,7 +180,7 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
         {
             if (_blankingTilesOpacity > 0)
             {
-                _blankingTilesOpacity = _blankingTilesOpacity - 16;
+                _blankingTilesOpacity = _blankingTilesOpacity - BlankingTilesFadeStep;
             }
 
             if (_blankingTilesOpacity < 0)
@@ -132,9 +190,9 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
         }
 
         // Leave the core room
-        if (!_replacingElements && _entryTime > 240)
+        if (!_replacingElements && _entryTime > CoreVisitFrames)
         {
-            GameEngine.GameScreens.ScreenNumber = 198;
+            GameEngine.GameScreens.ScreenNumber = WorldMap.CoreApproachScreenNumber;
             GameEngine.CurrentGameScreen = GameScreenType.MainGame;
             GameEngine.Player.BlobXPos = GameEngine.GameScreens.ScreenWidth - GameEngine.Player.BlobWidth;
             GameEngine.GetGameScreen(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.PlanetCore, null);
@@ -142,7 +200,7 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
             _justEnteredCore = true;
             GameEngine.BackgroundColour = Color.Black;
         }
-        else if (!_replacingElements && GameEngine.Elements.GetElementsReplacedCount() == 9)
+        else if (!_replacingElements && GameEngine.Elements.GetElementsReplacedCount() == CoreElementsToReplace)
         {
             // Finished the game!
             GameEngine.CurrentGameScreen = GameScreenType.GameComplete;
@@ -174,11 +232,11 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
         if (!_replacingElements)
         {
             GameEngine.ContentResourceManager.GetSpriteCollection("BlankingTile").Begin(BlendState.AlphaBlend, gameTime);
-            for (var a = 0; a < 6; a++)
+            for (var a = 0; a < BlankingTilesDown; a++)
             {
-                for (var b = 0; b < 6; b++)
+                for (var b = 0; b < BlankingTilesAcross; b++)
                 {
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlankingTile").DrawSprite(0, b * 128 + 128, a * 96, ColourHelper.GetXna4Colour(255, 255, 255, (byte)_blankingTilesOpacity));
+                    GameEngine.ContentResourceManager.GetSpriteCollection("BlankingTile").DrawSprite(0, b * TileMetrics.TileWidth + BlankingTilesFirstColumn, a * TileMetrics.TileHeight, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_blankingTilesOpacity));
                 }
             }
             GameEngine.ContentResourceManager.GetSpriteCollection("BlankingTile").End();
@@ -191,7 +249,7 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
         {
             for (var a = 0; a < _coreAlienCount; a++)
             {
-                _coreAliens[a].Draw(gameTime, (byte)(255 - _blankingTilesOpacity));
+                _coreAliens[a].Draw(gameTime, (byte)(ColourLevels.Full - _blankingTilesOpacity));
             }
         }
 
@@ -231,7 +289,7 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
                 GameEngine,
                 0,
                 0,
-                9);
+                CoreElementsToReplace);
 
             coreAlien.LoadContent(nastyGraphics);
             coreAlien.NastyType = NastyType.CoreGuardian;
@@ -251,7 +309,7 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
         }
         else
         {
-            GameEngine.GameScreens.ScreenNumber = 199;
+            GameEngine.GameScreens.ScreenNumber = WorldMap.CoreScreenNumber;
 
             // Add the collision map for the core elements
             GameEngine.GameScreens.CurrentGameScreenData.CollisionMap.AddRange(_elements.GetCollisionMap());
@@ -291,25 +349,25 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
     {
         // Figure out how many core aliens to display
         var elementsLeftToReplace = _elements.GetActiveElements().Count;
-        if (elementsLeftToReplace > 8)
+        if (elementsLeftToReplace > OneAlienFrom)
         {
             _coreAlienCount = 0;
         }
-        else if (elementsLeftToReplace <= 8 && elementsLeftToReplace > 6)
+        else if (elementsLeftToReplace <= OneAlienFrom && elementsLeftToReplace > TwoAliensFrom)
         {
             _coreAlienCount = 1;
         }
-        else if (elementsLeftToReplace <= 6 && elementsLeftToReplace > 4)
+        else if (elementsLeftToReplace <= TwoAliensFrom && elementsLeftToReplace > ThreeAliensFrom)
         {
             _coreAlienCount = 2;
         }
-        else if (elementsLeftToReplace <= 4 && elementsLeftToReplace > 2)
+        else if (elementsLeftToReplace <= ThreeAliensFrom && elementsLeftToReplace > FourAliensFrom)
         {
             _coreAlienCount = 3;
         }
-        else if (elementsLeftToReplace < 2)
+        else if (elementsLeftToReplace < FourAliensFrom)
         {
-            _coreAlienCount = 4;
+            _coreAlienCount = MaxCoreAliens;
         }
     }
 }

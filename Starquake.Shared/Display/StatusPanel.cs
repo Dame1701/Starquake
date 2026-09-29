@@ -14,6 +14,135 @@ namespace Starquake.Display;
 
 public class StatusPanel : GameComponentBase
 {
+    /// <summary>
+    ///     How much of each supply the blob can hold, and how much it starts a life with. The bars on
+    ///     the panel are drawn full at these, so a pick-up that would take a supply over its ceiling
+    ///     is simply capped.
+    /// </summary>
+    private const int MaxFirePower = 128;
+
+    /// <inheritdoc cref="MaxFirePower" />
+    private const int MaxEnergyLevel = 128;
+
+    /// <inheritdoc cref="MaxFirePower" />
+    private const int MaxPlatforms = 64;
+
+    /// <inheritdoc cref="MaxFirePower" />
+    private const int StartingPlatforms = 32;
+
+    /// <summary>
+    ///     What each power-up is worth. There are three sizes of each, plus a top-up that gives
+    ///     whichever supply is running lowest and an extra life.
+    /// </summary>
+    private const int SmallTopUp = 32;
+
+    /// <inheritdoc cref="SmallTopUp" />
+    private const int MediumTopUp = 64;
+
+    /// <inheritdoc cref="SmallTopUp" />
+    private const int LargeTopUp = 96;
+
+    /// <inheritdoc cref="SmallTopUp" />
+    private const int FullTopUp = 128;
+
+    /// <summary>
+    ///     The power-ups, in the order the tile sheet holds them.
+    /// </summary>
+    private const int PowerUpEnergyMedium = 0;
+
+    /// <inheritdoc cref="PowerUpEnergyMedium" />
+    private const int PowerUpEnergySmall = 1;
+
+    /// <inheritdoc cref="PowerUpEnergyMedium" />
+    private const int PowerUpEnergyFull = 2;
+
+    /// <inheritdoc cref="PowerUpEnergyMedium" />
+    private const int PowerUpFirePowerMedium = 3;
+
+    /// <inheritdoc cref="PowerUpEnergyMedium" />
+    private const int PowerUpFirePowerSmall = 4;
+
+    /// <inheritdoc cref="PowerUpEnergyMedium" />
+    private const int PowerUpPlatforms = 5;
+
+    /// <inheritdoc cref="PowerUpEnergyMedium" />
+    private const int PowerUpWhateverIsLowest = 6;
+
+    /// <inheritdoc cref="PowerUpEnergyMedium" />
+    private const int PowerUpExtraLife = 7;
+
+    /// <summary>
+    ///     A platform costs twice what a shot does, so the top-up power-up weighs the platform count
+    ///     double when deciding which supply is running lowest.
+    /// </summary>
+    private const int PlatformCost = 2;
+
+    /// <summary>
+    ///     The inventory strip: how far apart the slots are, and where the first one starts. The slot
+    ///     number, the item in it, and the scanner that sweeps it are each drawn at their own offset
+    ///     within the slot.
+    /// </summary>
+    private const int InventorySlotSpacing = 78;
+
+    /// <inheritdoc cref="InventorySlotSpacing" />
+    private const int InventoryNumberXPos = 700;
+
+    /// <inheritdoc cref="InventorySlotSpacing" />
+    private const int InventoryNumberYPos = 37;
+
+    /// <inheritdoc cref="InventorySlotSpacing" />
+    private const int InventoryItemXPos = 683;
+
+    /// <inheritdoc cref="InventorySlotSpacing" />
+    private const int InventoryItemYPos = 78;
+
+    /// <inheritdoc cref="InventorySlotSpacing" />
+    private const int InventoryScannerXPos = 681;
+
+    /// <inheritdoc cref="InventorySlotSpacing" />
+    private const int InventoryScannerYPos = 72;
+
+    /// <summary>
+    ///     The three supply bars. They share a left edge and a height, and each is scaled from its
+    ///     supply by however much of the bar one unit of it is worth.
+    /// </summary>
+    private const int BarXPos = 408;
+
+    /// <inheritdoc cref="BarXPos" />
+    private const int BarHeight = 30;
+
+    /// <inheritdoc cref="BarXPos" />
+    private const int EnergyBarYPos = 45;
+
+    /// <inheritdoc cref="BarXPos" />
+    private const int JumpBarYPos = 78;
+
+    /// <inheritdoc cref="BarXPos" />
+    private const int AmmoBarYPos = 110;
+
+    /// <inheritdoc cref="BarXPos" />
+    private const int EnergyBarScale = 2;
+
+    /// <inheritdoc cref="BarXPos" />
+    private const int JumpBarScale = 4;
+
+    /// <inheritdoc cref="BarXPos" />
+    private const int AmmoBarScale = 2;
+
+    /// <summary>
+    ///     Where the score and the lives remaining are printed.
+    /// </summary>
+    private const int ScoreXPos = 39;
+
+    /// <inheritdoc cref="ScoreXPos" />
+    private const int ScoreYPos = 38;
+
+    /// <inheritdoc cref="ScoreXPos" />
+    private const int LivesXPos = 244;
+
+    /// <inheritdoc cref="ScoreXPos" />
+    private const int LivesYPos = 113;
+
 
     private readonly KeyScanner _inventoryScanner;
 
@@ -36,9 +165,9 @@ public class StatusPanel : GameComponentBase
         set
         {
             _firePower = value;
-            if (_firePower > 128)
+            if (_firePower > MaxFirePower)
             {
-                _firePower = 128;
+                _firePower = MaxFirePower;
             }
 
             if (_firePower < 0)
@@ -55,9 +184,9 @@ public class StatusPanel : GameComponentBase
         {
             _energyLevel = value;
 
-            if (_energyLevel > 128)
+            if (_energyLevel > MaxEnergyLevel)
             {
-                _energyLevel = 128;
+                _energyLevel = MaxEnergyLevel;
             }
 
             if (_energyLevel < 0)
@@ -74,9 +203,9 @@ public class StatusPanel : GameComponentBase
         {
             _platforms = value;
 
-            if (_platforms > 64)
+            if (_platforms > MaxPlatforms)
             {
-                _platforms = 64;
+                _platforms = MaxPlatforms;
             }
 
             if (_platforms < 0)
@@ -115,9 +244,9 @@ public class StatusPanel : GameComponentBase
     public void Reset()
     {
         BlobLives = 4;
-        _firePower = 128;
-        _energyLevel = 128;
-        _platforms = 32;
+        _firePower = MaxFirePower;
+        _energyLevel = MaxEnergyLevel;
+        _platforms = StartingPlatforms;
         PlayerScore = 0;
     }
 
@@ -135,37 +264,37 @@ public class StatusPanel : GameComponentBase
         {
             var powerUpType = (int)data;
 
-            if (powerUpType == 0)
+            if (powerUpType == PowerUpEnergyMedium)
             {
-                EnergyLevel = EnergyLevel + 64;
+                EnergyLevel = EnergyLevel + MediumTopUp;
                 GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp2", false);
             }
-            else if (powerUpType == 1)
+            else if (powerUpType == PowerUpEnergySmall)
             {
-                EnergyLevel = EnergyLevel + 32;
+                EnergyLevel = EnergyLevel + SmallTopUp;
                 GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp2", false);
             }
-            else if (powerUpType == 2)
+            else if (powerUpType == PowerUpEnergyFull)
             {
-                EnergyLevel = EnergyLevel + 128;
+                EnergyLevel = EnergyLevel + FullTopUp;
                 GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp2", false);
             }
-            else if (powerUpType == 3)
+            else if (powerUpType == PowerUpFirePowerMedium)
             {
-                FirePower = FirePower + 64;
+                FirePower = FirePower + MediumTopUp;
                 GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp3", 0.5f, false);
             }
-            else if (powerUpType == 4)
+            else if (powerUpType == PowerUpFirePowerSmall)
             {
-                FirePower = FirePower + 32;
+                FirePower = FirePower + SmallTopUp;
                 GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp3", 0.5f, false);
             }
-            else if (powerUpType == 5)
+            else if (powerUpType == PowerUpPlatforms)
             {
-                Platforms = Platforms + 32;
+                Platforms = Platforms + SmallTopUp;
                 GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp1", false);
             }
-            else if (powerUpType == 6)
+            else if (powerUpType == PowerUpWhateverIsLowest)
             {
                 if (BlobLives == 0)
                 {
@@ -173,28 +302,28 @@ public class StatusPanel : GameComponentBase
                     GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("LifePowerUp", false); // Extra life
                 }
                 else if (
-                    Platforms * 2 <= EnergyLevel && // Top Up Jump Platforms
-                    Platforms * 2 <= FirePower)
+                    Platforms * PlatformCost <= EnergyLevel && // Top Up Jump Platforms
+                    Platforms * PlatformCost <= FirePower)
                 {
-                    Platforms = Platforms + 32;
+                    Platforms = Platforms + SmallTopUp;
                     GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp1", false);
                 }
                 else if (
-                    FirePower <= Platforms * 2 && // Fire power
+                    FirePower <= Platforms * PlatformCost && // Fire power
                     FirePower <= EnergyLevel)
                 {
-                    FirePower = FirePower + 64;
+                    FirePower = FirePower + MediumTopUp;
                     GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp3", 0.5f, false);
                 }
                 else if (
-                    EnergyLevel <= Platforms * 2 && // Energy
+                    EnergyLevel <= Platforms * PlatformCost && // Energy
                     EnergyLevel <= FirePower)
                 {
-                    EnergyLevel = EnergyLevel + 96;
+                    EnergyLevel = EnergyLevel + LargeTopUp;
                     GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp2", false);
                 }
             }
-            else if (powerUpType == 7)
+            else if (powerUpType == PowerUpExtraLife)
             {
                 BlobLives++;
                 GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("LifePowerUp", false);
@@ -264,7 +393,7 @@ public class StatusPanel : GameComponentBase
             else
             {
                 // Bring him back to life
-                EnergyLevel = 128;
+                EnergyLevel = MaxEnergyLevel;
 
                 // If he's out of platforms, give him some back
                 if (Platforms <= 8)
@@ -307,15 +436,15 @@ public class StatusPanel : GameComponentBase
                 // Draw numbers above object
                 if (_blobsInventory[a] == Collectables.None)
                 {
-                    _panelNumbers.Draw(78 * a + 700, 37, (a + 1).ToString(), GameEngine, gameTime, Color.White);
+                    _panelNumbers.Draw(InventorySlotSpacing * a + InventoryNumberXPos, InventoryNumberYPos, (a + 1).ToString(), GameEngine, gameTime, Color.White);
                 }
                 else
                 {
-                    _panelNumbers.Draw(78 * a + 700, 37, (a + 1).ToString(), GameEngine, gameTime, Color.OrangeRed);
+                    _panelNumbers.Draw(InventorySlotSpacing * a + InventoryNumberXPos, InventoryNumberYPos, (a + 1).ToString(), GameEngine, gameTime, Color.OrangeRed);
 
                     if (_slotToScan != a) // Don't draw the slot being scanned
                     {
-                        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).DrawSprite((int)_blobsInventory[a], 78 * a + 683, 78, Color.White);
+                        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).DrawSprite((int)_blobsInventory[a], InventorySlotSpacing * a + InventoryItemXPos, InventoryItemYPos, Color.White);
                     }
                 }
             }
@@ -324,27 +453,27 @@ public class StatusPanel : GameComponentBase
 
         if (_slotToScan >= 0)
         {
-            _inventoryScanner.Draw((int)_blobsInventory[_slotToScan], 78 * _slotToScan + 681, 72, gameTime);
+            _inventoryScanner.Draw((int)_blobsInventory[_slotToScan], InventorySlotSpacing * _slotToScan + InventoryScannerXPos, InventoryScannerYPos, gameTime);
         }
 
         // Draw energybars
         GameEngine.ContentResourceManager.GetSpriteCollection("EnerygyBar").Begin(BlendState.AlphaBlend, gameTime);
-        GameEngine.ContentResourceManager.GetSpriteCollection("EnerygyBar").DrawSprite(0, 408, 45, (int)(_energyLevel * 2), 30, Color.White);
+        GameEngine.ContentResourceManager.GetSpriteCollection("EnerygyBar").DrawSprite(0, BarXPos, EnergyBarYPos, (int)(_energyLevel * EnergyBarScale), BarHeight, Color.White);
         GameEngine.ContentResourceManager.GetSpriteCollection("EnerygyBar").End();
 
         GameEngine.ContentResourceManager.GetSpriteCollection("JumpBar").Begin(BlendState.AlphaBlend, gameTime);
-        GameEngine.ContentResourceManager.GetSpriteCollection("JumpBar").DrawSprite(0, 408, 78, (int)(_platforms * 4), 30, Color.White);
+        GameEngine.ContentResourceManager.GetSpriteCollection("JumpBar").DrawSprite(0, BarXPos, JumpBarYPos, (int)(_platforms * JumpBarScale), BarHeight, Color.White);
         GameEngine.ContentResourceManager.GetSpriteCollection("JumpBar").End();
 
         GameEngine.ContentResourceManager.GetSpriteCollection("AmmoBar").Begin(BlendState.AlphaBlend, gameTime);
-        GameEngine.ContentResourceManager.GetSpriteCollection("AmmoBar").DrawSprite(0, 408, 110, (int)(_firePower * 2), 30, Color.White);
+        GameEngine.ContentResourceManager.GetSpriteCollection("AmmoBar").DrawSprite(0, BarXPos, AmmoBarYPos, (int)(_firePower * AmmoBarScale), BarHeight, Color.White);
         GameEngine.ContentResourceManager.GetSpriteCollection("AmmoBar").End();
 
         // Draw score
-        _panelNumbers.Draw(39, 38, PlayerScore.ToString("000000"), GameEngine, gameTime, Color.White);
+        _panelNumbers.Draw(ScoreXPos, ScoreYPos, PlayerScore.ToString("000000"), GameEngine, gameTime, Color.White);
 
         // Draw remaining lives
-        _panelNumbers.Draw(244, 113, BlobLives.ToString("00"), GameEngine, gameTime, Color.White);
+        _panelNumbers.Draw(LivesXPos, LivesYPos, BlobLives.ToString("00"), GameEngine, gameTime, Color.White);
 
         // draw overlay
         GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelOverlay").Begin(BlendState.AlphaBlend, gameTime);

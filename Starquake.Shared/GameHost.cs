@@ -6,6 +6,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Starquake.Constants;
 using Starquake.Engines;
 using Starquake.Input;
 using Starquake.Structure;
@@ -31,8 +32,17 @@ public class GameHost : Game
     /// </summary>
     private const int MaxCatchUpFrames = 5;
 
-    public static readonly int ScreenWidth = 1280;
-    public static readonly int ScreenHeight = 800;
+    /// <summary>
+    ///     The size the game composes its picture at, and the size the window first opens at.
+    ///     Nothing in the game draws to the back buffer directly: everything is laid out against
+    ///     these two numbers and GameEngine.PresentationTransform scales the result onto whatever
+    ///     the back buffer happens to be, so the game looks the same in a small window as it does
+    ///     fullscreen on a 6K display.
+    /// </summary>
+    public const int ScreenWidth = 1280;
+
+    /// <inheritdoc cref="ScreenWidth" />
+    public const int ScreenHeight = 800;
 
     private static readonly TimeSpan LogicFrameLength = TimeSpan.FromTicks((long)(TimeSpan.TicksPerSecond / LogicFramesPerSecond));
 
@@ -235,7 +245,8 @@ public class GameHost : Game
                     // with it rather than being laid over the letterbox borders as well.
                     _gameEngine.Scanlines.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime,
                         _gameEngine.PresentationTransform);
-                    _gameEngine.Scanlines.DrawSprite(0, 0, 0, new Color(255, 255, 255, 255));
+                    _gameEngine.Scanlines.DrawSprite(0, 0, 0,
+                        new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ColourLevels.Full));
                     _gameEngine.Scanlines.End();
                 }
             }

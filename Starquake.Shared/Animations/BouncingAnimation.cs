@@ -3,6 +3,7 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
+using Starquake.Constants;
 using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Sprites;
@@ -20,7 +21,7 @@ public class BouncingAnimation
     private int _effectDuration;
     private int _effectDurationCounter;
 
-    private double _fade = 255;
+    private double _fade = ColourLevels.Full;
     private int _fadeSpeed;
     private double _gravity;
     private float _rotation;
@@ -50,7 +51,7 @@ public class BouncingAnimation
         _gravity = gravity;
         _effectDurationCounter = 0;
         Triggered = true;
-        _fade = 255;
+        _fade = ColourLevels.Full;
         _scale = 1.0f;
         _effectDuration = _gameEngine.RandomNumberGenerator.Next(effectMinDuration, effectMaxDuration);
         _fadeSpeed = _gameEngine.RandomNumberGenerator.Next(10, 30);
@@ -95,7 +96,7 @@ public class BouncingAnimation
 
             if (_fade > 0)
             {
-                _fade = _fade - 255 / (double)_effectDuration;
+                _fade = _fade - ColourLevels.Full / (double)_effectDuration;
             }
             else
             {
@@ -118,11 +119,11 @@ public class BouncingAnimation
     {
         if (spriteNumberOverride >= 0)
         {
-            spriteToDraw.DrawSprite(spriteNumberOverride, xPos, yPos, ColourHelper.GetXna4Colour(255, 255, 255, (byte)_fade), _scale, _rotation);
+            spriteToDraw.DrawSprite(spriteNumberOverride, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_fade), _scale, _rotation);
         }
         else
         {
-            spriteToDraw.DrawSprite(_spriteNo, xPos, yPos, ColourHelper.GetXna4Colour(255, 255, 255, (byte)_fade), _scale, _rotation);
+            spriteToDraw.DrawSprite(_spriteNo, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_fade), _scale, _rotation);
         }
     }
 }

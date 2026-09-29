@@ -3,6 +3,7 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
+using Starquake.Constants;
 using Starquake.Engines;
 using Starquake.Structure;
 
@@ -24,14 +25,14 @@ public class GameScreenBase : GameComponentBase
     public override void Update(GameTime gameTime)
     {
         // Fade screen back up
-        if (ScreenFade < 255)
+        if (ScreenFade < ColourLevels.Full)
         {
             ScreenFade = ScreenFade + ScreenFadeSpeed;
         }
 
-        if (ScreenFade > 255)
+        if (ScreenFade > ColourLevels.Full)
         {
-            ScreenFade = 255;
+            ScreenFade = ColourLevels.Full;
         }
     }
 }
