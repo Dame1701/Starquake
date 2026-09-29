@@ -1,0 +1,68 @@
+# Line endings.
+#
+# The repository stores text as LF; working copies get whatever the platform uses. Without
+# this, files committed from Windows kept their CRLF in the repository while files added on
+# macOS or Linux went in as LF, so the same tree held both and every cross-platform checkout
+# produced whole-file diffs that were nothing but line endings.
+#
+# `text=auto` lets Git decide by inspecting content -- a file containing NUL bytes is left
+# alone -- which is enough on its own. The lists below say so explicitly anyway, because a
+# misclassified asset is silently corrupted rather than noisily broken.
+
+* text=auto
+
+# --- Text -------------------------------------------------------------------------------
+
+*.cs         text diff=csharp
+*.axaml      text
+*.csproj     text
+*.props      text
+*.manifest   text
+*.resx       text
+*.json       text
+*.xml        text
+*.md         text
+*.txt        text
+*.plist      text
+*.fx         text
+*.mgcb       text
+*.spritefont text
+*.gitignore  text
+*.gitattributes text
+
+# Visual Studio rewrites this one with CRLF, so keep it that way in the working copy.
+*.sln        text eol=crlf
+
+# --- Binary -----------------------------------------------------------------------------
+#
+# SQScreenData.dat is the MessagePack screen data. A single byte of line-ending conversion
+# would corrupt it, so it is named here rather than left to detection.
+
+*.dat   binary
+
+*.png   binary
+*.bmp   binary
+*.dds   binary
+*.psd   binary
+*.rdw   binary
+*.ico   binary
+*.icns  binary
+*.ttf   binary
+
+*.wav   binary
+*.mp3   binary
+*.flac  binary
+
+*.dll   binary
+*.nupkg binary
+*.pkf   binary
+*.bin   binary
+*.xnb   binary
+
+# Visual Studio scratch state that is currently tracked.
+*.suo      binary
+*.vsidx    binary
+*.db       binary
+*.ide      binary
+*.ide-shm  binary
+*.ide-wal  binary
