@@ -7,12 +7,12 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using SharedLibs;
-using StarquakeXNA.Animations;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Structure;
+using Starquake.Animations;
+using Starquake.Engines;
+using Starquake.SharedLibs;
+using Starquake.Structure;
 
-namespace StarquakeXNA.GameComponents.GameScreens;
+namespace Starquake.GameComponents.GameScreens;
 
 public class CheopsScreen : GameComponentBase, IGameScreen
 {

@@ -7,11 +7,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Microsoft.Xna.Framework.Audio;
-using StarquakeXNA.ContentManagement;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Structure;
+using Starquake.ContentManagement;
+using Starquake.Engines;
+using Starquake.Structure;
 
-namespace StarquakeXNA.Sounds;
+namespace Starquake.Sounds;
 
 public class SoundEffectEngine(GameEngine gameEngineInstance) : IDisposable
 {

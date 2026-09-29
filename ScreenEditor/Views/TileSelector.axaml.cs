@@ -1,4 +1,4 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
@@ -6,7 +6,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 
-namespace ScreenEditor.Views;
+namespace Starquake.ScreenEditor.Views;
 
 public partial class TileSelector : UserControl
 {

@@ -1,10 +1,10 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
 using MessagePack;
 
-namespace SharedLibs;
+namespace Starquake.SharedLibs;
 
 [MessagePackObject]
 public sealed record CollisionTile(int TileImage, int XPos, int YPos, CollisionTileType CollisionTileType)

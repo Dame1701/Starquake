@@ -6,11 +6,11 @@ using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Helpers;
-using StarquakeXNA.Input;
+using Starquake.Engines;
+using Starquake.Helpers;
+using Starquake.Input;
 
-namespace StarquakeXNA.GameComponents.PresentationScreens;
+namespace Starquake.GameComponents.PresentationScreens;
 
 public class KeyDefiner
 {

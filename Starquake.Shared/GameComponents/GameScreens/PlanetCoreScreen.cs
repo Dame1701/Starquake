@@ -6,15 +6,15 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StarquakeXNA.ActiveSprites;
-using StarquakeXNA.ContentManagement;
-using StarquakeXNA.Display;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Helpers;
-using StarquakeXNA.Particles;
-using StarquakeXNA.Structure;
+using Starquake.ActiveSprites;
+using Starquake.ContentManagement;
+using Starquake.Display;
+using Starquake.Engines;
+using Starquake.Helpers;
+using Starquake.Particles;
+using Starquake.Structure;
 
-namespace StarquakeXNA.GameComponents.GameScreens;
+namespace Starquake.GameComponents.GameScreens;
 
 public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
 {

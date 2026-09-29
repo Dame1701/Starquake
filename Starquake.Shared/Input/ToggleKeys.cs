@@ -4,7 +4,7 @@
 // -
 using Microsoft.Xna.Framework.Input;
 
-namespace StarquakeXNA.Input;
+namespace Starquake.Input;
 
 /// <summary>
 ///     This class allows checking for keys that have been pressed down and then released. This is useful for when we don't

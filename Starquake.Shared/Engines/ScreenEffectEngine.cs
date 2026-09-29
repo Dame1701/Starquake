@@ -6,9 +6,9 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StarquakeXNA.Structure;
+using Starquake.Structure;
 
-namespace StarquakeXNA.Engines;
+namespace Starquake.Engines;
 
 public class RenderViewPort
 {

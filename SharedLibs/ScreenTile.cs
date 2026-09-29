@@ -1,15 +1,14 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
 using MessagePack;
 
-namespace SharedLibs;
+namespace Starquake.SharedLibs;
 
 [MessagePackObject]
 public class ScreenTile
 {
-
     public ScreenTile()
     {
     }

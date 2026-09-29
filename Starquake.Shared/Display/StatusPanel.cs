@@ -5,12 +5,12 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StarquakeXNA.Animations;
-using StarquakeXNA.ContentManagement;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Structure;
+using Starquake.Animations;
+using Starquake.ContentManagement;
+using Starquake.Engines;
+using Starquake.Structure;
 
-namespace StarquakeXNA.Display;
+namespace Starquake.Display;
 
 public class StatusPanel : GameComponentBase
 {

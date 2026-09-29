@@ -6,13 +6,13 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Input;
-using StarquakeXNA.Structure;
+using Starquake.Engines;
+using Starquake.Input;
+using Starquake.Structure;
 
-namespace StarquakeXNA;
+namespace Starquake;
 
-public class Starquake : Game
+public class GameHost : Game
 {
     /// <summary>
     ///     How many times a second the game thinks. This is the speed of the game: the engine moves
@@ -53,7 +53,7 @@ public class Starquake : Game
 
     private bool _resizingBackBuffer;
 
-    public Starquake()
+    public GameHost()
     {
         _graphics = new GraphicsDeviceManager(this);
         _graphics.SynchronizeWithVerticalRetrace = true;

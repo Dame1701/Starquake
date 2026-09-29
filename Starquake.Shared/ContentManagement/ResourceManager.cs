@@ -8,14 +8,14 @@ using System.ComponentModel;
 using System.IO;
 using System.Threading;
 using MessagePack;
-using SharedLibs;
-using StarquakeXNA.Animations;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Particles;
-using StarquakeXNA.Sounds;
-using StarquakeXNA.Structure;
+using Starquake.Animations;
+using Starquake.Engines;
+using Starquake.Particles;
+using Starquake.SharedLibs;
+using Starquake.Sounds;
+using Starquake.Structure;
 
-namespace StarquakeXNA.ContentManagement;
+namespace Starquake.ContentManagement;
 
 internal class DataDescription
 {

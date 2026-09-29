@@ -1,4 +1,4 @@
-<!--
+﻿<!--
   Screen data structures shared by the game and the screen editor.
 
   Unlike ProjectMercury this has no MonoGame dependency, so there is nothing to
@@ -10,6 +10,7 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <RootNamespace>Starquake.SharedLibs</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

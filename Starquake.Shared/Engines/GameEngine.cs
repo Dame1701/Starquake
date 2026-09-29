@@ -9,19 +9,19 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using SharedLibs;
-using StarquakeXNA.ActiveSprites;
-using StarquakeXNA.Animations;
-using StarquakeXNA.ContentManagement;
-using StarquakeXNA.Display;
-using StarquakeXNA.Fonts;
-using StarquakeXNA.GameComponents.GameScreens;
-using StarquakeXNA.GameComponents.PresentationScreens;
-using StarquakeXNA.Helpers;
-using StarquakeXNA.Input;
-using StarquakeXNA.Structure;
+using Starquake.ActiveSprites;
+using Starquake.Animations;
+using Starquake.ContentManagement;
+using Starquake.Display;
+using Starquake.Fonts;
+using Starquake.GameComponents.GameScreens;
+using Starquake.GameComponents.PresentationScreens;
+using Starquake.Helpers;
+using Starquake.Input;
+using Starquake.SharedLibs;
+using Starquake.Structure;
 
-namespace StarquakeXNA.Engines;
+namespace Starquake.Engines;
 
 public class GameEngine : StartableGameComponentBase, IDisposable
 {
@@ -112,8 +112,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     private int _powerUpType;
 
     /// <summary>
-    ///     The game is composed at a fixed <see cref="Starquake.ScreenWidth" /> by
-    ///     <see cref="Starquake.ScreenHeight" /> and only scaled onto the back buffer as the very
+    ///     The game is composed at a fixed <see cref="GameHost.ScreenWidth" /> by
+    ///     <see cref="GameHost.ScreenHeight" /> and only scaled onto the back buffer as the very
     ///     last step, so nothing in the game has to know or care whether it is in a small window,
     ///     a dragged-out one, or fullscreen on a 6K display. The scale is uniform so the picture
     ///     is never stretched, and whatever is left over becomes an even border - top and bottom,
@@ -669,7 +669,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             }
 
             // Setup the screen engine
-            ScreenEffctEngine = new ScreenEffectEngine(Starquake.ScreenWidth, Starquake.ScreenHeight, this);
+            ScreenEffctEngine = new ScreenEffectEngine(GameHost.ScreenWidth, GameHost.ScreenHeight, this);
 
             ScreenEffctEngine.RegisterViewPort(
                 "GameArea",
@@ -1036,11 +1036,11 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         var backBuffer = GraphicsDeviceMgr.GraphicsDevice.PresentationParameters;
 
         var scale = Math.Min(
-            backBuffer.BackBufferWidth / (float)Starquake.ScreenWidth,
-            backBuffer.BackBufferHeight / (float)Starquake.ScreenHeight);
+            backBuffer.BackBufferWidth / (float)GameHost.ScreenWidth,
+            backBuffer.BackBufferHeight / (float)GameHost.ScreenHeight);
 
-        var borderX = (backBuffer.BackBufferWidth - Starquake.ScreenWidth * scale) / 2f;
-        var borderY = (backBuffer.BackBufferHeight - Starquake.ScreenHeight * scale) / 2f;
+        var borderX = (backBuffer.BackBufferWidth - GameHost.ScreenWidth * scale) / 2f;
+        var borderY = (backBuffer.BackBufferHeight - GameHost.ScreenHeight * scale) / 2f;
 
         PresentationTransform =
             Matrix.CreateScale(scale, scale, 1f) *
@@ -1051,7 +1051,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     ///     Go fullscreen at the resolution the desktop is already running at, so the picture is
     ///     composed for the display it lands on instead of being stretched up from the windowed
     ///     size. The game itself never changes size: it always composes at
-    ///     <see cref="Starquake.ScreenWidth" /> x <see cref="Starquake.ScreenHeight" /> and
+    ///     <see cref="GameHost.ScreenWidth" /> x <see cref="GameHost.ScreenHeight" /> and
     ///     PresentationTransform scales that onto whatever back buffer we end up with.
     ///     HardwareModeSwitch has to be on. Borderless (the false case) looks like the friendlier
     ///     option, but on macOS it produces a window clamped to the desktop area *below* the menu
@@ -1064,8 +1064,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
         if (GraphicsDeviceMgr.IsFullScreen)
         {
-            GraphicsDeviceMgr.PreferredBackBufferWidth = Starquake.ScreenWidth;
-            GraphicsDeviceMgr.PreferredBackBufferHeight = Starquake.ScreenHeight;
+            GraphicsDeviceMgr.PreferredBackBufferWidth = GameHost.ScreenWidth;
+            GraphicsDeviceMgr.PreferredBackBufferHeight = GameHost.ScreenHeight;
         }
         else
         {

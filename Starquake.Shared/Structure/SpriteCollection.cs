@@ -7,10 +7,10 @@ using MessagePack;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Helpers;
+using Starquake.Engines;
+using Starquake.Helpers;
 
-namespace StarquakeXNA.Structure;
+namespace Starquake.Structure;
 
 [Serializable]
 public class SpriteCollection

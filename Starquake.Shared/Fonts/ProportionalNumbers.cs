@@ -4,9 +4,9 @@
 // -
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StarquakeXNA.Engines;
+using Starquake.Engines;
 
-namespace StarquakeXNA.Fonts;
+namespace Starquake.Fonts;
 
 public class ProportionalNumbers
 {

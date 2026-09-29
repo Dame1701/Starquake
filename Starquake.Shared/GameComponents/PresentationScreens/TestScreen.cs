@@ -5,11 +5,11 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using StarquakeXNA.ActiveSprites;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Structure;
+using Starquake.ActiveSprites;
+using Starquake.Engines;
+using Starquake.Structure;
 
-namespace StarquakeXNA.GameComponents.PresentationScreens;
+namespace Starquake.GameComponents.PresentationScreens;
 // This will be used for both blob and the nastie's death routines - except for the spiky bugger which will still use the explosion with some bits
 // Nasties will have a new mercury spat effect or just some smoke to enhance the death ray
 

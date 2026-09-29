@@ -3,9 +3,9 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
-using StarquakeXNA.ContentManagement;
+using Starquake.ContentManagement;
 
-namespace StarquakeXNA.Structure;
+namespace Starquake.Structure;
 
 public delegate void RaiseScreenChanged(GameScreenType triggerScreen);
 

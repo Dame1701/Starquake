@@ -1,4 +1,4 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
@@ -13,7 +13,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using ReactiveUI;
 
-namespace ScreenEditor.ViewModels;
+namespace Starquake.ScreenEditor.ViewModels;
 
 public class MainWindowViewModel : INotifyPropertyChanged
 {

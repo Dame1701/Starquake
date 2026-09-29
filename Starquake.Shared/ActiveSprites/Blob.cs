@@ -6,18 +6,18 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using SharedLibs;
-using StarquakeXNA.Animations;
-using StarquakeXNA.Collisions;
-using StarquakeXNA.ContentManagement;
-using StarquakeXNA.Display;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Helpers;
-using StarquakeXNA.Input;
-using StarquakeXNA.Particles;
-using StarquakeXNA.Structure;
+using Starquake.Animations;
+using Starquake.Collisions;
+using Starquake.ContentManagement;
+using Starquake.Display;
+using Starquake.Engines;
+using Starquake.Helpers;
+using Starquake.Input;
+using Starquake.Particles;
+using Starquake.SharedLibs;
+using Starquake.Structure;
 
-namespace StarquakeXNA.ActiveSprites;
+namespace Starquake.ActiveSprites;
 
 public class Blob : GameComponentBase
 {

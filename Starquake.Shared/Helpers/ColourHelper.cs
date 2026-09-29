@@ -4,7 +4,7 @@
 // -
 using Microsoft.Xna.Framework;
 
-namespace StarquakeXNA.Helpers;
+namespace Starquake.Helpers;
 
 public class ColourHelper
 {

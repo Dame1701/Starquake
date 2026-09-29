@@ -5,11 +5,11 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Fonts;
-using StarquakeXNA.Helpers;
+using Starquake.Engines;
+using Starquake.Fonts;
+using Starquake.Helpers;
 
-namespace StarquakeXNA.Scoring;
+namespace Starquake.Scoring;
 
 public class HiScores
 {

@@ -8,15 +8,15 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using ProjectMercury;
-using StarquakeXNA.Animations;
-using StarquakeXNA.Collisions;
-using StarquakeXNA.ContentManagement;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Helpers;
-using StarquakeXNA.Particles;
-using StarquakeXNA.Structure;
+using Starquake.Animations;
+using Starquake.Collisions;
+using Starquake.ContentManagement;
+using Starquake.Engines;
+using Starquake.Helpers;
+using Starquake.Particles;
+using Starquake.Structure;
 
-namespace StarquakeXNA.ActiveSprites;
+namespace Starquake.ActiveSprites;
 
 // This wraps multiple nasties
 public class Nasties : GameComponentBase

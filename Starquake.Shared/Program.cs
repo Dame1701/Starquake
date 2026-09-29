@@ -1,10 +1,10 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
 using System;
 
-namespace StarquakeXNA;
+namespace Starquake;
 
 internal static class Program
 {
@@ -19,7 +19,7 @@ internal static class Program
         // folder -- from Finder, for instance, where a .app bundle starts at "/".
         Environment.CurrentDirectory = AppContext.BaseDirectory;
 
-        using var game = new Starquake();
+        using var game = new GameHost();
         game.Run();
     }
 }

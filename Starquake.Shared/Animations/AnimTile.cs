@@ -5,10 +5,10 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Structure;
+using Starquake.Engines;
+using Starquake.Structure;
 
-namespace StarquakeXNA.Animations;
+namespace Starquake.Animations;
 
 public class AnimTileEngine : GameComponentBase
 {

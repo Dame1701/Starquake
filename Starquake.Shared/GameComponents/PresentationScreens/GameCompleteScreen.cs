@@ -5,12 +5,12 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Helpers;
-using StarquakeXNA.Input;
-using StarquakeXNA.Structure;
+using Starquake.Engines;
+using Starquake.Helpers;
+using Starquake.Input;
+using Starquake.Structure;
 
-namespace StarquakeXNA.GameComponents.PresentationScreens;
+namespace Starquake.GameComponents.PresentationScreens;
 
 public class GameCompleteScreen : GameScreenBase, IGameScreen
 {

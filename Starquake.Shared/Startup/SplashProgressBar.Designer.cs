@@ -1,5 +1,5 @@
 ﻿/*
-namespace StarquakeXNA
+namespace Starquake
 {
     partial class SplashProgressBar
     {

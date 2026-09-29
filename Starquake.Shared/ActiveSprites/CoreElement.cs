@@ -6,13 +6,13 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using SharedLibs;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Helpers;
-using StarquakeXNA.Particles;
-using StarquakeXNA.Structure;
+using Starquake.Engines;
+using Starquake.Helpers;
+using Starquake.Particles;
+using Starquake.SharedLibs;
+using Starquake.Structure;
 
-namespace StarquakeXNA.ActiveSprites;
+namespace Starquake.ActiveSprites;
 
 public class CoreElements : GameComponentBase
 {

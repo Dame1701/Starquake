@@ -3,11 +3,11 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Helpers;
-using StarquakeXNA.Structure;
+using Starquake.Engines;
+using Starquake.Helpers;
+using Starquake.Structure;
 
-namespace StarquakeXNA.Animations;
+namespace Starquake.Animations;
 
 public class BouncingAnimation
 {

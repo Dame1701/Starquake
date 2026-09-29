@@ -4,7 +4,7 @@
 // -
 using Microsoft.Xna.Framework.Audio;
 
-namespace StarquakeXNA.Sounds;
+namespace Starquake.Sounds;
 
 public class MultiInstanceSoundEffect
 {

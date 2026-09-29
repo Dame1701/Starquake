@@ -1,4 +1,4 @@
-<!--
+﻿<!--
   The game itself. Every platform builds from these sources; nothing here is allowed to be
   platform-specific except behind an #if WINDOWS guard.
 
@@ -16,7 +16,7 @@
     <PropertyGroup>
         <TargetFrameworks>net9.0;net9.0-windows</TargetFrameworks>
         <OutputType>Library</OutputType>
-        <RootNamespace>StarquakeXNA</RootNamespace>
+        <RootNamespace>Starquake</RootNamespace>
         <AssemblyName>Starquake.Shared</AssemblyName>
         <TieredCompilation>false</TieredCompilation>
         <!-- Lets the net9.0-windows target build on Linux and macOS. -->

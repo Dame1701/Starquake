@@ -5,7 +5,7 @@
 /*
 using System.Drawing;
 
-namespace StarquakeXNA
+namespace Starquake
 {
     public partial class SplashProgressBar : UserControl
     {

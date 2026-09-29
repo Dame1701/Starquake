@@ -6,7 +6,7 @@
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-        <RootNamespace>ScreenEditor</RootNamespace>
+        <RootNamespace>Starquake.ScreenEditor</RootNamespace>
         <AssemblyName>ScreenEditor</AssemblyName>
     </PropertyGroup>
 

@@ -6,7 +6,7 @@ using System;
 using Avalonia;
 using Avalonia.ReactiveUI;
 
-namespace ScreenEditor;
+namespace Starquake.ScreenEditor;
 
 internal class Program
 {

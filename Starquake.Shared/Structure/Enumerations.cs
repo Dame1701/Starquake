@@ -3,7 +3,8 @@
 // ---------------------------------------------------------
 // -
 
-namespace StarquakeXNA.Structure;
+
+namespace Starquake.Structure;
 
 public enum Collectables
 {

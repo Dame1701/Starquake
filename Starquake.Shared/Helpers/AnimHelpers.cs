@@ -3,7 +3,8 @@
 // ---------------------------------------------------------
 // -
 
-namespace StarquakeXNA.Helpers;
+
+namespace Starquake.Helpers;
 
 public class AnimationTrigger
 {

@@ -3,9 +3,9 @@
 // ---------------------------------------------------------
 // -
 using System;
-using SharedLibs;
+using Starquake.SharedLibs;
 
-namespace StarquakeXNA.Animations;
+namespace Starquake.Animations;
 
 public class FaderAnimation
 {

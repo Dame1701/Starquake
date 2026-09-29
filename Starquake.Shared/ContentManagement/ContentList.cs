@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Content;
 
-namespace StarquakeXNA.ContentManagement;
+namespace Starquake.ContentManagement;
 
 public class ContentList
 {

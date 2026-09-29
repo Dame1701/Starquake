@@ -4,9 +4,9 @@
 // -
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StarquakeXNA.Structure;
+using Starquake.Structure;
 
-namespace StarquakeXNA.Engines;
+namespace Starquake.Engines;
 
 public abstract class ScreenEffectBase
 {

@@ -3,9 +3,9 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework.Content;
-using StarquakeXNA.Engines;
+using Starquake.Engines;
 
-namespace StarquakeXNA.Structure;
+namespace Starquake.Structure;
 
 public class StartableGameComponentBase
 {

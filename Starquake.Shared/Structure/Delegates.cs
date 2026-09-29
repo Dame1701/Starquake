@@ -3,7 +3,8 @@
 // ---------------------------------------------------------
 // -
 
-namespace StarquakeXNA.Structure;
+
+namespace Starquake.Structure;
 
 public delegate void RaiseEngineComponentStatusChanged(string message, int percentComplete, GameEngineStatus status);
 

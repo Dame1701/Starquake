@@ -4,9 +4,9 @@
 // -
 using System;
 using Microsoft.Xna.Framework.Audio;
-using StarquakeXNA.Structure;
+using Starquake.Structure;
 
-namespace StarquakeXNA.Sounds;
+namespace Starquake.Sounds;
 
 public class SoundEffectInstanceRecord
 {

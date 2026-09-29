@@ -7,10 +7,10 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using ProjectMercury;
 using ProjectMercury.Renderers;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Structure;
+using Starquake.Engines;
+using Starquake.Structure;
 
-namespace StarquakeXNA.Particles;
+namespace Starquake.Particles;
 
 public interface IParticleEffect
 {

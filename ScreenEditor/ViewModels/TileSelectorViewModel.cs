@@ -1,8 +1,9 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-namespace ScreenEditor.ViewModels;
+
+namespace Starquake.ScreenEditor.ViewModels;
 
 public class TileSelectorViewModel
 {

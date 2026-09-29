@@ -4,7 +4,7 @@
 // -
 using System;
 
-namespace StarquakeXNA.Animations;
+namespace Starquake.Animations;
 
 public class RandomFaderAnimation
 {

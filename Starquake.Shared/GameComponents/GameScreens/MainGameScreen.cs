@@ -6,13 +6,13 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using StarquakeXNA.ContentManagement;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Helpers;
-using StarquakeXNA.Input;
-using StarquakeXNA.Structure;
+using Starquake.ContentManagement;
+using Starquake.Engines;
+using Starquake.Helpers;
+using Starquake.Input;
+using Starquake.Structure;
 
-namespace StarquakeXNA.GameComponents.GameScreens;
+namespace Starquake.GameComponents.GameScreens;
 
 public class MainGameScreen : GameComponentBase, IGameScreen
 {

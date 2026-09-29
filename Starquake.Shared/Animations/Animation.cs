@@ -3,7 +3,8 @@
 // ---------------------------------------------------------
 // -
 
-namespace StarquakeXNA.Animations;
+
+namespace Starquake.Animations;
 
 public class Animation
 {

@@ -3,9 +3,9 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
-using StarquakeXNA.Engines;
+using Starquake.Engines;
 
-namespace StarquakeXNA.Structure;
+namespace Starquake.Structure;
 
 public class SpritePixel
 {

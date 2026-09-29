@@ -3,9 +3,9 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
-using StarquakeXNA.Structure;
+using Starquake.Structure;
 
-namespace StarquakeXNA.Helpers;
+namespace Starquake.Helpers;
 
 public class SpriteHelpers
 {

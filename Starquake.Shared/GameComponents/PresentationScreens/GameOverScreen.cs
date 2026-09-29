@@ -6,15 +6,15 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Fonts;
-using StarquakeXNA.GameComponents.GameScreens;
-using StarquakeXNA.Helpers;
-using StarquakeXNA.Input;
-using StarquakeXNA.Scoring;
-using StarquakeXNA.Structure;
+using Starquake.Engines;
+using Starquake.Fonts;
+using Starquake.GameComponents.GameScreens;
+using Starquake.Helpers;
+using Starquake.Input;
+using Starquake.Scoring;
+using Starquake.Structure;
 
-namespace StarquakeXNA.GameComponents.PresentationScreens;
+namespace Starquake.GameComponents.PresentationScreens;
 
 public class GameOverScreen : GameScreenBase, IGameScreen
 {

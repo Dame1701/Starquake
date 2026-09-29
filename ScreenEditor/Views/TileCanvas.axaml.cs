@@ -1,4 +1,4 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
@@ -9,7 +9,7 @@ using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 
-namespace ScreenEditor.Views;
+namespace Starquake.ScreenEditor.Views;
 
 public partial class TileCanvas : UserControl
 {

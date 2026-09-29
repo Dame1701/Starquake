@@ -6,7 +6,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace StarquakeXNA.Helpers;
+namespace Starquake.Helpers;
 
 /// <summary>
 ///     An extended version of the SpriteBatch class that supports line and

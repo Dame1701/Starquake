@@ -3,9 +3,9 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework.Input;
-using StarquakeXNA.Engines;
+using Starquake.Engines;
 
-namespace StarquakeXNA.Input;
+namespace Starquake.Input;
 
 public class PlayerKeySet
 {

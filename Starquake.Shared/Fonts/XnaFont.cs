@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace StarquakeXNA.Fonts;
+namespace Starquake.Fonts;
 
 [Serializable]
 [XmlRoot]

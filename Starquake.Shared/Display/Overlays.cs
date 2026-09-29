@@ -4,10 +4,10 @@
 // -
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Helpers;
+using Starquake.Engines;
+using Starquake.Helpers;
 
-namespace StarquakeXNA.Display;
+namespace Starquake.Display;
 
 public class Overlays
 {

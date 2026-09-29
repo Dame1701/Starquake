@@ -5,9 +5,9 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StarquakeXNA.Helpers;
+using Starquake.Helpers;
 
-namespace StarquakeXNA.Fonts;
+namespace Starquake.Fonts;
 
 public class BitmapFont : IDisposable
 {

@@ -1,8 +1,9 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-namespace StarquakeXNA.Structure;
+
+namespace Starquake.Structure;
 
 public enum ScreenEffectType
 {

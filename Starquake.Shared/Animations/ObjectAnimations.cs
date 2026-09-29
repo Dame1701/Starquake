@@ -4,11 +4,11 @@
 // -
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Helpers;
-using StarquakeXNA.Structure;
+using Starquake.Engines;
+using Starquake.Helpers;
+using Starquake.Structure;
 
-namespace StarquakeXNA.Animations;
+namespace Starquake.Animations;
 
 public class KeyScanner
 {

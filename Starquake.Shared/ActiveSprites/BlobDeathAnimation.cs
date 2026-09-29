@@ -6,12 +6,12 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StarquakeXNA.Animations;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Particles;
-using StarquakeXNA.Structure;
+using Starquake.Animations;
+using Starquake.Engines;
+using Starquake.Particles;
+using Starquake.Structure;
 
-namespace StarquakeXNA.ActiveSprites;
+namespace Starquake.ActiveSprites;
 
 public class BouncingParticle
 {

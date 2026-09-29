@@ -1,4 +1,4 @@
-<!--
+﻿<!--
   Boilerplate shared by every platform head.
 
   A head is a thin .csproj that imports this file, picks its target framework and MonoGame
@@ -13,7 +13,7 @@
 <Project>
 
     <PropertyGroup>
-        <RootNamespace>StarquakeXNA</RootNamespace>
+        <RootNamespace>Starquake</RootNamespace>
         <AssemblyName>Starquake</AssemblyName>
         <OutputType>WinExe</OutputType>
         <PublishReadyToRun>false</PublishReadyToRun>

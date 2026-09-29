@@ -6,12 +6,12 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using SharedLibs;
-using StarquakeXNA.Display;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Structure;
+using Starquake.Display;
+using Starquake.Engines;
+using Starquake.SharedLibs;
+using Starquake.Structure;
 
-namespace StarquakeXNA.ActiveSprites;
+namespace Starquake.ActiveSprites;
 
 public class JumpPlatforms
 {

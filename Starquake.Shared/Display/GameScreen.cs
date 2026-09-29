@@ -10,14 +10,14 @@ using MessagePack;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ProjectMercury.Emitters;
-using SharedLibs;
-using StarquakeXNA.ActiveSprites;
-using StarquakeXNA.Collisions;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Particles;
-using StarquakeXNA.Structure;
+using Starquake.ActiveSprites;
+using Starquake.Collisions;
+using Starquake.Engines;
+using Starquake.Particles;
+using Starquake.SharedLibs;
+using Starquake.Structure;
 
-namespace StarquakeXNA.Display;
+namespace Starquake.Display;
 
 public class GameScreenCollection : GameComponentBase
 {

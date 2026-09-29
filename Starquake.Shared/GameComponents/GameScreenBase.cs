@@ -3,10 +3,10 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
-using StarquakeXNA.Engines;
-using StarquakeXNA.Structure;
+using Starquake.Engines;
+using Starquake.Structure;
 
-namespace StarquakeXNA.GameComponents;
+namespace Starquake.GameComponents;
 
 public class GameScreenBase : GameComponentBase
 {
