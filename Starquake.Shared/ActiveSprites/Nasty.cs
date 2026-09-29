@@ -6,6 +6,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Animations;
+using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Engines;
 using Starquake.Helpers;
@@ -21,6 +22,106 @@ public class Nasty : GameComponentBase
     // The number of frames for the birth to appear (60 frames = 1 second)
     private const int BirthPeriod = 60;
 
+    /// <summary>
+    ///     The nasty's walk cycle. It plays back and forth rather than looping, which is what gives
+    ///     the legs their scuttle.
+    /// </summary>
+    private const int NastyLastFrame = 3;
+
+    /// <inheritdoc cref="NastyLastFrame" />
+    private const int NastyAnimationDelay = 4;
+
+    /// <summary>
+    ///     How fast the nasty spins as it materialises, and how fast it is still spinning by the time
+    ///     it has finished. It slows from the one to the other over the second half of the birth.
+    /// </summary>
+    private const float BirthStartRotateSpeed = 8.0f;
+
+    /// <inheritdoc cref="BirthStartRotateSpeed" />
+    private const float BirthRespawnRotateSpeed = 32.0f;
+
+    /// <inheritdoc cref="BirthStartRotateSpeed" />
+    private const float BirthEndRotateSpeed = 16f;
+
+    /// <summary>
+    ///     The colours only fade in over the back half of the birth, so both fades count up at twice
+    ///     the rate the birth itself runs at.
+    /// </summary>
+    private const int BirthColourFadeHalf = 2;
+
+    /// <summary>
+    ///     How long a nasty lies dead before it is allowed to come back, and the longest it then
+    ///     waits before doing so. A nasty is never gone for good - it is only ever biding its time.
+    /// </summary>
+    private const int DeadPauseFrames = 50;
+
+    /// <inheritdoc cref="DeadPauseFrames" />
+    private const int LongestConceptionWait = 500;
+
+    /// <inheritdoc cref="DeadPauseFrames" />
+    private const int ShortestConceptionWaitOnCoreScreen = 60;
+
+    /// <summary>
+    ///     How long a nasty keeps to one frame of mind before picking another. It chases the blob for
+    ///     longer than it wanders, so the two ranges are different.
+    /// </summary>
+    private const int WanderingShortest = 200;
+
+    /// <inheritdoc cref="WanderingShortest" />
+    private const int WanderingLongest = 500;
+
+    /// <inheritdoc cref="WanderingShortest" />
+    private const int ChasingShortest = 400;
+
+    /// <inheritdoc cref="WanderingShortest" />
+    private const int ChasingLongest = 700;
+
+    /// <summary>
+    ///     A newly born nasty crawls at one pixel a frame for this long before it picks up speed, so
+    ///     it can be seen coming.
+    /// </summary>
+    private const int FirstMovementDuration = 90;
+
+    /// <summary>
+    ///     How far a nasty travels before choosing a new direction. The ranges differ by movement
+    ///     type: a bouncing nasty commits to longer runs than a wandering one.
+    /// </summary>
+    private const int ShortestRun = 8;
+
+    /// <inheritdoc cref="ShortestRun" />
+    private const int ShortestChasingRun = 10;
+
+    /// <inheritdoc cref="ShortestRun" />
+    private const int LongestRun = 40;
+
+    /// <inheritdoc cref="ShortestRun" />
+    private const int ShortestBouncingRun = 40;
+
+    /// <inheritdoc cref="ShortestRun" />
+    private const int LongestBouncingRun = 80;
+
+    /// <summary>
+    ///     How quickly a dead nasty shrinks away, and how fast the corpse spins as it goes.
+    /// </summary>
+    private const float DeathShrinkStep = 0.01f;
+
+    /// <inheritdoc cref="DeathShrinkStep" />
+    private const float DeathRotateSpeed = 16f;
+
+    /// <summary>
+    ///     How fast a live nasty rocks from side to side as it walks.
+    /// </summary>
+    private const float NastyRockSpeed = 4f;
+
+    /// <summary>
+    ///     The colours the different nasties are tinted: grey for one that has been shot, red for a
+    ///     spiky one, green for a conveyer one.
+    /// </summary>
+    private const int ShotNastyGrey = 50;
+
+    /// <inheritdoc cref="ShotNastyGrey" />
+    private const int ConveyerNastyGreen = 100;
+
     // Animation
     private readonly Animation _nastyAnim;
 
@@ -29,7 +130,7 @@ public class Nasty : GameComponentBase
 
     // Birth stuff
     private int _birthFadeLevel;
-    private float _birthRotateSpeed = 8.0f;
+    private float _birthRotateSpeed = BirthStartRotateSpeed;
 
     private float _birthScale;
     private int _birthTimer;
@@ -41,7 +142,7 @@ public class Nasty : GameComponentBase
     private bool _deathAnticlockwise;
 
     // Death stuff
-    private int _deathFadeLevel = 255;
+    private int _deathFadeLevel = ColourLevels.Full;
     private float _deathScale = 1f;
     private bool _firstMovement;
 
@@ -99,11 +200,11 @@ public class Nasty : GameComponentBase
 
         _nastyAnim = new Animation();
         _nastyAnim.FirstFrame = 0;
-        _nastyAnim.LastFrame = 3;
+        _nastyAnim.LastFrame = NastyLastFrame;
         _nastyAnim.Repeat = true;
         _nastyAnim.AnimateForwards = true;
         _nastyAnim.Yoyo = true;
-        _nastyAnim.Delay = 4;
+        _nastyAnim.Delay = NastyAnimationDelay;
     }
 
     private MoveType MovementType
@@ -126,11 +227,11 @@ public class Nasty : GameComponentBase
 
     public bool KeepNastyTheSame { get; set; }
 
-    public int NastyWidth { get; set; } = 64;
+    public int NastyWidth { get; set; } = SpriteMetrics.SpriteWidth;
 
     public NastyState NastyState { get; set; }
 
-    public int NastyHeight { get; set; } = 64;
+    public int NastyHeight { get; set; } = SpriteMetrics.SpriteHeight;
 
     public bool Smoking { get; set; }
 
@@ -220,7 +321,7 @@ public class Nasty : GameComponentBase
             var nastyLocationIndex = GameEngine.RandomNumberGenerator.Next(0, potentialLocations.Count);
 
             // Return a location
-            return new Point(potentialLocations[nastyLocationIndex].X + 32,
+            return new Point(potentialLocations[nastyLocationIndex].X + SpriteMetrics.HalfSpriteWidth,
                 potentialLocations[nastyLocationIndex].Y + 16);
         }
 
@@ -274,7 +375,7 @@ public class Nasty : GameComponentBase
             // Extend this to pause for random time before bringing a nasty back to life
             _nastyDeadPauseCounter = 0;
             NastyState = NastyState.PreConception;
-            _conceptionwaitCounter = GameEngine.RandomNumberGenerator.Next(0, 500);
+            _conceptionwaitCounter = GameEngine.RandomNumberGenerator.Next(0, LongestConceptionWait);
         }
     }
 
@@ -376,12 +477,12 @@ public class Nasty : GameComponentBase
 
     public override void Update(GameTime gameTime)
     {
-        if (GameEngine.GameScreens.ScreenNumber == 198)
+        if (GameEngine.GameScreens.ScreenNumber == WorldMap.CoreApproachScreenNumber)
         {
             NastyState = NastyState.Disabled;
         }
 
-        if (GameEngine.GameScreens.ScreenNumber == 199)
+        if (GameEngine.GameScreens.ScreenNumber == WorldMap.CoreScreenNumber)
         {
             _nastyType = NastyType.CoreGuardian;
             _attractedToBlob = false;
@@ -390,7 +491,7 @@ public class Nasty : GameComponentBase
         // Reset conception variables
         if (NastyState == NastyState.PreConception)
         {
-            _conceptionwaitCounter = GameEngine.RandomNumberGenerator.Next(0, 60);
+            _conceptionwaitCounter = GameEngine.RandomNumberGenerator.Next(0, ShortestConceptionWaitOnCoreScreen);
             NastyState = NastyState.Conception;
 
             if (!KeepNastyTheSame)
@@ -420,12 +521,12 @@ public class Nasty : GameComponentBase
                 _movementChangeCounter = 0;
                 _movementChangeCount = 0;
                 _firstMovement = true;
-                _deathFadeLevel = 255;
+                _deathFadeLevel = ColourLevels.Full;
                 _deathScale = 1f;
                 _birthFadeLevel = 0;
                 _birthScale = 0f;
                 _birthColourLevel = 0;
-                _birthRotateSpeed = 32.0f;
+                _birthRotateSpeed = BirthRespawnRotateSpeed;
                 _birthTimer = 0;
 
                 // Select a new location to spawn
@@ -457,42 +558,42 @@ public class Nasty : GameComponentBase
 
 
             // Fade the nasty in
-            if (_birthFadeLevel < 255)
+            if (_birthFadeLevel < ColourLevels.Full)
             {
                 _birthFadeLevel =
                     _birthFadeLevel +
-                    (int)(255 /
+                    (int)(ColourLevels.Full /
                           ((double)BirthPeriod /
-                           2)); // We only have half the time to do the colour fade in 
+                           BirthColourFadeHalf)); // We only have half the time to do the colour fade in 
             }
 
 
             // Once we're halfway through fade in the colours
-            if (_birthTimer > BirthPeriod / 2)
+            if (_birthTimer > BirthPeriod / BirthColourFadeHalf)
             {
-                if (_birthColourLevel < 255)
+                if (_birthColourLevel < ColourLevels.Full)
                 {
                     _birthColourLevel =
                         _birthColourLevel +
-                        (int)(255 /
+                        (int)(ColourLevels.Full /
                               ((double)BirthPeriod /
-                               2)); // We only have half the time to do the colour fade in 
+                               BirthColourFadeHalf)); // We only have half the time to do the colour fade in 
                 }
 
-                if (_birthRotateSpeed > 16)
+                if (_birthRotateSpeed > BirthEndRotateSpeed)
                 {
-                    _birthRotateSpeed = _birthRotateSpeed - 16f / ((float)BirthPeriod / 2);
+                    _birthRotateSpeed = _birthRotateSpeed - BirthEndRotateSpeed / ((float)BirthPeriod / BirthColourFadeHalf);
                 }
             }
 
-            if (_birthFadeLevel > 255)
+            if (_birthFadeLevel > ColourLevels.Full)
             {
-                _birthFadeLevel = 255;
+                _birthFadeLevel = ColourLevels.Full;
             }
 
-            if (_birthColourLevel > 255)
+            if (_birthColourLevel > ColourLevels.Full)
             {
-                _birthColourLevel = 255;
+                _birthColourLevel = ColourLevels.Full;
             }
 
             if (_birthTimer > BirthPeriod)
@@ -508,7 +609,7 @@ public class Nasty : GameComponentBase
         }
         else if (NastyState == NastyState.Shot)
         {
-            _deathFadeLevel = 255;
+            _deathFadeLevel = ColourLevels.Full;
             _deathScale = 1.0f;
 
             if (_nastyType == NastyType.Spiky ||
@@ -545,14 +646,14 @@ public class Nasty : GameComponentBase
             {
                 _nastyDiesAnimation.GetNextFrame();
 
-                if (_nastyDeadPauseCounter < 50)
+                if (_nastyDeadPauseCounter < DeadPauseFrames)
                 {
                     _nastyDeadPauseCounter++;
                 }
                 else
                 {
                     NastyState = NastyState.PreConception;
-                    _conceptionwaitCounter = GameEngine.RandomNumberGenerator.Next(0, 500);
+                    _conceptionwaitCounter = GameEngine.RandomNumberGenerator.Next(0, LongestConceptionWait);
                     _nastyDeadPauseCounter = 0;
                 }
             }
@@ -561,13 +662,13 @@ public class Nasty : GameComponentBase
         if (_nastyDies != null)
         {
             // Update the explosion
-            _nastyDies.Update(XPos + 32, YPos + 32, gameTime);
+            _nastyDies.Update(XPos + SpriteMetrics.HalfSpriteWidth, YPos + SpriteMetrics.HalfSpriteHeight, gameTime);
         }
 
         if (_nastyDiesType2 != null)
         {
             // Update the splat
-            _nastyDiesType2.Update(XPos + 32, YPos + 32, gameTime);
+            _nastyDiesType2.Update(XPos + SpriteMetrics.HalfSpriteWidth, YPos + SpriteMetrics.HalfSpriteHeight, gameTime);
         }
 
         var updateAnimation = false;
@@ -703,12 +804,12 @@ public class Nasty : GameComponentBase
 
                     if (attractionFlag == 0)
                     {
-                        _movementChangeCount = GameEngine.RandomNumberGenerator.Next(200, 500);
+                        _movementChangeCount = GameEngine.RandomNumberGenerator.Next(WanderingShortest, WanderingLongest);
                         _attractedToBlob = false;
                     }
                     else
                     {
-                        _movementChangeCount = GameEngine.RandomNumberGenerator.Next(400, 700);
+                        _movementChangeCount = GameEngine.RandomNumberGenerator.Next(ChasingShortest, ChasingLongest);
                         _attractedToBlob = true;
                     }
 
@@ -796,7 +897,7 @@ public class Nasty : GameComponentBase
                         if (_firstMovement)
                         {
                             MoveSpeed = 1;
-                            _movementChangeCount = 90;
+                            _movementChangeCount = FirstMovementDuration;
                             _firstMovement = false;
                         }
                     }
@@ -965,7 +1066,7 @@ public class Nasty : GameComponentBase
             }
         }
 
-        _stepsToMove = GameEngine.RandomNumberGenerator.Next(8, 40);
+        _stepsToMove = GameEngine.RandomNumberGenerator.Next(ShortestRun, LongestRun);
     }
 
     private void RandomUpDownLeftRight(int blobsXPosition, int blobsYPosition)
@@ -1049,7 +1150,7 @@ public class Nasty : GameComponentBase
             }
         }
 
-        _stepsToMove = GameEngine.RandomNumberGenerator.Next(8, 40);
+        _stepsToMove = GameEngine.RandomNumberGenerator.Next(ShortestRun, LongestRun);
     }
 
     private void RandomMovement(int blobsXPosition, int blobsYPosition)
@@ -1357,7 +1458,7 @@ public class Nasty : GameComponentBase
             }
         }
 
-        _stepsToMove = GameEngine.RandomNumberGenerator.Next(10, 40);
+        _stepsToMove = GameEngine.RandomNumberGenerator.Next(ShortestChasingRun, LongestRun);
     }
 
     private void SpikeyMovement(int blobsXPosition, int blobsYPosition)
@@ -1597,7 +1698,7 @@ public class Nasty : GameComponentBase
         }
         else
         {
-            _stepsToMove = GameEngine.RandomNumberGenerator.Next(40, 80);
+            _stepsToMove = GameEngine.RandomNumberGenerator.Next(ShortestBouncingRun, LongestBouncingRun);
         }
     }
 
@@ -1867,7 +1968,7 @@ public class Nasty : GameComponentBase
 
             // Choose the image
             _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                ColourHelper.GetXna4Colour(255, 255, 255, (byte)screenFade), 1.0f, 4f, true, GameEngine.Paused);
+                ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade), 1.0f, NastyRockSpeed, true, GameEngine.Paused);
             _nastySprite.End();
         }
         else
@@ -1878,8 +1979,8 @@ public class Nasty : GameComponentBase
 
                 // Choose the image
                 _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                    ColourHelper.GetXna4Colour((byte)_birthColourLevel, (byte)_birthColourLevel, 255,
-                        (byte)(255 * ((double)screenFade / 255))), _birthScale, _birthRotateSpeed,
+                    ColourHelper.GetXna4Colour((byte)_birthColourLevel, (byte)_birthColourLevel, ColourLevels.Full,
+                        (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), _birthScale, _birthRotateSpeed,
                     true, GameEngine.Paused);
                 _nastySprite.End();
             }
@@ -1890,17 +1991,17 @@ public class Nasty : GameComponentBase
                 {
                     _nastySprite.Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
                     _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                        ColourHelper.GetXna4Colour(50, 50, 50, (byte)screenFade));
+                        ColourHelper.GetXna4Colour(ShotNastyGrey, ShotNastyGrey, ShotNastyGrey, (byte)screenFade));
                     _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                        ColourHelper.GetXna4Colour(255, 0, 0, (byte)screenFade));
+                        ColourHelper.GetXna4Colour(ColourLevels.Full, 0, 0, (byte)screenFade));
                     _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                        ColourHelper.GetXna4Colour(0, 100, 0, (byte)screenFade));
+                        ColourHelper.GetXna4Colour(0, ConveyerNastyGreen, 0, (byte)screenFade));
                 }
                 else
                 {
                     _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
                     _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                        ColourHelper.GetXna4Colour(255, 255, 255, (byte)screenFade));
+                        ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
                 }
 
                 _nastySprite.End();
@@ -1932,7 +2033,7 @@ public class Nasty : GameComponentBase
                 // Shrink the nasty as it explodes
                 if (_deathScale > 0)
                 {
-                    _deathScale = _deathScale - 0.01f;
+                    _deathScale = _deathScale - DeathShrinkStep;
                 }
 
                 if (_deathScale < 0)
@@ -1944,8 +2045,8 @@ public class Nasty : GameComponentBase
                 {
                     _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
                     _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                        ColourHelper.GetXna4Colour(255, 255, 255,
-                            (byte)(_deathFadeLevel * ((double)screenFade / 255))), _deathScale, 16f,
+                        ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
+                            (byte)(_deathFadeLevel * ((double)screenFade / ColourLevels.Full))), _deathScale, DeathRotateSpeed,
                         _deathAnticlockwise, GameEngine.Paused);
                     _nastySprite.End();
                 }
@@ -1956,7 +2057,7 @@ public class Nasty : GameComponentBase
                         .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
                     GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").DrawSprite(
                         _nastyDiesAnimation.CurrentFrame, XPos, YPos,
-                        ColourHelper.GetXna4Colour(255, 255, 255, screenFade), 1f, 0f);
+                        ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, screenFade), 1f, 0f);
                     GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").End();
                 }
             }

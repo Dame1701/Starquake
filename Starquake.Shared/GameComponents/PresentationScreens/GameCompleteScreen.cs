@@ -5,6 +5,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Starquake.Constants;
 using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Input;
@@ -63,7 +64,7 @@ public class GameCompleteScreen : GameScreenBase, IGameScreen
         }
         else
         {
-            _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXna4Colour(255, 255, 255, (byte)ScreenFade));
+            _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
         }
 
         _backgroundImage.End();
@@ -71,9 +72,9 @@ public class GameCompleteScreen : GameScreenBase, IGameScreen
         GameEngine.Font2.Begin(BlendState.AlphaBlend);
         GameEngine.Font2.WriteTextCentred(1280, 150, "THE CORES COMPLETE", 2, ColourHelper.GetXna4Colour(230, 0, 0), (byte)ScreenFade);
         GameEngine.Font2.WriteTextCentred(1280, 210, "BUT HOW ARE YOU GONNA", 2, Color.Gray, (byte)ScreenFade);
-        GameEngine.Font2.WriteTextCentred(1280, 270, "GET HOME WHEN ONLY A", 2, new Color((byte)255, (byte)255, (byte)255, (byte)ScreenFade), (byte)ScreenFade);
+        GameEngine.Font2.WriteTextCentred(1280, 270, "GET HOME WHEN ONLY A", 2, new Color((byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ScreenFade), (byte)ScreenFade);
         GameEngine.Font2.WriteTextCentred(1280, 330, "THTUPID LOONY WOULD WANDER", 2, new Color((byte)150, (byte)150, (byte)150, (byte)ScreenFade), (byte)ScreenFade);
-        GameEngine.Font2.WriteTextCentred(1280, 390, "THIS FAR OUT IN THE GALAXY", 2, new Color((byte)255, (byte)255, (byte)255, (byte)ScreenFade), (byte)ScreenFade);
+        GameEngine.Font2.WriteTextCentred(1280, 390, "THIS FAR OUT IN THE GALAXY", 2, new Color((byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ScreenFade), (byte)ScreenFade);
         GameEngine.Font2.End();
 
         // Core elements
@@ -87,7 +88,7 @@ public class GameCompleteScreen : GameScreenBase, IGameScreen
         }
         else
         {
-            _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.GetXna4Colour(255, 255, 255, (byte)ScreenFade));
+            _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
         }
 
         _foregroundImage.End();

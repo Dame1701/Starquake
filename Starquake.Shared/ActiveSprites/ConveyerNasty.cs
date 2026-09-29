@@ -5,6 +5,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Animations;
+using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Engines;
 using Starquake.Helpers;
@@ -16,12 +17,23 @@ namespace Starquake.ActiveSprites;
 
 public class ConveyerNasty : GameComponentBase
 {
+    /// <summary>
+    ///     A conveyer nasty hangs from the rail it runs along, so it is drawn and tested a collision
+    ///     cell below the position it is tracked at.
+    /// </summary>
+    private const int HangsBelowRailBy = TileMetrics.CollisionCellHeight;
+
+    /// <summary>
+    ///     How quickly a shot conveyer nasty shrinks away.
+    /// </summary>
+    private const float DeathShrinkStep = 0.01f;
+
 
     private readonly Animation _anim;
     private readonly int _screenShakeXOffset = 0;
     private readonly int _screenShakeYOffset = 0;
 
-    private int _deathFadeLevel = 255;
+    private int _deathFadeLevel = ColourLevels.Full;
     private float _deathScale = 1f;
 
     public int XLocation { get; set; }
@@ -67,13 +79,13 @@ public class ConveyerNasty : GameComponentBase
         _anim.AnimateForwards = true;
         NastyState = NastyState.Conception;
 
-        _deathFadeLevel = 255;
+        _deathFadeLevel = ColourLevels.Full;
         _deathScale = 1f;
     }
 
     public void LoadContent(ContentList content)
     {
-        _nastySprite = new SpriteCollection(GameEngine, GameEngine.ContentMgr, content.GetContent("conveyerNasty"), 64, 64);
+        _nastySprite = new SpriteCollection(GameEngine, GameEngine.ContentMgr, content.GetContent("conveyerNasty"), SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
         _conveyerNastyDies = GameEngine.ContentResourceManager.GetParticleEffectInstance("NastyDies", ParticleEffectType.Triggered, null) as IStandardParticleEffect;
         if (_conveyerNastyDies != null)
         {
@@ -118,12 +130,12 @@ public class ConveyerNasty : GameComponentBase
         if (_conveyerNastyDies != null)
         {
             // Update the explosion
-            _conveyerNastyDies.Update(XLocation + _screenShakeXOffset + 32, YLocation + _screenShakeYOffset + 64, gameTime);
+            _conveyerNastyDies.Update(XLocation + _screenShakeXOffset + SpriteMetrics.HalfSpriteWidth, YLocation + _screenShakeYOffset + SpriteMetrics.SpriteHeight, gameTime);
         }
 
         if (NastyState == NastyState.Conception)
         {
-            _deathFadeLevel = 255;
+            _deathFadeLevel = ColourLevels.Full;
             _deathScale = 1f;
             NastyState = NastyState.Normal;
         }
@@ -131,7 +143,7 @@ public class ConveyerNasty : GameComponentBase
         {
             if (_nastyDirection == Direction.Left)
             {
-                var amountToMove = GameEngine.GameScreens.CheckCollision(Direction.Left, XLocation, YLocation + 32, 64, 64, MoveSpeed, false);
+                var amountToMove = GameEngine.GameScreens.CheckCollision(Direction.Left, XLocation, YLocation + HangsBelowRailBy, SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight, MoveSpeed, false);
                 if (amountToMove > 0)
                 {
                     XLocation = XLocation - amountToMove;
@@ -144,7 +156,7 @@ public class ConveyerNasty : GameComponentBase
             }
             else if (_nastyDirection == Direction.Right)
             {
-                var amountToMove = GameEngine.GameScreens.CheckCollision(Direction.Right, XLocation, YLocation + 32, 64, 64, MoveSpeed, false);
+                var amountToMove = GameEngine.GameScreens.CheckCollision(Direction.Right, XLocation, YLocation + HangsBelowRailBy, SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight, MoveSpeed, false);
                 if (amountToMove > 0)
                 {
                     XLocation = XLocation + amountToMove;
@@ -159,7 +171,7 @@ public class ConveyerNasty : GameComponentBase
         }
         else if (NastyState == NastyState.Shot)
         {
-            _deathFadeLevel = 255;
+            _deathFadeLevel = ColourLevels.Full;
             _deathScale = 1.0f;
 
             if (_conveyerNastyDies != null)
@@ -177,7 +189,7 @@ public class ConveyerNasty : GameComponentBase
         if (NastyState == NastyState.Normal)
         {
             _nastySprite.Begin(BlendState.AlphaBlend, gameTime);
-            _nastySprite.DrawSprite(_anim.CurrentFrame, XLocation, YLocation + 32, ColourHelper.GetXna4Colour(255, 255, 255, (byte)screenFade));
+            _nastySprite.DrawSprite(_anim.CurrentFrame, XLocation, YLocation + HangsBelowRailBy, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
             _nastySprite.End();
         }
         else if (NastyState == NastyState.Dead)
@@ -202,7 +214,7 @@ public class ConveyerNasty : GameComponentBase
             // Shrink the nasty as it explodes
             if (_deathScale > 0)
             {
-                _deathScale = _deathScale - 0.01f;
+                _deathScale = _deathScale - DeathShrinkStep;
             }
 
             if (_deathScale < 0)
@@ -213,7 +225,7 @@ public class ConveyerNasty : GameComponentBase
             if (_deathFadeLevel > 0)
             {
                 _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                _nastySprite.DrawSprite(_anim.CurrentFrame, XLocation, YLocation + 32, ColourHelper.GetXna4Colour(255, 255, 255, (byte)(_deathFadeLevel * ((double)screenFade / 255))), _deathScale, 0f);
+                _nastySprite.DrawSprite(_anim.CurrentFrame, XLocation, YLocation + HangsBelowRailBy, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)(_deathFadeLevel * ((double)screenFade / ColourLevels.Full))), _deathScale, 0f);
                 _nastySprite.End();
             }
         }

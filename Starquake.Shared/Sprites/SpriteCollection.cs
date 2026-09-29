@@ -7,6 +7,7 @@ using MessagePack;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Starquake.Constants;
 using Starquake.Engines;
 using Starquake.Helpers;
 
@@ -57,7 +58,7 @@ public class SpriteCollection
         _spriteTexturePosY = new int[SpriteCount];
 
         var counter = 0;
-        _fade = 255;
+        _fade = ColourLevels.Full;
 
         // Generate Coordinates for the textures of the tiles found
         for (var y = 0; y < noVerticalImages; y++)
@@ -95,7 +96,7 @@ public class SpriteCollection
 
     private void SetSpriteEffect()
     {
-        _fade = 255;
+        _fade = ColourLevels.Full;
     }
 
     public void ResetEffect()
@@ -125,7 +126,7 @@ public class SpriteCollection
             new Vector2(xPosition, yPosition),
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
                 SpriteHeight),
-            ColourHelper.GetXna4Colour(255, 255, 255, _fade),
+            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, _fade),
             0f,
             new Vector2(0, 0),
             new Vector2(1, 1),
@@ -140,7 +141,7 @@ public class SpriteCollection
             new Vector2(xPosition, yPosition),
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
                 SpriteHeight),
-            ColourHelper.GetXna4Colour(255, 255, 255, fade),
+            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, fade),
             0f,
             new Vector2(0, 0),
             new Vector2(1, 1),
@@ -158,7 +159,7 @@ public class SpriteCollection
             new Vector2(xPosition * hScaling, yPosition * vScaling),
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
                 SpriteHeight),
-            ColourHelper.GetXna4Colour(255, 255, 255, _fade),
+            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, _fade),
             0f,
             new Vector2(0, 0),
             new Vector2(hScaling, vScaling),
@@ -176,7 +177,7 @@ public class SpriteCollection
             new Vector2(xPosition * hScaling, yPosition * vScaling),
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
                 SpriteHeight),
-            ColourHelper.GetXna4Colour(255, 255, 255, _fade));
+            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, _fade));
     }
 
     public void DrawSprite(int spriteNumber, int xPosition, int yPosition, Color spriteColour, SpritePixel[] matrix,

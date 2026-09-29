@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Starquake.Constants;
 using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Input;
@@ -58,8 +59,8 @@ public class OptionsScreen : GameScreenBase, IGameScreen
         _options.Add(new Option("2", "Cursor Keys, Left Ctrl", true, Color.White));
         _options.Add(new Option("3", "Keyboard . . O, P, A, Q, SP", false, Color.White));
         _options.Add(new Option("4", "UDK Keyboard . . " + _keyDefiner.GetKeys(), false, Color.White));
-        _options.Add(new Option("5", "Define your own keys", false, ColourHelper.GetXna4Colour(130, 130, 255)));
-        _options.Add(new Option("0", "Start game", false, ColourHelper.GetXna4Colour(130, 130, 255)));
+        _options.Add(new Option("5", "Define your own keys", false, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full)));
+        _options.Add(new Option("0", "Start game", false, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full)));
         _options.Add(new Option("Q", "Quit", false, Color.White));
 
         GameEngine.Font2.Flash = true;
@@ -203,7 +204,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
         GameEngine.ScreenEffectEngine.SelectRenderViewPort("EntireScreen");
 
         _backgroundImage.Begin(BlendState.AlphaBlend, gameTime);
-        _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXna4Colour(255, 255, 255, (byte)ScreenFade));
+        _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
         _backgroundImage.End();
 
         GameEngine.Font2.Begin(BlendState.AlphaBlend);
@@ -246,7 +247,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
         GameEngine.Font2.End();
 
         _foregroundImage.Begin(BlendState.AlphaBlend, gameTime);
-        _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.GetXna4Colour(255, 255, 255, (byte)ScreenFade));
+        _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
         _foregroundImage.End();
     }
 

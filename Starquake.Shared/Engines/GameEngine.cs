@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Starquake.ActiveSprites;
 using Starquake.Animations;
+using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
@@ -27,6 +28,80 @@ namespace Starquake.Engines;
 
 public class GameEngine : StartableGameComponentBase, IDisposable
 {
+    /// <summary>
+    ///     How much of a channel the boot screen fades in by, and the progress bar background fades
+    ///     out by, each logic frame. <see cref="ColourLevels.Full" /> divided by this is how many
+    ///     frames the fade lasts.
+    /// </summary>
+    private const int BootFadeStep = 4;
+
+    /// <summary>
+    ///     A percentage, complete. The loader reports its progress as one, so this is what it reports
+    ///     when there is nothing left to load.
+    /// </summary>
+    private const int FullyLoadedPercent = 100;
+
+    /// <summary>
+    ///     How wide the boot progress bar is at full, in the one-pixel-wide slices it is drawn from,
+    ///     and where the first slice goes. Each slice is drawn two pixels further right than the last.
+    /// </summary>
+    private const int BootProgressBarSlices = 519;
+
+    /// <inheritdoc cref="BootProgressBarSlices" />
+    private const int BootProgressBarXPos = 122;
+
+    /// <inheritdoc cref="BootProgressBarSlices" />
+    private const int BootProgressBarYPos = 661;
+
+    /// <inheritdoc cref="BootProgressBarSlices" />
+    private const int BootProgressBarSliceSpacing = 2;
+
+    /// <summary>
+    ///     Where the progress bar's backing plate sits on the boot screen.
+    /// </summary>
+    private const int BootProgressBackgroundXPos = 116;
+
+    /// <inheritdoc cref="BootProgressBackgroundXPos" />
+    private const int BootProgressBackgroundYPos = 657;
+
+    /// <summary>
+    ///     Where the pause banner is drawn, in playfield coordinates.
+    /// </summary>
+    private const int PausedOverlayXPos = 400;
+
+    /// <inheritdoc cref="PausedOverlayXPos" />
+    private const int PausedOverlayYPos = 200;
+
+    /// <summary>
+    ///     Test-mode cheats: how many lives F2 hands back, and how long the screen-stepping keys wait
+    ///     between screens so that holding one down steps rather than races.
+    /// </summary>
+    private const int TestModeLivesRestored = 5;
+
+    /// <inheritdoc cref="TestModeLivesRestored" />
+    private const int TestModeScreenStepDelayMs = 100;
+
+    /// <summary>
+    ///     What shooting a nasty is worth.
+    /// </summary>
+    private const int ScoreForShootingNasty = 50;
+
+    /// <summary>
+    ///     How many nasties can be on a screen at once.
+    /// </summary>
+    private const int NastiesPerScreen = 4;
+
+    /// <summary>
+    ///     The screen the off-screen game screens are kept ticking over for, so the core is still
+    ///     working when the blob walks back into it.
+    /// </summary>
+    private const int ScreenKeptRunningOffScreen = WorldMap.CoreApproachScreenNumber;
+
+    /// <summary>
+    ///     The screen an inventory hand-over from the core was once done on. The code is still here
+    ///     but commented out.
+    /// </summary>
+    private const int CoreInventoryHandoverScreen = 197;
 
     private static GameEngine _sInstance;
     public string AccessCodesFailedName = "AccessCodesFailed";
@@ -43,7 +118,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public StatusPanel BlobStatusPanel;
     private SpriteCollection _bootProgress;
     private SpriteCollection _bootProgressBackground;
-    private int _bootProgressBackgroundFade = 255;
+    private int _bootProgressBackgroundFade = ColourLevels.Full;
     // Boot graphics
     private SpriteCollection _bootScreen;
 
@@ -184,12 +259,12 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         GameScreens =
             new GameScreenCollection(
                 this,
-                8,
-                6,
+                TileMetrics.TilesAcross,
+                TileMetrics.TilesDown,
                 0,
                 0,
-                32,
-                32);
+                TileMetrics.CollisionCellWidth,
+                TileMetrics.CollisionCellHeight);
 
         // Player keys
         _playerKeys = new PlayerKeySet();
@@ -256,7 +331,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     {
         if (interactionType == NastyInteractionType.BlobShot)
         {
-            BlobStatusPanel.PlayerScore = BlobStatusPanel.PlayerScore + 50;
+            BlobStatusPanel.PlayerScore = BlobStatusPanel.PlayerScore + ScoreForShootingNasty;
         }
         else if (interactionType == NastyInteractionType.HitBlob)
         {
@@ -315,7 +390,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         Player.Initialise();
 
         // Nasties
-        Nasties = new Nasties(this, 4);
+        Nasties = new Nasties(this, NastiesPerScreen);
         Nasties.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
 
         // Conveyer nasties
@@ -336,18 +411,18 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public void DefineContent()
     {
         // Load the boot image
-        _bootScreen = new SpriteCollection(this, ContentMgr, @"Graphics\\BootScreen2", 1280, 800);
+        _bootScreen = new SpriteCollection(this, ContentMgr, @"Graphics\\BootScreen2", GameHost.ScreenWidth, GameHost.ScreenHeight);
         _bootProgressBackground = new SpriteCollection(this, ContentMgr, @"Graphics\\ProgressBarBackground", 1046, 32);
         _bootProgress = new SpriteCollection(this, ContentMgr, @"Graphics\\BootProgress", 1, 24);
-        Scanlines = new SpriteCollection(this, ContentMgr, @"Graphics\\Scanlines2", 1280, 800);
+        Scanlines = new SpriteCollection(this, ContentMgr, @"Graphics\\Scanlines2", GameHost.ScreenWidth, GameHost.ScreenHeight);
 
         Status = GameEngineStatus.StartingGraphicsLoaded;
 
         // Font 1
-        Font1 = new BitmapFont(ContentMgr.Load<SpriteFont>("Fonts\\elektoraSmall"), new SpriteBatch(GraphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, 255), 12);
+        Font1 = new BitmapFont(ContentMgr.Load<SpriteFont>("Fonts\\elektoraSmall"), new SpriteBatch(GraphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
 
         // Font 2
-        Font2 = new BitmapFont(ContentMgr.Load<SpriteFont>("Fonts\\elektoraMedium"), new SpriteBatch(GraphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, 255), 12);
+        Font2 = new BitmapFont(ContentMgr.Load<SpriteFont>("Fonts\\elektoraMedium"), new SpriteBatch(GraphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
 
         // Blob's death effect
         BlobKiller = new BlobDeathAnimation(this);
@@ -364,79 +439,79 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ContentResourceManager.AddDataResource("ScreenCollisionData", "Data/SQScreenData.dat", typeof(int[,,]));
 
         // Option screen graphics
-        ContentResourceManager.AddSpriteResource("OptionScreenBackground", "Graphics\\OptionsScreenBackground", 1280, 800);
+        ContentResourceManager.AddSpriteResource("OptionScreenBackground", "Graphics\\OptionsScreenBackground", GameHost.ScreenWidth, GameHost.ScreenHeight);
         ContentResourceManager.AddSpriteResource("OptionScreenForeground", "Graphics\\OptionsScreenForeground", 821, 554);
 
         // Computer report screen graphics
-        ContentResourceManager.AddSpriteResource("ComputerReportScreenBackground", "Graphics\\ComputerReportScreenBackground", 1280, 800);
+        ContentResourceManager.AddSpriteResource("ComputerReportScreenBackground", "Graphics\\ComputerReportScreenBackground", GameHost.ScreenWidth, GameHost.ScreenHeight);
         ContentResourceManager.AddSpriteResource("ComputerReportScreenForeground", "Graphics\\ComputerReportScreenForeground", 821, 554);
 
         // Gameover screen graphics
-        ContentResourceManager.AddSpriteResource("GameOverScreenBackground", "Graphics\\GameOverScreenBackground", 1280, 800);
+        ContentResourceManager.AddSpriteResource("GameOverScreenBackground", "Graphics\\GameOverScreenBackground", GameHost.ScreenWidth, GameHost.ScreenHeight);
         ContentResourceManager.AddSpriteResource("GameOverScreenForeground", "Graphics\\GameOverScreenForeground", 821, 554);
 
         // HiScore screen graphics
-        ContentResourceManager.AddSpriteResource("HiScoreScreenBackground", "Graphics\\HiScoreScreenBackground", 1280, 800);
+        ContentResourceManager.AddSpriteResource("HiScoreScreenBackground", "Graphics\\HiScoreScreenBackground", GameHost.ScreenWidth, GameHost.ScreenHeight);
         ContentResourceManager.AddSpriteResource("HiScoreScreenForeground", "Graphics\\HiScoreScreenForeground", 821, 554);
 
         // Game Complete screen graphics
-        ContentResourceManager.AddSpriteResource("GameCompleteScreenBackground", "Graphics\\GameCompleteScreenBackground", 1280, 800);
+        ContentResourceManager.AddSpriteResource("GameCompleteScreenBackground", "Graphics\\GameCompleteScreenBackground", GameHost.ScreenWidth, GameHost.ScreenHeight);
         ContentResourceManager.AddSpriteResource("GameCompleteScreenForeground", "Graphics\\GameCompleteScreenForeground", 821, 554);
 
         // Game screen graphics
-        ContentResourceManager.AddSpriteResource("UpperScreenTiles", "Graphics\\UpperScreenTiles", 128, 96);
-        ContentResourceManager.AddSpriteResource("UpperScreenTilesOriginal", "Graphics\\UpperScreenTilesOriginal", 128, 96);
+        ContentResourceManager.AddSpriteResource("UpperScreenTiles", "Graphics\\UpperScreenTiles", TileMetrics.TileWidth, TileMetrics.TileHeight);
+        ContentResourceManager.AddSpriteResource("UpperScreenTilesOriginal", "Graphics\\UpperScreenTilesOriginal", TileMetrics.TileWidth, TileMetrics.TileHeight);
 
-        ContentResourceManager.AddSpriteResource("LowerScreenTiles", "Graphics\\StartilesNew", 128, 96);
-        ContentResourceManager.AddSpriteResource("LowerScreenTilesOriginal", "Graphics\\StartilesOriginal", 128, 96);
+        ContentResourceManager.AddSpriteResource("LowerScreenTiles", "Graphics\\StartilesNew", TileMetrics.TileWidth, TileMetrics.TileHeight);
+        ContentResourceManager.AddSpriteResource("LowerScreenTilesOriginal", "Graphics\\StartilesOriginal", TileMetrics.TileWidth, TileMetrics.TileHeight);
 
-        ContentResourceManager.AddSpriteResource("LowerScreenTilesDark", "Graphics\\startilesNew", 128, 96);
-        ContentResourceManager.AddSpriteResource("ExitShadows", "Graphics\\ExitShadows", 128, 96);
+        ContentResourceManager.AddSpriteResource("LowerScreenTilesDark", "Graphics\\startilesNew", TileMetrics.TileWidth, TileMetrics.TileHeight);
+        ContentResourceManager.AddSpriteResource("ExitShadows", "Graphics\\ExitShadows", TileMetrics.TileWidth, TileMetrics.TileHeight);
 
         // Blob's graphics
-        //ContentResourceManager.AddSpriteResource(gameEngine.BlobSpritesName, "Graphics\\blobNew", 64, 64);
-        //ContentResourceManager.AddSpriteResource(gameEngine.BlobSpritesName, "Graphics\\blobNewAlt", 64, 64);
-        ContentResourceManager.AddSpriteResource("BlobSprites", "Graphics\\blobNewAlt2", 64, 64);
-        ContentResourceManager.AddSpriteResource("BlobSpritesOriginal", "Graphics\\BlobOriginal", 64, 64);
+        //ContentResourceManager.AddSpriteResource(gameEngine.BlobSpritesName, "Graphics\\blobNew", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        //ContentResourceManager.AddSpriteResource(gameEngine.BlobSpritesName, "Graphics\\blobNewAlt", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        ContentResourceManager.AddSpriteResource("BlobSprites", "Graphics\\blobNewAlt2", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        ContentResourceManager.AddSpriteResource("BlobSpritesOriginal", "Graphics\\BlobOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
 
         ContentResourceManager.AddSpriteResource("BlobParts", "Graphics\\blobParts", 32, 32);
         ContentResourceManager.AddSpriteResource("BlobShuttle", "Graphics\\BlobShuttle", 64, 32);
         ContentResourceManager.AddSpriteResource("BlobShuttleOriginal", "Graphics\\BlobShuttleOriginal", 64, 32);
 
-        ContentResourceManager.AddSpriteResource("BlobFire1", "Graphics\\BlobFire1", 64, 64);
+        ContentResourceManager.AddSpriteResource("BlobFire1", "Graphics\\BlobFire1", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
         ContentResourceManager.AddSpriteResource("BlobFire2", "Graphics\\BlobFireNew2", 32, 32);
-        ContentResourceManager.AddSpriteResource("BlobFire2Original", "Graphics\\BlobFire2Original", 64, 64);
+        ContentResourceManager.AddSpriteResource("BlobFire2Original", "Graphics\\BlobFire2Original", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
 
         ContentResourceManager.AddSpriteResource("BlobFire2Overlay", "Graphics\\BlobFire2Overlay", 48, 48);
         ContentResourceManager.AddSpriteResource("JumpPlatforms", "Graphics\\BlobJumpPlatform", 64, 32);
         ContentResourceManager.AddSpriteResource("JumpPlatformsOriginal", "Graphics\\BlobJumpPlatformOriginal", 64, 32);
 
         // PickUps
-        ContentResourceManager.AddSpriteResource("PowerUps", "Graphics\\PowerUps", 64, 64);
-        ContentResourceManager.AddSpriteResource("PowerUpsOriginal", "Graphics\\PowerUpsOriginal", 64, 64);
-        ContentResourceManager.AddSpriteResource("Pickups", "Graphics\\Pickups", 64, 64);
-        ContentResourceManager.AddSpriteResource("PickupsOriginal", "Graphics\\PickupsOriginal", 64, 64);
+        ContentResourceManager.AddSpriteResource("PowerUps", "Graphics\\PowerUps", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        ContentResourceManager.AddSpriteResource("PowerUpsOriginal", "Graphics\\PowerUpsOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        ContentResourceManager.AddSpriteResource("Pickups", "Graphics\\Pickups", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        ContentResourceManager.AddSpriteResource("PickupsOriginal", "Graphics\\PickupsOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
 
         // Nasties
-        ContentResourceManager.AddSpriteResource("Nasties", "Graphics\\Nasties", 64, 64);
-        ContentResourceManager.AddSpriteResource("NastiesOriginal", "Graphics\\NastiesOriginal", 64, 64);
+        ContentResourceManager.AddSpriteResource("Nasties", "Graphics\\Nasties", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        ContentResourceManager.AddSpriteResource("NastiesOriginal", "Graphics\\NastiesOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
 
         // Access booth graphics
         ContentResourceManager.AddSpriteResource("ScanLine", "Graphics\\ScanLine", 74, 9);
 
-        ContentResourceManager.AddSpriteResource("AccessCodesFailed", "Graphics\\AccessCodesFailed", 64, 64);
-        ContentResourceManager.AddSpriteResource("AccessCodesPassed", "Graphics\\AccessCodesPassed", 64, 64);
-        ContentResourceManager.AddSpriteResource("AccessCodesGray", "Graphics\\AccessCodesGray", 64, 64);
-        ContentResourceManager.AddSpriteResource("PickupsIlluminated", "Graphics\\PickupsIlluminated", 64, 64);
+        ContentResourceManager.AddSpriteResource("AccessCodesFailed", "Graphics\\AccessCodesFailed", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        ContentResourceManager.AddSpriteResource("AccessCodesPassed", "Graphics\\AccessCodesPassed", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        ContentResourceManager.AddSpriteResource("AccessCodesGray", "Graphics\\AccessCodesGray", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        ContentResourceManager.AddSpriteResource("PickupsIlluminated", "Graphics\\PickupsIlluminated", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
 
-        ContentResourceManager.AddSpriteResource("AccessCodesFailedOriginal", "Graphics\\AccessCodesFailedOriginal", 64, 64);
-        ContentResourceManager.AddSpriteResource("AccessCodesPassedOriginal", "Graphics\\AccessCodesPassedOriginal", 64, 64);
-        ContentResourceManager.AddSpriteResource("AccessCodesGrayOriginal", "Graphics\\AccessCodesGrayOriginal", 64, 64);
-        ContentResourceManager.AddSpriteResource("PickupsIlluminatedOriginal", "Graphics\\PickupsIlluminatedOriginal", 64, 64);
+        ContentResourceManager.AddSpriteResource("AccessCodesFailedOriginal", "Graphics\\AccessCodesFailedOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        ContentResourceManager.AddSpriteResource("AccessCodesPassedOriginal", "Graphics\\AccessCodesPassedOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        ContentResourceManager.AddSpriteResource("AccessCodesGrayOriginal", "Graphics\\AccessCodesGrayOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        ContentResourceManager.AddSpriteResource("PickupsIlluminatedOriginal", "Graphics\\PickupsIlluminatedOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
 
         // Cheops pyramid
-        ContentResourceManager.AddSpriteResource("CheopsPyramid", "Graphics\\CheopsPyramid", 64, 64);
-        ContentResourceManager.AddSpriteResource("CheopsPyramidOriginal", "Graphics\\CheopsPyramidOriginal", 64, 64);
+        ContentResourceManager.AddSpriteResource("CheopsPyramid", "Graphics\\CheopsPyramid", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        ContentResourceManager.AddSpriteResource("CheopsPyramidOriginal", "Graphics\\CheopsPyramidOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
 
         // Teleporter Interior
         ContentResourceManager.AddSpriteResource("TeleportInteriorLower", "Graphics\\TeleportInteriorLower", 1020, 543);
@@ -447,9 +522,9 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         // ElectricityGatesAndNodes
         ContentResourceManager.AddSpriteResource("ElectricityNodeElectricity1", "Graphics\\ElectricityAnim", 70, 64);
         ContentResourceManager.AddSpriteResource("ElectricityNodeElectricity2", "Graphics\\ElectricityAnim", 70, 64);
-        ContentResourceManager.AddSpriteResource("NodeLights", "Graphics\\NodeLight", 64, 64);
+        ContentResourceManager.AddSpriteResource("NodeLights", "Graphics\\NodeLight", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
         ContentResourceManager.AddSpriteResource("GateLights", "Graphics\\GateLight", 32, 32);
-        ContentResourceManager.AddSpriteResource("ElectricityOriginal", "Graphics\\ElectricityOriginal", 64, 64);
+        ContentResourceManager.AddSpriteResource("ElectricityOriginal", "Graphics\\ElectricityOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
 
         // Odd sized graphics
         ContentResourceManager.AddSpriteResource("OllyBackground", "Graphics\\OllyBackground", 256, 192);
@@ -458,16 +533,16 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ContentResourceManager.AddSpriteResource("OllyEyes", "Graphics\\OllyEyes", 44, 8);
         ContentResourceManager.AddSpriteResource("OllyOriginal", "Graphics\\OllyOriginal", 256, 192);
 
-        ContentResourceManager.AddSpriteResource("BlobsShipOriginal", "Graphics\\BlobsSpaceShipOriginal", 128, 96);
+        ContentResourceManager.AddSpriteResource("BlobsShipOriginal", "Graphics\\BlobsSpaceShipOriginal", TileMetrics.TileWidth, TileMetrics.TileHeight);
         ContentResourceManager.AddSpriteResource("BlobsShip", "Graphics\\BlobsSpaceShip", 156, 128);
         ContentResourceManager.AddSpriteResource("BlobsShipHazardLights", "Graphics\\BlobsSpaceShipHazardLights", 156, 128);
         ContentResourceManager.AddSpriteResource("BlobsShipHeadLights", "Graphics\\BlobsSpaceShipHeadLights", 156, 128);
 
 
-        ContentResourceManager.AddSpriteResource("BlankingTile", "Graphics\\BlankingTile", 128, 96);
+        ContentResourceManager.AddSpriteResource("BlankingTile", "Graphics\\BlankingTile", TileMetrics.TileWidth, TileMetrics.TileHeight);
 
-        ContentResourceManager.AddSpriteResource("BreakableBridge", "Graphics\\BreakableBridge", 128, 96);
-        ContentResourceManager.AddSpriteResource("BreakableBridgeOriginal", "Graphics\\BreakableBridgeOriginal", 128, 96);
+        ContentResourceManager.AddSpriteResource("BreakableBridge", "Graphics\\BreakableBridge", TileMetrics.TileWidth, TileMetrics.TileHeight);
+        ContentResourceManager.AddSpriteResource("BreakableBridgeOriginal", "Graphics\\BreakableBridgeOriginal", TileMetrics.TileWidth, TileMetrics.TileHeight);
 
         // Status Panel
         ContentResourceManager.AddSpriteResource("StatusPanelGraphic", "Graphics\\StatusPanelNew", 1020, 181);
@@ -479,7 +554,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ContentResourceManager.AddSpriteResource("StatusPanelOverlay", "Graphics\\StatusPanelOverlay", 966, 135);
 
         ContentResourceManager.AddSpriteResource("ParticleSprite", "Graphics\\BouncingParticle", 32, 32);
-        ContentResourceManager.AddSpriteResource("CollisionTile", "Graphics\\CollisionTile", 32, 32);
+        ContentResourceManager.AddSpriteResource("CollisionTile", "Graphics\\CollisionTile", TileMetrics.CollisionCellWidth, TileMetrics.CollisionCellHeight);
 
         // Add Particle Effects
         ContentResourceManager.AddParticleResource("BeamMeUp_Small", "ParticleEffects\\BeamMeUp_Small");
@@ -504,9 +579,9 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ContentResourceManager.AddParticleResource("BlobFragmentExplosion", "ParticleEffects\\BlobFragmentExplosion");
 
         // Animation Tiles
-        ContentResourceManager.AddAnimatedSpriteResource("BreakableBridges", "Graphics\\BreakableBridgeAnim", 128, 8, 410, 4);
-        ContentResourceManager.AddAnimatedSpriteResource("TeleporterPadsOccupied", "Graphics\\TeleporterPadAnimationOccupied", 128, 96, 395, 8);
-        ContentResourceManager.AddAnimatedSpriteResource("TeleporterPadsUnoccupied", "Graphics\\TeleporterPadAnimationUnoccupied", 128, 96, 398, 1);
+        ContentResourceManager.AddAnimatedSpriteResource("BreakableBridges", "Graphics\\BreakableBridgeAnim", TileMetrics.TileWidth, 8, (int)ActionTiles.BreakableBridges, 4);
+        ContentResourceManager.AddAnimatedSpriteResource("TeleporterPadsOccupied", "Graphics\\TeleporterPadAnimationOccupied", TileMetrics.TileWidth, TileMetrics.TileHeight, (int)ActionTiles.ShuttlePlatform, 8);
+        ContentResourceManager.AddAnimatedSpriteResource("TeleporterPadsUnoccupied", "Graphics\\TeleporterPadAnimationUnoccupied", TileMetrics.TileWidth, TileMetrics.TileHeight, (int)ActionTiles.RemovedShuttlePlatform, 1);
 
         // Sounds
         ContentResourceManager.AddSoundResource("ScanCode", "Sounds\\ScanCode", SoundEffectInstanceType.Multi, 4, false);
@@ -569,50 +644,50 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             // Add the colour animations to the colour animation engine
             ColourAnimationEngine.RegisterTile(new ColourFaderAnimation
             {
-                TileNo = 397,
+                TileNo = (int)ActionTiles.TeleportBooth,
                 UpperTileToDraw = 7,
                 Intensity = 4,
-                TransitionColour = new Color(0, 0, 255),
+                TransitionColour = new Color(0, 0, ColourLevels.Full),
                 Speed = 8
             }); // Teleport booths
             ColourAnimationEngine.RegisterTile(new ColourFaderAnimation
             {
-                TileNo = 399,
+                TileNo = (int)ActionTiles.AccessBoothLeft,
                 UpperTileToDraw = 9,
                 Intensity = 2,
-                TransitionColour = new Color(0, 255, 0),
+                TransitionColour = new Color(0, ColourLevels.Full, 0),
                 Speed = 32
             }); // Access tunnel left
             ColourAnimationEngine.RegisterTile(new ColourFaderAnimation
             {
-                TileNo = 400,
+                TileNo = (int)ActionTiles.AccessBoothRight,
                 UpperTileToDraw = 10,
                 Intensity = 2,
-                TransitionColour = new Color(255, 0, 0),
+                TransitionColour = new Color(ColourLevels.Full, 0, 0),
                 Speed = 32
             }); // Access tunnel right
             ColourAnimationEngine.RegisterTile(new ColourFaderAnimation
             {
-                TileNo = 401,
+                TileNo = (int)ActionTiles.ShuttleTag1,
                 UpperTileToDraw = -1,
                 Intensity = 2,
-                TransitionColour = new Color(255, 255, 0),
+                TransitionColour = new Color(ColourLevels.Full, ColourLevels.Full, 0),
                 Speed = 16
             }); // Yellow teleport tag
             ColourAnimationEngine.RegisterTile(new ColourFaderAnimation
             {
-                TileNo = 417,
+                TileNo = (int)ActionTiles.ShuttleTag3,
                 UpperTileToDraw = -1,
                 Intensity = 6,
-                TransitionColour = new Color(255, 0, 0),
+                TransitionColour = new Color(ColourLevels.Full, 0, 0),
                 Speed = 16
             }); // Red teleport tag
             ColourAnimationEngine.RegisterTile(new ColourFaderAnimation
             {
-                TileNo = 418,
+                TileNo = (int)ActionTiles.ShuttleTag2,
                 UpperTileToDraw = -1,
                 Intensity = 6,
-                TransitionColour = new Color(0, 100, 255),
+                TransitionColour = new Color(0, 100, ColourLevels.Full),
                 Speed = 16
             }); // Blue teleport tag
 
@@ -691,12 +766,12 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                 "EntireScreen",
                 0,
                 0,
-                1280,
-                800);
+                GameHost.ScreenWidth,
+                GameHost.ScreenHeight);
 
             ContentResourceManager.Initialise();
 
-            UpdateStatus("Content loaded", 100, GameEngineStatus.StartGame);
+            UpdateStatus("Content loaded", FullyLoadedPercent, GameEngineStatus.StartGame);
         }
         else
         {
@@ -732,14 +807,14 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
         if (Status == GameEngineStatus.StartingGraphicsLoaded)
         {
-            _loadingScreenFade += 4;
+            _loadingScreenFade += BootFadeStep;
 
-            if (_loadingScreenFade > 255)
+            if (_loadingScreenFade > ColourLevels.Full)
             {
-                _loadingScreenFade = 255;
+                _loadingScreenFade = ColourLevels.Full;
             }
 
-            if (_loadingScreenFade == 255)
+            if (_loadingScreenFade == ColourLevels.Full)
             {
                 Status = GameEngineStatus.Starting;
                 LoadContent();
@@ -750,7 +825,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             // Fade out the progress bar background
             if (_bootProgressBackgroundFade > 0)
             {
-                _bootProgressBackgroundFade -= 4;
+                _bootProgressBackgroundFade -= BootFadeStep;
             }
 
             if (_bootProgressBackgroundFade < 0)
@@ -761,7 +836,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             // Wait for a keypress before leaving the loading screen
             if (ToggleKeys.GetPressedKey() != Keys.None)
             {
-                ContentResourceManager_OnGameComponentStatusChanged("Content loaded", 100, GameEngineStatus.Started);
+                ContentResourceManager_OnGameComponentStatusChanged("Content loaded", FullyLoadedPercent, GameEngineStatus.Started);
             }
         }
         else if (Status == GameEngineStatus.StartGame)
@@ -876,7 +951,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                 // Give us some lives back (Testing)
                 if (Keyboard.GetState().IsKeyDown(Keys.F2))
                 {
-                    BlobStatusPanel.BlobLives = 5;
+                    BlobStatusPanel.BlobLives = TestModeLivesRestored;
                     Player.BlobsState = BlobState.Dead;
                 }
 
@@ -925,53 +1000,53 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                         {
                             GameScreens.ScreenNumber--;
                             GetGameScreen(CurrentGameScreen).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
-                            Thread.Sleep(100);
+                            Thread.Sleep(TestModeScreenStepDelayMs);
                         }
                     }
 
                     if (Keyboard.GetState().IsKeyDown(Keys.NumPad6))
                     {
-                        if (GameScreens.ScreenNumber < 511)
+                        if (GameScreens.ScreenNumber < WorldMap.LastScreenNumber)
                         {
                             GameScreens.ScreenNumber++;
                             GetGameScreen(CurrentGameScreen).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
-                            Thread.Sleep(100);
+                            Thread.Sleep(TestModeScreenStepDelayMs);
                         }
                     }
 
                     if (Keyboard.GetState().IsKeyDown(Keys.NumPad8))
                     {
-                        if (GameScreens.ScreenNumber - 16 >= 0)
+                        if (GameScreens.ScreenNumber - WorldMap.ScreensAcross >= 0)
                         {
-                            GameScreens.ScreenNumber -= 16;
+                            GameScreens.ScreenNumber -= WorldMap.ScreensAcross;
                             GetGameScreen(CurrentGameScreen).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
-                            Thread.Sleep(100);
+                            Thread.Sleep(TestModeScreenStepDelayMs);
                         }
                     }
 
                     if (Keyboard.GetState().IsKeyDown(Keys.NumPad2))
                     {
-                        if (GameScreens.ScreenNumber + 16 <= 512)
+                        if (GameScreens.ScreenNumber + WorldMap.ScreensAcross <= WorldMap.ScreenCount)
                         {
-                            GameScreens.ScreenNumber += 16;
+                            GameScreens.ScreenNumber += WorldMap.ScreensAcross;
                             GetGameScreen(CurrentGameScreen).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
-                            Thread.Sleep(100);
+                            Thread.Sleep(TestModeScreenStepDelayMs);
                         }
                     }
 
                     // Test colour animation engine
                     if (ToggleKeys.GetPressedKey() == Keys.K)
                     {
-                        ColourAnimationEngine.Start(401, -1);
-                        ColourAnimationEngine.Start(417, -1);
-                        ColourAnimationEngine.Start(418, -1);
+                        ColourAnimationEngine.Start((int)ActionTiles.ShuttleTag1, -1);
+                        ColourAnimationEngine.Start((int)ActionTiles.ShuttleTag3, -1);
+                        ColourAnimationEngine.Start((int)ActionTiles.ShuttleTag2, -1);
                     }
 
                     if (ToggleKeys.GetPressedKey() == Keys.L)
                     {
-                        ColourAnimationEngine.Stop(401);
-                        ColourAnimationEngine.Stop(417);
-                        ColourAnimationEngine.Stop(418);
+                        ColourAnimationEngine.Stop((int)ActionTiles.ShuttleTag1);
+                        ColourAnimationEngine.Stop((int)ActionTiles.ShuttleTag3);
+                        ColourAnimationEngine.Stop((int)ActionTiles.ShuttleTag2);
                     }
                 }
             }
@@ -999,12 +1074,12 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                     {
                         if (igs is IRealTimeGameScreen && igs != screenToUpdate)
                         {
-                            if (GameScreens.ScreenNumber == 198)
+                            if (GameScreens.ScreenNumber == ScreenKeptRunningOffScreen)
                             {
                                 ((IRealTimeGameScreen)igs).UpdateOffScreen(gameTime);
                             }
 
-                            if (GameScreens.ScreenNumber == 197)
+                            if (GameScreens.ScreenNumber == CoreInventoryHandoverScreen)
                             {
                                 /*
                                 int counter = 4;
@@ -1106,7 +1181,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
             if (Paused)
             {
-                Overlays.Paused(400, 200, this);
+                Overlays.Paused(PausedOverlayXPos, PausedOverlayYPos, this);
             }
         }
         else
@@ -1136,22 +1211,22 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                 _bootScreen.End();
 
                 _bootProgressBackground.Begin(BlendState.AlphaBlend, gameTime, PresentationTransform);
-                _bootProgressBackground.DrawSpriteUnscaled(0, 116, 657, _bootProgressBackgroundFade);
+                _bootProgressBackground.DrawSpriteUnscaled(0, BootProgressBackgroundXPos, BootProgressBackgroundYPos, _bootProgressBackgroundFade);
                 _bootProgressBackground.End();
 
                 // Draw the status percentage
                 _bootProgress.Begin(BlendState.AlphaBlend, gameTime, PresentationTransform);
-                var percentBarWidth = (int)(519 / (double)100 * PercentComplete);
+                var percentBarWidth = (int)(BootProgressBarSlices / (double)FullyLoadedPercent * PercentComplete);
 
                 for (var a = 0; a < percentBarWidth; a++)
                 {
-                    _bootProgress.DrawSpriteUnscaled(0, 122 + a * 2, 661, _bootProgressBackgroundFade);
+                    _bootProgress.DrawSpriteUnscaled(0, BootProgressBarXPos + a * BootProgressBarSliceSpacing, BootProgressBarYPos, _bootProgressBackgroundFade);
                 }
 
                 _bootProgress.End();
                 //Vector2 statusMessageSize = Font1.MeasureString(statusMessage);
                 //Font1.Begin(BlendState.AlphaBlend);
-                //Font1.WriteText((int)(1280 - statusMessageSize.X) / 2, 620, statusMessage, Color.White, 255);
+                //Font1.WriteText((int)(1280 - statusMessageSize.X) / 2, 620, statusMessage, Color.White, ColourLevels.Full);
                 //Font1.End();
 
             }

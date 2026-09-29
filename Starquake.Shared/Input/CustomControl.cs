@@ -9,6 +9,44 @@ namespace Starquake.Input;
 
 public class CustomControl
 {
+    /// <summary>
+    ///     The range a joystick axis is asked to report over, so that a centred stick reads zero and
+    ///     the two extremes are symmetrical.
+    /// </summary>
+    private const int JoystickAxisRange = 100;
+
+    /// <summary>
+    ///     How far an analogue stick has to be pushed before the blob steps up to the next speed. The
+    ///     bands are deliberately uneven at the bottom so that a resting stick never nudges the blob.
+    /// </summary>
+    private const double SpeedBand1 = 0.2;
+
+    /// <inheritdoc cref="SpeedBand1" />
+    private const double SpeedBand2 = 0.4;
+
+    /// <inheritdoc cref="SpeedBand1" />
+    private const double SpeedBand3 = 0.6;
+
+    /// <inheritdoc cref="SpeedBand1" />
+    private const double SpeedBand4 = 0.8;
+
+    /// <inheritdoc cref="SpeedBand1" />
+    private const double VerticalDeadZone = 0.1;
+
+    /// <summary>
+    ///     The speeds those bands select, from a crawl up to the blob's full walking pace.
+    /// </summary>
+    private const int CrawlSpeed = 1;
+
+    /// <inheritdoc cref="CrawlSpeed" />
+    private const int SlowSpeed = 2;
+
+    /// <inheritdoc cref="CrawlSpeed" />
+    private const int BriskSpeed = 4;
+
+    /// <inheritdoc cref="CrawlSpeed" />
+    private const int FullSpeed = 8;
+
 
     //DirectInput directInputInstance;
     //Joystick joystick;
@@ -61,7 +99,7 @@ public class CustomControl
             {
                 if ((deviceObject.ObjectType & ObjectDeviceType.Axis) != 0)
                 {
-                    joystick.GetObjectPropertiesById((int)deviceObject.ObjectType).SetRange(-100, 100);
+                    joystick.GetObjectPropertiesById((int)deviceObject.ObjectType).SetRange(-JoystickAxisRange, JoystickAxisRange);
                 }
             }
 
@@ -144,47 +182,47 @@ public class CustomControl
 
     private void SetBlobHSpeed(float inputSpeed)
     {
-        if (inputSpeed < 0.2)
+        if (inputSpeed < SpeedBand1)
         {
-            _gameEngine.Player.BlobHSpeed = 1;
+            _gameEngine.Player.BlobHSpeed = CrawlSpeed;
         }
-        else if (inputSpeed < 0.4 && inputSpeed >= 0.2)
+        else if (inputSpeed < SpeedBand2 && inputSpeed >= SpeedBand1)
         {
-            _gameEngine.Player.BlobHSpeed = 2;
+            _gameEngine.Player.BlobHSpeed = SlowSpeed;
         }
-        else if (inputSpeed < 0.6 && inputSpeed >= 0.4)
+        else if (inputSpeed < SpeedBand3 && inputSpeed >= SpeedBand2)
         {
         }
-        else if (inputSpeed < 0.8 && inputSpeed >= 0.6)
+        else if (inputSpeed < SpeedBand4 && inputSpeed >= SpeedBand3)
         {
-            _gameEngine.Player.BlobHSpeed = 4;
+            _gameEngine.Player.BlobHSpeed = BriskSpeed;
         }
         else
         {
-            _gameEngine.Player.BlobHSpeed = 8;
+            _gameEngine.Player.BlobHSpeed = FullSpeed;
         }
     }
 
     private void SetBlobVSpeed(float inputSpeed)
     {
-        if (inputSpeed < 0.1)
+        if (inputSpeed < VerticalDeadZone)
         {
-            _gameEngine.Player.BlobVSpeed = 1;
+            _gameEngine.Player.BlobVSpeed = CrawlSpeed;
         }
-        else if (inputSpeed < 0.4 && inputSpeed >= 0.2)
+        else if (inputSpeed < SpeedBand2 && inputSpeed >= SpeedBand1)
         {
-            _gameEngine.Player.BlobVSpeed = 2;
+            _gameEngine.Player.BlobVSpeed = SlowSpeed;
         }
-        else if (inputSpeed < 0.6 && inputSpeed >= 0.4)
+        else if (inputSpeed < SpeedBand3 && inputSpeed >= SpeedBand2)
         {
         }
-        else if (inputSpeed < 0.8 && inputSpeed >= 0.6)
+        else if (inputSpeed < SpeedBand4 && inputSpeed >= SpeedBand3)
         {
-            _gameEngine.Player.BlobVSpeed = 4;
+            _gameEngine.Player.BlobVSpeed = BriskSpeed;
         }
         else
         {
-            _gameEngine.Player.BlobVSpeed = 8;
+            _gameEngine.Player.BlobVSpeed = FullSpeed;
         }
     }
 }

@@ -3,6 +3,7 @@
 // ---------------------------------------------------------
 // -
 using System;
+using Starquake.Constants;
 using Starquake.SharedLibs;
 
 namespace Starquake.Animations;
@@ -37,13 +38,13 @@ public class FaderAnimation
         {
             if (FadeDirection == FadeDirection.FadeUp)
             {
-                if (FadeLevel < 255)
+                if (FadeLevel < ColourLevels.Full)
                 {
                     FadeLevel += _fadeSpeed;
                 }
                 else
                 {
-                    FadeLevel = 255;
+                    FadeLevel = ColourLevels.Full;
                     FadeDirection = FadeDirection.FadeDown;
                 }
             }

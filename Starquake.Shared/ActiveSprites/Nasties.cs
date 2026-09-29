@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Starquake.Collisions;
+using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Engines;
 using Starquake.Helpers;
@@ -17,6 +18,29 @@ namespace Starquake.ActiveSprites;
 // This wraps multiple nasties
 public class Nasties : GameComponentBase
 {
+    /// <summary>
+    ///     A nasty parked this far off screen is one that has not been given a home yet, so it is
+    ///     skipped rather than drawn or tested.
+    /// </summary>
+    private const int UnplacedNastyPosition = -1000;
+
+    /// <summary>
+    ///     The size of the blob's shot, for testing it against a nasty.
+    /// </summary>
+    private const int FireWidth = TileMetrics.CollisionCellWidth;
+
+    /// <inheritdoc cref="FireWidth" />
+    private const int FireHeight = TileMetrics.CollisionCellHeight;
+
+    /// <summary>
+    ///     The reach of an electricity node's arc, which spans a whole tile across but only a
+    ///     collision cell down.
+    /// </summary>
+    private const int ElectricityArcWidth = TileMetrics.TileWidth;
+
+    /// <inheritdoc cref="ElectricityArcWidth" />
+    private const int ElectricityArcHeight = TileMetrics.CollisionCellHeight;
+
     private readonly List<Nasty> _nasties;
     private readonly int _nastyCount = 1;
     private readonly IPositionalTriggerParticleEffect _nastySmokes;
@@ -102,8 +126,8 @@ public class Nasties : GameComponentBase
                 }
 
                 // Setting the coordinates to a setting less than 0 will suspect all updates
-                if (_nasties[a].XPos > -1000 &&
-                    _nasties[a].YPos > -1000)
+                if (_nasties[a].XPos > UnplacedNastyPosition &&
+                    _nasties[a].YPos > UnplacedNastyPosition)
                 {
                     _nasties[a].Update(gameTime);
 
@@ -144,8 +168,8 @@ public class Nasties : GameComponentBase
                         if (CollisionDetection.Check(
                                 GameEngine.Player.BlobFireX,
                                 GameEngine.Player.BlobFireY,
-                                32,
-                                32,
+                                FireWidth,
+                                FireHeight,
                                 _nasties[a].XPos,
                                 _nasties[a].YPos,
                                 _nasties[a].NastyWidth,
@@ -191,8 +215,8 @@ public class Nasties : GameComponentBase
                                             .X,
                                         GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
                                             .Y,
-                                        128,
-                                        32,
+                                        ElectricityArcWidth,
+                                        ElectricityArcHeight,
                                         _nasties[a].XPos,
                                         _nasties[a].YPos,
                                         _nasties[a].NastyWidth,
@@ -208,8 +232,8 @@ public class Nasties : GameComponentBase
                                             .X,
                                         GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
                                             .Y,
-                                        128,
-                                        32);
+                                        ElectricityArcWidth,
+                                        ElectricityArcHeight);
 
                                     if (nastyTravelDirection != Direction.None &&
                                         _nasties[a].NastyState == NastyState.Normal)
@@ -344,8 +368,8 @@ public class Nasties : GameComponentBase
         {
             for (var a = 0; a < _nastyCount; a++)
             {
-                if (_nasties[a].XPos > -1000 &&
-                    _nasties[a].YPos > -1000)
+                if (_nasties[a].XPos > UnplacedNastyPosition &&
+                    _nasties[a].YPos > UnplacedNastyPosition)
                 {
                     _nasties[a].Draw(gameTime, screenFade);
                 }

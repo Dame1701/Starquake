@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Starquake.Animations;
+using Starquake.Constants;
 using Starquake.Engines;
 using Starquake.SharedLibs;
 using Starquake.Structure;
@@ -16,6 +17,12 @@ namespace Starquake.GameComponents.GameScreens;
 
 public class CheopsScreen : GameComponentBase, IGameScreen
 {
+    /// <summary>
+    ///     The value <see cref="_itemToSwap" /> holds while no inventory slot has been picked yet. It
+    ///     is a slot index everywhere else, and no inventory is anywhere near this long.
+    /// </summary>
+    private const int NoItemSelected = 255;
+
 
     #region IGameScreen Members
 
@@ -58,7 +65,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
     {
         _soundPlayed = false;
         _screenReadWait = new DateTime(0);
-        _resultMessageFade = 255;
+        _resultMessageFade = ColourLevels.Full;
         _elementSelectionMode = false;
 
         if (GameEngine.GameScreens.CurrentGameScreenData.CheopsAccessCode != null)
@@ -107,7 +114,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
 
         // Pick an item from the inventory to swap
         var slotsToSelectFrom = new List<int>();
-        _itemToSwap = 255;
+        _itemToSwap = NoItemSelected;
 
         for (var a = 0; a < GameEngine.Player.BlobInventory.Length; a++)
         {
@@ -132,7 +139,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
             }
 
             // No key so use the access card
-            if (_itemToSwap == 255)
+            if (_itemToSwap == NoItemSelected)
             {
                 for (var a = 0; a < GameEngine.Player.BlobInventory.Length; a++)
                 {
@@ -238,7 +245,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
     public override void Draw(GameTime gameTime)
     {
         GameEngine.Font2.Begin(BlendState.AlphaBlend);
-        GameEngine.Font2.WriteText(298, 100, "CHEOPS PYRAMID", 2, Color.White, 255);
+        GameEngine.Font2.WriteText(298, 100, "CHEOPS PYRAMID", 2, Color.White, ColourLevels.Full);
         GameEngine.Font2.End();
 
         //gameEngine.SQText.WriteText("CHEOPS PYRAMID", 198, 100, gameTime, Color.White);
@@ -259,7 +266,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
         if (!_elementSelectionMode)
         {
             GameEngine.Font2.Begin(BlendState.AlphaBlend);
-            GameEngine.Font2.WriteText(366, 200, "CHEOPS KEY CODE", 2, Color.White, 255);
+            GameEngine.Font2.WriteText(366, 200, "CHEOPS KEY CODE", 2, Color.White, ColourLevels.Full);
             GameEngine.Font2.End();
 
             for (var a = 0; a < 2; a++)
@@ -285,7 +292,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
                     GameEngine.ShapeDrawer.End();
 
                     GameEngine.Font2.Begin(BlendState.AlphaBlend);
-                    GameEngine.Font2.WriteText(340, 500, "ACCESS AUTHORISED", 2, new Color(0, 255, 0), (byte)_resultMessageFade);
+                    GameEngine.Font2.WriteText(340, 500, "ACCESS AUTHORISED", 2, new Color(0, ColourLevels.Full, 0), (byte)_resultMessageFade);
                     GameEngine.Font2.End();
 
                     GameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
@@ -331,11 +338,11 @@ public class CheopsScreen : GameComponentBase, IGameScreen
         else // We're in selection mode
         {
             GameEngine.Font2.Begin(BlendState.AlphaBlend);
-            GameEngine.Font2.WriteText(378, 190, "EXCHANGE       FOR", 2, Color.White, 255);
-            GameEngine.Font2.WriteText(65, 266, "1.              2.             3.            4.             5.", 2, Color.OrangeRed, 255);
-            GameEngine.Font2.WriteText(327, 432, "HIT ANY KEY FROM  TO", 2, Color.CornflowerBlue, 255);
-            GameEngine.Font2.WriteText(690, 432, "1", 2, Color.White, 255);
-            GameEngine.Font2.WriteText(783, 432, "5", 2, Color.White, 255);
+            GameEngine.Font2.WriteText(378, 190, "EXCHANGE       FOR", 2, Color.White, ColourLevels.Full);
+            GameEngine.Font2.WriteText(65, 266, "1.              2.             3.            4.             5.", 2, Color.OrangeRed, ColourLevels.Full);
+            GameEngine.Font2.WriteText(327, 432, "HIT ANY KEY FROM  TO", 2, Color.CornflowerBlue, ColourLevels.Full);
+            GameEngine.Font2.WriteText(690, 432, "1", 2, Color.White, ColourLevels.Full);
+            GameEngine.Font2.WriteText(783, 432, "5", 2, Color.White, ColourLevels.Full);
 
             GameEngine.Font2.End();
 
