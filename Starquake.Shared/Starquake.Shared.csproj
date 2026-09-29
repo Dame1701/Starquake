@@ -27,8 +27,8 @@
 
     <ItemGroup>
         <!-- Compiled into each head instead, but kept visible here where it lives. -->
-        <Compile Remove="Program.cs" />
-        <None Include="Program.cs" />
+        <Compile Remove="Program.cs"/>
+        <None Include="Program.cs"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -46,8 +46,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\ProjectMercury\ProjectMercury.csproj" />
-        <ProjectReference Include="..\SharedLibs\SharedLibs.csproj" />
+        <ProjectReference Include="..\ProjectMercury\ProjectMercury.csproj"/>
+        <ProjectReference Include="..\SharedLibs\SharedLibs.csproj"/>
         <!--
           The Project Mercury MGCB extension. It is a build-time tool, not a dependency:
           this reference exists so `dotnet build` on a head restores and builds it, and
@@ -57,9 +57,9 @@
         <ProjectReference Include="..\ProjectMercury.ContentPipeline\ProjectMercury.ContentPipeline.csproj"
                           ReferenceOutputAssembly="false"
                           Private="false"
-                          ExcludeAssets="all" />
-        <PackageReference Include="MessagePack" Version="3.1.1" />
-        <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.4.1" />
+                          ExcludeAssets="all"/>
+        <PackageReference Include="MessagePack" Version="3.1.1"/>
+        <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.4.1"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -70,11 +70,11 @@
           other writing the same .xnb files. The built content reaches each head's output
           through the project reference.
         -->
-        <MonoGameContentReference Include="Content\Content.mgcb" />
+        <MonoGameContentReference Include="Content\Content.mgcb"/>
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
-        <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4.1" />
+        <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4.1"/>
     </ItemGroup>
 
     <!--
@@ -88,12 +88,12 @@
     </PropertyGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net9.0-windows'">
-        <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.4.1" />
+        <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.4.1"/>
     </ItemGroup>
 
     <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
-        <Message Text="Restoring dotnet tools" Importance="High" />
-        <Exec Command="dotnet tool restore" />
+        <Message Text="Restoring dotnet tools" Importance="High"/>
+        <Exec Command="dotnet tool restore"/>
     </Target>
 
     <!--
@@ -105,7 +105,7 @@
     <Target Name="BuildContentPipelineExtension" BeforeTargets="RunContentBuilder">
         <MSBuild Projects="..\ProjectMercury.ContentPipeline\ProjectMercury.ContentPipeline.csproj"
                  Targets="Build"
-                 Properties="Configuration=$(Configuration);TargetFramework=net8.0" />
+                 Properties="Configuration=$(Configuration);TargetFramework=net8.0"/>
     </Target>
 
 </Project>

@@ -1,219 +1,201 @@
-﻿using System;
+﻿// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework;
 
-namespace StarquakeXNA
+namespace StarquakeXNA;
+
+public class PlayerKeySet
 {
-    public class PlayerKeySet
-    {
-        public Microsoft.Xna.Framework.Input.Keys Up;
-        public Microsoft.Xna.Framework.Input.Keys Down;
-        public Microsoft.Xna.Framework.Input.Keys Left;
-        public Microsoft.Xna.Framework.Input.Keys Right;
-        public Microsoft.Xna.Framework.Input.Keys Fire;
+    public Keys Down;
+    public Keys Fire;
+    public Keys Left;
 
-        public Microsoft.Xna.Framework.Input.Keys Pause;
-        public Microsoft.Xna.Framework.Input.Keys Quit;
+    public Keys Pause;
+    public Keys Quit;
+    public Keys Right;
+    public Keys Up;
+}
+
+public class CustomControl
+{
+
+    //DirectInput directInputInstance;
+    //Joystick joystick;
+
+    private readonly GameEngine gameEngine;
+
+    public CustomControl(PlayerKeySet PlayerKeys, GameEngine GameEngine, bool UseJoyPad = false)
+    {
+        gameEngine = GameEngine;
+        /*
+        if (UseJoyPad)
+        {
+            directInputInstance = new DirectInput();
+            playerKeySet = PlayerKeys;
+            InitialiseJoystick();
+        }
+        */
     }
 
-    public class CustomControl
+    public bool UseJoyPad { get; set; } = true;
+
+    public PlayerKeySet PlayerKeySet { get; set; }
+
+    private void InitialiseJoystick()
     {
-        bool useJoyPad = true;
-        public bool UseJoyPad
+        /*
+        // Search for device
+        foreach (DeviceInstance device in directInputInstance.GetDevices(DeviceClass.GameController, DeviceEnumerationFlags.AttachedOnly))
         {
-            get { return useJoyPad; }
-            set { useJoyPad = value; }
-        }
-
-        //DirectInput directInputInstance;
-        //Joystick joystick;
-
-        GameEngine gameEngine;
-        PlayerKeySet playerKeySet = null;
-
-        public PlayerKeySet PlayerKeySet
-        {
-            get { return playerKeySet; }
-            set { playerKeySet = value; }
-        }
-
-        public CustomControl(PlayerKeySet PlayerKeys, GameEngine GameEngine, bool UseJoyPad = false)
-        {
-            gameEngine = GameEngine;
-            /*
-            if (UseJoyPad)
+            // Create device
+            try
             {
-                directInputInstance = new DirectInput();
-                playerKeySet = PlayerKeys;
-                InitialiseJoystick();
+                joystick = new Joystick(directInputInstance, device.InstanceGuid);
+                break;
             }
-            */
+            catch (DirectInputException)
+            {
+            }
         }
 
-        void InitialiseJoystick()
+        if (joystick == null)
         {
-            /*
-            // Search for device
-            foreach (DeviceInstance device in directInputInstance.GetDevices(DeviceClass.GameController, DeviceEnumerationFlags.AttachedOnly))
+            // do error for no joystick here
+
+        }
+        else
+        {
+            // get joystick device objects
+            foreach (DeviceObjectInstance deviceObject in joystick.GetObjects())
             {
-                // Create device                 
-                try
+                if ((deviceObject.ObjectType & ObjectDeviceType.Axis) != 0)
                 {
-                    joystick = new Joystick(directInputInstance, device.InstanceGuid);
-                    break;
-                }
-                catch (DirectInputException)
-                {
+                    joystick.GetObjectPropertiesById((int)deviceObject.ObjectType).SetRange(-100, 100);
                 }
             }
 
-            if (joystick == null)
-            {
-                // do error for no joystick here
-                
-            }
-            else
-            {
-                // get joystick device objects
-                foreach (DeviceObjectInstance deviceObject in joystick.GetObjects())
-                {
-                    if ((deviceObject.ObjectType & ObjectDeviceType.Axis) != 0)
-                    {
-                        joystick.GetObjectPropertiesById((int)deviceObject.ObjectType).SetRange(-100, 100);
-                    }
-                }
-
-                // Acquire device             
-                joystick.Acquire();
-            }
-            */
+            // Acquire device
+            joystick.Acquire();
         }
+        */
+    }
 
-        public bool MovedUp()
+    public bool MovedUp()
+        /*
+        if (useJoyPad && joystick !=null)
         {
-            /*
-            if (useJoyPad && joystick !=null)
+            if (joystick.GetCurrentState().Y < 0)
             {
-                if (joystick.GetCurrentState().Y < 0)
-                {
-                    return true;
-                }
-
-                return false;
+                return true;
             }
-            */
-            return Microsoft.Xna.Framework.Input.Keyboard.GetState().IsKeyDown(playerKeySet.Up);
+
+            return false;
         }
+        */
+        => Keyboard.GetState().IsKeyDown(PlayerKeySet.Up);
 
-        public bool MovedDown()
+    public bool MovedDown()
+        /*
+        if (useJoyPad && joystick != null)
         {
-            /*
-            if (useJoyPad && joystick != null)
+            if (joystick.GetCurrentState().Y > 0)
             {
-                if (joystick.GetCurrentState().Y > 0)
-                {
-                    return true;
-                }
-
-                return false;
+                return true;
             }
-            */
-            return Microsoft.Xna.Framework.Input.Keyboard.GetState().IsKeyDown(playerKeySet.Down);
+
+            return false;
         }
+        */
+        => Keyboard.GetState().IsKeyDown(PlayerKeySet.Down);
 
-        public bool MovedLeft()
+    public bool MovedLeft()
+        /*
+        if (useJoyPad && joystick != null)
         {
-            /*
-            if (useJoyPad && joystick != null)
+            if (joystick.GetCurrentState().X < 0)
             {
-                if (joystick.GetCurrentState().X < 0)
-                {
-                    return true;
-                }
-
-                return false;
+                return true;
             }
-            */
-            return Microsoft.Xna.Framework.Input.Keyboard.GetState().IsKeyDown(playerKeySet.Left);
+
+            return false;
         }
+        */
+        => Keyboard.GetState().IsKeyDown(PlayerKeySet.Left);
 
-        public bool MovedRight()
+    public bool MovedRight()
+        /*
+        if (useJoyPad && joystick != null)
         {
-            /*
-            if (useJoyPad && joystick != null)
+            if (joystick.GetCurrentState().X > 0)
             {
-                if (joystick.GetCurrentState().X > 0)
-                {
-                    return true;
-                }
-
-                return false;
+                return true;
             }
-            */
-            return Microsoft.Xna.Framework.Input.Keyboard.GetState().IsKeyDown(playerKeySet.Right);
+
+            return false;
         }
+        */
+        => Keyboard.GetState().IsKeyDown(PlayerKeySet.Right);
 
-        public bool HasFired()
+    public bool HasFired()
+        /*
+        if (useJoyPad && joystick != null)
         {
-            /*
-            if (useJoyPad && joystick != null)
+            if (joystick.GetCurrentState().IsPressed(0) ||
+                joystick.GetCurrentState().IsPressed(1))
             {
-                if (joystick.GetCurrentState().IsPressed(0) ||
-                    joystick.GetCurrentState().IsPressed(1))
-                {
-                    return true;
-                }
-
-                return false;
+                return true;
             }
-            */
-            return Microsoft.Xna.Framework.Input.Keyboard.GetState().IsKeyDown(playerKeySet.Fire);
+
+            return false;
         }
+        */
+        => Keyboard.GetState().IsKeyDown(PlayerKeySet.Fire);
 
-        private void SetBlobHSpeed(float InputSpeed)
+    private void SetBlobHSpeed(float InputSpeed)
+    {
+        if (InputSpeed < 0.2)
         {
-            if (InputSpeed < 0.2)
-            {
-                gameEngine.Player.BlobHSpeed = 1;
-            }
-            else if (InputSpeed < 0.4 && InputSpeed >= 0.2)
-            {
-                gameEngine.Player.BlobHSpeed = 2;
-            }
-            else if (InputSpeed < 0.6 && InputSpeed >= 0.4)
-            {
-            }
-            else if (InputSpeed < 0.8 && InputSpeed >= 0.6)
-            {
-                gameEngine.Player.BlobHSpeed = 4;
-            }
-            else
-            {
-                gameEngine.Player.BlobHSpeed = 8;
-            }
+            gameEngine.Player.BlobHSpeed = 1;
         }
-
-        private void SetBlobVSpeed(float InputSpeed)
+        else if (InputSpeed < 0.4 && InputSpeed >= 0.2)
         {
-            if (InputSpeed < 0.1)
-            {
-                gameEngine.Player.BlobVSpeed = 1;
-            }
-            else if (InputSpeed < 0.4 && InputSpeed >= 0.2)
-            {
-                gameEngine.Player.BlobVSpeed = 2;
-            }
-            else if (InputSpeed < 0.6 && InputSpeed >= 0.4)
-            {
-            }
-            else if (InputSpeed < 0.8 && InputSpeed >= 0.6)
-            {
-                gameEngine.Player.BlobVSpeed = 4;
-            }
-            else
-            {
-                gameEngine.Player.BlobVSpeed = 8;
-            }
+            gameEngine.Player.BlobHSpeed = 2;
+        }
+        else if (InputSpeed < 0.6 && InputSpeed >= 0.4)
+        {
+        }
+        else if (InputSpeed < 0.8 && InputSpeed >= 0.6)
+        {
+            gameEngine.Player.BlobHSpeed = 4;
+        }
+        else
+        {
+            gameEngine.Player.BlobHSpeed = 8;
+        }
+    }
+
+    private void SetBlobVSpeed(float InputSpeed)
+    {
+        if (InputSpeed < 0.1)
+        {
+            gameEngine.Player.BlobVSpeed = 1;
+        }
+        else if (InputSpeed < 0.4 && InputSpeed >= 0.2)
+        {
+            gameEngine.Player.BlobVSpeed = 2;
+        }
+        else if (InputSpeed < 0.6 && InputSpeed >= 0.4)
+        {
+        }
+        else if (InputSpeed < 0.8 && InputSpeed >= 0.6)
+        {
+            gameEngine.Player.BlobVSpeed = 4;
+        }
+        else
+        {
+            gameEngine.Player.BlobVSpeed = 8;
         }
     }
 }

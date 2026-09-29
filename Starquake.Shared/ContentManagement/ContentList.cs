@@ -1,66 +1,62 @@
-﻿using System;
+﻿// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 using System.Collections.Generic;
-using System.Text;
 using Microsoft.Xna.Framework.Content;
 
-namespace StarquakeXNA.ContentManagement
+namespace StarquakeXNA.ContentManagement;
+
+public class ContentList
 {
-    public class ContentList
+    private readonly List<ContentEntry> content;
+
+    public ContentList(ContentManager ContentMgr)
     {
-        private List<ContentEntry> content;
-        
-        private ContentManager contentMgr;
-        public ContentManager ContentMgr
-        {
-            get { return contentMgr; }
-        }
+        content = new List<ContentEntry>();
+        this.ContentMgr = ContentMgr;
+    }
+    public ContentManager ContentMgr { get; }
 
-        public ContentList(ContentManager ContentMgr)
-        {
-            content = new List<ContentEntry>();
-            contentMgr = ContentMgr;
-        }
+    public void AddContent(string ContentName, string ContentFilePath)
+    {
+        content.Add(new ContentEntry(ContentName, ContentFilePath));
+    }
 
-        public void AddContent(string ContentName, string ContentFilePath)
+    public string GetContent(string ContentName)
+    {
+        for (var a = 0; a < content.Count; a++)
         {
-            content.Add(new ContentEntry(ContentName, ContentFilePath));
-        }
-
-        public string GetContent(string ContentName)
-        {
-            for (int a = 0; a < content.Count; a++)
+            if (content[a].Name == ContentName)
             {
-                if (content[a].Name == ContentName)
-                {
-                    return content[a].FilePath;
-                }
+                return content[a].FilePath;
             }
-
-            return null;
         }
 
-        public void RemoveContent(string ContentName)
+        return null;
+    }
+
+    public void RemoveContent(string ContentName)
+    {
+        for (var a = 0; a < content.Count; a++)
         {
-            for (int a = 0; a < content.Count; a++)
+            if (content[a].Name == ContentName)
             {
-                if (content[a].Name == ContentName)
-                {
-                    content.Remove(content[a]);
-                    break;
-                }
+                content.Remove(content[a]);
+                break;
             }
         }
     }
-    
-    public class ContentEntry
-    {
-        public string Name;
-        public string FilePath;
+}
 
-        public ContentEntry(string ContentName, string ContentFilePath)
-        {
-            Name = ContentName;
-            FilePath = ContentFilePath;
-        }
+public class ContentEntry
+{
+    public string FilePath;
+    public string Name;
+
+    public ContentEntry(string ContentName, string ContentFilePath)
+    {
+        Name = ContentName;
+        FilePath = ContentFilePath;
     }
 }

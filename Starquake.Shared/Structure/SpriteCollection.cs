@@ -1,58 +1,40 @@
-﻿using System;
+﻿// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
+using System;
 using MessagePack;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
-using StarquakeXNA.Helpers;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake_MonoGame.Structure;
+using StarquakeXNA.Helpers;
 
 namespace StarquakeXNA.Structure;
 
 [Serializable]
 public class SpriteCollection
-{  
-    private string _imageFilePath;
-    
-    private byte _fade;
-    
+{
+
     private bool _clockWise = true;
-    
-    private float _rotationSpeed = 1f;
-    
-    private int[] _spriteTexturePosX;
-    
-    private int[] _spriteTexturePosY;
+
+    private byte _fade;
 
     [NonSerialized]
     private GameEngine _gameEngineReference;
-    
-    [NonSerialized] 
-    private SpriteBatch _sprites;
+    private string _imageFilePath;
 
-    [NonSerialized] 
+    private float _rotationSpeed = 1f;
+
+    [NonSerialized]
     private Texture2D _spriteImages;
 
-    public float SpriteRotation
-    {
-        get;
-        private set;
-    }
+    [NonSerialized]
+    private SpriteBatch _sprites;
 
-    public int SpriteWidth
-    {
-        get; 
-    }
+    private int[] _spriteTexturePosX;
 
-    public int SpriteHeight
-    {
-        get;
-    }
-
-    public int SpriteCount
-    {
-        get;
-        private set;
-    }
+    private int[] _spriteTexturePosY;
 
     public SpriteCollection(GameEngine GameEngineReference, ContentManager Content, string ImageFilePath,
         int SpriteWidth, int SpriteHeight)
@@ -89,6 +71,28 @@ public class SpriteCollection
         }
     }
 
+    public float SpriteRotation
+    {
+        get;
+        private set;
+    }
+
+    public int SpriteWidth
+    {
+        get;
+    }
+
+    public int SpriteHeight
+    {
+        get;
+    }
+
+    public int SpriteCount
+    {
+        get;
+        private set;
+    }
+
     private void SetSpriteEffect()
     {
         _fade = 255;
@@ -100,9 +104,9 @@ public class SpriteCollection
     }
 
     /// <param name="transform">
-    /// Only wanted when drawing straight to the back buffer, where it scales and centres the
-    /// composition - see GameEngine.PresentationTransform. Drawing into a render target the
-    /// game composes at its own fixed size, so there it is left null.
+    ///     Only wanted when drawing straight to the back buffer, where it scales and centres the
+    ///     composition - see GameEngine.PresentationTransform. Drawing into a render target the
+    ///     game composes at its own fixed size, so there it is left null.
     /// </param>
     public void Begin(BlendState blendState, GameTime gameTime, Matrix? transform = null)
     {
@@ -192,7 +196,7 @@ public class SpriteCollection
                 blockMultiplier = 2;
             }
 
-            for (var a = 0; a < Matrix.Length; a += (BlockSize * blockMultiplier))
+            for (var a = 0; a < Matrix.Length; a += BlockSize * blockMultiplier)
             {
                 if (Matrix[a].IsOn)
                 {
@@ -467,7 +471,7 @@ public class SpriteCollection
             SpriteRotation = SpriteRotation,
             _spriteImages = _gameEngineReference.ContentMgr.Load<Texture2D>(_imageFilePath)
         };
-        
+
         return clonedSpriteCollection;
     }
 }

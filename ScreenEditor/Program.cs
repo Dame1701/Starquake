@@ -1,10 +1,14 @@
-﻿using Avalonia;
+﻿// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 using System;
+using Avalonia;
 using Avalonia.ReactiveUI;
 
 namespace ScreenEditor;
 
-class Program
+internal class Program
 {
     // Initialization code. Don't use any Avalonia, third-party APIs or any
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized

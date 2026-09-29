@@ -1,3 +1,7 @@
+// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 using System;
 using Microsoft.Xna.Framework.Audio;
 
@@ -5,12 +9,12 @@ namespace StarquakeXNA;
 
 public class SoundEffectInstanceRecord
 {
-    public readonly string SoundName;
-    public readonly SoundEffectInstance SoundInstance;
-    public long PlayStart;
-    public Guid Id;
     public readonly bool KillOnScreenChange;
+    public readonly SoundEffectInstance SoundInstance;
+    public readonly string SoundName;
+    public Guid Id;
     public enSoundEffectInstanceType InstanceType;
+    public long PlayStart;
     public float Volume;
 
     public SoundEffectInstanceRecord(string soundName, enSoundEffectInstanceType instanceType,

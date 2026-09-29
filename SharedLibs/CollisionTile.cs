@@ -1,3 +1,7 @@
+// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 using MessagePack;
 
 namespace SharedLibs;
@@ -19,7 +23,5 @@ public sealed record CollisionTile(int TileImage, int XPos, int YPos, CollisionT
     } = CollisionTileType;
 
     public override string ToString()
-    {
-        return "TileImage: " + TileImage + ", XPos: " + XPos + ", YPos: " + YPos + ", ColType: " + CollisionTileType;
-    }
+        => "TileImage: " + TileImage + ", XPos: " + XPos + ", YPos: " + YPos + ", ColType: " + CollisionTileType;
 }

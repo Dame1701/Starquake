@@ -1,3 +1,7 @@
+// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -9,43 +13,41 @@ namespace StarquakeXNA;
 public class Starquake : Game
 {
     /// <summary>
-    /// How many times a second the game thinks. This is the speed of the game: the engine moves
-    /// everything by a fixed amount per logic frame and scales nothing by elapsed time, exactly as
-    /// the original did, so this number is the only thing deciding how fast the blob runs.
-    ///
-    /// 50 matches the PAL original. 60 is the NTSC speed and is 20% faster. Anything is allowed -
-    /// it does not have to divide into the monitor's refresh rate, and the game runs at this speed
-    /// on every machine regardless of what the display is doing.
+    ///     How many times a second the game thinks. This is the speed of the game: the engine moves
+    ///     everything by a fixed amount per logic frame and scales nothing by elapsed time, exactly as
+    ///     the original did, so this number is the only thing deciding how fast the blob runs.
+    ///     50 matches the PAL original. 60 is the NTSC speed and is 20% faster. Anything is allowed -
+    ///     it does not have to divide into the monitor's refresh rate, and the game runs at this speed
+    ///     on every machine regardless of what the display is doing.
     /// </summary>
     public const double LogicFramesPerSecond = 60.0;
 
-    private readonly GraphicsDeviceManager _graphics;
-    private GameEngine _gameEngine;
+    /// <summary>
+    ///     How far behind we let the logic clock fall before dropping frames instead of catching up.
+    ///     A stall - a breakpoint, dragging the window, the machine waking - otherwise leaves a
+    ///     backlog that the game fast-forwards through all in one go.
+    /// </summary>
+    private const int MaxCatchUpFrames = 5;
 
     public static readonly int ScreenWidth = 1280;
     public static readonly int ScreenHeight = 800;
 
-    private static readonly TimeSpan LogicFrameLength =
-        TimeSpan.FromTicks((long)(TimeSpan.TicksPerSecond / LogicFramesPerSecond));
+    private static readonly TimeSpan LogicFrameLength = TimeSpan.FromTicks((long)(TimeSpan.TicksPerSecond / LogicFramesPerSecond));
+
+    private readonly GraphicsDeviceManager _graphics;
+    private readonly GameTime _logicGameTime = new();
+    private GameEngine _gameEngine;
 
     /// <summary>
-    /// How far behind we let the logic clock fall before dropping frames instead of catching up.
-    /// A stall - a breakpoint, dragging the window, the machine waking - otherwise leaves a
-    /// backlog that the game fast-forwards through all in one go.
-    /// </summary>
-    private const int MaxCatchUpFrames = 5;
-
-    /// <summary>
-    /// Real time banked since the last logic frame, plus the logic clock the game sees. The game
-    /// is never told the real frame time: every logic frame is exactly one
-    /// <see cref="LogicFramesPerSecond"/>th of a second long, so anything that does work off
-    /// ElapsedGameTime (the particle engine) stays locked to the same clock as everything that
-    /// counts frames.
+    ///     Real time banked since the last logic frame, plus the logic clock the game sees. The game
+    ///     is never told the real frame time: every logic frame is exactly one
+    ///     <see cref="LogicFramesPerSecond" />th of a second long, so anything that does work off
+    ///     ElapsedGameTime (the particle engine) stays locked to the same clock as everything that
+    ///     counts frames.
     /// </summary>
     private TimeSpan _logicAccumulator;
 
     private TimeSpan _logicClock;
-    private readonly GameTime _logicGameTime = new GameTime();
 
     private bool _resizingBackBuffer;
 
@@ -70,13 +72,13 @@ public class Starquake : Game
     }
 
     /// <summary>
-    /// Keep the back buffer the same size as the window the user just dragged, so the picture is
-    /// composed at the resolution it is actually displayed at rather than being stretched up from
-    /// whatever size the window happened to start at. The game itself needs no telling: it always
-    /// composes at its fixed size and GameEngine.PresentationTransform scales that onto whatever
-    /// the back buffer now is.
+    ///     Keep the back buffer the same size as the window the user just dragged, so the picture is
+    ///     composed at the resolution it is actually displayed at rather than being stretched up from
+    ///     whatever size the window happened to start at. The game itself needs no telling: it always
+    ///     composes at its fixed size and GameEngine.PresentationTransform scales that onto whatever
+    ///     the back buffer now is.
     /// </summary>
-    void Window_ClientSizeChanged(object sender, EventArgs e)
+    private void Window_ClientSizeChanged(object sender, EventArgs e)
     {
         if (_graphics == null ||
             _resizingBackBuffer ||
@@ -101,10 +103,10 @@ public class Starquake : Game
     }
 
     /// <summary>
-    /// Allows the game to perform any initialization it needs to before starting to run.
-    /// This is where it can query for any required services and load any non-graphic
-    /// related content.  Calling base.Initialize will enumerate through any components
-    /// and initialize them as well.
+    ///     Allows the game to perform any initialization it needs to before starting to run.
+    ///     This is where it can query for any required services and load any non-graphic
+    ///     related content.  Calling base.Initialize will enumerate through any components
+    ///     and initialize them as well.
     /// </summary>
     protected override void Initialize()
     {
@@ -121,8 +123,8 @@ public class Starquake : Game
     }
 
     /// <summary>
-    /// LoadContent will be called once per game and is the place to load
-    /// all of your content.
+    ///     LoadContent will be called once per game and is the place to load
+    ///     all of your content.
     /// </summary>
     protected override void LoadContent()
     {
@@ -140,9 +142,9 @@ public class Starquake : Game
     }
 
     /// <summary>
-    /// Called once per rendered frame, which on a modern display is far more often than the game
-    /// wants to think. Bank the real time that has passed and run whole logic frames out of it,
-    /// so the game advances at <see cref="LogicFramesPerSecond"/> no matter what the monitor does.
+    ///     Called once per rendered frame, which on a modern display is far more often than the game
+    ///     wants to think. Bank the real time that has passed and run whole logic frames out of it,
+    ///     so the game advances at <see cref="LogicFramesPerSecond" /> no matter what the monitor does.
     /// </summary>
     /// <param name="gameTime">Provides a snapshot of timing values.</param>
     protected override void Update(GameTime gameTime)
@@ -154,7 +156,7 @@ public class Starquake : Game
 
         _logicAccumulator += gameTime.ElapsedGameTime;
 
-        TimeSpan maxBacklog = LogicFrameLength * MaxCatchUpFrames;
+        var maxBacklog = LogicFrameLength * MaxCatchUpFrames;
 
         if (_logicAccumulator > maxBacklog)
         {
@@ -174,7 +176,7 @@ public class Starquake : Game
     }
 
     /// <summary>
-    /// One logic frame. Everything that counts frames rather than seconds belongs in here.
+    ///     One logic frame. Everything that counts frames rather than seconds belongs in here.
     /// </summary>
     /// <param name="gameTime">The logic clock, always exactly one logic frame elapsed.</param>
     private void UpdateLogicFrame(GameTime gameTime)
@@ -185,10 +187,7 @@ public class Starquake : Game
         ToggleKeys.Update();
 
         // Switch to fullscreen if Ctrl and Enter touched
-        if (_gameEngine?.Status is GameEngineStatus.StartingGraphicsLoaded 
-            or GameEngineStatus.Started 
-            or GameEngineStatus.ContentLoaded 
-            or GameEngineStatus.StartGame)
+        if (_gameEngine?.Status is GameEngineStatus.StartingGraphicsLoaded or GameEngineStatus.Started or GameEngineStatus.ContentLoaded or GameEngineStatus.StartGame)
         {
             // Allows the game to exit
             if (ToggleKeys.GetPressedKey() == Keys.Escape)
@@ -209,7 +208,7 @@ public class Starquake : Game
     }
 
     /// <summary>
-    /// This is called when the game should draw itself.
+    ///     This is called when the game should draw itself.
     /// </summary>
     /// <param name="gameTime">Provides a snapshot of timing values.</param>
     protected override void Draw(GameTime gameTime)

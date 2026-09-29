@@ -1,4 +1,8 @@
-﻿using System;
+﻿// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
+using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -9,12 +13,20 @@ namespace StarquakeXNA;
 
 public class BouncingParticle
 {
-    private readonly BouncingAnimation _particleBounce;
 
-    public IStandardParticleEffect Fireball { get; set; }
+    private readonly GameEngine _gameEngine;
+    private readonly BouncingAnimation _particleBounce;
 
     private int _oldXPos;
     private int _oldYPos;
+
+    public BouncingParticle(GameEngine GameEngineReference, int SpriteNo)
+    {
+        _gameEngine = GameEngineReference;
+        _particleBounce = new BouncingAnimation(GameEngineReference, SpriteNo);
+    }
+
+    public IStandardParticleEffect Fireball { get; set; }
 
     public int XPos { get; private set; }
 
@@ -22,21 +34,7 @@ public class BouncingParticle
 
     public bool Triggered => _particleBounce.Triggered;
 
-    private readonly GameEngine _gameEngine;
-
-    private IPositionalTriggerParticleEffect _sparkEffect;
-
-    public IPositionalTriggerParticleEffect SparkEffect
-    {
-        get => _sparkEffect;
-        set => _sparkEffect = value;
-    }
-
-    public BouncingParticle(GameEngine GameEngineReference, int SpriteNo)
-    {
-        _gameEngine = GameEngineReference;
-        _particleBounce = new BouncingAnimation(GameEngineReference, SpriteNo);
-    }
+    public IPositionalTriggerParticleEffect SparkEffect { get; set; }
 
     public void XBounce()
     {
@@ -76,7 +74,7 @@ public class BouncingParticle
     {
         _particleBounce.Reset();
     }
-    
+
     public void Update(GameTime gameTime)
     {
         if (_particleBounce.Triggered)
@@ -100,7 +98,7 @@ public class BouncingParticle
                 {
                     YPos = _oldYPos;
                     _particleBounce.YBounce();
-                    _sparkEffect.Start(XPos, YPos);
+                    SparkEffect.Start(XPos, YPos);
                 }
 
                 // Keep the parts within the screen bounds, makes for a better effect
@@ -108,7 +106,7 @@ public class BouncingParticle
                 {
                     YPos = _gameEngine.GameScreens.ScreenHeight - 32;
                     _particleBounce.YBounce();
-                    _sparkEffect.Start(XPos, YPos);
+                    SparkEffect.Start(XPos, YPos);
                 }
             }
             else
@@ -127,7 +125,7 @@ public class BouncingParticle
                 {
                     YPos = _oldYPos;
                     _particleBounce.YBounce();
-                    _sparkEffect.Start(XPos, YPos);
+                    SparkEffect.Start(XPos, YPos);
                 }
 
                 // Convert back to negative number
@@ -138,7 +136,7 @@ public class BouncingParticle
                 {
                     YPos = 32;
                     _particleBounce.YBounce();
-                    _sparkEffect.Start(XPos, YPos);
+                    SparkEffect.Start(XPos, YPos);
                 }
             }
 
@@ -158,7 +156,7 @@ public class BouncingParticle
                 {
                     XPos = _oldXPos;
                     _particleBounce.XBounce();
-                    _sparkEffect.Start(XPos, YPos);
+                    SparkEffect.Start(XPos, YPos);
                 }
 
                 // Keep the parts within the screen bounds, makes for a better effect
@@ -166,7 +164,7 @@ public class BouncingParticle
                 {
                     XPos = _gameEngine.GameScreens.ScreenWidth - 32;
                     _particleBounce.XBounce();
-                    _sparkEffect.Start(XPos, YPos);
+                    SparkEffect.Start(XPos, YPos);
                 }
             }
             else
@@ -184,7 +182,7 @@ public class BouncingParticle
                 {
                     XPos = _oldXPos;
                     _particleBounce.XBounce();
-                    _sparkEffect.Start(XPos, YPos);
+                    SparkEffect.Start(XPos, YPos);
                 }
 
                 // Convert back to negative number
@@ -195,7 +193,7 @@ public class BouncingParticle
                 {
                     XPos = 32;
                     _particleBounce.XBounce();
-                    _sparkEffect.Start(XPos, YPos);
+                    SparkEffect.Start(XPos, YPos);
                 }
             }
 
@@ -227,34 +225,15 @@ public class BouncingParticle
 
 public class BlobDeathAnimation : GameComponentBase
 {
-    private readonly List<BouncingParticle> _bouncingParticleSprites;
     private readonly Animation _blobDeathParticlesOriginal;
-    private bool _drawBlobParts;
 
     private IPositionalTriggerParticleEffect _blobFragmentBounceSparks;
-
-    public List<BouncingParticle> BouncingParticles => _bouncingParticleSprites;
-
-    public bool Triggered
-    {
-        get
-        {
-            foreach (var bouncingParticle in _bouncingParticleSprites)
-            {
-                if (bouncingParticle.Triggered)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-    }
+    private bool _drawBlobParts;
 
     public BlobDeathAnimation(GameEngine GameEngineReference)
         : base(GameEngineReference)
     {
-        _bouncingParticleSprites =
+        BouncingParticles =
         [
             new BouncingParticle(GameEngineReference, 0),
             new BouncingParticle(GameEngineReference, 1),
@@ -276,13 +255,31 @@ public class BlobDeathAnimation : GameComponentBase
         };
     }
 
+    public List<BouncingParticle> BouncingParticles { get; }
+
+    public bool Triggered
+    {
+        get
+        {
+            foreach (var bouncingParticle in BouncingParticles)
+            {
+                if (bouncingParticle.Triggered)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
     public override void LoadContent()
     {
         _blobFragmentBounceSparks =
             gameEngine.ContentResourceManager.GetParticleEffectInstance("FireSparks",
                 enParticleEffectType.TriggeredMultiLocationTimed, null) as IPositionalTriggerParticleEffect;
 
-        foreach (var t in _bouncingParticleSprites)
+        foreach (var t in BouncingParticles)
         {
             t.Fireball =
                 gameEngine.ContentResourceManager.GetParticleEffectInstance("BlobFragmentExplosion",
@@ -296,7 +293,7 @@ public class BlobDeathAnimation : GameComponentBase
     {
         _drawBlobParts = DrawBlobParts;
 
-        foreach (var bouncingParticle in _bouncingParticleSprites)
+        foreach (var bouncingParticle in BouncingParticles)
         {
             bouncingParticle.Trigger(EffectXPosition, EffectYPosition, EffectMinDuration, EffectMaxDuration);
         }
@@ -304,15 +301,15 @@ public class BlobDeathAnimation : GameComponentBase
 
     public void Reset()
     {
-        foreach (var bouncingParticle in _bouncingParticleSprites)
+        foreach (var bouncingParticle in BouncingParticles)
         {
             bouncingParticle.Reset();
         }
     }
-    
+
     public override void Update(GameTime gameTime)
     {
-        foreach (var bouncingParticle in _bouncingParticleSprites)
+        foreach (var bouncingParticle in BouncingParticles)
         {
             if (bouncingParticle.Triggered)
             {
@@ -338,7 +335,7 @@ public class BlobDeathAnimation : GameComponentBase
             gameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original")
                 .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
 
-            foreach (var bouncingParticle in _bouncingParticleSprites)
+            foreach (var bouncingParticle in BouncingParticles)
             {
                 if (bouncingParticle.Triggered)
                 {
@@ -351,7 +348,7 @@ public class BlobDeathAnimation : GameComponentBase
         }
         else
         {
-            foreach (var bouncingParticle in _bouncingParticleSprites)
+            foreach (var bouncingParticle in BouncingParticles)
             {
                 if (!bouncingParticle.Triggered)
                 {

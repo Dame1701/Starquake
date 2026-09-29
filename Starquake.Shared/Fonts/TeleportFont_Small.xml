@@ -1,103 +1,103 @@
 <?xml version="1.0"?>
-<XNAFont xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <UVList>
-    <XNAFontUV U="2" V="5" Width="12" C="97" />
-    <XNAFontUV U="2" V="21" Width="12" C="98" />
-    <XNAFontUV U="2" V="37" Width="12" C="99" />
-    <XNAFontUV U="2" V="53" Width="12" C="100" />
-    <XNAFontUV U="2" V="69" Width="11" C="101" />
-    <XNAFontUV U="2" V="84" Width="11" C="102" />
-    <XNAFontUV U="2" V="99" Width="12" C="103" />
-    <XNAFontUV U="2" V="115" Width="12" C="104" />
-    <XNAFontUV U="2" V="131" Width="5" C="105" />
-    <XNAFontUV U="2" V="140" Width="12" C="106" />
-    <XNAFontUV U="2" V="156" Width="12" C="107" />
-    <XNAFontUV U="2" V="172" Width="11" C="108" />
-    <XNAFontUV U="2" V="187" Width="12" C="109" />
-    <XNAFontUV U="2" V="203" Width="12" C="110" />
-    <XNAFontUV U="2" V="219" Width="12" C="111" />
-    <XNAFontUV U="2" V="235" Width="12" C="112" />
-    <XNAFontUV U="25" V="5" Width="12" C="113" />
-    <XNAFontUV U="25" V="21" Width="12" C="114" />
-    <XNAFontUV U="25" V="37" Width="12" C="115" />
-    <XNAFontUV U="25" V="53" Width="11" C="116" />
-    <XNAFontUV U="25" V="68" Width="12" C="117" />
-    <XNAFontUV U="25" V="84" Width="12" C="118" />
-    <XNAFontUV U="25" V="100" Width="12" C="119" />
-    <XNAFontUV U="25" V="116" Width="12" C="120" />
-    <XNAFontUV U="25" V="132" Width="12" C="121" />
-    <XNAFontUV U="25" V="148" Width="10" C="122" />
-    <XNAFontUV U="25" V="162" Width="12" C="65" />
-    <XNAFontUV U="25" V="178" Width="12" C="66" />
-    <XNAFontUV U="25" V="194" Width="12" C="67" />
-    <XNAFontUV U="25" V="210" Width="12" C="68" />
-    <XNAFontUV U="25" V="226" Width="11" C="69" />
-    <XNAFontUV U="25" V="241" Width="11" C="70" />
-    <XNAFontUV U="48" V="5" Width="12" C="71" />
-    <XNAFontUV U="48" V="21" Width="12" C="72" />
-    <XNAFontUV U="48" V="37" Width="5" C="73" />
-    <XNAFontUV U="48" V="46" Width="12" C="74" />
-    <XNAFontUV U="48" V="62" Width="12" C="75" />
-    <XNAFontUV U="48" V="78" Width="11" C="76" />
-    <XNAFontUV U="48" V="93" Width="19" C="77" />
-    <XNAFontUV U="48" V="116" Width="12" C="78" />
-    <XNAFontUV U="48" V="132" Width="12" C="79" />
-    <XNAFontUV U="48" V="148" Width="12" C="80" />
-    <XNAFontUV U="48" V="164" Width="12" C="81" />
-    <XNAFontUV U="48" V="180" Width="12" C="82" />
-    <XNAFontUV U="48" V="196" Width="12" C="83" />
-    <XNAFontUV U="48" V="212" Width="11" C="84" />
-    <XNAFontUV U="48" V="227" Width="12" C="85" />
-    <XNAFontUV U="48" V="243" Width="12" C="86" />
-    <XNAFontUV U="71" V="5" Width="19" C="87" />
-    <XNAFontUV U="71" V="28" Width="12" C="88" />
-    <XNAFontUV U="71" V="44" Width="12" C="89" />
-    <XNAFontUV U="71" V="60" Width="10" C="90" />
-    <XNAFontUV U="71" V="74" Width="12" C="49" />
-    <XNAFontUV U="71" V="90" Width="12" C="50" />
-    <XNAFontUV U="71" V="106" Width="12" C="51" />
-    <XNAFontUV U="71" V="122" Width="12" C="52" />
-    <XNAFontUV U="71" V="138" Width="12" C="53" />
-    <XNAFontUV U="71" V="154" Width="12" C="54" />
-    <XNAFontUV U="71" V="170" Width="12" C="55" />
-    <XNAFontUV U="71" V="186" Width="12" C="56" />
-    <XNAFontUV U="71" V="202" Width="12" C="57" />
-    <XNAFontUV U="71" V="218" Width="12" C="48" />
-    <XNAFontUV U="71" V="234" Width="8" C="45" />
-    <XNAFontUV U="71" V="246" Width="9" C="61" />
-    <XNAFontUV U="94" V="5" Width="8" C="96" />
-    <XNAFontUV U="94" V="17" Width="13" C="126" />
-    <XNAFontUV U="94" V="34" Width="5" C="33" />
-    <XNAFontUV U="94" V="43" Width="22" C="64" />
-    <XNAFontUV U="94" V="69" Width="13" C="35" />
-    <XNAFontUV U="94" V="86" Width="12" C="36" />
-    <XNAFontUV U="94" V="102" Width="20" C="37" />
-    <XNAFontUV U="94" V="126" Width="11" C="94" />
-    <XNAFontUV U="94" V="141" Width="15" C="38" />
-    <XNAFontUV U="94" V="160" Width="6" C="42" />
-    <XNAFontUV U="94" V="170" Width="7" C="40" />
-    <XNAFontUV U="94" V="181" Width="7" C="41" />
-    <XNAFontUV U="94" V="192" Width="9" C="95" />
-    <XNAFontUV U="94" V="205" Width="10" C="43" />
-    <XNAFontUV U="94" V="219" Width="7" C="91" />
-    <XNAFontUV U="94" V="230" Width="7" C="93" />
-    <XNAFontUV U="94" V="241" Width="8" C="123" />
-    <XNAFontUV U="117" V="5" Width="8" C="125" />
-    <XNAFontUV U="117" V="17" Width="5" C="59" />
-    <XNAFontUV U="117" V="26" Width="5" C="39" />
-    <XNAFontUV U="117" V="35" Width="5" C="58" />
-    <XNAFontUV U="117" V="44" Width="7" C="34" />
-    <XNAFontUV U="117" V="55" Width="5" C="44" />
-    <XNAFontUV U="117" V="64" Width="5" C="46" />
-    <XNAFontUV U="117" V="73" Width="5" C="60" />
-    <XNAFontUV U="117" V="82" Width="5" C="62" />
-    <XNAFontUV U="117" V="91" Width="12" C="47" />
-    <XNAFontUV U="117" V="107" Width="11" C="63" />
-    <XNAFontUV U="117" V="122" Width="12" C="92" />
-    <XNAFontUV U="117" V="138" Width="5" C="124" />
-    <XNAFontUV U="117" V="147" Width="12" C="32" />
-  </UVList>
-  <FontFamily>LCD2</FontFamily>
-  <Height>22</Height>
-  <Kerning>0</Kerning>
+<XNAFont>
+    <UVList>
+        <XNAFontUV U="2" V="5" Width="12" C="97"/>
+        <XNAFontUV U="2" V="21" Width="12" C="98"/>
+        <XNAFontUV U="2" V="37" Width="12" C="99"/>
+        <XNAFontUV U="2" V="53" Width="12" C="100"/>
+        <XNAFontUV U="2" V="69" Width="11" C="101"/>
+        <XNAFontUV U="2" V="84" Width="11" C="102"/>
+        <XNAFontUV U="2" V="99" Width="12" C="103"/>
+        <XNAFontUV U="2" V="115" Width="12" C="104"/>
+        <XNAFontUV U="2" V="131" Width="5" C="105"/>
+        <XNAFontUV U="2" V="140" Width="12" C="106"/>
+        <XNAFontUV U="2" V="156" Width="12" C="107"/>
+        <XNAFontUV U="2" V="172" Width="11" C="108"/>
+        <XNAFontUV U="2" V="187" Width="12" C="109"/>
+        <XNAFontUV U="2" V="203" Width="12" C="110"/>
+        <XNAFontUV U="2" V="219" Width="12" C="111"/>
+        <XNAFontUV U="2" V="235" Width="12" C="112"/>
+        <XNAFontUV U="25" V="5" Width="12" C="113"/>
+        <XNAFontUV U="25" V="21" Width="12" C="114"/>
+        <XNAFontUV U="25" V="37" Width="12" C="115"/>
+        <XNAFontUV U="25" V="53" Width="11" C="116"/>
+        <XNAFontUV U="25" V="68" Width="12" C="117"/>
+        <XNAFontUV U="25" V="84" Width="12" C="118"/>
+        <XNAFontUV U="25" V="100" Width="12" C="119"/>
+        <XNAFontUV U="25" V="116" Width="12" C="120"/>
+        <XNAFontUV U="25" V="132" Width="12" C="121"/>
+        <XNAFontUV U="25" V="148" Width="10" C="122"/>
+        <XNAFontUV U="25" V="162" Width="12" C="65"/>
+        <XNAFontUV U="25" V="178" Width="12" C="66"/>
+        <XNAFontUV U="25" V="194" Width="12" C="67"/>
+        <XNAFontUV U="25" V="210" Width="12" C="68"/>
+        <XNAFontUV U="25" V="226" Width="11" C="69"/>
+        <XNAFontUV U="25" V="241" Width="11" C="70"/>
+        <XNAFontUV U="48" V="5" Width="12" C="71"/>
+        <XNAFontUV U="48" V="21" Width="12" C="72"/>
+        <XNAFontUV U="48" V="37" Width="5" C="73"/>
+        <XNAFontUV U="48" V="46" Width="12" C="74"/>
+        <XNAFontUV U="48" V="62" Width="12" C="75"/>
+        <XNAFontUV U="48" V="78" Width="11" C="76"/>
+        <XNAFontUV U="48" V="93" Width="19" C="77"/>
+        <XNAFontUV U="48" V="116" Width="12" C="78"/>
+        <XNAFontUV U="48" V="132" Width="12" C="79"/>
+        <XNAFontUV U="48" V="148" Width="12" C="80"/>
+        <XNAFontUV U="48" V="164" Width="12" C="81"/>
+        <XNAFontUV U="48" V="180" Width="12" C="82"/>
+        <XNAFontUV U="48" V="196" Width="12" C="83"/>
+        <XNAFontUV U="48" V="212" Width="11" C="84"/>
+        <XNAFontUV U="48" V="227" Width="12" C="85"/>
+        <XNAFontUV U="48" V="243" Width="12" C="86"/>
+        <XNAFontUV U="71" V="5" Width="19" C="87"/>
+        <XNAFontUV U="71" V="28" Width="12" C="88"/>
+        <XNAFontUV U="71" V="44" Width="12" C="89"/>
+        <XNAFontUV U="71" V="60" Width="10" C="90"/>
+        <XNAFontUV U="71" V="74" Width="12" C="49"/>
+        <XNAFontUV U="71" V="90" Width="12" C="50"/>
+        <XNAFontUV U="71" V="106" Width="12" C="51"/>
+        <XNAFontUV U="71" V="122" Width="12" C="52"/>
+        <XNAFontUV U="71" V="138" Width="12" C="53"/>
+        <XNAFontUV U="71" V="154" Width="12" C="54"/>
+        <XNAFontUV U="71" V="170" Width="12" C="55"/>
+        <XNAFontUV U="71" V="186" Width="12" C="56"/>
+        <XNAFontUV U="71" V="202" Width="12" C="57"/>
+        <XNAFontUV U="71" V="218" Width="12" C="48"/>
+        <XNAFontUV U="71" V="234" Width="8" C="45"/>
+        <XNAFontUV U="71" V="246" Width="9" C="61"/>
+        <XNAFontUV U="94" V="5" Width="8" C="96"/>
+        <XNAFontUV U="94" V="17" Width="13" C="126"/>
+        <XNAFontUV U="94" V="34" Width="5" C="33"/>
+        <XNAFontUV U="94" V="43" Width="22" C="64"/>
+        <XNAFontUV U="94" V="69" Width="13" C="35"/>
+        <XNAFontUV U="94" V="86" Width="12" C="36"/>
+        <XNAFontUV U="94" V="102" Width="20" C="37"/>
+        <XNAFontUV U="94" V="126" Width="11" C="94"/>
+        <XNAFontUV U="94" V="141" Width="15" C="38"/>
+        <XNAFontUV U="94" V="160" Width="6" C="42"/>
+        <XNAFontUV U="94" V="170" Width="7" C="40"/>
+        <XNAFontUV U="94" V="181" Width="7" C="41"/>
+        <XNAFontUV U="94" V="192" Width="9" C="95"/>
+        <XNAFontUV U="94" V="205" Width="10" C="43"/>
+        <XNAFontUV U="94" V="219" Width="7" C="91"/>
+        <XNAFontUV U="94" V="230" Width="7" C="93"/>
+        <XNAFontUV U="94" V="241" Width="8" C="123"/>
+        <XNAFontUV U="117" V="5" Width="8" C="125"/>
+        <XNAFontUV U="117" V="17" Width="5" C="59"/>
+        <XNAFontUV U="117" V="26" Width="5" C="39"/>
+        <XNAFontUV U="117" V="35" Width="5" C="58"/>
+        <XNAFontUV U="117" V="44" Width="7" C="34"/>
+        <XNAFontUV U="117" V="55" Width="5" C="44"/>
+        <XNAFontUV U="117" V="64" Width="5" C="46"/>
+        <XNAFontUV U="117" V="73" Width="5" C="60"/>
+        <XNAFontUV U="117" V="82" Width="5" C="62"/>
+        <XNAFontUV U="117" V="91" Width="12" C="47"/>
+        <XNAFontUV U="117" V="107" Width="11" C="63"/>
+        <XNAFontUV U="117" V="122" Width="12" C="92"/>
+        <XNAFontUV U="117" V="138" Width="5" C="124"/>
+        <XNAFontUV U="117" V="147" Width="12" C="32"/>
+    </UVList>
+    <FontFamily>LCD2</FontFamily>
+    <Height>22</Height>
+    <Kerning>0</Kerning>
 </XNAFont>

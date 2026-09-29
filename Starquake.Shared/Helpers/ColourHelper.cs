@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 using Microsoft.Xna.Framework;
 
-namespace StarquakeXNA.Helpers
-{
-    public class ColourHelper
-    {
-        public static Color GetXNA4Colour(int r, int g, int b, int a)
-        {
-            return new Color(r, g, b) * (float)((1f / 255f) * (float)a);
-        }
+namespace StarquakeXNA.Helpers;
 
-        public static Color GetXNA4Colour(int r, int g, int b)
-        {
-            return new Color(r, g, b) * 1;
-        }
-    }
+public class ColourHelper
+{
+    public static Color GetXNA4Colour(int r, int g, int b, int a)
+        => new Color(r, g, b) * (1f / 255f * a);
+
+    public static Color GetXNA4Colour(int r, int g, int b)
+        => new Color(r, g, b) * 1;
 }

@@ -1,4 +1,8 @@
-﻿using System;
+﻿// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -9,13 +13,24 @@ namespace StarquakeXNA.Sounds;
 
 public class SoundEffectEngine(GameEngine GameEngineInstance) : IDisposable
 {
-    private readonly Dictionary<string, MultiInstanceSoundEffect> _multiInstanceSoundEffects = new();
 
     private readonly List<SoundEffectInstanceRecord> _multiInstanceSoundEffectInstances = [];
+    private readonly Dictionary<string, MultiInstanceSoundEffect> _multiInstanceSoundEffects = new();
     private readonly List<SoundEffectInstanceRecord> _singleInstanceSoundEffectInstances = [];
     private bool _periodicBackgroundSoundsEnabled;
     private Guid _periodicBackgroundSoundsId = Guid.Empty;
     private Timer _periodicSoundTimer;
+
+    public void Dispose()
+    {
+        if (_periodicSoundTimer == null)
+        {
+            return;
+        }
+
+        _periodicSoundTimer.Dispose();
+        _periodicSoundTimer = null;
+    }
 
     public void LoadSoundEffect(SoundDescription SoundDesc)
     {
@@ -74,7 +89,7 @@ public class SoundEffectEngine(GameEngine GameEngineInstance) : IDisposable
         _periodicBackgroundSoundsEnabled = false;
     }
 
-    void PlayPeriodicSound(object state)
+    private void PlayPeriodicSound(object state)
     {
         if (GetSoundState(_periodicBackgroundSoundsId) == SoundState.Playing)
         {
@@ -87,7 +102,7 @@ public class SoundEffectEngine(GameEngine GameEngineInstance) : IDisposable
     }
 
     /// <summary>
-    /// Kills all sounds currently playing
+    ///     Kills all sounds currently playing
     /// </summary>
     public void KillSounds(bool Paused)
     {
@@ -207,14 +222,10 @@ public class SoundEffectEngine(GameEngine GameEngineInstance) : IDisposable
     }
 
     public Guid PlaySound(string SoundName, bool Looped)
-    {
-        return PlaySound(SoundName, 1F, Looped);
-    }
+        => PlaySound(SoundName, 1F, Looped);
 
     public Guid PlaySound(string SoundName, float Volume)
-    {
-        return PlaySound(SoundName, Volume, false);
-    }
+        => PlaySound(SoundName, Volume, false);
 
     public Guid PlaySound(string SoundName, float Volume, bool Looped)
     {
@@ -346,9 +357,7 @@ public class SoundEffectEngine(GameEngine GameEngineInstance) : IDisposable
     }
 
     public Guid PlaySound(string SoundName)
-    {
-        return PlaySound(SoundName, 1, false);
-    }
+        => PlaySound(SoundName, 1, false);
 
     private SoundState GetSoundState(Guid Id)
     {
@@ -356,16 +365,5 @@ public class SoundEffectEngine(GameEngine GameEngineInstance) : IDisposable
             .FirstOrDefault(sfx => sfx.Id == Id);
 
         return soundEffectInstanceRecord != null ? soundEffectInstanceRecord.SoundInstance.State : SoundState.Stopped;
-    }
-
-    public void Dispose()
-    {
-        if (_periodicSoundTimer == null)
-        {
-            return;
-        }
-
-        _periodicSoundTimer.Dispose();
-        _periodicSoundTimer = null;
     }
 }

@@ -1,138 +1,102 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
+namespace StarquakeXNA;
 
-namespace StarquakeXNA
+public class Animation
 {
-    public class Animation
+
+    private int currentFrame;
+
+    private int delayCounter;
+
+    public int FirstFrame { get; set; }
+
+    public int LastFrame { get; set; }
+
+    public int Delay { get; set; }
+
+    public bool Yoyo { get; set; }
+
+    public bool Repeat { get; set; }
+
+    public bool Finished { get; set; }
+
+    public bool AnimateForwards { get; set; }
+
+    public int CurrentFrame
     {
-        int firstFrame;
-        public int FirstFrame
+        get => currentFrame;
+        set
         {
-            get { return firstFrame; }
-            set { firstFrame = value; }
+            currentFrame = value;
+            delayCounter = 0;
         }
+    }
 
-        int lastFrame;
-        public int LastFrame
+    public void GetNextFrame()
+    {
+        if (delayCounter > Delay)
         {
-            get { return lastFrame; }
-            set { lastFrame = value; }
-        }
+            delayCounter = 0;
 
-        int delay;
-        public int Delay
-        {
-            get { return delay; }
-            set { delay = value; }
-        }
-
-        bool yoyo;
-        public bool Yoyo
-        {
-            get { return yoyo; }
-            set { yoyo = value; }
-        }
-
-        bool repeat;
-        public bool Repeat
-        {
-            get { return repeat; }
-            set { repeat = value; }
-        }
-
-        bool finished;
-        public bool Finished
-        {
-
-            get { return finished; }
-            set { finished = value; }
-        }
-
-        bool animateForwards;
-        public bool AnimateForwards
-        {
-            get { return animateForwards; }
-            set { animateForwards = value; }
-        }
-        
-        int currentFrame = 0;
-        public int CurrentFrame
-        {
-            get { return currentFrame; }
-            set 
-            { 
-                currentFrame = value;
-                delayCounter = 0;
-            }
-        }
-
-        int delayCounter = 0;
-
-        public void GetNextFrame()
-        {
-            if (delayCounter > delay)
+            if (AnimateForwards)
             {
-                delayCounter = 0;
-
-                if (AnimateForwards)
+                if (currentFrame < LastFrame)
                 {
-                    if (currentFrame < LastFrame)
-                    {
-                        currentFrame++;
-                    }
-                    else
-                    {
-                        if (repeat)
-                        {
-
-                            if (yoyo)
-                            {
-                                AnimateForwards = false;
-                            }
-                            else
-                            {
-                                currentFrame = FirstFrame;
-                            }
-                        }
-                        else
-                        {
-                            finished = true;
-                        }
-                    }
+                    currentFrame++;
                 }
                 else
                 {
-                    if (currentFrame > FirstFrame)
+                    if (Repeat)
                     {
-                        currentFrame--;
-                    }
-                    else
-                    {
-                        if (repeat)
-                        {
 
-                            if (yoyo)
-                            {
-                                AnimateForwards = true;
-                            }
-                            else
-                            {
-                                currentFrame = LastFrame;
-                            }
+                        if (Yoyo)
+                        {
+                            AnimateForwards = false;
                         }
                         else
                         {
-                            finished = true;
+                            currentFrame = FirstFrame;
                         }
+                    }
+                    else
+                    {
+                        Finished = true;
                     }
                 }
             }
             else
             {
-                delayCounter++;
+                if (currentFrame > FirstFrame)
+                {
+                    currentFrame--;
+                }
+                else
+                {
+                    if (Repeat)
+                    {
+
+                        if (Yoyo)
+                        {
+                            AnimateForwards = true;
+                        }
+                        else
+                        {
+                            currentFrame = LastFrame;
+                        }
+                    }
+                    else
+                    {
+                        Finished = true;
+                    }
+                }
             }
         }
-
+        else
+        {
+            delayCounter++;
+        }
     }
 }

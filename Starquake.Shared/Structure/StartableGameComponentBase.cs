@@ -1,39 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 using Microsoft.Xna.Framework.Content;
-using System.Threading;
-using StarquakeXNA.Structure;
 
 namespace StarquakeXNA.Structure;
 
 public class StartableGameComponentBase
 {
-    public event RaiseEngineComponentStatusChanged OnGameComponentStatusChanged;
-    protected GameEngine gameEngineInstance;
     protected ContentManager contentManagerInstance;
-
-    protected GameEngineStatus status;
-
-    public GameEngineStatus Status
-    {
-        get { return status; }
-    }
-
-    protected string statusMessage;
-
-    public string StatusMessage
-    {
-        get { return statusMessage; }
-    }
+    protected GameEngine gameEngineInstance;
 
     protected int percentComplete;
 
-    public int PercentComplete
-    {
-        get { return percentComplete; }
-    }
+    protected GameEngineStatus status;
+
+    protected string statusMessage;
 
     public StartableGameComponentBase()
     {
@@ -46,6 +28,13 @@ public class StartableGameComponentBase
         contentManagerInstance = GameEngineInstance.ContentMgr;
         status = GameEngineStatus.NotStarted;
     }
+
+    public GameEngineStatus Status => status;
+
+    public string StatusMessage => statusMessage;
+
+    public int PercentComplete => percentComplete;
+    public event RaiseEngineComponentStatusChanged OnGameComponentStatusChanged;
 
     protected void UpdateStatus(string StatusMessage, int PercentComplete, GameEngineStatus Status)
     {

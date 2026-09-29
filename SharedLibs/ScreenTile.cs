@@ -1,3 +1,7 @@
+// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 using MessagePack;
 
 namespace SharedLibs;
@@ -5,8 +9,6 @@ namespace SharedLibs;
 [MessagePackObject]
 public class ScreenTile
 {
-    [Key(0)]
-    public int TileImage { get; set; }
 
     public ScreenTile()
     {
@@ -16,4 +18,6 @@ public class ScreenTile
     {
         TileImage = tileImage;
     }
+    [Key(0)]
+    public int TileImage { get; set; }
 }

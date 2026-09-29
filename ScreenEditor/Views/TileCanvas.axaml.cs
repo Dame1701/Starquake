@@ -1,3 +1,7 @@
+// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
@@ -9,41 +13,50 @@ namespace ScreenEditor.Views;
 
 public partial class TileCanvas : UserControl
 {
-    private Point _mouseCoords;
-    
-    private int _scrollValue;
-    
-    private bool _showGrid;
-
-    private Bitmap? _tileSet;
-    private int _tileCount;
-    private int _tilesToDrawAcross;
-    private int _tilesToDrawDown;
-    private bool _mouseOnCanvas;
-    
-    public int SelectedTile { get; set; }
 
     public static readonly DirectProperty<TileCanvas, int> ScrollMaxProperty =
         AvaloniaProperty.RegisterDirect<TileCanvas, int>(
             nameof(ScrollMax),
-            o => o.ScrollMax,         
+            o => o.ScrollMax,
             (o, v) => o.ScrollMax = v,
             defaultBindingMode: BindingMode.TwoWay);
-    
+
     public static readonly DirectProperty<TileCanvas, int> ScrollValueProperty =
         AvaloniaProperty.RegisterDirect<TileCanvas, int>(
             nameof(ScrollValue),
-            o => o.ScrollValue,         
+            o => o.ScrollValue,
             (o, v) => o.ScrollValue = v,
             defaultBindingMode: BindingMode.TwoWay);
-    
+    private Point _mouseCoords;
+    private bool _mouseOnCanvas;
+
     private int _scrollMax;
+
+    private int _scrollValue;
+
+    private bool _showGrid;
+    private int _tileCount;
+
+    private Bitmap? _tileSet;
+    private int _tilesToDrawAcross;
+    private int _tilesToDrawDown;
+
+    public TileCanvas()
+    {
+        InitializeComponent();
+        TileSize = new Size(128, 96);
+        //DataContext = this;
+        ScrollMax = 130;
+    }
+
+    public int SelectedTile { get; set; }
+
     public int ScrollMax
     {
         get => _scrollMax;
         set => SetAndRaise(ScrollMaxProperty, ref _scrollMax, value);
     }
-    
+
     public int ScrollValue
     {
         get => _scrollValue;
@@ -54,7 +67,7 @@ public partial class TileCanvas : UserControl
             InvalidateVisual();
         }
     }
-    
+
     public Bitmap? TileSet
     {
         get => _tileSet;
@@ -71,13 +84,13 @@ public partial class TileCanvas : UserControl
             InvalidateVisual();
         }
     }
-    
+
     public Size TileSize
     {
-        get; 
+        get;
         set;
     }
-    
+
     public bool ShowGrid
     {
         get => _showGrid;
@@ -89,14 +102,6 @@ public partial class TileCanvas : UserControl
     }
 
     public int TilesDown { get; set; }
-    
-    public TileCanvas()
-    {
-        InitializeComponent();
-        TileSize = new Size(128, 96);
-        //DataContext = this;
-        ScrollMax = 130;
-    }
 
     public override void Render(DrawingContext context)
     {

@@ -1,3 +1,7 @@
+// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -6,7 +10,7 @@ using ScreenEditor.Views;
 
 namespace ScreenEditor;
 
-public partial class App : Application
+public class App : Application
 {
     public override void Initialize()
     {

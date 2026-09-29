@@ -1,96 +1,96 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <XnaContent xmlns:Modifiers="ProjectMercury.Modifiers">
-  <Asset Type="ProjectMercury.ParticleEffect">
-    <Item>
-      <Name>Text Emitter 1</Name>
-      <Budget>5000</Budget>
-      <Term>1</Term>
-      <ReleaseQuantity>10</ReleaseQuantity>
-      <Enabled>true</Enabled>
-      <ReleaseSpeed>
-        <Value>400</Value>
-        <Variation>25</Variation>
-      </ReleaseSpeed>
-      <ReleaseColour>
-        <Value>0 0.2 0.5</Value>
-        <Variation>0 0 0</Variation>
-      </ReleaseColour>
-      <ReleaseOpacity>
-        <Value>1</Value>
-        <Variation>0</Variation>
-      </ReleaseOpacity>
-      <ReleaseScale>
-        <Value>110</Value>
-        <Variation>10</Variation>
-      </ReleaseScale>
-      <ReleaseRotation>
-        <Value>0</Value>
-        <Variation>0</Variation>
-      </ReleaseRotation>
-      <ReleaseImpulse>10 10</ReleaseImpulse>
-      <ParticleTextureAssetName>Textures\BinaryTexture2</ParticleTextureAssetName>
-      <Modifiers>
-        <Item Type="Modifiers:OpacityInterpolatorModifier">
-          <InitialOpacity>0</InitialOpacity>
-          <MiddleOpacity>0.5</MiddleOpacity>
-          <MiddlePosition>0.5</MiddlePosition>
-          <FinalOpacity>0</FinalOpacity>
+    <Asset Type="ProjectMercury.ParticleEffect">
+        <Item>
+            <Name>Text Emitter 1</Name>
+            <Budget>5000</Budget>
+            <Term>1</Term>
+            <ReleaseQuantity>10</ReleaseQuantity>
+            <Enabled>true</Enabled>
+            <ReleaseSpeed>
+                <Value>400</Value>
+                <Variation>25</Variation>
+            </ReleaseSpeed>
+            <ReleaseColour>
+                <Value>0 0.2 0.5</Value>
+                <Variation>0 0 0</Variation>
+            </ReleaseColour>
+            <ReleaseOpacity>
+                <Value>1</Value>
+                <Variation>0</Variation>
+            </ReleaseOpacity>
+            <ReleaseScale>
+                <Value>110</Value>
+                <Variation>10</Variation>
+            </ReleaseScale>
+            <ReleaseRotation>
+                <Value>0</Value>
+                <Variation>0</Variation>
+            </ReleaseRotation>
+            <ReleaseImpulse>10 10</ReleaseImpulse>
+            <ParticleTextureAssetName>Textures\BinaryTexture2</ParticleTextureAssetName>
+            <Modifiers>
+                <Item Type="Modifiers:OpacityInterpolatorModifier">
+                    <InitialOpacity>0</InitialOpacity>
+                    <MiddleOpacity>0.5</MiddleOpacity>
+                    <MiddlePosition>0.5</MiddlePosition>
+                    <FinalOpacity>0</FinalOpacity>
+                </Item>
+                <Item Type="Modifiers:ColourModifier">
+                    <InitialColour>0 0.5 1</InitialColour>
+                    <UltimateColour>0.5019608 0.5019608 0.5019608</UltimateColour>
+                </Item>
+            </Modifiers>
+            <BlendMode>Alpha</BlendMode>
+            <TriggerOffset>0 0</TriggerOffset>
+            <MinimumTriggerPeriod>0.4</MinimumTriggerPeriod>
         </Item>
-        <Item Type="Modifiers:ColourModifier">
-          <InitialColour>0 0.5 1</InitialColour>
-          <UltimateColour>0.5019608 0.5019608 0.5019608</UltimateColour>
+        <Item>
+            <Name>Text Emitter 2</Name>
+            <Budget>5000</Budget>
+            <Term>1</Term>
+            <ReleaseQuantity>10</ReleaseQuantity>
+            <Enabled>true</Enabled>
+            <ReleaseSpeed>
+                <Value>400</Value>
+                <Variation>25</Variation>
+            </ReleaseSpeed>
+            <ReleaseColour>
+                <Value>0 0.6 1</Value>
+                <Variation>0 0 0</Variation>
+            </ReleaseColour>
+            <ReleaseOpacity>
+                <Value>1</Value>
+                <Variation>0</Variation>
+            </ReleaseOpacity>
+            <ReleaseScale>
+                <Value>110</Value>
+                <Variation>16</Variation>
+            </ReleaseScale>
+            <ReleaseRotation>
+                <Value>0</Value>
+                <Variation>0</Variation>
+            </ReleaseRotation>
+            <ReleaseImpulse>0 0</ReleaseImpulse>
+            <ParticleTextureAssetName>Textures\BinaryTexture1</ParticleTextureAssetName>
+            <Modifiers>
+                <Item Type="Modifiers:OpacityInterpolatorModifier">
+                    <InitialOpacity>0</InitialOpacity>
+                    <MiddleOpacity>0.5</MiddleOpacity>
+                    <MiddlePosition>0.5</MiddlePosition>
+                    <FinalOpacity>0</FinalOpacity>
+                </Item>
+                <Item Type="Modifiers:ColourModifier">
+                    <InitialColour>0 0 1</InitialColour>
+                    <UltimateColour>0.2509804 0.2509804 0.2509804</UltimateColour>
+                </Item>
+            </Modifiers>
+            <BlendMode>Alpha</BlendMode>
+            <TriggerOffset>0 0</TriggerOffset>
+            <MinimumTriggerPeriod>0.4</MinimumTriggerPeriod>
         </Item>
-      </Modifiers>
-      <BlendMode>Alpha</BlendMode>
-      <TriggerOffset>0 0</TriggerOffset>
-      <MinimumTriggerPeriod>0.4</MinimumTriggerPeriod>
-    </Item>
-    <Item>
-      <Name>Text Emitter 2</Name>
-      <Budget>5000</Budget>
-      <Term>1</Term>
-      <ReleaseQuantity>10</ReleaseQuantity>
-      <Enabled>true</Enabled>
-      <ReleaseSpeed>
-        <Value>400</Value>
-        <Variation>25</Variation>
-      </ReleaseSpeed>
-      <ReleaseColour>
-        <Value>0 0.6 1</Value>
-        <Variation>0 0 0</Variation>
-      </ReleaseColour>
-      <ReleaseOpacity>
-        <Value>1</Value>
-        <Variation>0</Variation>
-      </ReleaseOpacity>
-      <ReleaseScale>
-        <Value>110</Value>
-        <Variation>16</Variation>
-      </ReleaseScale>
-      <ReleaseRotation>
-        <Value>0</Value>
-        <Variation>0</Variation>
-      </ReleaseRotation>
-      <ReleaseImpulse>0 0</ReleaseImpulse>
-      <ParticleTextureAssetName>Textures\BinaryTexture1</ParticleTextureAssetName>
-      <Modifiers>
-        <Item Type="Modifiers:OpacityInterpolatorModifier">
-          <InitialOpacity>0</InitialOpacity>
-          <MiddleOpacity>0.5</MiddleOpacity>
-          <MiddlePosition>0.5</MiddlePosition>
-          <FinalOpacity>0</FinalOpacity>
-        </Item>
-        <Item Type="Modifiers:ColourModifier">
-          <InitialColour>0 0 1</InitialColour>
-          <UltimateColour>0.2509804 0.2509804 0.2509804</UltimateColour>
-        </Item>
-      </Modifiers>
-      <BlendMode>Alpha</BlendMode>
-      <TriggerOffset>0 0</TriggerOffset>
-      <MinimumTriggerPeriod>0.4</MinimumTriggerPeriod>
-    </Item>
-    <Name>Particle Effect</Name>
-    <Author>Matt Davey</Author>
-    <Description />
-  </Asset>
+        <Name>Particle Effect</Name>
+        <Author>Matt Davey</Author>
+        <Description/>
+    </Asset>
 </XnaContent>

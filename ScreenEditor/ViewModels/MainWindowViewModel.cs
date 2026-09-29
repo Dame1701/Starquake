@@ -1,3 +1,7 @@
+// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -15,6 +19,19 @@ public class MainWindowViewModel : INotifyPropertyChanged
 {
     private Bitmap? _tileSet;
 
+    public MainWindowViewModel()
+    {
+        NewMapDataCommand = ReactiveCommand.Create(NewMapDataAction);
+
+        LoadMapDataAsyncCommand = ReactiveCommand.CreateFromTask(LoadMapDataAsyncAction);
+
+        SaveMapDataAsyncCommand = ReactiveCommand.CreateFromTask(SaveMapDataAsyncAction);
+
+        LoadTileSetAsyncCommand = ReactiveCommand.CreateFromTask(LoadTileSetAsyncAction);
+
+        ShowGridToggleCommand = ReactiveCommand.Create<bool>(ShowGridToggleAction);
+    }
+
     public Bitmap? TileSet
     {
         get => _tileSet;
@@ -25,50 +42,37 @@ public class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
+    public ICommand NewMapDataCommand { get; }
+
+    public ICommand LoadMapDataAsyncCommand { get; }
+    public ICommand SaveMapDataAsyncCommand { get; }
+
+    public ICommand LoadTileSetAsyncCommand { get; }
+
+    public ICommand ShowGridToggleCommand { get; }
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
-    
-    public ICommand NewMapDataCommand { get; }
-
-    public ICommand LoadMapDataAsyncCommand { get; }
-    public ICommand SaveMapDataAsyncCommand { get; }
-    
-    public ICommand LoadTileSetAsyncCommand { get; }
-    
-    public ICommand ShowGridToggleCommand { get; }
-    
-    public MainWindowViewModel()
-    {
-        NewMapDataCommand = ReactiveCommand.Create(NewMapDataAction);
-        
-        LoadMapDataAsyncCommand = ReactiveCommand.CreateFromTask(LoadMapDataAsyncAction);
-        
-        SaveMapDataAsyncCommand = ReactiveCommand.CreateFromTask(SaveMapDataAsyncAction);
-        
-        LoadTileSetAsyncCommand = ReactiveCommand.CreateFromTask(LoadTileSetAsyncAction);
-        
-        ShowGridToggleCommand = ReactiveCommand.Create<bool>(ShowGridToggleAction);
-    }
 
     private void NewMapDataAction()
     {
-        
+
     }
 
     private async Task LoadMapDataAsyncAction()
     {
-        
+
     }
-    
+
     private async Task SaveMapDataAsyncAction()
     {
-        
+
     }
-    
+
     private async Task LoadTileSetAsyncAction()
     {
         var applicationLifetime = Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
@@ -76,11 +80,11 @@ public class MainWindowViewModel : INotifyPropertyChanged
         {
             throw new Exception("Main Window is null");
         }
-        
+
         var files = await applicationLifetime.MainWindow.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Open PNG File",
-            AllowMultiple = false, 
+            AllowMultiple = false,
             FileTypeFilter = [FilePickerFileTypes.ImagePng]
         });
 
@@ -90,10 +94,10 @@ public class MainWindowViewModel : INotifyPropertyChanged
             TileSet = new Bitmap(files[0].TryGetLocalPath());
         }
     }
-    
+
     private void ShowGridToggleAction(bool isChecked)
     {
-        
+
     }
 }
 
@@ -142,7 +146,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
                           // Calculate tile count
                           tileCount = (tileSet.Width / tileSize.Width) * (tileSet.Height / tileSize.Height);
-                         
+
                           if (screenCollisionDataArray !=null)
                           {
                               int CollisionMapsToAdd = (tileSize.Width / 32) * (tileSize.Height / 32) * ((tileCount - 1) - screenCollisionDataArray.GetUpperBound(0));

@@ -1,41 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 using Microsoft.Xna.Framework;
 
-namespace StarquakeXNA.GameComponents
+namespace StarquakeXNA.GameComponents;
+
+public class GameScreenBase : GameComponentBase
 {
-    public class GameScreenBase : GameComponentBase
+    protected int screenFade;
+    protected int screenFadeSpeed;
+
+    public GameScreenBase(GameEngine GameEngineReference)
+        : base(GameEngineReference)
     {
-        protected int screenFadeSpeed;
-        protected int screenFade;
+        //screenFade = 0;
+        // screenFadeSpeed = 5;
+    }
 
-        public int ScreenFade
+    public int ScreenFade
+    {
+        get => screenFade;
+        set => screenFade = value;
+    }
+
+    public override void Update(GameTime gameTime)
+    {
+        // Fade screen back up
+        if (screenFade < 255)
         {
-            get { return screenFade; }
-            set { screenFade = value; }
+            screenFade = screenFade + screenFadeSpeed;
         }
 
-        public GameScreenBase(GameEngine GameEngineReference)
-            : base(GameEngineReference)
+        if (screenFade > 255)
         {
-            //screenFade = 0;
-           // screenFadeSpeed = 5;
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-            // Fade screen back up
-            if (screenFade < 255)
-            {
-                screenFade = screenFade + screenFadeSpeed;
-            }
-
-            if (screenFade > 255)
-            {
-                screenFade = 255;
-            }
+            screenFade = 255;
         }
     }
 }

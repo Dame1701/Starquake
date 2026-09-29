@@ -1,4 +1,8 @@
-﻿/*
+﻿// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
+/*
 using System.Drawing;
 
 namespace StarquakeXNA
@@ -9,8 +13,8 @@ namespace StarquakeXNA
         public int Value
         {
             get { return this.value; }
-            set 
-            { 
+            set
+            {
                 this.value = value;
                 this.Invalidate();
             }
@@ -20,8 +24,8 @@ namespace StarquakeXNA
         public Color ColourGradient1
         {
             get { return colourGradient1; }
-            set 
-            { 
+            set
+            {
                 colourGradient1 = value;
                 Invalidate();
             }
@@ -31,8 +35,8 @@ namespace StarquakeXNA
         public Color ColourGradient2
         {
             get { return colourGradient2; }
-            set 
-            { 
+            set
+            {
                 colourGradient2 = value;
                 Invalidate();
             }

@@ -1,12 +1,16 @@
+// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 using Microsoft.Xna.Framework.Audio;
 
 namespace StarquakeXNA;
 
 public class MultiInstanceSoundEffect
 {
-    public SoundEffect Sound;
-    public int MaxInstances;
     public bool KillOnScreenChange;
+    public int MaxInstances;
+    public SoundEffect Sound;
 
     public MultiInstanceSoundEffect(SoundEffect sound, int maxInstances, bool killOnScreenChange)
     {

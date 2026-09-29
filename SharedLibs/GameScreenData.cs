@@ -1,3 +1,7 @@
+// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 using MessagePack;
 
 namespace SharedLibs;
@@ -5,28 +9,6 @@ namespace SharedLibs;
 [MessagePackObject]
 public sealed class GameScreenData
 {
-    [Key(0)]
-    public ScreenTile[,]? ScreenTiles { get; set; }
-
-    [Key(1)]
-    public List<CollisionTile>? CollisionMap { get; set; }
-
-    [IgnoreMember]
-    public bool KeepNastiesTheSame { get; set; }
-    
-    [IgnoreMember]
-    public InteractiveItem? PowerUp { get; set; }
-
-    [IgnoreMember]
-    public InteractiveItem? CheopsPyramid { get; set; }
-
-    [IgnoreMember] public List<InteractiveItem> PickUps { get; set; } = [];
-
-    [IgnoreMember] public string? AccessCode { get; set; }
-
-    [IgnoreMember] public string? CheopsAccessCode { get; set; }
-
-    [IgnoreMember] public bool ScreenVisited { get; set; }
 
     public GameScreenData()
     {
@@ -43,4 +25,26 @@ public sealed class GameScreenData
             }
         }
     }
+    [Key(0)]
+    public ScreenTile[,]? ScreenTiles { get; set; }
+
+    [Key(1)]
+    public List<CollisionTile>? CollisionMap { get; set; }
+
+    [IgnoreMember]
+    public bool KeepNastiesTheSame { get; set; }
+
+    [IgnoreMember]
+    public InteractiveItem? PowerUp { get; set; }
+
+    [IgnoreMember]
+    public InteractiveItem? CheopsPyramid { get; set; }
+
+    [IgnoreMember] public List<InteractiveItem> PickUps { get; set; } = [];
+
+    [IgnoreMember] public string? AccessCode { get; set; }
+
+    [IgnoreMember] public string? CheopsAccessCode { get; set; }
+
+    [IgnoreMember] public bool ScreenVisited { get; set; }
 }

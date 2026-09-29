@@ -1,3 +1,7 @@
+// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 namespace StarquakeXNA.Structure;
 
 public enum GameEngineStatus
@@ -7,5 +11,5 @@ public enum GameEngineStatus
     Starting,
     ContentLoaded,
     Started,
-    StartGame,
+    StartGame
 }

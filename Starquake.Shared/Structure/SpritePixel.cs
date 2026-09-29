@@ -1,83 +1,80 @@
-﻿using Microsoft.Xna.Framework;
+﻿// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
+using Microsoft.Xna.Framework;
 using StarquakeXNA;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace Starquake_MonoGame.Structure
+namespace Starquake_MonoGame.Structure;
+
+public class SpritePixel
 {
-    public class SpritePixel
+    public SpritePixel()
     {
-        public SpritePixel()
-        {
-            IsOn = true;
-            Colour = Color.White;
-        }
-        public bool IsOn { get; set; }
+        IsOn = true;
+        Colour = Color.White;
+    }
+    public bool IsOn { get; set; }
 
-        public Color Colour { get; set; }
+    public Color Colour { get; set; }
+}
+
+public class SpritePixelMatrix
+{
+
+    public SpritePixelMatrix(int Size)
+    {
+        Matrix = new SpritePixel[Size];
+
+        for (var a = 0; a < Matrix.Length; a++)
+        {
+            if (Matrix[a] == null)
+            {
+                Matrix[a] = new SpritePixel
+                {
+                    IsOn = true
+                };
+            }
+        }
     }
 
-    public class SpritePixelMatrix
+    public SpritePixel[] Matrix { get; }
+
+    public bool Finished
     {
-        SpritePixel[] matrix;
-
-        public SpritePixel[] Matrix
+        get
         {
-            get { return matrix; }
-        }
-
-        public SpritePixelMatrix(int Size)
-        {
-            matrix = new SpritePixel[Size];
-
-            for (int a = 0; a < matrix.Length; a++)
+            for (var a = 0; a < Matrix.Length; a++)
             {
-                if (matrix[a] == null)
+                if (Matrix[a].IsOn)
                 {
-                    matrix[a] = new SpritePixel() { IsOn = true };
+                    return false;
                 }
             }
-        }
 
-        public bool Finished
+            return true;
+        }
+    }
+
+    public void SetPixel(int Index, Color Colour)
+    {
+        Matrix[Index].IsOn = false;
+        Matrix[Index].Colour = Colour;
+    }
+
+    public void SetRandomPixel(Color Colour)
+    {
+        if (!Finished)
         {
-            get
+            SpritePixel p = null;
+
+            do
             {
-                for (int a = 0; a < matrix.Length; a++)
-                {
-                    if (matrix[a].IsOn)
-                    {
-                        return false;
-                    }
-                }
+                p = Matrix[GameEngine.GetInstance().RandomNumberGenerator.Next(0, Matrix.Length)];
+            } while (p.Colour != Color.White);
 
-                return true;
-            }
-        }
-
-        public void SetPixel(int Index, Color Colour)
-        {
-            matrix[Index].IsOn = false;
-            matrix[Index].Colour = Colour;
-        }
-
-        public void SetRandomPixel(Color Colour)
-        {
-            if (!Finished)
-            {
-                SpritePixel p = null;
-
-                do
-                {
-                    p = matrix[GameEngine.GetInstance().RandomNumberGenerator.Next(0, matrix.Length)];
-                }
-                while (p.Colour != Color.White);
-
-                p.Colour = Colour;
-                p.IsOn = false;
-            }
+            p.Colour = Colour;
+            p.IsOn = false;
         }
     }
 }

@@ -1,8 +1,8 @@
-﻿namespace StarquakeXNA;
-
-
-
-
+﻿// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
+namespace StarquakeXNA;
 
 public enum enCollectables
 {
@@ -14,7 +14,7 @@ public enum enCollectables
 public enum enTileType
 {
     ElectricityNode = 394,
-    ElectricityGate = 406,
+    ElectricityGate = 406
 }
 
 public enum enDirection
@@ -27,7 +27,7 @@ public enum enDirection
     DownLeft,
     UpRight,
     DownRight,
-    None,
+    None
 }
 
 public enum enNastyType
@@ -59,7 +59,7 @@ public enum enNastyState
     Birth,
     Normal,
     Shot,
-    Dead,
+    Dead
 }
 
 public enum enBlobState
@@ -68,18 +68,18 @@ public enum enBlobState
     Overloading,
     Dead,
     Dying,
-    Gameover,
+    Gameover
 }
 
 public enum enActionEvent
 {
-    Teleported,
+    Teleported
 }
 
 public enum enNastyInterationType
 {
     HitBlob,
-    BlobShot,
+    BlobShot
 }
 
 public enum enActionTiles
@@ -98,7 +98,7 @@ public enum enActionTiles
     BlankFiller = 390,
     ConveyerNasty = 391,
     BreakableBridges = 410,
-    PreferredCoreLocation = 392,
+    PreferredCoreLocation = 392
 }
 
 public enum enGameScreen
@@ -114,14 +114,14 @@ public enum enGameScreen
     TestScreen,
     HiScores,
     GameOver,
-    GameComplete,
+    GameComplete
 }
 
 public enum enBlobAction
 {
     LaidPlatform,
     FiredLazer,
-    GotPowerUp,
+    GotPowerUp
 }
 
 public enum enSoundEffectInstanceType

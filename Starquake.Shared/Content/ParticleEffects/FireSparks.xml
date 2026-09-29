@@ -1,102 +1,102 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <XnaContent xmlns:Modifiers="ProjectMercury.Modifiers">
-  <Asset Type="ProjectMercury.ParticleEffect">
-    <Item>
-      <Name>Sparks1</Name>
-      <Budget>2000</Budget>
-      <Term>0.5</Term>
-      <ReleaseQuantity>5</ReleaseQuantity>
-      <Enabled>true</Enabled>
-      <ReleaseSpeed>
-        <Value>100</Value>
-        <Variation>50</Variation>
-      </ReleaseSpeed>
-      <ReleaseColour>
-        <Value>1 1 1</Value>
-        <Variation>0 0 0</Variation>
-      </ReleaseColour>
-      <ReleaseOpacity>
-        <Value>1</Value>
-        <Variation>0</Variation>
-      </ReleaseOpacity>
-      <ReleaseScale>
-        <Value>40</Value>
-        <Variation>20</Variation>
-      </ReleaseScale>
-      <ReleaseRotation>
-        <Value>0</Value>
-        <Variation>0</Variation>
-      </ReleaseRotation>
-      <ReleaseImpulse>50 0</ReleaseImpulse>
-		<ParticleTextureAssetName>Textures\Star</ParticleTextureAssetName>
-      <Modifiers>
-        <Item Type="Modifiers:OpacityModifier">
-          <Initial>1</Initial>
-          <Ultimate>0</Ultimate>
+    <Asset Type="ProjectMercury.ParticleEffect">
+        <Item>
+            <Name>Sparks1</Name>
+            <Budget>2000</Budget>
+            <Term>0.5</Term>
+            <ReleaseQuantity>5</ReleaseQuantity>
+            <Enabled>true</Enabled>
+            <ReleaseSpeed>
+                <Value>100</Value>
+                <Variation>50</Variation>
+            </ReleaseSpeed>
+            <ReleaseColour>
+                <Value>1 1 1</Value>
+                <Variation>0 0 0</Variation>
+            </ReleaseColour>
+            <ReleaseOpacity>
+                <Value>1</Value>
+                <Variation>0</Variation>
+            </ReleaseOpacity>
+            <ReleaseScale>
+                <Value>40</Value>
+                <Variation>20</Variation>
+            </ReleaseScale>
+            <ReleaseRotation>
+                <Value>0</Value>
+                <Variation>0</Variation>
+            </ReleaseRotation>
+            <ReleaseImpulse>50 0</ReleaseImpulse>
+            <ParticleTextureAssetName>Textures\Star</ParticleTextureAssetName>
+            <Modifiers>
+                <Item Type="Modifiers:OpacityModifier">
+                    <Initial>1</Initial>
+                    <Ultimate>0</Ultimate>
+                </Item>
+                <Item Type="Modifiers:LinearGravityModifier">
+                    <Gravity>0 1000</Gravity>
+                </Item>
+                <Item Type="Modifiers:ColourInterpolatorModifier">
+                    <InitialColour>1 1 1</InitialColour>
+                    <MiddleColour>1 1 0</MiddleColour>
+                    <MiddlePosition>0.7</MiddlePosition>
+                    <FinalColour>1 0.1 0</FinalColour>
+                </Item>
+            </Modifiers>
+            <BlendMode>Add</BlendMode>
+            <TriggerOffset>0 0</TriggerOffset>
+            <MinimumTriggerPeriod>0</MinimumTriggerPeriod>
         </Item>
-        <Item Type="Modifiers:LinearGravityModifier">
-          <Gravity>0 1000</Gravity>
+        <Item>
+            <Name>Sparks2</Name>
+            <Budget>2000</Budget>
+            <Term>0.7</Term>
+            <ReleaseQuantity>5</ReleaseQuantity>
+            <Enabled>true</Enabled>
+            <ReleaseSpeed>
+                <Value>100</Value>
+                <Variation>50</Variation>
+            </ReleaseSpeed>
+            <ReleaseColour>
+                <Value>1 1 0.7529412</Value>
+                <Variation>0 0 0</Variation>
+            </ReleaseColour>
+            <ReleaseOpacity>
+                <Value>1</Value>
+                <Variation>0</Variation>
+            </ReleaseOpacity>
+            <ReleaseScale>
+                <Value>5</Value>
+                <Variation>0</Variation>
+            </ReleaseScale>
+            <ReleaseRotation>
+                <Value>0</Value>
+                <Variation>0</Variation>
+            </ReleaseRotation>
+            <ReleaseImpulse>50 0</ReleaseImpulse>
+            <ParticleTextureAssetName>Textures\Star</ParticleTextureAssetName>
+            <Modifiers>
+                <Item Type="Modifiers:OpacityModifier">
+                    <Initial>1</Initial>
+                    <Ultimate>0</Ultimate>
+                </Item>
+                <Item Type="Modifiers:LinearGravityModifier">
+                    <Gravity>0 1000</Gravity>
+                </Item>
+                <Item Type="Modifiers:ColourInterpolatorModifier">
+                    <InitialColour>1 1 0.7</InitialColour>
+                    <MiddleColour>1 1 0</MiddleColour>
+                    <MiddlePosition>0.7</MiddlePosition>
+                    <FinalColour>1 0 0</FinalColour>
+                </Item>
+            </Modifiers>
+            <BlendMode>Add</BlendMode>
+            <TriggerOffset>0 0</TriggerOffset>
+            <MinimumTriggerPeriod>0</MinimumTriggerPeriod>
         </Item>
-        <Item Type="Modifiers:ColourInterpolatorModifier">
-          <InitialColour>1 1 1</InitialColour>
-          <MiddleColour>1 1 0</MiddleColour>
-          <MiddlePosition>0.7</MiddlePosition>
-          <FinalColour>1 0.1 0</FinalColour>
-        </Item>
-      </Modifiers>
-      <BlendMode>Add</BlendMode>
-      <TriggerOffset>0 0</TriggerOffset>
-      <MinimumTriggerPeriod>0</MinimumTriggerPeriod>
-    </Item>
-    <Item>
-      <Name>Sparks2</Name>
-      <Budget>2000</Budget>
-      <Term>0.7</Term>
-      <ReleaseQuantity>5</ReleaseQuantity>
-      <Enabled>true</Enabled>
-      <ReleaseSpeed>
-        <Value>100</Value>
-        <Variation>50</Variation>
-      </ReleaseSpeed>
-      <ReleaseColour>
-        <Value>1 1 0.7529412</Value>
-        <Variation>0 0 0</Variation>
-      </ReleaseColour>
-      <ReleaseOpacity>
-        <Value>1</Value>
-        <Variation>0</Variation>
-      </ReleaseOpacity>
-      <ReleaseScale>
-        <Value>5</Value>
-        <Variation>0</Variation>
-      </ReleaseScale>
-      <ReleaseRotation>
-        <Value>0</Value>
-        <Variation>0</Variation>
-      </ReleaseRotation>
-      <ReleaseImpulse>50 0</ReleaseImpulse>
-		<ParticleTextureAssetName>Textures\Star</ParticleTextureAssetName>
-      <Modifiers>
-        <Item Type="Modifiers:OpacityModifier">
-          <Initial>1</Initial>
-          <Ultimate>0</Ultimate>
-        </Item>
-        <Item Type="Modifiers:LinearGravityModifier">
-          <Gravity>0 1000</Gravity>
-        </Item>
-        <Item Type="Modifiers:ColourInterpolatorModifier">
-          <InitialColour>1 1 0.7</InitialColour>
-          <MiddleColour>1 1 0</MiddleColour>
-          <MiddlePosition>0.7</MiddlePosition>
-          <FinalColour>1 0 0</FinalColour>
-        </Item>
-      </Modifiers>
-      <BlendMode>Add</BlendMode>
-      <TriggerOffset>0 0</TriggerOffset>
-      <MinimumTriggerPeriod>0</MinimumTriggerPeriod>
-    </Item>
-    <Name>Particle Effect</Name>
-    <Author>Damien Green</Author>
-    <Description />
-  </Asset>
+        <Name>Particle Effect</Name>
+        <Author>Damien Green</Author>
+        <Description/>
+    </Asset>
 </XnaContent>

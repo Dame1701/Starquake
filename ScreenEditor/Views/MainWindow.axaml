@@ -8,7 +8,7 @@
         x:Class="ScreenEditor.Views.MainWindow"
         Title="Starquake ScreenEditor">
     <Design.DataContext>
-        <vm:MainWindowViewModel></vm:MainWindowViewModel>
+        <vm:MainWindowViewModel />
     </Design.DataContext>
     <DockPanel>
         <Menu DockPanel.Dock="Top">

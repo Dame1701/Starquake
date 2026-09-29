@@ -1,136 +1,127 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using StarquakeXNA.Helpers;
 using StarquakeXNA.Structure;
 
-namespace StarquakeXNA
+namespace StarquakeXNA;
+
+public class BouncingAnimation
 {
-    public class BouncingAnimation
+    private readonly double friction = 1.00;
+
+    private readonly GameEngine gameEngine;
+
+    private readonly int spriteNo;
+
+    private int effectDuration;
+    private int effectDurationCounter;
+
+    private double fade = 255;
+    private int fadeSpeed;
+    private double gravity;
+    private float rotation;
+    private float rotationSpeed;
+
+    private float scale = 1.0f;
+    private int xDelta;
+    private double yDelta;
+
+    public BouncingAnimation(GameEngine GameEngineReference, int SpriteNo)
     {
-        double gravity = 0;
-        double yDelta = 0;
-        int xDelta = 0;
-        double friction = 1.00;
-        int fadeSpeed = 0;
+        spriteNo = SpriteNo;
+        gameEngine = GameEngineReference;
+    }
+    public int Fade => (int)fade;
+    public bool Triggered { get; private set; }
 
-        int effectDuration = 0;
-        int effectDurationCounter = 0;
+    public void Reset()
+    {
+        Triggered = false;
+    }
 
-        double fade = 255;
-        public int Fade
+    public void Trigger(double Gravity, int InitialYSpeed, int XSpeed, int EffectMinDuration = 50, int EffectMaxDuration = 100)
+    {
+        yDelta = InitialYSpeed;
+        xDelta = XSpeed;
+        gravity = Gravity;
+        effectDurationCounter = 0;
+        Triggered = true;
+        fade = 255;
+        scale = 1.0f;
+        effectDuration = gameEngine.RandomNumberGenerator.Next(EffectMinDuration, EffectMaxDuration);
+        fadeSpeed = gameEngine.RandomNumberGenerator.Next(10, 30);
+        rotationSpeed = (float)(gameEngine.RandomNumberGenerator.NextDouble() - 0.5);
+    }
+
+    public void YBounce()
+    {
+        if (Triggered)
         {
-            get { return (int)fade; }
+            gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("BlobPartClang", false);
+            yDelta = -yDelta;
         }
+    }
 
-        int spriteNo;
-        float rotation = 0f;
-        float rotationSpeed = 0f;
-
-        float scale = 1.0f;
-
-        GameEngine gameEngine;
-        bool triggered = false;
-        public bool Triggered
+    public void XBounce()
+    {
+        if (Triggered)
         {
-            get { return triggered; }
+            gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("BlobPartClang", false);
+            xDelta = -xDelta;
         }
+    }
 
-        public BouncingAnimation(GameEngine GameEngineReference, int SpriteNo)
+    public Point Update()
+    {
+        if (Triggered)
         {
-            spriteNo = SpriteNo;
-            gameEngine = GameEngineReference;
-        }
+            yDelta += gravity;
+            yDelta /= friction;
 
-        public void Reset()
-        {
-            triggered = false;
-        }
+            rotation = rotation + rotationSpeed;
 
-        public void Trigger(double Gravity, int InitialYSpeed, int XSpeed, int EffectMinDuration = 50, int EffectMaxDuration = 100)
-        {
-            yDelta = InitialYSpeed;
-            xDelta = XSpeed;
-            gravity = Gravity;
-            effectDurationCounter = 0;
-            triggered = true;
-            fade = 255;
-            scale = 1.0f;
-            effectDuration = gameEngine.RandomNumberGenerator.Next(EffectMinDuration, EffectMaxDuration);
-            fadeSpeed = gameEngine.RandomNumberGenerator.Next(10, 30);
-            rotationSpeed = (float)(gameEngine.RandomNumberGenerator.NextDouble() - 0.5);
-        }
-
-        public void YBounce()
-        {
-            if (triggered)
+            if (scale > 0)
             {
-                gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("BlobPartClang", false); 
-                yDelta = -yDelta;
-            }
-        }
-
-        public void XBounce()
-        {
-            if (triggered)
-            {
-                gameEngine.ContentResourceManager.GetSoundFXEngine().PlaySound("BlobPartClang", false); 
-                xDelta = -xDelta;
-            }
-        }
-
-        public Point Update()
-        {
-            if (triggered)
-            {
-                yDelta += gravity;
-                yDelta /= friction;
-                
-                rotation = rotation + rotationSpeed;
-
-                if (scale > 0)
-                {
-                    scale = scale - (1f / (float)effectDuration);
-                }
-                else
-                {
-                    scale = 0;
-                }
-
-                if (fade > 0)
-                {
-                    fade = fade - ((double)255 / (double)effectDuration);
-                }
-                else
-                {
-                    fade = 0;
-                }
-
-                // Fade the particles out
-                if (effectDurationCounter > effectDuration)
-                {
-                    triggered = false;
-                }
-
-                effectDurationCounter++;
-            }
-
-            return new Point(xDelta, (int)yDelta);
-        }
-
-        public void Draw(SpriteCollection SpriteToDraw, int xPos, int yPos, int SpriteNumberOverride = -1)
-        {
-            if (SpriteNumberOverride >= 0)
-            {
-                SpriteToDraw.DrawSprite(SpriteNumberOverride, xPos, yPos, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)fade), scale, rotation);
+                scale = scale - 1f / effectDuration;
             }
             else
             {
-                SpriteToDraw.DrawSprite(spriteNo, xPos, yPos, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)fade), scale, rotation);
+                scale = 0;
             }
+
+            if (fade > 0)
+            {
+                fade = fade - 255 / (double)effectDuration;
+            }
+            else
+            {
+                fade = 0;
+            }
+
+            // Fade the particles out
+            if (effectDurationCounter > effectDuration)
+            {
+                Triggered = false;
+            }
+
+            effectDurationCounter++;
+        }
+
+        return new Point(xDelta, (int)yDelta);
+    }
+
+    public void Draw(SpriteCollection SpriteToDraw, int xPos, int yPos, int SpriteNumberOverride = -1)
+    {
+        if (SpriteNumberOverride >= 0)
+        {
+            SpriteToDraw.DrawSprite(SpriteNumberOverride, xPos, yPos, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)fade), scale, rotation);
+        }
+        else
+        {
+            SpriteToDraw.DrawSprite(spriteNo, xPos, yPos, ColourHelper.GetXNA4Colour(255, 255, 255, (byte)fade), scale, rotation);
         }
     }
 }

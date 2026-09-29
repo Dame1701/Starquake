@@ -1,257 +1,232 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
+namespace StarquakeXNA.AnimationHelpers;
 
-namespace StarquakeXNA.AnimationHelpers
+public class AnimationTrigger
 {
-    public class AnimationTrigger
+    protected bool triggered;
+
+    protected bool useTrigger;
+
+    public AnimationTrigger(bool UseTrigger)
     {
-        protected bool triggered;
-        public bool Triggered
-        {
-            get { return triggered; }
-        }
+        useTrigger = UseTrigger;
+    }
+    public bool Triggered => triggered;
 
-        protected bool useTrigger;
+    public void Trigger()
+    {
+        triggered = true;
+    }
+}
 
-        public void Trigger()
-        {
-            triggered = true;
-        }
+public class IntegerSubtractor : AnimationTrigger
+{
+    private readonly int finalValue;
+    private readonly int initialValue;
+    private readonly int stepSize;
 
-        public AnimationTrigger(bool UseTrigger)
+    public IntegerSubtractor(
+        int InitialValue,
+        int FinalValue,
+        int StepSize,
+        bool UseTrigger) : base(UseTrigger)
+    {
+        initialValue = InitialValue;
+        finalValue = FinalValue;
+        stepSize = StepSize;
+
+        Reset();
+    }
+    public int Modifier { get; private set; }
+
+    public byte ByteModifier
+    {
+        get
         {
-            useTrigger = UseTrigger;
+            if (Modifier > 255)
+            {
+                return 255;
+            }
+            if (Modifier < 0)
+            {
+                return 0;
+            }
+
+            return (byte)Modifier;
         }
     }
 
-    public class IntegerSubtractor : AnimationTrigger
+    public void Reset()
     {
-        private int initialValue;
-        private int finalValue;
-        private int stepSize;
-        
-        private int modifier;
-        public int Modifier
-        {
-            get { return modifier; }
-        }
+        Modifier = initialValue;
+        triggered = !useTrigger;
+    }
 
-        public byte ByteModifier
+
+    public void Update()
+    {
+        if (triggered)
         {
-            get
+            if (Modifier > finalValue)
             {
-                if (modifier > 255)
-                {
-                    return 255;
-                }
-                else if (modifier < 0)
-                {
-                    return 0;
-                }
-
-                return (byte)modifier;
+                Modifier = Modifier - stepSize;
             }
-        }
 
-        public IntegerSubtractor(
-            int InitialValue,
-            int FinalValue,
-            int StepSize,
-            bool UseTrigger) : base(UseTrigger)
-        {
-            initialValue = InitialValue;
-            finalValue = FinalValue;
-            stepSize = StepSize;
-
-            Reset();
-        }
-
-        public void Reset()
-        {
-            modifier = initialValue;
-            triggered = !useTrigger;
-        }
-
-
-        public void Update()
-        {
-            if (triggered)
+            if (Modifier <= finalValue)
             {
-                if (modifier > finalValue)
-                {
-                    modifier = modifier - stepSize;
-                }
-
-                if (modifier <= finalValue)
-                {
-                    modifier = finalValue;
-                }
+                Modifier = finalValue;
             }
         }
     }
+}
 
-    public class IntegerAdder : AnimationTrigger
+public class IntegerAdder : AnimationTrigger
+{
+    private readonly int finalValue;
+    private readonly int initialValue;
+    private readonly int stepSize;
+
+    public IntegerAdder(
+        int InitialValue,
+        int FinalValue,
+        int StepSize,
+        bool UseTrigger) : base(UseTrigger)
     {
-        private int initialValue;
-        private int finalValue;
-        private int stepSize;
+        initialValue = InitialValue;
+        finalValue = FinalValue;
+        stepSize = StepSize;
 
-        private int modifier;
-        public int Modifier
-        {
-            get { return modifier; }
-        }
+        Reset();
+    }
+    public int Modifier { get; private set; }
 
-        public byte ByteModifier
+    public byte ByteModifier
+    {
+        get
         {
-            get 
+            if (Modifier > 255)
             {
-                if (modifier > 255)
-                {
-                    return 255;
-                }
-                else if (modifier < 0)
-                {
-                    return 0;
-                }
-
-                return (byte)modifier;
+                return 255;
             }
-        }
-
-        public IntegerAdder(
-            int InitialValue,
-            int FinalValue,
-            int StepSize,
-            bool UseTrigger) : base(UseTrigger)
-        {
-            initialValue = InitialValue;
-            finalValue = FinalValue;
-            stepSize = StepSize;
-
-            Reset();
-        }
-
-        public void Reset()
-        {
-            modifier = initialValue;
-            triggered = !useTrigger;
-        }
-
-
-        public void Update()
-        {
-            if (triggered)
+            if (Modifier < 0)
             {
-                if (modifier < finalValue)
-                {
-                    modifier = modifier + stepSize;
-                }
-
-                if (modifier >= finalValue)
-                {
-                    modifier = finalValue;
-                }
+                return 0;
             }
+
+            return (byte)Modifier;
         }
     }
 
-    public class FloatSubtractor : AnimationTrigger
+    public void Reset()
     {
-        private float initialValue;
-        private float finalValue;
-        private float stepSize;
+        Modifier = initialValue;
+        triggered = !useTrigger;
+    }
 
-        private float modifier;
-        public float Modifier
+
+    public void Update()
+    {
+        if (triggered)
         {
-            get { return modifier; }
-        }
-
-        public FloatSubtractor(
-            float InitialValue,
-            float FinalValue,
-            float StepSize,
-            bool UseTrigger) : base(UseTrigger)
-        {
-            initialValue = InitialValue;
-            finalValue = FinalValue;
-            stepSize = StepSize;
-
-            Reset();
-        }
-
-        public void Reset()
-        {
-            modifier = initialValue;
-            triggered = !useTrigger;
-        }
-
-
-        public void Update()
-        {
-            if (triggered)
+            if (Modifier < finalValue)
             {
-                if (modifier > finalValue)
-                {
-                    modifier = modifier - stepSize;
-                }
+                Modifier = Modifier + stepSize;
+            }
 
-                if (modifier <= finalValue)
-                {
-                    modifier = finalValue;
-                }
+            if (Modifier >= finalValue)
+            {
+                Modifier = finalValue;
             }
         }
     }
+}
 
-    public class FloatAdder : AnimationTrigger
+public class FloatSubtractor : AnimationTrigger
+{
+    private readonly float finalValue;
+    private readonly float initialValue;
+    private readonly float stepSize;
+
+    public FloatSubtractor(
+        float InitialValue,
+        float FinalValue,
+        float StepSize,
+        bool UseTrigger) : base(UseTrigger)
     {
-        private float initialValue;
-        private float finalValue;
-        private float stepSize;
+        initialValue = InitialValue;
+        finalValue = FinalValue;
+        stepSize = StepSize;
 
-        private float modifier;
-        public float Modifier
+        Reset();
+    }
+    public float Modifier { get; private set; }
+
+    public void Reset()
+    {
+        Modifier = initialValue;
+        triggered = !useTrigger;
+    }
+
+
+    public void Update()
+    {
+        if (triggered)
         {
-            get { return modifier; }
-        }
-
-        public FloatAdder(
-            float InitialValue,
-            float FinalValue,
-            float StepSize,
-            bool UseTrigger) : base(UseTrigger)
-        {
-            initialValue = InitialValue;
-            finalValue = FinalValue;
-            stepSize = StepSize;
-
-            Reset();
-        }
-
-        public void Reset()
-        {
-            modifier = initialValue;
-            triggered = !useTrigger;
-        }
-
-
-        public void Update()
-        {
-            if (triggered)
+            if (Modifier > finalValue)
             {
-                if (modifier < finalValue)
-                {
-                    modifier = modifier + stepSize;
-                }
+                Modifier = Modifier - stepSize;
+            }
 
-                if (modifier >= finalValue)
-                {
-                    modifier = finalValue;
-                }
+            if (Modifier <= finalValue)
+            {
+                Modifier = finalValue;
+            }
+        }
+    }
+}
+
+public class FloatAdder : AnimationTrigger
+{
+    private readonly float finalValue;
+    private readonly float initialValue;
+    private readonly float stepSize;
+
+    public FloatAdder(
+        float InitialValue,
+        float FinalValue,
+        float StepSize,
+        bool UseTrigger) : base(UseTrigger)
+    {
+        initialValue = InitialValue;
+        finalValue = FinalValue;
+        stepSize = StepSize;
+
+        Reset();
+    }
+    public float Modifier { get; private set; }
+
+    public void Reset()
+    {
+        Modifier = initialValue;
+        triggered = !useTrigger;
+    }
+
+
+    public void Update()
+    {
+        if (triggered)
+        {
+            if (Modifier < finalValue)
+            {
+                Modifier = Modifier + stepSize;
+            }
+
+            if (Modifier >= finalValue)
+            {
+                Modifier = finalValue;
             }
         }
     }

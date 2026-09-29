@@ -1,3 +1,7 @@
+// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 using System;
 
 namespace StarquakeXNA;
@@ -5,7 +9,7 @@ namespace StarquakeXNA;
 internal static class Program
 {
     /// <summary>
-    /// The main entry point for the application.
+    ///     The main entry point for the application.
     /// </summary>
     [STAThread]
     private static void Main(string[] args)

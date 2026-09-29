@@ -1,42 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 using Microsoft.Xna.Framework;
 
-namespace StarquakeXNA
+namespace StarquakeXNA;
+
+public abstract class GameComponentBase
 {
-    public abstract class GameComponentBase
+    protected GameEngine gameEngine;
+
+    public GameComponentBase(GameEngine GameEngineReference)
     {
-        protected GameEngine gameEngine;
+        gameEngine = GameEngineReference;
+    }
 
-        public GameComponentBase(GameEngine GameEngineReference)
-        {
-            gameEngine = GameEngineReference;
-        }
+    public virtual void LoadContent()
+    {
+    }
 
-        public virtual void LoadContent()
-        {
-        }
+    public virtual void Initialise(object Data)
+    {
+    }
 
-        public virtual void Initialise(object Data)
-        {
-        }
+    public virtual void Update(GameTime gameTime)
+    {
+    }
 
-        public virtual void Update(GameTime gameTime)
-        {
-        }
+    public virtual void Draw(GameTime gameTime)
+    {
+    }
 
-        public virtual void Draw(GameTime gameTime)
-        {
-        }
+    public virtual void Draw(GameTime gameTime, int screenFade, object Parameters)
+    {
+    }
 
-        public virtual void Draw(GameTime gameTime, int screenFade, object Parameters)
-        {
-        }
-
-        public virtual void Draw(GameTime gameTime, int screenFade)
-        {
-        }
+    public virtual void Draw(GameTime gameTime, int screenFade)
+    {
     }
 }

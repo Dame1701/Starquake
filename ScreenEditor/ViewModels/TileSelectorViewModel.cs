@@ -1,5 +1,7 @@
-using Avalonia.Media.Imaging;
-
+// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 namespace ScreenEditor.ViewModels;
 
 public class TileSelectorViewModel
@@ -11,9 +13,9 @@ public class TileSelectorViewModel
     //    get { return tileCanvas1.SelectedTile; }
     //}
 
-   // public TileSelectorViewModel()
+    // public TileSelectorViewModel()
     //{
-        //();
+    //();
     //}
 
     /*
@@ -40,4 +42,3 @@ public class TileSelectorViewModel
         }
     }*/
 }
-

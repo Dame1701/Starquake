@@ -1,104 +1,93 @@
-﻿using System;
+﻿// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StarquakeXNA.Structure;
 
-namespace StarquakeXNA
+namespace StarquakeXNA;
+
+public class AnimTileEngine : GameComponentBase
 {
-    public class AnimTileEngine : GameComponentBase
+
+    public AnimTileEngine(GameEngine GameEngineReference)
+        : base(GameEngineReference)
     {
-        private List<AnimTile> animTiles;
-        public List<AnimTile> AnimTilesList
-        {
-            get { return animTiles; }
-        }
+        AnimTilesList = new List<AnimTile>();
+    }
+    public List<AnimTile> AnimTilesList { get; }
 
-        public AnimTileEngine(GameEngine GameEngineReference)
-            : base(GameEngineReference)
+    public bool ContainsTile(int TileNumber)
+    {
+        for (var a = 0; a < AnimTilesList.Count; a++)
         {
-            animTiles = new List<AnimTile>();
-        }
-
-        public bool ContainsTile(int TileNumber)
-        {
-            for (int a = 0; a < animTiles.Count; a++)
+            if (AnimTilesList[a].ScreenTileRef == TileNumber)
             {
-                if (animTiles[a].ScreenTileRef == TileNumber)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-            for (int a = 0; a < animTiles.Count; a++)
-            {
-                animTiles[a].Update(gameTime);
+                return true;
             }
         }
 
-        public void Draw(int TileNumber, int XPos, int YPos, Color Colour, GameTime gameTime)
+        return false;
+    }
+
+    public override void Update(GameTime gameTime)
+    {
+        for (var a = 0; a < AnimTilesList.Count; a++)
         {
-            for (int a = 0; a < animTiles.Count; a++)
-            {
-                if (animTiles[a].ScreenTileRef == TileNumber)
-                {
-                    animTiles[a].Draw(XPos, YPos, Colour, gameTime);
-                }
-            }
+            AnimTilesList[a].Update(gameTime);
         }
     }
 
-    public class AnimTile : GameComponentBase
+    public void Draw(int TileNumber, int XPos, int YPos, Color Colour, GameTime gameTime)
     {
-        private int screenTileRef;
-        public int ScreenTileRef
+        for (var a = 0; a < AnimTilesList.Count; a++)
         {
-            get { return screenTileRef; }
-        }
-        private SpriteCollection tileAnimationSpriteSet;
-
-        private Animation tileAnimation;
-        public Animation TileAnimation
-        {
-            get { return tileAnimation; }
-        }
-
-        public AnimTile(GameEngine GameEngineReference, int ScreenTileRef, SpriteCollection TileAnimationSpriteSet, int Delay) : base(GameEngineReference)
-        {
-            screenTileRef = ScreenTileRef;
-            tileAnimationSpriteSet = TileAnimationSpriteSet;
-
-            tileAnimation = new Animation();
-            tileAnimation.FirstFrame = 0;
-            
-            tileAnimation.LastFrame = tileAnimationSpriteSet.SpriteCount - 1;
-            tileAnimation.AnimateForwards = true;
-            tileAnimation.Repeat = true;
-            tileAnimation.CurrentFrame = 0;
-            tileAnimation.Delay = Delay;
-            tileAnimation.Yoyo = true;
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-            tileAnimation.GetNextFrame();
-        }
-
-        public void Draw(int XPos, int YPos, Color Colour, GameTime gameTime)
-        {
-            if (!gameEngine.UsingOldGraphics)
+            if (AnimTilesList[a].ScreenTileRef == TileNumber)
             {
-                tileAnimationSpriteSet.Begin(BlendState.AlphaBlend, gameTime);
-                tileAnimationSpriteSet.DrawSprite(tileAnimation.CurrentFrame, XPos, YPos, Colour);
-                tileAnimationSpriteSet.End();
+                AnimTilesList[a].Draw(XPos, YPos, Colour, gameTime);
             }
+        }
+    }
+}
+
+public class AnimTile : GameComponentBase
+{
+
+    private readonly SpriteCollection tileAnimationSpriteSet;
+
+    public AnimTile(GameEngine GameEngineReference, int ScreenTileRef, SpriteCollection TileAnimationSpriteSet, int Delay) : base(GameEngineReference)
+    {
+        this.ScreenTileRef = ScreenTileRef;
+        tileAnimationSpriteSet = TileAnimationSpriteSet;
+
+        TileAnimation = new Animation();
+        TileAnimation.FirstFrame = 0;
+
+        TileAnimation.LastFrame = tileAnimationSpriteSet.SpriteCount - 1;
+        TileAnimation.AnimateForwards = true;
+        TileAnimation.Repeat = true;
+        TileAnimation.CurrentFrame = 0;
+        TileAnimation.Delay = Delay;
+        TileAnimation.Yoyo = true;
+    }
+    public int ScreenTileRef { get; }
+
+    public Animation TileAnimation { get; }
+
+    public override void Update(GameTime gameTime)
+    {
+        TileAnimation.GetNextFrame();
+    }
+
+    public void Draw(int XPos, int YPos, Color Colour, GameTime gameTime)
+    {
+        if (!gameEngine.UsingOldGraphics)
+        {
+            tileAnimationSpriteSet.Begin(BlendState.AlphaBlend, gameTime);
+            tileAnimationSpriteSet.DrawSprite(TileAnimation.CurrentFrame, XPos, YPos, Colour);
+            tileAnimationSpriteSet.End();
         }
     }
 }

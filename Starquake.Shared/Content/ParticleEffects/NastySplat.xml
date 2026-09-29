@@ -1,307 +1,307 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <XnaContent xmlns:Modifiers="ProjectMercury.Modifiers">
-  <Asset Type="ProjectMercury.ParticleEffect">
-    <Item>
-      <Name>Bones</Name>
-      <Budget>6</Budget>
-      <Term>3</Term>
-      <ReleaseQuantity>6</ReleaseQuantity>
-      <Enabled>true</Enabled>
-      <ReleaseSpeed>
-        <Value>100</Value>
-        <Variation>0</Variation>
-      </ReleaseSpeed>
-      <ReleaseColour>
-        <Value>1 1 1</Value>
-        <Variation>0 0 0</Variation>
-      </ReleaseColour>
-      <ReleaseOpacity>
-        <Value>10</Value>
-        <Variation>5</Variation>
-      </ReleaseOpacity>
-      <ReleaseScale>
-        <Value>40</Value>
-        <Variation>40</Variation>
-      </ReleaseScale>
-      <ReleaseRotation>
-        <Value>70</Value>
-        <Variation>70</Variation>
-      </ReleaseRotation>
-      <ReleaseImpulse>0 0</ReleaseImpulse>
-      <ParticleTextureAssetName>Textures\Bone</ParticleTextureAssetName>
-      <Modifiers>
-        <Item Type="Modifiers:LinearGravityModifier">
-          <Gravity>50 600</Gravity>
+    <Asset Type="ProjectMercury.ParticleEffect">
+        <Item>
+            <Name>Bones</Name>
+            <Budget>6</Budget>
+            <Term>3</Term>
+            <ReleaseQuantity>6</ReleaseQuantity>
+            <Enabled>true</Enabled>
+            <ReleaseSpeed>
+                <Value>100</Value>
+                <Variation>0</Variation>
+            </ReleaseSpeed>
+            <ReleaseColour>
+                <Value>1 1 1</Value>
+                <Variation>0 0 0</Variation>
+            </ReleaseColour>
+            <ReleaseOpacity>
+                <Value>10</Value>
+                <Variation>5</Variation>
+            </ReleaseOpacity>
+            <ReleaseScale>
+                <Value>40</Value>
+                <Variation>40</Variation>
+            </ReleaseScale>
+            <ReleaseRotation>
+                <Value>70</Value>
+                <Variation>70</Variation>
+            </ReleaseRotation>
+            <ReleaseImpulse>0 0</ReleaseImpulse>
+            <ParticleTextureAssetName>Textures\Bone</ParticleTextureAssetName>
+            <Modifiers>
+                <Item Type="Modifiers:LinearGravityModifier">
+                    <Gravity>50 600</Gravity>
+                </Item>
+                <Item Type="Modifiers:RotationRateModifier">
+                    <InitialRate>4</InitialRate>
+                    <FinalRate>8</FinalRate>
+                </Item>
+                <Item Type="Modifiers:OpacityModifier">
+                    <Initial>1</Initial>
+                    <Ultimate>0</Ultimate>
+                </Item>
+            </Modifiers>
+            <BlendMode>Alpha</BlendMode>
+            <TriggerOffset>0 0</TriggerOffset>
+            <MinimumTriggerPeriod>0</MinimumTriggerPeriod>
         </Item>
-        <Item Type="Modifiers:RotationRateModifier">
-          <InitialRate>4</InitialRate>
-          <FinalRate>8</FinalRate>
+        <Item>
+            <Name>Left Eye</Name>
+            <Budget>1</Budget>
+            <Term>3</Term>
+            <ReleaseQuantity>1</ReleaseQuantity>
+            <Enabled>true</Enabled>
+            <ReleaseSpeed>
+                <Value>100</Value>
+                <Variation>0</Variation>
+            </ReleaseSpeed>
+            <ReleaseColour>
+                <Value>1 1 1</Value>
+                <Variation>0 0 0</Variation>
+            </ReleaseColour>
+            <ReleaseOpacity>
+                <Value>10</Value>
+                <Variation>5</Variation>
+            </ReleaseOpacity>
+            <ReleaseScale>
+                <Value>20</Value>
+                <Variation>0</Variation>
+            </ReleaseScale>
+            <ReleaseRotation>
+                <Value>20</Value>
+                <Variation>10</Variation>
+            </ReleaseRotation>
+            <ReleaseImpulse>0 0</ReleaseImpulse>
+            <ParticleTextureAssetName>Textures\Eye</ParticleTextureAssetName>
+            <Modifiers>
+                <Item Type="Modifiers:LinearGravityModifier">
+                    <Gravity>50 600</Gravity>
+                </Item>
+                <Item Type="Modifiers:OpacityModifier">
+                    <Initial>1</Initial>
+                    <Ultimate>0</Ultimate>
+                </Item>
+                <Item Type="Modifiers:RotationRateModifier">
+                    <InitialRate>4</InitialRate>
+                    <FinalRate>8</FinalRate>
+                </Item>
+            </Modifiers>
+            <BlendMode>Alpha</BlendMode>
+            <TriggerOffset>0 0</TriggerOffset>
+            <MinimumTriggerPeriod>0</MinimumTriggerPeriod>
         </Item>
-        <Item Type="Modifiers:OpacityModifier">
-          <Initial>1</Initial>
-          <Ultimate>0</Ultimate>
+        <Item>
+            <Name>Right Eye</Name>
+            <Budget>1</Budget>
+            <Term>3</Term>
+            <ReleaseQuantity>1</ReleaseQuantity>
+            <Enabled>true</Enabled>
+            <ReleaseSpeed>
+                <Value>100</Value>
+                <Variation>0</Variation>
+            </ReleaseSpeed>
+            <ReleaseColour>
+                <Value>1 1 1</Value>
+                <Variation>0 0 0</Variation>
+            </ReleaseColour>
+            <ReleaseOpacity>
+                <Value>10</Value>
+                <Variation>5</Variation>
+            </ReleaseOpacity>
+            <ReleaseScale>
+                <Value>20</Value>
+                <Variation>0</Variation>
+            </ReleaseScale>
+            <ReleaseRotation>
+                <Value>20</Value>
+                <Variation>10</Variation>
+            </ReleaseRotation>
+            <ReleaseImpulse>0 0</ReleaseImpulse>
+            <ParticleTextureAssetName>Textures\Eye</ParticleTextureAssetName>
+            <Modifiers>
+                <Item Type="Modifiers:LinearGravityModifier">
+                    <Gravity>-50 600</Gravity>
+                </Item>
+                <Item Type="Modifiers:OpacityModifier">
+                    <Initial>1</Initial>
+                    <Ultimate>0</Ultimate>
+                </Item>
+                <Item Type="Modifiers:RotationRateModifier">
+                    <InitialRate>4</InitialRate>
+                    <FinalRate>8</FinalRate>
+                </Item>
+            </Modifiers>
+            <BlendMode>Alpha</BlendMode>
+            <TriggerOffset>0 0</TriggerOffset>
+            <MinimumTriggerPeriod>0</MinimumTriggerPeriod>
         </Item>
-      </Modifiers>
-      <BlendMode>Alpha</BlendMode>
-      <TriggerOffset>0 0</TriggerOffset>
-      <MinimumTriggerPeriod>0</MinimumTriggerPeriod>
-    </Item>
-    <Item>
-      <Name>Left Eye</Name>
-      <Budget>1</Budget>
-      <Term>3</Term>
-      <ReleaseQuantity>1</ReleaseQuantity>
-      <Enabled>true</Enabled>
-      <ReleaseSpeed>
-        <Value>100</Value>
-        <Variation>0</Variation>
-      </ReleaseSpeed>
-      <ReleaseColour>
-        <Value>1 1 1</Value>
-        <Variation>0 0 0</Variation>
-      </ReleaseColour>
-      <ReleaseOpacity>
-        <Value>10</Value>
-        <Variation>5</Variation>
-      </ReleaseOpacity>
-      <ReleaseScale>
-        <Value>20</Value>
-        <Variation>0</Variation>
-      </ReleaseScale>
-      <ReleaseRotation>
-        <Value>20</Value>
-        <Variation>10</Variation>
-      </ReleaseRotation>
-      <ReleaseImpulse>0 0</ReleaseImpulse>
-      <ParticleTextureAssetName>Textures\Eye</ParticleTextureAssetName>
-      <Modifiers>
-        <Item Type="Modifiers:LinearGravityModifier">
-          <Gravity>50 600</Gravity>
+        <Item>
+            <Name>Left Splat</Name>
+            <Budget>1000</Budget>
+            <Term>3</Term>
+            <ReleaseQuantity>100</ReleaseQuantity>
+            <Enabled>true</Enabled>
+            <ReleaseSpeed>
+                <Value>100</Value>
+                <Variation>50</Variation>
+            </ReleaseSpeed>
+            <ReleaseColour>
+                <Value>0 0.1 0</Value>
+                <Variation>0 0 0</Variation>
+            </ReleaseColour>
+            <ReleaseOpacity>
+                <Value>10</Value>
+                <Variation>5</Variation>
+            </ReleaseOpacity>
+            <ReleaseScale>
+                <Value>32</Value>
+                <Variation>8</Variation>
+            </ReleaseScale>
+            <ReleaseRotation>
+                <Value>0</Value>
+                <Variation>0</Variation>
+            </ReleaseRotation>
+            <ReleaseImpulse>0 0</ReleaseImpulse>
+            <ParticleTextureAssetName>Textures\Particle004</ParticleTextureAssetName>
+            <Modifiers>
+                <Item Type="Modifiers:LinearGravityModifier">
+                    <Gravity>50 500</Gravity>
+                </Item>
+                <Item Type="Modifiers:OpacityModifier">
+                    <Initial>0.8</Initial>
+                    <Ultimate>0</Ultimate>
+                </Item>
+            </Modifiers>
+            <BlendMode>Add</BlendMode>
+            <TriggerOffset>0 0</TriggerOffset>
+            <MinimumTriggerPeriod>0</MinimumTriggerPeriod>
         </Item>
-        <Item Type="Modifiers:OpacityModifier">
-          <Initial>1</Initial>
-          <Ultimate>0</Ultimate>
+        <Item>
+            <Name>Right Splat</Name>
+            <Budget>1000</Budget>
+            <Term>3</Term>
+            <ReleaseQuantity>100</ReleaseQuantity>
+            <Enabled>true</Enabled>
+            <ReleaseSpeed>
+                <Value>100</Value>
+                <Variation>50</Variation>
+            </ReleaseSpeed>
+            <ReleaseColour>
+                <Value>0 0.1 0</Value>
+                <Variation>0 0 0</Variation>
+            </ReleaseColour>
+            <ReleaseOpacity>
+                <Value>10</Value>
+                <Variation>5</Variation>
+            </ReleaseOpacity>
+            <ReleaseScale>
+                <Value>32</Value>
+                <Variation>8</Variation>
+            </ReleaseScale>
+            <ReleaseRotation>
+                <Value>0</Value>
+                <Variation>0</Variation>
+            </ReleaseRotation>
+            <ReleaseImpulse>0 0</ReleaseImpulse>
+            <ParticleTextureAssetName>Textures\Particle004</ParticleTextureAssetName>
+            <Modifiers>
+                <Item Type="Modifiers:LinearGravityModifier">
+                    <Gravity>-50 500</Gravity>
+                </Item>
+                <Item Type="Modifiers:OpacityModifier">
+                    <Initial>0.8</Initial>
+                    <Ultimate>0</Ultimate>
+                </Item>
+            </Modifiers>
+            <BlendMode>Add</BlendMode>
+            <TriggerOffset>0 0</TriggerOffset>
+            <MinimumTriggerPeriod>0</MinimumTriggerPeriod>
         </Item>
-        <Item Type="Modifiers:RotationRateModifier">
-          <InitialRate>4</InitialRate>
-          <FinalRate>8</FinalRate>
+        <Item>
+            <Name>Splodges</Name>
+            <Budget>1000</Budget>
+            <Term>2</Term>
+            <ReleaseQuantity>20</ReleaseQuantity>
+            <Enabled>true</Enabled>
+            <ReleaseSpeed>
+                <Value>50</Value>
+                <Variation>25</Variation>
+            </ReleaseSpeed>
+            <ReleaseColour>
+                <Value>0.5 1 0</Value>
+                <Variation>0 0 0</Variation>
+            </ReleaseColour>
+            <ReleaseOpacity>
+                <Value>10</Value>
+                <Variation>5</Variation>
+            </ReleaseOpacity>
+            <ReleaseScale>
+                <Value>64</Value>
+                <Variation>32</Variation>
+            </ReleaseScale>
+            <ReleaseRotation>
+                <Value>0</Value>
+                <Variation>0</Variation>
+            </ReleaseRotation>
+            <ReleaseImpulse>0 0</ReleaseImpulse>
+            <ParticleTextureAssetName>Textures\MultiDot</ParticleTextureAssetName>
+            <Modifiers>
+                <Item Type="Modifiers:LinearGravityModifier">
+                    <Gravity>0 550</Gravity>
+                </Item>
+                <Item Type="Modifiers:OpacityModifier">
+                    <Initial>0.4</Initial>
+                    <Ultimate>0</Ultimate>
+                </Item>
+            </Modifiers>
+            <BlendMode>Alpha</BlendMode>
+            <TriggerOffset>0 0</TriggerOffset>
+            <MinimumTriggerPeriod>0</MinimumTriggerPeriod>
         </Item>
-      </Modifiers>
-      <BlendMode>Alpha</BlendMode>
-      <TriggerOffset>0 0</TriggerOffset>
-      <MinimumTriggerPeriod>0</MinimumTriggerPeriod>
-    </Item>
-    <Item>
-      <Name>Right Eye</Name>
-      <Budget>1</Budget>
-      <Term>3</Term>
-      <ReleaseQuantity>1</ReleaseQuantity>
-      <Enabled>true</Enabled>
-      <ReleaseSpeed>
-        <Value>100</Value>
-        <Variation>0</Variation>
-      </ReleaseSpeed>
-      <ReleaseColour>
-        <Value>1 1 1</Value>
-        <Variation>0 0 0</Variation>
-      </ReleaseColour>
-      <ReleaseOpacity>
-        <Value>10</Value>
-        <Variation>5</Variation>
-      </ReleaseOpacity>
-      <ReleaseScale>
-        <Value>20</Value>
-        <Variation>0</Variation>
-      </ReleaseScale>
-      <ReleaseRotation>
-        <Value>20</Value>
-        <Variation>10</Variation>
-      </ReleaseRotation>
-      <ReleaseImpulse>0 0</ReleaseImpulse>
-      <ParticleTextureAssetName>Textures\Eye</ParticleTextureAssetName>
-      <Modifiers>
-        <Item Type="Modifiers:LinearGravityModifier">
-          <Gravity>-50 600</Gravity>
+        <Item>
+            <Name>Blood</Name>
+            <Budget>1000</Budget>
+            <Term>1</Term>
+            <ReleaseQuantity>100</ReleaseQuantity>
+            <Enabled>true</Enabled>
+            <ReleaseSpeed>
+                <Value>100</Value>
+                <Variation>50</Variation>
+            </ReleaseSpeed>
+            <ReleaseColour>
+                <Value>1 0 0</Value>
+                <Variation>0.5 0.2 0</Variation>
+            </ReleaseColour>
+            <ReleaseOpacity>
+                <Value>10</Value>
+                <Variation>5</Variation>
+            </ReleaseOpacity>
+            <ReleaseScale>
+                <Value>32</Value>
+                <Variation>16</Variation>
+            </ReleaseScale>
+            <ReleaseRotation>
+                <Value>0</Value>
+                <Variation>0</Variation>
+            </ReleaseRotation>
+            <ReleaseImpulse>0 0</ReleaseImpulse>
+            <ParticleTextureAssetName>Textures\MultiDot</ParticleTextureAssetName>
+            <Modifiers>
+                <Item Type="Modifiers:LinearGravityModifier">
+                    <Gravity>0 550</Gravity>
+                </Item>
+                <Item Type="Modifiers:OpacityModifier">
+                    <Initial>0.2</Initial>
+                    <Ultimate>0</Ultimate>
+                </Item>
+            </Modifiers>
+            <BlendMode>Alpha</BlendMode>
+            <TriggerOffset>0 0</TriggerOffset>
+            <MinimumTriggerPeriod>0</MinimumTriggerPeriod>
         </Item>
-        <Item Type="Modifiers:OpacityModifier">
-          <Initial>1</Initial>
-          <Ultimate>0</Ultimate>
-        </Item>
-        <Item Type="Modifiers:RotationRateModifier">
-          <InitialRate>4</InitialRate>
-          <FinalRate>8</FinalRate>
-        </Item>
-      </Modifiers>
-      <BlendMode>Alpha</BlendMode>
-      <TriggerOffset>0 0</TriggerOffset>
-      <MinimumTriggerPeriod>0</MinimumTriggerPeriod>
-    </Item>
-    <Item>
-      <Name>Left Splat</Name>
-      <Budget>1000</Budget>
-      <Term>3</Term>
-      <ReleaseQuantity>100</ReleaseQuantity>
-      <Enabled>true</Enabled>
-      <ReleaseSpeed>
-        <Value>100</Value>
-        <Variation>50</Variation>
-      </ReleaseSpeed>
-      <ReleaseColour>
-        <Value>0 0.1 0</Value>
-        <Variation>0 0 0</Variation>
-      </ReleaseColour>
-      <ReleaseOpacity>
-        <Value>10</Value>
-        <Variation>5</Variation>
-      </ReleaseOpacity>
-      <ReleaseScale>
-        <Value>32</Value>
-        <Variation>8</Variation>
-      </ReleaseScale>
-      <ReleaseRotation>
-        <Value>0</Value>
-        <Variation>0</Variation>
-      </ReleaseRotation>
-      <ReleaseImpulse>0 0</ReleaseImpulse>
-      <ParticleTextureAssetName>Textures\Particle004</ParticleTextureAssetName>
-      <Modifiers>
-        <Item Type="Modifiers:LinearGravityModifier">
-          <Gravity>50 500</Gravity>
-        </Item>
-        <Item Type="Modifiers:OpacityModifier">
-          <Initial>0.8</Initial>
-          <Ultimate>0</Ultimate>
-        </Item>
-      </Modifiers>
-      <BlendMode>Add</BlendMode>
-      <TriggerOffset>0 0</TriggerOffset>
-      <MinimumTriggerPeriod>0</MinimumTriggerPeriod>
-    </Item>
-    <Item>
-      <Name>Right Splat</Name>
-      <Budget>1000</Budget>
-      <Term>3</Term>
-      <ReleaseQuantity>100</ReleaseQuantity>
-      <Enabled>true</Enabled>
-      <ReleaseSpeed>
-        <Value>100</Value>
-        <Variation>50</Variation>
-      </ReleaseSpeed>
-      <ReleaseColour>
-        <Value>0 0.1 0</Value>
-        <Variation>0 0 0</Variation>
-      </ReleaseColour>
-      <ReleaseOpacity>
-        <Value>10</Value>
-        <Variation>5</Variation>
-      </ReleaseOpacity>
-      <ReleaseScale>
-        <Value>32</Value>
-        <Variation>8</Variation>
-      </ReleaseScale>
-      <ReleaseRotation>
-        <Value>0</Value>
-        <Variation>0</Variation>
-      </ReleaseRotation>
-      <ReleaseImpulse>0 0</ReleaseImpulse>
-      <ParticleTextureAssetName>Textures\Particle004</ParticleTextureAssetName>
-      <Modifiers>
-        <Item Type="Modifiers:LinearGravityModifier">
-          <Gravity>-50 500</Gravity>
-        </Item>
-        <Item Type="Modifiers:OpacityModifier">
-          <Initial>0.8</Initial>
-          <Ultimate>0</Ultimate>
-        </Item>
-      </Modifiers>
-      <BlendMode>Add</BlendMode>
-      <TriggerOffset>0 0</TriggerOffset>
-      <MinimumTriggerPeriod>0</MinimumTriggerPeriod>
-    </Item>
-    <Item>
-      <Name>Splodges</Name>
-      <Budget>1000</Budget>
-      <Term>2</Term>
-      <ReleaseQuantity>20</ReleaseQuantity>
-      <Enabled>true</Enabled>
-      <ReleaseSpeed>
-        <Value>50</Value>
-        <Variation>25</Variation>
-      </ReleaseSpeed>
-      <ReleaseColour>
-        <Value>0.5 1 0</Value>
-        <Variation>0 0 0</Variation>
-      </ReleaseColour>
-      <ReleaseOpacity>
-        <Value>10</Value>
-        <Variation>5</Variation>
-      </ReleaseOpacity>
-      <ReleaseScale>
-        <Value>64</Value>
-        <Variation>32</Variation>
-      </ReleaseScale>
-      <ReleaseRotation>
-        <Value>0</Value>
-        <Variation>0</Variation>
-      </ReleaseRotation>
-      <ReleaseImpulse>0 0</ReleaseImpulse>
-      <ParticleTextureAssetName>Textures\MultiDot</ParticleTextureAssetName>
-      <Modifiers>
-        <Item Type="Modifiers:LinearGravityModifier">
-          <Gravity>0 550</Gravity>
-        </Item>
-        <Item Type="Modifiers:OpacityModifier">
-          <Initial>0.4</Initial>
-          <Ultimate>0</Ultimate>
-        </Item>
-      </Modifiers>
-      <BlendMode>Alpha</BlendMode>
-      <TriggerOffset>0 0</TriggerOffset>
-      <MinimumTriggerPeriod>0</MinimumTriggerPeriod>
-    </Item>
-    <Item>
-      <Name>Blood</Name>
-      <Budget>1000</Budget>
-      <Term>1</Term>
-      <ReleaseQuantity>100</ReleaseQuantity>
-      <Enabled>true</Enabled>
-      <ReleaseSpeed>
-        <Value>100</Value>
-        <Variation>50</Variation>
-      </ReleaseSpeed>
-      <ReleaseColour>
-        <Value>1 0 0</Value>
-        <Variation>0.5 0.2 0</Variation>
-      </ReleaseColour>
-      <ReleaseOpacity>
-        <Value>10</Value>
-        <Variation>5</Variation>
-      </ReleaseOpacity>
-      <ReleaseScale>
-        <Value>32</Value>
-        <Variation>16</Variation>
-      </ReleaseScale>
-      <ReleaseRotation>
-        <Value>0</Value>
-        <Variation>0</Variation>
-      </ReleaseRotation>
-      <ReleaseImpulse>0 0</ReleaseImpulse>
-      <ParticleTextureAssetName>Textures\MultiDot</ParticleTextureAssetName>
-      <Modifiers>
-        <Item Type="Modifiers:LinearGravityModifier">
-          <Gravity>0 550</Gravity>
-        </Item>
-        <Item Type="Modifiers:OpacityModifier">
-          <Initial>0.2</Initial>
-          <Ultimate>0</Ultimate>
-        </Item>
-      </Modifiers>
-      <BlendMode>Alpha</BlendMode>
-      <TriggerOffset>0 0</TriggerOffset>
-      <MinimumTriggerPeriod>0</MinimumTriggerPeriod>
-    </Item>
-    <Name>NastySplat</Name>
-    <Author>Damien Green</Author>
-    <Description>A simple splat effect.</Description>
-  </Asset>
+        <Name>NastySplat</Name>
+        <Author>Damien Green</Author>
+        <Description>A simple splat effect.</Description>
+    </Asset>
 </XnaContent>

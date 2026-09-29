@@ -1,39 +1,38 @@
-﻿using SharedLibs;
+﻿// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace Starquake_XNA
+namespace Starquake_XNA;
+
+public class RandomFaderAnimation
 {
-    public class RandomFaderAnimation
+    private readonly int minimumFade;
+    private readonly Random randomGenerator;
+    private readonly int switchSpeed;
+    public int FadeLevel;
+    private int switchCounter;
+
+    public RandomFaderAnimation(int SwitchSpeed, Random RandomGenerator, int MinimumFade = 0)
     {
-        public int FadeLevel;
-        Random randomGenerator;
-        int switchSpeed;
-        int switchCounter;
-        int minimumFade;
+        minimumFade = MinimumFade;
+        switchCounter = 0;
+        randomGenerator = RandomGenerator;
+        FadeLevel = 0;
+        switchSpeed = SwitchSpeed;
+    }
 
-        public RandomFaderAnimation(int SwitchSpeed, Random RandomGenerator, int MinimumFade = 0)
+    public void Update()
+    {
+        if (switchCounter < switchSpeed)
         {
-            minimumFade = MinimumFade;
-            switchCounter = 0;
-            randomGenerator = RandomGenerator;
-            FadeLevel = 0;
-            switchSpeed = SwitchSpeed;
+            switchCounter++;
         }
-
-        public void Update()
+        else
         {
-            if (switchCounter < switchSpeed)
-            {
-                switchCounter++;
-            }
-            else
-            {
-                switchCounter = 0;
-                FadeLevel = randomGenerator.Next(minimumFade, 255);
-            }
+            switchCounter = 0;
+            FadeLevel = randomGenerator.Next(minimumFade, 255);
         }
     }
 }

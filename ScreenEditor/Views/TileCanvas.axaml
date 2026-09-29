@@ -16,6 +16,6 @@
                    HorizontalAlignment="Right"
                    Minimum="0"
                    Maximum="{Binding ScrollMax, RelativeSource={RelativeSource AncestorType=views:TileCanvas}, Mode=TwoWay}"
-                   Value="{Binding ScrollValue, RelativeSource={RelativeSource AncestorType=views:TileCanvas}, Mode=TwoWay}"/>
+                   Value="{Binding ScrollValue, RelativeSource={RelativeSource AncestorType=views:TileCanvas}, Mode=TwoWay}" />
     </Border>
 </UserControl>
