@@ -2,14 +2,19 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+using System;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
+using Starquake.ActiveSprites;
 using Starquake.Animations;
 using Starquake.Constants;
-using Starquake.Engines;
+using Starquake.ContentManagement;
+using Starquake.Display;
+using Starquake.Fonts;
+using Starquake.GameComponents;
 using Starquake.Sprites;
 using Starquake.Structure;
 
@@ -17,7 +22,18 @@ namespace Starquake.GameComponents.GameScreens;
 
 public class TeleportScreen : GameComponentBase, IGameScreen
 {
-    private readonly GameEngine GameEngine;
+    private readonly Blob _blob;
+    private readonly ContentManager _contentManager;
+    private readonly BitmapFont _font;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsDeviceManager _graphicsDeviceManager;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly PresentationSettings _presentation;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
+    private readonly ScreenDirectory _screenDirectory;
+    private readonly Shapes _shapeDrawer;
+
 
     #region IGameScreen Members
 
@@ -62,9 +78,30 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
     public bool Success => true;
 
-    public TeleportScreen(GameEngine gameEngineReference)
+    public TeleportScreen(
+        ContentManager content,
+        ResourceManager resources,
+        BitmapFont font,
+        GameScreenCollection gameScreens,
+        GraphicsDeviceManager graphics,
+        GraphicsSet graphicsSet,
+        Blob blob,
+        PresentationSettings presentation,
+        Random randomNumberGenerator,
+        ScreenDirectory screenDirectory,
+        Shapes shapeDrawer)
     {
-        GameEngine = gameEngineReference;
+        _contentManager = content;
+        _resources = resources;
+        _font = font;
+        _gameScreens = gameScreens;
+        _graphicsDeviceManager = graphics;
+        _graphicsSet = graphicsSet;
+        _blob = blob;
+        _presentation = presentation;
+        _randomNumberGenerator = randomNumberGenerator;
+        _screenDirectory = screenDirectory;
+        _shapeDrawer = shapeDrawer;
 
         _keyFades = new FaderAnimation[16];
         _powerSupplyFader = new FaderAnimation(1, null, 100);
@@ -72,7 +109,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
         for (var a = 0; a < 16; a++)
         {
-            _keyFades[a] = new FaderAnimation(4, GameEngine.RandomNumberGenerator);
+            _keyFades[a] = new FaderAnimation(4, _randomNumberGenerator);
         }
 
         _teleportCodes = new Dictionary<int, string>();
@@ -92,12 +129,12 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         _teleportCodes.Add(461, "aisle");
         _teleportCodes.Add(506, "exeon");
 
-        _teleportSprites = new SpriteCollection(GameEngine.GraphicsDeviceMgr, GameEngine.ContentMgr, "Graphics\\TeleportEntry", 62, 62);
-        _teleportDistort = new SpriteCollection(GameEngine.GraphicsDeviceMgr, GameEngine.ContentMgr, "Graphics\\TeleportDistort", 44, 29);
-        _teleportMonitorScreen = new SpriteCollection(GameEngine.GraphicsDeviceMgr, GameEngine.ContentMgr, "Graphics\\TeleportInfoMonitor", 268, 210);
-        _teleportMonitorScreenDistortion = new SpriteCollection(GameEngine.GraphicsDeviceMgr, GameEngine.ContentMgr, "Graphics\\TeleportInfoMonitorDistortion", 230, 30);
+        _teleportSprites = new SpriteCollection(_graphicsDeviceManager, _contentManager, "Graphics\\TeleportEntry", 62, 62);
+        _teleportDistort = new SpriteCollection(_graphicsDeviceManager, _contentManager, "Graphics\\TeleportDistort", 44, 29);
+        _teleportMonitorScreen = new SpriteCollection(_graphicsDeviceManager, _contentManager, "Graphics\\TeleportInfoMonitor", 268, 210);
+        _teleportMonitorScreenDistortion = new SpriteCollection(_graphicsDeviceManager, _contentManager, "Graphics\\TeleportInfoMonitorDistortion", 230, 30);
 
-        _teleportMonitorScreenDistortionYPos = GameEngine.Presentation.ScreenYOffset + 28;
+        _teleportMonitorScreenDistortionYPos = _presentation.ScreenYOffset + 28;
 
         _teleportCodeLetters = new TeleportCodeLetter[5];
         for (var a = 0; a < 5; a++)
@@ -117,13 +154,13 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         _teleportCounter = 0;
         ScreenFade = ColourLevels.Full;
 
-        _oldOffsetX = GameEngine.Presentation.ScreenXOffset;
-        _oldOffsetY = GameEngine.Presentation.ScreenYOffset;
+        _oldOffsetX = _presentation.ScreenXOffset;
+        _oldOffsetY = _presentation.ScreenYOffset;
     }
 
     public override void Update(GameTime gameTime)
     {
-        GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("MachineryBackground", 0.5f, true);
+        _resources.GetSoundFxEngine().PlaySound("MachineryBackground", 0.5f, true);
 
         foreach (var keyFade in _keyFades)
         {
@@ -149,7 +186,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
             _keyPressed = false;
         }
 
-        _teleportCodes.TryGetValue(GameEngine.GameScreens.ScreenNumber, out _teleportCode);
+        _teleportCodes.TryGetValue(_gameScreens.ScreenNumber, out _teleportCode);
 
         for (var a = 0; a < 5; a++)
         {
@@ -168,7 +205,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         {
             if (Keyboard.GetState().IsKeyDown((Keys)a))
             {
-                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("TeleportKeyClick", 0.5f, false);
+                _resources.GetSoundFxEngine().PlaySound("TeleportKeyClick", 0.5f, false);
 
                 _keyPressed = true;
                 _keyIdPressed = a;
@@ -205,12 +242,12 @@ public class TeleportScreen : GameComponentBase, IGameScreen
             {
                 _codeRecognised = true;
 
-                GameEngine.GameScreens.ScreenNumber = destinationScreen;
-                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("Teleport", false);
+                _gameScreens.ScreenNumber = destinationScreen;
+                _resources.GetSoundFxEngine().PlaySound("Teleport", false);
             }
             else
             {
-                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("TeleportInvalidCode", 0.8f, false);
+                _resources.GetSoundFxEngine().PlaySound("TeleportInvalidCode", 0.8f, false);
             }
 
             _attemptingTeleport = true;
@@ -249,26 +286,26 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
         if (_teleportCounter > 58)
         {
-            GameEngine.Presentation.ScreenXOffset = _oldOffsetX;
-            GameEngine.Presentation.ScreenYOffset = _oldOffsetY;
+            _presentation.ScreenXOffset = _oldOffsetX;
+            _presentation.ScreenYOffset = _oldOffsetY;
 
-            var teleporterLocation = GameEngine.GameScreens.GetCoordsOfTiles(397);
+            var teleporterLocation = _gameScreens.GetCoordsOfTiles(397);
             if (teleporterLocation != null &&
                 teleporterLocation.Count == 1)
             {
-                GameEngine.Player.BlobXPos = teleporterLocation[0].X + 20;
-                GameEngine.Player.BlobYPos = teleporterLocation[0].Y + 32;
+                _blob.BlobXPos = teleporterLocation[0].X + 20;
+                _blob.BlobYPos = teleporterLocation[0].Y + 32;
             }
 
-            GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).ScreenFade = 0;
+            _screenDirectory.Get(GameScreenType.MainGame).ScreenFade = 0;
 
             // only do this if the teleport was successful
             if (_codeRecognised && _currentCode != _previousCode.ToUpper())
             {
-                GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.Teleporter, null);
-                GameEngine.GameScreens.UpdateCollisionMap(true);
+                _screenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.Teleporter, null);
+                _gameScreens.UpdateCollisionMap(true);
             }
-            GameEngine.ScreenDirectory.Current = GameScreenType.MainGame;
+            _screenDirectory.Current = GameScreenType.MainGame;
         }
     }
 
@@ -320,21 +357,21 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
     private void DrawInteriorLowerLayer(GameTime gameTime)
     {
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleportInteriorLower").Begin(BlendState.AlphaBlend, gameTime);
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleportInteriorLower").DrawSprite(0, 0, 0, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleportInteriorLower").End();
+        _resources.GetSpriteCollection("TeleportInteriorLower").Begin(BlendState.AlphaBlend, gameTime);
+        _resources.GetSpriteCollection("TeleportInteriorLower").DrawSprite(0, 0, 0, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
+        _resources.GetSpriteCollection("TeleportInteriorLower").End();
     }
 
     private void DrawTeleportPad(GameTime gameTime)
     {
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).Begin(BlendState.AlphaBlend, gameTime);
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).DrawSprite(397, 550, 96, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
+        _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).Begin(BlendState.AlphaBlend, gameTime);
+        _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).DrawSprite(397, 550, 96, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
 
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).End();
+        _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).End();
 
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.UpperScreenTiles).Begin(BlendState.AlphaBlend, gameTime);
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.UpperScreenTiles).DrawSprite(7, 550, 96, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.UpperScreenTiles).End();
+        _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).Begin(BlendState.AlphaBlend, gameTime);
+        _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).DrawSprite(7, 550, 96, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
+        _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).End();
     }
 
     private void DrawConsoleText()
@@ -344,20 +381,20 @@ public class TeleportScreen : GameComponentBase, IGameScreen
             _previousCode = _teleportCode ?? string.Empty;
         }
 
-        GameEngine.Font2.Begin(BlendState.AlphaBlend);
+        _font.Begin(BlendState.AlphaBlend);
 
-        GameEngine.Font2.WriteText(100, 64, "YOU HAVE ENTERED", 2, Color.White, (byte)ScreenFade);
-        GameEngine.Font2.WriteText(244, 128, "TELEPORT", 2, Color.White, (byte)ScreenFade);
-        GameEngine.Font2.WriteText(164, 192, "CODE", 2, Color.White, (byte)ScreenFade);
+        _font.WriteText(100, 64, "YOU HAVE ENTERED", 2, Color.White, (byte)ScreenFade);
+        _font.WriteText(244, 128, "TELEPORT", 2, Color.White, (byte)ScreenFade);
+        _font.WriteText(164, 192, "CODE", 2, Color.White, (byte)ScreenFade);
 
         if (_teleportCode != null)
         {
-            GameEngine.Font2.WriteText(316, 189, _previousCode, 10, new Color(36, 16, 4), (byte)ScreenFade, 1.2f);
-            GameEngine.Font2.WriteText(320, 192, _previousCode, 10, new Color(ColourLevels.Full, 180, 0), (byte)ScreenFade);
+            _font.WriteText(316, 189, _previousCode, 10, new Color(36, 16, 4), (byte)ScreenFade, 1.2f);
+            _font.WriteText(320, 192, _previousCode, 10, new Color(ColourLevels.Full, 180, 0), (byte)ScreenFade);
         }
 
-        GameEngine.Font2.WriteText(228, 256, "ENTER TELEPORTAL", 2, Color.White, (byte)ScreenFade);
-        GameEngine.Font2.WriteText(228, 320, "DESTINATION CODE", 2, Color.White, (byte)ScreenFade);
+        _font.WriteText(228, 256, "ENTER TELEPORTAL", 2, Color.White, (byte)ScreenFade);
+        _font.WriteText(228, 320, "DESTINATION CODE", 2, Color.White, (byte)ScreenFade);
 
         if (_attemptingTeleport)
         {
@@ -366,7 +403,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
         DrawEnteredCode();
 
-        GameEngine.Font2.End();
+        _font.End();
     }
 
     /// <summary>
@@ -378,34 +415,34 @@ public class TeleportScreen : GameComponentBase, IGameScreen
     if (_codeRecognised)
     {
         // Teleporting text - recognised code
-        GameEngine.ShapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-        GameEngine.ShapeDrawer.FillRectangle(new Rectangle(87, 440, 40, 40), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
-        GameEngine.ShapeDrawer.FillRectangle(new Rectangle(135, 442, 36, 36), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
-        GameEngine.ShapeDrawer.FillRectangle(new Rectangle(179, 446, 28, 28), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
-        GameEngine.ShapeDrawer.End();
+        _shapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+        _shapeDrawer.FillRectangle(new Rectangle(87, 440, 40, 40), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
+        _shapeDrawer.FillRectangle(new Rectangle(135, 442, 36, 36), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
+        _shapeDrawer.FillRectangle(new Rectangle(179, 446, 28, 28), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
+        _shapeDrawer.End();
 
-        GameEngine.Font2.WriteText(GameEngine.Presentation.ScreenXOffset + 88, GameEngine.Presentation.ScreenYOffset + 431, "NOW TELEPORTING", new Color(0, ColourLevels.Full - _teleportingMessageFader.FadeLevel, 0), ColourLevels.Full);
+        _font.WriteText(_presentation.ScreenXOffset + 88, _presentation.ScreenYOffset + 431, "NOW TELEPORTING", new Color(0, ColourLevels.Full - _teleportingMessageFader.FadeLevel, 0), ColourLevels.Full);
 
-        GameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
-        GameEngine.ShapeDrawer.FillRectangle(new Rectangle(556, 446, 28, 28), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
-        GameEngine.ShapeDrawer.FillRectangle(new Rectangle(592, 442, 36, 36), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
-        GameEngine.ShapeDrawer.FillRectangle(new Rectangle(636, 440, 40, 40), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
-        GameEngine.ShapeDrawer.End();
+        _shapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+        _shapeDrawer.FillRectangle(new Rectangle(556, 446, 28, 28), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
+        _shapeDrawer.FillRectangle(new Rectangle(592, 442, 36, 36), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
+        _shapeDrawer.FillRectangle(new Rectangle(636, 440, 40, 40), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
+        _shapeDrawer.End();
     }
     else
     {
         // Teleporting text - unrecognised code
-        GameEngine.ShapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-        GameEngine.ShapeDrawer.FillRectangle(new Rectangle(100, 442, 36, 36), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
-        GameEngine.ShapeDrawer.FillRectangle(new Rectangle(144, 446, 28, 28), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
-        GameEngine.ShapeDrawer.End();
+        _shapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+        _shapeDrawer.FillRectangle(new Rectangle(100, 442, 36, 36), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
+        _shapeDrawer.FillRectangle(new Rectangle(144, 446, 28, 28), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
+        _shapeDrawer.End();
 
-        GameEngine.Font2.WriteText(GameEngine.Presentation.ScreenXOffset + 49, GameEngine.Presentation.ScreenYOffset + 431, "CODE NOT RECOGNISED", new Color(ColourLevels.Full - _teleportingMessageFader.FadeLevel, 0, 0), ColourLevels.Full);
+        _font.WriteText(_presentation.ScreenXOffset + 49, _presentation.ScreenYOffset + 431, "CODE NOT RECOGNISED", new Color(ColourLevels.Full - _teleportingMessageFader.FadeLevel, 0, 0), ColourLevels.Full);
 
-        GameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
-        GameEngine.ShapeDrawer.FillRectangle(new Rectangle(590, 446, 28, 28), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
-        GameEngine.ShapeDrawer.FillRectangle(new Rectangle(626, 442, 36, 36), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
-        GameEngine.ShapeDrawer.End();
+        _shapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+        _shapeDrawer.FillRectangle(new Rectangle(590, 446, 28, 28), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
+        _shapeDrawer.FillRectangle(new Rectangle(626, 442, 36, 36), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
+        _shapeDrawer.End();
     }
     }
 
@@ -415,18 +452,18 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
         for (var a = 0; a < 5; a++)
         {
-            GameEngine.Font2.WriteText(teleportLetterLocation, 412, _teleportCodeLetters[a].Letter, 2, new Color(36, 16, 4), (byte)ScreenFade, new Vector2(1f, 0.5f), SpriteEffects.FlipVertically);
+            _font.WriteText(teleportLetterLocation, 412, _teleportCodeLetters[a].Letter, 2, new Color(36, 16, 4), (byte)ScreenFade, new Vector2(1f, 0.5f), SpriteEffects.FlipVertically);
 
-            GameEngine.Font2.WriteText(teleportLetterLocation, 380, _teleportCodeLetters[a].Letter, 2, new Color(ColourLevels.Full, 180, 0), (byte)ScreenFade);
+            _font.WriteText(teleportLetterLocation, 380, _teleportCodeLetters[a].Letter, 2, new Color(ColourLevels.Full, 180, 0), (byte)ScreenFade);
             teleportLetterLocation += 50;
         }
     }
 
     private void DrawInteriorUpperLayer(GameTime gameTime)
     {
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleportInteriorUpper").Begin(BlendState.AlphaBlend, gameTime);
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleportInteriorUpper").DrawSprite(0, 51, 42, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleportInteriorUpper").End();
+        _resources.GetSpriteCollection("TeleportInteriorUpper").Begin(BlendState.AlphaBlend, gameTime);
+        _resources.GetSpriteCollection("TeleportInteriorUpper").DrawSprite(0, 51, 42, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
+        _resources.GetSpriteCollection("TeleportInteriorUpper").End();
     }
 
     /// <summary>
@@ -435,7 +472,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
     /// </summary>
     private void DrawKeyHighlights(GameTime gameTime)
     {
-        var overlays = GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterKeyOverlays");
+        var overlays = _resources.GetSpriteCollection("TeleporterKeyOverlays");
 
         overlays.Begin(BlendState.Additive, gameTime);
 
@@ -457,9 +494,9 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
     private void DrawPowerSupply(GameTime gameTime)
     {
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterPowerSupply").Begin(BlendState.AlphaBlend, gameTime);
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterPowerSupply").DrawSprite(0, 754, 6, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_powerSupplyFader.FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterPowerSupply").End();
+        _resources.GetSpriteCollection("TeleporterPowerSupply").Begin(BlendState.AlphaBlend, gameTime);
+        _resources.GetSpriteCollection("TeleporterPowerSupply").DrawSprite(0, 754, 6, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_powerSupplyFader.FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
+        _resources.GetSpriteCollection("TeleporterPowerSupply").End();
     }
 
     #endregion

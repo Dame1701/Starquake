@@ -2,14 +2,18 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+using System;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
+using Starquake.ActiveSprites;
 using Starquake.Animations;
 using Starquake.Constants;
-using Starquake.Engines;
+using Starquake.ContentManagement;
+using Starquake.Display;
+using Starquake.Fonts;
+using Starquake.GameComponents;
 using Starquake.SharedLibs;
 using Starquake.Structure;
 
@@ -17,7 +21,17 @@ namespace Starquake.GameComponents.GameScreens;
 
 public class CheopsScreen : GameComponentBase, IGameScreen
 {
-    private readonly GameEngine GameEngine;
+    private readonly Blob _blob;
+    private readonly CoreElements _elements;
+    private readonly BitmapFont _font;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
+    private readonly ScreenDirectory _screenDirectory;
+    private readonly Shapes _shapeDrawer;
+    private readonly StatusPanel _statusPanel;
+
 
     /// <summary>
     ///     The value <see cref="_itemToSwap" /> holds while no inventory slot has been picked yet. It
@@ -44,9 +58,28 @@ public class CheopsScreen : GameComponentBase, IGameScreen
 
     public bool Success => true;
 
-    public CheopsScreen(GameEngine gameEngineReference)
+    public CheopsScreen(
+        StatusPanel statusPanel,
+        ResourceManager resources,
+        CoreElements elements,
+        BitmapFont font,
+        GameScreenCollection gameScreens,
+        GraphicsSet graphicsSet,
+        Blob blob,
+        Random randomNumberGenerator,
+        ScreenDirectory screenDirectory,
+        Shapes shapeDrawer)
     {
-        GameEngine = gameEngineReference;
+        _statusPanel = statusPanel;
+        _resources = resources;
+        _elements = elements;
+        _font = font;
+        _gameScreens = gameScreens;
+        _graphicsSet = graphicsSet;
+        _blob = blob;
+        _randomNumberGenerator = randomNumberGenerator;
+        _screenDirectory = screenDirectory;
+        _shapeDrawer = shapeDrawer;
 
         _accessCode = new int[2]
         {
@@ -58,7 +91,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
 
         for (var a = 0; a < _accessCodes.Length; a++)
         {
-            _accessCodes[a] = new KeyScanner(GameEngine.ContentResourceManager, GameEngine.GraphicsSet, GameEngine.RandomNumberGenerator, true);
+            _accessCodes[a] = new KeyScanner(_resources, _graphicsSet, _randomNumberGenerator, true);
         }
 
         Reset(null);
@@ -86,11 +119,11 @@ public class CheopsScreen : GameComponentBase, IGameScreen
     /// </summary>
     private void ReadAccessCode()
     {
-        if (GameEngine.GameScreens.CurrentGameScreenData.CheopsAccessCode != null)
+        if (_gameScreens.CurrentGameScreenData.CheopsAccessCode != null)
         {
             for (var a = 0; a < _accessCode.Length; a++)
             {
-                _accessCode[a] = int.Parse(GameEngine.GameScreens.CurrentGameScreenData.CheopsAccessCode.Substring(a, 1));
+                _accessCode[a] = int.Parse(_gameScreens.CurrentGameScreenData.CheopsAccessCode.Substring(a, 1));
             }
         }
     }
@@ -107,10 +140,10 @@ public class CheopsScreen : GameComponentBase, IGameScreen
             var match = false;
 
             int a;
-            for (a = 0; a < GameEngine.Player.BlobInventory.Length; a++)
+            for (a = 0; a < _blob.BlobInventory.Length; a++)
             {
-                if ((int)GameEngine.Player.BlobInventory[a] - 10 == _accessCode[b] ||
-                    GameEngine.Player.BlobInventory[a] == Collectables.AccessCard)
+                if ((int)_blob.BlobInventory[a] - 10 == _accessCode[b] ||
+                    _blob.BlobInventory[a] == Collectables.AccessCard)
                 {
                     match = true;
                     break;
@@ -145,11 +178,11 @@ public class CheopsScreen : GameComponentBase, IGameScreen
         var slotsToSelectFrom = new List<int>();
         _itemToSwap = NoItemSelected;
 
-        for (var a = 0; a < GameEngine.Player.BlobInventory.Length; a++)
+        for (var a = 0; a < _blob.BlobInventory.Length; a++)
         {
-            if (GameEngine.Player.BlobInventory[a] != Collectables.AccessCard &&
-                GameEngine.Player.BlobInventory[a] != Collectables.Key &&
-                GameEngine.Player.BlobInventory[a] != Collectables.None)
+            if (_blob.BlobInventory[a] != Collectables.AccessCard &&
+                _blob.BlobInventory[a] != Collectables.Key &&
+                _blob.BlobInventory[a] != Collectables.None)
             {
                 slotsToSelectFrom.Add(a);
             }
@@ -159,9 +192,9 @@ public class CheopsScreen : GameComponentBase, IGameScreen
 
         if (slotsToSelectFrom.Count == 0)
         {
-            for (var a = 0; a < GameEngine.Player.BlobInventory.Length; a++)
+            for (var a = 0; a < _blob.BlobInventory.Length; a++)
             {
-                if (GameEngine.Player.BlobInventory[a] == Collectables.Key)
+                if (_blob.BlobInventory[a] == Collectables.Key)
                 {
                     _itemToSwap = a;
                 }
@@ -170,9 +203,9 @@ public class CheopsScreen : GameComponentBase, IGameScreen
             // No key so use the access card
             if (_itemToSwap == NoItemSelected)
             {
-                for (var a = 0; a < GameEngine.Player.BlobInventory.Length; a++)
+                for (var a = 0; a < _blob.BlobInventory.Length; a++)
                 {
-                    if (GameEngine.Player.BlobInventory[a] == Collectables.AccessCard)
+                    if (_blob.BlobInventory[a] == Collectables.AccessCard)
                     {
                         _itemToSwap = a;
                     }
@@ -181,7 +214,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
         }
         else
         {
-            _itemToSwap = slotsToSelectFrom[GameEngine.RandomNumberGenerator.Next(0, slotsToSelectFrom.Count)];
+            _itemToSwap = slotsToSelectFrom[_randomNumberGenerator.Next(0, slotsToSelectFrom.Count)];
         }
     }
 
@@ -194,14 +227,14 @@ public class CheopsScreen : GameComponentBase, IGameScreen
         _itemsToSelect = new InteractiveItem[5];
 
         // Get an element from the core if there is one, if there isn't we've completed the game and this should never happen....
-        var activeElements = GameEngine.Elements.GetActiveElements();
+        var activeElements = _elements.GetActiveElements();
         var coreElementSlot = -1;
         var coreElement = 0;
 
         if (activeElements.Count > 0)
         {
-            coreElementSlot = GameEngine.RandomNumberGenerator.Next(0, 5);
-            coreElement = activeElements[GameEngine.RandomNumberGenerator.Next(0, activeElements.Count)].CurrentElement;
+            coreElementSlot = _randomNumberGenerator.Next(0, 5);
+            coreElement = activeElements[_randomNumberGenerator.Next(0, activeElements.Count)].CurrentElement;
         }
 
         // The item to swap takes the first slot the core element did not
@@ -215,11 +248,11 @@ public class CheopsScreen : GameComponentBase, IGameScreen
             }
             else if (a == swapItemSlot)
             {
-                _itemsToSelect[a] = new InteractiveItem(0, 0, (int)GameEngine.Player.BlobInventory[_itemToSwap]);
+                _itemsToSelect[a] = new InteractiveItem(0, 0, (int)_blob.BlobInventory[_itemToSwap]);
             }
             else
             {
-                _itemsToSelect[a] = new InteractiveItem(0, 0, GameEngine.RandomNumberGenerator.Next(0, 28));
+                _itemsToSelect[a] = new InteractiveItem(0, 0, _randomNumberGenerator.Next(0, 28));
             }
         }
     }
@@ -228,7 +261,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
 
     public override void Update(GameTime gameTime)
     {
-        GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("MachineryBackground", 0.5f, true);
+        _resources.GetSoundFxEngine().PlaySound("MachineryBackground", 0.5f, true);
 
         if (!_elementSelectionMode)
         {
@@ -236,7 +269,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
             if (!_accessCodes[0].Scanned)
             {
                 _accessCodes[0].StartScan();
-                GameEngine.BlobStatusPanel.ScanSlot(_inventorySlotToScan[0]);
+                _statusPanel.ScanSlot(_inventorySlotToScan[0]);
             }
 
             // Follow with the subsequent ones...
@@ -247,13 +280,13 @@ public class CheopsScreen : GameComponentBase, IGameScreen
                     if (a < 1 && !_accessCodes[a + 1].Scanned)
                     {
                         _accessCodes[a + 1].StartScan();
-                        GameEngine.BlobStatusPanel.ScanSlot(_inventorySlotToScan[a + 1]);
+                        _statusPanel.ScanSlot(_inventorySlotToScan[a + 1]);
                     }
                 }
                 _accessCodes[a].Update();
             }
 
-            _resultMessageFade = GameEngine.RandomNumberGenerator.Next(200, 256);
+            _resultMessageFade = _randomNumberGenerator.Next(200, 256);
         }
 
         if (_screenReadWait.Ticks > 0)
@@ -266,8 +299,8 @@ public class CheopsScreen : GameComponentBase, IGameScreen
                 }
                 else // Kick you out
                 {
-                    GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
-                    GameEngine.ScreenDirectory.Current = GameScreenType.MainGame;
+                    _screenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
+                    _screenDirectory.Current = GameScreenType.MainGame;
                 }
             }
         }
@@ -277,9 +310,9 @@ public class CheopsScreen : GameComponentBase, IGameScreen
 
     public override void Draw(GameTime gameTime)
     {
-        GameEngine.Font2.Begin(BlendState.AlphaBlend);
-        GameEngine.Font2.WriteText(298, 100, "CHEOPS PYRAMID", 2, Color.White, ColourLevels.Full);
-        GameEngine.Font2.End();
+        _font.Begin(BlendState.AlphaBlend);
+        _font.WriteText(298, 100, "CHEOPS PYRAMID", 2, Color.White, ColourLevels.Full);
+        _font.End();
 
         DrawPyramid(gameTime);
 
@@ -295,17 +328,17 @@ public class CheopsScreen : GameComponentBase, IGameScreen
 
     private void DrawPyramid(GameTime gameTime)
     {
-        if (GameEngine.GraphicsSet.IsOriginal)
+        if (_graphicsSet.IsOriginal)
         {
-            GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").Begin(BlendState.AlphaBlend, gameTime);
-            GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").DrawSprite(0, 750, 69);
-            GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").End();
+            _resources.GetSpriteCollection("CheopsPyramidOriginal").Begin(BlendState.AlphaBlend, gameTime);
+            _resources.GetSpriteCollection("CheopsPyramidOriginal").DrawSprite(0, 750, 69);
+            _resources.GetSpriteCollection("CheopsPyramidOriginal").End();
         }
         else
         {
-            GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").Begin(BlendState.AlphaBlend, gameTime);
-            GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").DrawSprite(0, 750, 69);
-            GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").End();
+            _resources.GetSpriteCollection("CheopsPyramid").Begin(BlendState.AlphaBlend, gameTime);
+            _resources.GetSpriteCollection("CheopsPyramid").DrawSprite(0, 750, 69);
+            _resources.GetSpriteCollection("CheopsPyramid").End();
         }
     }
 
@@ -315,9 +348,9 @@ public class CheopsScreen : GameComponentBase, IGameScreen
     private void DrawElementsOnOffer(GameTime gameTime)
     {
     {
-        GameEngine.Font2.Begin(BlendState.AlphaBlend);
-        GameEngine.Font2.WriteText(366, 200, "CHEOPS KEY CODE", 2, Color.White, ColourLevels.Full);
-        GameEngine.Font2.End();
+        _font.Begin(BlendState.AlphaBlend);
+        _font.WriteText(366, 200, "CHEOPS KEY CODE", 2, Color.White, ColourLevels.Full);
+        _font.End();
 
         for (var a = 0; a < 2; a++)
         {
@@ -335,51 +368,51 @@ public class CheopsScreen : GameComponentBase, IGameScreen
 
             if (_codeSucceeded)
             {
-                GameEngine.ShapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(187, 498, 40, 40), new Color(0, _resultMessageFade, 0));
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(235, 500, 36, 36), new Color(0, _resultMessageFade, 0));
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(279, 504, 28, 28), new Color(0, _resultMessageFade, 0));
-                GameEngine.ShapeDrawer.End();
+                _shapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                _shapeDrawer.FillRectangle(new Rectangle(187, 498, 40, 40), new Color(0, _resultMessageFade, 0));
+                _shapeDrawer.FillRectangle(new Rectangle(235, 500, 36, 36), new Color(0, _resultMessageFade, 0));
+                _shapeDrawer.FillRectangle(new Rectangle(279, 504, 28, 28), new Color(0, _resultMessageFade, 0));
+                _shapeDrawer.End();
 
-                GameEngine.Font2.Begin(BlendState.AlphaBlend);
-                GameEngine.Font2.WriteText(340, 500, "ACCESS AUTHORISED", 2, new Color(0, ColourLevels.Full, 0), (byte)_resultMessageFade);
-                GameEngine.Font2.End();
+                _font.Begin(BlendState.AlphaBlend);
+                _font.WriteText(340, 500, "ACCESS AUTHORISED", 2, new Color(0, ColourLevels.Full, 0), (byte)_resultMessageFade);
+                _font.End();
 
-                GameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(776, 504, 28, 28), new Color(0, _resultMessageFade, 0));
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(812, 500, 36, 36), new Color(0, _resultMessageFade, 0));
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(856, 498, 40, 40), new Color(0, _resultMessageFade, 0));
-                GameEngine.ShapeDrawer.End();
+                _shapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+                _shapeDrawer.FillRectangle(new Rectangle(776, 504, 28, 28), new Color(0, _resultMessageFade, 0));
+                _shapeDrawer.FillRectangle(new Rectangle(812, 500, 36, 36), new Color(0, _resultMessageFade, 0));
+                _shapeDrawer.FillRectangle(new Rectangle(856, 498, 40, 40), new Color(0, _resultMessageFade, 0));
+                _shapeDrawer.End();
 
                 // Don't allow the sound to be called more than once
                 if (!_soundPlayed)
                 {
-                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("AccessSuccess", 1f, false);
+                    _resources.GetSoundFxEngine().PlaySound("AccessSuccess", 1f, false);
                     _soundPlayed = true;
                 }
             }
             else
             {
-                GameEngine.ShapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(187, 498, 40, 40), new Color(_resultMessageFade, 0, 0, 0));
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(235, 500, 36, 36), new Color(_resultMessageFade, 0, 0, 0));
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(279, 504, 28, 28), new Color(_resultMessageFade, 0, 0, 0));
-                GameEngine.ShapeDrawer.End();
+                _shapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                _shapeDrawer.FillRectangle(new Rectangle(187, 498, 40, 40), new Color(_resultMessageFade, 0, 0, 0));
+                _shapeDrawer.FillRectangle(new Rectangle(235, 500, 36, 36), new Color(_resultMessageFade, 0, 0, 0));
+                _shapeDrawer.FillRectangle(new Rectangle(279, 504, 28, 28), new Color(_resultMessageFade, 0, 0, 0));
+                _shapeDrawer.End();
 
-                GameEngine.Font2.Begin(BlendState.AlphaBlend);
-                GameEngine.Font2.WriteText(330, 500, "ACCESS CODE INVALID", 2, Color.Red, (byte)_resultMessageFade);
-                GameEngine.Font2.End();
+                _font.Begin(BlendState.AlphaBlend);
+                _font.WriteText(330, 500, "ACCESS CODE INVALID", 2, Color.Red, (byte)_resultMessageFade);
+                _font.End();
 
-                GameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(776, 504, 28, 28), new Color(_resultMessageFade, 0, 0, 0));
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(812, 500, 36, 36), new Color(_resultMessageFade, 0, 0, 0));
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(856, 498, 40, 40), new Color(_resultMessageFade, 0, 0, 0));
-                GameEngine.ShapeDrawer.End();
+                _shapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+                _shapeDrawer.FillRectangle(new Rectangle(776, 504, 28, 28), new Color(_resultMessageFade, 0, 0, 0));
+                _shapeDrawer.FillRectangle(new Rectangle(812, 500, 36, 36), new Color(_resultMessageFade, 0, 0, 0));
+                _shapeDrawer.FillRectangle(new Rectangle(856, 498, 40, 40), new Color(_resultMessageFade, 0, 0, 0));
+                _shapeDrawer.End();
 
                 // Don't allow the sound to be called more than once
                 if (!_soundPlayed)
                 {
-                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("AccessFailed", 1f, false);
+                    _resources.GetSoundFxEngine().PlaySound("AccessFailed", 1f, false);
                     _soundPlayed = true;
                 }
             }
@@ -393,71 +426,71 @@ public class CheopsScreen : GameComponentBase, IGameScreen
     private void DrawElementSelection(GameTime gameTime)
     {
     {
-        GameEngine.Font2.Begin(BlendState.AlphaBlend);
-        GameEngine.Font2.WriteText(378, 190, "EXCHANGE       FOR", 2, Color.White, ColourLevels.Full);
-        GameEngine.Font2.WriteText(65, 266, "1.              2.             3.            4.             5.", 2, Color.OrangeRed, ColourLevels.Full);
-        GameEngine.Font2.WriteText(327, 432, "HIT ANY KEY FROM  TO", 2, Color.CornflowerBlue, ColourLevels.Full);
-        GameEngine.Font2.WriteText(690, 432, "1", 2, Color.White, ColourLevels.Full);
-        GameEngine.Font2.WriteText(783, 432, "5", 2, Color.White, ColourLevels.Full);
+        _font.Begin(BlendState.AlphaBlend);
+        _font.WriteText(378, 190, "EXCHANGE       FOR", 2, Color.White, ColourLevels.Full);
+        _font.WriteText(65, 266, "1.              2.             3.            4.             5.", 2, Color.OrangeRed, ColourLevels.Full);
+        _font.WriteText(327, 432, "HIT ANY KEY FROM  TO", 2, Color.CornflowerBlue, ColourLevels.Full);
+        _font.WriteText(690, 432, "1", 2, Color.White, ColourLevels.Full);
+        _font.WriteText(783, 432, "5", 2, Color.White, ColourLevels.Full);
 
-        GameEngine.Font2.End();
+        _font.End();
 
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups).Begin(BlendState.AlphaBlend, gameTime);
+        _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).Begin(BlendState.AlphaBlend, gameTime);
 
         // Need to select something from the inventory randomly ignoring access card and key unless they are the only items....
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups).DrawSprite((int)GameEngine.Player.BlobInventory[_itemToSwap], 590, 168, Color.White);
+        _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite((int)_blob.BlobInventory[_itemToSwap], 590, 168, Color.White);
 
         for (var a = 0; a < 5; a++)
         {
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups).DrawSprite(_itemsToSelect[a].Type, a * 216 + 100, 298, Color.White);
+            _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite(_itemsToSelect[a].Type, a * 216 + 100, 298, Color.White);
         }
 
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups).End();
+        _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
 
         if (Keyboard.GetState().IsKeyDown(Keys.D1))
         {
-            GameEngine.Player.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[0].Type;
-            GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
-            GameEngine.ScreenDirectory.Current = GameScreenType.MainGame;
-            GameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
-            GameEngine.GameScreens.UpdateCollisionMap(false);
-            GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+            _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[0].Type;
+            _screenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
+            _screenDirectory.Current = GameScreenType.MainGame;
+            _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
+            _gameScreens.UpdateCollisionMap(false);
+            _resources.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
         }
         else if (Keyboard.GetState().IsKeyDown(Keys.D2))
         {
-            GameEngine.Player.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[1].Type;
-            GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
-            GameEngine.ScreenDirectory.Current = GameScreenType.MainGame;
-            GameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
-            GameEngine.GameScreens.UpdateCollisionMap(false);
-            GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+            _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[1].Type;
+            _screenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
+            _screenDirectory.Current = GameScreenType.MainGame;
+            _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
+            _gameScreens.UpdateCollisionMap(false);
+            _resources.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
         }
         else if (Keyboard.GetState().IsKeyDown(Keys.D3))
         {
-            GameEngine.Player.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[2].Type;
-            GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
-            GameEngine.ScreenDirectory.Current = GameScreenType.MainGame;
-            GameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
-            GameEngine.GameScreens.UpdateCollisionMap(false);
-            GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+            _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[2].Type;
+            _screenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
+            _screenDirectory.Current = GameScreenType.MainGame;
+            _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
+            _gameScreens.UpdateCollisionMap(false);
+            _resources.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
         }
         else if (Keyboard.GetState().IsKeyDown(Keys.D4))
         {
-            GameEngine.Player.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[3].Type;
-            GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
-            GameEngine.ScreenDirectory.Current = GameScreenType.MainGame;
-            GameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
-            GameEngine.GameScreens.UpdateCollisionMap(false);
-            GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+            _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[3].Type;
+            _screenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
+            _screenDirectory.Current = GameScreenType.MainGame;
+            _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
+            _gameScreens.UpdateCollisionMap(false);
+            _resources.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
         }
         else if (Keyboard.GetState().IsKeyDown(Keys.D5))
         {
-            GameEngine.Player.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[4].Type;
-            GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
-            GameEngine.ScreenDirectory.Current = GameScreenType.MainGame;
-            GameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
-            GameEngine.GameScreens.UpdateCollisionMap(false);
-            GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+            _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[4].Type;
+            _screenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
+            _screenDirectory.Current = GameScreenType.MainGame;
+            _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
+            _gameScreens.UpdateCollisionMap(false);
+            _resources.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
         }
     }
     }

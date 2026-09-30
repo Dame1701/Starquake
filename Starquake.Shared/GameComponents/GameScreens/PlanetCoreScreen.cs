@@ -2,15 +2,15 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+using System;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 using Starquake.ActiveSprites;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
-using Starquake.Engines;
+using Starquake.GameComponents;
 using Starquake.Helpers;
 using Starquake.Particles;
 using Starquake.Structure;
@@ -19,7 +19,15 @@ namespace Starquake.GameComponents.GameScreens;
 
 public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
 {
-    private readonly GameEngine GameEngine;
+    private readonly Blob _blob;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly PresentationSettings _presentation;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
+    private readonly ScreenDirectory _screenDirectory;
+    private readonly GameSession _session;
+
 
     /// <summary>
     ///     The most aliens the core room ever holds, which is also how many it holds once the blob
@@ -93,31 +101,44 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
     private int _entryTime;
 
     private bool _justEnteredCore = true;
-    private Random _randomNumberGenerator;
 
     private bool _replacingElements;
 
 
-    public PlanetCoreScreen(GameEngine gameEngineReference, CoreElements elements)
+    public PlanetCoreScreen(
+        ResourceManager resources,
+        GameScreenCollection gameScreens,
+        GraphicsSet graphicsSet,
+        PresentationSettings presentation,
+        ScreenDirectory screenDirectory,
+        GameSession session,
+        Blob blob,
+        Random randomNumberGenerator,
+        CoreElements elements)
     {
-        GameEngine = gameEngineReference;
+        _resources = resources;
+        _gameScreens = gameScreens;
+        _graphicsSet = graphicsSet;
+        _presentation = presentation;
+        _screenDirectory = screenDirectory;
+        _session = session;
+        _blob = blob;
+        _randomNumberGenerator = randomNumberGenerator;
 
         _elements = elements;
         _elements.OnCoreElementReplaced += elements_OnCoreElementReplaced;
         _elements.LoadContent();
 
-        _randomNumberGenerator = new Random((int)DateTime.Now.Ticks);
-
         _coreAliens = new List<Nasty>();
         for (var a = 0; a < _coreAlienCount; a++)
         {
             var coreAlien = new Nasty(
-                GameEngine.ContentResourceManager,
-                GameEngine.GameScreens,
-                GameEngine.GraphicsSet,
-                GameEngine.Session,
-                GameEngine.Player,
-                GameEngine.RandomNumberGenerator,
+                _resources,
+                _gameScreens,
+                _graphicsSet,
+                _session,
+                _blob,
+                _randomNumberGenerator,
                 0,
                 0,
                 CoreElementsToReplace);
@@ -126,8 +147,8 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
             _coreAliens.Add(coreAlien);
         }
 
-        _coreComputationEffect = (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("BinaryEffect", ParticleEffectType.Continual, null);
-        _coreSparks = (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("CoreSparks", ParticleEffectType.Continual, null);
+        _coreComputationEffect = (IStandardParticleEffect)_resources.GetParticleEffectInstance("BinaryEffect", ParticleEffectType.Continual, null);
+        _coreSparks = (IStandardParticleEffect)_resources.GetParticleEffectInstance("CoreSparks", ParticleEffectType.Continual, null);
     }
 
     public bool Success => true;
@@ -172,13 +193,13 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
             // Check to see if blob is carrying any elements to replace
             var activeElements = _elements.GetActiveElements();
 
-            for (var a = 0; a < GameEngine.Player.BlobInventory.Length; a++)
+            for (var a = 0; a < _blob.BlobInventory.Length; a++)
             {
                 foreach (var activeElement in activeElements)
                 {
-                    if ((int)GameEngine.Player.BlobInventory[a] == activeElement.CurrentElement)
+                    if ((int)_blob.BlobInventory[a] == activeElement.CurrentElement)
                     {
-                        GameEngine.Player.BlobInventory[a] = Collectables.None;
+                        _blob.BlobInventory[a] = Collectables.None;
                         _elementsToReplace.Enqueue(activeElement.CurrentElement);
                         _replacingElements = true;
 
@@ -212,19 +233,19 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
         // Leave the core room
         if (!_replacingElements && _entryTime > CoreVisitFrames)
         {
-            GameEngine.GameScreens.ScreenNumber = WorldMap.CoreApproachScreenNumber;
-            GameEngine.ScreenDirectory.Current = GameScreenType.MainGame;
-            GameEngine.Player.BlobXPos = GameEngine.GameScreens.ScreenWidth - GameEngine.Player.BlobWidth;
-            GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.PlanetCore, null);
+            _gameScreens.ScreenNumber = WorldMap.CoreApproachScreenNumber;
+            _screenDirectory.Current = GameScreenType.MainGame;
+            _blob.BlobXPos = _gameScreens.ScreenWidth - _blob.BlobWidth;
+            _screenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.PlanetCore, null);
 
             _justEnteredCore = true;
-            GameEngine.Presentation.BackgroundColour = Color.Black;
+            _presentation.BackgroundColour = Color.Black;
         }
-        else if (!_replacingElements && GameEngine.Elements.GetElementsReplacedCount() == CoreElementsToReplace)
+        else if (!_replacingElements && _elements.GetElementsReplacedCount() == CoreElementsToReplace)
         {
             // Finished the game!
-            GameEngine.ScreenDirectory.Current = GameScreenType.GameComplete;
-            GameEngine.ScreenDirectory.Get(GameScreenType.GameComplete).PerformPostScreenChangeActions(GameScreenType.MainGame, null);
+            _screenDirectory.Current = GameScreenType.GameComplete;
+            _screenDirectory.Get(GameScreenType.GameComplete).PerformPostScreenChangeActions(GameScreenType.MainGame, null);
         }
         else
         {
@@ -251,18 +272,18 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
 
         if (!_replacingElements)
         {
-            GameEngine.ContentResourceManager.GetSpriteCollection("BlankingTile").Begin(BlendState.AlphaBlend, gameTime);
+            _resources.GetSpriteCollection("BlankingTile").Begin(BlendState.AlphaBlend, gameTime);
             for (var a = 0; a < BlankingTilesDown; a++)
             {
                 for (var b = 0; b < BlankingTilesAcross; b++)
                 {
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlankingTile").DrawSprite(0, b * TileMetrics.TileWidth + BlankingTilesFirstColumn, a * TileMetrics.TileHeight, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_blankingTilesOpacity));
+                    _resources.GetSpriteCollection("BlankingTile").DrawSprite(0, b * TileMetrics.TileWidth + BlankingTilesFirstColumn, a * TileMetrics.TileHeight, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_blankingTilesOpacity));
                 }
             }
-            GameEngine.ContentResourceManager.GetSpriteCollection("BlankingTile").End();
+            _resources.GetSpriteCollection("BlankingTile").End();
         }
 
-        GameEngine.GameScreens.Draw(Color.White, gameTime);
+        _gameScreens.Draw(Color.White, gameTime);
 
         // Draw the core aliens
         if (!_replacingElements)
@@ -300,12 +321,12 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
     /// </summary>
     private void EnterCore()
     {
-        GameEngine.GameScreens.ScreenNumber = WorldMap.CoreScreenNumber;
+        _gameScreens.ScreenNumber = WorldMap.CoreScreenNumber;
 
         // Add the collision map for the core elements
-        GameEngine.GameScreens.CurrentGameScreenData.CollisionMap.AddRange(_elements.GetCollisionMap());
+        _gameScreens.CurrentGameScreenData.CollisionMap.AddRange(_elements.GetCollisionMap());
 
-        var potentialLocations = GameEngine.GameScreens.GetNastyPotentialLocations();
+        var potentialLocations = _gameScreens.GetNastyPotentialLocations();
         if (potentialLocations.Count < _coreAlienCount)
         {
             _coreAlienCount = potentialLocations.Count;

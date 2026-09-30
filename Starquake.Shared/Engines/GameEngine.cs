@@ -872,10 +872,49 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                 Elements));
 
         ScreenDirectory.Add(GameScreenType.MainGame, _mainScreen);
-        ScreenDirectory.Add(GameScreenType.Teleporter, new TeleportScreen(this));
-        ScreenDirectory.Add(GameScreenType.PlanetCore, new PlanetCoreScreen(this, Elements));
-        ScreenDirectory.Add(GameScreenType.AccessBooth, new AccessBoothScreen(this));
-        ScreenDirectory.Add(GameScreenType.Cheops, new CheopsScreen(this));
+        ScreenDirectory.Add(GameScreenType.Teleporter, new TeleportScreen(
+            ContentMgr,
+            ContentResourceManager,
+            Font2,
+            GameScreens,
+            GraphicsDeviceMgr,
+            GraphicsSet,
+            Player,
+            Presentation,
+            RandomNumberGenerator,
+            ScreenDirectory,
+            ShapeDrawer));
+        ScreenDirectory.Add(GameScreenType.PlanetCore, new PlanetCoreScreen(
+            ContentResourceManager,
+            GameScreens,
+            GraphicsSet,
+            Presentation,
+            ScreenDirectory,
+            Session,
+            Player,
+            RandomNumberGenerator,
+            Elements));
+        ScreenDirectory.Add(GameScreenType.AccessBooth, new AccessBoothScreen(
+            BlobStatusPanel,
+            ContentResourceManager,
+            Font2,
+            GameScreens,
+            GraphicsSet,
+            Player,
+            RandomNumberGenerator,
+            ScreenDirectory,
+            ShapeDrawer));
+        ScreenDirectory.Add(GameScreenType.Cheops, new CheopsScreen(
+            BlobStatusPanel,
+            ContentResourceManager,
+            Elements,
+            Font2,
+            GameScreens,
+            GraphicsSet,
+            Player,
+            RandomNumberGenerator,
+            ScreenDirectory,
+            ShapeDrawer));
 
         foreach (var screen in ScreenDirectory.All)
         {
