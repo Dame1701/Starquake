@@ -451,7 +451,7 @@ public class StatusPanel : GameComponentBase
             GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).End();
         }
 
-        if (_slotToScan >= 0)
+        if (_slotToScan >= 0 && _blobsInventory != null)
         {
             _inventoryScanner.Draw((int)_blobsInventory[_slotToScan], InventorySlotSpacing * _slotToScan + InventoryScannerXPos, InventoryScannerYPos, gameTime);
         }

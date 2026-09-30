@@ -109,7 +109,7 @@ public class KeyDefiner
         {
             if (pressedKey == Keys.Y)
             {
-                KeyDefinitionComplete(this, EventArgs.Empty);
+                KeyDefinitionComplete?.Invoke(this, EventArgs.Empty);
             }
             else if (pressedKey == Keys.N)
             {

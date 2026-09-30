@@ -72,8 +72,7 @@ public class ParticleEngine
             return cpe;
         }
 
-        //throw new Exception("Effect: '" + EffectName + "' has not been registered");
-        return null;
+        throw new InvalidOperationException($"Particle effect '{effectName}' has not been registered.");
     }
 
     public MultiTriggerTimeBasedParticleEffect CreateMultiTriggeredTimeBasedEffectInstance(string effectName)
@@ -93,8 +92,7 @@ public class ParticleEngine
             return mtpe;
         }
 
-        //throw new Exception("Effect: '" + EffectName + "' has not been registered");
-        return null;
+        throw new InvalidOperationException($"Particle effect '{effectName}' has not been registered.");
     }
 
     public TriggeredParticleEffect CreateSingleTriggerEffectInstance(string effectName)
@@ -114,7 +112,6 @@ public class ParticleEngine
             return tpe;
         }
 
-        //throw new Exception("Effect: '" + EffectName + "' has not been registered");
-        return null;
+        throw new InvalidOperationException($"Particle effect '{effectName}' has not been registered.");
     }
 }
