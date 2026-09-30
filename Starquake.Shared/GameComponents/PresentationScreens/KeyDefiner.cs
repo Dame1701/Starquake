@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
@@ -47,7 +48,7 @@ public class KeyDefiner
     }
     public Keys[] DefinedKeys { get; }
 
-    public event EventHandler KeyDefinitionComplete;
+    public event EventHandler? KeyDefinitionComplete;
 
     public string GetKeys()
     {

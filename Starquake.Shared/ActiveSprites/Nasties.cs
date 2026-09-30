@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -66,7 +67,7 @@ public class Nasties : GameComponentBase
                     3));
         }
     }
-    public event RaiseInteractionWithBlob OnNastyInteractionWithBlob;
+    public event RaiseInteractionWithBlob? OnNastyInteractionWithBlob;
 
     #region IGameComponent Members
 
