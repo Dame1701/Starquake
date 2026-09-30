@@ -251,7 +251,7 @@ public class StatusPanel : GameComponentBase
         PlayerScore = 0;
     }
 
-    public void BlobHasPerformedAnAction(BlobAction action, object data)
+    public void BlobHasPerformedAnAction(BlobAction action, object? data)
     {
         if (action == BlobAction.FiredLazer)
         {
@@ -263,7 +263,12 @@ public class StatusPanel : GameComponentBase
         }
         else if (action == BlobAction.GotPowerUp)
         {
-            var powerUpType = (int)data;
+            // The only action that carries anything, and what it carries is the power up's type
+            if (data is not int powerUpType)
+            {
+                throw new ArgumentException(
+                    "A power up action needs the type of power up collected.", nameof(data));
+            }
 
             if (powerUpType == PowerUpEnergyMedium)
             {

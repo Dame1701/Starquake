@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
@@ -295,11 +296,11 @@ public class Blob : GameComponentBase
 
     private readonly JumpPlatforms _blobJumpPlatformEngine;
     private int _blobAlarmSoundCounter;
-    private Animation _blobAnimFire1;
-    private Animation _blobAnimFire2;
+    private readonly Animation _blobAnimFire1;
+    private readonly Animation _blobAnimFire2;
 
-    private Animation _blobAnimLeft;
-    private Animation _blobAnimRight;
+    private readonly Animation _blobAnimLeft;
+    private readonly Animation _blobAnimRight;
 
     private bool _blobCanFire = true;
     private int _blobDistanceFallen;
@@ -313,8 +314,8 @@ public class Blob : GameComponentBase
     private int _blobFireDistance;
 
     private int _blobFireFade;
-    private IPositionalTriggerParticleEffect _blobFireSparks;
-    private IStandardParticleEffect _blobFireTrail;
+    private readonly IPositionalTriggerParticleEffect _blobFireSparks;
+    private readonly IStandardParticleEffect _blobFireTrail;
 
     private int _blobFrameOnEntry;
     private bool _blobOnShuttle;
@@ -327,10 +328,10 @@ public class Blob : GameComponentBase
 
     private Point _blobScreenEntryLocation;
 
-    private Animation _blobShuttleAnim;
+    private readonly Animation _blobShuttleAnim;
     private Direction _blobsLastAnimDirection = Direction.None;
 
-    private IStandardParticleEffect _blobTeleporterBeam;
+    private readonly IStandardParticleEffect _blobTeleporterBeam;
     private int _blobTotalDistanceFallen;
     private bool _blobTouched;
 
@@ -352,11 +353,11 @@ public class Blob : GameComponentBase
 
     private int _teleportFadeLevel;
 
-    private TileDetected _tileAboveBlob;
-    private TileDetected _tileBelowBlob;
-    private TileDetected _tileLeftBlob;
-    private TileDetected _tileRightBlob;
-    private List<ResetTile> _tilesToReset;
+    private TileDetected? _tileAboveBlob;
+    private TileDetected? _tileBelowBlob;
+    private TileDetected? _tileLeftBlob;
+    private TileDetected? _tileRightBlob;
+    private readonly List<ResetTile> _tilesToReset = [];
 
     public Blob(GameEngine gameEngineReference) : base(gameEngineReference)
     {
@@ -366,75 +367,7 @@ public class Blob : GameComponentBase
         _teleportFadeLevel = ColourLevels.Full;
         _startBlobTeleporting = false;
         BlobsState = BlobState.Normal;
-    }
 
-    public Collectables[] BlobInventory { get; private set; }
-
-    private Direction DirectionBlobMoved { get; set; } = Direction.None;
-
-    public int BlobXPos
-    {
-        get => _blobXPos;
-        set
-        {
-            _blobXPos = value;
-            _blobScreenEntryLocation.X = value;
-        }
-    }
-
-    public int BlobYPos
-    {
-        get => _blobYPos;
-        set
-        {
-            _blobYPos = value;
-            _blobScreenEntryLocation.Y = value;
-        }
-    }
-
-    public BlobState BlobsState { get; set; }
-
-    public bool BlobTouchedByNasty { get; set; }
-
-    public int BlobWidth => SpriteMetrics.SpriteWidth;
-
-    public int BlobHeight { get; private set; } = SpriteMetrics.SpriteHeight;
-
-    public int BlobFrame { get; set; } = BlobRestingFrame;
-
-    public int BlobHSpeed { get; set; } = BlobWalkSpeed;
-
-    public int BlobVSpeed { get; set; } = BlobWalkSpeed;
-
-    public int BlobFireX { get; private set; }
-
-    public int BlobFireY { get; private set; }
-
-    public bool BlobHasFired { get; private set; }
-
-    public CustomControl BlobsControl { get; }
-
-    public event RaiseScreenChanged OnScreenChanged;
-
-    public event RaiseBlobAction OnBlobActionRaised;
-
-    public void KillBlob(bool resetBlobToScreenEntryPoint, bool overloadFirst)
-    {
-        if (BlobsState != BlobState.Normal)
-        {
-            return;
-        }
-
-        _resetBlobToScreenEntryPoint = resetBlobToScreenEntryPoint;
-
-        _blobOverloadState = overloadFirst ? OverloadSwelling : OverloadExploded;
-
-        BlobsState = BlobState.Overloading;
-        _blobAlarmSoundCounter = 0;
-    }
-
-    public void LoadContent(ContentList content)
-    {
         _blobTeleporterBeam =
             (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("BeamMeUp_Small",
                 ParticleEffectType.Triggered, null);
@@ -446,14 +379,8 @@ public class Blob : GameComponentBase
             (IPositionalTriggerParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("FireSparks",
                 ParticleEffectType.TriggeredMultiLocationTimed, null);
 
-        if (_blobTeleporterBeam != null)
-        {
-            _blobTeleporterBeam.ParticleEffectComplete += blobTeleporterBeam_ParticleEffectComplete;
-        }
-    }
+        _blobTeleporterBeam.ParticleEffectComplete += blobTeleporterBeam_ParticleEffectComplete;
 
-    public void Initialise()
-    {
         // Fire location starts same as Blob's screen location
         BlobFireX = _blobXPos + FireOffset;
         BlobFireY = _blobYPos + FireOffset;
@@ -527,7 +454,71 @@ public class Blob : GameComponentBase
         BlobInventory[1] = Collectables.Key;
         BlobInventory[0] = Collectables.AccessCard;
 
-        _tilesToReset = [];
+    }
+
+    public Collectables[] BlobInventory { get; }
+
+    private Direction DirectionBlobMoved { get; set; } = Direction.None;
+
+    public int BlobXPos
+    {
+        get => _blobXPos;
+        set
+        {
+            _blobXPos = value;
+            _blobScreenEntryLocation.X = value;
+        }
+    }
+
+    public int BlobYPos
+    {
+        get => _blobYPos;
+        set
+        {
+            _blobYPos = value;
+            _blobScreenEntryLocation.Y = value;
+        }
+    }
+
+    public BlobState BlobsState { get; set; }
+
+    public bool BlobTouchedByNasty { get; set; }
+
+    public int BlobWidth => SpriteMetrics.SpriteWidth;
+
+    public int BlobHeight { get; private set; } = SpriteMetrics.SpriteHeight;
+
+    public int BlobFrame { get; set; } = BlobRestingFrame;
+
+    public int BlobHSpeed { get; set; } = BlobWalkSpeed;
+
+    public int BlobVSpeed { get; set; } = BlobWalkSpeed;
+
+    public int BlobFireX { get; private set; }
+
+    public int BlobFireY { get; private set; }
+
+    public bool BlobHasFired { get; private set; }
+
+    public CustomControl BlobsControl { get; }
+
+    public event RaiseScreenChanged? OnScreenChanged;
+
+    public event RaiseBlobAction? OnBlobActionRaised;
+
+    public void KillBlob(bool resetBlobToScreenEntryPoint, bool overloadFirst)
+    {
+        if (BlobsState != BlobState.Normal)
+        {
+            return;
+        }
+
+        _resetBlobToScreenEntryPoint = resetBlobToScreenEntryPoint;
+
+        _blobOverloadState = overloadFirst ? OverloadSwelling : OverloadExploded;
+
+        BlobsState = BlobState.Overloading;
+        _blobAlarmSoundCounter = 0;
     }
 
     // Blob has hit something
@@ -539,7 +530,7 @@ public class Blob : GameComponentBase
 
     public void TriggerBlobTeleportedAnimation()
     {
-        _blobTeleporterBeam?.Start();
+        _blobTeleporterBeam.Start();
         _startBlobTeleporting = true;
         _teleportFadeLevel = 0;
     }
@@ -786,7 +777,7 @@ public class Blob : GameComponentBase
                                 _inventoryAccessed = true;
 
                                 // Collect powerups
-                                InteractiveItem interactiveItemDropped = null;
+                                InteractiveItem? interactiveItemDropped = null;
 
                                 // Pull out the last item and put it on the screen
                                 if (BlobInventory[^1] != Collectables.None)
@@ -1760,8 +1751,11 @@ public class Blob : GameComponentBase
                     }
                 }
 
-                // Detect an access booth
-                if (_tileLeftBlob is { TileNumber: (int)ActionTiles.AccessBoothRight })
+                // Detect an access booth. Note that each side detects the booth on one side of
+                // blob and then reports the map position of the tile on his other side, which is
+                // why both tiles have to be there for either to trigger
+                if (_tileLeftBlob is { TileNumber: (int)ActionTiles.AccessBoothRight } &&
+                    _tileRightBlob != null)
                 {
                     if (_tileLeftBlob.XPosition <= 46 &&
                         _tileLeftBlob.YPosition == 32)
@@ -1775,7 +1769,8 @@ public class Blob : GameComponentBase
                     }
                 }
 
-                if (_tileRightBlob is { TileNumber: (int)ActionTiles.AccessBoothLeft })
+                if (_tileRightBlob is { TileNumber: (int)ActionTiles.AccessBoothLeft } &&
+                    _tileLeftBlob != null)
                 {
                     if (_tileRightBlob.XPosition >= 24 &&
                         _tileRightBlob.YPosition == 32)
@@ -2511,7 +2506,7 @@ public class Blob : GameComponentBase
             temp.Add(t);
         }
 
-        return temp.Count > 0 ? temp : null;
+        return temp;
     }
 
     private void blobTeleporterBeam_ParticleEffectComplete()
@@ -2523,13 +2518,7 @@ public class Blob : GameComponentBase
     {
         offset = 0;
 
-        var screenItems = GetCollisionObjects();
-        if (screenItems == null)
-        {
-            return false;
-        }
-
-        foreach (var t in screenItems)
+        foreach (var t in GetCollisionObjects())
         {
             if (!CollisionDetection.Check(blobsPosition, new Rectangle(t.XLocation, t.YLocation, SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight)))
             {

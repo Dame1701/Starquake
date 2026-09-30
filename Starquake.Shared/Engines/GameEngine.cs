@@ -369,12 +369,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         // Core Elements
         Elements = new CoreElements(this);
 
-        // Player (Blob)
-        Player = new Blob(this);
-        Player.OnScreenChanged += Player_OnScreenChanged;
-        Player.OnBlobActionRaised += Player_OnBlobActionRaised;
-        Player.Initialise();
-
         // Nasties
         Nasties = new Nasties(this, NastiesPerScreen);
         Nasties.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
@@ -619,8 +613,11 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         {
             SqText = new ImageFont(this, ContentMgr);
 
-            var blobGraphics = new ContentList(ContentMgr);
-            Player.LoadContent(blobGraphics);
+            // Player (Blob). Built here rather than in Initialise because the three particle
+            // effects he carries are resources, and those do not exist until content loads
+            Player = new Blob(this);
+            Player.OnScreenChanged += Player_OnScreenChanged;
+            Player.OnBlobActionRaised += Player_OnBlobActionRaised;
 
             // Game Screens. Built here rather than in the constructor because the screen data and
             // the collision map it needs are resources, and those do not exist until content loads
