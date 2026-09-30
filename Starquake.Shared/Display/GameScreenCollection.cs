@@ -73,19 +73,6 @@ public class GameScreenCollection : GameComponentBase
     private const int LastCollidableTile = (int)ActionTiles.ShuttleTag2;
 
     /// <summary>
-    ///     Collision tiles carrying an image number beyond this are game objects rather than scenery -
-    ///     a nasty, a pickup, a core element - and are tested against a sprite-sized box.
-    /// </summary>
-    private const int FirstGameObjectImage = 999;
-
-    /// <summary>
-    ///     The box a game object is tested against when checking whether a nasty has ended up embedded
-    ///     in one. Half a sprite, not a whole one, and not a collision cell either - it is its own
-    ///     number and was written inline as a bare 32.
-    /// </summary>
-    private const int GameObjectProbeSize = 32;
-
-    /// <summary>
     ///     The eight lower tiles that cast a shadow onto the tile below them, and the upper-layer
     ///     sprite that shadow is drawn with. They come in pairs with a gap between each pair, which is
     ///     why this is eight numbers rather than a range.
@@ -199,7 +186,6 @@ public class GameScreenCollection : GameComponentBase
     /// </summary>
     private static readonly string[] ForceFieldEmitterNames = ["Emitter01", "Emitter05"];
 
-    private readonly List<CollisionTile> _detectedCollisionMap;
     private readonly CoreElements _elements;
 
     private readonly GameScreenData[] _gameScreens;
@@ -209,7 +195,6 @@ public class GameScreenCollection : GameComponentBase
     private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
 
-    private readonly int[,,] _screenCollisionDataArray;
     private readonly int _tileHeight;
 
     private readonly int _tileWidth;
@@ -252,12 +237,12 @@ public class GameScreenCollection : GameComponentBase
         CollAreaWidth = collAreaWidth;
         CollAreaHeight = collAreaHeight;
 
-        _detectedCollisionMap = new List<CollisionTile>();
-
         // Load screen data
         _gameScreens = (GameScreenData[])_resources.GetDataResource("GameScreens");
-        _screenCollisionDataArray =
-            (int[,,])_resources.GetDataResource("ScreenCollisionData");
+
+        Collisions = new ScreenCollisionMap(
+            _gameScreens,
+            (int[,,])_resources.GetDataResource("ScreenCollisionData"));
 
         BlobsShipSmoke1 =
             (IStandardParticleEffect)_resources.GetParticleEffectInstance("BasicSmokePlume",
@@ -274,6 +259,13 @@ public class GameScreenCollection : GameComponentBase
         _tileWidth = TileMetrics.TileWidth;
         _tileHeight = TileMetrics.TileHeight;
     }
+
+    /// <summary>
+    ///     What can be walked into on the screen being shown, and how far a mover may travel before
+    ///     it is. Rebuilt by <see cref="UpdateCollisionMap" /> whenever the screen changes or
+    ///     something on it does.
+    /// </summary>
+    public ScreenCollisionMap Collisions { get; }
 
     public int TilesAcross { get; }
 
@@ -473,8 +465,7 @@ public class GameScreenCollection : GameComponentBase
                 }
 
                 // Only place on tiles with collision blocks below the powerup
-                if (_screenCollisionDataArray[tileImage, 1, 0] != 1 ||
-                    _screenCollisionDataArray[tileImage, 2, 0] != 1)
+                if (!Collisions.CanStandOnTopOf(tileImage))
                 {
                     continue;
                 }
@@ -492,7 +483,7 @@ public class GameScreenCollection : GameComponentBase
     public void SaveData()
     {
         byte[] gameScreensData = MessagePackSerializer.Serialize(_gameScreens);
-        byte[] collisionData = MessagePackSerializer.Serialize(_screenCollisionDataArray);
+        byte[] collisionData = MessagePackSerializer.Serialize(Collisions.TileCollisionData);
 
         using (var fs = new FileStream("SQScreenData.dat", FileMode.Create, FileAccess.Write))
         {
@@ -517,17 +508,9 @@ public class GameScreenCollection : GameComponentBase
     ///     Rebuilds the collision map for the screen being shown.
     /// </summary>
     /// <param name="screenChanged">
-    ///     Whether this is a new screen rather than a change on the one already up. All it controls is
-    ///     the key-door cache: the doors are found once per screen and held.
+    ///     Whether this is a new screen rather than a change on the one already up. All it controls
+    ///     here is the key-door cache: the doors are found once per screen and held.
     /// </param>
-    /// <remarks>
-    ///     It used to control more, or appear to. The false path first removed the game-object tiles
-    ///     from the map, and the map was then replaced wholesale on the very next line, so that work
-    ///     was thrown away - and the removal walked the list with an index while removing from it, so
-    ///     it would have skipped every second match had it mattered. The two paths also differed in
-    ///     whether the screen's objects went straight into the map or into a list appended to it
-    ///     afterwards, which put the same tiles in the same order either way.
-    /// </remarks>
     public void UpdateCollisionMap(bool screenChanged)
     {
         if (screenChanged)
@@ -535,261 +518,7 @@ public class GameScreenCollection : GameComponentBase
             _keyLockDoors = null;
         }
 
-        _gameScreens[ScreenNumber].CollisionMap = new List<CollisionTile>();
-
-        for (int y = 0; y < TilesDown; y++)
-        {
-            for (int x = 0; x < TilesAcross; x++)
-            {
-                if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage <= -1)
-                {
-                    continue;
-                }
-
-                AddTileCollisionCells(x, y);
-                AddInteriorCollisionCells(x, y);
-                AddCentralSpikeCollisionCells(x, y);
-                AddWallSpikeCollisionCells(x, y);
-                AddSecretPassageCollisionCells(x, y);
-            }
-        }
-
-        AddScreenObjectCollisionTiles();
-    }
-
-    /// <summary>
-    ///     The cells of one tile that everything collides with, read from the collision data that ships
-    ///     alongside the screens.
-    /// </summary>
-    private void AddTileCollisionCells(int x, int y)
-    {
-        for (int y1 = 0; y1 < TileMetrics.CollisionCellsDownTile; y1++)
-        {
-            for (int x1 = 0; x1 < TileMetrics.CollisionCellsAcrossTile; x1++)
-            {
-                if (_screenCollisionDataArray[_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage, x1,
-                        y1] == 1)
-                {
-                    _gameScreens[ScreenNumber].CollisionMap.Add(
-                        new CollisionTile(
-                            _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage,
-                            x * _resources
-                                .GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteWidth +
-                            x1 * CollAreaWidth,
-                            y * _resources
-                                .GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteHeight +
-                            y1 * CollAreaHeight,
-                            CollisionTileType.EveryoneHits));
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    ///     Teleporters, access booths and tunnel lifts. Blob walks into these on purpose, so their cells
-    ///     stop everything except him.
-    /// </summary>
-    private void AddInteriorCollisionCells(int x, int y)
-    {
-        if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.TeleportBooth ||
-            _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.AccessBoothLeft ||
-            _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.AccessBoothRight ||
-            _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.TunnelLiftTop1 ||
-            _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.TunnelLiftShaft1 ||
-            _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.TunnelLiftShaft2 ||
-            _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.TunnelLiftShaft3 ||
-            _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.TunnelLiftTop2 ||
-            _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.TunnelLiftTop3)
-        {
-            // Cover the whole tile since it doesn't matter - nasties can't touch any of it anyway
-            int tileX = x * TileMetrics.TileWidth;
-            int tileY = y * TileMetrics.TileHeight;
-
-            for (int a = 0; a < TileMetrics.CollisionCellsDownTile; a++)
-            {
-                for (int b = 0; b < TileMetrics.CollisionCellsAcrossTile; b++)
-                {
-                    _gameScreens[ScreenNumber].CollisionMap.Add(
-                        new CollisionTile(
-                            (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                            b * TileMetrics.CollisionCellWidth + tileX,
-                            a * TileMetrics.CollisionCellHeight + tileY,
-                            CollisionTileType.NotBlob));
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    ///     Central spikes and broken bottles. Only the four middle cells, and only against nasties - blob
-    ///     is meant to be able to walk onto them and die.
-    /// </summary>
-    private void AddCentralSpikeCollisionCells(int x, int y)
-    {
-        int tileX = x * TileMetrics.TileWidth;
-        int tileY = y * TileMetrics.TileHeight;
-
-        if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.Spike2 ||
-            _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.Spike3)
-        {
-            _gameScreens[ScreenNumber].CollisionMap.Add(
-                new CollisionTile(
-                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                    TileMetrics.CollisionCellWidth + tileX,
-                    TileMetrics.CollisionCellHeight + tileY,
-                    CollisionTileType.NotBlob));
-
-            _gameScreens[ScreenNumber].CollisionMap.Add(
-                new CollisionTile(
-                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                    TileMetrics.CollisionCellWidth + tileX,
-                    TileMetrics.CollisionCellHeight * 2 + tileY,
-                    CollisionTileType.NotBlob));
-
-            _gameScreens[ScreenNumber].CollisionMap.Add(
-                new CollisionTile(
-                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                    TileMetrics.CollisionCellWidth * 2 + tileX,
-                    TileMetrics.CollisionCellHeight + tileY,
-                    CollisionTileType.NotBlob));
-
-            _gameScreens[ScreenNumber].CollisionMap.Add(
-                new CollisionTile(
-                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                    TileMetrics.CollisionCellWidth * 2 + tileX,
-                    TileMetrics.CollisionCellHeight * 2 + tileY,
-                    CollisionTileType.NotBlob));
-        }
-    }
-
-    /// <summary>
-    ///     Spikes mounted on a right-hand wall, so their cells run down the tile rather than across its
-    ///     middle.
-    /// </summary>
-    private void AddWallSpikeCollisionCells(int x, int y)
-    {
-        int tileX = x * TileMetrics.TileWidth;
-        int tileY = y * TileMetrics.TileHeight;
-
-        if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.Spike1)
-        {
-            _gameScreens[ScreenNumber].CollisionMap.Add(
-                new CollisionTile(
-                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                    TileMetrics.CollisionCellWidth * 2 + tileX,
-                    tileY,
-                    CollisionTileType.NotBlob));
-
-            _gameScreens[ScreenNumber].CollisionMap.Add(
-                new CollisionTile(
-                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                    TileMetrics.CollisionCellWidth * 3 + tileX,
-                    tileY,
-                    CollisionTileType.NotBlob));
-
-            _gameScreens[ScreenNumber].CollisionMap.Add(
-                new CollisionTile(
-                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                    TileMetrics.CollisionCellWidth * 2 + tileX,
-                    TileMetrics.CollisionCellHeight + tileY,
-                    CollisionTileType.NotBlob));
-
-            _gameScreens[ScreenNumber].CollisionMap.Add(
-                new CollisionTile(
-                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                    TileMetrics.CollisionCellWidth * 3 + tileX,
-                    TileMetrics.CollisionCellHeight + tileY,
-                    CollisionTileType.NotBlob));
-        }
-    }
-
-    private void AddSecretPassageCollisionCells(int x, int y)
-    {
-        int tileX = x * TileMetrics.TileWidth;
-        int tileY = y * TileMetrics.TileHeight;
-
-        for (int a = 0; a < TunnelTiles.MouthPairs; a++)
-        {
-            int tunnelTile = a + TunnelTiles.FirstMouth;
-            if (tunnelTile % 2 == 0)
-            {
-                // Left passages
-                if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == tunnelTile)
-                {
-                    for (int b = 0; b < 3; b++)
-                    {
-                        _gameScreens[ScreenNumber].CollisionMap.Add(
-                            new CollisionTile(
-                                (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                tileX,
-                                b * 32 + tileY,
-                                CollisionTileType.NotBlob));
-                    }
-                }
-            }
-            else
-            {
-                // Right passages
-                if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == tunnelTile)
-                {
-                    for (int b = 0; b < 3; b++)
-                    {
-                        _gameScreens[ScreenNumber].CollisionMap.Add(
-                            new CollisionTile(
-                                (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                tileX + 96,
-                                b * 32 + tileY,
-                                CollisionTileType.NotBlob));
-                    }
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    ///     The power-up, the pick-ups and the pyramid. On a screen change these go straight onto the map
-    ///     just rebuilt; otherwise they are held back and appended to it.
-    /// </summary>
-    private void AddScreenObjectCollisionTiles()
-    {
-        List<CollisionTile> objectCollisions = _gameScreens[ScreenNumber].CollisionMap;
-
-        InteractiveItem? powerUp = _gameScreens[ScreenNumber].PowerUp;
-        if (powerUp != null)
-        {
-            AddObjectCollisionTiles(objectCollisions, powerUp);
-        }
-
-        foreach (InteractiveItem pickUp in _gameScreens[ScreenNumber].PickUps)
-        {
-            AddObjectCollisionTiles(objectCollisions, pickUp);
-        }
-
-        InteractiveItem? cheopsPyramid = _gameScreens[ScreenNumber].CheopsPyramid;
-        if (cheopsPyramid != null)
-        {
-            AddObjectCollisionTiles(objectCollisions, cheopsPyramid);
-        }
-    }
-
-    /// <summary>
-    ///     An item sitting on a screen occupies two tiles each way, and nothing but blob collides
-    ///     with one.
-    /// </summary>
-    private static void AddObjectCollisionTiles(List<CollisionTile> collisionMap, InteractiveItem item)
-    {
-        for (int y = 0; y < 2; y++)
-        {
-            for (int x = 0; x < 2; x++)
-            {
-                collisionMap.Add(
-                    new CollisionTile(
-                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                        item.XLocation + x * 32,
-                        item.YLocation + y * 32,
-                        CollisionTileType.NotBlob));
-            }
-        }
+        Collisions.Rebuild(ScreenNumber);
     }
 
     public void ChangeShuttlePlatformState(bool padRemoved)
@@ -829,33 +558,16 @@ public class GameScreenCollection : GameComponentBase
         }
     }
 
+    /// <inheritdoc cref="ScreenCollisionMap.CheckRectangles" />
     public int CheckRectangles(
         int playerXPos,
         int playerYPos,
         int playerWidth,
         int playerHeight,
         bool isBlob)
-    {
-        // Cycle through the collision map
-        foreach (CollisionTile collisionTile in _gameScreens[_screenNumber].CollisionMap)
-        {
-            var collide =
-                CollisionDetection.Check(
-                    new Rectangle(playerXPos, playerYPos, playerWidth, playerHeight),
-                    new Rectangle(collisionTile.XPos,
-                        collisionTile.YPos, CollAreaWidth, CollAreaHeight));
+        => Collisions.CheckRectangles(playerXPos, playerYPos, playerWidth, playerHeight, isBlob);
 
-            // A NotBlob tile is there for the nasties to walk on, so the blob passes through it
-            // and we carry on looking for something it does hit.
-            if (collide && !(isBlob && collisionTile.CollisionTileType == CollisionTileType.NotBlob))
-            {
-                return collisionTile.TileImage;
-            }
-        }
-
-        return -1;
-    }
-
+    /// <inheritdoc cref="ScreenCollisionMap.CheckCollision" />
     public int CheckCollision(
         Direction playerDirection,
         int playerXPos,
@@ -864,131 +576,8 @@ public class GameScreenCollection : GameComponentBase
         int playerHeight,
         int velocity,
         bool isBlob)
-    {
-        int checkMovementAmount = velocity;
-
-        _detectedCollisionMap.Clear();
-
-        // Cycle through the collision map
-        foreach (CollisionTile colTile in _gameScreens[_screenNumber].CollisionMap)
-        {
-            _detectedCollisionMap.Add(colTile);
-
-            int checkMovementAmountTemp = StepAllowedBy(
-                colTile,
-                playerDirection,
-                playerXPos,
-                playerYPos,
-                playerWidth,
-                playerHeight,
-                velocity,
-                isBlob);
-
-            if (checkMovementAmountTemp <= checkMovementAmount)
-            {
-                checkMovementAmount = checkMovementAmountTemp;
-            }
-        }
-
-        if (!isBlob)
-        {
-            checkMovementAmount = ClampToScreenBounds(
-                playerDirection,
-                playerXPos,
-                playerYPos,
-                playerWidth,
-                playerHeight,
-                checkMovementAmount);
-        }
-
-        return checkMovementAmount;
-    }
-
-    /// <summary>
-    ///     How far one collision tile allows the mover to travel. Two kinds of tile let it pass
-    ///     regardless: those marked <see cref="CollisionTileType.NotBlob" /> when the mover is blob,
-    ///     and a game object a nasty has ended up embedded inside, which is released rather than
-    ///     trapped.
-    /// </summary>
-    private int StepAllowedBy(
-        CollisionTile colTile,
-        Direction playerDirection,
-        int playerXPos,
-        int playerYPos,
-        int playerWidth,
-        int playerHeight,
-        int velocity,
-        bool isBlob)
-    {
-        if (colTile.CollisionTileType == CollisionTileType.NotBlob && isBlob)
-        {
-            return velocity;
-        }
-
-        if (colTile.TileImage > FirstGameObjectImage &&
-            !isBlob &&
-            (CollisionObjectType)colTile.TileImage is CollisionObjectType.JumpPlatform or
-            CollisionObjectType.CoreElement or
-            CollisionObjectType.GameObject &&
-            CollisionDetection.Check(
-                new Rectangle(playerXPos, playerYPos, playerWidth, playerHeight),
-                new Rectangle(colTile.XPos, colTile.YPos, GameObjectProbeSize, GameObjectProbeSize)))
-        {
-            return velocity;
-        }
-
-        return CollisionDetection.CheckDirection(
-            playerDirection,
-            velocity,
-            playerXPos,
-            playerYPos,
-            playerWidth,
-            playerHeight,
-            colTile.XPos,
-            colTile.YPos,
-            CollAreaWidth,
-            CollAreaHeight);
-    }
-
-    /// <summary>
-    ///     Stops a mover at the edge of the screen. Only nasties are clamped: blob walking off an edge
-    ///     is how he changes screens.
-    /// </summary>
-    /// <remarks>
-    ///     This was four arms, one per direction, which were two shapes written twice. Up and left run
-    ///     into nought; down and right run into the screen's own width or height less the mover's size.
-    /// </remarks>
-    private int ClampToScreenBounds(
-        Direction playerDirection,
-        int playerXPos,
-        int playerYPos,
-        int playerWidth,
-        int playerHeight,
-        int checkMovementAmount)
-    {
-        (int position, int size, int limit) = playerDirection switch
-        {
-            Direction.Up or Direction.Down => (playerYPos, playerHeight, ScreenHeight),
-            Direction.Left or Direction.Right => (playerXPos, playerWidth, ScreenWidth),
-            _ => (0, 0, 0)
-        };
-
-        if (playerDirection is Direction.Up or Direction.Left)
-        {
-            int overshoot = position - checkMovementAmount;
-
-            return overshoot < 0 ? checkMovementAmount + overshoot : checkMovementAmount;
-        }
-
-        if (playerDirection is Direction.Down or Direction.Right)
-        {
-            int overshoot = position + size + checkMovementAmount - limit;
-
-            return overshoot > 0 ? checkMovementAmount - overshoot : checkMovementAmount;
-        }
-
-        return checkMovementAmount;
-    }
+        => Collisions.CheckCollision(
+            playerDirection, playerXPos, playerYPos, playerWidth, playerHeight, velocity, isBlob);
 
     public Point ConvertToScreenCoords(int tileMapXPos, int tileMapYPos)
         => new(
@@ -1088,6 +677,7 @@ public class GameScreenCollection : GameComponentBase
         return returnedTiles;
     }
 
+    /// <inheritdoc cref="ScreenCollisionMap.CheckTileByObject" />
     public TileDetected? CheckTileByObject(
         Direction directionToCheck,
         int playerXPos,
@@ -1095,74 +685,8 @@ public class GameScreenCollection : GameComponentBase
         int playerWidth,
         int playerHeight,
         int velocity)
-    {
-        if (ProbeRectangleFor(directionToCheck, playerXPos, playerYPos, playerWidth, playerHeight, velocity)
-            is not { } probe)
-        {
-            return null;
-        }
-
-        SpriteCollection tiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
-
-        // A check along the vertical axis reports where the object's foot sits inside the tile; every
-        // other check reports where its top does.
-        bool measureFromFoot = directionToCheck is Direction.Up or Direction.Down;
-
-        for (int y = 0; y < TilesDown; y++)
-        {
-            for (int x = 0; x < TilesAcross; x++)
-            {
-                if (_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage <= -1)
-                {
-                    continue;
-                }
-
-                var tileRect = new Rectangle(
-                    x * tiles.SpriteWidth,
-                    y * tiles.SpriteHeight,
-                    tiles.SpriteWidth,
-                    tiles.SpriteHeight);
-
-                if (!CollisionDetection.Check(probe, tileRect))
-                {
-                    continue;
-                }
-
-                int xpos = playerXPos - x * tiles.SpriteWidth;
-                int ypos = (measureFromFoot ? playerYPos + playerHeight : playerYPos) - y * tiles.SpriteHeight;
-
-                return new TileDetected(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, xpos, ypos, x, y);
-            }
-        }
-
-        return null;
-    }
-
-    /// <summary>
-    ///     The box to look for a tile in, given which way the object is about to move. Null for a
-    ///     direction that is not checked, which is every diagonal.
-    /// </summary>
-    /// <remarks>
-    ///     The four straight directions each probe a different shape, which is the only real difference
-    ///     between the five arms this replaced: up and left shift the whole box, down probes a thin
-    ///     strip below the object's feet, and right stretches the box rather than shifting it.
-    /// </remarks>
-    private static Rectangle? ProbeRectangleFor(
-        Direction directionToCheck,
-        int playerXPos,
-        int playerYPos,
-        int playerWidth,
-        int playerHeight,
-        int velocity)
-        => directionToCheck switch
-        {
-            Direction.Up => new Rectangle(playerXPos, playerYPos - velocity, playerWidth, playerHeight),
-            Direction.Down => new Rectangle(playerXPos, playerYPos + playerHeight, playerWidth, velocity),
-            Direction.Left => new Rectangle(playerXPos - velocity, playerYPos, playerWidth, playerHeight),
-            Direction.Right => new Rectangle(playerXPos, playerYPos, playerWidth + velocity, playerHeight),
-            Direction.None => new Rectangle(playerXPos, playerYPos, playerWidth, playerHeight),
-            _ => null
-        };
+        => Collisions.CheckTileByObject(
+            directionToCheck, playerXPos, playerYPos, playerWidth, playerHeight, velocity);
 
     /// <summary>
     ///     Stepped with where the blob is and whether it is carrying a key, rather than holding
