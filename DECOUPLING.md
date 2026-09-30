@@ -30,8 +30,9 @@ commit, separate from any move.
 | — | The metric script's identifier list was missing plain `gameEngine`, which under-reported four files as using no members at all. Fixed, and the counts restated against it. |
 | Stage 5 (Presentation) | Seven loose fields become one `PresentationSettings`, and the transform calculation moves with them — nine tests now pin the uniform scale and the even border, which needed a graphics device before. `AdditiveFade` drops the engine entirely. |
 | Stage 5 (World) | Two clusters, not one: eleven files want the planet, five the director, eight both. `ScreenDirectory` takes `CurrentGameScreen` and `GetGameScreen`; eight tests pin the throwing and lenient lookups apart. `GameScreens` — the planet — is still to do. |
-| Bug | The joypad check listed five conditions and the fifth repeated the third. Dead as written; removed behaviour-preserving, with the likely intent (`Fire`) raised rather than assumed. |
-| — | `InTestMode` was the last constant wearing a field's clothing. Now `TestMode.Enabled`. |
+| Bug | The joypad check listed five conditions and the fifth repeated the third. Dead as written; removed behaviour-preserving, then corrected to `Fire` once confirmed — `OptionsScreen`'s joystick option unbinds all five, so that was always the intent. |
+| — | `InTestMode` was the last constant wearing a field's clothing. The debug keys are now compiled out of a release build with `[Conditional("DEBUG")]` rather than guarded by a constant, which left an unreachable branch and a CS0162 in Release. |
+| Bug | The player's quit key was handled only inside `HandleTestModeKeys`, under a comment calling it a test — so a key the options screen offers in all four layouts worked only in a debug build. Moved out. |
 
 **50 → 46 coupled files**, and `GameEngine`'s public surface is down to 31 members from about 50.
 
