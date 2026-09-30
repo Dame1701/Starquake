@@ -389,7 +389,7 @@ once after construction", rather than a pretence that the graph is a tree. Decid
 
 ## Where it stopped, and what is left
 
-**60 coupled files to 21.** `GameEngine` is 1335 lines and 31 public members, from 1371 and about
+**60 coupled files to 20.** `GameEngine` is 1326 lines and 31 public members, from 1371 and about
 50. 57 tests, from 40. Twenty-nine commits, every one of them building at 0 warnings and 0 errors
 with the tests passing.
 
@@ -415,7 +415,10 @@ only because its six presentation screens still read the inherited field. It goe
 | --- | --- |
 | `Nasty`, and `Nasties` which builds it | `Paused` — the Session cluster |
 | `JumpPlatform`, and `JumpPlatforms` which builds it | `ScreenEffectEngine`; the blob builds `JumpPlatforms` and the blob is built first |
-| `TestScreen` | the same, built in `BuildGameScreens` one phase before the screen effect engine |
+
+`TestScreen` was a third of these and is now deleted: it was registered in the screen directory and
+nothing ever navigated to it, so it could not be reached. The F11 handler went with it — an empty
+branch wrapping a commented-out WinForms resize from before this was a MonoGame project.
 
 ## What actually worked
 
