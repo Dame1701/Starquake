@@ -7,6 +7,7 @@ using System;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Starquake.ActiveSprites.BlobParts;
 using Starquake.Animations;
 using Starquake.Collisions;
 using Starquake.Constants;
@@ -33,12 +34,6 @@ public class Blob : GameComponentBase
     ///     have at this many pixels a frame, and the dark and the arrival follow from that.
     /// </summary>
     private const int TunnelEntrySpeed = 64;
-
-    /// <summary>
-    ///     How many things the blob can carry. Picking something up pushes the whole inventory along
-    ///     one and drops whatever falls off the end.
-    /// </summary>
-    private const int BlobMaxItemsHeld = 4;
 
     /// <summary>
     ///     The shuttle the blob rides sits directly beneath it and makes the pair this much taller,
@@ -227,12 +222,6 @@ public class Blob : GameComponentBase
     private const int BrokenGlassReachUp = -16;
 
     /// <summary>
-    ///     How thick a slice is tested when working out which way a stuck blob has to be nudged to
-    ///     get free after a tile map change.
-    /// </summary>
-    private const int UnstickProbeThickness = 8;
-
-    /// <summary>
     ///     Where the blob starts, and where it reappears after losing a life.
     /// </summary>
     private const int BlobStartXPos = 416;
@@ -330,6 +319,9 @@ public class Blob : GameComponentBase
     private Direction _directionGoingThroughTunnel = Direction.None;
     private int _distanceInTunnelLift;
     private bool _inTunnelLift;
+    private readonly Inventory _inventory;
+    private readonly UnstickProbe _unstickProbe;
+
     private bool _inventoryAccessed;
 
     private bool _jumpPressed;
@@ -409,21 +401,19 @@ public class Blob : GameComponentBase
 
         _directionBlobFired = Direction.Right;
 
-        BlobInventory = new Collectables[BlobMaxItemsHeld];
-
-        // Clear inventory items
-        for (int a = 0; a < BlobInventory.Length; a++)
-        {
-            BlobInventory[a] = Collectables.None;
-        }
+        _inventory = new Inventory();
+        _unstickProbe = new UnstickProbe(gameScreens.Collisions);
 
         // Temporary test code to give Blob Access card and Key
         BlobInventory[1] = Collectables.Key;
         BlobInventory[0] = Collectables.AccessCard;
-
     }
 
-    public Collectables[] BlobInventory { get; }
+    /// <summary>
+    ///     What the blob is carrying. The queue itself is <see cref="Inventory" />'s; this is what
+    ///     the status panel draws and the access booths read.
+    /// </summary>
+    public Collectables[] BlobInventory => _inventory.Items;
 
     private Direction DirectionBlobMoved { get; set; } = Direction.None;
 
@@ -836,9 +826,9 @@ public class Blob : GameComponentBase
 
                     _inventoryAccessed = true;
 
-                    InteractiveItem? itemDropped = DropLastHeldItem();
-                    ShuffleInventoryAlong();
-                    PickUpItemUnderfoot(itemDropped);
+                    _inventory.SwapWithFloor(
+                        new Rectangle(_blobXPos, BlobYPos, BlobWidth, BlobHeight),
+                        _gameScreens.CurrentGameScreenData.PickUps);
 
                     _gameScreens.UpdateCollisionMap(false);
                 }
@@ -863,82 +853,6 @@ public class Blob : GameComponentBase
             Repeat = true,
             AnimateForwards = animateForwards
         };
-
-    /// <summary>
-    ///     Drops whatever is at the back of the inventory onto the floor, snapped to the collision
-    ///     grid, and hands it back so the pick-up pass can tell it apart from anything already there.
-    /// </summary>
-    private InteractiveItem? DropLastHeldItem()
-    {
-        if (BlobInventory[^1] == Collectables.None)
-        {
-            return null;
-        }
-
-        int itemXPos = _blobXPos / _gameScreens.CollAreaWidth *
-                       _gameScreens.CollAreaWidth;
-        int itemYPos = _blobYPos / _gameScreens.CollAreaHeight *
-                       _gameScreens.CollAreaHeight;
-
-        var droppedItem = new InteractiveItem(itemXPos, itemYPos, (int)BlobInventory[^1]);
-
-        _gameScreens.CurrentGameScreenData.PickUps.Add(droppedItem);
-
-        // Nothing held here now
-        BlobInventory[^1] = Collectables.None;
-
-        return droppedItem;
-    }
-
-    private void ShuffleInventoryAlong()
-    {
-        for (int b = BlobInventory.Length - 1; b > 0; b--)
-        {
-            BlobInventory[b] = BlobInventory[b - 1];
-            BlobInventory[b - 1] = Collectables.None;
-        }
-    }
-
-    private void PickUpItemUnderfoot(InteractiveItem? itemDropped)
-    {
-        if (_gameScreens.CurrentGameScreenData.PickUps != null)
-        {
-            for (int a = 0; a < _gameScreens.CurrentGameScreenData.PickUps.Count; a++)
-            {
-                if (!CollisionDetection.Check(
-                        _blobXPos,
-                        BlobYPos,
-                        BlobWidth,
-                        BlobHeight,
-                        _gameScreens.CurrentGameScreenData.PickUps[a].XLocation + SpriteMetrics.SpriteWidth / 4,
-                        _gameScreens.CurrentGameScreenData.PickUps[a].YLocation + TileMetrics.CollisionCellHeight,
-                        TileMetrics.CollisionCellWidth,
-                        TileMetrics.CollisionCellHeight))
-                {
-                    continue;
-                }
-
-                // Make sure it's not what we just dropped....
-                bool pickupItem = !(itemDropped != null &&
-                                    itemDropped ==
-                                    _gameScreens.CurrentGameScreenData.PickUps[a]);
-
-                if (!pickupItem)
-                {
-                    continue;
-                }
-
-                // Add the item to Blob's inventory
-                BlobInventory[0] = (Collectables)_gameScreens
-                    .CurrentGameScreenData.PickUps[a].Type;
-
-                // Remove it from the screen
-                _gameScreens.CurrentGameScreenData.PickUps.Remove(
-                    _gameScreens.CurrentGameScreenData.PickUps[a]);
-                break;
-            }
-        }
-    }
 
     /// <summary>
     ///     Un-latches the up and down controls so that holding either only acts once, and puts the
@@ -1718,82 +1632,12 @@ public class Blob : GameComponentBase
     /// </remarks>
     public void UnstickBlobFromTiles()
     {
-        UnstickFromEdge(Direction.Up);
-        UnstickFromEdge(Direction.Down);
-        UnstickFromEdge(Direction.Left);
-        UnstickFromEdge(Direction.Right);
+        Point freed = _unstickProbe.FreePositionFor(
+            new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight));
+
+        _blobXPos = freed.X;
+        _blobYPos = freed.Y;
     }
-
-    private void UnstickFromEdge(Direction edge)
-    {
-        Rectangle caughtOn = EdgeProbe(edge);
-        Rectangle oppositeEdge = EdgeProbe(OppositeOf(edge));
-        Point push = PushAwayFrom(edge);
-
-        if (!IsInsideScenery(caughtOn) || IsInsideScenery(oppositeEdge))
-        {
-            return;
-        }
-
-        // Walk the probe away from the edge until it comes free, and move him that far
-        int distanceToMove = 0;
-
-        while (IsInsideScenery(new Rectangle(
-                   caughtOn.X + push.X * distanceToMove,
-                   caughtOn.Y + push.Y * distanceToMove,
-                   caughtOn.Width,
-                   caughtOn.Height)))
-        {
-            distanceToMove++;
-        }
-
-        _blobXPos += push.X * distanceToMove;
-        _blobYPos += push.Y * distanceToMove;
-    }
-
-    /// <summary>
-    ///     The thin strip along one edge of blob that is tested for being buried in scenery.
-    /// </summary>
-    private Rectangle EdgeProbe(Direction edge)
-        => edge switch
-        {
-            Direction.Up => new Rectangle(_blobXPos, _blobYPos, BlobWidth, UnstickProbeThickness),
-            Direction.Down => new Rectangle(
-                _blobXPos,
-                _blobYPos + (BlobHeight - UnstickProbeThickness),
-                BlobWidth,
-                UnstickProbeThickness),
-            Direction.Left => new Rectangle(_blobXPos, _blobYPos, UnstickProbeThickness, BlobHeight),
-            _ => new Rectangle(
-                _blobXPos + (BlobWidth - UnstickProbeThickness),
-                _blobYPos,
-                UnstickProbeThickness,
-                BlobHeight)
-        };
-
-    private static Direction OppositeOf(Direction edge)
-        => edge switch
-        {
-            Direction.Up => Direction.Down,
-            Direction.Down => Direction.Up,
-            Direction.Left => Direction.Right,
-            _ => Direction.Left
-        };
-
-    /// <summary>
-    ///     Which way blob has to move to get off an edge he is caught on.
-    /// </summary>
-    private static Point PushAwayFrom(Direction edge)
-        => edge switch
-        {
-            Direction.Up => new Point(0, 1),
-            Direction.Down => new Point(0, -1),
-            Direction.Left => new Point(1, 0),
-            _ => new Point(-1, 0)
-        };
-
-    private bool IsInsideScenery(Rectangle probe)
-        => _gameScreens.CheckRectangles(probe.X, probe.Y, probe.Width, probe.Height, true) >= 0;
 
     public void PerformPostChangeScreenActions()
     {

@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -86,8 +85,7 @@ public class GameHost : Game
     /// </summary>
     private void Window_ClientSizeChanged(object? sender, EventArgs e)
     {
-        if (_graphics == null ||
-            _resizingBackBuffer ||
+        if (_resizingBackBuffer ||
             _graphics.IsFullScreen ||
             Window.ClientBounds.Width == 0 ||
             Window.ClientBounds.Height == 0)
@@ -152,11 +150,6 @@ public class GameHost : Game
     /// <param name="gameTime">Provides a snapshot of timing values.</param>
     protected override void Update(GameTime gameTime)
     {
-        if (_graphics == null)
-        {
-            return;
-        }
-
         _logicAccumulator += gameTime.ElapsedGameTime;
 
         TimeSpan maxBacklog = LogicFrameLength * MaxCatchUpFrames;
