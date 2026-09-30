@@ -329,7 +329,7 @@ public class Blob : GameComponentBase
         GameEngine = gameEngineReference;
 
         _blobJumpPlatformEngine = new JumpPlatforms(GameEngine);
-        BlobsControl = new CustomControl(gameEngineReference.PlayerKeys, this, true);
+        BlobsControl = new CustomControl(gameEngineReference.Session.PlayerKeys, this, true);
         _blobTouched = false;
         _teleportFadeLevel = ColourLevels.Full;
         _startBlobTeleporting = false;
@@ -1917,7 +1917,7 @@ public class Blob : GameComponentBase
                         _blobAnimFire1.CurrentFrame, BlobFireX, BlobFireY,
                         ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
                             (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), 1.0f, 0f, true,
-                        GameEngine.Paused);
+                        GameEngine.Session.Paused);
                     GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").End();
                 }
                 else
@@ -1928,7 +1928,7 @@ public class Blob : GameComponentBase
                         _blobAnimFire1.CurrentFrame, BlobFireX, BlobFireY - FireOffset,
                         ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
                             (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), 1.0f, 0f, true,
-                        GameEngine.Paused);
+                        GameEngine.Session.Paused);
                     GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire1").End();
                 }
             }
@@ -1943,7 +1943,7 @@ public class Blob : GameComponentBase
                         ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
                             (byte)(_blobFireFade * ((double)screenFade / ColourLevels.Full))), 1.0f, 10f,
                         true,
-                        GameEngine.Paused);
+                        GameEngine.Session.Paused);
                     GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2").End();
                 }
             }

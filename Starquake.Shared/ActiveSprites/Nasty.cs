@@ -1531,7 +1531,7 @@ public class Nasty : GameComponentBase
 
         // Choose the image
         _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade), 1.0f, NastyRockSpeed, true, GameEngine.Paused);
+            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade), 1.0f, NastyRockSpeed, true, GameEngine.Session.Paused);
         _nastySprite.End();
     }
 
@@ -1547,7 +1547,7 @@ public class Nasty : GameComponentBase
         _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
             ColourHelper.GetXna4Colour((byte)_birthColourLevel, (byte)_birthColourLevel, ColourLevels.Full,
                 (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), _birthScale, _birthRotateSpeed,
-            true, GameEngine.Paused);
+            true, GameEngine.Session.Paused);
         _nastySprite.End();
     }
 
@@ -1618,7 +1618,7 @@ public class Nasty : GameComponentBase
             _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
                 ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
                     (byte)(_deathFadeLevel * ((double)screenFade / ColourLevels.Full))), _deathScale, DeathRotateSpeed,
-                _deathAnticlockwise, GameEngine.Paused);
+                _deathAnticlockwise, GameEngine.Session.Paused);
             _nastySprite.End();
         }
 

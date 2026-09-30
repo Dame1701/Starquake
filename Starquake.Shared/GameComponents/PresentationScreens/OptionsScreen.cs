@@ -138,7 +138,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
                 continue;
             }
 
-            GameEngine.PlayerKeys = KeysForOption(option);
+            GameEngine.Session.PlayerKeys = KeysForOption(option);
             break;
         }
 

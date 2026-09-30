@@ -201,7 +201,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
     public void Reset(object? data)
     {
         _gameStartedTime = DateTime.Now;
-        GameEngine.Paused = false;
+        GameEngine.Session.Paused = false;
         GameEngine.BlobStatusPanel.Reset();
         GameEngine.Elements.Reset();
         GameEngine.GameScreens.Reset();
@@ -270,7 +270,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
     /// </summary>
     private void QuitToGameOverIfAsked()
     {
-        if (ToggleKeys.GetPressedKey() != GameEngine.PlayerKeys.Quit)
+        if (ToggleKeys.GetPressedKey() != GameEngine.Session.PlayerKeys.Quit)
         {
             return;
         }

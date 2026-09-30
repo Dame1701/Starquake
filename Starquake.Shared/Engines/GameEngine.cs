@@ -110,6 +110,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     private BlobDeathAnimation? _blobKiller;
 
     public StatusPanel BlobStatusPanel;
+
+    private GameSession? _session;
     private SpriteCollection _bootProgress;
     private SpriteCollection _bootProgressBackground;
     private int _bootProgressBackgroundFade = ColourLevels.Full;
@@ -157,10 +159,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     private GameWindow _parentWindow;
     private bool _particleTestTrigger;
 
-    private bool _paused;
     private Blob? _player;
 
-    private PlayerKeySet _playerKeys;
 
     private int _powerUpType;
 
@@ -198,8 +198,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     {
         _parentWindow = parentWindow;
 
-        Paused = false;
-
         // Setup graphics device and content management
         GraphicsDeviceMgr = graphics;
         ContentMgr = content;
@@ -214,66 +212,45 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
         // Starting screen will be the title screen later.....
 
-        // Player keys
-        _playerKeys = new PlayerKeySet();
-        _playerKeys.Up = Keys.Up;
-        _playerKeys.Down = Keys.Down;
-        _playerKeys.Left = Keys.Left;
-        _playerKeys.Right = Keys.Right;
-        _playerKeys.Fire = Keys.LeftControl;
-
         DefineContent();
         Initialise();
     }
 
-    public PlayerKeySet PlayerKeys
+    private void Session_OnPlayerKeysChanged(PlayerKeySet playerKeys)
     {
-        get => _playerKeys;
-        set
+        // The blob does not exist until content has loaded, and the options screen can be used
+        // before then; it reads the set back off the session when it is built.
+        if (_player is not { BlobsControl: not null })
         {
-            _playerKeys = value;
-            if (_player is { BlobsControl: not null })
-            {
-                Player.BlobsControl.PlayerKeySet = value;
-
-                // Unbinding every movement key is how the options screen says "use the joypad",
-                // and its joystick option unbinds all five - the four directions and fire.
-                if (Player.BlobsControl.PlayerKeySet.Up == Keys.None &&
-                    Player.BlobsControl.PlayerKeySet.Down == Keys.None &&
-                    Player.BlobsControl.PlayerKeySet.Left == Keys.None &&
-                    Player.BlobsControl.PlayerKeySet.Right == Keys.None &&
-                    Player.BlobsControl.PlayerKeySet.Fire == Keys.None)
-                {
-                    Player.BlobsControl.UseJoyPad = true;
-                }
-                else
-                {
-                    Player.BlobsControl.UseJoyPad = false;
-                }
-            }
+            return;
         }
+
+        Player.BlobsControl.PlayerKeySet = playerKeys;
+
+        // Unbinding every movement key is how the options screen says "use the joypad",
+        // and its joystick option unbinds all five - the four directions and fire.
+        Player.BlobsControl.UseJoyPad =
+            playerKeys.Up == Keys.None &&
+            playerKeys.Down == Keys.None &&
+            playerKeys.Left == Keys.None &&
+            playerKeys.Right == Keys.None &&
+            playerKeys.Fire == Keys.None;
     }
 
-    public bool Paused
+    /// <summary>
+    ///     The background rumble follows the pause. The null check the old setter carried is gone
+    ///     with it: it was there because the constructor assigned Session.Paused before the resource manager
+    ///     existed, and this is only subscribed to once the session is built, by which time it does.
+    /// </summary>
+    private void Session_OnPausedChanged(bool paused)
     {
-        get => _paused;
-        set
+        if (paused)
         {
-            _paused = value;
-            if (_paused)
-            {
-                if (ContentResourceManager != null)
-                {
-                    ContentResourceManager.GetSoundFxEngine().DisablePeriodicBackgroundSounds(true);
-                }
-            }
-            else
-            {
-                if (ContentResourceManager != null)
-                {
-                    ContentResourceManager.GetSoundFxEngine().EnablePeriodicBackgroundSounds();
-                }
-            }
+            ContentResourceManager.GetSoundFxEngine().DisablePeriodicBackgroundSounds(true);
+        }
+        else
+        {
+            ContentResourceManager.GetSoundFxEngine().EnablePeriodicBackgroundSounds();
         }
     }
 
@@ -300,6 +277,12 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     /// <inheritdoc cref="GameScreens" />
     public TunnelLiftAnimationEngine TunnelAnimations => NotBeforeContentLoads(_tunnelAnimations);
+
+    /// <summary>
+    ///     The game being played - score, lives, pause and controls. Does not exist until
+    ///     <see cref="Initialise" /> has run, which is before any content loads.
+    /// </summary>
+    public GameSession Session => NotBeforeContentLoads(_session);
 
     /// <inheritdoc cref="GameScreens" />
     public BlobDeathAnimation BlobKiller => NotBeforeContentLoads(_blobKiller);
@@ -375,6 +358,10 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
         BlobStatusPanel = new StatusPanel(this);
         BlobStatusPanel.Initialise(null);
+
+        _session = new GameSession();
+        _session.OnPausedChanged += Session_OnPausedChanged;
+        _session.OnPlayerKeysChanged += Session_OnPlayerKeysChanged;
 
         // Core Elements
         Elements = new CoreElements(BlobStatusPanel, ContentResourceManager, GraphicsSet, Presentation, RandomNumberGenerator);
@@ -946,7 +933,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
         HandleTestModeKeys();
 
-        if (!Paused)
+        if (!Session.Paused)
         {
             UpdateActiveScreen(gameTime);
         }
@@ -966,11 +953,11 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     {
         if (ScreenDirectory.Current != GameScreenType.Teleporter)
         {
-            if (ToggleKeys.GetPressedKey() == PlayerKeys.Pause)
+            if (ToggleKeys.GetPressedKey() == Session.PlayerKeys.Pause)
             {
-                Paused = !Paused;
+                Session.Paused = !Session.Paused;
 
-                if (Paused)
+                if (Session.Paused)
                 {
                     ContentResourceManager.GetSoundFxEngine().KillSounds(true);
                 }
@@ -994,9 +981,9 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             ScreenDirectory.Current == GameScreenType.AccessBooth)
         {
             // Automatically pause the game after switching to or from fullscreen so the player doesn't die unexpectantly
-            if (!Paused)
+            if (!Session.Paused)
             {
-                Paused = true;
+                Session.Paused = true;
             }
         }
 
@@ -1263,7 +1250,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             var screenToDraw = ScreenDirectory.CurrentScreen;
             screenToDraw?.Draw(gameTime);
 
-            if (Paused)
+            if (Session.Paused)
             {
                 Overlays.Paused(PausedOverlayXPos, PausedOverlayYPos, ShapeDrawer, Font2);
             }
