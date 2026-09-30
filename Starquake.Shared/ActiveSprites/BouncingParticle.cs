@@ -222,7 +222,7 @@ public class BouncingParticle
 
     public void Draw(SpriteCollection spriteToDraw, int screenFade, int spriteNumber = -1)
     {
-        if (Triggered && spriteNumber >= 0 && spriteToDraw != null)
+        if (Triggered && spriteToDraw != null)
         {
             _particleBounce.Draw(spriteToDraw, XPos + 4, YPos + 4, spriteNumber);
         }
