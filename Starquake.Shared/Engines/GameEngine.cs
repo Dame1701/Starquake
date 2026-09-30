@@ -779,7 +779,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         }
     }
 
-    public void LoadContent()
+    private void LoadContent()
     {
         ContentResourceManager.LoadContent();
         BlobKiller.LoadContent();

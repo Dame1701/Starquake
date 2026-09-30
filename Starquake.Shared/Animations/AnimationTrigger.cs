@@ -8,7 +8,7 @@ public class AnimationTrigger
 {
     protected readonly bool UseTrigger;
 
-    public AnimationTrigger(bool useTrigger)
+    protected AnimationTrigger(bool useTrigger)
     {
         UseTrigger = useTrigger;
     }

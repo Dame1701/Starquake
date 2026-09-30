@@ -29,7 +29,7 @@ public static class CollisionDetection
     /// <param name="boundingBox1"></param>
     /// <param name="boundingBox2"></param>
     /// <returns></returns>
-    public static int CheckDirection(Direction direction, int boundingBox1Velocity,
+    private static int CheckDirection(Direction direction, int boundingBox1Velocity,
         Rectangle boundingBox1, Rectangle boundingBox2)
         => CheckDirection(
             direction,

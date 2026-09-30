@@ -76,7 +76,7 @@ public sealed class EditorDocument
     ///     How many tile images the collision masks cover. A tile sheet with more tiles than this can
     ///     still be painted with; <see cref="EnsureCollisionCapacity" /> grows the masks to match.
     /// </summary>
-    public int CollisionTileCount => _collisionMasks.GetLength(0);
+    private int CollisionTileCount => _collisionMasks.GetLength(0);
 
     /// <summary>
     ///     An empty planet: every screen present but blank, and every tile passable.

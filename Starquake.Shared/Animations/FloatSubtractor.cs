@@ -24,7 +24,7 @@ public class FloatSubtractor : AnimationTrigger
     }
     public float Modifier { get; private set; }
 
-    public void Reset()
+    private void Reset()
     {
         Modifier = _initialValue;
         Triggered = !UseTrigger;

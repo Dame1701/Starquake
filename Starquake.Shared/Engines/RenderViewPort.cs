@@ -43,7 +43,7 @@ public class RenderViewPort
 
     public int Width { get; set; }
 
-    public int Height { get; set; }
+    public int Height { get; }
 
     public int MasterWidth => RenderTarget.Width;
 

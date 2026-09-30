@@ -45,18 +45,18 @@ public sealed class TileSheet : IDisposable
         ThumbnailColours = thumbnailColours;
     }
 
-    public string Path { get; }
+    private string Path { get; }
 
     public string Name => System.IO.Path.GetFileNameWithoutExtension(Path);
 
     /// <summary>
     ///     The sheet itself, for drawing tiles from.
     /// </summary>
-    public IImage Image => _bitmap;
+    private IImage Image => _bitmap;
 
-    public int TilesAcross { get; }
+    private int TilesAcross { get; }
 
-    public int TilesDown { get; }
+    private int TilesDown { get; }
 
     public int TileCount => TilesAcross * TilesDown;
 
@@ -86,7 +86,7 @@ public sealed class TileSheet : IDisposable
     /// <summary>
     ///     Where a tile number sits on the sheet, in sheet pixels.
     /// </summary>
-    public Rect SourceRect(int tileImage)
+    private Rect SourceRect(int tileImage)
     {
         var row = tileImage / TilesAcross;
         var column = tileImage - row * TilesAcross;

@@ -13,7 +13,7 @@ public class GameScreenBase : GameComponentBase
 {
     protected int ScreenFadeSpeed;
 
-    public GameScreenBase(GameEngine gameEngineReference)
+    protected GameScreenBase(GameEngine gameEngineReference)
         : base(gameEngineReference)
     {
         //ScreenFade = 0;

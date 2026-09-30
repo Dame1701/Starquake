@@ -28,7 +28,7 @@ public static class EditorColours
     ///     The lighter square of the chequer that fills a tile position with nothing in it, so that an
     ///     unpainted part of a screen cannot be mistaken for a dark piece of scenery.
     /// </summary>
-    public static readonly Color VoidChequer = Color.FromRgb(0x14, 0x17, 0x1C);
+    private static readonly Color VoidChequer = Color.FromRgb(0x14, 0x17, 0x1C);
 
     public static readonly Color Background = Color.FromRgb(0x0E, 0x10, 0x14);
 
@@ -60,7 +60,7 @@ public static class EditorColours
     /// <summary>
     ///     Solid parts of a tile, when the collision overlay is on.
     /// </summary>
-    public static readonly Color Collision = Color.FromRgb(0xFF, 0x4D, 0x5E);
+    private static readonly Color Collision = Color.FromRgb(0xFF, 0x4D, 0x5E);
 
     public static readonly IBrush VoidBrush = new SolidColorBrush(Void);
 

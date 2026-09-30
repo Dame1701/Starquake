@@ -14,7 +14,7 @@ public class ResetTile
         ScreenNumber = screenNumber;
     }
 
-    public TileDetected TileToReset { get; set; }
+    public TileDetected TileToReset { get; }
 
-    public int ScreenNumber { get; set; }
+    public int ScreenNumber { get; }
 }

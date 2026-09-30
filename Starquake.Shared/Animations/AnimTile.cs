@@ -32,7 +32,7 @@ public class AnimTile : GameComponentBase
     }
     public int ScreenTileRef { get; }
 
-    public Animation TileAnimation { get; }
+    private Animation TileAnimation { get; }
 
     public override void Update(GameTime gameTime)
     {

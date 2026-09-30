@@ -19,7 +19,7 @@ public abstract class ScreenEffectBase
     {
         GameEngine = gameEngineReference;
     }
-    public ScreenEffectType ScreenEffectType { get; protected set; }
+    public ScreenEffectType ScreenEffectType { get; protected init; }
     public bool EffectFinished { get; protected set; } = true;
 
     public virtual void TriggerEffect(RenderViewPort effectSurface, int effectSpeed, int effectDuration)

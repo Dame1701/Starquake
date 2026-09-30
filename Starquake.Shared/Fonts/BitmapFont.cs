@@ -37,13 +37,13 @@ public class BitmapFont : IDisposable
         _flashColour = this.Colour1;
     }
 
-    public Color Colour1 { get; set; }
+    private Color Colour1 { get; }
 
-    public Color Colour2 { get; set; }
+    private Color Colour2 { get; }
 
     public bool Flash { get; set; }
 
-    public int FlashInterval { get; set; }
+    private int FlashInterval { get; }
 
     #region IDisposable Members
 
@@ -182,11 +182,11 @@ public class BitmapFont : IDisposable
         _fontSpriteBatch.End();
     }
 
-    public Vector2 MeasureString(string text)
+    private Vector2 MeasureString(string text)
         => _font.MeasureString(text);
 
     // Measure the string and take into account horizontal leading
-    public Vector2 MeasureString(string text, int leading)
+    private Vector2 MeasureString(string text, int leading)
     {
         var temp = _font.MeasureString(text);
         temp.X = temp.X + (float)text.Length * leading;

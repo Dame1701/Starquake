@@ -88,7 +88,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
     private int _shakingScreenCount;
     private int _shakingScreenCounter;
 
-    public int ScreenFadeSpeed { get; set; }
+    private int ScreenFadeSpeed { get; set; }
 
     public bool Success => true;
 

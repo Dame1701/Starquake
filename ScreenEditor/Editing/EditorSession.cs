@@ -304,7 +304,7 @@ public sealed class EditorSession : ViewModelBase
         Invalidate();
     }
 
-    public void Invalidate() => Invalidated?.Invoke(this, EventArgs.Empty);
+    private void Invalidate() => Invalidated?.Invoke(this, EventArgs.Empty);
 
     /// <summary>
     ///     Applies the given tool at a tile position on the current screen, recording whatever it does
@@ -333,7 +333,7 @@ public sealed class EditorSession : ViewModelBase
         }
     }
 
-    public void PaintTile(int x, int y, int tileImage)
+    private void PaintTile(int x, int y, int tileImage)
     {
         var existing = _document.GetTile(_currentScreen, x, y);
         if (existing == tileImage)
@@ -349,7 +349,7 @@ public sealed class EditorSession : ViewModelBase
     ///     Replaces the connected run of identical tiles the given position is part of. Screens are
     ///     small, so this is the plain four-way flood rather than anything clever.
     /// </summary>
-    public void FloodFill(int x, int y, int tileImage)
+    private void FloodFill(int x, int y, int tileImage)
     {
         var target = _document.GetTile(_currentScreen, x, y);
         if (target == tileImage)

@@ -110,7 +110,7 @@ public class ScreenEffectEngine : GameComponentBase
         viewPort.YPos = viewPort.MasterYPos + yOffset;
     }
 
-    public RenderViewPort GetRenderViewPort(string name)
+    private RenderViewPort GetRenderViewPort(string name)
     {
         for (var a = 0; a < _renderViewPorts.Count; a++)
         {

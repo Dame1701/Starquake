@@ -36,7 +36,7 @@ public static class GameContent
     ///     published copy, say. Everything else here returns nothing in that case, and the editor
     ///     opens empty rather than complaining.
     /// </summary>
-    public static string? RepositoryRoot { get; } = FindRepositoryRoot();
+    private static string? RepositoryRoot { get; } = FindRepositoryRoot();
 
     public static string? MapPath => Combine("Starquake.Shared", "Data", ScreenDataFile.DefaultFileName);
 

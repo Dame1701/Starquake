@@ -141,9 +141,9 @@ public class GameScreenCollection : GameComponentBase
         _detectedCollisionMap = new List<CollisionTile>();
     }
 
-    public int TilesAcross { get; set; }
+    public int TilesAcross { get; }
 
-    public int TilesDown { get; set; }
+    public int TilesDown { get; }
 
     public GameScreenData CurrentGameScreenData => _gameScreens[ScreenNumber];
 
@@ -978,7 +978,7 @@ public class GameScreenCollection : GameComponentBase
         return null;
     }
 
-    public List<KeyLockDoor> GetKeyLockDoors()
+    private List<KeyLockDoor> GetKeyLockDoors()
     {
         List<KeyLockDoor> returnedTiles = null;
 
@@ -1008,7 +1008,7 @@ public class GameScreenCollection : GameComponentBase
         return returnedTiles;
     }
 
-    public List<Point> GetCoordsOfTiles(int tileType, int screenNumber)
+    private List<Point> GetCoordsOfTiles(int tileType, int screenNumber)
     {
         List<Point> returnedTiles = null;
 

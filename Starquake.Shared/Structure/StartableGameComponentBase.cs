@@ -12,12 +12,12 @@ public class StartableGameComponentBase
     protected readonly ContentManager ContentManagerInstance;
     protected readonly GameEngine GameEngineInstance;
 
-    public StartableGameComponentBase()
+    protected StartableGameComponentBase()
     {
         Status = GameEngineStatus.NotStarted;
     }
 
-    public StartableGameComponentBase(GameEngine gameEngineInstance)
+    protected StartableGameComponentBase(GameEngine gameEngineInstance)
     {
         GameEngineInstance = gameEngineInstance;
         ContentManagerInstance = gameEngineInstance.ContentMgr;
@@ -28,7 +28,7 @@ public class StartableGameComponentBase
 
     public string StatusMessage { get; protected set; }
 
-    public int PercentComplete { get; protected set; }
+    protected int PercentComplete { get; set; }
     public event RaiseEngineComponentStatusChanged OnGameComponentStatusChanged;
 
     protected void UpdateStatus(string statusMessage, int percentComplete, GameEngineStatus status)

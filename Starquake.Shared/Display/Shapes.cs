@@ -28,7 +28,7 @@ public class Shapes : SpriteBatch
     ///     The texture used when drawing rectangles, lines and other
     ///     primitives. This is a 1x1 white texture created at runtime.
     /// </summary>
-    public Texture2D WhiteTexture { get; protected set; }
+    private Texture2D WhiteTexture { get; }
 
     /// <summary>
     ///     Draw a line between the two supplied points.

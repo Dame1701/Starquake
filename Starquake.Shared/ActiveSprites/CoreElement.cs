@@ -105,7 +105,7 @@ public class CoreElement
 
     public int CurrentElement { get; }
 
-    public int FinalElement { get; }
+    private int FinalElement { get; }
 
     public event RaiseEffectComplete OnCoreElementReplaced;
 

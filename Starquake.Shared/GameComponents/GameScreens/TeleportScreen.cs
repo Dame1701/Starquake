@@ -252,7 +252,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         }
     }
 
-    public static int FindKey(IDictionary<int, string> lookup, string value)
+    private static int FindKey(IDictionary<int, string> lookup, string value)
     {
         foreach (var pair in lookup)
         {

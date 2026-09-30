@@ -24,7 +24,7 @@ public class IntegerSubtractor : AnimationTrigger
 
         Reset();
     }
-    public int Modifier { get; private set; }
+    private int Modifier { get; set; }
 
     public byte ByteModifier
     {
@@ -43,7 +43,7 @@ public class IntegerSubtractor : AnimationTrigger
         }
     }
 
-    public void Reset()
+    private void Reset()
     {
         Modifier = _initialValue;
         Triggered = !UseTrigger;

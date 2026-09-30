@@ -227,11 +227,11 @@ public class Nasty : GameComponentBase
 
     public bool KeepNastyTheSame { get; set; }
 
-    public int NastyWidth { get; set; } = SpriteMetrics.SpriteWidth;
+    public int NastyWidth { get; } = SpriteMetrics.SpriteWidth;
 
     public NastyState NastyState { get; set; }
 
-    public int NastyHeight { get; set; } = SpriteMetrics.SpriteHeight;
+    public int NastyHeight { get; } = SpriteMetrics.SpriteHeight;
 
     public bool Smoking { get; set; }
 

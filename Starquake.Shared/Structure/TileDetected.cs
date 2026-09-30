@@ -17,15 +17,15 @@ public class TileDetected
         MapYPosition = mapYPosition;
     }
 
-    public int TileNumber { get; set; }
+    public int TileNumber { get; }
 
-    public int XPosition { get; set; }
+    public int XPosition { get; }
 
-    public int YPosition { get; set; }
+    public int YPosition { get; }
 
-    public int MapXPosition { get; set; }
+    public int MapXPosition { get; }
 
-    public int MapYPosition { get; set; }
+    public int MapYPosition { get; }
 
     public override string ToString()
         => "TileNo: " + TileNumber + " " + "XPos: " + XPosition + " " + "YPos " +
