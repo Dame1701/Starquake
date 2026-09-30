@@ -1,8 +1,12 @@
 # Making the code say what the comments say
 
-**Stages 1 to 3 landed.** Stage 4 is still a plan. This document is meant to become a record the
-way `NULLABLE.md` did — as each stage lands, its section is rewritten to say what it actually
-decided rather than what it intended.
+**Stages 1 to 3 landed, and stage 4 all but its tail.** This document is a record of what the work
+actually decided, the way `NULLABLE.md` is — each stage's section was rewritten as it landed rather
+than left as the intention. What is left to do is listed at the end of stage 4, along with the
+findings this work turned up and deliberately did not act on.
+
+Twenty commits, `a7e3e8d` to `4935935`. The solution builds at 0 warnings and 0 errors throughout,
+and the 40 tests added in stage 3 pass.
 
 The goal is the clean-code one: fewer comments, because the code says it instead. In this
 codebase that means one specific move, made many times — a long method whose `//` comments act
@@ -52,21 +56,22 @@ what stage 2 left them at:
 
 | Method | Lines | Now |
 | --- | --- | --- |
-| `Blob.Update` | 1,564 | 36 |
+| `Blob.Update` | 1,564 | 37 |
 | `Blob.UpdateFire` (was part of it) | 608 | gone — see stage 3 |
-| `Nasty.Update` | 432 | 425 |
-| `GameEngine.Update` | 306 | 306 |
-| `Nasty.SpikeyMovement` | 241 | 241 |
-| `Nasty.MoveNastyOneStep` | 235 | 235 |
-| `ToggleKeys.GetFriendlyName` | 232 | 232 |
-| `GameScreenCollection.BuildScreenCollisionMap` | 227 | 227 |
-| `GameScreenCollection.DrawUpperLayer` | 222 | 222 |
-| `Nasty.RandomMovementsAllDirections` | 222 | 222 |
-| `GameEngine.DefineContent` | 219 | 219 |
+| `Nasty.Update` | 432 | 47 |
+| `GameEngine.Update` | 306 | 20 |
+| `Nasty.SpikeyMovement` | 241 | 73 |
+| `Nasty.MoveNastyOneStep` | 235 | 46 |
+| `ToggleKeys.GetFriendlyName` | 232 | 232 — left alone, see stage 4 |
+| `GameScreenCollection.BuildScreenCollisionMap` | 227 | 38 |
+| `GameScreenCollection.DrawUpperLayer` | 222 | 16 |
+| `Nasty.RandomMovementsAllDirections` | 222 | 18 |
+| `GameEngine.DefineContent` | 219 | 26 |
 
 `Blob.Update` was 62% of `Blob.cs` on its own. It was one `switch` over three `BlobState` values,
-and the `Normal` case was almost all of it. What is left of it is `UpdateFire` at 608 lines, which
-is stage 3.
+and the `Normal` case was almost all of it.
+
+31 methods still exceed 80 lines, the longest of them 232. The list is at the end of stage 4.
 
 Be careful reading that script's output. Its `^    (public|private|...).*\(` pattern needs a `(`
 to start counting a new method, so a method followed by a run of get-only properties is credited
@@ -149,7 +154,7 @@ the same logic, and nothing but reading all six side by side would have found it
 ## Stage 2 — split `Blob.Update` — **done**
 
 Two commits, `f63e916` for `Update` and `76a192c` for `Draw`. `Blob.Update` was 1,564 lines and
-is now 36; `Blob.Draw` was 197 and is now 23. `Blob.cs` gained 38 private methods and no statements.
+is now 37; `Blob.Draw` was 197 and is now 23. `Blob.cs` gained 38 private methods and no statements.
 
 The tree came out as planned, with three differences.
 
@@ -245,7 +250,7 @@ Four commits. `66e7b0e` added the test project the plan said to offer first, `20
 `482b2ba` dealt with what reading all six branches side by side turned up, and `5febc34` did the
 collapse.
 
-`Blob.UpdateFire` was 608 lines and is now 20, calling into `BlobFire` — 242 lines including its
+`Blob.UpdateFire` was 608 lines and is now 18, calling into `BlobFire` — 242 lines including its
 documentation. `Blob.cs` went from 2,723 lines to 2,133, and no method in it exceeds 80 lines any
 more.
 
@@ -346,35 +351,144 @@ dotnet test Starquake.Tests/Starquake.Tests.csproj  # 40 tests
 
 ---
 
-## Stage 4 — the same treatment elsewhere
+## Stage 4 — the same treatment elsewhere — **mostly done**
 
-In descending value. Each is independent; each is its own commit or small series.
+All four named targets are addressed. The unnamed tail at the end of this stage is partly done and
+is listed below.
 
-**`Nasty`** (2,061 lines). `Update` is 432 lines. Beyond splitting it, the six movement methods
-share one idea: given a direction and what it just hit, pick the reflected direction.
-`DiagonalBouncing` and `DiagonalBouncingInSteps` are near-identical — the second adds an `else`
-fallback per case and sets `_stepsToMove` at the end — and both express a reflection table as
-four nested `if`/`else if` ladders. That table is data. Make it data, and the six methods get
-much smaller. `SpikeyMovement` (241) and `MoveNastyOneStep` (235) then want their own splits.
+### `Nasty` — done, four commits
 
-**`GameEngine`** (1,243 lines). `Update` (306) splits along its state tests into
-`HandleDebugKeys` — the F8/F9/F10/F12 block, which is most of it — plus `UpdateBootSequence` and
-`UpdateActiveScreen`. `DefineContent` (219) is a flat list of registrations already grouped by
-comment: `DefineBootGraphics`, `DefineFonts`, `DefinePresentationScreens`, `DefineGameGraphics`,
-`DefineSounds`. `ContentResourceManager_OnGameComponentStatusChanged` (147) is doing two
-unrelated jobs — constructing the components that need loaded content, and registering the
-colour animations; the second is a long literal list and wants to be its own method at least.
-The `catch { }` around `ToggleFullScreen` is a separate question, not a refactor — leave it.
+`2,061` lines to `1,551`. `Update` was 432 and is 47: one method per `NastyState`, plus
+`ShouldAnimate`, `ReleaseAttractionIfStuck`, `MoveNasty` and `UpdateFrameOfMind`.
 
-**`GameScreenCollection`** (1,769 lines) is already the best-decomposed of the four, at 31
-methods. Three are long: `BuildScreenCollisionMap` (227), `DrawUpperLayer` (222), `Reset` (206).
-Split those and it is done; the rest of the file is fine.
+The reflection table the plan asked for turned out to be **four** tables, and all four are now
+data:
 
-**`ToggleKeys.GetFriendlyName`** (232) is a single `switch` mapping keys to display strings. It is
-long but it is a lookup table, and it is already as clear as it is going to get. Converting it to
-a dictionary is defensible and is not an improvement in readability. Lowest priority, and
-"leave it" is an acceptable outcome.
+- `Reflected` — the 12 `(travelling, hit) -> new direction` mappings that `DiagonalBouncing` and
+  `DiagonalBouncingInSteps` each wrote out in full. The one real difference between those two
+  methods survives as `TurnedAwayVertically`: the stepped one turns away even when it hit nothing.
+- `WaysAwayFrom` — the eight escape triples from `RandomMovementsAllDirections`, which was 222
+  lines of twelve near-identical blocks and is now two lookups and one pick.
+- `WaysTowardsBlob` — the four chase triples from the same method.
+- `BounceStraightBack` and `HeadTowardsBlob` — shared by `RandomMovement` and
+  `RandomUpDownLeftRight`, which were near-identical for 75 lines.
 
-Then the remaining `Update`/`Draw`/`Reset` methods over 80 lines across
-`GameComponents/GameScreens/*` and `Animations/*` — same move, much smaller each. Re-run the
-measurement script to pick them up.
+`SpikeyMovement` (241 to 73) was the same 55 lines once per quadrant the blob can be in, with the
+directions and subtractions swapped. `MoveNastyOneStep` (235 to 46) was eight blocks saying how to
+move and eight more saying what it hit, when every direction is a vertical component, a horizontal
+one, or both. Its two `ref` parameters were the same dead pair as stage 1b's and are gone.
+
+Two things were preserved rather than tidied, each with a `///` saying why. `RandomMovement` clears
+the direction before chasing and `RandomUpDownLeftRight` does not, so a nasty level with the blob
+behaves differently in the two — that is load-bearing. And `SpikeyMovement`'s quadrant tests were
+an if/else chain with inclusive bounds on both sides, so a nasty exactly level with the blob fell
+into whichever arm matched first; that is an artefact of the order they were written in, and
+straightening it would change the game.
+
+**A third drift, found the same way as the other two.** `RandomMovementsAllDirections` picks one of
+three escape directions for each of twelve cases. Eleven roll `Next(0, 3)`; the case for hitting
+something above rolled `Next(0, 2)`, so its third option could never come up and a nasty bouncing
+off a ceiling never went down-right. Fixed in its own commit.
+
+### `GameEngine` — done, one commit
+
+`Update` 306 lines to 20, `DefineContent` 219 to 26, and
+`ContentResourceManager_OnGameComponentStatusChanged` 147 to 17. The file grew slightly, to 1,371
+lines: the split is signatures and documentation, not logic.
+
+`Update` splits as the plan predicted — the debug keys are one method each rather than four
+anonymous blocks in the middle of a frame — and `DefineContent` becomes fourteen `Define*` methods,
+one per comment that already grouped the registrations. Its `[MemberNotNull]` contract from
+`NULLABLE.md` is kept whole by having `DefineBootGraphics` and `DefineFonts` declare what they fill
+in; without that the split costs six warnings, which is exactly the thing this plan must not spend.
+
+The handler was doing four jobs, not two: `BuildComponentsNeedingLoadedContent`,
+`RegisterColourAnimations`, `BuildGameScreens` and `RegisterScreenEffectViewPorts`.
+
+As the plan said, the `catch { }` around `ToggleFullScreen` is left alone.
+
+### `GameScreenCollection` — done, one commit
+
+`BuildScreenCollisionMap` 227 lines to 38, `DrawUpperLayer` 222 to 16, `Reset` 206 to 19.
+
+`DrawUpperLayer` held a fifth table: a fourteen-arm `if`/`else if` ladder in which every arm made
+the same draw call with a different sprite number. It is now `UpperLayerPatchFor`, returning the
+sprite and how many rows down to draw it. The row offset exists for one case — a shadow belongs to
+the tile above it — and saying so is the whole point, because previously that was a `(y + 1)` in
+the middle of 150 otherwise identical lines. `Reset`'s two trimming loops differed only in what
+they cleared and are now one `TrimTo`.
+
+### `ToggleKeys.GetFriendlyName` — left alone, as the plan allowed
+
+232 lines, and still the longest method in the solution. It is a `switch` from key to display
+string: long because it is data, and a dictionary would not read better. The plan offered "leave
+it" as an acceptable outcome and that is the outcome.
+
+### The tail — four done, 31 methods still over 80 lines
+
+Done: `MainGameScreen.Update` (218 to 35), `Nasties.Update` (174 to 55), `CheopsScreen.Draw` (164
+to 17), `IntroSequence.Update` (155 to 32).
+
+`MainGameScreen.Update` had a sixth piece of duplication worth naming: four of its blocks opened
+with the same two-line test for whether the intro sequence still owns the screen, now the
+`GameIsInPlay` property.
+
+**Still to do**, from the measurement script. Nothing here is over 150 lines and none of it is
+duplicated logic — it is the plain version of the same move:
+
+| Method | Lines |
+| --- | --- |
+| `BouncingParticle.Update` | 137 |
+| `TeleportScreen.Draw` | 135 |
+| `CheopsScreen.Reset` | 132 |
+| `SoundEffectEngine.PlaySound` | 129 |
+| `TeleportScreen.Update` | 128 |
+| `OptionsScreen.Update` | 125 |
+| `Nasty.UpdateFrameOfMind` | 122 |
+| `GameScreenCollection.Update` / `Draw` / `CheckTileByObject` / `CheckCollision` | 107-115 |
+| `Nasty.Draw` | 110 |
+| `ElectricityGatesAndNodesEngine.DrawUpperLayer` | 110 |
+| `MainGameScreen.Draw` | 108 |
+| `ResourceManager.backgroundWorker_DoWork` | 103 |
+| `CollisionDetection.CheckDirection` | 103 |
+| `GameScreenCollection.PlaceScreenObjects` | 101 |
+| ...and 12 more between 84 and 97 |
+
+Three entries in that list want a note rather than a plain split:
+
+- **`CollisionDetection.CheckDirection`** (103) is four copies of one loop differing only in which
+  way the probe steps — the `BlobFire` treatment applies directly, and it is the one method in the
+  solution that already has tests.
+- **`GameScreenCollection.PlaceScreenObjects`** (101) is new, from this stage's own `Reset` split.
+  It wants a second pass.
+- **The `Blob` constructor** (148 by the script, 92 in fact) and
+  **`GameScreenCollection`'s constants block** (111) are both measurement artefacts — see the note
+  under "Where the size is".
+
+---
+
+## Follow-ups this work found and deliberately did not take
+
+Each of these is a real finding, noted rather than acted on so that it gets its own commit the way
+`ab470df`, `482b2ba` and the `Next(0, 3)` fix did.
+
+- **`Blob.LayJumpPlatformOrJump`** still has the empty `if (temp == -1) { }` and the comment about
+  `-1` sitting above a test for `-1000`. Carried over from stage 2.
+- **`BuildScreenCollisionMap`'s `screenChanged` parameter does almost nothing.** The
+  `!screenChanged` path removes game-object tiles from the collision map, and then the map is
+  replaced wholesale on the next line, so that work is discarded. Both paths end up appending the
+  screen's objects to a freshly built map in the same order. All the parameter actually controls is
+  whether `_keyLockDoors` is cleared. Worth confirming and then simplifying.
+- **`CollisionDetection` keeps its intermediate values in static fields**, which is why test
+  parallelisation is off. It is a latent bug in the game too, the moment anything touches collision
+  off the update thread.
+- **The point-blank push-through applies only to horizontally fired shots** (stage 3). It looks
+  accidental; fixing it changes the game.
+- **`DrawOverloadFlare` and `LayJumpPlatformOrJump` both have a local called `temp`**, as do
+  several methods in `Nasty`. Carried over from stage 2.
+- **`Blob` has ~60 fields**, many now used by exactly one method. The plan called this out in stage
+  2 and it is still true, now with the reads visible.
+- **The guards are one level deeper than they need to be.** Stage 2 kept every guard verbatim
+  rather than inverting it, on purpose. Later stages did invert the simple ones where it flattened
+  a whole method. The stage 2 methods could have the same pass now that each can be read alone.
+
