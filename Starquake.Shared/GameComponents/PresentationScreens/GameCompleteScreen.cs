@@ -2,11 +2,16 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
+using Starquake.ActiveSprites;
 using Starquake.Constants;
-using Starquake.Engines;
+using Starquake.ContentManagement;
+using Starquake.Display;
+using Starquake.Engines.ScreenEffects;
+using Starquake.Fonts;
+using Starquake.GameComponents;
 using Starquake.Helpers;
 using Starquake.Input;
 using Starquake.Sprites;
@@ -16,18 +21,35 @@ namespace Starquake.GameComponents.PresentationScreens;
 
 public class GameCompleteScreen : GameScreenBase, IGameScreen
 {
+    private readonly CoreElements _elements;
+
     private readonly SpriteCollection _backgroundImage;
     private bool _fadeComplete;
     private readonly SpriteCollection _foregroundImage;
 
-    public GameCompleteScreen(GameEngine gameEngineReference)
-        : base(gameEngineReference)
+    public GameCompleteScreen(
+        ResourceManager resources,
+        BitmapFont font,
+        GraphicsDeviceManager graphics,
+        PresentationSettings presentation,
+        ScreenEffectEngine screenEffects,
+        ScreenDirectory screenDirectory,
+        CoreElements elements)
+        : base(
+            resources,
+            font,
+            graphics,
+            presentation,
+            screenEffects,
+            screenDirectory)
     {
+        _elements = elements;
+
         ScreenFade = 0;
         ScreenFadeSpeed = 5;
 
-        _backgroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("GameCompleteScreenBackground");
-        _foregroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("GameCompleteScreenForeground");
+        _backgroundImage = Resources.GetSpriteCollection("GameCompleteScreenBackground");
+        _foregroundImage = Resources.GetSpriteCollection("GameCompleteScreenForeground");
     }
 
     public bool Success => true;
@@ -48,9 +70,9 @@ public class GameCompleteScreen : GameScreenBase, IGameScreen
     {
         if (ToggleKeys.GetPressedKey() != Keys.None)
         {
-            GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.Presentation.ScreenClearColour);
-            GameEngine.ScreenDirectory.Current = GameScreenType.GameOver;
-            GameEngine.ScreenDirectory.Get(GameScreenType.GameOver).PerformPostScreenChangeActions(GameScreenType.GameComplete, null);
+            GraphicsDeviceManager.GraphicsDevice.Clear(Presentation.ScreenClearColour);
+            ScreenDirectory.Current = GameScreenType.GameOver;
+            ScreenDirectory.Get(GameScreenType.GameOver).PerformPostScreenChangeActions(GameScreenType.GameComplete, null);
         }
 
         base.Update(gameTime);
@@ -58,7 +80,7 @@ public class GameCompleteScreen : GameScreenBase, IGameScreen
 
     public override void Draw(GameTime gameTime)
     {
-        GameEngine.ScreenEffectEngine.SelectRenderViewPort("EntireScreen");
+        ScreenEffects.SelectRenderViewPort("EntireScreen");
         _backgroundImage.Begin(BlendState.AlphaBlend, gameTime);
 
         if (_fadeComplete)
@@ -72,16 +94,16 @@ public class GameCompleteScreen : GameScreenBase, IGameScreen
 
         _backgroundImage.End();
 
-        GameEngine.Font2.Begin(BlendState.AlphaBlend);
-        GameEngine.Font2.WriteTextCentred(1280, 150, "THE CORES COMPLETE", 2, ColourHelper.GetXna4Colour(230, 0, 0), (byte)ScreenFade);
-        GameEngine.Font2.WriteTextCentred(1280, 210, "BUT HOW ARE YOU GONNA", 2, Color.Gray, (byte)ScreenFade);
-        GameEngine.Font2.WriteTextCentred(1280, 270, "GET HOME WHEN ONLY A", 2, new Color((byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ScreenFade), (byte)ScreenFade);
-        GameEngine.Font2.WriteTextCentred(1280, 330, "THTUPID LOONY WOULD WANDER", 2, new Color((byte)150, (byte)150, (byte)150, (byte)ScreenFade), (byte)ScreenFade);
-        GameEngine.Font2.WriteTextCentred(1280, 390, "THIS FAR OUT IN THE GALAXY", 2, new Color((byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ScreenFade), (byte)ScreenFade);
-        GameEngine.Font2.End();
+        Font.Begin(BlendState.AlphaBlend);
+        Font.WriteTextCentred(1280, 150, "THE CORES COMPLETE", 2, ColourHelper.GetXna4Colour(230, 0, 0), (byte)ScreenFade);
+        Font.WriteTextCentred(1280, 210, "BUT HOW ARE YOU GONNA", 2, Color.Gray, (byte)ScreenFade);
+        Font.WriteTextCentred(1280, 270, "GET HOME WHEN ONLY A", 2, new Color((byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ScreenFade), (byte)ScreenFade);
+        Font.WriteTextCentred(1280, 330, "THTUPID LOONY WOULD WANDER", 2, new Color((byte)150, (byte)150, (byte)150, (byte)ScreenFade), (byte)ScreenFade);
+        Font.WriteTextCentred(1280, 390, "THIS FAR OUT IN THE GALAXY", 2, new Color((byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ScreenFade), (byte)ScreenFade);
+        Font.End();
 
         // Core elements
-        GameEngine.Elements.Draw(gameTime, 540, 450, ScreenFade);
+        _elements.Draw(gameTime, 540, 450, ScreenFade);
 
         _foregroundImage.Begin(BlendState.AlphaBlend, gameTime);
 

@@ -2,11 +2,16 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
+using System;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
 using Starquake.Constants;
-using Starquake.Engines;
+using Starquake.ContentManagement;
+using Starquake.Display;
+using Starquake.Engines.ScreenEffects;
+using Starquake.Fonts;
+using Starquake.GameComponents;
 using Starquake.Helpers;
 using Starquake.Input;
 using Starquake.Sprites;
@@ -16,6 +21,8 @@ namespace Starquake.GameComponents.PresentationScreens;
 
 public class ComputerReportScreen : GameScreenBase, IGameScreen
 {
+    private readonly Random _randomNumberGenerator;
+
 
     #region IGameScreen Members
 
@@ -25,25 +32,40 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
 
     public bool Success => true;
 
-    public ComputerReportScreen(GameEngine gameEngineReference)
-        : base(gameEngineReference)
+    public ComputerReportScreen(
+        ResourceManager resources,
+        BitmapFont font,
+        GraphicsDeviceManager graphics,
+        PresentationSettings presentation,
+        ScreenEffectEngine screenEffects,
+        ScreenDirectory screenDirectory,
+        Random randomNumberGenerator)
+        : base(
+            resources,
+            font,
+            graphics,
+            presentation,
+            screenEffects,
+            screenDirectory)
     {
+        _randomNumberGenerator = randomNumberGenerator;
+
         ScreenFade = 0;
         ScreenFadeSpeed = 5;
 
-        _backgroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("ComputerReportScreenBackground");
-        _foregroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("ComputerReportScreenForeground");
+        _backgroundImage = Resources.GetSpriteCollection("ComputerReportScreenBackground");
+        _foregroundImage = Resources.GetSpriteCollection("ComputerReportScreenForeground");
     }
 
     public override void Update(GameTime gameTime)
     {
         if (ToggleKeys.GetPressedKey() != Keys.None)
         {
-            GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.Presentation.ScreenClearColour);
-            GameEngine.ScreenDirectory.Current = GameScreenType.MainGame;
+            GraphicsDeviceManager.GraphicsDevice.Clear(Presentation.ScreenClearColour);
+            ScreenDirectory.Current = GameScreenType.MainGame;
 
-            GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).Reset(null);
-            GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.ComputerReport, false);
+            ScreenDirectory.Get(GameScreenType.MainGame).Reset(null);
+            ScreenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.ComputerReport, false);
         }
 
         if (ScreenFade >= ColourLevels.Full)
@@ -53,8 +75,8 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
                 _fadeComplete = true;
             }
 
-            ScreenFade = GameEngine.RandomNumberGenerator.Next(ColourLevels.Full);
-            ScreenFadeSpeed = GameEngine.RandomNumberGenerator.Next(20);
+            ScreenFade = _randomNumberGenerator.Next(ColourLevels.Full);
+            ScreenFadeSpeed = _randomNumberGenerator.Next(20);
 
             if (ScreenFadeSpeed < 4)
             {
@@ -67,7 +89,7 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
 
     public override void Draw(GameTime gameTime)
     {
-        GameEngine.ScreenEffectEngine.SelectRenderViewPort("EntireScreen");
+        ScreenEffects.SelectRenderViewPort("EntireScreen");
         _backgroundImage.Begin(BlendState.AlphaBlend, gameTime);
 
         if (_fadeComplete)
@@ -81,15 +103,15 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
 
         _backgroundImage.End();
 
-        GameEngine.Font2.Begin(BlendState.AlphaBlend);
-        GameEngine.Font2.WriteTextCentred(1280, 180, "Flight Computer Report", 2, ColourHelper.GetXna4Colour(200, 200, 100), (byte)ScreenFade);
-        GameEngine.Font2.WriteTextCentred(1280, 260, "Touchdown Imminent Prepare", 2, Color.White, (byte)ScreenFade);
-        GameEngine.Font2.WriteTextCentred(1280, 320, "For Mission Starquake . . .", 2, Color.White, (byte)ScreenFade);
-        GameEngine.Font2.WriteTextCentred(1280, 380, "Crash . . . Bang . . . Smash . . .", 2, Color.Red, (byte)ScreenFade);
-        GameEngine.Font2.WriteTextCentred(1280, 440, "Touchdown", 2, Color.White, (byte)ScreenFade);
-        GameEngine.Font2.WriteTextCentred(1280, 500, "Comthuter Malthunction", 2, Color.Red, (byte)ScreenFade);
-        GameEngine.Font2.WriteTextCentred(1280, 560, "Malfunnythinkin . . .", 2, Color.Red, (byte)ScreenFade);
-        GameEngine.Font2.End();
+        Font.Begin(BlendState.AlphaBlend);
+        Font.WriteTextCentred(1280, 180, "Flight Computer Report", 2, ColourHelper.GetXna4Colour(200, 200, 100), (byte)ScreenFade);
+        Font.WriteTextCentred(1280, 260, "Touchdown Imminent Prepare", 2, Color.White, (byte)ScreenFade);
+        Font.WriteTextCentred(1280, 320, "For Mission Starquake . . .", 2, Color.White, (byte)ScreenFade);
+        Font.WriteTextCentred(1280, 380, "Crash . . . Bang . . . Smash . . .", 2, Color.Red, (byte)ScreenFade);
+        Font.WriteTextCentred(1280, 440, "Touchdown", 2, Color.White, (byte)ScreenFade);
+        Font.WriteTextCentred(1280, 500, "Comthuter Malthunction", 2, Color.Red, (byte)ScreenFade);
+        Font.WriteTextCentred(1280, 560, "Malfunnythinkin . . .", 2, Color.Red, (byte)ScreenFade);
+        Font.End();
 
         _foregroundImage.Begin(BlendState.AlphaBlend, gameTime);
 

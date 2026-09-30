@@ -2,13 +2,17 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+using System;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
 using Starquake.Constants;
-using Starquake.Engines;
+using Starquake.ContentManagement;
+using Starquake.Display;
+using Starquake.Engines.ScreenEffects;
+using Starquake.Fonts;
+using Starquake.GameComponents;
 using Starquake.Helpers;
 using Starquake.Input;
 using Starquake.Sprites;
@@ -18,6 +22,8 @@ namespace Starquake.GameComponents.PresentationScreens;
 
 public class OptionsScreen : GameScreenBase, IGameScreen
 {
+    private readonly GameSession _session;
+
 
     #region IGameScreen Members
 
@@ -29,17 +35,32 @@ public class OptionsScreen : GameScreenBase, IGameScreen
 
     public bool Success => true;
 
-    public OptionsScreen(GameEngine gameEngineReference)
-        : base(gameEngineReference)
+    public OptionsScreen(
+        ResourceManager resources,
+        BitmapFont font,
+        GraphicsDeviceManager graphics,
+        PresentationSettings presentation,
+        ScreenEffectEngine screenEffects,
+        ScreenDirectory screenDirectory,
+        GameSession session)
+        : base(
+            resources,
+            font,
+            graphics,
+            presentation,
+            screenEffects,
+            screenDirectory)
     {
+        _session = session;
+
         ScreenFade = 0;
         ScreenFadeSpeed = 5;
 
-        _keyDefiner = new KeyDefiner(gameEngineReference.ContentResourceManager, gameEngineReference.Font2);
+        _keyDefiner = new KeyDefiner(Resources, Font);
         _keyDefiner.KeyDefinitionComplete += keyDefiner_KeyDefinitionComplete;
 
-        _backgroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("OptionScreenBackground");
-        _foregroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("OptionScreenForeground");
+        _backgroundImage = Resources.GetSpriteCollection("OptionScreenBackground");
+        _foregroundImage = Resources.GetSpriteCollection("OptionScreenForeground");
 
         _options =
         [
@@ -65,7 +86,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
 
     public override void LoadContent()
     {
-        GameEngine.Font2.Flash = true;
+        Font.Flash = true;
     }
 
     /// <summary>
@@ -84,7 +105,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
         else
         {
             HandleOptionKeys();
-            GameEngine.Font2.Update();
+            Font.Update();
         }
 
         base.Update(gameTime);
@@ -108,7 +129,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
         {
             _definingKeys = true;
             _keyDefiner.Reset();
-            GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+            Resources.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
             return;
         }
 
@@ -122,7 +143,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
 
         ClearSelectedOptions();
         _options[option].Selected = true;
-        GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+        Resources.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
     }
 
     /// <summary>
@@ -138,13 +159,13 @@ public class OptionsScreen : GameScreenBase, IGameScreen
                 continue;
             }
 
-            GameEngine.Session.PlayerKeys = KeysForOption(option);
+            _session.PlayerKeys = KeysForOption(option);
             break;
         }
 
-        GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.Presentation.ScreenClearColour);
-        GameEngine.ScreenDirectory.Current = GameScreenType.ComputerReport;
-        GameEngine.ScreenDirectory.Get(GameScreenType.ComputerReport).PerformPostScreenChangeActions(GameScreenType.Options, null);
+        GraphicsDeviceManager.GraphicsDevice.Clear(Presentation.ScreenClearColour);
+        ScreenDirectory.Current = GameScreenType.ComputerReport;
+        ScreenDirectory.Get(GameScreenType.ComputerReport).PerformPostScreenChangeActions(GameScreenType.Options, null);
     }
 
     /// <summary>
@@ -210,13 +231,13 @@ public class OptionsScreen : GameScreenBase, IGameScreen
 
     public override void Draw(GameTime gameTime)
     {
-        GameEngine.ScreenEffectEngine.SelectRenderViewPort("EntireScreen");
+        ScreenEffects.SelectRenderViewPort("EntireScreen");
 
         _backgroundImage.Begin(BlendState.AlphaBlend, gameTime);
         _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
         _backgroundImage.End();
 
-        GameEngine.Font2.Begin(BlendState.AlphaBlend);
+        Font.Begin(BlendState.AlphaBlend);
         if (!_definingKeys)
         {
             var optionXPos = 320;
@@ -226,20 +247,20 @@ public class OptionsScreen : GameScreenBase, IGameScreen
             {
                 if (opt.Unavailable)
                 {
-                    GameEngine.Font2.WriteText(optionXPos, optionYPos, opt.ActivationKey + ".", 2, ColourHelper.GetXna4Colour(100, 0, 0), (byte)ScreenFade);
-                    GameEngine.Font2.WriteText(optionXPos + 50, optionYPos, opt.OptionText + " (offline)", 2, ColourHelper.GetXna4Colour(100, 0, 0), (byte)ScreenFade);
+                    Font.WriteText(optionXPos, optionYPos, opt.ActivationKey + ".", 2, ColourHelper.GetXna4Colour(100, 0, 0), (byte)ScreenFade);
+                    Font.WriteText(optionXPos + 50, optionYPos, opt.OptionText + " (offline)", 2, ColourHelper.GetXna4Colour(100, 0, 0), (byte)ScreenFade);
                 }
                 else
                 {
                     if (opt.Selected)
                     {
-                        GameEngine.Font2.WriteText(optionXPos, optionYPos, opt.ActivationKey + ".", 2, (byte)ScreenFade);
-                        GameEngine.Font2.WriteText(optionXPos + 50, optionYPos, opt.OptionText, 2, (byte)ScreenFade);
+                        Font.WriteText(optionXPos, optionYPos, opt.ActivationKey + ".", 2, (byte)ScreenFade);
+                        Font.WriteText(optionXPos + 50, optionYPos, opt.OptionText, 2, (byte)ScreenFade);
                     }
                     else
                     {
-                        GameEngine.Font2.WriteText(optionXPos, optionYPos, opt.ActivationKey + ".", 2, opt.Colour, (byte)ScreenFade);
-                        GameEngine.Font2.WriteText(optionXPos + 50, optionYPos, opt.OptionText, 2, opt.Colour, (byte)ScreenFade);
+                        Font.WriteText(optionXPos, optionYPos, opt.ActivationKey + ".", 2, opt.Colour, (byte)ScreenFade);
+                        Font.WriteText(optionXPos + 50, optionYPos, opt.OptionText, 2, opt.Colour, (byte)ScreenFade);
                     }
                 }
 
@@ -251,9 +272,9 @@ public class OptionsScreen : GameScreenBase, IGameScreen
             _keyDefiner.Draw(gameTime, ScreenFade);
         }
 
-        GameEngine.Font2.WriteText(555, 640, "2017", 2, new Color(112, 155, 155), (byte)ScreenFade);
+        Font.WriteText(555, 640, "2017", 2, new Color(112, 155, 155), (byte)ScreenFade);
 
-        GameEngine.Font2.End();
+        Font.End();
 
         _foregroundImage.Begin(BlendState.AlphaBlend, gameTime);
         _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));

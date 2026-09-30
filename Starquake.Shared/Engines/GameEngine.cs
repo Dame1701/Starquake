@@ -828,11 +828,48 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
         _mainScreen = new MainGameScreen(this);
 
-        ScreenDirectory.Add(GameScreenType.Options, new OptionsScreen(this));
-        ScreenDirectory.Add(GameScreenType.ComputerReport, new ComputerReportScreen(this));
-        ScreenDirectory.Add(GameScreenType.HiScores, new HiScoreScreen(this));
-        ScreenDirectory.Add(GameScreenType.GameOver, new GameOverScreen(this));
-        ScreenDirectory.Add(GameScreenType.GameComplete, new GameCompleteScreen(this));
+        ScreenDirectory.Add(GameScreenType.Options, new OptionsScreen(
+                ContentResourceManager,
+                Font2,
+                GraphicsDeviceMgr,
+                Presentation,
+                ScreenEffectEngine,
+                ScreenDirectory,
+                Session));
+        ScreenDirectory.Add(GameScreenType.ComputerReport, new ComputerReportScreen(
+                ContentResourceManager,
+                Font2,
+                GraphicsDeviceMgr,
+                Presentation,
+                ScreenEffectEngine,
+                ScreenDirectory,
+                RandomNumberGenerator));
+        ScreenDirectory.Add(GameScreenType.HiScores, new HiScoreScreen(
+                ContentResourceManager,
+                Font2,
+                GraphicsDeviceMgr,
+                Presentation,
+                ScreenEffectEngine,
+                ScreenDirectory,
+                BlobStatusPanel));
+        ScreenDirectory.Add(GameScreenType.GameOver, new GameOverScreen(
+                ContentResourceManager,
+                Font2,
+                GraphicsDeviceMgr,
+                Presentation,
+                ScreenEffectEngine,
+                ScreenDirectory,
+                BlobStatusPanel,
+                Elements,
+                GameScreens));
+        ScreenDirectory.Add(GameScreenType.GameComplete, new GameCompleteScreen(
+                ContentResourceManager,
+                Font2,
+                GraphicsDeviceMgr,
+                Presentation,
+                ScreenEffectEngine,
+                ScreenDirectory,
+                Elements));
 
         ScreenDirectory.Add(GameScreenType.MainGame, _mainScreen);
         ScreenDirectory.Add(GameScreenType.Teleporter, new TeleportScreen(this));

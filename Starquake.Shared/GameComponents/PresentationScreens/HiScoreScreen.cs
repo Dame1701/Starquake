@@ -3,11 +3,15 @@
 // ---------------------------------------------------------
 // -
 using System;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
 using Starquake.Constants;
-using Starquake.Engines;
+using Starquake.ContentManagement;
+using Starquake.Display;
+using Starquake.Engines.ScreenEffects;
+using Starquake.Fonts;
+using Starquake.GameComponents;
 using Starquake.Helpers;
 using Starquake.Input;
 using Starquake.Scoring;
@@ -18,6 +22,8 @@ namespace Starquake.GameComponents.PresentationScreens;
 
 public class HiScoreScreen : GameScreenBase, IGameScreen
 {
+    private readonly StatusPanel _statusPanel;
+
     private readonly HiScores _hiscoreList;
     private readonly SpriteCollection _backgroundImage;
     private bool _fadeComplete;
@@ -25,14 +31,29 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
     private bool _gotHighScore;
     private HiScore _playersHighScore = new();
 
-    public HiScoreScreen(GameEngine gameEngineReference)
-        : base(gameEngineReference)
+    public HiScoreScreen(
+        ResourceManager resources,
+        BitmapFont font,
+        GraphicsDeviceManager graphics,
+        PresentationSettings presentation,
+        ScreenEffectEngine screenEffects,
+        ScreenDirectory screenDirectory,
+        StatusPanel statusPanel)
+        : base(
+            resources,
+            font,
+            graphics,
+            presentation,
+            screenEffects,
+            screenDirectory)
     {
+        _statusPanel = statusPanel;
+
         ScreenFade = 0;
         ScreenFadeSpeed = 5;
 
-        _backgroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("HiScoreScreenBackground");
-        _foregroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("HiScoreScreenForeground");
+        _backgroundImage = Resources.GetSpriteCollection("HiScoreScreenBackground");
+        _foregroundImage = Resources.GetSpriteCollection("HiScoreScreenForeground");
         _hiscoreList = new HiScores();
     }
 
@@ -51,7 +72,7 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
         _playersHighScore = new HiScore();
 
         // Lets see if we have a place in the high score table
-        _gotHighScore = _hiscoreList.GotHighScore(GameEngine.BlobStatusPanel.PlayerScore);
+        _gotHighScore = _hiscoreList.GotHighScore(_statusPanel.PlayerScore);
 
         if (_gotHighScore)
         {
@@ -78,9 +99,9 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
         {
             if (ToggleKeys.GetPressedKey() != Keys.None)
             {
-                GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.Presentation.ScreenClearColour);
-                GameEngine.ScreenDirectory.Current = GameScreenType.Options;
-                GameEngine.ScreenDirectory.Get(GameScreenType.Options).PerformPostScreenChangeActions(GameScreenType.HiScores, null);
+                GraphicsDeviceManager.GraphicsDevice.Clear(Presentation.ScreenClearColour);
+                ScreenDirectory.Current = GameScreenType.Options;
+                ScreenDirectory.Get(GameScreenType.Options).PerformPostScreenChangeActions(GameScreenType.HiScores, null);
             }
         }
         else
@@ -128,7 +149,7 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
 
     public override void Draw(GameTime gameTime)
     {
-        GameEngine.ScreenEffectEngine.SelectRenderViewPort("EntireScreen");
+        ScreenEffects.SelectRenderViewPort("EntireScreen");
         _backgroundImage.Begin(BlendState.AlphaBlend, gameTime);
 
         if (_fadeComplete)
@@ -146,22 +167,22 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
         if (_gotHighScore)
         {
 
-            GameEngine.Font2.Begin(BlendState.AlphaBlend);
-            GameEngine.Font2.WriteTextCentred(1280, 180, "ENCODE YOUR NAME", 2, ColourHelper.GetXna4Colour(9, 132, ColourLevels.Full), (byte)ScreenFade);
-            GameEngine.Font2.WriteTextCentred(1280, 240, "INTO THE CORE", 2, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full), (byte)ScreenFade);
-            GameEngine.Font2.WriteTextCentred(1280, 300, "FOR YOU HAVE ACHIEVED", 2, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full), (byte)ScreenFade);
-            GameEngine.Font2.WriteTextCentred(1280, 360, "A HERO'S SCORE", 2, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full), (byte)ScreenFade);
+            Font.Begin(BlendState.AlphaBlend);
+            Font.WriteTextCentred(1280, 180, "ENCODE YOUR NAME", 2, ColourHelper.GetXna4Colour(9, 132, ColourLevels.Full), (byte)ScreenFade);
+            Font.WriteTextCentred(1280, 240, "INTO THE CORE", 2, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full), (byte)ScreenFade);
+            Font.WriteTextCentred(1280, 300, "FOR YOU HAVE ACHIEVED", 2, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full), (byte)ScreenFade);
+            Font.WriteTextCentred(1280, 360, "A HERO'S SCORE", 2, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full), (byte)ScreenFade);
 
-            GameEngine.Font2.WriteTextCentred(1280, 420, _playersHighScore.Name, 2, ColourHelper.GetXna4Colour(9, 132, ColourLevels.Full), (byte)ScreenFade);
-            GameEngine.Font2.End();
+            Font.WriteTextCentred(1280, 420, _playersHighScore.Name, 2, ColourHelper.GetXna4Colour(9, 132, ColourLevels.Full), (byte)ScreenFade);
+            Font.End();
         }
         else
         {
-            GameEngine.Font2.Begin(BlendState.AlphaBlend);
-            GameEngine.Font2.WriteTextCentred(1280, 180, "CORE OF HEROES", 2, ColourHelper.GetXna4Colour(9, 132, ColourLevels.Full), (byte)ScreenFade);
-            GameEngine.Font2.End();
+            Font.Begin(BlendState.AlphaBlend);
+            Font.WriteTextCentred(1280, 180, "CORE OF HEROES", 2, ColourHelper.GetXna4Colour(9, 132, ColourLevels.Full), (byte)ScreenFade);
+            Font.End();
 
-            _hiscoreList.Draw(GameEngine.ContentResourceManager, GameEngine.Font2, gameTime, 380, 250, ScreenFade);
+            _hiscoreList.Draw(Resources, Font, gameTime, 380, 250, ScreenFade);
         }
 
         _foregroundImage.Begin(BlendState.AlphaBlend, gameTime);
