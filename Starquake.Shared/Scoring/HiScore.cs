@@ -2,13 +2,14 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 
 namespace Starquake.Scoring;
 
 public class HiScore
 {
     public int AdventureScore;
-    public string Name;
+    public string Name = string.Empty;
     public int Score;
 
     public string AdventureScoreString

@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using Microsoft.Xna.Framework;
 
 namespace Starquake.Animations;
@@ -20,8 +21,6 @@ public class ColourFaderAnimation
 
     // Loop counter
     public int LoopCounter;
-    // Name
-    public string Name;
 
     // Is the animation running?
     public bool Running;

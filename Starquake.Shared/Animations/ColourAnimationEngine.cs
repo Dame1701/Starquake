@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -96,75 +97,6 @@ public class ColourAnimationEngine : GameComponentBase
         }
     }
 
-    public void Start(string name, int loopCount)
-    {
-        foreach (var colourAnimation in _colourAnimationsRegistered)
-        {
-            if (colourAnimation.Name == name)
-            {
-                if (!colourAnimation.Running)
-                {
-                    // Make colour initially invisible
-                    colourAnimation.TransitionColour.A = 0;
-                    colourAnimation.Running = true;
-                    colourAnimation.Direction = ColourAnimationDirection.FadeUp;
-                    colourAnimation.Stopping = false;
-                    colourAnimation.LoopCount = loopCount;
-
-                    // Reset the loop counter
-                    colourAnimation.LoopCounter = 0;
-                }
-            }
-        }
-    }
-
-    public void Start(string name, int loopCount, Color transitionColour)
-    {
-        foreach (var colourAnimation in _colourAnimationsRegistered)
-        {
-            if (colourAnimation.Name == name)
-            {
-                if (!colourAnimation.Running)
-                {
-                    // Make colour initially invisible
-                    colourAnimation.TransitionColour = transitionColour;
-                    colourAnimation.TransitionColour.A = 0;
-                    colourAnimation.Running = true;
-                    colourAnimation.Direction = ColourAnimationDirection.FadeUp;
-                    colourAnimation.Stopping = false;
-                    colourAnimation.LoopCount = loopCount;
-
-                    // Reset the loop counter
-                    colourAnimation.LoopCounter = 0;
-                }
-            }
-        }
-    }
-
-    public void Start(string name, int loopCount, Color transitionColour, int intensity)
-    {
-        foreach (var colourAnimation in _colourAnimationsRegistered)
-        {
-            if (colourAnimation.Name == name)
-            {
-                if (!colourAnimation.Running)
-                {
-                    // Make colour initially invisible
-                    colourAnimation.TransitionColour = transitionColour;
-                    colourAnimation.TransitionColour.A = 0;
-                    colourAnimation.Intensity = intensity;
-                    colourAnimation.Running = true;
-                    colourAnimation.Direction = ColourAnimationDirection.FadeUp;
-                    colourAnimation.Stopping = false;
-                    colourAnimation.LoopCount = loopCount;
-
-                    // Reset the loop counter
-                    colourAnimation.LoopCounter = 0;
-                }
-            }
-        }
-    }
-
     public void Stop(int tileNo)
     {
         for (var a = 0; a < _colourAnimationsRegistered.Count; a++)
@@ -181,38 +113,11 @@ public class ColourAnimationEngine : GameComponentBase
         }
     }
 
-    public void Stop(string name)
-    {
-        for (var a = 0; a < _colourAnimationsRegistered.Count; a++)
-        {
-            if (_colourAnimationsRegistered[a].Name == name)
-            {
-                if (_colourAnimationsRegistered[a].Running &&
-                    !_colourAnimationsRegistered[a].Stopping)
-                {
-                    // Schedule a stop
-                    _colourAnimationsRegistered[a].Stopping = true;
-                }
-            }
-        }
-    }
-
     public void ChangeSpeed(int tileNo, int speed)
     {
         foreach (var colourAnimation in _colourAnimationsRegistered)
         {
             if (colourAnimation.TileNo == tileNo)
-            {
-                colourAnimation.Speed = speed;
-            }
-        }
-    }
-
-    public void ChangeSpeed(string name, int speed)
-    {
-        foreach (var colourAnimation in _colourAnimationsRegistered)
-        {
-            if (colourAnimation.Name == name)
             {
                 colourAnimation.Speed = speed;
             }
