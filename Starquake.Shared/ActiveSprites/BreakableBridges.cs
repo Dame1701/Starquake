@@ -3,7 +3,11 @@
 // ---------------------------------------------------------
 // -
 using System.Collections.Generic;
+using System;
 using Microsoft.Xna.Framework;
+using Starquake.ContentManagement;
+using Starquake.Display;
+using Starquake.Engines.ScreenEffects;
 using Starquake.Engines;
 
 namespace Starquake.ActiveSprites;
@@ -11,22 +15,38 @@ namespace Starquake.ActiveSprites;
 public class BreakableBridges
 {
     private readonly List<BreakableBridge> _bridges;
-    private readonly GameEngine _gameEngineReference;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsDeviceManager _graphicsDeviceManager;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
+    private readonly ScreenEffectEngine _screenEffects;
 
-    public BreakableBridges(GameEngine gameEngineReference)
+    public BreakableBridges(
+        ResourceManager resources,
+        GameScreenCollection gameScreens,
+        GraphicsDeviceManager graphics,
+        GraphicsSet graphicsSet,
+        Random randomNumberGenerator,
+        ScreenEffectEngine screenEffects)
     {
-        _gameEngineReference = gameEngineReference;
+        _resources = resources;
+        _gameScreens = gameScreens;
+        _graphicsDeviceManager = graphics;
+        _graphicsSet = graphicsSet;
+        _randomNumberGenerator = randomNumberGenerator;
+        _screenEffects = screenEffects;
         _bridges = new List<BreakableBridge>();
     }
 
     public void AddBridge(int tileLocationX, int tileLocationY)
     {
-        _bridges.Add(new BreakableBridge(tileLocationX, tileLocationY, _gameEngineReference));
+        _bridges.Add(new BreakableBridge(tileLocationX, tileLocationY, _resources, _graphicsDeviceManager, _graphicsSet, _randomNumberGenerator, _screenEffects));
     }
 
     public void AddBridge(Point tileLocation)
     {
-        _bridges.Add(new BreakableBridge(tileLocation.X, tileLocation.Y, _gameEngineReference));
+        _bridges.Add(new BreakableBridge(tileLocation.X, tileLocation.Y, _resources, _graphicsDeviceManager, _graphicsSet, _randomNumberGenerator, _screenEffects));
     }
 
     public void Update()
@@ -42,7 +62,7 @@ public class BreakableBridges
                 else
                 {
                     // Update the collision map to remove the bridge collision once we've finished dissolving
-                    _gameEngineReference.GameScreens.UpdateCollisionMap(false);
+                    _gameScreens.UpdateCollisionMap(false);
 
                     _bridges.Remove(_bridges[a]);
                     a--;

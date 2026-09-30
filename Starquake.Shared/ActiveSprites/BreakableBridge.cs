@@ -2,8 +2,11 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
+using System;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
+using Starquake.ContentManagement;
+using Starquake.Engines.ScreenEffects;
 using Starquake.Engines;
 using Starquake.Sprites;
 
@@ -14,7 +17,9 @@ public class BreakableBridge
 
     private readonly SpriteCollection _breakableBridge;
     private readonly SpriteCollection _breakableBridgeOriginal;
-    private readonly GameEngine _gameEngineReference;
+    private readonly GraphicsDeviceManager _graphicsDeviceManager;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly ScreenEffectEngine _screenEffects;
     private readonly SpritePixelMatrix _matrix;
     private readonly RenderTarget2D _renderTarget;
     private readonly SpriteBatch _textureDrawer;
@@ -22,16 +27,25 @@ public class BreakableBridge
     private readonly int _xPos;
     private readonly int _yPos;
 
-    public BreakableBridge(int xPos, int yPos, GameEngine gameEngineReference)
+    public BreakableBridge(
+        int xPos,
+        int yPos,
+        ResourceManager resources,
+        GraphicsDeviceManager graphics,
+        GraphicsSet graphicsSet,
+        Random randomNumberGenerator,
+        ScreenEffectEngine screenEffects)
     {
-        _gameEngineReference = gameEngineReference;
+        _graphicsDeviceManager = graphics;
+        _graphicsSet = graphicsSet;
+        _screenEffects = screenEffects;
 
-        _breakableBridge = _gameEngineReference.ContentResourceManager.GetSpriteCollection("BreakableBridge");
-        _breakableBridgeOriginal = _gameEngineReference.ContentResourceManager.GetSpriteCollection("BreakableBridgeOriginal");
+        _breakableBridge = resources.GetSpriteCollection("BreakableBridge");
+        _breakableBridgeOriginal = resources.GetSpriteCollection("BreakableBridgeOriginal");
 
-        _textureDrawer = new SpriteBatch(gameEngineReference.GraphicsDeviceMgr.GraphicsDevice);
-        _matrix = new SpritePixelMatrix(_breakableBridge.SpriteWidth * _breakableBridge.SpriteHeight, gameEngineReference.RandomNumberGenerator);
-        _renderTarget = new RenderTarget2D(gameEngineReference.GraphicsDeviceMgr.GraphicsDevice, _breakableBridge.SpriteWidth, _breakableBridge.SpriteHeight);
+        _textureDrawer = new SpriteBatch(graphics.GraphicsDevice);
+        _matrix = new SpritePixelMatrix(_breakableBridge.SpriteWidth * _breakableBridge.SpriteHeight, randomNumberGenerator);
+        _renderTarget = new RenderTarget2D(graphics.GraphicsDevice, _breakableBridge.SpriteWidth, _breakableBridge.SpriteHeight);
 
         _xPos = xPos;
         _yPos = yPos;
@@ -52,10 +66,10 @@ public class BreakableBridge
         if (!Finished)
         {
             // The render target is a texture that we draw directly to
-            _gameEngineReference.GraphicsDeviceMgr.GraphicsDevice.SetRenderTarget(_renderTarget);
-            _gameEngineReference.GraphicsDeviceMgr.GraphicsDevice.Clear(Color.Transparent);
+            _graphicsDeviceManager.GraphicsDevice.SetRenderTarget(_renderTarget);
+            _graphicsDeviceManager.GraphicsDevice.Clear(Color.Transparent);
 
-            if (_gameEngineReference.GraphicsSet.IsOriginal)
+            if (_graphicsSet.IsOriginal)
             {
                 _breakableBridgeOriginal.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
                 _breakableBridgeOriginal.DrawSprite(0, 0, 0, Color.White, _matrix.Matrix);
@@ -69,7 +83,7 @@ public class BreakableBridge
             }
 
             // Set the render targer back to the screen
-            _gameEngineReference.ScreenEffectEngine.SelectRenderViewPort("GameArea", false);
+            _screenEffects.SelectRenderViewPort("GameArea", false);
 
             _textureDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
             _textureDrawer.Draw(

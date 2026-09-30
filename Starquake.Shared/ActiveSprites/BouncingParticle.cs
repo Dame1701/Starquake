@@ -5,6 +5,8 @@
 using System;
 using Microsoft.Xna.Framework;
 using Starquake.Animations;
+using Starquake.ContentManagement;
+using Starquake.Display;
 using Starquake.Engines;
 using Starquake.Particles;
 using Starquake.Sprites;
@@ -15,16 +17,18 @@ namespace Starquake.ActiveSprites;
 public class BouncingParticle
 {
 
-    private readonly GameEngine _gameEngine;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly Random _randomNumberGenerator;
     private readonly BouncingAnimation _particleBounce;
 
     private int _oldXPos;
     private int _oldYPos;
 
-    public BouncingParticle(GameEngine gameEngineReference, int spriteNo)
+    public BouncingParticle(ResourceManager resources, GameScreenCollection gameScreens, Random randomNumberGenerator, int spriteNo)
     {
-        _gameEngine = gameEngineReference;
-        _particleBounce = new BouncingAnimation(gameEngineReference.ContentResourceManager, gameEngineReference.RandomNumberGenerator, spriteNo);
+        _gameScreens = gameScreens;
+        _randomNumberGenerator = randomNumberGenerator;
+        _particleBounce = new BouncingAnimation(resources, randomNumberGenerator, spriteNo);
     }
 
     public required IStandardParticleEffect Fireball { get; init; }
@@ -62,9 +66,9 @@ public class BouncingParticle
         // emitter's buffer at the positions they froze at when the bounce stopped
         Fireball.Reset();
 
-        var xSpeed = _gameEngine.RandomNumberGenerator.Next(4, 12);
+        var xSpeed = _randomNumberGenerator.Next(4, 12);
 
-        var xDirection = _gameEngine.RandomNumberGenerator.Next(0, 2);
+        var xDirection = _randomNumberGenerator.Next(0, 2);
         if (xDirection == 0)
         {
             xSpeed = -xSpeed;
@@ -73,8 +77,8 @@ public class BouncingParticle
         Fireball.Start();
 
         _particleBounce.Trigger(
-            _gameEngine.RandomNumberGenerator.Next(1, 2),
-            _gameEngine.RandomNumberGenerator.Next(1, 20),
+            _randomNumberGenerator.Next(1, 2),
+            _randomNumberGenerator.Next(1, 20),
             xSpeed, effectMinDuration, effectMaxDuration);
     }
 
@@ -153,7 +157,7 @@ public class BouncingParticle
             : movingPositive ? Direction.Right : Direction.Left;
 
         // Absolute value used here to convert the negative to positive for col routine
-        var speed = _gameEngine.GameScreens.CheckCollision(
+        var speed = _gameScreens.CheckCollision(
             direction,
             XPos,
             YPos,
@@ -175,8 +179,8 @@ public class BouncingParticle
 
         var position = vertical ? YPos : XPos;
         var screenSize = vertical
-            ? _gameEngine.GameScreens.ScreenHeight
-            : _gameEngine.GameScreens.ScreenWidth;
+            ? _gameScreens.ScreenHeight
+            : _gameScreens.ScreenWidth;
 
         // Keep the parts within the screen bounds, makes for a better effect
         if (movingPositive && position > screenSize - ParticleSize)

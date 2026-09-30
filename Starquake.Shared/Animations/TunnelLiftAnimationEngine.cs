@@ -4,8 +4,10 @@
 // -
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
+using Starquake.ContentManagement;
+using Starquake.Display;
 using Starquake.Engines;
 using Starquake.Structure;
 
@@ -13,7 +15,9 @@ namespace Starquake.Animations;
 
 public class TunnelLiftAnimationEngine : GameComponentBase
 {
-    private readonly GameEngine GameEngine;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly ResourceManager _resources;
 
     /// <summary>
     ///     How far apart the arrow animations of neighbouring lift shafts are started, in logic
@@ -23,18 +27,20 @@ public class TunnelLiftAnimationEngine : GameComponentBase
 
     private List<TunnelLiftAnimationColumn>? _columns;
 
-    public TunnelLiftAnimationEngine(GameEngine engine)
+    public TunnelLiftAnimationEngine(ResourceManager resources, GameScreenCollection gameScreens, GraphicsSet graphicsSet)
     {
-        GameEngine = engine;
+        _resources = resources;
+        _gameScreens = gameScreens;
+        _graphicsSet = graphicsSet;
     }
 
     public void PerformPostChangeScreenActions()
     {
         Point[]? tunnelLiftArrowLocations;
 
-        if (GameEngine.GraphicsSet.IsRedrawn)
+        if (_graphicsSet.IsRedrawn)
         {
-            tunnelLiftArrowLocations = GameEngine.GameScreens.GetCoordsOfTiles(new[]
+            tunnelLiftArrowLocations = _gameScreens.GetCoordsOfTiles(new[]
             {
                 (int)ActionTiles.TunnelLiftTopAlternate,
                 (int)ActionTiles.TunnelLiftTop1,
@@ -48,7 +54,7 @@ public class TunnelLiftAnimationEngine : GameComponentBase
         }
         else
         {
-            tunnelLiftArrowLocations = GameEngine.GameScreens.GetCoordsOfTiles(new[]
+            tunnelLiftArrowLocations = _gameScreens.GetCoordsOfTiles(new[]
             {
                 (int)ActionTiles.TunnelLiftTile,
                 (int)ActionTiles.TunnelLiftShaft1,
@@ -95,14 +101,14 @@ public class TunnelLiftAnimationEngine : GameComponentBase
     {
         if (_columns != null && _columns.Count > 0)
         {
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.UpperScreenTiles).Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+            _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
 
             foreach (var column in _columns)
             {
-                column.Draw(GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.UpperScreenTiles), screenfade);
+                column.Draw(_resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles), screenfade);
             }
 
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.UpperScreenTiles).End();
+            _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).End();
         }
     }
 }

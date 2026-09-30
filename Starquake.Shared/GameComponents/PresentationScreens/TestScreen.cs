@@ -30,7 +30,7 @@ public class TestScreen : GameScreenBase, IGameScreen
     {
         ScreenFade = 0;
 
-        _bda = new BlobDeathAnimation(gameEngineReference);
+        _bda = new BlobDeathAnimation(gameEngineReference.ContentResourceManager, gameEngineReference.GameScreens, gameEngineReference.GraphicsSet, gameEngineReference.RandomNumberGenerator);
     }
 
     public override void Update(GameTime gameTime)

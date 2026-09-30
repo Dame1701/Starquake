@@ -3,9 +3,12 @@
 // ---------------------------------------------------------
 // -
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+using System;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 using Starquake.ActiveSprites;
+using Starquake.ContentManagement;
+using Starquake.Display;
 using Starquake.Engines;
 using Starquake.Particles;
 using Starquake.Structure;
@@ -14,7 +17,10 @@ namespace Starquake.Animations;
 
 public class BlobDeathAnimation : GameComponentBase
 {
-    private readonly GameEngine GameEngine;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
 
     // The six fragment sprites Blob comes apart into. Deliberately not a straight run
     private static readonly int[] FragmentSpriteNumbers = [0, 1, 1, 2, 3, 5];
@@ -24,9 +30,16 @@ public class BlobDeathAnimation : GameComponentBase
     private IPositionalTriggerParticleEffect? _blobFragmentBounceSparks;
     private bool _drawBlobParts;
 
-    public BlobDeathAnimation(GameEngine gameEngineReference)
+    public BlobDeathAnimation(
+        ResourceManager resources,
+        GameScreenCollection gameScreens,
+        GraphicsSet graphicsSet,
+        Random randomNumberGenerator)
     {
-        GameEngine = gameEngineReference;
+        _resources = resources;
+        _gameScreens = gameScreens;
+        _graphicsSet = graphicsSet;
+        _randomNumberGenerator = randomNumberGenerator;
 
         BouncingParticles = new List<BouncingParticle>(FragmentSpriteNumbers.Length);
 
@@ -81,17 +94,17 @@ public class BlobDeathAnimation : GameComponentBase
     public override void LoadContent()
     {
         _blobFragmentBounceSparks =
-            (IPositionalTriggerParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("FireSparks",
+            (IPositionalTriggerParticleEffect)_resources.GetParticleEffectInstance("FireSparks",
                 ParticleEffectType.TriggeredMultiLocationTimed, null);
 
         // Each fragment needs its own explosion emitter, but they all spark off the one effect
         BouncingParticles.Clear();
         foreach (var fragmentSpriteNumber in FragmentSpriteNumbers)
         {
-            BouncingParticles.Add(new BouncingParticle(GameEngine, fragmentSpriteNumber)
+            BouncingParticles.Add(new BouncingParticle(_resources, _gameScreens, _randomNumberGenerator, fragmentSpriteNumber)
             {
                 Fireball =
-                    (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("BlobFragmentExplosion",
+                    (IStandardParticleEffect)_resources.GetParticleEffectInstance("BlobFragmentExplosion",
                         ParticleEffectType.Continual, null),
                 SparkEffect = _blobFragmentBounceSparks
             });
@@ -127,7 +140,7 @@ public class BlobDeathAnimation : GameComponentBase
             }
         }
 
-        if (GameEngine.GraphicsSet.IsOriginal)
+        if (_graphicsSet.IsOriginal)
         {
             _blobDeathParticlesOriginal.GetNextFrame();
         }
@@ -140,21 +153,21 @@ public class BlobDeathAnimation : GameComponentBase
 
     public override void Draw(GameTime gameTime, int screenFade)
     {
-        if (GameEngine.GraphicsSet.IsOriginal)
+        if (_graphicsSet.IsOriginal)
         {
-            GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original")
+            _resources.GetSpriteCollection("BlobFire2Original")
                 .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
 
             foreach (var bouncingParticle in BouncingParticles)
             {
                 if (bouncingParticle.Triggered)
                 {
-                    bouncingParticle.Draw(GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original"),
+                    bouncingParticle.Draw(_resources.GetSpriteCollection("BlobFire2Original"),
                         screenFade, _blobDeathParticlesOriginal.CurrentFrame);
                 }
             }
 
-            GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").End();
+            _resources.GetSpriteCollection("BlobFire2Original").End();
         }
         else
         {
@@ -167,11 +180,11 @@ public class BlobDeathAnimation : GameComponentBase
 
                 if (_drawBlobParts)
                 {
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobParts")
+                    _resources.GetSpriteCollection("BlobParts")
                         .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                    bouncingParticle.Draw(GameEngine.ContentResourceManager.GetSpriteCollection("BlobParts"),
+                    bouncingParticle.Draw(_resources.GetSpriteCollection("BlobParts"),
                         screenFade);
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobParts").End();
+                    _resources.GetSpriteCollection("BlobParts").End();
                 }
                 else
                 {

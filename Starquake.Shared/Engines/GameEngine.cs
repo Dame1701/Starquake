@@ -106,7 +106,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     private const int CoreInventoryHandoverScreen = 197;
 
-    public BlobDeathAnimation BlobKiller;
+    private BlobDeathAnimation? _blobKiller;
 
     public StatusPanel BlobStatusPanel;
     private SpriteCollection _bootProgress;
@@ -187,7 +187,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
 
     // Tunnel lift animations
-    public TunnelLiftAnimationEngine TunnelAnimations;
+    private TunnelLiftAnimationEngine? _tunnelAnimations;
 
     // Scaling
     public GameEngine(
@@ -296,6 +296,12 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public BreakableBridges BreakableBridgesEngine => NotBeforeContentLoads(_breakableBridgesEngine);
 
     /// <inheritdoc cref="GameScreens" />
+    public TunnelLiftAnimationEngine TunnelAnimations => NotBeforeContentLoads(_tunnelAnimations);
+
+    /// <inheritdoc cref="GameScreens" />
+    public BlobDeathAnimation BlobKiller => NotBeforeContentLoads(_blobKiller);
+
+    /// <inheritdoc cref="GameScreens" />
     public ScreenEffectEngine ScreenEffectEngine => NotBeforeContentLoads(_screenEffectEngine);
 
     /// <inheritdoc cref="GameScreens" />
@@ -353,7 +359,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     [MemberNotNull(nameof(IntroSequence), nameof(BlobStatusPanel), nameof(Elements),
         nameof(Nasties), nameof(ConveyerNastiesInstance), nameof(ElectricityNodeGateEngine),
-        nameof(TunnelAnimations), nameof(ShapeDrawer))]
+        nameof(ShapeDrawer))]
     private void Initialise()
     {
         // Sequences
@@ -377,9 +383,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ElectricityNodeGateEngine = new ElectricityGatesAndNodesEngine(this, ConveyerNastiesInstance);
         ElectricityNodeGateEngine.OnBlobStruckByElectricity += ElectricityNodeGateEngine_OnBlobStruckByElectricity;
 
-        // Animations
-        TunnelAnimations = new TunnelLiftAnimationEngine(this);
-
         // Test area
         ShapeDrawer = new Shapes(GraphicsDeviceMgr.GraphicsDevice);
     }
@@ -394,7 +397,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     ///     one place it is known to matter, and the rest was not worth risking to tidy.
     /// </remarks>
     [MemberNotNull(nameof(_bootScreen), nameof(_bootProgressBackground), nameof(_bootProgress),
-        nameof(Scanlines), nameof(Font1), nameof(Font2), nameof(BlobKiller))]
+        nameof(Scanlines), nameof(Font1), nameof(Font2))]
     private void DefineContent()
     {
         DefineBootGraphics();
@@ -402,8 +405,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         Status = GameEngineStatus.StartingGraphicsLoaded;
 
         DefineFonts();
-
-        BlobKiller = new BlobDeathAnimation(this);
 
         DefineSharedGraphics();
         DefineScreenData();
@@ -680,6 +681,17 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         BuildGameScreens();
         RegisterScreenEffectViewPorts();
 
+        // The breakable bridges last: each bridge composes itself into a render target and then
+        // asks the screen effect engine for the view port to draw it through, and that engine is
+        // what RegisterScreenEffectViewPorts has only just built.
+        _breakableBridgesEngine = new BreakableBridges(
+            ContentResourceManager,
+            GameScreens,
+            GraphicsDeviceMgr,
+            GraphicsSet,
+            RandomNumberGenerator,
+            ScreenEffectEngine);
+
         ContentResourceManager.Initialise();
 
         UpdateStatus("Content loaded", FullyLoadedPercent, GameEngineStatus.StartGame);
@@ -711,6 +723,13 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
         _colourAnimationEngine = new ColourAnimationEngine(this);
 
+        // Tunnel lift animations. After the screen collection, which it reads the lift shafts from.
+        _tunnelAnimations = new TunnelLiftAnimationEngine(ContentResourceManager, GameScreens, GraphicsSet);
+
+        // The blob's death throes. After the screen collection, which each thrown-off fragment
+        // bounces around.
+        _blobKiller = new BlobDeathAnimation(ContentResourceManager, GameScreens, GraphicsSet, RandomNumberGenerator);
+
         Presentation.ScreenXOffset = (GraphicsDeviceMgr.PreferredBackBufferWidth - GameScreens.ScreenWidth) / 2;
         Presentation.ScreenYOffset = 10;
 
@@ -718,8 +737,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         var converyerNastyGraphics = new ContentList(ContentMgr);
         converyerNastyGraphics.AddContent("conveyerNasty", "Graphics\\ConveryerNasty");
         ConveyerNastiesInstance.LoadContent(converyerNastyGraphics);
-
-        _breakableBridgesEngine = new BreakableBridges(this);
     }
 
     /// <summary>
