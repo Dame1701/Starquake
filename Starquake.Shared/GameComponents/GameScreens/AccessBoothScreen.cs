@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -191,7 +192,7 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
 
     #region IGameScreen Members
 
-    public void Reset(object data)
+    public void Reset(object? data)
     {
         _soundPlayed = false;
         _blobAnim1.Reset(Direction.Left);
@@ -283,7 +284,7 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
         }
     }
 
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
     {
         //throw new NotImplementedException();
     }

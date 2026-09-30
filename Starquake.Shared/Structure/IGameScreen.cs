@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using Microsoft.Xna.Framework;
 
 namespace Starquake.Structure;
@@ -13,7 +14,7 @@ public interface IGameScreen
     bool Success { get; }
 
     void Update(GameTime gameTime);
-    void Reset(object data);
+    void Reset(object? data);
     void Draw(GameTime gameTime);
-    void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object param);
+    void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param);
 }

@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using Microsoft.Xna.Framework;
 using Starquake.Engines;
 
@@ -20,7 +21,7 @@ public abstract class GameComponentBase
     {
     }
 
-    public virtual void Initialise(object data)
+    public virtual void Initialise(object? data)
     {
     }
 
@@ -32,7 +33,7 @@ public abstract class GameComponentBase
     {
     }
 
-    public virtual void Draw(GameTime gameTime, int screenFade, object parameters)
+    public virtual void Draw(GameTime gameTime, int screenFade, object? parameters)
     {
     }
 
