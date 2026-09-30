@@ -1925,10 +1925,15 @@ public class GameScreenCollection : GameComponentBase
             tempElements.Add(_elements.GetActiveElements()[a]);
         }
 
-        // Make a random number of the core elements on the map match what we need
-        int matchNumber = _randomNumberGenerator.Next(2, 6);
+        // Make a random number of the core elements on the map match what we need. Neither list is a
+        // fixed length - one is however many screens the generator gave a pick-up to, the other however
+        // many elements the core still wants - so the draw is clamped to what is actually there rather
+        // than trusted to fit. A hundred pick-up screens is what makes five safe today, not construction.
+        int matchesToMake = Math.Min(
+            _randomNumberGenerator.Next(2, 6),
+            Math.Min(screensContainingCoreElements.Count, tempElements.Count));
 
-        for (int a = 0; a < matchNumber; a++)
+        for (int a = 0; a < matchesToMake; a++)
         {
             int elementIndex = _randomNumberGenerator.Next(0, tempElements.Count);
             screensContainingCoreElements[a].PickUps[0].Type = tempElements[elementIndex].CurrentElement;
