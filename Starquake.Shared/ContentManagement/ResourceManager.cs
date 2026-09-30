@@ -26,9 +26,6 @@ public class ResourceManager : StartableGameComponentBase
     /// </summary>
     private const int FullyLoadedPercent = 100;
 
-    /// <inheritdoc cref="FullyLoadedPercent" />
-    private const int LaunchPauseMs = 500;
-
     private readonly AnimTileEngine _animationTileEngine;
     private readonly List<AnimSpriteDescription> _animSpriteDescriptions;
     private readonly ContentManager _contentManagerInstance;
@@ -100,10 +97,6 @@ public class ResourceManager : StartableGameComponentBase
         try
         {
             await Task.Run(LoadEverything).ConfigureAwait(false);
-
-            // A beat on the finished loading screen before the game appears. Awaited rather than
-            // slept through, so it holds the pause without parking a thread-pool thread on it.
-            await Task.Delay(LaunchPauseMs).ConfigureAwait(false);
         }
         catch (Exception exception)
         {

@@ -135,7 +135,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     private BlobDeathAnimation? _blobKiller;
     private SpriteCollection _bootProgress;
     private SpriteCollection _bootProgressBackground;
-    private int _bootProgressBackgroundFade = ColourLevels.Full;
     // Boot graphics
     private SpriteCollection _bootScreen;
 
@@ -767,7 +766,12 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         }
         else if (Status == GameEngineStatus.ContentLoaded)
         {
-            WaitToLeaveTheLoadingScreen();
+            // Straight into the game. The status is raised by the loading task, so this is also the
+            // hop back onto the main thread - everything below is built here, not on the pool.
+            ContentResourceManager_OnGameComponentStatusChanged(
+                "Content loaded",
+                FullyLoadedPercent,
+                GameEngineStatus.Started);
         }
         else if (Status == GameEngineStatus.StartGame)
         {
@@ -788,26 +792,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         {
             Status = GameEngineStatus.Starting;
             LoadContent();
-        }
-    }
-
-    private void WaitToLeaveTheLoadingScreen()
-    {
-        // Fade out the progress bar background
-        if (_bootProgressBackgroundFade > 0)
-        {
-            _bootProgressBackgroundFade -= BootFadeStep;
-        }
-
-        if (_bootProgressBackgroundFade < 0)
-        {
-            _bootProgressBackgroundFade = 0;
-        }
-
-        // Wait for a keypress before leaving the loading screen
-        if (ToggleKeys.GetPressedKey() != Keys.None)
-        {
-            ContentResourceManager_OnGameComponentStatusChanged("Content loaded", FullyLoadedPercent, GameEngineStatus.Started);
         }
     }
 
@@ -1156,7 +1140,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                 _bootScreen.End();
 
                 _bootProgressBackground.Begin(BlendState.AlphaBlend, gameTime, Presentation.Transform);
-                _bootProgressBackground.DrawSpriteUnscaled(0, BootProgressBackgroundXPos, BootProgressBackgroundYPos, _bootProgressBackgroundFade);
+                _bootProgressBackground.DrawSpriteUnscaled(0, BootProgressBackgroundXPos, BootProgressBackgroundYPos, ColourLevels.Full);
                 _bootProgressBackground.End();
 
                 // Draw the status percentage
@@ -1165,7 +1149,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
                 for (int a = 0; a < percentBarWidth; a++)
                 {
-                    _bootProgress.DrawSpriteUnscaled(0, BootProgressBarXPos + a * BootProgressBarSliceSpacing, BootProgressBarYPos, _bootProgressBackgroundFade);
+                    _bootProgress.DrawSpriteUnscaled(0, BootProgressBarXPos + a * BootProgressBarSliceSpacing, BootProgressBarYPos, ColourLevels.Full);
                 }
 
                 _bootProgress.End();
