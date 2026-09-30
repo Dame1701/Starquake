@@ -153,7 +153,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public BitmapFont Font2;
     private GameComponentBase _gameCompleteScreen;
     private GameComponentBase _gameOverScreen;
-    public readonly GameScreenCollection GameScreens;
+    public GameScreenCollection GameScreens;
 
     //public MercuryParticleEngine ParticleEngine;
     public readonly GraphicsDeviceManager GraphicsDeviceMgr;
@@ -251,17 +251,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
         // Starting screen will be the title screen later.....
         CurrentGameScreen = GameScreenType.Options;
-
-        // Game Screens
-        GameScreens =
-            new GameScreenCollection(
-                this,
-                TileMetrics.TilesAcross,
-                TileMetrics.TilesDown,
-                0,
-                0,
-                TileMetrics.CollisionCellWidth,
-                TileMetrics.CollisionCellHeight);
 
         // Player keys
         _playerKeys = new PlayerKeySet();
@@ -633,7 +622,17 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             var blobGraphics = new ContentList(ContentMgr);
             Player.LoadContent(blobGraphics);
 
-            GameScreens.LoadContent();
+            // Game Screens. Built here rather than in the constructor because the screen data and
+            // the collision map it needs are resources, and those do not exist until content loads
+            GameScreens =
+                new GameScreenCollection(
+                    this,
+                    TileMetrics.TilesAcross,
+                    TileMetrics.TilesDown,
+                    0,
+                    0,
+                    TileMetrics.CollisionCellWidth,
+                    TileMetrics.CollisionCellHeight);
 
             // Animation engine
             ColourAnimationEngine = new ColourAnimationEngine(this);

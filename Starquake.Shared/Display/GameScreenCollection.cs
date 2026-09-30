@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -105,11 +106,11 @@ public class GameScreenCollection : GameComponentBase
     private readonly List<CollisionTile> _detectedCollisionMap;
     private readonly int _pickUpCount = 100;
 
-    private GameScreenData[] _gameScreens;
+    private readonly GameScreenData[] _gameScreens;
 
-    private IStandardParticleEffect _keyDoorForceFieldNoAccess;
+    private readonly IStandardParticleEffect _keyDoorForceFieldNoAccess;
 
-    private List<KeyLockDoor> _keyLockDoors;
+    private List<KeyLockDoor>? _keyLockDoors;
 
     private int _oldXoffset;
     private int _oldYoffset;
@@ -119,7 +120,7 @@ public class GameScreenCollection : GameComponentBase
     private int _ollyEyesX;
     private int _ollyEyesY;
 
-    private int[,,] _screenCollisionDataArray;
+    private readonly int[,,] _screenCollisionDataArray;
 
     private int _screenNumber;
     private int _tileHeight;
@@ -139,6 +140,26 @@ public class GameScreenCollection : GameComponentBase
         this.CollAreaHeight = collAreaHeight;
 
         _detectedCollisionMap = new List<CollisionTile>();
+
+        // Load screen data
+        _gameScreens = (GameScreenData[])GameEngine.ContentResourceManager.GetDataResource("GameScreens");
+        _screenCollisionDataArray =
+            (int[,,])GameEngine.ContentResourceManager.GetDataResource("ScreenCollisionData");
+
+        BlobsShipSmoke1 =
+            (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume",
+                ParticleEffectType.Continual, null);
+        BlobsShipSmoke2 =
+            (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume2",
+                ParticleEffectType.Continual, null);
+
+        _keyDoorForceFieldNoAccess =
+            (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("ForceField",
+                ParticleEffectType.Continual, null);
+
+        // Make this better in the future...?
+        _tileWidth = TileMetrics.TileWidth;
+        _tileHeight = TileMetrics.TileHeight;
     }
 
     public int TilesAcross { get; }
@@ -147,9 +168,9 @@ public class GameScreenCollection : GameComponentBase
 
     public GameScreenData CurrentGameScreenData => _gameScreens[ScreenNumber];
 
-    public IStandardParticleEffect BlobsShipSmoke1 { get; private set; }
+    public IStandardParticleEffect BlobsShipSmoke1 { get; }
 
-    public IStandardParticleEffect BlobsShipSmoke2 { get; private set; }
+    public IStandardParticleEffect BlobsShipSmoke2 { get; }
 
     public int ScreenWidth => GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
         .SpriteWidth * TilesAcross;
@@ -177,33 +198,7 @@ public class GameScreenCollection : GameComponentBase
     public GameScreenData GetGameScreen(int number)
         => _gameScreens[number];
 
-    public new void LoadContent()
-    {
-        // Load screen data
-        _gameScreens = (GameScreenData[])GameEngine.ContentResourceManager.GetDataResource("GameScreens");
-        _screenCollisionDataArray =
-            (int[,,])GameEngine.ContentResourceManager.GetDataResource("ScreenCollisionData");
-
-        BlobsShipSmoke1 =
-            (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume",
-                ParticleEffectType.Continual, null);
-        BlobsShipSmoke2 =
-            (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume2",
-                ParticleEffectType.Continual, null);
-
-        _keyDoorForceFieldNoAccess =
-            (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("ForceField",
-                ParticleEffectType.Continual, null);
-
-        // Make this better in the future...?
-        _tileWidth = TileMetrics.TileWidth;
-        _tileHeight = TileMetrics.TileHeight;
-
-        // Save out the data to MessagePack
-        //SaveData();
-    }
-
-    public override void Initialise(object data)
+    public override void Initialise(object? data)
     {
         // Setup Collision map, we're using 8 x 8 blocks for each collision area for improved accuracy
         BuildScreenCollisionMap(true);
@@ -223,6 +218,7 @@ public class GameScreenCollection : GameComponentBase
 
         return (int)Math.Ceiling(screensVisited / (double)_gameScreens.Length * FullPercentage);
     }
+
 
     private bool CheckAccessCodeValidity(string accessCode)
     {
@@ -296,7 +292,7 @@ public class GameScreenCollection : GameComponentBase
         return potentialLocations;
     }
 
-    private InteractiveItem GetPreferredLocation(int screenNumber)
+    private InteractiveItem? GetPreferredLocation(int screenNumber)
     {
         for (var y = 1; y < _gameScreens[screenNumber].ScreenTiles.GetLength(1); y++)
         {
@@ -353,10 +349,11 @@ public class GameScreenCollection : GameComponentBase
                     {
                         // Check for powerups in the way - useful for pickup sweep
                         var powerUpInWay = false;
-                        if (_gameScreens[_screenNumber].PowerUp != null)
+                        var powerUpOnScreen = _gameScreens[_screenNumber].PowerUp;
+                        if (powerUpOnScreen != null)
                         {
-                            if (_gameScreens[_screenNumber].PowerUp.XLocation == x + 32 &&
-                                _gameScreens[_screenNumber].PowerUp.YLocation == y + 32)
+                            if (powerUpOnScreen.XLocation == x + 32 &&
+                                powerUpOnScreen.YLocation == y + 32)
                             {
                                 powerUpInWay = true;
                             }
@@ -437,7 +434,7 @@ public class GameScreenCollection : GameComponentBase
     private void BuildScreenCollisionMap(bool screenChanged)
     {
         // Grab any collision tiles that are special cases i.e. Jump Platforms etc.
-        List<CollisionTile> collisionsToAppend = null;
+        var collisionsToAppend = new List<CollisionTile>();
 
         if (screenChanged)
         {
@@ -446,11 +443,6 @@ public class GameScreenCollection : GameComponentBase
 
         if (!screenChanged)
         {
-            if (collisionsToAppend == null)
-            {
-                collisionsToAppend = new List<CollisionTile>();
-            }
-
             for (var a = 0; a < _gameScreens[ScreenNumber].CollisionMap.Count; a++)
             {
                 if (_gameScreens[ScreenNumber].CollisionMap[a].TileImage == (int)CollisionObjectType.GameObject)
@@ -637,99 +629,48 @@ public class GameScreenCollection : GameComponentBase
         }
 
 
-        // Add secondary maps for Cheops pyramids etc.
-        if (_gameScreens[ScreenNumber].PowerUp != null)
+        // Add secondary maps for Cheops pyramids etc. When the screen changed these go straight
+        // onto the map just rebuilt above; otherwise they are appended to the existing one
+        var objectCollisions = screenChanged ? _gameScreens[ScreenNumber].CollisionMap : collisionsToAppend;
+
+        var powerUp = _gameScreens[ScreenNumber].PowerUp;
+        if (powerUp != null)
         {
-            for (var y = 0; y < 2; y++)
-            {
-                for (var x = 0; x < 2; x++)
-                {
-                    if (screenChanged)
-                    {
-                        _gameScreens[ScreenNumber].CollisionMap.Add(
-                            new CollisionTile(
-                                (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                _gameScreens[ScreenNumber].PowerUp.XLocation + x * 32,
-                                _gameScreens[ScreenNumber].PowerUp.YLocation + y * 32,
-                                CollisionTileType.NotBlob));
-                    }
-                    else
-                    {
-                        collisionsToAppend.Add(
-                            new CollisionTile(
-                                (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                _gameScreens[ScreenNumber].PowerUp.XLocation + x * 32,
-                                _gameScreens[ScreenNumber].PowerUp.YLocation + y * 32,
-                                CollisionTileType.NotBlob));
-                    }
-                }
-            }
+            AddObjectCollisionTiles(objectCollisions, powerUp);
         }
 
-        if (_gameScreens[ScreenNumber].PickUps != null)
+        foreach (var pickUp in _gameScreens[ScreenNumber].PickUps)
         {
-            foreach (var pickUp in _gameScreens[ScreenNumber].PickUps)
-            {
-                for (var y = 0; y < 2; y++)
-                {
-                    for (var x = 0; x < 2; x++)
-                    {
-                        if (screenChanged)
-                        {
-                            _gameScreens[ScreenNumber].CollisionMap.Add(
-                                new CollisionTile(
-                                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                    pickUp.XLocation + x * 32,
-                                    pickUp.YLocation + y * 32,
-                                    CollisionTileType.NotBlob));
-                        }
-                        else
-                        {
-                            collisionsToAppend.Add(
-                                new CollisionTile(
-                                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                    pickUp.XLocation + x * 32,
-                                    pickUp.YLocation + y * 32,
-                                    CollisionTileType.NotBlob));
-                        }
-                    }
-                }
-            }
+            AddObjectCollisionTiles(objectCollisions, pickUp);
         }
 
-        if (_gameScreens[ScreenNumber].CheopsPyramid != null)
+        var cheopsPyramid = _gameScreens[ScreenNumber].CheopsPyramid;
+        if (cheopsPyramid != null)
         {
-            for (var y = 0; y < 2; y++)
-            {
-                for (var x = 0; x < 2; x++)
-                {
-                    if (screenChanged)
-                    {
-                        _gameScreens[ScreenNumber].CollisionMap.Add(
-                            new CollisionTile(
-                                (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                _gameScreens[ScreenNumber].CheopsPyramid.XLocation + x * 32,
-                                _gameScreens[ScreenNumber].CheopsPyramid.YLocation + y * 32,
-                                CollisionTileType.NotBlob));
-                    }
-                    else
-                    {
-                        collisionsToAppend.Add(
-                            new CollisionTile(
-                                (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                _gameScreens[ScreenNumber].CheopsPyramid.XLocation + x * 32,
-                                _gameScreens[ScreenNumber].CheopsPyramid.YLocation + y * 32,
-                                CollisionTileType.NotBlob));
-                    }
-                }
-            }
+            AddObjectCollisionTiles(objectCollisions, cheopsPyramid);
         }
 
         // Check to see if we need to append any special cases
-        if (collisionsToAppend != null)
+        _gameScreens[ScreenNumber].CollisionMap.AddRange(collisionsToAppend);
+    }
+
+    /// <summary>
+    ///     An item sitting on a screen occupies two tiles each way, and nothing but blob collides
+    ///     with one.
+    /// </summary>
+    private static void AddObjectCollisionTiles(List<CollisionTile> collisionMap, InteractiveItem item)
+    {
+        for (var y = 0; y < 2; y++)
         {
-            // Add them to the tile map
-            _gameScreens[ScreenNumber].CollisionMap.AddRange(collisionsToAppend);
+            for (var x = 0; x < 2; x++)
+            {
+                collisionMap.Add(
+                    new CollisionTile(
+                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                        item.XLocation + x * 32,
+                        item.YLocation + y * 32,
+                        CollisionTileType.NotBlob));
+            }
         }
     }
 
@@ -921,7 +862,7 @@ public class GameScreenCollection : GameComponentBase
 
     public List<Point> GetCoordsOfTiles(int tileType)
     {
-        List<Point> returnedTiles = null;
+        var returnedTiles = new List<Point>();
 
         for (var y = 0; y < TilesDown; y++)
         {
@@ -929,11 +870,6 @@ public class GameScreenCollection : GameComponentBase
             {
                 if (_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage == tileType)
                 {
-                    if (returnedTiles == null)
-                    {
-                        returnedTiles = new List<Point>();
-                    }
-
                     returnedTiles.Add(new Point(
                         x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
                             .SpriteWidth,
@@ -948,7 +884,7 @@ public class GameScreenCollection : GameComponentBase
 
     public Point[] GetCoordsOfTiles(int[] tileTypes)
     {
-        List<Point> returnedTiles = null;
+        var returnedTiles = new List<Point>();
 
         for (var y = 0; y < TilesDown; y++)
         {
@@ -956,11 +892,6 @@ public class GameScreenCollection : GameComponentBase
             {
                 if (tileTypes.Contains(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage))
                 {
-                    if (returnedTiles == null)
-                    {
-                        returnedTiles = new List<Point>();
-                    }
-
                     returnedTiles.Add(new Point(
                         x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
                             .SpriteWidth,
@@ -970,17 +901,12 @@ public class GameScreenCollection : GameComponentBase
             }
         }
 
-        if (returnedTiles != null && returnedTiles.Count > 0)
-        {
-            return returnedTiles.OrderByDescending(rt => rt.Y).ToArray();
-        }
-
-        return null;
+        return returnedTiles.OrderByDescending(rt => rt.Y).ToArray();
     }
 
     private List<KeyLockDoor> GetKeyLockDoors()
     {
-        List<KeyLockDoor> returnedTiles = null;
+        var returnedTiles = new List<KeyLockDoor>();
 
         for (var y = 0; y < TilesDown; y++)
         {
@@ -988,11 +914,6 @@ public class GameScreenCollection : GameComponentBase
             {
                 if (_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.AccessForceField)
                 {
-                    if (returnedTiles == null)
-                    {
-                        returnedTiles = new List<KeyLockDoor>();
-                    }
-
                     returnedTiles.Add(new KeyLockDoor
                     {
                         Location = new Point(
@@ -1010,7 +931,7 @@ public class GameScreenCollection : GameComponentBase
 
     private List<Point> GetCoordsOfTiles(int tileType, int screenNumber)
     {
-        List<Point> returnedTiles = null;
+        var returnedTiles = new List<Point>();
 
         for (var y = 0; y < TilesDown; y++)
         {
@@ -1018,11 +939,6 @@ public class GameScreenCollection : GameComponentBase
             {
                 if (_gameScreens[screenNumber].ScreenTiles[x, y].TileImage == tileType)
                 {
-                    if (returnedTiles == null)
-                    {
-                        returnedTiles = new List<Point>();
-                    }
-
                     returnedTiles.Add(new Point(
                         x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
                             .SpriteWidth,
@@ -1035,7 +951,7 @@ public class GameScreenCollection : GameComponentBase
         return returnedTiles;
     }
 
-    public TileDetected CheckTileByObject(
+    public TileDetected? CheckTileByObject(
         Direction directionToCheck,
         int playerXPos,
         int playerYPos,
@@ -1164,11 +1080,9 @@ public class GameScreenCollection : GameComponentBase
                     // Create the collision map
                     if (keyLockDoor.CollisionTiles.Count == 0) // If the collision map doesn't exist, create it
                     {
-                        CollisionTile keyLockCollisionTile = null;
-
                         for (var c = 0; c < 3; c++)
                         {
-                            keyLockCollisionTile =
+                            var keyLockCollisionTile =
                                 new CollisionTile(
                                     (int)CollisionObjectType.KeyAccessDoor, // Random image that's meaningless
                                     keyLockDoor.Location.X + 48,
@@ -1759,30 +1673,30 @@ public class GameScreenCollection : GameComponentBase
 
                     // Setup the access code for the pyramid
                     // Ensure we get a unique code
+                    string cheopsAccessCode;
                     do
                     {
-                        _gameScreens[a].CheopsAccessCode = GameEngine.RandomNumberGenerator.Next(CheopsCodeLowest, CheopsCodeExclusiveUpperBound).ToString();
-                    } while (!CheckAccessCodeValidity(_gameScreens[a].CheopsAccessCode));
+                        cheopsAccessCode = GameEngine.RandomNumberGenerator.Next(CheopsCodeLowest, CheopsCodeExclusiveUpperBound).ToString();
+                    } while (!CheckAccessCodeValidity(cheopsAccessCode));
+
+                    _gameScreens[a].CheopsAccessCode = cheopsAccessCode;
                 }
 
                 // Setup access booth codes
-                List<Point> accessBooths = null;
-                if (GetCoordsOfTiles((int)ActionTiles.AccessBoothLeft, a) != null && GetCoordsOfTiles((int)ActionTiles.AccessBoothLeft, a).Count > 0)
-                {
-                    accessBooths = GetCoordsOfTiles((int)ActionTiles.AccessBoothLeft, a);
-                }
-                else if (GetCoordsOfTiles((int)ActionTiles.AccessBoothLeft, a) != null && GetCoordsOfTiles((int)ActionTiles.AccessBoothLeft, a).Count > 0)
-                {
-                    accessBooths = GetCoordsOfTiles((int)ActionTiles.AccessBoothRight, a);
-                }
+                var leftBooths = GetCoordsOfTiles((int)ActionTiles.AccessBoothLeft, a);
+                var rightBooths = GetCoordsOfTiles((int)ActionTiles.AccessBoothRight, a);
+                var accessBooths = leftBooths.Count > 0 ? leftBooths : rightBooths;
 
-                if (accessBooths != null)
+                if (accessBooths.Count > 0)
                 {
                     // Ensure we get a unique code
+                    string accessCode;
                     do
                     {
-                        _gameScreens[a].AccessCode = GameEngine.RandomNumberGenerator.Next(AccessCodeLowest, AccessCodeExclusiveUpperBound).ToString();
-                    } while (!CheckAccessCodeValidity(_gameScreens[a].AccessCode));
+                        accessCode = GameEngine.RandomNumberGenerator.Next(AccessCodeLowest, AccessCodeExclusiveUpperBound).ToString();
+                    } while (!CheckAccessCodeValidity(accessCode));
+
+                    _gameScreens[a].AccessCode = accessCode;
                 }
             }
         }
