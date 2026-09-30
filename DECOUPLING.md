@@ -120,6 +120,10 @@ whole truth.
 
 ## Stage 3 — cut the resource cycle
 
+**Blocked on a decision, and the plan was wrong about its size.** See *What the survey missed*
+below: `ResourceManager` does not use one member of the engine, it uses one member and is a conduit
+for five constructors. Read that section before starting this stage.
+
 The biggest single win, and the one that makes the rest tractable.
 
 `ResourceManager` is depended on by 34 files — and it uses exactly one member of the engine,
@@ -140,6 +144,49 @@ Change those three constructors and the `engine → ResourceManager → engine` 
 and the art-set selection — `UsingOldGraphics` (15 files) together with the `ResourceNames` stage
 1 left behind, which are one decision held as two members — belong here too, and folding them in
 collapses the whole Resources cluster into one narrow dependency.
+
+## What the survey missed
+
+Two things, both found by doing stages 1 and 2 rather than by reading. The first was local and is
+recorded under stage 1. The second is structural and changes stages 3 to 6.
+
+**The map counts member accesses, so it cannot see the engine being passed on.** The script greps
+for `<engine reference>.<Member>`. A class that takes a `GameEngine` and only hands it to something
+else never matches, and so never appears. Ten such files exist, and the true number of files
+coupled to the engine is **58, not 50**:
+
+`AnimTileEngine`, `Overlays`, `PanelNumbers`, `LeftTunnelEntryEffect`, `RightTunnelEntryEffect`,
+`ScreenEffectBase`, `ProportionalNumbers`, `GameScreenBase`, `HiScores`, `GameComponentBase`.
+
+`ResourceManager` is the case that matters, because stage 3 turns on it. The map has it using one
+member, `ContentMgr`, which is true — and it also keeps `_gameEngineInstance` in a field to pass
+into five constructors: `ParticleEngine`, `AnimTileEngine`, `SoundEffectEngine`, and every
+`AnimTile` and `SpriteCollection` it loads. So `ResourceManager(ContentManager)` is not a
+three-constructor change. `SpriteCollection` wants `ContentMgr`, `GraphicsDeviceMgr` and
+`PresentationTransform`; `AnimTile` wants the art-set selection. Those have to be narrowed first or
+`ResourceManager` has nothing to pass them. Stage 3 sits on top of part of stage 4, not before it.
+
+**The base classes are the actual backbone, and the plan never names them.** `GameComponentBase`
+holds `protected GameEngine GameEngine` (`GameComponentBase.cs:12`) and does nothing else with it —
+it never calls a member itself. It is a pure conduit, and it is why `GameEngine.Xxx` is a legal
+expression in so many files: for 31 of the coupled classes that spelling is the *inherited field*,
+not the type name. `ScreenEffectBase` does the same for three more.
+
+That is the real mechanism by which the god object is reachable from everywhere, and it changes
+what the later stages cost:
+
+- **Stage 4's "roughly twenty classes are one-line changes" is optimistic.** `AnimTile`,
+  `BlobDeathAnimation`, `ColourAnimationEngine`, `StatusPanel` and others on that list inherit the
+  field. Dropping their `GameEngine` reference means not calling `base(gameEngine)`, which means
+  the base constructor's parameter has to go, which touches every sibling at once — the
+  one-file-at-a-time property the whole plan depends on does not hold through the base class.
+- **The order has to account for it.** Either `GameComponentBase` loses its engine parameter early,
+  in one deliberate commit that touches all 22 subclasses and gives each what it actually uses; or
+  it keeps the parameter and stages 4 to 6 narrow only the classes that take their own, leaving the
+  inherited field as a second route to the engine and the invariant stage 2 bought only half true.
+
+The first is a large single commit and against this plan's grain. The second leaves the job
+unfinished. Worth deciding explicitly before stage 3, because both readings change what stage 3 is.
 
 ## Stage 4 — inject the leaf primitives
 
@@ -209,13 +256,25 @@ have dropped off it entirely.
 for f in $(find Starquake.Shared -name "*.cs" -not -path "*/obj/*" -not -name "GameEngine.cs"); do
   m=$(grep -hoE "\b(GameEngine|_gameEngine|_gameEngineReference|_gameEngineInstance|gameEngineReference|gameEngineInstance|gameEngineRef|_gameEngineRef)\.[A-Za-z_][A-Za-z0-9_]*" "$f" \
       | sed -E 's/^[^.]+\.//' | sort -u | tr '\n' ' ')
+  # A class that only passes the engine on accesses no member, so count the holders too or the
+  # map reports 50 coupled files where there are 58.
+  if [ -z "$m" ] && grep -qE "GameEngine [a-zA-Z_]|readonly GameEngine|protected GameEngine" "$f"; then
+    m="(holds one, passes it on)"
+  fi
   if [ -n "$m" ]; then printf "%-62s %s\n" "${f#Starquake.Shared/}" "$m"; fi
 done
 ```
 
-The identifier list in that regex is every name the engine reference goes by across the codebase.
-It was checked to be exhaustive as of this document; if a stage introduces another spelling, add it
-or the map will silently under-report.
+Two ways this under-reports, both of which bit once already:
+
+- **The identifier list** is every name the engine reference goes by. It was checked to be
+  exhaustive as of this document; if a stage introduces another spelling, add it.
+- **A member access is not the only kind of coupling.** The `(holds one, passes it on)` branch above
+  catches the ten files that take a `GameEngine` and only hand it to something else. It still does
+  not distinguish a class that uses the engine from one that inherits the field from
+  `GameComponentBase` and uses it — for those 31, `GameEngine.Xxx` is the inherited field, so they
+  are counted, but the map makes them look like they hold their own reference when the fix is in
+  the base class. Read the rows against *What the survey missed*.
 
 Verify a stage with:
 
