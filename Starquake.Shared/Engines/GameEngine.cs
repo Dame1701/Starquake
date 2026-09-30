@@ -697,9 +697,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             converyerNastyGraphics.AddContent("conveyerNasty", "Graphics\\ConveryerNasty");
             ConveyerNastiesInstance.LoadContent(converyerNastyGraphics);
 
-            // Initialise Electricity nodes and gates
-            ElectricityNodeGateEngine.Initialise(null);
-
             // Initialise Breakable bridges
             BreakableBridgesEngine = new BreakableBridges(this);
 

@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
@@ -86,25 +87,22 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
     private const float ConveyerArcScale = 0.5f;
 
     private readonly ConveyerNasties _conveyerNasties;
-    private Animation _electricityAnimation;
-    private Animation _electricityAnimation2;
-    private Animation _electricityAnimationOriginal;
+    private readonly Animation _electricityAnimation;
+    private readonly Animation _electricityAnimation2;
+    private readonly Animation _electricityAnimationOriginal;
 
-    private List<SecondLayerTile> _secondLayerTiles;
-    public ElectricityRandomiser[] ElectricityNodeControllers { get; private set; }
+    private List<SecondLayerTile>? _secondLayerTiles;
+    public ElectricityRandomiser[]? ElectricityNodeControllers { get; private set; }
 
     #region IGameComponent Members
 
-    public event EventHandler OnBlobStruckByElectricity;
+    public event EventHandler? OnBlobStruckByElectricity;
 
     public ElectricityGatesAndNodesEngine(GameEngine gameEngineReference,
         ConveyerNasties convyrNasties) : base(gameEngineReference)
     {
         _conveyerNasties = convyrNasties;
-    }
 
-    public override void Initialise(object data)
-    {
         _electricityAnimationOriginal = new Animation();
         _electricityAnimationOriginal.FirstFrame = 0;
         _electricityAnimationOriginal.CurrentFrame = 0;
