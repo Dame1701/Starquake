@@ -1,4 +1,4 @@
-<!--
+﻿<!--
   MGCB extension that compiles the ParticleEffects XML into .xnb. It is a build-time tool,
   never shipped with the game, and is loaded into MGCB itself, a net8.0 application, so
   this has to be net8.0 and so does ProjectMercury, which it drags along.
@@ -14,7 +14,15 @@
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
+        <!--
+          Off here alone. This is the Mercury particle engine, written in 2009, long before
+          nullable reference types existed, and it is upstream code rather than ours: every
+          field it leaves for Initialise to fill and every parameter it treats as optional
+          reports against a standard it was never written to. Annotating it would be a large
+          diff through third-party source and would make future comparison with upstream
+          harder for no benefit to the game. Everything we do write keeps Nullable on.
+        -->
+        <Nullable>disable</Nullable>
         <RootNamespace>ProjectMercury.ContentPipeline</RootNamespace>
         <AssemblyName>ProjectMercury.ContentPipeline</AssemblyName>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>

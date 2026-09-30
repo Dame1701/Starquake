@@ -301,7 +301,7 @@ namespace ProjectMercury.Emitters
             emitter.Modifiers                = this.Modifiers.DeepCopy();
             emitter.Name                     = String.Format("Copy of {0}", this.Name);
             emitter.ParticleTexture          = this.ParticleTexture;
-            emitter.ParticleTextureAssetName = String.Copy(this.ParticleTextureAssetName ?? String.Empty);
+            emitter.ParticleTextureAssetName = this.ParticleTextureAssetName ?? String.Empty;
             emitter.ReleaseColour            = this.ReleaseColour;
             emitter.ReleaseOpacity           = this.ReleaseOpacity;
             emitter.ReleaseQuantity          = this.ReleaseQuantity;

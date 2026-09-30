@@ -1,4 +1,4 @@
-<!--
+﻿<!--
   The Project Mercury particle engine, used by the game at runtime and by MGCB at build
   time (it has to resolve ProjectMercury.ParticleEffect to compile the ParticleEffects
   XML into .xnb).
@@ -19,7 +19,15 @@
         <TargetFrameworks>net8.0;net8.0-windows</TargetFrameworks>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
+        <!--
+          Off here alone. This is the Mercury particle engine, written in 2009, long before
+          nullable reference types existed, and it is upstream code rather than ours: every
+          field it leaves for Initialise to fill and every parameter it treats as optional
+          reports against a standard it was never written to. Annotating it would be a large
+          diff through third-party source and would make future comparison with upstream
+          harder for no benefit to the game. Everything we do write keeps Nullable on.
+        -->
+        <Nullable>disable</Nullable>
         <RootNamespace>ProjectMercury</RootNamespace>
         <AssemblyName>ProjectMercury</AssemblyName>
         <!-- Lets the net8.0-windows target build on Linux and macOS. -->
