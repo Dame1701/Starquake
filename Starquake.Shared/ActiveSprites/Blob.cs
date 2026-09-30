@@ -1425,7 +1425,7 @@ public class Blob : GameComponentBase
                                 // Randomly select the new direction
                                 _blobFireCollisionDirection = GameEngine.RandomNumberGenerator.Next(FireDeflectedLeft, FireDeflectedRight + 1);
 
-                                _blobFireSparks?.Start(BlobFireX, BlobFireY + 24);
+                                _blobFireSparks?.Start(BlobFireX, BlobFireY + FireSparksYOffset);
                             }
                         }
 
@@ -1559,7 +1559,7 @@ public class Blob : GameComponentBase
                                 // Randomly select the new direction
                                 _blobFireCollisionDirection = GameEngine.RandomNumberGenerator.Next(FireDeflectedLeft, FireDeflectedRight + 1);
 
-                                _blobFireSparks?.Start(BlobFireX, BlobFireY + 24);
+                                _blobFireSparks?.Start(BlobFireX, BlobFireY + FireSparksYOffset);
                             }
                         }
 
