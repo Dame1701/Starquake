@@ -50,6 +50,12 @@ public class GameScreenCollection : GameComponentBase
     private const int SceneryTile2 = 121;
 
     /// <summary>
+    ///     How many of the 512 screens are given a pick-up. It was a readonly field with an
+    ///     initialiser and no other assignment - a const wearing a field's clothing.
+    /// </summary>
+    private const int PickUpCount = 100;
+
+    /// <summary>
     ///     Where an item is drawn relative to the tile it stands on: one collision cell in from the
     ///     tile's left edge, and two cells above its top. There was a second, unread pair of these
     ///     saying the same thing in terms of the cell size; this is the pair that is used, so it is
@@ -200,7 +206,6 @@ public class GameScreenCollection : GameComponentBase
     private readonly GraphicsSet _graphicsSet;
 
     private readonly IStandardParticleEffect _keyDoorForceFieldNoAccess;
-    private readonly int _pickUpCount = 100;
     private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
 
@@ -1709,7 +1714,7 @@ public class GameScreenCollection : GameComponentBase
     {
         var powerUpScreens = new List<int>();
 
-        for (int a = 0; a < _pickUpCount; a++)
+        for (int a = 0; a < PickUpCount; a++)
         {
             // Only place on screens where we can have more than 1 object
             int screenChosen = -1;

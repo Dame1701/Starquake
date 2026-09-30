@@ -50,7 +50,7 @@ public class Nasties : GameComponentBase
     private readonly GraphicsSet _graphicsSet;
 
     private readonly List<Nasty> _nasties;
-    private readonly int _nastyCount = 1;
+    private readonly int _nastyCount;
     private readonly IPositionalTriggerParticleEffect _nastySmokes;
     private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
