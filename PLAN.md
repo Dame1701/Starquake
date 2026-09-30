@@ -1,9 +1,9 @@
 # Fixing what the review found
 
-**Phases 0 to 3 have landed.** This document was written the way `REFACTORING.md` and
+**Phases 0 to 4 have landed.** This document was written the way `REFACTORING.md` and
 `DECOUPLING.md` were written before their stages landed, and each finished phase's section has
 been replaced with what the work actually decided, as it landed, rather than left as the
-intention. Phases 4 to 6 are still the plan.
+intention. Phases 5 and 6 are still the plan.
 
 It covers a full review of the game carried out against `ef5a6a3`. Every finding is here; the
 ordering is the point of the document. `ProjectMercury` was out of scope throughout.
@@ -223,116 +223,127 @@ left in the game and both are on the same line of `ToggleKeys.Update`.
 
 **Nothing static and mutable is left in the game.**
 
-## Where that leaves the four god classes
+## Phase 4 — break up the god classes *(landed)*
 
-The numbers below phase 4 quotes were measured against `ef5a6a3`. Phases 0 to 3 moved them a
-little, and not always down — the input snapshot has to be threaded to fifteen constructors, which
-is what replacing global state with a dependency costs:
+Four classes held 7,000 of the game's 22,436 lines when this was written. The measure set for the
+phase was `DECOUPLING.md`'s: **if nothing becomes testable that was not testable before, the split
+earned nothing and should be reverted.** By that measure it earned 82 tests, 65 to 147.
 
-| Class | Then | Now |
-| --- | --- | --- |
-| `Blob` | 2,218 | 2,210 |
-| `GameScreenCollection` | 1,938 | 1,915 |
-| `Nasty` | 1,646 | 1,642 |
-| `GameEngine` | 1,227 | 1,233 |
-
-Phase 4 is untouched by all of this, which is the point of having done it first: the deletions are
-out of the way, the build now enforces the standard the splits could otherwise erode, and the
-world generator is seeded so 4.3 has something to test against.
-
-## Phase 4 — break up the god classes
-
-Four classes hold 7,000 of the game's 22,436 lines. These figures were measured against
-`ef5a6a3`; the table above shows where phases 0 to 3 left them.
-
-| Class | Lines | Fields | What it actually does |
+| Class | Before | After | What came out |
 | --- | --- | --- | --- |
-| `Blob` | 2,218 | 110 | Player state machine, six detection systems, firing, inventory, tunnel travel, death sequence, and all its own drawing |
-| `GameScreenCollection` | 1,938 | 18 | Seven jobs — storage, collision building, collision querying, rendering, world generation, key-door state, Olly's eyes |
-| `Nasty` | 1,646 | 35 | Lifecycle state machine, fourteen movement behaviours, and drawing |
-| `GameEngine` | 1,227 | 29 | Composition root, frame loop, event broker — plus a loading screen and a hotkey handler |
+| `Blob` | 2,218 | 2,055 | `UnstickProbe`, `Inventory` |
+| `GameScreenCollection` | 1,938 | **550** | `ScreenCollisionMap`, `WorldPopulator`, `ScreenRenderer` |
+| `Nasty` | 1,646 | **819** | `NastyBrain`, `NastyMovementState`, `MoveType` |
+| `GameEngine` | 1,227 | **961** | `LoadingScreen`, `GlobalHotkeys`, `TestModeKeys` |
+| `StatusPanel` | 547 | **255** | `PlayerStats`, `PowerUp` |
 
-**Size is the symptom, not the diagnosis.** 5 of 129 types are under test, and
-`Starquake.Tests.csproj` explains why in its own header comment: a test needing a
-`GraphicsDevice` does not belong there. That is not a testing problem. It is what happens when
-update logic and draw code share a class.
+**4.1 — `PlayerStats` out of `StatusPanel`** (`057bdc1`). The split settled four dependencies
+rather than one: `Blob`, `CoreElements`, `GameOverScreen` and `HiScoreScreen` each held a
+`StatusPanel` and wanted nothing from it but the stats, so all four now name what they depend on.
+`AccessBoothScreen` and `CheopsScreen` still hold the panel, because `ScanSlot` really is a HUD
+animation.
 
-**So the measure for this whole phase is the one `DECOUPLING.md` set for itself: if nothing
-becomes testable that was not testable before, the split earned nothing and should be reverted.**
-Every item below names its test payoff. Ordered smallest-payoff-first, so that the cheap ones
-teach you something before the expensive ones.
+What made it testable was not an interface. `PlayerStats` takes the real sound engine, and a sound
+it has never been given is a no-op returning `Guid.Empty`, so a test hands it a `SoundEffectEngine`
+over an empty `ContentManager`. `DrawEnergy` and `TakeALife` return what they decided rather than
+acting on a blob, so the class never learns what a blob is. *21 tests.*
 
-**4.1 — `PlayerStats` out of `StatusPanel`** (547 lines). The class is named for a HUD widget and
-owns the player's entire game state: `PlayerScore`, `BlobLives`, `EnergyLevel`, `FirePower`,
-`Platforms`, the inventory reference, all eight power-up rules and the platform cost. That is why
-`Blob` reads its supplies off the panel — the cycle `DECOUPLING.md` had to break by passing the
-blob into `Update` rather than holding it. *Payoff: every scoring and power-up rule becomes
-testable with no graphics, and `StatusPanel` goes back to drawing.*
+**4.2 — `ScreenCollisionMap`** (`312fd6d`). It needs no content: the screen records and the tile
+collision data are plain arrays, and **every tile sheet in the game is registered at
+`TileMetrics.TileWidth` by `TileHeight`**, so asking a sprite sheet for its frame size was the same
+answer the long way round. Same for the `CollAreaWidth`/`CollAreaHeight` constructor parameters,
+which `GameEngine` was passing in as the `CollisionCell` constants.
 
-**4.2 — `ScreenCollisionMap` out of `GameScreenCollection`** (about 400 lines).
-`UpdateCollisionMap` (called `BuildScreenCollisionMap` before 2.8 merged the two), the five
-`Add*CollisionCells` methods that survived it, `CheckCollision`,
-`CheckRectangles`, `CheckTileByObject`, `StepAllowedBy`, `ClampToScreenBounds`. *Payoff: the
-thing most likely to break when level data changes becomes testable.*
+Three things the move turned up. `_detectedCollisionMap` was filled on every `CheckCollision` call
+— several times a frame per mover — and read by nothing. The six places that add a nasty-only cell
+each carried the same *"Random image that's meaningless"* comment against the same call; that is
+one `AddNastyOnlyCell`. And the spike and booth cell lists were written out longhand where they are
+two nested loops over the same cell ranges. *22 tests, on screens built by hand so a test says what
+it needs — one solid tile, one spike, one tunnel mouth — rather than hunting the shipped map.*
 
-**4.3 — `WorldPopulator` out of `GameScreenCollection`** (about 250 lines). `Reset` and the six
-placement methods, which no longer take a `Random` parameter — 0.4 gave them the field.
-Reproducible from a seed, which is the whole of what makes this testable. *Payoff: world generation becomes
-testable and reproducible — and this is where the phase 6 key placement lands.*
+**4.3 — `WorldPopulator`** (`6d4fbd4`). The one thing that would have dragged the graphics in
+behind it is `CoreElements`; `Populate` takes the element numbers as a list instead.
+`GetPotentialLocations`, `GetPreferredLocation`, `CheckAccessCodeValidity` and the private
+`GetCoordsOfTiles` overload moved with it, world generation being their only caller — and that
+overload was building a list of `Point` only so `AssignAccessBoothCode` could ask whether it was
+empty, which is now a `HasTile` that stops at the first one.
 
-**4.4 — `NastyMovement` out of `Nasty`** (lines 847 to 1480). Fourteen behaviours, about 25 of the
-class's 45 constants, `MoveType`, `Direction`, `MoveSpeed`, `_stepsToMove`,
-`_lastCollisionDirection`. Needs the collision map and a `Random`, no graphics. Replace
-`CopyFromSource` with a `record struct` that copies whole: it currently assigns `Direction` and
-`_stepsMovedCounter` twice each, and copies 17 fields of a class that has about 35, so
-`_birthTimer`, `_nastyStuckCounter`, `_spikeyPause`, `_firstMovement`, `_prevXpos`/`_prevYpos`,
-`Smoking` and `_deathScale` are silently dropped across a screen swap. Whether each omission is
-deliberate cannot be told from the code. *Payoff: "nasties get stuck" becomes reproducible —
-`ReleaseAttractionIfStuck` and `_nastyStuckCounter` exist because it happens.*
+Everything is behaviour for behaviour **including the order the random numbers are drawn in**,
+which is what makes a seed mean the same world it did before. *16 tests: same seed same world, the
+ceilings hold, codes have no repeated digit, nothing lands on a tile that already means something —
+and the draw is pinned as stopping one short of the key and the access card, which is the defect
+6.1 fixes.*
 
-**4.5 — loading screen and global hotkeys out of `GameEngine`.** Two clusters that are neither
-composition root nor frame loop. The loading screen is `_bootScreen`, `_bootProgress`,
-`_bootProgressBackground`, `_loadingScreenFade`, `_bootProgressBackgroundFade`, seven layout
-constants, `DefineBootGraphics`, `FadeUpTheLoadingScreen`, `WaitToLeaveTheLoadingScreen`, the
-content-status handler and about forty lines of `Draw` — it *is* a screen, and every other screen
-in the game is its own class. The hotkeys are `TogglePauseIfAsked`, `ToggleFullScreenIfAsked`,
-`ToggleBackgroundsIfAsked`, `SwitchGraphicsSetIfAsked`, `HandleTestModeKeys` and
-`StepBetweenScreens`, roughly 150 lines wanting the session, the graphics set and the
-presentation settings. Takes the engine under 1,000 lines. *Payoff: modest, mostly clarity — but
-cheap.*
+**4.4 — `NastyBrain`** (`5448a86`). `CopyFromSource` is why this was worth doing: seventeen fields
+assigned by hand, two of them twice, out of a class with about thirty-five, so anything added
+afterwards was silently dropped at every screen swap and nothing said so. The movement half is one
+assignment of a `record struct` now, and what is inside that struct is the answer to which state
+carries. **The state that deliberately did not carry stays outside it and is documented as starting
+fresh**, which preserves the old behaviour exactly — the difference is that it is a decision written
+down rather than a list someone might not have finished.
 
-**4.6 — `ScreenRenderer` out of `GameScreenCollection`** (about 400 lines). All fourteen `Draw*`
-methods, their nineteen sprite-index constants, the key-door force-field effects, and Olly's eyes
-— a one-screen easter egg carrying six constants of its own. Leaves `GameScreenCollection` as the
-screen array, `ScreenNumber`, `CurrentGameScreenData`, `GetGameScreen` and `SaveData`, which is
-what its name has always claimed. Do it last of the three so 4.2 and 4.3 have already drawn the
-seams. *Payoff: none directly — it is the residue. Combine with 5.1.*
+Two things the tests caught while being written:
 
-**4.7 — `Blob`'s four clusters.** The method work here is already done; the problem is 110 fields,
-and the clusters are legible straight off the field names:
+*Moving before reconsidering is load-bearing.* `Nasty.Update` called `ReleaseAttractionIfStuck`,
+`MoveNasty`, `UpdateFrameOfMind` in that order. Reordering it made a core guardian come out facing
+the wrong way, because the movement methods read what the step just walked into.
 
-| Cluster | Fields | Methods |
-| --- | --- | --- |
-| `BlobWeapon` | `_blobFire`, `_blobFireFade`, `_blobCanFire`, `_directionBlobFired`, `_blobFireSparks`, `_blobFireTrail` | `StartFiring`, `UpdateFire`, `PointBlankReach`, `StopFireEffects`, `DrawFire` |
-| `BlobInventory` | `BlobInventory[]`, `_inventoryAccessed` | `AccessInventory`, `DropLastHeldItem`, `ShuffleInventoryAlong`, `PickUpItemUnderfoot` |
-| `TunnelTraversal` | `_inTunnelLift`, `_distanceInTunnelLift`, `_blobTunnelLiftSoundId`, `_directionGoingThroughTunnel` | `RideTunnelLift`, `DetectLeftHandTunnel`, `DetectRightHandTunnel` |
-| `BlobDeathSequence` | `_blobOverloadState`, `_blobScale`, `_blobAlarmSoundCounter`, `_teleportFadeLevel` | `UpdateOverloadingState`, `UpdateDyingState`, `DrawOverloadAlarmState`, `DrawOverloadFlare` |
+*`Direction`'s default is `Up`, not `None`* — `None` is last in the enum, because
+`RandomStraightDirection` and `RandomDiagonal` index the first and second four. A brain that has
+not been `Reset` is facing up rather than nowhere, which is why every nasty is `Initialise`d before
+it runs.
 
-Start with the unstick probe — `UnstickFromEdge`, `EdgeProbe`, `OppositeOf`, `PushAwayFrom`,
-`IsInsideScenery`. It is already self-contained, four of its five methods are `static` or take
-only a rectangle, and it is the one part of `Blob` testable today. `FireSurroundings`, the private
-class already at the bottom of the file, is the shape to copy. *Most expensive, least urgent.*
+*12 tests, and the one this split was for is that a chasing nasty walled in gives up chasing after
+a quarter of a second. "Nasties get stuck" is the thing `ReleaseAttractionIfStuck` exists for, and
+it is now reproducible in a test rather than only in a game.*
+
+**4.5 — `LoadingScreen`, `GlobalHotkeys` and `TestModeKeys`** (`56fe4ba`). The loading screen keeps
+its two decisions as return values rather than events: `FadeUp` says when the content load may
+begin, `WaitForAKey` says when the game may start, and the engine decides what those mean because
+that is the engine's business. The artwork swap tells whoever is drawing through a callback the
+engine supplies rather than by holding the engine — the reference `DECOUPLING.md` removed, and not
+worth reintroducing for one line. Both the call to the debug keys and their construction are
+`Conditional`, so a release build still has no path to any of it.
+
+One tidy worth naming: the five in-play screens were listed three times in three slightly different
+shapes — twice as a chain of ORs and once as a pattern — and are one array tested once.
+*No tests, and none expected; the plan called this "modest, mostly clarity" in advance.*
+
+**4.6 — `ScreenRenderer`** (`28d795d`). The last of `GameScreenCollection`'s seven jobs. The
+key-door frame was the one genuinely mixed method — it drove the force field's emitters and set the
+collision tile types in the same sequence — and the two no longer interleave, the tile loop having
+sat between the dim pass and the bright one without touching either. *No tests, and none expected:
+drawing needs a graphics device. What it buys is the place 5.1 goes.*
+
+**4.7 — `UnstickProbe` and `Inventory` out of `Blob`** (`90e7910`). The two parts of `Blob` that are
+arithmetic rather than drawing, which by this phase's measure are the two worth taking. The probe
+is a question now rather than a command — given where the blob is, where should he be — and the
+blob does the moving.
+
+**The other three clusters are deliberately not taken.** `BlobWeapon`, `TunnelTraversal` and
+`BlobDeathSequence` are each mostly particle effects, sounds and drawing wrapped around two or
+three counters, so extracting them would move lines without making anything testable, and this
+phase says in its own words that such a split has earned nothing. `Blob` is still 2,055 lines and
+its 110 fields are still the real problem. *11 tests, including the two rules that make the
+inventory a puzzle rather than a bag.*
+
+### What phase 4 did not settle
+
+`Blob` is the one god class still standing, and the reason is worth writing down rather than
+leaving for the next reader to rediscover: its remaining bulk is not separable state, it is one
+state machine that draws itself. Splitting it needs the update logic and the draw code prised
+apart first, and that is a different task from moving four field clusters into four files.
 
 ## Phase 5 — performance
 
-Deliberately after 4.6, because the renderer split is where these live and doing both at once
-makes the diff unreadable. None of it matters on a modern GPU at 60 Hz — it is the difference
+Deliberately after 4.6, which has landed: the renderer split is where these live, and doing both
+at once would have made the diff unreadable. None of it matters on a modern GPU at 60 Hz — it is the difference
 between running on a Raspberry Pi and not.
 
-**5.1 — batch the tile draws.** Each screen is an 8 × 6 grid. `DrawLowerTile`
-(`GameScreenCollection.cs:1379`) runs 48 times a frame and per tile does a dictionary lookup, a
-cast, then a full `SpriteBatch.Begin()` → one `Draw` → `End()`. `DrawUpperTilePatch` (line 1506)
-does the same 48 more times with two lookups each. A `Begin`/`End` pair flushes a draw call, so
+**5.1 — batch the tile draws.** Each screen is an 8 × 6 grid. `DrawLowerTile` runs 48 times a
+frame and per tile does a dictionary lookup, a cast, then a full `SpriteBatch.Begin()` → one
+`Draw` → `End()`. `DrawUpperTilePatch` does the same 48 more times with two lookups each. Both are
+`ScreenRenderer`'s since 4.6, which is what that split was for. A `Begin`/`End` pair flushes a draw call, so
 the tile layers alone issue up to 5,700 flushes a second to draw at most 96 sprites — batching is
 the entire purpose of `SpriteBatch`. Both layers draw from one sheet each, so hoisting `Begin`
 and `End` out of the loops is one batch per layer.
@@ -470,6 +481,9 @@ So they can be re-derived rather than taken on trust.
 target frameworks. `NoWarn=1591` is needed because `GenerateDocumentationFile` floods the output
 with missing-doc warnings that are not the point. Since 1.1 a plain `dotnet build Starquake.sln`
 reports them, as errors.
+
+**The test count** by running the tests: 65 before phase 4 and 147 after it, which is the measure
+that phase set for itself.
 
 **The line and field counts** with `wc -l` and a `grep -cE` over the private declarations, and the
 methods over 80 lines with the `awk` script in `REFACTORING.md` — including its known false
