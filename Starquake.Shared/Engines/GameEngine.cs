@@ -147,7 +147,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public readonly GraphicsDeviceManager GraphicsDeviceMgr;
 
     // Game Sequences
-    public IntroSequence IntroSequence;
+    private IntroSequence? _introSequence;
 
     // Loading screen
     private int _loadingScreenFade;
@@ -285,6 +285,9 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public GameSession Session => NotBeforeContentLoads(_session);
 
     /// <inheritdoc cref="GameScreens" />
+    public IntroSequence IntroSequence => NotBeforeContentLoads(_introSequence);
+
+    /// <inheritdoc cref="GameScreens" />
     public Nasties Nasties => NotBeforeContentLoads(_nasties);
 
     /// <inheritdoc cref="GameScreens" />
@@ -352,14 +355,11 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     }
 
-    [MemberNotNull(nameof(IntroSequence), nameof(BlobStatusPanel), nameof(Elements),
+    [MemberNotNull(nameof(BlobStatusPanel), nameof(Elements),
         nameof(ShapeDrawer))]
     private void Initialise()
     {
-        // Sequences
-        IntroSequence = new IntroSequence(this);
-
-        BlobStatusPanel = new StatusPanel(this);
+        BlobStatusPanel = new StatusPanel(ContentResourceManager, GraphicsSet, ScreenDirectory, RandomNumberGenerator);
         BlobStatusPanel.Initialise(null);
 
         _session = new GameSession();
@@ -719,6 +719,19 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         // The blob's death throes. After the screen collection, which each thrown-off fragment
         // bounces around.
         _blobKiller = new BlobDeathAnimation(ContentResourceManager, GameScreens, GraphicsSet, RandomNumberGenerator);
+
+        // The intro sequence flies the blob's ship in over the planet and blows it up, so it
+        // comes after both the planet and the death animation.
+        _introSequence = new IntroSequence(
+            ContentResourceManager,
+            Font2,
+            GameScreens,
+            GraphicsSet,
+            Presentation,
+            ScreenDirectory,
+            ScreenEffectEngine,
+            BlobKiller,
+            RandomNumberGenerator);
 
         Presentation.ScreenXOffset = (GraphicsDeviceMgr.PreferredBackBufferWidth - GameScreens.ScreenWidth) / 2;
         Presentation.ScreenYOffset = 10;
@@ -1249,7 +1262,10 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             ScreenDirectory.Current == GameScreenType.Teleporter ||
             ScreenDirectory.Current == GameScreenType.AccessBooth)
         {
-            BlobStatusPanel.Update(Player.BlobInventory);
+            BlobStatusPanel.Update(
+                Player.BlobInventory,
+                Player,
+                !IntroSequence.SequenceRunning || IntroSequence.SequenceStage == IntroSequenceStage.EndPause);
         }
     }
 

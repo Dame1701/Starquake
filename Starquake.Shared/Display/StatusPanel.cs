@@ -3,18 +3,22 @@
 // ---------------------------------------------------------
 // -
 using System;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
+using Starquake.ActiveSprites;
 using Starquake.Animations;
 using Starquake.ContentManagement;
-using Starquake.Engines;
+using Starquake.GameComponents;
 using Starquake.Structure;
 
 namespace Starquake.Display;
 
 public class StatusPanel : GameComponentBase
 {
-    private readonly GameEngine GameEngine;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly ResourceManager _resources;
+    private readonly ScreenDirectory _screenDirectory;
+
 
     /// <summary>
     ///     How much of each supply the blob can hold, and how much it starts a life with. The bars on
@@ -219,17 +223,23 @@ public class StatusPanel : GameComponentBase
 
     public int PlayerScore { get; set; }
 
-    public int Width => GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelGraphic").SpriteWidth;
+    public int Width => _resources.GetSpriteCollection("StatusPanelGraphic").SpriteWidth;
 
-    public int Height => GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelGraphic").SpriteHeight;
+    public int Height => _resources.GetSpriteCollection("StatusPanelGraphic").SpriteHeight;
 
     #region IGameComponent Members
 
-    public StatusPanel(GameEngine gameEngineRef)
+    public StatusPanel(
+        ResourceManager resources,
+        GraphicsSet graphicsSet,
+        ScreenDirectory screenDirectory,
+        Random randomNumberGenerator)
     {
-        GameEngine = gameEngineRef;
+        _resources = resources;
+        _graphicsSet = graphicsSet;
+        _screenDirectory = screenDirectory;
 
-        _inventoryScanner = new KeyScanner(gameEngineRef.ContentResourceManager, gameEngineRef.GraphicsSet, gameEngineRef.RandomNumberGenerator, false);
+        _inventoryScanner = new KeyScanner(resources, graphicsSet, randomNumberGenerator, false);
     }
 
     public void LoadContent(ContentList content)
@@ -351,25 +361,25 @@ public class StatusPanel : GameComponentBase
     private void TopUpEnergy(int amount)
     {
         EnergyLevel += amount;
-        GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp2", false);
+        _resources.GetSoundFxEngine().PlaySound("PowerUp2", false);
     }
 
     private void TopUpFirePower(int amount)
     {
         FirePower += amount;
-        GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp3", 0.5f, false);
+        _resources.GetSoundFxEngine().PlaySound("PowerUp3", 0.5f, false);
     }
 
     private void TopUpPlatforms(int amount)
     {
         Platforms += amount;
-        GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp1", false);
+        _resources.GetSoundFxEngine().PlaySound("PowerUp1", false);
     }
 
     private void GiveExtraLife()
     {
         BlobLives++;
-        GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("LifePowerUp", false);
+        _resources.GetSoundFxEngine().PlaySound("LifePowerUp", false);
     }
 
     public void PerformPostChangeScreenActions()
@@ -378,16 +388,22 @@ public class StatusPanel : GameComponentBase
     }
 
 
-    public void Update(Collectables[] blobsInventory)
+    /// <summary>
+    ///     Steps the panel. Takes the blob rather than holding it, and is told whether the intro is
+    ///     at a point where energy should drain, because the panel is built before either exists -
+    ///     the blob needs the panel to read its supplies from, and the panel needs the blob to drain
+    ///     and revive. Handing it over per call is what makes that pair acyclic.
+    /// </summary>
+    public void Update(Collectables[] blobsInventory, Blob blob, bool energyMayDrain)
     {
-        if (GameEngine.Player.BlobsState == BlobState.Normal)
+        if (blob.BlobsState == BlobState.Normal)
         {
             _blobsInventory = blobsInventory;
 
-            if (!GameEngine.IntroSequence.SequenceRunning || GameEngine.IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
+            if (energyMayDrain)
             {
                 // Delete Blob'ss energy one bar every 4 seconds, but only if we're not in a teleporter
-                if (GameEngine.ScreenDirectory.Current == GameScreenType.MainGame)
+                if (_screenDirectory.Current == GameScreenType.MainGame)
                 {
                     if (!_removeEnergyTimerStarted)
                     {
@@ -407,7 +423,7 @@ public class StatusPanel : GameComponentBase
                 if (EnergyLevel <= 0)
                 {
                     // Lose a life and put us into the overloading state
-                    GameEngine.Player.KillBlob(false, true);
+                    blob.KillBlob(false, true);
                     EnergyLevel = 0;
                 }
             }
@@ -421,14 +437,14 @@ public class StatusPanel : GameComponentBase
                 _inventoryScanner.Update();
             }
         }
-        else if (GameEngine.Player.BlobsState == BlobState.Dead)
+        else if (blob.BlobsState == BlobState.Dead)
         {
             BlobLives -= 1;
 
             if (BlobLives < 0)
             {
                 // That's all folks
-                GameEngine.Player.BlobsState = BlobState.Gameover;
+                blob.BlobsState = BlobState.Gameover;
                 BlobLives = 0;
             }
             else
@@ -442,7 +458,7 @@ public class StatusPanel : GameComponentBase
                     Platforms = 8;
                 }
 
-                GameEngine.Player.BlobsState = BlobState.Normal;
+                blob.BlobsState = BlobState.Normal;
             }
         }
     }
@@ -467,33 +483,33 @@ public class StatusPanel : GameComponentBase
 
     public override void Draw(GameTime gameTime)
     {
-        GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelGraphic").Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-        GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelGraphic").DrawSprite(0, 0, 0, Color.White);
-        GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelGraphic").End();
+        _resources.GetSpriteCollection("StatusPanelGraphic").Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+        _resources.GetSpriteCollection("StatusPanelGraphic").DrawSprite(0, 0, 0, Color.White);
+        _resources.GetSpriteCollection("StatusPanelGraphic").End();
 
         // Draw inventory
         if (_blobsInventory != null)
         {
             // Draw items
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups).Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+            _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
             for (var a = 0; a < _blobsInventory.Length; a++)
             {
                 // Draw numbers above object
                 if (_blobsInventory[a] == Collectables.None)
                 {
-                    PanelNumbers.Draw(InventorySlotSpacing * a + InventoryNumberXPos, InventoryNumberYPos, (a + 1).ToString(), GameEngine.ContentResourceManager, gameTime, Color.White);
+                    PanelNumbers.Draw(InventorySlotSpacing * a + InventoryNumberXPos, InventoryNumberYPos, (a + 1).ToString(), _resources, gameTime, Color.White);
                 }
                 else
                 {
-                    PanelNumbers.Draw(InventorySlotSpacing * a + InventoryNumberXPos, InventoryNumberYPos, (a + 1).ToString(), GameEngine.ContentResourceManager, gameTime, Color.OrangeRed);
+                    PanelNumbers.Draw(InventorySlotSpacing * a + InventoryNumberXPos, InventoryNumberYPos, (a + 1).ToString(), _resources, gameTime, Color.OrangeRed);
 
                     if (_slotToScan != a) // Don't draw the slot being scanned
                     {
-                        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups).DrawSprite((int)_blobsInventory[a], InventorySlotSpacing * a + InventoryItemXPos, InventoryItemYPos, Color.White);
+                        _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite((int)_blobsInventory[a], InventorySlotSpacing * a + InventoryItemXPos, InventoryItemYPos, Color.White);
                     }
                 }
             }
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups).End();
+            _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
         }
 
         if (_slotToScan >= 0 && _blobsInventory != null)
@@ -502,28 +518,28 @@ public class StatusPanel : GameComponentBase
         }
 
         // Draw energybars
-        GameEngine.ContentResourceManager.GetSpriteCollection("EnerygyBar").Begin(BlendState.AlphaBlend, gameTime);
-        GameEngine.ContentResourceManager.GetSpriteCollection("EnerygyBar").DrawSprite(0, BarXPos, EnergyBarYPos, (int)(_energyLevel * EnergyBarScale), BarHeight, Color.White);
-        GameEngine.ContentResourceManager.GetSpriteCollection("EnerygyBar").End();
+        _resources.GetSpriteCollection("EnerygyBar").Begin(BlendState.AlphaBlend, gameTime);
+        _resources.GetSpriteCollection("EnerygyBar").DrawSprite(0, BarXPos, EnergyBarYPos, (int)(_energyLevel * EnergyBarScale), BarHeight, Color.White);
+        _resources.GetSpriteCollection("EnerygyBar").End();
 
-        GameEngine.ContentResourceManager.GetSpriteCollection("JumpBar").Begin(BlendState.AlphaBlend, gameTime);
-        GameEngine.ContentResourceManager.GetSpriteCollection("JumpBar").DrawSprite(0, BarXPos, JumpBarYPos, (int)(_platforms * JumpBarScale), BarHeight, Color.White);
-        GameEngine.ContentResourceManager.GetSpriteCollection("JumpBar").End();
+        _resources.GetSpriteCollection("JumpBar").Begin(BlendState.AlphaBlend, gameTime);
+        _resources.GetSpriteCollection("JumpBar").DrawSprite(0, BarXPos, JumpBarYPos, (int)(_platforms * JumpBarScale), BarHeight, Color.White);
+        _resources.GetSpriteCollection("JumpBar").End();
 
-        GameEngine.ContentResourceManager.GetSpriteCollection("AmmoBar").Begin(BlendState.AlphaBlend, gameTime);
-        GameEngine.ContentResourceManager.GetSpriteCollection("AmmoBar").DrawSprite(0, BarXPos, AmmoBarYPos, (int)(_firePower * AmmoBarScale), BarHeight, Color.White);
-        GameEngine.ContentResourceManager.GetSpriteCollection("AmmoBar").End();
+        _resources.GetSpriteCollection("AmmoBar").Begin(BlendState.AlphaBlend, gameTime);
+        _resources.GetSpriteCollection("AmmoBar").DrawSprite(0, BarXPos, AmmoBarYPos, (int)(_firePower * AmmoBarScale), BarHeight, Color.White);
+        _resources.GetSpriteCollection("AmmoBar").End();
 
         // Draw score
-        PanelNumbers.Draw(ScoreXPos, ScoreYPos, PlayerScore.ToString("000000"), GameEngine.ContentResourceManager, gameTime, Color.White);
+        PanelNumbers.Draw(ScoreXPos, ScoreYPos, PlayerScore.ToString("000000"), _resources, gameTime, Color.White);
 
         // Draw remaining lives
-        PanelNumbers.Draw(LivesXPos, LivesYPos, BlobLives.ToString("00"), GameEngine.ContentResourceManager, gameTime, Color.White);
+        PanelNumbers.Draw(LivesXPos, LivesYPos, BlobLives.ToString("00"), _resources, gameTime, Color.White);
 
         // draw overlay
-        GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelOverlay").Begin(BlendState.AlphaBlend, gameTime);
-        GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelOverlay").DrawSprite(0, 22, 26, Color.White);
-        GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelOverlay").End();
+        _resources.GetSpriteCollection("StatusPanelOverlay").Begin(BlendState.AlphaBlend, gameTime);
+        _resources.GetSpriteCollection("StatusPanelOverlay").DrawSprite(0, 22, 26, Color.White);
+        _resources.GetSpriteCollection("StatusPanelOverlay").End();
     }
 
     #endregion

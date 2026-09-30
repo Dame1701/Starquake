@@ -3,11 +3,15 @@
 // ---------------------------------------------------------
 // -
 using System;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 using Starquake.Constants;
-using Starquake.Engines;
+using Starquake.ContentManagement;
+using Starquake.Display;
+using Starquake.Engines.ScreenEffects;
+using Starquake.Fonts;
 using Starquake.GameComponents.GameScreens;
+using Starquake.GameComponents;
 using Starquake.Sounds;
 using Starquake.Structure;
 
@@ -15,7 +19,16 @@ namespace Starquake.Animations;
 
 public class IntroSequence : GameComponentBase
 {
-    private readonly GameEngine GameEngine;
+    private readonly BlobDeathAnimation _blobKiller;
+    private readonly BitmapFont _font;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly PresentationSettings _presentation;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
+    private readonly ScreenDirectory _screenDirectory;
+    private readonly ScreenEffectEngine _screenEffects;
+
 
     private readonly FaderAnimation _blobShipHazardLightFlash;
     private readonly RandomFaderAnimation _blobShipHeadLightFlash;
@@ -52,24 +65,41 @@ public class IntroSequence : GameComponentBase
 
     private float _yAmountToMoveEachFrame;
 
-    public IntroSequence(GameEngine gameEngine)
+    public IntroSequence(
+        ResourceManager resources,
+        BitmapFont font,
+        GameScreenCollection gameScreens,
+        GraphicsSet graphicsSet,
+        PresentationSettings presentation,
+        ScreenDirectory screenDirectory,
+        ScreenEffectEngine screenEffects,
+        BlobDeathAnimation blobKiller,
+        Random randomNumberGenerator)
     {
-        GameEngine = gameEngine;
+        _resources = resources;
+        _font = font;
+        _gameScreens = gameScreens;
+        _graphicsSet = graphicsSet;
+        _presentation = presentation;
+        _screenDirectory = screenDirectory;
+        _screenEffects = screenEffects;
+        _blobKiller = blobKiller;
+        _randomNumberGenerator = randomNumberGenerator;
 
         _blobShipHazardLightFlash = new FaderAnimation(10);
-        _blobShipHeadLightFlash = new RandomFaderAnimation(4, GameEngine.RandomNumberGenerator, 100);
+        _blobShipHeadLightFlash = new RandomFaderAnimation(4, _randomNumberGenerator, 100);
     }
 
-    public int BlobSpaceShipXPos => (int)_blobSpaceShipXPos + GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.BlobsShip).SpriteWidth / 2;
+    public int BlobSpaceShipXPos => (int)_blobSpaceShipXPos + _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).SpriteWidth / 2;
 
-    public int BlobSpaceShipYPos => (int)_blobSpaceShipYPos + GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.BlobsShip).SpriteHeight / 2;
+    public int BlobSpaceShipYPos => (int)_blobSpaceShipYPos + _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).SpriteHeight / 2;
     public IntroSequenceStage SequenceStage { get; private set; } = IntroSequenceStage.None;
 
     /// <summary>
     ///     The screen the sequence fades up over. Looked up rather than held, so the sequence cannot
     ///     be built before the screen it needs exists.
     /// </summary>
-    private MainGameScreen MainScreen => (MainGameScreen)GameEngine.ScreenDirectory.Get(GameScreenType.MainGame);
+    private MainGameScreen MainScreen => (MainGameScreen)_screenDirectory.Get(GameScreenType.MainGame);
 
     public void Reset()
     {
@@ -107,10 +137,10 @@ public class IntroSequence : GameComponentBase
 
         _sequenceCounter = 0;
 
-        GameEngine.ContentResourceManager.GetSoundFxEngine().StopSound(_shipExplosionSound, SoundFade.None);
+        _resources.GetSoundFxEngine().StopSound(_shipExplosionSound, SoundFade.None);
 
-        GameEngine.GameScreens.BlobsShipSmoke1.Reset();
-        GameEngine.GameScreens.BlobsShipSmoke2.Reset();
+        _gameScreens.BlobsShipSmoke1.Reset();
+        _gameScreens.BlobsShipSmoke2.Reset();
     }
 
     /// <summary>
@@ -156,7 +186,7 @@ public class IntroSequence : GameComponentBase
         {
             if (_startPauseCounter == 0)
             {
-                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobShipFall");
+                _resources.GetSoundFxEngine().PlaySound("BlobShipFall");
             }
 
             _startPauseCounter++;
@@ -189,20 +219,20 @@ public class IntroSequence : GameComponentBase
         else
         {
             SequenceStage = IntroSequenceStage.ShipExploading;
-            GameEngine.BlobKiller.Trigger(_blobSpaceShipEndXPos, _blobSpaceShipEndYPos, false, 100, 200);
+            _blobKiller.Trigger(_blobSpaceShipEndXPos, _blobSpaceShipEndYPos, false, 100, 200);
         }
     }
 
     private void UpdateShipExploding(GameTime gameTime)
     {
         SequenceStage = IntroSequenceStage.PreFadePause;
-        _shipExplosionSound = GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobShipExplodes");
-        GameEngine.Presentation.ScreenClearColour = Color.White;
+        _shipExplosionSound = _resources.GetSoundFxEngine().PlaySound("BlobShipExplodes");
+        _presentation.ScreenClearColour = Color.White;
     }
 
     private void UpdatePreFadePause(GameTime gameTime)
     {
-        GameEngine.Presentation.ScreenClearColour = Color.Black;
+        _presentation.ScreenClearColour = Color.Black;
         if (_shipRotationSpeed > 0)
         {
             _shipRotationSpeed = _shipRotationSpeed - 2;
@@ -235,18 +265,18 @@ public class IntroSequence : GameComponentBase
 
         if (_rumbleAmount > 0)
         {
-            var xShakeOffset = GameEngine.RandomNumberGenerator.Next(0, (int)_rumbleAmount);
-            var yShakeOffset = GameEngine.RandomNumberGenerator.Next(0, (int)_rumbleAmount);
+            var xShakeOffset = _randomNumberGenerator.Next(0, (int)_rumbleAmount);
+            var yShakeOffset = _randomNumberGenerator.Next(0, (int)_rumbleAmount);
 
             _rumbleAmount = _rumbleAmount - 0.5;
 
-            GameEngine.ScreenEffectEngine.MoveViewPort("GameArea", xShakeOffset, yShakeOffset);
+            _screenEffects.MoveViewPort("GameArea", xShakeOffset, yShakeOffset);
 
             // Play rumble sound
-            _rumbleSound = GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("Rumble", true);
+            _rumbleSound = _resources.GetSoundFxEngine().PlaySound("Rumble", true);
         }
 
-        GameEngine.BlobKiller.Update(gameTime);
+        _blobKiller.Update(gameTime);
     }
 
     private void UpdateCaptionFadeUp()
@@ -297,7 +327,7 @@ public class IntroSequence : GameComponentBase
             }
             else
             {
-                GameEngine.ContentResourceManager.GetSoundFxEngine().StopSound(_rumbleSound, SoundFade.Fast);
+                _resources.GetSoundFxEngine().StopSound(_rumbleSound, SoundFade.Fast);
                 SequenceStage = IntroSequenceStage.Finished;
                 SequenceRunning = false;
             }
@@ -314,58 +344,58 @@ public class IntroSequence : GameComponentBase
         {
 
 
-            if (GameEngine.GraphicsSet.IsOriginal)
+            if (_graphicsSet.IsOriginal)
             {
-                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.BlobsShip).Begin(BlendState.AlphaBlend, gameTime);
+                _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).Begin(BlendState.AlphaBlend, gameTime);
                 if (SequenceStage == IntroSequenceStage.Finished || SequenceStage == IntroSequenceStage.CaptionFadeUp || SequenceStage == IntroSequenceStage.EndPause)
                 {
-                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.BlobsShip).DrawSprite(0, 640, 288, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade));
+                    _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).DrawSprite(0, 640, 288, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade));
                 }
                 else
                 {
-                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.BlobsShip).DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
+                    _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
                 }
 
-                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.BlobsShip).End();
+                _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).End();
             }
             else
             {
-                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.BlobsShip).Begin(BlendState.AlphaBlend, gameTime);
-                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.BlobsShip).DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
-                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.BlobsShip).End();
+                _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).Begin(BlendState.AlphaBlend, gameTime);
+                _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
+                _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).End();
 
                 if (SequenceStage != IntroSequenceStage.Finished && SequenceStage != IntroSequenceStage.EndPause)
                 {
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHazardLights").Begin(BlendState.AlphaBlend, gameTime);
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHazardLights").DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, 0), 1.0f, _shipRotationSpeed, true, false);
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHazardLights").End();
+                    _resources.GetSpriteCollection("BlobsShipHazardLights").Begin(BlendState.AlphaBlend, gameTime);
+                    _resources.GetSpriteCollection("BlobsShipHazardLights").DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, 0), 1.0f, _shipRotationSpeed, true, false);
+                    _resources.GetSpriteCollection("BlobsShipHazardLights").End();
 
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHeadLights").Begin(BlendState.AlphaBlend, gameTime);
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHeadLights").DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHeadLights").End();
+                    _resources.GetSpriteCollection("BlobsShipHeadLights").Begin(BlendState.AlphaBlend, gameTime);
+                    _resources.GetSpriteCollection("BlobsShipHeadLights").DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
+                    _resources.GetSpriteCollection("BlobsShipHeadLights").End();
                 }
                 else
                 {
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHazardLights").Begin(BlendState.AlphaBlend, gameTime);
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHazardLights").DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_blobShipHazardLightFlash.FadeLevel * ((double)MainScreen.ScreenFade / ColourLevels.Full))), 1.0f, _shipRotationSpeed, true, false);
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHazardLights").End();
+                    _resources.GetSpriteCollection("BlobsShipHazardLights").Begin(BlendState.AlphaBlend, gameTime);
+                    _resources.GetSpriteCollection("BlobsShipHazardLights").DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_blobShipHazardLightFlash.FadeLevel * ((double)MainScreen.ScreenFade / ColourLevels.Full))), 1.0f, _shipRotationSpeed, true, false);
+                    _resources.GetSpriteCollection("BlobsShipHazardLights").End();
 
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHeadLights").Begin(BlendState.AlphaBlend, gameTime);
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHeadLights").DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_blobShipHeadLightFlash.FadeLevel * ((double)MainScreen.ScreenFade / ColourLevels.Full))), 1.0f, _shipRotationSpeed, true, false);
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHeadLights").End();
+                    _resources.GetSpriteCollection("BlobsShipHeadLights").Begin(BlendState.AlphaBlend, gameTime);
+                    _resources.GetSpriteCollection("BlobsShipHeadLights").DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_blobShipHeadLightFlash.FadeLevel * ((double)MainScreen.ScreenFade / ColourLevels.Full))), 1.0f, _shipRotationSpeed, true, false);
+                    _resources.GetSpriteCollection("BlobsShipHeadLights").End();
                 }
             }
 
             if (SequenceStage == IntroSequenceStage.PreFadePause)
             {
-                GameEngine.BlobKiller.Draw(gameTime, MainScreen.ScreenFade);
+                _blobKiller.Draw(gameTime, MainScreen.ScreenFade);
             }
         }
         else
         {
-            GameEngine.Font2.Begin(BlendState.AlphaBlend);
-            GameEngine.Font2.WriteText(180, 210, "Prepare for mission Starquake ...", 2, Color.White, (byte)MainScreen.ScreenFade);
-            GameEngine.Font2.End();
+            _font.Begin(BlendState.AlphaBlend);
+            _font.WriteText(180, 210, "Prepare for mission Starquake ...", 2, Color.White, (byte)MainScreen.ScreenFade);
+            _font.End();
         }
     }
 }
