@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-#nullable enable
 using Microsoft.Xna.Framework;
 using ProjectMercury;
 using ProjectMercury.Renderers;

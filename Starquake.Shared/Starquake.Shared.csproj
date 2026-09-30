@@ -19,6 +19,7 @@
         <RootNamespace>Starquake</RootNamespace>
         <AssemblyName>Starquake.Shared</AssemblyName>
         <TieredCompilation>false</TieredCompilation>
+        <Nullable>enable</Nullable>
         <!-- Lets the net9.0-windows target build on Linux and macOS. -->
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <!-- Content.mgcb is named explicitly below; don't glob for it as well. -->
