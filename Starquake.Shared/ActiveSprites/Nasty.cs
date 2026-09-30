@@ -33,6 +33,12 @@ public class Nasty : GameComponentBase
     private const int NastyAnimationDelay = 4;
 
     /// <summary>
+    ///     How many frames of the sprite sheet each kind of nasty occupies, which is what turns a
+    ///     <see cref="NastyType" /> into the first sprite of its walk cycle.
+    /// </summary>
+    private const int FramesPerNasty = 4;
+
+    /// <summary>
     ///     How fast the nasty spins as it materialises, and how fast it is still spinning by the time
     ///     it has finished. It slows from the one to the other over the second half of the birth.
     /// </summary>
@@ -82,6 +88,51 @@ public class Nasty : GameComponentBase
     ///     it can be seen coming.
     /// </summary>
     private const int FirstMovementDuration = 90;
+
+    /// <inheritdoc cref="FirstMovementDuration" />
+    private const int FirstMovementSpeed = 1;
+
+    /// <summary>
+    ///     The core guardian's fixed speed. It never picks another, unlike every other nasty.
+    /// </summary>
+    private const int CoreGuardianSpeed = 8;
+
+    /// <summary>
+    ///     How fast a nasty moves. A wandering one ambles through a random walk and strides at anything
+    ///     else; a chasing one is the other way about, picking its way on a random walk and charging on
+    ///     the direct movements. Each pair is the range a speed is drawn from.
+    /// </summary>
+    private const int WanderingAmbleSpeed = 2;
+
+    /// <inheritdoc cref="WanderingAmbleSpeed" />
+    private const int WanderingAmbleSpeedLimit = 4;
+
+    /// <inheritdoc cref="WanderingAmbleSpeed" />
+    private const int WanderingStrideSpeed = 6;
+
+    /// <inheritdoc cref="WanderingAmbleSpeed" />
+    private const int WanderingStrideSpeedLimit = 8;
+
+    /// <inheritdoc cref="WanderingAmbleSpeed" />
+    private const int ChasingPickingSpeed = 4;
+
+    /// <inheritdoc cref="WanderingAmbleSpeed" />
+    private const int ChasingPickingSpeedLimit = 6;
+
+    /// <inheritdoc cref="WanderingAmbleSpeed" />
+    private const int ChasingChargeSpeed = 8;
+
+    /// <inheritdoc cref="WanderingAmbleSpeed" />
+    private const int ChasingChargeSpeedLimit = 10;
+
+    /// <summary>
+    ///     How far a nasty set to bounce in steps travels before choosing again. Shorter than the other
+    ///     runs, which is what makes it step rather than bounce.
+    /// </summary>
+    private const int ShortestSteppedRun = 8;
+
+    /// <inheritdoc cref="ShortestSteppedRun" />
+    private const int LongestSteppedRun = 16;
 
     /// <summary>
     ///     How far a nasty travels before choosing a new direction. The ranges differ by movement
@@ -851,126 +902,123 @@ public class Nasty : GameComponentBase
     ///     How long a nasty keeps to one frame of mind before picking another, and what it picks: whether
     ///     it chases the blob or wanders, how it moves, which way it sets off and how fast.
     /// </summary>
+    /// <summary>
+    ///     How long a nasty keeps to one frame of mind before picking another, and what it picks:
+    ///     whether it chases the blob or wanders, how it moves, which way it sets off and how fast.
+    /// </summary>
     private void UpdateFrameOfMind()
     {
-        if (_nastyType != NastyType.CoreGuardian)
+        if (_nastyType == NastyType.CoreGuardian)
         {
-            if (_movementChangeCounter < _movementChangeCount)
-            {
-                _movementChangeCounter++;
-            }
-            else
-            {
-                var attractionFlag = GameEngine.RandomNumberGenerator.Next(0, 2);
-
-                if (attractionFlag == 0)
-                {
-                    _movementChangeCount = GameEngine.RandomNumberGenerator.Next(WanderingShortest, WanderingLongest);
-                    _attractedToBlob = false;
-                }
-                else
-                {
-                    _movementChangeCount = GameEngine.RandomNumberGenerator.Next(ChasingShortest, ChasingLongest);
-                    _attractedToBlob = true;
-                }
-
-                _movementChangeCounter = 0;
-
-                if (_nastyType == NastyType.Spiky)
-                {
-                    _attractedToBlob = true; // Spiky nasties are always attracted to blob
-                    MovementType = MoveType.SpikeyMovement;
-                }
-                else
-                {
-                    if (_attractedToBlob)
-                    {
-                        // just choose from the attraction modes....
-                        MovementType = (MoveType)GameEngine.RandomNumberGenerator.Next(0, 2);
-                    }
-                    else
-                    {
-                        MovementType = (MoveType)GameEngine.RandomNumberGenerator.Next(0,
-                            Enum.GetValues(typeof(MoveType)).Length - 1);
-                    }
-
-                    if (MovementType == MoveType.DiagonalBouncing)
-                    {
-                        Direction =
-                            (Direction)GameEngine.RandomNumberGenerator.Next(4, 8); // select from 2nd four
-                    }
-                    else if (MovementType == MoveType.RandomMovement ||
-                             MovementType == MoveType.RandomUpDownLeftRight)
-                    {
-                        Direction =
-                            (Direction)GameEngine.RandomNumberGenerator.Next(0, 4); // select from 1st four
-                    }
-                    else if (MovementType == MoveType.DiagonalBouncingInSteps)
-                    {
-                        Direction =
-                            (Direction)GameEngine.RandomNumberGenerator.Next(4, 8); // select from 2nd four
-                        _stepsToMove = GameEngine.RandomNumberGenerator.Next(8, 16);
-                    }
-
-                    // Create a random speed for the nasty to move
-                    if (!_attractedToBlob)
-                    {
-                        if (MovementType == MoveType.DiagonalBouncing ||
-                            MovementType == MoveType.DiagonalBouncingInSteps ||
-                            MovementType == MoveType.RandomUpDownLeftRight)
-                        {
-                            MoveSpeed = GameEngine.RandomNumberGenerator.Next(6, 8);
-                        }
-                        else if (MovementType == MoveType.RandomMovement ||
-                                 MovementType == MoveType.RandomMovementsAllDirections)
-                        {
-                            MoveSpeed = GameEngine.RandomNumberGenerator.Next(2, 4);
-                        }
-                        else
-                        {
-                            MoveSpeed = GameEngine.RandomNumberGenerator.Next(6, 8);
-                        }
-                    }
-                    else
-                    {
-                        if (MovementType == MoveType.RandomMovement ||
-                            MovementType == MoveType.RandomMovementsAllDirections)
-                        {
-                            MoveSpeed = GameEngine.RandomNumberGenerator.Next(4, 6);
-                        }
-                        else if (MovementType == MoveType.RandomUpDownLeftRight ||
-                                 MovementType == MoveType.DiagonalBouncing ||
-                                 MovementType == MoveType.DiagonalBouncingInSteps)
-                        {
-                            MoveSpeed = GameEngine.RandomNumberGenerator.Next(8, 10);
-                        }
-                        else if (MovementType == MoveType.SpikeyMovement)
-                        {
-                            MoveSpeed = GameEngine.RandomNumberGenerator.Next(4, 6);
-                        }
-                        else
-                        {
-                            MoveSpeed = GameEngine.RandomNumberGenerator.Next(8, 10);
-                        }
-                    }
-
-                    // Change movespeed to 1 if this is the first movement - allows the nasties to sppear moving slowly
-                    if (_firstMovement)
-                    {
-                        MoveSpeed = 1;
-                        _movementChangeCount = FirstMovementDuration;
-                        _firstMovement = false;
-                    }
-                }
-            }
-        }
-        else
-        {
+            // The guardian has one frame of mind and never changes it
             _attractedToBlob = false;
             _constantMovement = true;
             MovementType = MoveType.DiagonalBouncing;
-            MoveSpeed = 8;
+            MoveSpeed = CoreGuardianSpeed;
+
+            return;
         }
+
+        if (_movementChangeCounter < _movementChangeCount)
+        {
+            _movementChangeCounter++;
+
+            return;
+        }
+
+        ChooseNewFrameOfMind();
+    }
+
+    private void ChooseNewFrameOfMind()
+    {
+        var wandering = CoinFlip();
+
+        _attractedToBlob = !wandering;
+        _movementChangeCount = wandering
+            ? GameEngine.RandomNumberGenerator.Next(WanderingShortest, WanderingLongest)
+            : GameEngine.RandomNumberGenerator.Next(ChasingShortest, ChasingLongest);
+        _movementChangeCounter = 0;
+
+        if (_nastyType == NastyType.Spiky)
+        {
+            _attractedToBlob = true; // Spiky nasties are always attracted to blob
+            MovementType = MoveType.SpikeyMovement;
+
+            return;
+        }
+
+        MovementType = _attractedToBlob
+            // just choose from the attraction modes....
+            ? (MoveType)GameEngine.RandomNumberGenerator.Next(0, 2)
+            : (MoveType)GameEngine.RandomNumberGenerator.Next(0, Enum.GetValues(typeof(MoveType)).Length - 1);
+
+        SetStartingDirection();
+
+        MoveSpeed = ChooseMoveSpeed();
+
+        if (_firstMovement)
+        {
+            // Change movespeed to 1 if this is the first movement - allows the nasties to sppear moving slowly
+            MoveSpeed = FirstMovementSpeed;
+            _movementChangeCount = FirstMovementDuration;
+            _firstMovement = false;
+        }
+    }
+
+    /// <summary>
+    ///     Which way a nasty sets off, which depends on how it has just decided to move: the bouncing
+    ///     types start on a diagonal, the others on a straight direction, and anything else keeps
+    ///     whatever it was already doing.
+    /// </summary>
+    private void SetStartingDirection()
+    {
+        switch (MovementType)
+        {
+            case MoveType.DiagonalBouncing:
+            {
+                Direction = RandomDiagonal();
+
+                break;
+            }
+            case MoveType.RandomMovement or MoveType.RandomUpDownLeftRight:
+            {
+                Direction = RandomStraightDirection();
+
+                break;
+            }
+            case MoveType.DiagonalBouncingInSteps:
+            {
+                Direction = RandomDiagonal();
+                _stepsToMove = GameEngine.RandomNumberGenerator.Next(ShortestSteppedRun, LongestSteppedRun);
+
+                break;
+            }
+        }
+    }
+
+    /// <summary>
+    ///     How fast a nasty moves, given what it has just decided to do. A chasing nasty is faster than
+    ///     a wandering one at everything except the two random walks, where it is slower - it is picking
+    ///     its way towards the blob rather than striding about.
+    /// </summary>
+    /// <remarks>
+    ///     This was two blocks of four arms in which the last arm repeated the first, so each block is
+    ///     really one test.
+    /// </remarks>
+    private int ChooseMoveSpeed()
+    {
+        var randomWalk = MovementType is MoveType.RandomMovement or MoveType.RandomMovementsAllDirections;
+
+        if (!_attractedToBlob)
+        {
+            return randomWalk
+                ? GameEngine.RandomNumberGenerator.Next(WanderingAmbleSpeed, WanderingAmbleSpeedLimit)
+                : GameEngine.RandomNumberGenerator.Next(WanderingStrideSpeed, WanderingStrideSpeedLimit);
+        }
+
+        return randomWalk || MovementType == MoveType.SpikeyMovement
+            ? GameEngine.RandomNumberGenerator.Next(ChasingPickingSpeed, ChasingPickingSpeedLimit)
+            : GameEngine.RandomNumberGenerator.Next(ChasingChargeSpeed, ChasingChargeSpeedLimit);
     }
 
     private void DiagonalBouncingInSteps()
@@ -1443,107 +1491,143 @@ public class Nasty : GameComponentBase
     {
         CheckSpritesInUse();
 
-        var nastyImage = (int)_nastyType * 4;
+        var nastyImage = (int)_nastyType * FramesPerNasty;
 
         if (_nastyType == NastyType.CoreGuardian)
         {
-            _nastySprite.Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+            DrawCoreGuardian(nastyImage, gameTime, screenFade);
 
-            // Choose the image
+            return;
+        }
+
+        switch (NastyState)
+        {
+            case NastyState.Birth:
+            {
+                DrawBirth(nastyImage, gameTime, screenFade);
+
+                break;
+            }
+            case NastyState.Normal:
+            {
+                DrawLiveNasty(nastyImage, gameTime, screenFade);
+
+                break;
+            }
+            case NastyState.Dead:
+            {
+                DrawDeath(nastyImage, gameTime, screenFade);
+
+                break;
+            }
+        }
+    }
+
+    private void DrawCoreGuardian(int nastyImage, GameTime gameTime, int screenFade)
+    {
+        _nastySprite.Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+
+        // Choose the image
+        _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
+            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade), 1.0f, NastyRockSpeed, true, GameEngine.Paused);
+        _nastySprite.End();
+    }
+
+    /// <summary>
+    ///     A nasty materialises spinning and part-coloured, so it is drawn at its own scale and rotation
+    ///     rather than the walk cycle's.
+    /// </summary>
+    private void DrawBirth(int nastyImage, GameTime gameTime, int screenFade)
+    {
+        _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+
+        // Choose the image
+        _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
+            ColourHelper.GetXna4Colour((byte)_birthColourLevel, (byte)_birthColourLevel, ColourLevels.Full,
+                (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), _birthScale, _birthRotateSpeed,
+            true, GameEngine.Paused);
+        _nastySprite.End();
+    }
+
+    private void DrawLiveNasty(int nastyImage, GameTime gameTime, int screenFade)
+    {
+        // Choose the image
+        if (Smoking)
+        {
+            _nastySprite.Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
             _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade), 1.0f, NastyRockSpeed, true, GameEngine.Paused);
-            _nastySprite.End();
+                ColourHelper.GetXna4Colour(ShotNastyGrey, ShotNastyGrey, ShotNastyGrey, (byte)screenFade));
+            _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
+                ColourHelper.GetXna4Colour(ColourLevels.Full, 0, 0, (byte)screenFade));
+            _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
+                ColourHelper.GetXna4Colour(0, ConveyerNastyGreen, 0, (byte)screenFade));
         }
         else
         {
-            if (NastyState == NastyState.Birth)
-            {
-                _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+            _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+            _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
+                ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
+        }
 
-                // Choose the image
-                _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                    ColourHelper.GetXna4Colour((byte)_birthColourLevel, (byte)_birthColourLevel, ColourLevels.Full,
-                        (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), _birthScale, _birthRotateSpeed,
-                    true, GameEngine.Paused);
-                _nastySprite.End();
-            }
-            else if (NastyState == NastyState.Normal)
-            {
-                // Choose the image
-                if (Smoking)
-                {
-                    _nastySprite.Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
-                    _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                        ColourHelper.GetXna4Colour(ShotNastyGrey, ShotNastyGrey, ShotNastyGrey, (byte)screenFade));
-                    _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                        ColourHelper.GetXna4Colour(ColourLevels.Full, 0, 0, (byte)screenFade));
-                    _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                        ColourHelper.GetXna4Colour(0, ConveyerNastyGreen, 0, (byte)screenFade));
-                }
-                else
-                {
-                    _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                    _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                        ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
-                }
+        _nastySprite.End();
+    }
 
-                _nastySprite.End();
-            }
-            else if (NastyState == NastyState.Dead)
-            {
-                // Draw the explosion
-                if (_nastyDies != null)
-                {
-                    _nastyDies.Draw();
-                }
+    /// <summary>
+    ///     The corpse shrinks and spins away while the explosion plays over it.
+    /// </summary>
+    private void DrawDeath(int nastyImage, GameTime gameTime, int screenFade)
+    {
+        // Draw the explosion
+        if (_nastyDies != null)
+        {
+            _nastyDies.Draw();
+        }
 
-                if (_nastyDiesType2 != null)
-                {
-                    _nastyDiesType2.Draw();
-                }
+        if (_nastyDiesType2 != null)
+        {
+            _nastyDiesType2.Draw();
+        }
 
-                // Fade the nasty out as it explodes
-                if (_deathFadeLevel > 0)
-                {
-                    _deathFadeLevel = _deathFadeLevel - 20;
-                }
+        // Fade the nasty out as it explodes
+        if (_deathFadeLevel > 0)
+        {
+            _deathFadeLevel = _deathFadeLevel - 20;
+        }
 
-                if (_deathFadeLevel < 0)
-                {
-                    _deathFadeLevel = 0;
-                }
+        if (_deathFadeLevel < 0)
+        {
+            _deathFadeLevel = 0;
+        }
 
-                // Shrink the nasty as it explodes
-                if (_deathScale > 0)
-                {
-                    _deathScale = _deathScale - DeathShrinkStep;
-                }
+        // Shrink the nasty as it explodes
+        if (_deathScale > 0)
+        {
+            _deathScale = _deathScale - DeathShrinkStep;
+        }
 
-                if (_deathScale < 0)
-                {
-                    _deathScale = 0;
-                }
+        if (_deathScale < 0)
+        {
+            _deathScale = 0;
+        }
 
-                if (_deathFadeLevel > 0)
-                {
-                    _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                    _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                        ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
-                            (byte)(_deathFadeLevel * ((double)screenFade / ColourLevels.Full))), _deathScale, DeathRotateSpeed,
-                        _deathAnticlockwise, GameEngine.Paused);
-                    _nastySprite.End();
-                }
+        if (_deathFadeLevel > 0)
+        {
+            _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+            _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
+                ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
+                    (byte)(_deathFadeLevel * ((double)screenFade / ColourLevels.Full))), _deathScale, DeathRotateSpeed,
+                _deathAnticlockwise, GameEngine.Paused);
+            _nastySprite.End();
+        }
 
-                if (GameEngine.UsingOldGraphics)
-                {
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original")
-                        .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").DrawSprite(
-                        _nastyDiesAnimation.CurrentFrame, XPos, YPos,
-                        ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, screenFade), 1f, 0f);
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").End();
-                }
-            }
+        if (GameEngine.UsingOldGraphics)
+        {
+            GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original")
+                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+            GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").DrawSprite(
+                _nastyDiesAnimation.CurrentFrame, XPos, YPos,
+                ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, screenFade), 1f, 0f);
+            GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").End();
         }
     }
 

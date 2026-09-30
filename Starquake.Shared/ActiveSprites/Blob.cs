@@ -351,60 +351,14 @@ public class Blob : GameComponentBase
         _blobFire.Launch(_blobXPos + FireOffset, _blobYPos + FireOffset);
         _blobFireFade = 0;
 
-        _blobShuttleAnim = new Animation
-        {
-            FirstFrame = 0,
-            CurrentFrame = 0,
-            LastFrame = ShuttleLastFrame,
-            Yoyo = false,
-            Delay = AnimationDelay,
-            Repeat = true,
-            AnimateForwards = true
-        };
+        // Every one of these loops forward with no yoyo except the left walk, which runs backwards
+        // through the same frames, and the shuttle fire, which is slower
+        _blobShuttleAnim = LoopingAnimation(0, ShuttleLastFrame, AnimationDelay, true);
+        _blobAnimLeft = LoopingAnimation(BlobWalkLeftFirstFrame, BlobWalkLeftLastFrame, AnimationDelay, false);
+        _blobAnimRight = LoopingAnimation(BlobWalkRightFirstFrame, BlobWalkRightLastFrame, AnimationDelay, true);
+        _blobAnimFire1 = LoopingAnimation(0, FireAnimLastFrame, AnimationDelay, true);
+        _blobAnimFire2 = LoopingAnimation(0, ShuttleFireAnimLastFrame, ShuttleFireAnimationDelay, true);
 
-        _blobAnimLeft = new Animation
-        {
-            FirstFrame = BlobWalkLeftFirstFrame,
-            CurrentFrame = BlobWalkLeftFirstFrame,
-            LastFrame = BlobWalkLeftLastFrame,
-            Yoyo = false,
-            Delay = AnimationDelay,
-            Repeat = true,
-            AnimateForwards = false
-        };
-
-        _blobAnimRight = new Animation
-        {
-            FirstFrame = BlobWalkRightFirstFrame,
-            CurrentFrame = BlobWalkRightFirstFrame,
-            LastFrame = BlobWalkRightLastFrame,
-            Yoyo = false,
-            Delay = AnimationDelay,
-            Repeat = true,
-            AnimateForwards = true
-        };
-
-        _blobAnimFire1 = new Animation
-        {
-            FirstFrame = 0,
-            CurrentFrame = 0,
-            LastFrame = FireAnimLastFrame,
-            Yoyo = false,
-            Delay = AnimationDelay,
-            Repeat = true,
-            AnimateForwards = true
-        };
-
-        _blobAnimFire2 = new Animation
-        {
-            FirstFrame = 0,
-            CurrentFrame = 0,
-            LastFrame = ShuttleFireAnimLastFrame,
-            Yoyo = false,
-            Delay = ShuttleFireAnimationDelay,
-            Repeat = true,
-            AnimateForwards = true
-        };
         _directionBlobFired = Direction.Right;
 
         BlobInventory = new Collectables[BlobMaxItemsHeld];
@@ -837,6 +791,24 @@ public class Blob : GameComponentBase
     }
 
     /// <summary>
+    ///     One of blob's animations: a run of frames played end to end and started over, which is what
+    ///     all five of his are.
+    /// </summary>
+    /// <param name="firstFrame">Also the frame it starts on.</param>
+    /// <param name="animateForwards">False to run the frames backwards, which is how the left walk works.</param>
+    private static Animation LoopingAnimation(int firstFrame, int lastFrame, int delay, bool animateForwards)
+        => new()
+        {
+            FirstFrame = firstFrame,
+            CurrentFrame = firstFrame,
+            LastFrame = lastFrame,
+            Yoyo = false,
+            Delay = delay,
+            Repeat = true,
+            AnimateForwards = animateForwards
+        };
+
+    /// <summary>
     ///     Drops whatever is at the back of the inventory onto the floor, snapped to the collision
     ///     grid, and hands it back so the pick-up pass can tell it apart from anything already there.
     /// </summary>
@@ -1129,92 +1101,117 @@ public class Blob : GameComponentBase
         }
     }
 
+    /// <summary>
+    ///     Moves blob onto the next screen when he walks off an edge of this one, and says whether it
+    ///     happened. Each edge is different enough to be its own method: the two vertical ones have to
+    ///     decide where he lands.
+    /// </summary>
     private bool ChangeScreenIfOffEdge()
     {
-        var changedScreens = false;
+        var changedScreens = ChangeScreenOffLeftEdge();
 
-        if (_blobXPos < 0)
-        {
-            if (GameEngine.GameScreens.ScreenNumber - 1 >= 0)
-            {
-                GameEngine.GameScreens.ScreenNumber--;
-                _blobXPos = GameEngine.GameScreens.ScreenWidth - GameEngine.ContentResourceManager
-                    .GetSpriteCollection(GameEngine.BlobSpritesName).SpriteWidth;
-                changedScreens = true;
-
-                if (OnScreenChanged != null)
-                {
-                    OnScreenChanged(GameScreenType.MainGame);
-                }
-            }
-        }
-
-        if (_blobXPos + GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName)
-                .SpriteWidth > GameEngine.GameScreens.ScreenWidth)
-        {
-            if (GameEngine.GameScreens.ScreenNumber + 1 <= WorldMap.ScreenCount)
-            {
-                GameEngine.GameScreens.ScreenNumber++;
-                _blobXPos = 0;
-                changedScreens = true;
-
-                if (OnScreenChanged != null)
-                {
-                    OnScreenChanged(GameScreenType.MainGame);
-                }
-            }
-        }
-
-        if (_blobYPos < 0)
-        {
-            if (GameEngine.GameScreens.ScreenNumber - WorldMap.ScreensAcross >= 0)
-            {
-                GameEngine.GameScreens.ScreenNumber -= WorldMap.ScreensAcross;
-                changedScreens = true;
-
-                if (OnScreenChanged != null)
-                {
-                    OnScreenChanged(GameScreenType.MainGame);
-                }
-
-                if (_blobOnShuttle)
-                {
-                    _blobYPos = GameEngine.GameScreens.ScreenHeight - BlobHeight;
-                }
-                else // Must be on a jumpplatform unless we're in a tunnel lift.....
-                {
-                    if (!_inTunnelLift)
-                    {
-                        _blobYPos = _blobJumpPlatformEngine.GetNewJumpPlatform(_blobXPos,
-                            GameEngine.GameScreens.ScreenHeight - GameEngine.ContentResourceManager
-                                .GetSpriteCollection(GameEngine.BlobSpritesName).SpriteHeight, 0, 0, false);
-                    }
-                    else
-                    {
-                        _blobYPos = GameEngine.GameScreens.ScreenHeight - BlobHeight;
-                    }
-                }
-            }
-        }
-
-        if (_blobYPos + BlobHeight > GameEngine.GameScreens.ScreenHeight)
-        {
-            if (GameEngine.GameScreens.ScreenNumber + WorldMap.ScreensAcross <= WorldMap.ScreenCount)
-            {
-                GameEngine.GameScreens.ScreenNumber += WorldMap.ScreensAcross;
-                _blobYPos = 0;
-                _blobDistanceFallen = 0;
-                _blobFallSpeed = BlobInitialFallSpeed;
-
-                changedScreens = true;
-                if (OnScreenChanged != null)
-                {
-                    OnScreenChanged(GameScreenType.MainGame);
-                }
-            }
-        }
+        changedScreens |= ChangeScreenOffRightEdge();
+        changedScreens |= ChangeScreenOffTopEdge();
+        changedScreens |= ChangeScreenOffBottomEdge();
 
         return changedScreens;
+    }
+
+    private bool ChangeScreenOffLeftEdge()
+    {
+        if (_blobXPos >= 0 || GameEngine.GameScreens.ScreenNumber - 1 < 0)
+        {
+            return false;
+        }
+
+        GameEngine.GameScreens.ScreenNumber--;
+        _blobXPos = GameEngine.GameScreens.ScreenWidth - GameEngine.ContentResourceManager
+            .GetSpriteCollection(GameEngine.BlobSpritesName).SpriteWidth;
+
+        RaiseScreenChangedToMainGame();
+
+        return true;
+    }
+
+    private bool ChangeScreenOffRightEdge()
+    {
+        var blobRightEdge = _blobXPos + GameEngine.ContentResourceManager
+            .GetSpriteCollection(GameEngine.BlobSpritesName).SpriteWidth;
+
+        if (blobRightEdge <= GameEngine.GameScreens.ScreenWidth ||
+            GameEngine.GameScreens.ScreenNumber + 1 > WorldMap.ScreenCount)
+        {
+            return false;
+        }
+
+        GameEngine.GameScreens.ScreenNumber++;
+        _blobXPos = 0;
+
+        RaiseScreenChangedToMainGame();
+
+        return true;
+    }
+
+    /// <summary>
+    ///     Going up, blob has to be put down on something. On a shuttle he lands at the foot of the new
+    ///     screen; on foot he is given a fresh jump platform to stand on, unless a tunnel lift is
+    ///     carrying him, in which case it keeps carrying him.
+    /// </summary>
+    private bool ChangeScreenOffTopEdge()
+    {
+        if (_blobYPos >= 0 || GameEngine.GameScreens.ScreenNumber - WorldMap.ScreensAcross < 0)
+        {
+            return false;
+        }
+
+        GameEngine.GameScreens.ScreenNumber -= WorldMap.ScreensAcross;
+
+        RaiseScreenChangedToMainGame();
+
+        if (_blobOnShuttle || _inTunnelLift)
+        {
+            _blobYPos = GameEngine.GameScreens.ScreenHeight - BlobHeight;
+        }
+        else
+        {
+            _blobYPos = _blobJumpPlatformEngine.GetNewJumpPlatform(
+                _blobXPos,
+                GameEngine.GameScreens.ScreenHeight - GameEngine.ContentResourceManager
+                    .GetSpriteCollection(GameEngine.BlobSpritesName).SpriteHeight,
+                0,
+                0,
+                false);
+        }
+
+        return true;
+    }
+
+    private bool ChangeScreenOffBottomEdge()
+    {
+        if (_blobYPos + BlobHeight <= GameEngine.GameScreens.ScreenHeight ||
+            GameEngine.GameScreens.ScreenNumber + WorldMap.ScreensAcross > WorldMap.ScreenCount)
+        {
+            return false;
+        }
+
+        GameEngine.GameScreens.ScreenNumber += WorldMap.ScreensAcross;
+        _blobYPos = 0;
+
+        // He is falling onto the new screen, so the fall starts again from the top of it
+        _blobDistanceFallen = 0;
+        _blobFallSpeed = BlobInitialFallSpeed;
+
+        RaiseScreenChangedToMainGame();
+
+        return true;
+    }
+
+    private void RaiseScreenChangedToMainGame()
+    {
+        if (OnScreenChanged != null)
+        {
+            OnScreenChanged(GameScreenType.MainGame);
+        }
     }
 
     private void DetectSurroundingTiles()
@@ -1629,102 +1626,94 @@ public class Blob : GameComponentBase
         }
     }
 
+    /// <summary>
+    ///     Pushes blob out of any scenery he has ended up inside, which happens when a tile appears
+    ///     under him - a shuttle platform being taken, a screen changing beneath his feet.
+    /// </summary>
+    /// <remarks>
+    ///     Each edge is tried in turn, and only if he is caught on that edge and free at the opposite
+    ///     one: caught on both means there is nowhere to push him and he is left where he is. The four
+    ///     edges were four copies of this, differing only in which thin strip is probed and which way
+    ///     he is then walked.
+    /// </remarks>
     public void UnstickBlobFromTiles()
     {
-        // Is blob stuck at the top?
-        if (GameEngine.GameScreens.CheckRectangles(_blobXPos, _blobYPos, BlobWidth, UnstickProbeThickness, true) >= 0)
-        {
-            // And not stuck at the bottom?
-            if (GameEngine.GameScreens.CheckRectangles(
-                    _blobXPos,
-                    _blobYPos + (BlobHeight - UnstickProbeThickness),
-                    BlobWidth,
-                    UnstickProbeThickness,
-                    true) < 0)
-            {
-                // He's stuck at the top so lets figure out how far we need to go to release him
-                var distanceToMoveY = 0;
-                while (GameEngine.GameScreens.CheckRectangles(
-                           _blobXPos,
-                           _blobYPos + distanceToMoveY,
-                           BlobWidth,
-                           UnstickProbeThickness,
-                           true) >= 0)
-                {
-                    distanceToMoveY++;
-                }
+        UnstickFromEdge(Direction.Up);
+        UnstickFromEdge(Direction.Down);
+        UnstickFromEdge(Direction.Left);
+        UnstickFromEdge(Direction.Right);
+    }
 
-                // Shift Blob to a safe position
-                _blobYPos += distanceToMoveY;
-            }
+    private void UnstickFromEdge(Direction edge)
+    {
+        var caughtOn = EdgeProbe(edge);
+        var oppositeEdge = EdgeProbe(OppositeOf(edge));
+        var push = PushAwayFrom(edge);
+
+        if (!IsInsideScenery(caughtOn) || IsInsideScenery(oppositeEdge))
+        {
+            return;
         }
 
-        if (GameEngine.GameScreens.CheckRectangles(
+        // Walk the probe away from the edge until it comes free, and move him that far
+        var distanceToMove = 0;
+
+        while (IsInsideScenery(new Rectangle(
+                   caughtOn.X + push.X * distanceToMove,
+                   caughtOn.Y + push.Y * distanceToMove,
+                   caughtOn.Width,
+                   caughtOn.Height)))
+        {
+            distanceToMove++;
+        }
+
+        _blobXPos += push.X * distanceToMove;
+        _blobYPos += push.Y * distanceToMove;
+    }
+
+    /// <summary>
+    ///     The thin strip along one edge of blob that is tested for being buried in scenery.
+    /// </summary>
+    private Rectangle EdgeProbe(Direction edge)
+        => edge switch
+        {
+            Direction.Up => new Rectangle(_blobXPos, _blobYPos, BlobWidth, UnstickProbeThickness),
+            Direction.Down => new Rectangle(
                 _blobXPos,
                 _blobYPos + (BlobHeight - UnstickProbeThickness),
                 BlobWidth,
-                UnstickProbeThickness, true) >= 0) // Is Blob stuck at the bottom
+                UnstickProbeThickness),
+            Direction.Left => new Rectangle(_blobXPos, _blobYPos, UnstickProbeThickness, BlobHeight),
+            _ => new Rectangle(
+                _blobXPos + (BlobWidth - UnstickProbeThickness),
+                _blobYPos,
+                UnstickProbeThickness,
+                BlobHeight)
+        };
+
+    private static Direction OppositeOf(Direction edge)
+        => edge switch
         {
-            // And not stuck at the top?
-            if (GameEngine.GameScreens.CheckRectangles(
-                    _blobXPos,
-                    _blobYPos,
-                    BlobWidth,
-                    UnstickProbeThickness,
-                    true) < 0)
-            {
-                // He's stuck at the bottom so lets figure out how far we need to go to release him
-                var distanceToMoveY = 0;
-                while (GameEngine.GameScreens.CheckRectangles(
-                           _blobXPos,
-                           _blobYPos + (BlobHeight - UnstickProbeThickness) - distanceToMoveY, BlobWidth, UnstickProbeThickness, true) >= 0)
-                {
-                    distanceToMoveY++;
-                }
+            Direction.Up => Direction.Down,
+            Direction.Down => Direction.Up,
+            Direction.Left => Direction.Right,
+            _ => Direction.Left
+        };
 
-                // Shift Blob to a safe position
-                _blobYPos -= distanceToMoveY;
-            }
-        }
-
-        if (GameEngine.GameScreens.CheckRectangles(_blobXPos, _blobYPos, UnstickProbeThickness, BlobHeight, true) >=
-            0) // Is Blob stuck at the left
+    /// <summary>
+    ///     Which way blob has to move to get off an edge he is caught on.
+    /// </summary>
+    private static Point PushAwayFrom(Direction edge)
+        => edge switch
         {
-            // And not stuck at the right?
-            if (GameEngine.GameScreens.CheckRectangles(_blobXPos + (BlobWidth - UnstickProbeThickness), _blobYPos, UnstickProbeThickness, BlobHeight, true) < 0)
-            {
-                // He's stuck at the top so lets figure out how far we need to go to release him
-                var distanceToMoveX = 0;
-                while (GameEngine.GameScreens.CheckRectangles(_blobXPos + distanceToMoveX, _blobYPos, UnstickProbeThickness, BlobHeight,
-                           true) >= 0)
-                {
-                    distanceToMoveX++;
-                }
+            Direction.Up => new Point(0, 1),
+            Direction.Down => new Point(0, -1),
+            Direction.Left => new Point(1, 0),
+            _ => new Point(-1, 0)
+        };
 
-                // Shift Blob to a safe position
-                _blobXPos += distanceToMoveX;
-            }
-        }
-
-        if (GameEngine.GameScreens.CheckRectangles(_blobXPos + (BlobWidth - UnstickProbeThickness), _blobYPos, UnstickProbeThickness, BlobHeight, true) >=
-            0) // Is Blob stuck at the right
-        {
-            // And not stuck at the left?
-            if (GameEngine.GameScreens.CheckRectangles(_blobXPos, _blobYPos, UnstickProbeThickness, BlobHeight, true) < 0)
-            {
-                // He's stuck at the top so lets figure out how far we need to go to release him
-                var distanceToMoveX = 0;
-                while (GameEngine.GameScreens.CheckRectangles(_blobXPos + (BlobWidth - UnstickProbeThickness) - distanceToMoveX,
-                           _blobYPos, UnstickProbeThickness, BlobHeight, true) >= 0)
-                {
-                    distanceToMoveX++;
-                }
-
-                // Shift Blob to a safe position
-                _blobXPos -= distanceToMoveX;
-            }
-        }
-    }
+    private bool IsInsideScenery(Rectangle probe)
+        => GameEngine.GameScreens.CheckRectangles(probe.X, probe.Y, probe.Width, probe.Height, true) >= 0;
 
     public void PerformPostChangeScreenActions()
     {

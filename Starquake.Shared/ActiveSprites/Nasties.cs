@@ -288,65 +288,31 @@ public class Nasties : GameComponentBase
         (list[a], list[b]) = (list[b], list[a]);
     }
 
+    /// <summary>
+    ///     One screen in this many is populated with a single kind of nasty instead of a mixture.
+    /// </summary>
+    private const int SameNastyScreenOdds = 4;
+
+    /// <summary>
+    ///     Hands the screen's nasties over on a screen change. Walking back the way you came gets the
+    ///     same nasties you left, kept in the second half of the array; going anywhere else gets a
+    ///     fresh batch and puts the ones you left behind into that half.
+    /// </summary>
     public void PerformPostChangeScreenActions()
     {
-        if (GameEngine.GameScreens.ScreenNumber != _previousScreenVisited)
-        {
-            // Save the nasties on the screen we have left into the previous screen array
-            for (var a = 0; a < _nastyCount; a++)
-            {
-                // Make sure they don't stay dead when we leave
-                if (_nasties[a].NastyState == NastyState.Dead ||
-                    _nasties[a].NastyState == NastyState.Shot)
-                {
-                    _nasties[a].NastyState = NastyState.PreConception;
-                }
+        var goingBackTheWayWeCame = GameEngine.GameScreens.ScreenNumber == _previousScreenVisited;
 
-                _nasties[a + _nastyCount].CopyFromSource(_nasties[a]);
-            }
-        }
-
-        // Do we have nasties from the previous screen...?
-        if (GameEngine.GameScreens.ScreenNumber == _previousScreenVisited)
+        if (goingBackTheWayWeCame)
         {
-            // Swap them all around
             for (var a = 0; a < _nastyCount; a++)
             {
                 Swap(_nasties, a, a + _nastyCount);
             }
         }
-
-        // Nope so we are going to create a batch from scratch
-        if (GameEngine.GameScreens.ScreenNumber != _previousScreenVisited)
+        else
         {
-            // Do we generate all nasties the same
-            if (GameEngine.RandomNumberGenerator.Next(0, 4) == 0)
-            {
-                GameEngine.GameScreens.CurrentGameScreenData.KeepNastiesTheSame = true;
-            }
-            else
-            {
-                GameEngine.GameScreens.CurrentGameScreenData.KeepNastiesTheSame = false;
-            }
-
-            var nastyType = NastyType.Ghost;
-            if (GameEngine.GameScreens.CurrentGameScreenData.KeepNastiesTheSame)
-            {
-                nastyType = Nasty.GetRandomNastyType(GameEngine, true);
-            }
-
-            // Reset the nasties
-            for (var a = 0; a < _nastyCount; a++)
-            {
-                _nasties[a].KeepNastyTheSame = GameEngine.GameScreens.CurrentGameScreenData.KeepNastiesTheSame;
-                _nasties[a].NastyState = NastyState.PreConception;
-
-                if (GameEngine.GameScreens.CurrentGameScreenData.KeepNastiesTheSame)
-                {
-                    _nasties[a].KeepNastyTheSame = true;
-                    _nasties[a].NastyType = nastyType;
-                }
-            }
+            StoreNastiesFromScreenWeLeft();
+            CreateFreshNasties();
         }
 
         for (var a = 0; a < _nastyCount; a++)
@@ -354,22 +320,68 @@ public class Nasties : GameComponentBase
             _nasties[a].PerformPostChangeScreenActions();
         }
 
-        // Deactivate some nasties if we have conveyer nasties on screen
-        if (GameEngine.ConveyerNastiesInstance.NastiesActive > 0)
-        {
-            for (var a = 0; a < GameEngine.ConveyerNastiesInstance.NastiesActive; a++)
-            {
-                _nasties[a].NastyState = NastyState.Disabled;
-            }
-        }
+        DisableNastiesDisplacedByConveyerNasties();
 
-        // Reset the nasty smoke effect
-        if (_nastySmokes != null)
-        {
-            _nastySmokes.Reset();
-        }
+        _nastySmokes?.Reset();
 
         _previousScreenVisited = GameEngine.GameScreens.PreviousScreenNumber;
+    }
+
+    /// <summary>
+    ///     Saves the nasties of the screen being left into the second half of the array, where they
+    ///     wait in case the blob comes straight back. Any that were dead are revived first, so a screen
+    ///     is never returned to empty.
+    /// </summary>
+    private void StoreNastiesFromScreenWeLeft()
+    {
+        for (var a = 0; a < _nastyCount; a++)
+        {
+            if (_nasties[a].NastyState is NastyState.Dead or NastyState.Shot)
+            {
+                _nasties[a].NastyState = NastyState.PreConception;
+            }
+
+            _nasties[a + _nastyCount].CopyFromSource(_nasties[a]);
+        }
+    }
+
+    /// <summary>
+    ///     A new screen's worth of nasties. One screen in four is populated with a single kind rather
+    ///     than a mixture, which is what makes some rooms feel like they belong to something.
+    /// </summary>
+    private void CreateFreshNasties()
+    {
+        var screenData = GameEngine.GameScreens.CurrentGameScreenData;
+
+        screenData.KeepNastiesTheSame =
+            GameEngine.RandomNumberGenerator.Next(0, SameNastyScreenOdds) == 0;
+
+        var nastyType = screenData.KeepNastiesTheSame
+            ? Nasty.GetRandomNastyType(GameEngine, true)
+            : NastyType.Ghost;
+
+        for (var a = 0; a < _nastyCount; a++)
+        {
+            _nasties[a].KeepNastyTheSame = screenData.KeepNastiesTheSame;
+            _nasties[a].NastyState = NastyState.PreConception;
+
+            if (screenData.KeepNastiesTheSame)
+            {
+                _nasties[a].NastyType = nastyType;
+            }
+        }
+    }
+
+    /// <summary>
+    ///     A conveyer nasty takes the place of an ordinary one rather than adding to the count, so the
+    ///     first few are switched off.
+    /// </summary>
+    private void DisableNastiesDisplacedByConveyerNasties()
+    {
+        for (var a = 0; a < GameEngine.ConveyerNastiesInstance.NastiesActive; a++)
+        {
+            _nasties[a].NastyState = NastyState.Disabled;
+        }
     }
 
     public override void Draw(GameTime gameTime, int screenFade)
