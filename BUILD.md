@@ -59,6 +59,16 @@ main reason this is on MonoGame 3.8.4: 3.8.2's content builder shipped x86_64-on
 natives (FreeImage, freetype) and could only be built by routing MGCB through an x64 .NET
 host under Rosetta.
 
+## CI
+
+`.github/workflows/build.yml` restores, builds and tests the solution on Ubuntu, macOS and
+Windows on every push to `main` and every pull request. `Directory.Build.props` sets
+`TreatWarningsAsErrors`, so a warning fails it.
+
+Every project builds on every platform, so one runner would prove the code compiles. There
+are three because the packaging does not travel: the `.app` bundle and its ad-hoc signature
+are a macOS-only target, and only a run on macOS builds them.
+
 ## The content build and Project Mercury
 
 `Content.mgcb` is built by `Starquake.Shared` itself, not by the heads. That is deliberate:

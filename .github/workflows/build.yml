@@ -1,0 +1,48 @@
+# The gate the repository did not have.
+#
+# "0 warnings, 65 tests green" was held by discipline alone until this file existed, and
+# discipline is exactly what a `git bisect` six months from now cannot verify. Directory.Build.props
+# sets TreatWarningsAsErrors, so a warning fails the build here rather than scrolling past in a log.
+#
+# Every project builds on every platform - the Windows head sets EnableWindowsTargeting - so one
+# job would prove the code compiles. Three exist because the packaging does not travel: the .app
+# bundle and its ad-hoc signature are a macOS-only target, and only a run on macOS builds them.
+
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          # 8.0 as well as 9.0: MGCB is a net8.0 application and so are ProjectMercury and its
+          # content pipeline extension, which is why they target net8.0 while the game targets
+          # net9.0. See BUILD.md.
+          dotnet-version: |
+            8.0.x
+            9.0.x
+
+      - name: Restore
+        run: dotnet restore Starquake.sln
+
+      - name: Build
+        run: dotnet build Starquake.sln --no-restore
+
+      - name: Test
+        run: dotnet test Starquake.Tests/Starquake.Tests.csproj --no-build
