@@ -148,6 +148,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     private IntroSequence? _introSequence;
 
     // Loading screen
+    private int _bootProgressBackgroundFade = ColourLevels.Full;
+
     private int _loadingScreenFade;
 
     private MainGameScreen? _mainScreen;
@@ -766,16 +768,43 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         }
         else if (Status == GameEngineStatus.ContentLoaded)
         {
-            // Straight into the game. The status is raised by the loading task, so this is also the
-            // hop back onto the main thread - everything below is built here, not on the pool.
-            ContentResourceManager_OnGameComponentStatusChanged(
-                "Content loaded",
-                FullyLoadedPercent,
-                GameEngineStatus.Started);
+            WaitToLeaveTheLoadingScreen();
         }
         else if (Status == GameEngineStatus.StartGame)
         {
             UpdateRunningGame(gameTime);
+        }
+    }
+
+    /// <summary>
+    ///     Holds the finished loading screen until a key is pressed, fading the progress bar out
+    ///     while it waits. The wait is deliberate - it has been here since the first commit - so the
+    ///     boot screen is something to look at and leave rather than something that vanishes.
+    ///     <para>
+    ///         It is also the hop back onto the main thread. The loading task raises
+    ///         <see cref="GameEngineStatus.ContentLoaded" /> from the thread pool, and everything
+    ///         <see cref="BuildComponentsNeedingLoadedContent" /> builds has to be built here.
+    ///     </para>
+    /// </summary>
+    private void WaitToLeaveTheLoadingScreen()
+    {
+        // Fade out the progress bar background
+        if (_bootProgressBackgroundFade > 0)
+        {
+            _bootProgressBackgroundFade -= BootFadeStep;
+        }
+
+        if (_bootProgressBackgroundFade < 0)
+        {
+            _bootProgressBackgroundFade = 0;
+        }
+
+        if (ToggleKeys.GetPressedKey() != Keys.None)
+        {
+            ContentResourceManager_OnGameComponentStatusChanged(
+                "Content loaded",
+                FullyLoadedPercent,
+                GameEngineStatus.Started);
         }
     }
 
@@ -1140,7 +1169,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                 _bootScreen.End();
 
                 _bootProgressBackground.Begin(BlendState.AlphaBlend, gameTime, Presentation.Transform);
-                _bootProgressBackground.DrawSpriteUnscaled(0, BootProgressBackgroundXPos, BootProgressBackgroundYPos, ColourLevels.Full);
+                _bootProgressBackground.DrawSpriteUnscaled(0, BootProgressBackgroundXPos, BootProgressBackgroundYPos, _bootProgressBackgroundFade);
                 _bootProgressBackground.End();
 
                 // Draw the status percentage
@@ -1149,7 +1178,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
                 for (int a = 0; a < percentBarWidth; a++)
                 {
-                    _bootProgress.DrawSpriteUnscaled(0, BootProgressBarXPos + a * BootProgressBarSliceSpacing, BootProgressBarYPos, ColourLevels.Full);
+                    _bootProgress.DrawSpriteUnscaled(0, BootProgressBarXPos + a * BootProgressBarSliceSpacing, BootProgressBarYPos, _bootProgressBackgroundFade);
                 }
 
                 _bootProgress.End();
