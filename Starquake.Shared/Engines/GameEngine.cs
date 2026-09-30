@@ -392,21 +392,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
         DefineFonts();
 
-        DefineSharedGraphics();
-        DefineScreenData();
-        DefinePresentationScreenGraphics();
-        DefineGameScreenTiles();
-        DefineBlobGraphics();
-        DefinePickUpAndNastyGraphics();
-        DefineAccessBoothGraphics();
-        DefineCheopsGraphics();
-        DefineTeleporterGraphics();
-        DefineElectricityGraphics();
-        DefineOddSizedGraphics();
-        DefineStatusPanelGraphics();
-        DefineParticleEffects();
-        DefineAnimationTiles();
-        DefineSounds();
+        ContentManifest.RegisterAll(ContentResourceManager);
     }
 
     [MemberNotNull(nameof(_bootScreen), nameof(_bootProgressBackground), nameof(_bootProgress),
@@ -426,229 +412,19 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         Font2 = new BitmapFont(ContentMgr.Load<SpriteFont>("Fonts\\elektoraMedium"), new SpriteBatch(GraphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
     }
 
-    private void DefineSharedGraphics()
-    {
-        ContentResourceManager.AddSpriteResource("Background1", "Graphics\\Background1", 1024, 576);
-        //ContentResourceManager.AddSpriteResource("Background2", "Graphics\\Background2", 1024, 576);
-        ContentResourceManager.AddSpriteResource("ProportionalNumbers", "Graphics\\ProportionalNumbers", 27, 26);
-    }
-
-    /// <summary>
-    ///     Both resources read the same file, and the reader takes them in the order they are named here,
-    ///     so these two must stay in this order and in this method.
-    /// </summary>
-    private void DefineScreenData()
-    {
-        ContentResourceManager.AddDataResource("GameScreens", "Data/SQScreenData.dat", typeof(GameScreenData[]));
-        ContentResourceManager.AddDataResource("ScreenCollisionData", "Data/SQScreenData.dat", typeof(int[,,]));
-    }
-
-    private void DefinePresentationScreenGraphics()
-    {
-        ContentResourceManager.AddSpriteResource("OptionScreenBackground", "Graphics\\OptionsScreenBackground", CompositionSize.Width, CompositionSize.Height);
-        ContentResourceManager.AddSpriteResource("OptionScreenForeground", "Graphics\\OptionsScreenForeground", 821, 554);
-
-        ContentResourceManager.AddSpriteResource("ComputerReportScreenBackground", "Graphics\\ComputerReportScreenBackground", CompositionSize.Width, CompositionSize.Height);
-        ContentResourceManager.AddSpriteResource("ComputerReportScreenForeground", "Graphics\\ComputerReportScreenForeground", 821, 554);
-
-        ContentResourceManager.AddSpriteResource("GameOverScreenBackground", "Graphics\\GameOverScreenBackground", CompositionSize.Width, CompositionSize.Height);
-        ContentResourceManager.AddSpriteResource("GameOverScreenForeground", "Graphics\\GameOverScreenForeground", 821, 554);
-
-        ContentResourceManager.AddSpriteResource("HiScoreScreenBackground", "Graphics\\HiScoreScreenBackground", CompositionSize.Width, CompositionSize.Height);
-        ContentResourceManager.AddSpriteResource("HiScoreScreenForeground", "Graphics\\HiScoreScreenForeground", 821, 554);
-
-        ContentResourceManager.AddSpriteResource("GameCompleteScreenBackground", "Graphics\\GameCompleteScreenBackground", CompositionSize.Width, CompositionSize.Height);
-        ContentResourceManager.AddSpriteResource("GameCompleteScreenForeground", "Graphics\\GameCompleteScreenForeground", 821, 554);
-    }
-
-    private void DefineGameScreenTiles()
-    {
-        ContentResourceManager.AddSpriteResource("UpperScreenTiles", "Graphics\\UpperScreenTiles", TileMetrics.TileWidth, TileMetrics.TileHeight);
-        ContentResourceManager.AddSpriteResource("UpperScreenTilesOriginal", "Graphics\\UpperScreenTilesOriginal", TileMetrics.TileWidth, TileMetrics.TileHeight);
-
-        ContentResourceManager.AddSpriteResource("LowerScreenTiles", "Graphics\\StartilesNew", TileMetrics.TileWidth, TileMetrics.TileHeight);
-        ContentResourceManager.AddSpriteResource("LowerScreenTilesOriginal", "Graphics\\StartilesOriginal", TileMetrics.TileWidth, TileMetrics.TileHeight);
-
-        ContentResourceManager.AddSpriteResource("LowerScreenTilesDark", "Graphics\\startilesNew", TileMetrics.TileWidth, TileMetrics.TileHeight);
-        ContentResourceManager.AddSpriteResource("ExitShadows", "Graphics\\ExitShadows", TileMetrics.TileWidth, TileMetrics.TileHeight);
-    }
-
-    private void DefineBlobGraphics()
-    {
-        //ContentResourceManager.AddSpriteResource(gameEngine.GraphicsSet.Names.BlobSprites, "Graphics\\blobNew", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        //ContentResourceManager.AddSpriteResource(gameEngine.GraphicsSet.Names.BlobSprites, "Graphics\\blobNewAlt", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        ContentResourceManager.AddSpriteResource("BlobSprites", "Graphics\\blobNewAlt2", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        ContentResourceManager.AddSpriteResource("BlobSpritesOriginal", "Graphics\\BlobOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-
-        ContentResourceManager.AddSpriteResource("BlobParts", "Graphics\\blobParts", 32, 32);
-        ContentResourceManager.AddSpriteResource("BlobShuttle", "Graphics\\BlobShuttle", 64, 32);
-        ContentResourceManager.AddSpriteResource("BlobShuttleOriginal", "Graphics\\BlobShuttleOriginal", 64, 32);
-
-        ContentResourceManager.AddSpriteResource("BlobFire1", "Graphics\\BlobFire1", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        ContentResourceManager.AddSpriteResource("BlobFire2", "Graphics\\BlobFireNew2", 32, 32);
-        ContentResourceManager.AddSpriteResource("BlobFire2Original", "Graphics\\BlobFire2Original", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-
-        ContentResourceManager.AddSpriteResource("BlobFire2Overlay", "Graphics\\BlobFire2Overlay", 48, 48);
-        ContentResourceManager.AddSpriteResource("JumpPlatforms", "Graphics\\BlobJumpPlatform", 64, 32);
-        ContentResourceManager.AddSpriteResource("JumpPlatformsOriginal", "Graphics\\BlobJumpPlatformOriginal", 64, 32);
-    }
-
-    private void DefinePickUpAndNastyGraphics()
-    {
-        ContentResourceManager.AddSpriteResource("PowerUps", "Graphics\\PowerUps", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        ContentResourceManager.AddSpriteResource("PowerUpsOriginal", "Graphics\\PowerUpsOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        ContentResourceManager.AddSpriteResource("Pickups", "Graphics\\Pickups", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        ContentResourceManager.AddSpriteResource("PickupsOriginal", "Graphics\\PickupsOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-
-        ContentResourceManager.AddSpriteResource("Nasties", "Graphics\\Nasties", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        ContentResourceManager.AddSpriteResource("NastiesOriginal", "Graphics\\NastiesOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-    }
-
-    private void DefineAccessBoothGraphics()
-    {
-        ContentResourceManager.AddSpriteResource("ScanLine", "Graphics\\ScanLine", 74, 9);
-
-        ContentResourceManager.AddSpriteResource("AccessCodesFailed", "Graphics\\AccessCodesFailed", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        ContentResourceManager.AddSpriteResource("AccessCodesPassed", "Graphics\\AccessCodesPassed", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        ContentResourceManager.AddSpriteResource("AccessCodesGray", "Graphics\\AccessCodesGray", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        ContentResourceManager.AddSpriteResource("PickupsIlluminated", "Graphics\\PickupsIlluminated", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-
-        ContentResourceManager.AddSpriteResource("AccessCodesFailedOriginal", "Graphics\\AccessCodesFailedOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        ContentResourceManager.AddSpriteResource("AccessCodesPassedOriginal", "Graphics\\AccessCodesPassedOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        ContentResourceManager.AddSpriteResource("AccessCodesGrayOriginal", "Graphics\\AccessCodesGrayOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        ContentResourceManager.AddSpriteResource("PickupsIlluminatedOriginal", "Graphics\\PickupsIlluminatedOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-    }
-
-    private void DefineCheopsGraphics()
-    {
-        ContentResourceManager.AddSpriteResource("CheopsPyramid", "Graphics\\CheopsPyramid", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        ContentResourceManager.AddSpriteResource("CheopsPyramidOriginal", "Graphics\\CheopsPyramidOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-    }
-
-    private void DefineTeleporterGraphics()
-    {
-        ContentResourceManager.AddSpriteResource("TeleportInteriorLower", "Graphics\\TeleportInteriorLower", 1020, 543);
-        ContentResourceManager.AddSpriteResource("TeleportInteriorUpper", "Graphics\\TeleportInteriorUpper", 654, 460);
-        ContentResourceManager.AddSpriteResource("TeleporterKeyOverlays", "Graphics\\TeleporterKeyOverlays", 23, 23);
-        ContentResourceManager.AddSpriteResource("TeleporterPowerSupply", "Graphics\\TeleporterPowerSupply", 246, 402);
-    }
-
-    private void DefineElectricityGraphics()
-    {
-        ContentResourceManager.AddSpriteResource("ElectricityNodeElectricity1", "Graphics\\ElectricityAnim", 70, 64);
-        ContentResourceManager.AddSpriteResource("ElectricityNodeElectricity2", "Graphics\\ElectricityAnim", 70, 64);
-        ContentResourceManager.AddSpriteResource("NodeLights", "Graphics\\NodeLight", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        ContentResourceManager.AddSpriteResource("GateLights", "Graphics\\GateLight", 32, 32);
-        ContentResourceManager.AddSpriteResource("ElectricityOriginal", "Graphics\\ElectricityOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-    }
-
-    private void DefineOddSizedGraphics()
-    {
-        ContentResourceManager.AddSpriteResource("OllyBackground", "Graphics\\OllyBackground", 256, 192);
-        ContentResourceManager.AddSpriteResource("OllyLower", "Graphics\\OllyLower", 256, 192);
-        ContentResourceManager.AddSpriteResource("OllyUpper", "Graphics\\OllyUpper", 125, 120);
-        ContentResourceManager.AddSpriteResource("OllyEyes", "Graphics\\OllyEyes", 44, 8);
-        ContentResourceManager.AddSpriteResource("OllyOriginal", "Graphics\\OllyOriginal", 256, 192);
-
-        ContentResourceManager.AddSpriteResource("BlobsShipOriginal", "Graphics\\BlobsSpaceShipOriginal", TileMetrics.TileWidth, TileMetrics.TileHeight);
-        ContentResourceManager.AddSpriteResource("BlobsShip", "Graphics\\BlobsSpaceShip", 156, 128);
-        ContentResourceManager.AddSpriteResource("BlobsShipHazardLights", "Graphics\\BlobsSpaceShipHazardLights", 156, 128);
-        ContentResourceManager.AddSpriteResource("BlobsShipHeadLights", "Graphics\\BlobsSpaceShipHeadLights", 156, 128);
 
 
-        ContentResourceManager.AddSpriteResource("BlankingTile", "Graphics\\BlankingTile", TileMetrics.TileWidth, TileMetrics.TileHeight);
 
-        ContentResourceManager.AddSpriteResource("BreakableBridge", "Graphics\\BreakableBridge", TileMetrics.TileWidth, TileMetrics.TileHeight);
-        ContentResourceManager.AddSpriteResource("BreakableBridgeOriginal", "Graphics\\BreakableBridgeOriginal", TileMetrics.TileWidth, TileMetrics.TileHeight);
-    }
 
-    private void DefineStatusPanelGraphics()
-    {
-        ContentResourceManager.AddSpriteResource("StatusPanelGraphic", "Graphics\\StatusPanelNew", 1020, 181);
-        ContentResourceManager.AddSpriteResource("EnerygyBar", "Graphics\\EnergyBar", 256, 30);
-        ContentResourceManager.AddSpriteResource("JumpBar", "Graphics\\JumpBar", 240, 30);
-        ContentResourceManager.AddSpriteResource("AmmoBar", "Graphics\\AmmoBar", 240, 30);
-        ContentResourceManager.AddSpriteResource("PanelNumbers", "Graphics\\PanelNumbers", 29, 29);
-        ContentResourceManager.AddSpriteResource("StatusPanelShadow", "Graphics\\StatusPanelShadow", 1020, 50);
-        ContentResourceManager.AddSpriteResource("StatusPanelOverlay", "Graphics\\StatusPanelOverlay", 966, 135);
 
-        ContentResourceManager.AddSpriteResource("ParticleSprite", "Graphics\\BouncingParticle", 32, 32);
-        ContentResourceManager.AddSpriteResource("CollisionTile", "Graphics\\CollisionTile", TileMetrics.CollisionCellWidth, TileMetrics.CollisionCellHeight);
-    }
 
-    private void DefineParticleEffects()
-    {
-        ContentResourceManager.AddParticleResource("BeamMeUp_Small", "ParticleEffects\\BeamMeUp_Small");
-        ContentResourceManager.AddParticleResource("FireTrail", "ParticleEffects\\FireTrail");
 
-        ContentResourceManager.AddParticleResource("Fireball", "ParticleEffects\\Fireball");
-        ContentResourceManager.AddParticleResource("NastyDies", "ParticleEffects\\NastyDies");
-        ContentResourceManager.AddParticleResource("NastySplat", "ParticleEffects\\NastySplat");
 
-        ContentResourceManager.AddParticleResource("BinaryEffect", "ParticleEffects\\BinaryEffect");
-        ContentResourceManager.AddParticleResource("BasicSmokeSmall", "ParticleEffects\\BasicSmokeSmall");
 
-        ContentResourceManager.AddParticleResource("BasicSmokePlume", "ParticleEffects\\BasicSmokePlume");
-        ContentResourceManager.AddParticleResource("BasicSmokePlume2", "ParticleEffects\\BasicSmokePlume2");
-        ContentResourceManager.AddParticleResource("Sparks", "ParticleEffects\\Sparks");
 
-        ContentResourceManager.AddParticleResource("CoreSparks", "ParticleEffects\\CoreSparks");
-        ContentResourceManager.AddParticleResource("CoreReplacementParticleEffect", "ParticleEffects\\CoreReplacementParticleEffect");
-        ContentResourceManager.AddParticleResource("FireSparks", "ParticleEffects\\FireSparks");
 
-        ContentResourceManager.AddParticleResource("ForceField", "ParticleEffects\\ForceField");
-        ContentResourceManager.AddParticleResource("BlobFragmentExplosion", "ParticleEffects\\BlobFragmentExplosion");
-    }
 
-    private void DefineAnimationTiles()
-    {
-        ContentResourceManager.AddAnimatedSpriteResource("BreakableBridges", "Graphics\\BreakableBridgeAnim", TileMetrics.TileWidth, 8, (int)ActionTiles.BreakableBridges, 4);
-        ContentResourceManager.AddAnimatedSpriteResource("TeleporterPadsOccupied", "Graphics\\TeleporterPadAnimationOccupied", TileMetrics.TileWidth, TileMetrics.TileHeight, (int)ActionTiles.ShuttlePlatform, 8);
-        ContentResourceManager.AddAnimatedSpriteResource("TeleporterPadsUnoccupied", "Graphics\\TeleporterPadAnimationUnoccupied", TileMetrics.TileWidth, TileMetrics.TileHeight, (int)ActionTiles.RemovedShuttlePlatform, 1);
-    }
 
-    private void DefineSounds()
-    {
-        ContentResourceManager.AddSoundResource("ScanCode", "Sounds\\ScanCode", SoundEffectInstanceType.Multi, 4, false);
-        ContentResourceManager.AddSoundResource("AccessSuccess", "Sounds\\AccessSuccess", SoundEffectInstanceType.Multi, 2, false);
-        ContentResourceManager.AddSoundResource("AccessFailed", "Sounds\\AccessFailed", SoundEffectInstanceType.Single, 0, false);
-        ContentResourceManager.AddSoundResource("MachineryBackground", "Sounds\\MachineryBackground", SoundEffectInstanceType.Single, 0, true);
-
-        ContentResourceManager.AddSoundResource("Tunnel", "Sounds\\Tunnel", SoundEffectInstanceType.Single, 0, false);
-        ContentResourceManager.AddSoundResource("TunnelSwish1", "Sounds\\TunnelSwish1", SoundEffectInstanceType.Single, 0, false);
-        ContentResourceManager.AddSoundResource("TunnelSwish2", "Sounds\\TunnelSwish2", SoundEffectInstanceType.Single, 0, false);
-
-        ContentResourceManager.AddSoundResource("NastyDeath", "Sounds\\NastyDeath", SoundEffectInstanceType.Multi, 4, true);
-        ContentResourceManager.AddSoundResource("BlobLazer", "Sounds\\BlobLazer", SoundEffectInstanceType.Multi, 2, true);
-        ContentResourceManager.AddSoundResource("ElectricityNodes", "Sounds\\ElectricityNodes", SoundEffectInstanceType.Multi, 4, true);
-        ContentResourceManager.AddSoundResource("BridgeBreak", "Sounds\\BridgeBreak", SoundEffectInstanceType.Single, 0, true);
-        ContentResourceManager.AddSoundResource("BlobRun", "Sounds\\BlobRun", SoundEffectInstanceType.Single, 0, false);
-        ContentResourceManager.AddSoundResource("BlobFalls", "Sounds\\BlobFalls", SoundEffectInstanceType.Single, 0, true);
-        ContentResourceManager.AddSoundResource("TunnelLift", "Sounds\\TunnelLift", SoundEffectInstanceType.Single, 0, false);
-        ContentResourceManager.AddSoundResource("NastyAppear", "Sounds\\NastyAppear", SoundEffectInstanceType.Multi, 4, true);
-        ContentResourceManager.AddSoundResource("Rumble", "Sounds\\Rumble", SoundEffectInstanceType.Single, 0, false);
-        ContentResourceManager.AddSoundResource("BlobJumps", "Sounds\\BlobJump", SoundEffectInstanceType.Multi, 4, true);
-        ContentResourceManager.AddSoundResource("BlobJumpsNoPlatforms", "Sounds\\BlobJumpNoPlatforms", SoundEffectInstanceType.Multi, 4, true);
-        ContentResourceManager.AddSoundResource("BlobPickUp", "Sounds\\BlobPickUp", SoundEffectInstanceType.Multi, 4, true);
-        ContentResourceManager.AddSoundResource("BlobOverloadAlarm", "Sounds\\BlobOverloadAlarm", SoundEffectInstanceType.Single, 0, false);
-        ContentResourceManager.AddSoundResource("BlobShipFall", "Sounds\\BlobShipFall", SoundEffectInstanceType.Single, 0, false);
-        ContentResourceManager.AddSoundResource("BlobShipExplodes", "Sounds\\BlobShipExplodes", SoundEffectInstanceType.Single, 0, false);
-
-        ContentResourceManager.AddSoundResource("BlobExplodes", "Sounds\\BlobExplodes", SoundEffectInstanceType.Multi, 4, false);
-        ContentResourceManager.AddSoundResource("BlobPartClang", "Sounds\\BlobPartClang", SoundEffectInstanceType.Multi, 8, false);
-
-        ContentResourceManager.AddSoundResource("NastyAppears", "Sounds\\BlobExplodes", SoundEffectInstanceType.Multi, 4, false);
-        ContentResourceManager.AddSoundResource("TeleportKeyClick", "Sounds\\TeleportKeyClick", SoundEffectInstanceType.Multi, 5, false);
-        ContentResourceManager.AddSoundResource("TeleportInvalidCode", "Sounds\\TeleportInvalidCode", SoundEffectInstanceType.Single, 0, false);
-        ContentResourceManager.AddSoundResource("Teleport", "Sounds\\Teleport", SoundEffectInstanceType.Multi, 3, false);
-
-        ContentResourceManager.AddSoundResource("PowerUp1", "Sounds\\PowerUp1", SoundEffectInstanceType.Multi, 2, false);
-        ContentResourceManager.AddSoundResource("PowerUp2", "Sounds\\PowerUp2", SoundEffectInstanceType.Multi, 2, false);
-        ContentResourceManager.AddSoundResource("PowerUp3", "Sounds\\PowerUp3", SoundEffectInstanceType.Multi, 2, false);
-        ContentResourceManager.AddSoundResource("LifePowerUp", "Sounds\\LifePowerUp", SoundEffectInstanceType.Multi, 2, false);
-
-        ContentResourceManager.AddSoundResource("BackgroundSound1", "Sounds\\BackgroundSound1", SoundEffectInstanceType.Single, 0, false);
-    }
 
     /// <summary>
     ///     Captures all status changes from game components. Everything the game cannot build until its
