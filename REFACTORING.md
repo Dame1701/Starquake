@@ -1,12 +1,14 @@
 # Making the code say what the comments say
 
-**Stages 1 to 3 landed, and stage 4 all but its tail.** This document is a record of what the work
-actually decided, the way `NULLABLE.md` is — each stage's section was rewritten as it landed rather
-than left as the intention. What is left to do is listed at the end of stage 4, along with the
-findings this work turned up and deliberately did not act on.
+**All four stages have landed.** This document is a record of what the work actually decided, the
+way `NULLABLE.md` is — each stage's section was rewritten as it landed rather than left as the
+intention. The findings it turned up and deliberately did not act on are listed at the end.
 
-Twenty commits, `a7e3e8d` to `4935935`. The solution builds at 0 warnings and 0 errors throughout,
-and the 40 tests added in stage 3 pass.
+`ToggleKeys.GetFriendlyName` is the only method in `Starquake.Shared` still over 80 lines, and the
+plan named that as an acceptable outcome before the work started.
+
+Twenty-six commits, `a7e3e8d` to `820287c`. The solution builds at 0 warnings and 0 errors
+throughout, and the 40 tests added in stage 3 pass.
 
 The goal is the clean-code one: fewer comments, because the code says it instead. In this
 codebase that means one specific move, made many times — a long method whose `//` comments act
@@ -71,7 +73,7 @@ what stage 2 left them at:
 `Blob.Update` was 62% of `Blob.cs` on its own. It was one `switch` over three `BlobState` values,
 and the `Normal` case was almost all of it.
 
-31 methods still exceed 80 lines, the longest of them 232. The list is at the end of stage 4.
+One method still exceeds 80 lines: `ToggleKeys.GetFriendlyName`, at 232, left alone on purpose.
 
 Be careful reading that script's output. Its `^    (public|private|...).*\(` pattern needs a `(`
 to start counting a new method, so a method followed by a run of get-only properties is credited
@@ -351,10 +353,9 @@ dotnet test Starquake.Tests/Starquake.Tests.csproj  # 40 tests
 
 ---
 
-## Stage 4 — the same treatment elsewhere — **mostly done**
+## Stage 4 — the same treatment elsewhere — **done**
 
-All four named targets are addressed. The unnamed tail at the end of this stage is partly done and
-is listed below.
+All four named targets are addressed, and so is the unnamed tail.
 
 ### `Nasty` — done, four commits
 
@@ -424,48 +425,85 @@ they cleared and are now one `TrimTo`.
 string: long because it is data, and a dictionary would not read better. The plan offered "leave
 it" as an acceptable outcome and that is the outcome.
 
-### The tail — four done, 31 methods still over 80 lines
+### The tail — done
 
-Done: `MainGameScreen.Update` (218 to 35), `Nasties.Update` (174 to 55), `CheopsScreen.Draw` (164
-to 17), `IntroSequence.Update` (155 to 32).
+All 31 are done. `ToggleKeys.GetFriendlyName` is the only method in `Starquake.Shared` still over
+80 lines, and that is a decision rather than an omission.
 
-`MainGameScreen.Update` had a sixth piece of duplication worth naming: four of its blocks opened
-with the same two-line test for whether the intro sequence still owns the screen, now the
-`GameIsInPlay` property.
+The first four were the plain move: `MainGameScreen.Update` (218 to 35), `Nasties.Update` (174 to
+55), `CheopsScreen.Draw` (164 to 17), `IntroSequence.Update` (155 to 32). `MainGameScreen.Update`
+had a sixth piece of duplication worth naming — four of its blocks opened with the same two-line
+test for whether the intro sequence still owns the screen, now the `GameIsInPlay` property.
 
-**Still to do**, from the measurement script. Nothing here is over 150 lines and none of it is
-duplicated logic — it is the plain version of the same move:
+The rest were not plain moves. **Eleven more tables came out of the tail**, which is the finding of
+this stage: the pattern this plan was written to chase — N near-identical arms differing in one or
+two values — was not confined to the four methods it named.
 
-| Method | Lines |
+| Where | Was | Became |
+| --- | --- | --- |
+| `CollisionDetection.CheckDirection` | four copies of one stepped loop | one loop plus `StepFor` |
+| `CheckCollision`'s bounds clamp | four arms, two shapes twice | `ClampToScreenBounds` |
+| `CheckTileByObject` | five arms | `ProbeRectangleFor` + a `measureFromFoot` flag |
+| `GetPotentialLocations` | a fifteen-term inequality chain | `TilesNothingMayBePlacedOn` |
+| `UnstickBlobFromTiles` | four copies of one edge test | an edge plus a push |
+| `BouncingParticle.Update` | four copies, axis and sign swapped | one `StepAlongAxis` |
+| `Nasty.ChooseMoveSpeed` | two blocks of four arms, last repeating first | two tests |
+| `TeleportScreen`'s key highlights | sixteen identical draw calls | `KeyHighlightPositions` |
+| `OptionsScreen`'s key presets | four blocks of seven assignments | four object initialisers |
+| `NastyHelpers.ApplyNastyColours` | fourteen arms of three colours | a fourteen-entry table |
+| `StatusPanel`'s power ups | eight two-line arms | four one-line helpers |
+
+Three more repeated conditions became named properties, joining stage 4's `GameIsInPlay`:
+`MainGameScreen.WorldIsVisible`, `GameScreenCollection`'s `objectsArePlaced`, and
+`Nasties`'s `goingBackTheWayWeCame`.
+
+### How the tail was verified
+
+A statement multiset comparison proves a move preserved everything. It proves nothing about a
+deduplication — collapsing five arms into one is exactly the change it flags. So each of the eleven
+was checked on its own terms, and the collision maths was checked by brute force:
+
+| Check | Cases |
 | --- | --- |
-| `BouncingParticle.Update` | 137 |
-| `TeleportScreen.Draw` | 135 |
-| `CheopsScreen.Reset` | 132 |
-| `SoundEffectEngine.PlaySound` | 129 |
-| `TeleportScreen.Update` | 128 |
-| `OptionsScreen.Update` | 125 |
-| `Nasty.UpdateFrameOfMind` | 122 |
-| `GameScreenCollection.Update` / `Draw` / `CheckTileByObject` / `CheckCollision` | 107-115 |
-| `Nasty.Draw` | 110 |
-| `ElectricityGatesAndNodesEngine.DrawUpperLayer` | 110 |
-| `MainGameScreen.Draw` | 108 |
-| `ResourceManager.backgroundWorker_DoWork` | 103 |
-| `CollisionDetection.CheckDirection` | 103 |
-| `GameScreenCollection.PlaceScreenObjects` | 101 |
-| ...and 12 more between 84 and 97 |
+| `CheckDirection`, old against new | 32,131,125 |
+| `ClampToScreenBounds`, old against new | 2,286,144 |
+| `UnstickBlobFromTiles`, old against new | 576,000 |
+| `BouncingParticle`'s axis step, old against new | 243,000 |
 
-Three entries in that list want a note rather than a plain split:
+The rest were verified by extracting the table from both the old and the new source and comparing
+it entry by entry: the fourteen nasty colour sets, the sixteen key positions, the four key presets
+field by field, the thirty-nine tile-to-sprite mappings, the twelve nasty speed combinations, the
+four starting directions, the five probe rectangles, the exclusion sets, the eight power-up
+effects, and the key-door emitter sequence replayed for both key states.
 
-- **`CollisionDetection.CheckDirection`** (103) is four copies of one loop differing only in which
-  way the probe steps — the `BlobFire` treatment applies directly, and it is the one method in the
-  solution that already has tests.
-- **`GameScreenCollection.PlaceScreenObjects`** (101) is new, from this stage's own `Reset` split.
-  It wants a second pass.
-- **The `Blob` constructor** (148 by the script, 92 in fact) and
-  **`GameScreenCollection`'s constants block** (111) are both measurement artefacts — see the note
-  under "Where the size is".
+**One of those checks caught a real mistake before it landed.** Naming the bare `32` in
+`CheckCollision`'s game-object probe as `SpriteMetrics.SpriteWidth` looked obviously right and would
+have doubled it to 64. `SpriteWidth` is 64; the probe is half that. It is `GameObjectProbeSize`
+now. The lesson is the narrow one: do not name a literal by the first constant that seems to fit,
+check its value.
+
+### Debris removed along the way
+
+Deliberately, and each said in its commit: the empty `if (amountThatCanBeMoved == 0) { }` in
+`CheckDirection`; `GetPotentialLocations`'s dead inner re-test and the unreachable `else` beside
+it; two locals in `TeleportScreen.Draw` assigned and never read; a redundant re-assignment inside
+`Nasties`'s loop; `// 419 is the key access door tile`, which documented a number the code had
+replaced with `ActionTiles.AccessForceField`; and five identical commented-out joystick blocks in
+`CustomControl`, sixty lines of it, now one sentence on the class.
+
+### One earlier decision reversed
+
+Stage 4's record said `Blob.ChangeScreenIfOffEdge` was better left whole, on the grounds that four
+methods named after four edges would read no better. Doing it showed otherwise: the two vertical
+edges have to decide where blob lands, and that wants its own name and its own `///`. It is four
+methods now.
+
+The `Blob` constructor was revisited too, but only partly. Its five `Animation` initialisers were
+seven assignments each and are now five calls to one factory; the rest stands, for the reason stage
+2 gave.
 
 ---
+
 
 ## Follow-ups this work found and deliberately did not take
 
@@ -491,4 +529,25 @@ Each of these is a real finding, noted rather than acted on so that it gets its 
 - **The guards are one level deeper than they need to be.** Stage 2 kept every guard verbatim
   rather than inverting it, on purpose. Later stages did invert the simple ones where it flattened
   a whole method. The stage 2 methods could have the same pass now that each can be read alone.
+
+Found in the tail, and the two worth looking at first:
+
+- **Three bounds tests look one out.** `Blob.ChangeScreenOffRightEdge`,
+  `Blob.ChangeScreenOffBottomEdge` and `GameEngine`'s NumPad2 test-mode key all guard with
+  `ScreenNumber + n <= WorldMap.ScreenCount`. `ScreenCount` is 512, the screen array is allocated
+  at exactly that length, and the last valid index is therefore 511 — which `WorldMap` already
+  names `LastScreenNumber`. Walking off the right or bottom edge of the final screen looks like it
+  would step onto screen 512 and throw. The matching left and top tests use `>= 0` and are right,
+  and `StepBetweenScreens`'s NumPad6 correctly uses `< WorldMap.LastScreenNumber`, so the three
+  above are the odd ones out. All preserved exactly as found: a one-character change to a bounds
+  test is precisely the thing that wants its own commit and its own play-test.
+- **`GameScreenCollection.PowerUpIsInTheWay` compares a pixel location against a tile index**
+  (`powerUpOnScreen.XLocation == x + 32`, where `x` counts tiles), and reads the power-up of the
+  screen currently being displayed rather than the one being filled in. Either could be a defect.
+  It has a `///` saying so.
+- **`Scorpian` and `Helicopter` splatter identical colours.** Visible now that the fourteen sets are
+  a table rather than fourteen arms. Could be deliberate, could be a paste.
+- **`SoundEffectEngine` has a commented-out spin-wait** labelled "Hack to make the sounds actually
+  stop!". If stopping a sound is genuinely not synchronous, something downstream may still depend on
+  the old timing.
 
