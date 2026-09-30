@@ -2,10 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Starquake.ContentManagement;
@@ -351,11 +347,6 @@ public class SoundEffectEngine(ContentManager content) : IDisposable
     /// </summary>
     private static Guid PlaySingleInstance(SoundEffectInstanceRecord record, float volume, bool looped)
     {
-        if (record.SoundInstance == null)
-        {
-            return Guid.Empty;
-        }
-
         // If the sound is currently playing or paused, reset it
         if (!looped && record.SoundInstance.State is SoundState.Playing or SoundState.Paused)
         {
@@ -380,7 +371,7 @@ public class SoundEffectEngine(ContentManager content) : IDisposable
     private Guid PlayMultiInstance(string soundName, float volume)
     {
         // Create a new instance, but maybe keep a list of all instances created so we can put a max seal of the number of instances per sound allowed
-        if (!_multiInstanceSoundEffects.TryGetValue(soundName, out MultiInstanceSoundEffect? misxf) || misxf == null)
+        if (!_multiInstanceSoundEffects.TryGetValue(soundName, out MultiInstanceSoundEffect? misxf))
         {
             return Guid.Empty;
         }

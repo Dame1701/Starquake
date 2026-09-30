@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System.Threading;
 using Microsoft.Xna.Framework.Input;
 using Starquake.ActiveSprites;
 using Starquake.Constants;
@@ -10,7 +9,6 @@ using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
 using Starquake.GameComponents;
 using Starquake.Scoring;
-using Starquake.SharedLibs;
 using Starquake.Structure;
 
 namespace Starquake.Input;

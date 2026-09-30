@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
@@ -18,56 +17,66 @@ public class HiScores
 
     public HiScores()
     {
-        _scores = new List<HiScore>();
+        _scores =
+        [
+            new HiScore
+            {
+                Name = "Damien",
+                Score = 55250,
+                AdventureScore = 36
+            },
 
-        _scores.Add(new HiScore
-        {
-            Name = "Damien",
-            Score = 55250,
-            AdventureScore = 36
-        });
-        _scores.Add(new HiScore
-        {
-            Name = "Lucy",
-            Score = 40350,
-            AdventureScore = 30
-        });
-        _scores.Add(new HiScore
-        {
-            Name = "Chris",
-            Score = 27150,
-            AdventureScore = 26
-        });
-        _scores.Add(new HiScore
-        {
-            Name = "Swainy",
-            Score = 20750,
-            AdventureScore = 20
-        });
-        _scores.Add(new HiScore
-        {
-            Name = "Matt",
-            Score = 16500,
-            AdventureScore = 15
-        });
-        _scores.Add(new HiScore
-        {
-            Name = "Glenn",
-            Score = 10250,
-            AdventureScore = 11
-        });
-        _scores.Add(new HiScore
-        {
-            Name = "Andy",
-            Score = 5250,
-            AdventureScore = 5
-        });
-        _scores.Add(new HiScore
-        {
-            Name = "Nick",
-            Score = 2150,
-            AdventureScore = 3
-        });
+            new HiScore
+            {
+                Name = "Lucy",
+                Score = 40350,
+                AdventureScore = 30
+            },
+
+            new HiScore
+            {
+                Name = "Chris",
+                Score = 27150,
+                AdventureScore = 26
+            },
+
+            new HiScore
+            {
+                Name = "Swainy",
+                Score = 20750,
+                AdventureScore = 20
+            },
+
+            new HiScore
+            {
+                Name = "Matt",
+                Score = 16500,
+                AdventureScore = 15
+            },
+
+            new HiScore
+            {
+                Name = "Glenn",
+                Score = 10250,
+                AdventureScore = 11
+            },
+
+            new HiScore
+            {
+                Name = "Andy",
+                Score = 5250,
+                AdventureScore = 5
+            },
+
+            new HiScore
+            {
+                Name = "Nick",
+                Score = 2150,
+                AdventureScore = 3
+            }
+
+        ];
+
     }
 
     /// <summary>

@@ -14,8 +14,8 @@ public class TriggeredParticleEffect : IStandardParticleEffect
 {
     private readonly GraphicsSet _graphicsSet;
 
-    internal readonly ParticleEffect MercuryParticleEffect;
-    internal readonly SpriteBatchRenderer Renderer;
+    private readonly ParticleEffect _mercuryParticleEffect;
+    private readonly SpriteBatchRenderer _renderer;
 
     private bool _triggered;
 
@@ -23,14 +23,14 @@ public class TriggeredParticleEffect : IStandardParticleEffect
         SpriteBatchRenderer renderer)
     {
         _graphicsSet = graphicsSet;
-        MercuryParticleEffect = mercuryParticleEffect;
-        Renderer = renderer;
+        _mercuryParticleEffect = mercuryParticleEffect;
+        _renderer = renderer;
         EffectActive = false;
         _triggered = false;
     }
     public bool EffectActive { get; private set; }
 
-    public ParticleEffect Effect => MercuryParticleEffect;
+    public ParticleEffect Effect => _mercuryParticleEffect;
 
     public event RaiseEffectComplete? ParticleEffectComplete;
 
@@ -40,7 +40,7 @@ public class TriggeredParticleEffect : IStandardParticleEffect
         if (EffectActive)
         {
             // Kill the previous effect
-            MercuryParticleEffect.Terminate();
+            _mercuryParticleEffect.Terminate();
             EffectActive = false;
             _triggered = false;
         }
@@ -52,7 +52,7 @@ public class TriggeredParticleEffect : IStandardParticleEffect
     // Stops an effect playing
     public void Stop()
     {
-        MercuryParticleEffect.Terminate();
+        _mercuryParticleEffect.Terminate();
         EffectActive = false;
         _triggered = false;
     }
@@ -60,7 +60,7 @@ public class TriggeredParticleEffect : IStandardParticleEffect
     public void Reset()
     {
         EffectActive = false;
-        MercuryParticleEffect.Terminate();
+        _mercuryParticleEffect.Terminate();
     }
 
     public void Update(int xPos, int yPos, GameTime gameTime)
@@ -70,22 +70,22 @@ public class TriggeredParticleEffect : IStandardParticleEffect
             if (!_triggered)
             {
                 var position = new Vector2(xPos, yPos);
-                MercuryParticleEffect.Trigger(ref position);
+                _mercuryParticleEffect.Trigger(ref position);
 
                 // Workaround for a bizzare bug that seems to stop the particle from working
                 // unless we trigger until we get an active partical count.....
-                if (MercuryParticleEffect.ActiveParticlesCount > 0)
+                if (_mercuryParticleEffect.ActiveParticlesCount > 0)
                 {
                     _triggered = true;
                 }
             }
             else
             {
-                if (MercuryParticleEffect.ActiveParticlesCount == 0)
+                if (_mercuryParticleEffect.ActiveParticlesCount == 0)
                 {
                     _triggered = false;
                     EffectActive = false;
-                    MercuryParticleEffect.Terminate();
+                    _mercuryParticleEffect.Terminate();
 
                     if (ParticleEffectComplete != null)
                     {
@@ -98,7 +98,7 @@ public class TriggeredParticleEffect : IStandardParticleEffect
 
         // Mercury must always be updated
         float deltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
-        MercuryParticleEffect.Update(deltaSeconds);
+        _mercuryParticleEffect.Update(deltaSeconds);
     }
 
     public void Draw()
@@ -106,7 +106,7 @@ public class TriggeredParticleEffect : IStandardParticleEffect
         if (_graphicsSet.IsRedrawn)
         {
             // We must always call this!
-            Renderer.RenderEffect(MercuryParticleEffect);
+            _renderer.RenderEffect(_mercuryParticleEffect);
         }
     }
 
@@ -114,7 +114,7 @@ public class TriggeredParticleEffect : IStandardParticleEffect
     {
         if (_graphicsSet.IsRedrawn)
         {
-            Renderer.RenderEffect(MercuryParticleEffect, screenFade);
+            _renderer.RenderEffect(_mercuryParticleEffect, screenFade);
         }
     }
 }

@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
 using Microsoft.Xna.Framework;
 
 namespace Starquake.Sprites;
@@ -14,19 +13,7 @@ public class SpritePixelMatrix
     public SpritePixelMatrix(int size, Random randomNumberGenerator)
     {
         _randomNumberGenerator = randomNumberGenerator;
-
         Matrix = new SpritePixel[size];
-
-        for (int a = 0; a < Matrix.Length; a++)
-        {
-            if (Matrix[a] == null)
-            {
-                Matrix[a] = new SpritePixel
-                {
-                    IsOn = true
-                };
-            }
-        }
     }
 
     public SpritePixel[] Matrix { get; }

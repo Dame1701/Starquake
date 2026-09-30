@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
 using Microsoft.Xna.Framework;
 using ProjectMercury;
 using ProjectMercury.Renderers;
@@ -15,22 +14,19 @@ namespace Starquake.Particles;
 public class ContinuousParticleEffect : IStandardParticleEffect
 {
     private readonly GraphicsSet _graphicsSet;
-
-    internal readonly ParticleEffect MercuryParticleEffect;
-
-    internal readonly SpriteBatchRenderer Renderer;
+    private readonly ParticleEffect _mercuryParticleEffect;
+    private readonly SpriteBatchRenderer _renderer;
 
     /// <summary>
     ///     How many more logic frames the effect emits for, when it has a duration at all.
     /// </summary>
     private int _framesLeftToEmit;
 
-    public ContinuousParticleEffect(GraphicsSet graphicsSet, ParticleEffect mercuryParticleEffect,
-        SpriteBatchRenderer renderer)
+    public ContinuousParticleEffect(GraphicsSet graphicsSet, ParticleEffect mercuryParticleEffect, SpriteBatchRenderer renderer)
     {
         _graphicsSet = graphicsSet;
-        MercuryParticleEffect = mercuryParticleEffect;
-        Renderer = renderer;
+        _mercuryParticleEffect = mercuryParticleEffect;
+        _renderer = renderer;
         EffectActive = false;
     }
 
@@ -40,9 +36,9 @@ public class ContinuousParticleEffect : IStandardParticleEffect
     ///     clock every frame - the game moves everything by a fixed amount per logic frame, and an
     ///     effect timed off DateTime.Now drifts against the thing it is drawn on.
     /// </summary>
-    public TimeSpan? EffectDuration { get; set; }
+    public TimeSpan? EffectDuration { get; init; }
 
-    public ParticleEffect Effect => MercuryParticleEffect;
+    public ParticleEffect Effect => _mercuryParticleEffect;
     public bool EffectActive { get; private set; }
 
     public event RaiseEffectComplete? ParticleEffectComplete;
@@ -70,7 +66,7 @@ public class ContinuousParticleEffect : IStandardParticleEffect
     public void Reset()
     {
         EffectActive = false;
-        MercuryParticleEffect.Terminate();
+        _mercuryParticleEffect.Terminate();
     }
 
     public void Update(int xPos, int yPos, GameTime gameTime)
@@ -79,14 +75,14 @@ public class ContinuousParticleEffect : IStandardParticleEffect
         {
             if (EffectDuration == null)
             {
-                MercuryParticleEffect.Trigger(new Vector2(xPos, yPos));
+                _mercuryParticleEffect.Trigger(new Vector2(xPos, yPos));
             }
             else if (_framesLeftToEmit > 0)
             {
                 _framesLeftToEmit--;
-                MercuryParticleEffect.Trigger(new Vector2(xPos, yPos));
+                _mercuryParticleEffect.Trigger(new Vector2(xPos, yPos));
             }
-            else if (MercuryParticleEffect.ActiveParticlesCount == 0)
+            else if (_mercuryParticleEffect.ActiveParticlesCount == 0)
             {
                 // The emitting is over, but the particles already in flight have to be allowed to
                 // finish before the effect says it is done
@@ -97,7 +93,7 @@ public class ContinuousParticleEffect : IStandardParticleEffect
 
         // Mercury must always be updated
         float deltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
-        MercuryParticleEffect.Update(deltaSeconds);
+        _mercuryParticleEffect.Update(deltaSeconds);
     }
 
     public void Draw()
@@ -105,7 +101,7 @@ public class ContinuousParticleEffect : IStandardParticleEffect
         // We must always call this!
         if (_graphicsSet.IsRedrawn)
         {
-            Renderer.RenderEffect(MercuryParticleEffect);
+            _renderer.RenderEffect(_mercuryParticleEffect);
         }
     }
 
@@ -113,7 +109,7 @@ public class ContinuousParticleEffect : IStandardParticleEffect
     {
         if (_graphicsSet.IsRedrawn)
         {
-            Renderer.RenderEffect(MercuryParticleEffect, screenFade);
+            _renderer.RenderEffect(_mercuryParticleEffect, screenFade);
         }
     }
 }

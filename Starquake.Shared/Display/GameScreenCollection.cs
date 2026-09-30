@@ -32,91 +32,11 @@ public class GameScreenCollection : GameComponentBase
     /// </summary>
     private const int FullPercentage = 100;
 
-    /// <summary>
-    ///     Anything numbered above this is scenery drawn on the upper layer rather than a tile the
-    ///     blob can stand on, so the collision map skips it.
-    /// </summary>
-    private const int LastCollidableTile = (int)ActionTiles.ShuttleTag2;
-
-    /// <summary>
-    ///     The eight lower tiles that cast a shadow onto the tile below them, and the upper-layer
-    ///     sprite that shadow is drawn with. They come in pairs with a gap between each pair, which is
-    ///     why this is eight numbers rather than a range.
-    /// </summary>
-    private const int ShadowTile1 = 377;
-
-    /// <inheritdoc cref="ShadowTile1" />
-    private const int ShadowTile2 = 378;
-
-    /// <inheritdoc cref="ShadowTile1" />
-    private const int ShadowTile3 = 380;
-
-    /// <inheritdoc cref="ShadowTile1" />
-    private const int ShadowTile4 = 381;
-
-    /// <inheritdoc cref="ShadowTile1" />
-    private const int ShadowTile5 = 385;
-
-    /// <inheritdoc cref="ShadowTile1" />
-    private const int ShadowTile6 = 386;
-
-    /// <inheritdoc cref="ShadowTile1" />
-    private const int ShadowTile7 = 388;
-
-    /// <inheritdoc cref="ShadowTile1" />
-    private const int ShadowTile8 = 389;
-
-    /// <inheritdoc cref="ShadowTile1" />
-    private const int ShadowSprite = 8;
-
-    /// <summary>
-    ///     The two upper-layer sprites that cover a tunnel mouth. Every mouth tile of a side maps to
-    ///     the same one.
-    /// </summary>
-    private const int LeftTunnelMouthSprite = 11;
-
-    /// <inheritdoc cref="LeftTunnelMouthSprite" />
-    private const int RightTunnelMouthSprite = 12;
-
-    /// <summary>
-    ///     Olly, the eye that watches the blob from the wall of one particular screen, and the screen
-    ///     it lives on. Its pupil tracks the blob across the room at a fraction of the blob's speed.
-    /// </summary>
-    private const int OllyScreenNumber = 477;
-
-    /// <inheritdoc cref="OllyScreenNumber" />
-    private const int OllyEyesRestX = 486;
-
-    /// <inheritdoc cref="OllyScreenNumber" />
-    private const int OllyEyesRestY = 206;
-
-    /// <inheritdoc cref="OllyScreenNumber" />
-    private const int OllyGazeCentreX = 350;
-
-    /// <inheritdoc cref="OllyScreenNumber" />
-    private const int OllyGazeDamping = 44;
-
-    /// <inheritdoc cref="OllyScreenNumber" />
-    private const int OllyVerticalGazeDamping = 20;
-
-    /// <inheritdoc cref="ForceFieldEmitterNames" />
-    private const int DimFieldQuantity = 100;
-
-    /// <inheritdoc cref="ForceFieldEmitterNames" />
-    private const int BrightFieldQuantity = 10;
-
-    /// <summary>
-    ///     The two emitters that make up a key door's force field, and the two quantities it is run at:
-    ///     a dim alpha-blended pass for the body of the field and a bright additive one over the middle.
-    /// </summary>
-    private static readonly string[] ForceFieldEmitterNames = ["Emitter01", "Emitter05"];
-
     private readonly CoreElements _elements;
 
     private readonly GameScreenData[] _gameScreens;
     private readonly GraphicsSet _graphicsSet;
 
-    private readonly IStandardParticleEffect _keyDoorForceFieldNoAccess;
     private readonly WorldPopulator _worldPopulator;
     private readonly ResourceManager _resources;
 
@@ -127,10 +47,6 @@ public class GameScreenCollection : GameComponentBase
     private List<KeyLockDoor>? _keyLockDoors;
 
 
-
-    // olly
-    private int _ollyEyesX;
-    private int _ollyEyesY;
 
     private int _screenNumber;
 
@@ -170,15 +86,19 @@ public class GameScreenCollection : GameComponentBase
 
         _worldPopulator = new WorldPopulator(_gameScreens, Collisions, randomNumberGenerator);
 
+        Renderer = new ScreenRenderer(
+            resources,
+            graphicsSet,
+            _gameScreens,
+            ColourAnimations,
+            (IStandardParticleEffect)resources.GetParticleEffectInstance(
+                "ForceField", ParticleEffectType.Continual, null));
+
         BlobsShipSmoke1 =
             (IStandardParticleEffect)_resources.GetParticleEffectInstance("BasicSmokePlume",
                 ParticleEffectType.Continual, null);
         BlobsShipSmoke2 =
             (IStandardParticleEffect)_resources.GetParticleEffectInstance("BasicSmokePlume2",
-                ParticleEffectType.Continual, null);
-
-        _keyDoorForceFieldNoAccess =
-            (IStandardParticleEffect)_resources.GetParticleEffectInstance("ForceField",
                 ParticleEffectType.Continual, null);
 
         // Make this better in the future...?
@@ -192,6 +112,12 @@ public class GameScreenCollection : GameComponentBase
     ///     something on it does.
     /// </summary>
     public ScreenCollisionMap Collisions { get; }
+
+    /// <summary>
+    ///     What draws the screen being shown. Kept pointed at the same screen as
+    ///     <see cref="Collisions" />.
+    /// </summary>
+    public ScreenRenderer Renderer { get; }
 
     public int TilesAcross { get; }
 
@@ -341,6 +267,7 @@ public class GameScreenCollection : GameComponentBase
         }
 
         Collisions.Rebuild(ScreenNumber);
+        Renderer.ScreenNumber = ScreenNumber;
     }
 
     public void ChangeShuttlePlatformState(bool padRemoved)
@@ -504,10 +431,11 @@ public class GameScreenCollection : GameComponentBase
     public void Update(GameTime gameTime, int blobXPos, int blobYPos, bool blobHasKey)
     {
         _keyLockDoors ??= GetKeyLockDoors();
+        Renderer.KeyLockDoors = _keyLockDoors;
 
-        if (_keyLockDoors != null && _keyDoorForceFieldNoAccess != null)
+        if (_keyLockDoors != null)
         {
-            _keyDoorForceFieldNoAccess.Start();
+            Renderer.StartForceField();
 
             foreach (KeyLockDoor keyLockDoor in _keyLockDoors)
             {
@@ -515,19 +443,16 @@ public class GameScreenCollection : GameComponentBase
             }
         }
 
-        if (ScreenNumber == OllyScreenNumber)
-        {
-            TrackBlobWithOllysEyes(blobXPos, blobYPos);
-        }
+        Renderer.TrackBlobWithOllysEyes(blobXPos, blobYPos);
 
         _resources.GetAnimationEngine().Update(gameTime);
         ColourAnimations.Update(gameTime);
     }
 
     /// <summary>
-    ///     One key-locked door: its force field, and whether it lets blob through. Green and passable
-    ///     to him if he is carrying the key, red and solid if not - and solid to nasties either way,
-    ///     which is why the tiles flip between <see cref="CollisionTileType.NotBlob" /> and
+    ///     One key-locked door: whether it lets blob through, and the force field that says so.
+    ///     Passable to him if he is carrying the key, solid if not - and solid to nasties either
+    ///     way, which is why the tiles flip between <see cref="CollisionTileType.NotBlob" /> and
     ///     <see cref="CollisionTileType.EveryoneHits" /> rather than being removed.
     /// </summary>
     private void UpdateKeyLockDoor(KeyLockDoor keyLockDoor, GameTime gameTime, bool blobHasKey)
@@ -537,22 +462,6 @@ public class GameScreenCollection : GameComponentBase
             AddKeyLockDoorCollisionTiles(keyLockDoor);
         }
 
-        // The field is drawn twice: a dim grey pass for the body of it, then a bright additive pass
-        // over the middle, which is what gives it its core.
-        SetForceFieldEmitters(new Color(100, 100, 100), DimFieldQuantity, EmitterBlendMode.Alpha);
-
-        for (int c = 0; c < 4; c++)
-        {
-            _keyDoorForceFieldNoAccess!.Update(keyLockDoor.Location.X + 52 + c, keyLockDoor.Location.Y + 48, gameTime);
-        }
-
-        for (int c = 0; c < 4; c++)
-        {
-            _keyDoorForceFieldNoAccess!.Update(keyLockDoor.Location.X + 76 + c, keyLockDoor.Location.Y + 48, gameTime);
-        }
-
-        SetForceFieldColour(blobHasKey ? new Color(0, ColourLevels.Full, 0) : new Color(ColourLevels.Full, 0, 0));
-
         foreach (CollisionTile collisionTile in keyLockDoor.CollisionTiles)
         {
             collisionTile.CollisionTileType = blobHasKey
@@ -560,12 +469,7 @@ public class GameScreenCollection : GameComponentBase
                 : CollisionTileType.EveryoneHits;
         }
 
-        SetForceFieldEmitters(null, BrightFieldQuantity, EmitterBlendMode.Add);
-
-        for (int c = 0; c < 12; c++)
-        {
-            _keyDoorForceFieldNoAccess!.Update(keyLockDoor.Location.X + 60 + c, keyLockDoor.Location.Y + 48, gameTime);
-        }
+        Renderer.AnimateForceField(keyLockDoor, gameTime, blobHasKey);
     }
 
     private void AddKeyLockDoorCollisionTiles(KeyLockDoor keyLockDoor)
@@ -587,374 +491,22 @@ public class GameScreenCollection : GameComponentBase
         }
     }
 
-    /// <summary>
-    ///     The force field is two emitters that are always set together, so this sets both.
-    ///     <paramref name="colour" /> is null to leave the colour as it is.
-    /// </summary>
-    private void SetForceFieldEmitters(Color? colour, int quantity, EmitterBlendMode blendMode)
-    {
-        foreach (string name in ForceFieldEmitterNames)
-        {
-            Emitter? emitter = _keyDoorForceFieldNoAccess!.Effect[name];
-
-            if (colour is { } releaseColour)
-            {
-                emitter.ReleaseColour = releaseColour.ToVector3();
-            }
-
-            emitter.ReleaseQuantity = quantity;
-            emitter.BlendMode = blendMode;
-        }
-    }
-
-    /// <inheritdoc cref="SetForceFieldEmitters" />
-    private void SetForceFieldColour(Color colour)
-    {
-        foreach (string name in ForceFieldEmitterNames)
-        {
-            _keyDoorForceFieldNoAccess!.Effect[name].ReleaseColour = colour.ToVector3();
-        }
-    }
-
-    /// <summary>
-    ///     Olly's eyes follow the blob about, damped so they drift rather than snap.
-    /// </summary>
-    private void TrackBlobWithOllysEyes(int blobXPos, int blobYPos)
-    {
-        _ollyEyesX = OllyEyesRestX + (blobXPos - OllyGazeCentreX) / OllyGazeDamping;
-        _ollyEyesY = OllyEyesRestY + blobYPos / OllyVerticalGazeDamping;
-    }
-
-    public void DrawCoreElements(int xPos, int yPos)
-    {
-        int objNo = 0;
-
-        _resources.GetSpriteCollection(_graphicsSet.Names.Pickups)
-            .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
-        for (int y = 0; y < 3; y++)
-        {
-            for (int x = 0; x < 3; x++)
-            {
-                _resources.GetSpriteCollection(_graphicsSet.Names.Pickups)
-                    .DrawSprite(objNo, x * 64 + xPos, y * 64 + yPos, Color.White);
-                objNo++;
-            }
-        }
-
-        _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
-    }
-
+    /// <inheritdoc cref="ScreenRenderer.Draw" />
     public void Draw(Color colour, GameTime gameTime, bool introSequenceRunning = false,
         IntroSequenceStage introSequenceStage = IntroSequenceStage.None)
-    {
-        for (int y = 0; y < TilesDown; y++)
-        {
-            for (int x = 0; x < TilesAcross; x++)
-            {
-                DrawLowerTile(x, y, colour);
-            }
-        }
+        => Renderer.Draw(colour, gameTime, introSequenceRunning, introSequenceStage);
 
-        ColourAnimations.Draw(gameTime, colour.A);
-
-        // The intro sequence flies over a screen whose objects have not been placed yet
-        bool objectsArePlaced = !introSequenceRunning || introSequenceStage == IntroSequenceStage.EndPause;
-
-        if (objectsArePlaced)
-        {
-            DrawPowerUp(colour);
-            DrawPickUps(colour);
-            DrawCheopsPyramid(colour);
-        }
-
-        DrawOllyBackground(colour);
-    }
-
-    private void DrawLowerTile(int x, int y, Color colour)
-    {
-        int tileImage = _gameScreens[_screenNumber].ScreenTiles[x, y].TileImage;
-
-        if (tileImage <= -1 || tileImage is
-                (int)ActionTiles.BlankFiller or // The blank spacer tile
-                (int)ActionTiles.ConveyerNasty or // Tile representing conveyer nasties
-                (int)ActionTiles.TunnelLiftTile or
-                (int)ActionTiles.PreferredCoreLocation) // Tile representing preferred pickup location
-        {
-            return;
-        }
-
-        // Avoid the tunnel tiles
-        if (tileImage < (int)ActionTiles.AccessForceField)
-        {
-            SpriteCollection tiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
-
-            tiles.Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate);
-            tiles.DrawSprite(tileImage, x * _tileWidth, y * _tileHeight, colour);
-            tiles.End();
-        }
-
-        // Draw animation portions
-        _resources.GetAnimationEngine()
-            .Draw(tileImage, x * _tileWidth, y * _tileHeight, colour);
-    }
-
-    private void DrawPowerUp(Color colour)
-    {
-        if (CurrentGameScreenData.PowerUp == null)
-        {
-            return;
-        }
-
-        _resources.GetSpriteCollection(_graphicsSet.Names.PowerUps)
-            .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate);
-        _resources.GetSpriteCollection(_graphicsSet.Names.PowerUps).DrawSprite(
-            CurrentGameScreenData.PowerUp.Type, CurrentGameScreenData.PowerUp.XLocation,
-            CurrentGameScreenData.PowerUp.YLocation, colour);
-        _resources.GetSpriteCollection(_graphicsSet.Names.PowerUps).End();
-    }
-
-    private void DrawPickUps(Color colour)
-    {
-        if (CurrentGameScreenData.PickUps == null)
-        {
-            return;
-        }
-
-        _resources.GetSpriteCollection(_graphicsSet.Names.Pickups)
-            .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate);
-        foreach (InteractiveItem pickUp in CurrentGameScreenData.PickUps)
-        {
-            _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite(
-                pickUp.Type, pickUp.XLocation,
-                pickUp.YLocation, colour);
-        }
-
-        _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
-    }
-
-    private void DrawCheopsPyramid(Color colour)
-    {
-        if (CurrentGameScreenData.CheopsPyramid == null)
-        {
-            return;
-        }
-
-        if (_graphicsSet.IsOriginal)
-        {
-            _resources.GetSpriteCollection("CheopsPyramidOriginal")
-                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
-            _resources.GetSpriteCollection("CheopsPyramidOriginal").DrawSprite(0,
-                CurrentGameScreenData.CheopsPyramid.XLocation, CurrentGameScreenData.CheopsPyramid.YLocation,
-                colour);
-            _resources.GetSpriteCollection("CheopsPyramidOriginal").End();
-        }
-        else
-        {
-            _resources.GetSpriteCollection("CheopsPyramid")
-                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
-            _resources.GetSpriteCollection("CheopsPyramid").DrawSprite(0,
-                CurrentGameScreenData.CheopsPyramid.XLocation, CurrentGameScreenData.CheopsPyramid.YLocation,
-                colour);
-            _resources.GetSpriteCollection("CheopsPyramid").End();
-        }
-    }
-
-    /// <summary>
-    ///     Olly has no backdrop in the original graphics, which is why the old set skips this.
-    /// </summary>
-    private void DrawOllyBackground(Color colour)
-    {
-        if (ScreenNumber != OllyScreenNumber || _graphicsSet.IsOriginal)
-        {
-            return;
-        }
-
-        _resources.GetSpriteCollection("OllyBackground")
-            .Begin(BlendState.AlphaBlend);
-        _resources.GetSpriteCollection("OllyBackground")
-            .DrawSprite(0, 382, 146, colour);
-        _resources.GetSpriteCollection("OllyBackground").End();
-    }
-
+    /// <inheritdoc cref="ScreenRenderer.DrawUpperLayer" />
     public void DrawUpperLayer(Color colour)
-    {
-        for (int y = 0; y < TilesDown; y++)
-        {
-            for (int x = 0; x < TilesAcross; x++)
-            {
-                DrawUpperTilePatch(x, y, colour);
-                DrawTunnelEntrance(x, y, colour);
-            }
-        }
+        => Renderer.DrawUpperLayer(colour);
 
-        DrawOlly(colour);
-        DrawKeyDoorForceFields();
-
-        ColourAnimations.DrawUpperLayer();
-    }
-
-    /// <summary>
-    ///     Lays the upper-layer patch over one tile - the inside of a lift shaft, a booth, a tunnel mouth,
-    ///     the shadow another tile casts. A tile with no patch is left as the lower layer drew it.
-    /// </summary>
-    private void DrawUpperTilePatch(int x, int y, Color colour)
-    {
-        if (UpperLayerPatchFor(CurrentGameScreenData.ScreenTiles[x, y].TileImage) is not var (sprite, rowOffset))
-        {
-            return;
-        }
-
-        SpriteCollection upperTiles = _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles);
-        SpriteCollection lowerTiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
-
-        upperTiles.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
-        upperTiles.DrawSprite(
-            sprite,
-            x * lowerTiles.SpriteWidth,
-            (y + rowOffset) * lowerTiles.SpriteHeight,
-            colour);
-        upperTiles.End();
-    }
-
-    /// <summary>
-    ///     Which sprite of the upper tile set covers a given lower tile, and how many rows below that tile
-    ///     it is drawn. This was a fourteen-arm if/else ladder in which every arm made the same draw call
-    ///     with a different sprite number.
-    /// </summary>
-    /// <remarks>
-    ///     The row offset exists for one case. A shadow belongs to the tile above it, so it is recorded
-    ///     against that tile and drawn a row further down; everything else draws in place.
-    /// </remarks>
-    private static (int Sprite, int RowOffset)? UpperLayerPatchFor(int tileImage)
-    {
-        if (tileImage is ShadowTile1 or
-            ShadowTile2 or
-            ShadowTile3 or
-            ShadowTile4 or
-            ShadowTile5 or
-            ShadowTile6 or
-            ShadowTile7 or
-            ShadowTile8)
-        {
-            return (ShadowSprite, 1);
-        }
-
-        if (tileImage is
-            TunnelTiles.LeftMouth1 or
-            TunnelTiles.LeftMouth2 or
-            TunnelTiles.LeftMouth3 or
-            TunnelTiles.LeftMouth4 or
-            TunnelTiles.LeftMouth5 or
-            TunnelTiles.LeftMouth6 or
-            TunnelTiles.LeftMouth7 or
-            TunnelTiles.LeftMouth8 or
-            TunnelTiles.LeftMouth9 or
-            TunnelTiles.LeftMouth10)
-        {
-            return (LeftTunnelMouthSprite, 0);
-        }
-
-        if (tileImage is
-            TunnelTiles.RightMouth1 or
-            TunnelTiles.RightMouth2 or
-            TunnelTiles.RightMouth3 or
-            TunnelTiles.RightMouth4 or
-            TunnelTiles.RightMouth5 or
-            TunnelTiles.RightMouth6 or
-            TunnelTiles.RightMouth7 or
-            TunnelTiles.RightMouth8 or
-            TunnelTiles.RightMouth9 or
-            TunnelTiles.RightMouth10)
-        {
-            return (RightTunnelMouthSprite, 0);
-        }
-
-        return (ActionTiles)tileImage switch
-        {
-            ActionTiles.TunnelLiftTopAlternate => (0, 0),
-            ActionTiles.TunnelLiftTop1 => (0, 0),
-            ActionTiles.TunnelLiftTile => (1, 0),
-            ActionTiles.TunnelLiftShaft1 => (2, 0),
-            ActionTiles.TunnelLiftShaft2 => (3, 0),
-            ActionTiles.TunnelLiftShaft3 => (4, 0),
-            ActionTiles.TunnelLiftTop2 => (5, 0),
-            ActionTiles.TunnelLiftTop3 => (6, 0),
-            ActionTiles.TeleportBooth => (7, 0),
-            ActionTiles.AccessBoothLeft => (9, 0),
-            ActionTiles.AccessBoothRight => (10, 0),
-            _ => null
-        };
-    }
-
-    private void DrawTunnelEntrance(int x, int y, Color colour)
-    {
-        if (CurrentGameScreenData.ScreenTiles[x, y].TileImage > LastCollidableTile)
-        {
-            _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
-                .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate);
-            _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
-                .DrawSprite(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, x * _tileWidth,
-                    y * _tileHeight, colour);
-            _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).End();
-        }
-    }
-
-    private void DrawOlly(Color colour)
-    {
-        if (ScreenNumber == OllyScreenNumber)
-        {
-            if (_graphicsSet.IsOriginal)
-            {
-                _resources.GetSpriteCollection("OllyOriginal")
-                    .Begin(BlendState.AlphaBlend);
-                _resources.GetSpriteCollection("OllyOriginal")
-                    .DrawSprite(0, 384, 100, colour);
-                _resources.GetSpriteCollection("OllyOriginal").End();
-            }
-            else
-            {
-                _resources.GetSpriteCollection("OllyLower")
-                    .Begin(BlendState.AlphaBlend);
-                _resources.GetSpriteCollection("OllyLower").DrawSprite(0, 382, 146, colour);
-                _resources.GetSpriteCollection("OllyLower").End();
-
-                _resources.GetSpriteCollection("OllyEyes")
-                    .Begin(BlendState.AlphaBlend);
-                _resources.GetSpriteCollection("OllyEyes")
-                    .DrawSprite(0, _ollyEyesX, _ollyEyesY, colour);
-                _resources.GetSpriteCollection("OllyEyes").End();
-
-                _resources.GetSpriteCollection("OllyUpper")
-                    .Begin(BlendState.AlphaBlend);
-                _resources.GetSpriteCollection("OllyUpper").DrawSprite(0, 450, 166, colour);
-                _resources.GetSpriteCollection("OllyUpper").End();
-            }
-        }
-    }
-
-    private void DrawKeyDoorForceFields()
-    {
-        if (_keyLockDoors != null)
-        {
-            if (_keyDoorForceFieldNoAccess != null)
-            {
-                _keyDoorForceFieldNoAccess.Draw();
-            }
-        }
-    }
-
+    /// <inheritdoc cref="ScreenRenderer.DrawShadowing" />
     public void DrawShadowing()
-    {
-        if (_graphicsSet.IsRedrawn)
-        {
-            // Status panel shadow
-            _resources.GetSpriteCollection("StatusPanelShadow")
-                .Begin(BlendState.AlphaBlend);
-            _resources.GetSpriteCollection("StatusPanelShadow")
-                .DrawSprite(0, 0, 0, Color.White);
-            _resources.GetSpriteCollection("StatusPanelShadow").End();
-        }
-    }
+        => Renderer.DrawShadowing();
+
+    /// <inheritdoc cref="ScreenRenderer.DrawCoreElements" />
+    public void DrawCoreElements(int xPos, int yPos)
+        => Renderer.DrawCoreElements(xPos, yPos);
 
     public List<SecondLayerTile> GetListOfSecondLayerTiles()
     {

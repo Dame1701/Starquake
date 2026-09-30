@@ -2,9 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
 using Microsoft.Xna.Framework.Audio;
-using Starquake.Structure;
 
 namespace Starquake.Sounds;
 

@@ -13,32 +13,32 @@ namespace Starquake.Particles;
 public class MultiTriggerTimeBasedParticleEffect : IPositionalTriggerParticleEffect
 {
     private readonly GraphicsSet _graphicsSet;
-    internal readonly ParticleEffect MercuryParticleEffect;
-    internal readonly SpriteBatchRenderer Renderer;
+    private readonly ParticleEffect _mercuryParticleEffect;
+    private readonly SpriteBatchRenderer _renderer;
 
     public MultiTriggerTimeBasedParticleEffect(GraphicsSet graphicsSet,
         ParticleEffect mercuryParticleEffect, SpriteBatchRenderer renderer)
     {
         _graphicsSet = graphicsSet;
-        MercuryParticleEffect = mercuryParticleEffect;
-        Renderer = renderer;
+        _mercuryParticleEffect = mercuryParticleEffect;
+        _renderer = renderer;
     }
     public event RaiseEffectComplete? ParticleEffectComplete;
 
-    public ParticleEffect Effect => MercuryParticleEffect;
+    public ParticleEffect Effect => _mercuryParticleEffect;
 
     public void Start(int xPos, int yPos)
     {
         var position = new Vector2(xPos, yPos);
-        MercuryParticleEffect.Trigger(ref position);
+        _mercuryParticleEffect.Trigger(ref position);
     }
 
     public void Update(GameTime gameTime)
     {
         float deltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
-        MercuryParticleEffect.Update(deltaSeconds);
+        _mercuryParticleEffect.Update(deltaSeconds);
 
-        if (MercuryParticleEffect.ActiveParticlesCount == 0)
+        if (_mercuryParticleEffect.ActiveParticlesCount == 0)
         {
             if (ParticleEffectComplete != null)
             {
@@ -51,7 +51,7 @@ public class MultiTriggerTimeBasedParticleEffect : IPositionalTriggerParticleEff
     {
         get
         {
-            if (MercuryParticleEffect.ActiveParticlesCount > 0)
+            if (_mercuryParticleEffect.ActiveParticlesCount > 0)
             {
                 return true;
             }
@@ -62,12 +62,12 @@ public class MultiTriggerTimeBasedParticleEffect : IPositionalTriggerParticleEff
 
     public void Stop()
     {
-        MercuryParticleEffect.Terminate();
+        _mercuryParticleEffect.Terminate();
     }
 
     public void Reset()
     {
-        MercuryParticleEffect.Terminate();
+        _mercuryParticleEffect.Terminate();
     }
 
     public void Draw()
@@ -75,9 +75,9 @@ public class MultiTriggerTimeBasedParticleEffect : IPositionalTriggerParticleEff
         if (_graphicsSet.IsRedrawn)
         {
             // We must always call this!
-            if (MercuryParticleEffect.ActiveParticlesCount > 0)
+            if (_mercuryParticleEffect.ActiveParticlesCount > 0)
             {
-                Renderer.RenderEffect(MercuryParticleEffect);
+                _renderer.RenderEffect(_mercuryParticleEffect);
             }
         }
     }
@@ -87,9 +87,9 @@ public class MultiTriggerTimeBasedParticleEffect : IPositionalTriggerParticleEff
         if (_graphicsSet.IsRedrawn)
         {
             // We must always call this!
-            if (MercuryParticleEffect.ActiveParticlesCount > 0)
+            if (_mercuryParticleEffect.ActiveParticlesCount > 0)
             {
-                Renderer.RenderEffect(MercuryParticleEffect, screenFade);
+                _renderer.RenderEffect(_mercuryParticleEffect, screenFade);
             }
         }
     }
