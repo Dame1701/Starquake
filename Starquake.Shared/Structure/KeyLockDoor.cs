@@ -10,7 +10,7 @@ namespace Starquake.Structure;
 
 public class KeyLockDoor
 {
-    public List<CollisionTile> CollisionTiles;
+    public readonly List<CollisionTile> CollisionTiles;
     public Point Location;
 
     public KeyLockDoor()

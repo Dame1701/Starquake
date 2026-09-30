@@ -7,12 +7,12 @@ namespace Starquake.ContentManagement;
 
 internal class AnimSpriteDescription
 {
-    public int Delay;
-    public string FilePath;
-    public int Height;
-    public string ResourceName;
-    public int TileToAnimate;
-    public int Width;
+    public readonly int Delay;
+    public readonly string FilePath;
+    public readonly int Height;
+    public readonly string ResourceName;
+    public readonly int TileToAnimate;
+    public readonly int Width;
 
     public AnimSpriteDescription(string resourceName, string filePath, int width, int height, int tileToAnimate, int delay)
     {

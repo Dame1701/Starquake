@@ -8,11 +8,11 @@ namespace Starquake.GameComponents.PresentationScreens;
 
 public class Option
 {
-    public string ActivationKey;
+    public readonly string ActivationKey;
     public Color Colour;
-    public string OptionText;
+    public readonly string OptionText;
     public bool Selected;
-    public bool Unavailable;
+    public readonly bool Unavailable;
 
     public Option(string activationKey, string optionText, bool selected, Color colour, bool unavailable = false)
     {

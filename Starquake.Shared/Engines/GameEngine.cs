@@ -159,7 +159,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public readonly GraphicsDeviceManager GraphicsDeviceMgr;
     private GameComponentBase _hiScoreScreen;
 
-    public bool InTestMode = true;
+    public readonly bool InTestMode = true;
 
     // Game Sequences
     public IntroSequence IntroSequence;

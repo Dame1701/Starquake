@@ -10,7 +10,7 @@ public class SecondLayerTile
 {
     public Point TileLocation;
 
-    public TileType TileType;
+    public readonly TileType TileType;
     public SecondLayerTile(TileType tileType, Point tileLocation)
     {
         TileType = tileType;

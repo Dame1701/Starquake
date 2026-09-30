@@ -8,11 +8,11 @@ namespace Starquake.ContentManagement;
 
 public class SoundDescription
 {
-    public string FilePath;
-    public SoundEffectInstanceType InstanceType;
-    public bool KillOnScreenChange;
+    public readonly string FilePath;
+    public readonly SoundEffectInstanceType InstanceType;
+    public readonly bool KillOnScreenChange;
     public int MaxInstances;
-    public string ResourceName;
+    public readonly string ResourceName;
 
     public SoundDescription(string resourceName, string filePath, SoundEffectInstanceType instanceType, int maxInstances, bool killOnScreenChange)
     {

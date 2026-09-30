@@ -7,8 +7,8 @@ namespace Starquake.ContentManagement;
 
 public class ContentEntry
 {
-    public string FilePath;
-    public string Name;
+    public readonly string FilePath;
+    public readonly string Name;
 
     public ContentEntry(string contentName, string contentFilePath)
     {

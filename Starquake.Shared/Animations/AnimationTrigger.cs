@@ -6,7 +6,7 @@ namespace Starquake.Animations;
 
 public class AnimationTrigger
 {
-    protected bool UseTrigger;
+    protected readonly bool UseTrigger;
 
     public AnimationTrigger(bool useTrigger)
     {

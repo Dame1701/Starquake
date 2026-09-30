@@ -8,8 +8,8 @@ namespace Starquake.ContentManagement;
 
 internal class DataDescription
 {
-    public string FilePath;
-    public string ResourceName;
+    public readonly string FilePath;
+    public readonly string ResourceName;
     public Type ResourceType;
 
     public DataDescription(string resourceName, string filePath, Type resourceType)

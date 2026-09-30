@@ -7,10 +7,10 @@ namespace Starquake.ContentManagement;
 
 internal class SpriteDescription
 {
-    public string FilePath;
-    public int Height;
-    public string ResourceName;
-    public int Width;
+    public readonly string FilePath;
+    public readonly int Height;
+    public readonly string ResourceName;
+    public readonly int Width;
 
     public SpriteDescription(string resourceName, string filePath, int width, int height)
     {

@@ -8,9 +8,9 @@ namespace Starquake.Sounds;
 
 public class MultiInstanceSoundEffect
 {
-    public bool KillOnScreenChange;
-    public int MaxInstances;
-    public SoundEffect Sound;
+    public readonly bool KillOnScreenChange;
+    public readonly int MaxInstances;
+    public readonly SoundEffect Sound;
 
     public MultiInstanceSoundEffect(SoundEffect sound, int maxInstances, bool killOnScreenChange)
     {

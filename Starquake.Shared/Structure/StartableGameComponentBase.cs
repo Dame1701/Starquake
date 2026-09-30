@@ -9,8 +9,8 @@ namespace Starquake.Structure;
 
 public class StartableGameComponentBase
 {
-    protected ContentManager ContentManagerInstance;
-    protected GameEngine GameEngineInstance;
+    protected readonly ContentManager ContentManagerInstance;
+    protected readonly GameEngine GameEngineInstance;
 
     public StartableGameComponentBase()
     {
