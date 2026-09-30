@@ -35,9 +35,42 @@ commit, separate from any move.
 
 **50 → 46 coupled files**, and `GameEngine`'s public surface is down to 31 members from about 50.
 
+### Stage 4's leaves, finished
+
+Twelve classes narrowed across three commits, now that the base class no longer forces the engine
+on them. Four drawing helpers took a whole engine as a *method* parameter — `PanelNumbers`,
+`ProportionalNumbers`, `Overlays`, `HiScores` — and those carry no construction-order risk at all,
+since the dependency arrives per call. Eight more take theirs at construction: `ElementFader`,
+`RenderViewPort`, `ElectricityRandomiser`, `BouncingAnimation`, `KeyScanner`,
+`BlobAccessBoothAnim`, `CoreElement`, `CoreElements`.
+
+**Construction order is the constraint on the remainder, and it has to be checked per class.** The
+engine's lazily-built members — the planet, the blob, the screen effect engine — throw if read
+before content has loaded, so a class handed one at construction throws where holding the engine
+and reading it later did not. That is the bug that went in with the random number generator, and
+three classes are stopped by it:
+
+| Class | Wants | Built |
+| --- | --- | --- |
+| `TunnelLiftAnimationEngine` | the planet | before the planet exists |
+| `BlobDeathAnimation` | conduit for `BouncingParticle`, which wants the planet | before the planet exists |
+| `BreakableBridges` | conduit for `BreakableBridge`, which wants the screen effect engine | before that exists |
+
+None of these is a leaf. They are the actor graph, and they belong with stage 6, where the order of
+construction is the actual subject rather than an obstacle.
+
+**33 coupled files**, from 60 at the baseline.
+
 ### What is left of stage 5
 
-`GameScreens` — the planet, wanted by nineteen files — and the Session cluster. Session is more
+`GameScreens` — the planet, wanted by nineteen files — and the Session cluster.
+
+The planet does **not** want an interface. Its consumers use twenty-seven distinct members of it —
+`CurrentGameScreenData`, `ScreenNumber`, `CheckCollision`, `UpdateCollisionMap` and so on down a
+long tail — so it is a genuinely wide collaborator, not a role. An `IWorld` over that surface would
+be the plan's own failure case: an interface that renames a slice of the god object rather than
+removing the coupling. What the planet's consumers get instead is the concrete
+`GameScreenCollection`, one class at a time, as construction order allows. Session is more
 entangled than the plan expected, and not by accident:
 
 - `Paused` is not plain state. Its setter starts and stops the periodic background sounds, and it
