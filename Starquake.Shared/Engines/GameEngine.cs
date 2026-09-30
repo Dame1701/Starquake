@@ -424,17 +424,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         BuildGameScreens();
         RegisterScreenEffectViewPorts();
 
-        // The breakable bridges last: each bridge composes itself into a render target and then
-        // asks the screen effect engine for the view port to draw it through, and that engine is
-        // what RegisterScreenEffectViewPorts has only just built.
-        _breakableBridgesEngine = new BreakableBridges(
-            ContentResourceManager,
-            GameScreens,
-            GraphicsDeviceMgr,
-            GraphicsSet,
-            RandomNumberGenerator,
-            ScreenEffectEngine);
-
         ContentResourceManager.Initialise();
 
         UpdateStatus("Content loaded", FullyLoadedPercent, GameEngineStatus.StartGame);
@@ -467,6 +456,21 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         // The blob's death throes. After the screen collection, which each thrown-off fragment
         // bounces around.
         _blobKiller = new BlobDeathAnimation(ContentResourceManager, GameScreens, GraphicsSet, RandomNumberGenerator);
+
+        // Its fragments each take a particle effect instance, so this cannot run until the
+        // resources are loaded - which is now, not when the load was started.
+        BlobKiller.LoadContent();
+
+        // The breakable bridges, before the blob that breaks them. Each bridge composes itself into
+        // a render target and then asks the screen effect engine for a view port to draw through,
+        // but only when it draws - so it needs the engine to exist, not its view ports.
+        _breakableBridgesEngine = new BreakableBridges(
+            ContentResourceManager,
+            GameScreens,
+            GraphicsDeviceMgr,
+            GraphicsSet,
+            RandomNumberGenerator,
+            ScreenEffectEngine);
 
         // The blob. After the planet it walks around and the death animation it triggers, neither of
         // which needs the blob back, and built here rather than in Initialise because the three
@@ -503,7 +507,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         Presentation.ScreenXOffset = (GraphicsDeviceMgr.PreferredBackBufferWidth - GameScreens.ScreenWidth) / 2;
         Presentation.ScreenYOffset = 10;
 
-        ConveyerNastiesInstance.Initialise(null);
         // The conveyer nasties and the electricity engine. Both chase the blob and read the
         // planet, so both are built here rather than in Initialise, where neither existed yet.
         _conveyerNastiesInstance = new ConveyerNasties(
@@ -514,6 +517,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             Player,
             RandomNumberGenerator);
         ConveyerNastiesInstance.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
+        ConveyerNastiesInstance.Initialise(null);
 
         var converyerNastyGraphics = new ContentList(ContentMgr);
         converyerNastyGraphics.AddContent("conveyerNasty", "Graphics\\ConveryerNasty");
@@ -731,11 +735,15 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             CompositionSize.Height);
     }
 
+    /// <summary>
+    ///     Starts the content loading and returns at once - <see cref="ResourceManager.LoadContent" />
+    ///     hands the work to a background worker. Nothing that needs loaded content may be touched
+    ///     from here; it is all built in
+    ///     <see cref="ContentResourceManager_OnGameComponentStatusChanged" /> when the worker says it
+    ///     has finished.
+    /// </summary>
     private void LoadContent()
-    {
-        ContentResourceManager.LoadContent();
-        BlobKiller.LoadContent();
-    }
+        => ContentResourceManager.LoadContent();
 
     // Resets the game back to defaults - need to sort all of this out!
     public void Reset()

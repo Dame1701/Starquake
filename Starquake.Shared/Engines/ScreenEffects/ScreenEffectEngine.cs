@@ -156,6 +156,16 @@ public class ScreenEffectEngine : GameComponentBase
 
     public void Draw()
     {
+        // Nothing to compose until the view ports have been registered, and clearing the back
+        // buffer to draw nothing over it would wipe out whatever did draw - the boot screen, which
+        // is on screen for the whole of the content load and is drawn straight to the back buffer.
+        // This used to be guaranteed by the engine not existing yet; it is built before the view
+        // ports now, so it has to say so itself.
+        if (_renderViewPorts.Count == 0)
+        {
+            return;
+        }
+
         // Select the back buffer
         _graphicsDeviceManager.GraphicsDevice.SetRenderTarget(null);
 
