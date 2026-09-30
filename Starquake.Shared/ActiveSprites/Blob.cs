@@ -24,11 +24,6 @@ public class Blob : GameComponentBase
 {
 
     /// <summary>
-    ///     How far the blob's shot travels each logic frame.
-    /// </summary>
-    private const int BlobFireSpeed = 16;
-
-    /// <summary>
     ///     How many things the blob can carry. Picking something up pushes the whole inventory along
     ///     one and drops whatever falls off the end.
     /// </summary>
@@ -134,35 +129,6 @@ public class Blob : GameComponentBase
     ///     Where a shot leaves the blob, measured in from its top left corner.
     /// </summary>
     private const int FireOffset = 16;
-
-    /// <summary>
-    ///     The shot itself - a thin sliver <see cref="FireWidth" /> across and
-    ///     <see cref="FireLength" /> along, whichever way it happens to be travelling. The long
-    ///     dimension doubles as the allowance the shot is given at the screen edges, so a shot is
-    ///     spent when its far end leaves the playfield rather than when its origin does.
-    /// </summary>
-    private const int FireWidth = 2;
-
-    /// <inheritdoc cref="FireWidth" />
-    private const int FireLength = 32;
-
-    /// <summary>
-    ///     Where the sparks are thrown from when a shot hits something, measured down from the shot.
-    /// </summary>
-    private const int FireSparksYOffset = 24;
-
-    /// <summary>
-    ///     What a shot fired from the shuttle is doing. It leaves straight up or straight down, and
-    ///     the first thing it hits sends it off diagonally one way or the other rather than stopping
-    ///     it, so this says which of the three it is currently on.
-    /// </summary>
-    private const int FireTravellingStraight = 0;
-
-    /// <inheritdoc cref="FireTravellingStraight" />
-    private const int FireDeflectedLeft = 1;
-
-    /// <inheritdoc cref="FireTravellingStraight" />
-    private const int FireDeflectedRight = 2;
 
     /// <summary>
     ///     How the blob comes apart when it dies. It swells to <see cref="OverloadMaxScale" />, then
@@ -309,9 +275,8 @@ public class Blob : GameComponentBase
 
     private int _blobFallSpeed = BlobInitialFallSpeed;
     private Guid _blobFallsSoundId;
-    private int _blobFireCollisionDirection;
-    private int _blobFireDistance;
 
+    private readonly BlobFire _blobFire;
     private int _blobFireFade;
     private readonly IPositionalTriggerParticleEffect _blobFireSparks;
     private readonly IStandardParticleEffect _blobFireTrail;
@@ -380,9 +345,10 @@ public class Blob : GameComponentBase
 
         _blobTeleporterBeam.ParticleEffectComplete += blobTeleporterBeam_ParticleEffectComplete;
 
+        _blobFire = new BlobFire(new FireSurroundings(GameEngine, this));
+
         // Fire location starts same as Blob's screen location
-        BlobFireX = _blobXPos + FireOffset;
-        BlobFireY = _blobYPos + FireOffset;
+        _blobFire.Launch(_blobXPos + FireOffset, _blobYPos + FireOffset);
         _blobFireFade = 0;
 
         _blobShuttleAnim = new Animation
@@ -493,9 +459,9 @@ public class Blob : GameComponentBase
 
     public int BlobVSpeed { get; set; } = BlobWalkSpeed;
 
-    public int BlobFireX { get; private set; }
+    public int BlobFireX => _blobFire.X;
 
-    public int BlobFireY { get; private set; }
+    public int BlobFireY => _blobFire.Y;
 
     public bool BlobHasFired { get; private set; }
 
@@ -1089,15 +1055,12 @@ public class Blob : GameComponentBase
                 {
                     // Play sound
                     GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobLazer");
-                    _blobFireDistance = 0;
 
-                    BlobFireX = _blobXPos + FireOffset;
-                    BlobFireY = _blobYPos + FireOffset;
+                    _blobFire.Launch(_blobXPos + FireOffset, _blobYPos + FireOffset);
                     _blobFireFade = 0;
 
                     _blobCanFire = false;
                     BlobHasFired = true;
-                    _blobFireCollisionDirection = FireTravellingStraight;
 
                     if (OnBlobActionRaised != null)
                     {
@@ -1126,612 +1089,32 @@ public class Blob : GameComponentBase
 
     private void UpdateFire()
     {
-        if (BlobHasFired)
+        if (!BlobHasFired)
         {
-            var hitScreenBoundary = false;
-
-            if (_blobFireTrail != null)
-            {
-                _blobFireTrail.Start();
-            }
-
-            if (_blobOnShuttleCached)
-            {
-                if (_directionBlobFired == Direction.Up)
-                {
-                    var amountToMoveY = 0;
-                    var amountToMoveX = 0;
-
-                    if (_blobFireCollisionDirection == FireTravellingStraight)
-                    {
-                        amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Up, BlobFireX,
-                            BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-                    }
-                    else if (_blobFireCollisionDirection == FireDeflectedLeft)
-                    {
-                        amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Left, BlobFireX,
-                            BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-                        amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Down, BlobFireX,
-                            BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-                    }
-                    else if (_blobFireCollisionDirection == FireDeflectedRight)
-                    {
-                        amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Right, BlobFireX,
-                            BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-                        amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Down, BlobFireX,
-                            BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-                    }
-
-                    // have we hit game scenary
-                    if (_blobFireCollisionDirection == FireTravellingStraight)
-                    {
-                        if (amountToMoveY == 0)
-                        {
-                            // Lets change fire direction, we can go diagonal 
-                            if (_blobFireCollisionDirection == FireTravellingStraight)
-                            {
-                                // Randomly select the new direction
-                                _blobFireCollisionDirection = GameEngine.RandomNumberGenerator.Next(FireDeflectedLeft, FireDeflectedRight + 1);
-
-                                if (_blobFireSparks != null)
-                                {
-                                    _blobFireSparks.Start(BlobFireX, BlobFireY + FireSparksYOffset);
-                                }
-                            }
-                        }
-
-                        // Have we crossed the screen boundary
-                        if (BlobFireY < 0)
-                        {
-                            amountToMoveY = 0;
-                            hitScreenBoundary = true;
-                        }
-
-                        // Have we hit a nastie
-                        if (_blobFireCollisionDirection == FireTravellingStraight)
-                        {
-                            if (amountToMoveY > 0)
-                            {
-                                BlobFireY = BlobFireY - amountToMoveY;
-                            }
-                            else
-                            {
-                                BlobHasFired = false;
-                                _blobCanFire = true;
-
-                                if (_blobFireSparks != null && !hitScreenBoundary)
-                                {
-                                    _blobFireSparks.Start(BlobFireX, BlobFireY + FireSparksYOffset);
-                                }
-                            }
-                        }
-                    }
-                    else if (_blobFireCollisionDirection > 0)
-                    {
-                        if (BlobFireY + FireLength > GameEngine.GameScreens.ScreenHeight)
-                        {
-                            amountToMoveY = 0;
-                            hitScreenBoundary = true;
-                        }
-
-                        if (_blobFireCollisionDirection == FireDeflectedLeft)
-                        {
-                            if (BlobFireX < 0)
-                            {
-                                amountToMoveX = 0;
-                                hitScreenBoundary = true;
-                            }
-                        }
-                        else if (_blobFireCollisionDirection == FireDeflectedRight)
-                        {
-                            if (BlobFireX + FireLength > GameEngine.GameScreens.ScreenWidth)
-                            {
-                                amountToMoveX = 0;
-                                hitScreenBoundary = true;
-                            }
-                        }
-
-                        if (amountToMoveX > 0 && amountToMoveY > 0)
-                        {
-                            BlobFireY = BlobFireY + amountToMoveY;
-
-                            if (_blobFireCollisionDirection == FireDeflectedLeft)
-                            {
-                                BlobFireX = BlobFireX - amountToMoveX;
-                                _blobFireDistance = _blobFireDistance + amountToMoveX;
-                            }
-                            else if (_blobFireCollisionDirection == FireDeflectedRight)
-                            {
-                                BlobFireX = BlobFireX + amountToMoveX;
-                                _blobFireDistance = _blobFireDistance + amountToMoveX;
-                            }
-                        }
-                        else
-                        {
-                            BlobHasFired = false;
-                            _blobCanFire = true;
-
-                            if (_blobFireSparks != null && !hitScreenBoundary)
-                            {
-                                _blobFireSparks.Start(BlobFireX, BlobFireY + FireSparksYOffset);
-                            }
-                        }
-                    }
-                }
-                else if (_directionBlobFired == Direction.Down)
-                {
-                    var amountToMoveY = 0;
-                    var amountToMoveX = 0;
-
-                    if (_blobFireCollisionDirection == FireTravellingStraight)
-                    {
-                        amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Down, BlobFireX,
-                            BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-                    }
-                    else if (_blobFireCollisionDirection == FireDeflectedLeft)
-                    {
-                        amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Left, BlobFireX,
-                            BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-                        amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Up, BlobFireX,
-                            BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-                    }
-                    else if (_blobFireCollisionDirection == FireDeflectedRight)
-                    {
-                        amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Right, BlobFireX,
-                            BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-                        amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Up, BlobFireX,
-                            BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-                    }
-
-                    // have we hit game scenary
-                    if (_blobFireCollisionDirection == FireTravellingStraight)
-                    {
-                        if (amountToMoveY == 0)
-                        {
-                            // Lets change fire direction, we can go diagonal 
-                            if (_blobFireCollisionDirection == FireTravellingStraight)
-                            {
-                                // Randomly select the new direction
-                                _blobFireCollisionDirection = GameEngine.RandomNumberGenerator.Next(FireDeflectedLeft, FireDeflectedRight + 1);
-
-                                if (_blobFireSparks != null)
-                                {
-                                    _blobFireSparks.Start(BlobFireX, BlobFireY + FireSparksYOffset);
-                                }
-                            }
-                        }
-
-                        // Have we crossed the screen boundary
-                        if (BlobFireY + FireLength > GameEngine.GameScreens.ScreenHeight)
-                        {
-                            amountToMoveY = 0;
-                            hitScreenBoundary = true;
-                        }
-
-                        // Have we hit a nastie
-                        if (_blobFireCollisionDirection == FireTravellingStraight)
-                        {
-                            if (amountToMoveY > 0)
-                            {
-                                BlobFireY = BlobFireY + amountToMoveY;
-                            }
-                            else
-                            {
-                                BlobHasFired = false;
-                                _blobCanFire = true;
-
-                                if (_blobFireSparks != null && !hitScreenBoundary)
-                                {
-                                    _blobFireSparks.Start(BlobFireX, BlobFireY + FireSparksYOffset);
-                                }
-                            }
-                        }
-                    }
-                    else if (_blobFireCollisionDirection > 0)
-                    {
-                        if (BlobFireY < 0)
-                        {
-                            amountToMoveY = 0;
-                            hitScreenBoundary = true;
-                        }
-
-                        if (_blobFireCollisionDirection == FireDeflectedLeft)
-                        {
-                            if (BlobFireX < 0)
-                            {
-                                amountToMoveX = 0;
-                                hitScreenBoundary = true;
-                            }
-                        }
-                        else if (_blobFireCollisionDirection == FireDeflectedRight)
-                        {
-                            if (BlobFireX + FireLength > GameEngine.GameScreens.ScreenWidth)
-                            {
-                                amountToMoveX = 0;
-                                hitScreenBoundary = true;
-                            }
-                        }
-
-                        if (amountToMoveX > 0 && amountToMoveY > 0)
-                        {
-                            BlobFireY = BlobFireY - amountToMoveY;
-
-                            if (_blobFireCollisionDirection == FireDeflectedLeft)
-                            {
-                                BlobFireX = BlobFireX - amountToMoveX;
-                                _blobFireDistance = _blobFireDistance + amountToMoveX;
-                            }
-                            else if (_blobFireCollisionDirection == FireDeflectedRight)
-                            {
-                                BlobFireX = BlobFireX + amountToMoveX;
-                                _blobFireDistance = _blobFireDistance + amountToMoveX;
-                            }
-                        }
-                        else
-                        {
-                            BlobHasFired = false;
-                            _blobCanFire = true;
-
-                            if (_blobFireSparks != null && !hitScreenBoundary)
-                            {
-                                _blobFireSparks.Start(BlobFireX, BlobFireY + FireSparksYOffset);
-                            }
-                        }
-                    }
-                }
-                else if (_directionBlobFired == Direction.Left)
-                {
-                    var amountToMoveY = 0;
-                    var amountToMoveX = 0;
-
-                    if (_blobFireCollisionDirection == FireTravellingStraight)
-                    {
-                        amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Left, BlobFireX,
-                            BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-                    }
-                    else if (_blobFireCollisionDirection == FireDeflectedLeft)
-                    {
-                        amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Right, BlobFireX,
-                            BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-                        amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Up, BlobFireX,
-                            BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-                    }
-                    else if (_blobFireCollisionDirection == FireDeflectedRight)
-                    {
-                        amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Right, BlobFireX,
-                            BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-                        amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Down, BlobFireX,
-                            BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-                    }
-
-                    if (CheckForBlobCollisionWithObject(
-                            new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight), out var offset))
-                    {
-                        if (_blobFireDistance < offset + BlobWidth / 2)
-                        {
-                            amountToMoveX = BlobFireSpeed;
-                            amountToMoveY = BlobFireSpeed;
-                        }
-                    }
-
-                    // have we hit game scenary
-                    if (_blobFireCollisionDirection == FireTravellingStraight)
-                    {
-                        if (amountToMoveX == 0)
-                        {
-                            // Lets change fire direction, we can go diagonal 
-                            if (_blobFireCollisionDirection == FireTravellingStraight)
-                            {
-                                // Randomly select the new direction
-                                _blobFireCollisionDirection = GameEngine.RandomNumberGenerator.Next(FireDeflectedLeft, FireDeflectedRight + 1);
-
-                                _blobFireSparks?.Start(BlobFireX, BlobFireY + FireSparksYOffset);
-                            }
-                        }
-
-                        // Have we crossed the screen boundary
-                        if (BlobFireX < 0)
-                        {
-                            amountToMoveX = 0;
-                            hitScreenBoundary = true;
-                        }
-
-                        // Have we hit a nastie
-                        if (_blobFireCollisionDirection == FireTravellingStraight)
-                        {
-                            if (amountToMoveX > 0)
-                            {
-                                BlobFireX -= amountToMoveX;
-                                _blobFireDistance += amountToMoveX;
-                            }
-                            else
-                            {
-                                BlobHasFired = false;
-                                _blobCanFire = true;
-
-                                if (_blobFireSparks != null && !hitScreenBoundary)
-                                {
-                                    _blobFireSparks.Start(BlobFireX, BlobFireY + FireSparksYOffset);
-                                }
-                            }
-                        }
-                    }
-                    else if (_blobFireCollisionDirection > 0)
-                    {
-                        if (BlobFireX + FireLength > GameEngine.GameScreens.ScreenWidth)
-                        {
-                            amountToMoveX = 0;
-                            hitScreenBoundary = true;
-                        }
-
-                        if (_blobFireCollisionDirection == FireDeflectedLeft)
-                        {
-                            if (BlobFireY < 0)
-                            {
-                                amountToMoveY = 0;
-                                hitScreenBoundary = true;
-                            }
-                        }
-                        else if (_blobFireCollisionDirection == FireDeflectedRight)
-                        {
-                            if (BlobFireY + FireLength > GameEngine.GameScreens.ScreenHeight)
-                            {
-                                amountToMoveY = 0;
-                                hitScreenBoundary = true;
-                            }
-                        }
-
-                        if (amountToMoveX > 0 && amountToMoveY > 0)
-                        {
-                            BlobFireX = BlobFireX + amountToMoveX;
-                            _blobFireDistance = _blobFireDistance + amountToMoveX;
-
-                            if (_blobFireCollisionDirection == FireDeflectedLeft)
-                            {
-                                BlobFireY = BlobFireY - amountToMoveY;
-                            }
-                            else if (_blobFireCollisionDirection == FireDeflectedRight)
-                            {
-                                BlobFireY = BlobFireY + amountToMoveY;
-                            }
-                        }
-                        else
-                        {
-                            BlobHasFired = false;
-                            _blobCanFire = true;
-
-                            if (_blobFireSparks != null && !hitScreenBoundary)
-                            {
-                                _blobFireSparks.Start(BlobFireX, BlobFireY + FireSparksYOffset);
-                            }
-                        }
-                    }
-                }
-                else if (_directionBlobFired == Direction.Right)
-                {
-                    var amountToMoveY = 0;
-                    var amountToMoveX = 0;
-
-                    if (_blobFireCollisionDirection == FireTravellingStraight)
-                    {
-                        amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Right, BlobFireX,
-                            BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-                    }
-                    else if (_blobFireCollisionDirection == FireDeflectedLeft)
-                    {
-                        amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Left, BlobFireX,
-                            BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-                        amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Up, BlobFireX,
-                            BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-                    }
-                    else if (_blobFireCollisionDirection == FireDeflectedRight)
-                    {
-                        amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Left, BlobFireX,
-                            BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-                        amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Down, BlobFireX,
-                            BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-                    }
-
-                    if (CheckForBlobCollisionWithObject(
-                            new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight), out var offset))
-                    {
-                        if (_blobFireDistance < offset + BlobWidth / 2)
-                        {
-                            amountToMoveX = BlobFireSpeed;
-                            amountToMoveY = BlobFireSpeed;
-                        }
-                    }
-
-                    //if (CheckForBlobFireCollisionWithObject(new Rectangle(blobFireX, blobFireY, 32, 32)))
-                    //{
-                    //    amountToMoveX = blobFireSpeed;
-                    //    amountToMoveY = blobFireSpeed;
-                    //}
-
-                    // have we hit game scenary
-                    if (_blobFireCollisionDirection == FireTravellingStraight)
-                    {
-                        if (amountToMoveX == 0)
-                        {
-                            // Lets change fire direction, we can go diagonal 
-                            if (_blobFireCollisionDirection == FireTravellingStraight)
-                            {
-                                // Randomly select the new direction
-                                _blobFireCollisionDirection = GameEngine.RandomNumberGenerator.Next(FireDeflectedLeft, FireDeflectedRight + 1);
-
-                                _blobFireSparks?.Start(BlobFireX, BlobFireY + FireSparksYOffset);
-                            }
-                        }
-
-                        // Have we crossed the screen boundary
-                        if (BlobFireX + FireLength > GameEngine.GameScreens.ScreenWidth)
-                        {
-                            amountToMoveX = 0;
-                            hitScreenBoundary = true;
-                        }
-
-                        // Have we hit a nastie
-                        if (_blobFireCollisionDirection == FireTravellingStraight)
-                        {
-                            if (amountToMoveX > 0)
-                            {
-                                BlobFireX = BlobFireX + amountToMoveX;
-                                _blobFireDistance = _blobFireDistance + amountToMoveX;
-                            }
-                            else
-                            {
-                                BlobHasFired = false;
-                                _blobCanFire = true;
-
-                                if (_blobFireSparks != null && !hitScreenBoundary)
-                                {
-                                    _blobFireSparks.Start(BlobFireX, BlobFireY + FireSparksYOffset);
-                                }
-                            }
-                        }
-                    }
-                    else if (_blobFireCollisionDirection > 0)
-                    {
-                        if (BlobFireX < 0)
-                        {
-                            amountToMoveX = 0;
-                            hitScreenBoundary = true;
-                        }
-
-                        if (_blobFireCollisionDirection == FireDeflectedLeft)
-                        {
-                            if (BlobFireY < 0)
-                            {
-                                amountToMoveY = 0;
-                                hitScreenBoundary = true;
-                            }
-                        }
-                        else if (_blobFireCollisionDirection == FireDeflectedRight)
-                        {
-                            if (BlobFireY + FireLength > GameEngine.GameScreens.ScreenHeight)
-                            {
-                                amountToMoveY = 0;
-                                hitScreenBoundary = true;
-                            }
-                        }
-
-                        if (amountToMoveX > 0 && amountToMoveY > 0)
-                        {
-                            BlobFireX -= amountToMoveX;
-                            _blobFireDistance += amountToMoveX;
-
-                            if (_blobFireCollisionDirection == FireDeflectedLeft)
-                            {
-                                BlobFireY -= amountToMoveY;
-                            }
-                            else if (_blobFireCollisionDirection == FireDeflectedRight)
-                            {
-                                BlobFireY += amountToMoveY;
-                            }
-                        }
-                        else
-                        {
-                            BlobHasFired = false;
-                            _blobCanFire = true;
-
-                            if (_blobFireSparks != null && !hitScreenBoundary)
-                            {
-                                _blobFireSparks.Start(BlobFireX, BlobFireY + FireSparksYOffset);
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                if (_directionBlobFired == Direction.Left)
-                {
-                    var amountToMove = GameEngine.GameScreens.CheckCollision(Direction.Left, BlobFireX,
-                        BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-
-                    if (CheckForBlobCollisionWithObject(
-                            new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight), out var offset))
-                    {
-                        if (_blobFireDistance < offset + BlobWidth / 2)
-                        {
-                            amountToMove = BlobFireSpeed;
-                        }
-                    }
-
-                    // Have we crossed the screen boundary
-                    if (BlobFireX < 0)
-                    {
-                        amountToMove = 0;
-                        hitScreenBoundary = true;
-                    }
-
-                    // Have we hit a nastie
-                    if (amountToMove > 0)
-                    {
-                        BlobFireX -= amountToMove;
-                        _blobFireDistance += amountToMove;
-                    }
-                    else
-                    {
-                        BlobHasFired = false;
-                        _blobCanFire = true;
-
-                        if (_blobFireSparks != null && !hitScreenBoundary)
-                        {
-                            _blobFireSparks.Start(BlobFireX, BlobFireY + FireSparksYOffset);
-                        }
-                    }
-                }
-                else if (_directionBlobFired == Direction.Right)
-                {
-                    var amountToMove = GameEngine.GameScreens.CheckCollision(Direction.Right, BlobFireX,
-                        BlobFireY, FireWidth, FireLength, BlobFireSpeed, false);
-
-                    if (CheckForBlobCollisionWithObject(
-                            new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight), out var offset))
-                    {
-                        if (_blobFireDistance < offset + BlobWidth / 2)
-                        {
-                            amountToMove = BlobFireSpeed;
-                        }
-                    }
-
-                    // Have we crossed the screen boundary
-                    if (BlobFireX + FireLength > GameEngine.GameScreens.ScreenWidth)
-                    {
-                        amountToMove = 0;
-                        hitScreenBoundary = true;
-                    }
-
-                    // Have we hit a nastie
-                    if (amountToMove > 0)
-                    {
-                        BlobFireX = BlobFireX + amountToMove;
-                        _blobFireDistance = _blobFireDistance + amountToMove;
-                    }
-                    else
-                    {
-                        BlobHasFired = false;
-                        _blobCanFire = true;
-
-                        if (_blobFireSparks != null && !hitScreenBoundary)
-                        {
-                            _blobFireSparks.Start(BlobFireX, BlobFireY + FireSparksYOffset);
-                        }
-                    }
-                }
-                else
-                {
-                    // Blob has fired in an invalid direction, probably since he steped off a shuttle pad so kill the fire
-                    BlobHasFired = false;
-                    _blobCanFire = true;
-                }
-            }
-
-            _blobAnimFire1.GetNextFrame();
-            _blobAnimFire2.GetNextFrame();
+            return;
         }
+
+        _blobFireTrail?.Start();
+
+        if (!_blobFire.Advance(_directionBlobFired, _blobOnShuttleCached, PointBlankReach()))
+        {
+            BlobHasFired = false;
+            _blobCanFire = true;
+        }
+
+        _blobAnimFire1.GetNextFrame();
+        _blobAnimFire2.GetNextFrame();
     }
+
+    /// <summary>
+    ///     How far a shot has to travel before the thing the blob is standing on is allowed to stop
+    ///     it, or null if he is standing on nothing. Without this a shot fired while stood over a
+    ///     collectable dies on the spot.
+    /// </summary>
+    private int? PointBlankReach()
+        => CheckForBlobCollisionWithObject(new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight), out var offset)
+            ? offset + BlobWidth / 2
+            : null;
 
     private void StopFireEffects()
     {
@@ -2348,10 +1731,8 @@ public class Blob : GameComponentBase
         // Reset blob's fire
         BlobHasFired = false;
         _blobCanFire = true;
-        _blobFireCollisionDirection = FireTravellingStraight;
 
-        BlobFireX = _blobXPos + FireOffset;
-        BlobFireY = _blobYPos + FireOffset;
+        _blobFire.Launch(_blobXPos + FireOffset, _blobYPos + FireOffset);
         _blobFireFade = 0;
 
         _blobJumpPlatformEngine.ResetPlatforms();
@@ -2720,5 +2101,33 @@ public class Blob : GameComponentBase
         }
 
         return false;
+    }
+
+    /// <summary>
+    ///     Joins a <see cref="BlobFire" /> to the game it is flying through. Everything the shot
+    ///     asks about is answered from here, so the shot itself knows about nothing but its own
+    ///     position - which is what lets its rules be tested without a screen or a graphics device.
+    /// </summary>
+    private sealed class FireSurroundings(GameEngine gameEngine, Blob blob) : IFireSurroundings
+    {
+        public int ScreenWidth => gameEngine.GameScreens.ScreenWidth;
+
+        public int ScreenHeight => gameEngine.GameScreens.ScreenHeight;
+
+        /// <inheritdoc />
+        /// <remarks>
+        ///     The shot is not the blob, so it gets none of the leniency the collision map gives him.
+        /// </remarks>
+        public int DistanceClear(Direction direction, int x, int y, int width, int height, int distance)
+            => gameEngine.GameScreens.CheckCollision(direction, x, y, width, height, distance, false);
+
+        /// <inheritdoc />
+        public FireDeflection ChooseDeflection()
+            => (FireDeflection)gameEngine.RandomNumberGenerator.Next(
+                (int)FireDeflection.Left,
+                (int)FireDeflection.Right + 1);
+
+        /// <inheritdoc />
+        public void ThrowSparks(int x, int y) => blob._blobFireSparks?.Start(x, y);
     }
 }
