@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.ContentManagement;
 using Starquake.Structure;
@@ -69,7 +68,6 @@ public class BlobAccessBoothAnim
     {
         if (startingDirection == Direction.Right)
         {
-            //blobX = 164;
             _blobX = _startPoint;
             _blobFrame = 10;
         }
@@ -86,7 +84,7 @@ public class BlobAccessBoothAnim
     {
         if (_blobDirection == Direction.Right)
         {
-            _blobX = _blobX + 8;
+            _blobX += 8;
 
             if (!_animTurn.Finished)
             {
@@ -108,7 +106,7 @@ public class BlobAccessBoothAnim
         }
         else if (_blobDirection == Direction.Left)
         {
-            _blobX = _blobX - 8;
+            _blobX -= 8;
 
             if (!_animTurn.Finished)
             {

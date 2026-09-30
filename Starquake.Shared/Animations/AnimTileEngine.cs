@@ -12,7 +12,7 @@ public class AnimTileEngine : GameComponentBase
 {
     public AnimTileEngine()
     {
-        AnimTilesList = new List<AnimTile>();
+        AnimTilesList = [];
     }
     public List<AnimTile> AnimTilesList { get; }
 

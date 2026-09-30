@@ -14,7 +14,6 @@ namespace Starquake.Animations;
 
 public class BlobDeathAnimation : GameComponentBase
 {
-
     // The six fragment sprites Blob comes apart into. Deliberately not a straight run
     private static readonly int[] FragmentSpriteNumbers = [0, 1, 1, 2, 3, 5];
 
@@ -23,6 +22,7 @@ public class BlobDeathAnimation : GameComponentBase
     private readonly GraphicsSet _graphicsSet;
     private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
+    private readonly List<BouncingParticle> _bouncingParticles;
 
     private IPositionalTriggerParticleEffect? _blobFragmentBounceSparks;
     private bool _drawBlobParts;
@@ -38,7 +38,7 @@ public class BlobDeathAnimation : GameComponentBase
         _graphicsSet = graphicsSet;
         _randomNumberGenerator = randomNumberGenerator;
 
-        BouncingParticles = new List<BouncingParticle>(FragmentSpriteNumbers.Length);
+        _bouncingParticles = new List<BouncingParticle>(FragmentSpriteNumbers.Length);
 
         _blobDeathParticlesOriginal = new Animation
         {
@@ -52,13 +52,11 @@ public class BlobDeathAnimation : GameComponentBase
         };
     }
 
-    public List<BouncingParticle> BouncingParticles { get; }
-
     public bool Triggered
     {
         get
         {
-            foreach (BouncingParticle bouncingParticle in BouncingParticles)
+            foreach (BouncingParticle bouncingParticle in _bouncingParticles)
             {
                 if (bouncingParticle.Triggered)
                 {
@@ -76,7 +74,7 @@ public class BlobDeathAnimation : GameComponentBase
     {
         get
         {
-            foreach (BouncingParticle bouncingParticle in BouncingParticles)
+            foreach (BouncingParticle bouncingParticle in _bouncingParticles)
             {
                 if (bouncingParticle.Triggered || bouncingParticle.HasActiveParticles)
                 {
@@ -90,19 +88,17 @@ public class BlobDeathAnimation : GameComponentBase
 
     public override void LoadContent()
     {
-        _blobFragmentBounceSparks =
-            (IPositionalTriggerParticleEffect)_resources.GetParticleEffectInstance("FireSparks",
-                ParticleEffectType.TriggeredMultiLocationTimed, null);
+        _blobFragmentBounceSparks = (IPositionalTriggerParticleEffect)_resources
+            .GetParticleEffectInstance("FireSparks", ParticleEffectType.TriggeredMultiLocationTimed, null);
 
         // Each fragment needs its own explosion emitter, but they all spark off the one effect
-        BouncingParticles.Clear();
+        _bouncingParticles.Clear();
         foreach (int fragmentSpriteNumber in FragmentSpriteNumbers)
         {
-            BouncingParticles.Add(new BouncingParticle(_resources, _gameScreens, _randomNumberGenerator, fragmentSpriteNumber)
+            _bouncingParticles.Add(new BouncingParticle(_resources, _gameScreens, _randomNumberGenerator, fragmentSpriteNumber)
             {
-                Fireball =
-                    (IStandardParticleEffect)_resources.GetParticleEffectInstance("BlobFragmentExplosion",
-                        ParticleEffectType.Continual, null),
+                Fireball = (IStandardParticleEffect)_resources
+                    .GetParticleEffectInstance("BlobFragmentExplosion", ParticleEffectType.Continual, null),
                 SparkEffect = _blobFragmentBounceSparks
             });
         }
@@ -113,7 +109,7 @@ public class BlobDeathAnimation : GameComponentBase
     {
         _drawBlobParts = drawBlobParts;
 
-        foreach (BouncingParticle bouncingParticle in BouncingParticles)
+        foreach (BouncingParticle bouncingParticle in _bouncingParticles)
         {
             bouncingParticle.Trigger(effectXPosition, effectYPosition, effectMinDuration, effectMaxDuration);
         }
@@ -121,7 +117,7 @@ public class BlobDeathAnimation : GameComponentBase
 
     public void Reset()
     {
-        foreach (BouncingParticle bouncingParticle in BouncingParticles)
+        foreach (BouncingParticle bouncingParticle in _bouncingParticles)
         {
             bouncingParticle.Reset();
         }
@@ -129,7 +125,7 @@ public class BlobDeathAnimation : GameComponentBase
 
     public override void Update(GameTime gameTime)
     {
-        foreach (BouncingParticle bouncingParticle in BouncingParticles)
+        foreach (BouncingParticle bouncingParticle in _bouncingParticles)
         {
             if (bouncingParticle.Triggered || bouncingParticle.HasActiveParticles)
             {
@@ -155,12 +151,14 @@ public class BlobDeathAnimation : GameComponentBase
             _resources.GetSpriteCollection("BlobFire2Original")
                 .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
 
-            foreach (BouncingParticle bouncingParticle in BouncingParticles)
+            foreach (BouncingParticle bouncingParticle in _bouncingParticles)
             {
                 if (bouncingParticle.Triggered)
                 {
-                    bouncingParticle.Draw(_resources.GetSpriteCollection("BlobFire2Original"),
-                        screenFade, _blobDeathParticlesOriginal.CurrentFrame);
+                    bouncingParticle.Draw(
+                        _resources.GetSpriteCollection("BlobFire2Original"),
+                        screenFade,
+                        _blobDeathParticlesOriginal.CurrentFrame);
                 }
             }
 
@@ -168,13 +166,9 @@ public class BlobDeathAnimation : GameComponentBase
         }
         else
         {
-            foreach (BouncingParticle bouncingParticle in BouncingParticles)
+            foreach (BouncingParticle bouncingParticle in _bouncingParticles)
             {
-                if (bouncingParticle is
-                    {
-                        Triggered: false,
-                        HasActiveParticles: false
-                    })
+                if (bouncingParticle is { Triggered: false, HasActiveParticles: false })
                 {
                     continue;
                 }
@@ -183,8 +177,9 @@ public class BlobDeathAnimation : GameComponentBase
                 {
                     _resources.GetSpriteCollection("BlobParts")
                         .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
-                    bouncingParticle.Draw(_resources.GetSpriteCollection("BlobParts"),
-                        screenFade);
+
+                    bouncingParticle.Draw(_resources.GetSpriteCollection("BlobParts"), screenFade);
+
                     _resources.GetSpriteCollection("BlobParts").End();
                 }
                 else
