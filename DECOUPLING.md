@@ -387,7 +387,43 @@ This is where the honest answer may be "a registry the actors resolve each other
 once after construction", rather than a pretence that the graph is a tree. Decide it with stages
 1–5 landed and the cycle isolated to this one cluster, not now.
 
-## Where it stopped, and what is left
+## The second pass — finishing what stage 5 and 6 left
+
+Picked up after the plan had been worked through once, on the question of whether the rest could be
+decoupled at all. Measuring first settled it: every remaining class except one used only **one to
+four of the eleven actors**, so no registry and no bag object was needed — inject the specific ones
+and each lands at four to nine constructor parameters.
+
+| Landed | What it did |
+| --- | --- |
+| — | `StatusPanel` was asking the engine for `GameEngine.BlobStatusPanel` to read an energy level it owns. Second self-reference of this shape, after the blob's. |
+| **`GameSession`** | `Paused` and `PlayerKeys`, the last real design question. Neither is plain state — one setter drives the background rumble, the other pushes into the blob's control — so the session holds the values and raises events, and the engine acts on them. Eight tests. `StatusPanel` deliberately *not* included: it needs the engine to construct, so holding it would have made the session untestable. |
+| — | `Nasty` and `Nasties`, unblocked by the session, and `Nasties` moved after the blob and the two engines it asks about hazards. `GetRandomNastyType`'s `bool` chose between two identical branches; deleted. |
+| — | Building `ScreenEffectEngine` split from registering its view ports — the engine needs a graphics device, the view ports need dimensions known only after content loads, and they were being built together to suit the later. That unblocked `JumpPlatform` and `JumpPlatforms`. |
+| **Presentation screens** | All five use *exactly* the same six members, so those six go on `GameScreenBase` — five of five consumers using six of six is a real cluster, as against the actors where fifteen classes each want two of eleven. The last conduit goes with it. |
+
+**60 coupled files to 10.** `GameEngine` is 30 public members, from about 50.
+
+### What is left, and why
+
+Eight of the ten are the broad consumers the plan always said this would come down to, and they
+divide into two kinds:
+
+- **`MainGameScreen` (19 members) should keep the engine.** It uses all eleven actors, because it
+  *is* the main game — it drives the blob, the nasties, the bridges, the lifts, the animations and
+  the effects every frame. Its alternatives are an eighteen-parameter constructor or a bag object
+  existing solely for it. If it should be smaller, the job is splitting a 610-line class, which is
+  a different task from decoupling.
+- **The other seven are ordinary work**, not design questions: `Blob`, `TeleportScreen`,
+  `CheopsScreen`, `PlanetCoreScreen`, `AccessBoothScreen`, `IntroSequence`, `StatusPanel`,
+  `GameScreenCollection`. Each would take five to eleven named things. Nothing blocks them — the
+  cycles are cut and the ordering is sorted. It is typing, one class at a time, and the pattern is
+  now established five times over.
+
+`GameHost` is the tenth and is not coupling: it constructs the engine, and holding a reference to
+what you own is what a host does.
+
+## Where the first pass stopped
 
 **60 coupled files to 20.** `GameEngine` is 1326 lines and 31 public members, from 1371 and about
 50. 57 tests, from 40. Twenty-nine commits, every one of them building at 0 warnings and 0 errors
