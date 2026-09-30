@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <Import Project="..\Starquake.Shared\Starquake.Shared.props"/>
 
     <PropertyGroup>
@@ -11,6 +11,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.4.1"/>
+        <PackageReference Include="MonoGame.Framework.WindowsDX"/>
     </ItemGroup>
 </Project>

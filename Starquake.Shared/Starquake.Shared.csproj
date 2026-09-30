@@ -56,8 +56,8 @@
                           ReferenceOutputAssembly="false"
                           Private="false"
                           ExcludeAssets="all"/>
-        <PackageReference Include="MessagePack" Version="3.1.10"/>
-        <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.4.1"/>
+        <PackageReference Include="MessagePack"/>
+        <PackageReference Include="MonoGame.Content.Builder.Task"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -72,7 +72,7 @@
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
-        <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4.1"/>
+        <PackageReference Include="MonoGame.Framework.DesktopGL"/>
     </ItemGroup>
 
     <!--
@@ -86,7 +86,7 @@
     </PropertyGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net9.0-windows'">
-        <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.4.1"/>
+        <PackageReference Include="MonoGame.Framework.WindowsDX"/>
     </ItemGroup>
 
     <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
