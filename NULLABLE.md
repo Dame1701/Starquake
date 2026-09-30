@@ -1,4 +1,4 @@
-# Putting the game on the nullable standard
+﻿# Putting the game on the nullable standard
 
 A work plan, written to be picked up cold. Everything needed to start is in this file.
 
@@ -111,6 +111,16 @@ strips `using MessagePack;` from the `SharedLibs` serialisation types while leav
 `[MessagePackObject]` and `[Key]` behind. It also cannot do the conversions anyone would want it
 for — zero `for`→`foreach`, zero primary constructors — it only reformats. `jb inspectcode` is
 fine and is what found this work.
+
+**The measurement build empties the content output.** The `--no-incremental` build above
+deletes `Starquake.Mac/bin/Debug/net9.0/Content/Graphics` and MGCB's cache then believes it is
+still up to date, so the next `--no-build` smoke run dies with a missing `BootScreen2.xnb`. It
+looks exactly like a broken constructor and is not. Rebuild the head project without
+`--no-build` once to refill it:
+
+```bash
+dotnet build Starquake.Mac/Starquake.Mac.csproj -v q --nologo
+```
 
 **File encodings differ by project.** Our own sources are UTF-8 **with BOM** and LF endings; read
 and write them as `utf-8-sig`. `ProjectMercury` sources are **Latin-1** and will raise
