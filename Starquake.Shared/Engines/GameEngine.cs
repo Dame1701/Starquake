@@ -237,11 +237,11 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             {
                 Player.BlobsControl.PlayerKeySet = value;
 
+                // Unbinding all four directions is how the options screen says "use the joypad".
                 if (Player.BlobsControl.PlayerKeySet.Up == Keys.None &&
                     Player.BlobsControl.PlayerKeySet.Down == Keys.None &&
                     Player.BlobsControl.PlayerKeySet.Left == Keys.None &&
-                    Player.BlobsControl.PlayerKeySet.Right == Keys.None &&
-                    Player.BlobsControl.PlayerKeySet.Left == Keys.None)
+                    Player.BlobsControl.PlayerKeySet.Right == Keys.None)
                 {
                     Player.BlobsControl.UseJoyPad = true;
                 }
