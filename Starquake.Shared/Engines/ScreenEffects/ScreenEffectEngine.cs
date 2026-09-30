@@ -37,8 +37,8 @@ public class ScreenEffectEngine : GameComponentBase
         _screenEffects = new List<ScreenEffectBase>();
 
         // Add all of the screen effects we can find - do this eventually through reflection but for now - manually!
-        _screenEffects.Add(new LeftTunnelEntryEffect(GameEngine));
-        _screenEffects.Add(new RightTunnelEntryEffect(GameEngine));
+        _screenEffects.Add(new LeftTunnelEntryEffect());
+        _screenEffects.Add(new RightTunnelEntryEffect());
         _screenEffects.Add(new AdditiveFade(GameEngine));
 
         _renderer = new SpriteBatch(GameEngine.GraphicsDeviceMgr.GraphicsDevice);

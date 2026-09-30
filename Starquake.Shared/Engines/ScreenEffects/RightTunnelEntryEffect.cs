@@ -10,7 +10,7 @@ public class RightTunnelEntryEffect : ScreenEffectBase
 {
     private int _effectState;
 
-    public RightTunnelEntryEffect(GameEngine gameEngineReference) : base(gameEngineReference)
+    public RightTunnelEntryEffect()
     {
         ScreenEffectType = ScreenEffectType.RightTunnelEntry;
     }

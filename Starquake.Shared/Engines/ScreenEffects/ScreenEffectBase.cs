@@ -13,12 +13,7 @@ public abstract class ScreenEffectBase
     protected int EffectSpeed;
 
     protected RenderViewPort? EffectSurface;
-    protected readonly GameEngine GameEngine;
 
-    public ScreenEffectBase(GameEngine gameEngineReference)
-    {
-        GameEngine = gameEngineReference;
-    }
     public ScreenEffectType ScreenEffectType { get; protected init; }
     public bool EffectFinished { get; protected set; } = true;
 

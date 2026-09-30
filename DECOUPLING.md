@@ -26,9 +26,13 @@ commit, separate from any move.
 | — | `AnimTile` takes the `GraphicsSet`. `AnimTileEngine`'s engine parameter was unused and is deleted. |
 | Bug | `RandomNumberGenerator` was seeded after the resource manager was built, so handing it to the sound engine captured a null. Reordered. Mine, from two commits earlier. |
 | Stage 3 | `ResourceManager(ContentManager, GraphicsDeviceManager, Random, GraphicsSet)`. The cycle is cut and the whole resource subtree is free of the engine. |
+| — | `ScreenEffectBase` stops holding an engine it never called a member on. `LeftTunnelEntryEffect` and `RightTunnelEntryEffect` took one, passed it to the base, and never read it; both constructors now take nothing. `AdditiveFade`, the only one that wanted it, holds its own. |
+| — | The metric script's identifier list was missing plain `gameEngine`, which under-reported four files as using no members at all. Fixed, and the counts restated against it. |
 
-The map is down to **42 coupled files from 58**, and outside the six broad consumers the widest row
-is seven members. Stage 3's real signature was four primitives, not one: the graphics device manager
+The map is down to **50 coupled files from 60**, measured with the corrected script at both ends.
+The 58 and 42 quoted earlier were both computed with the incomplete identifier list and the earlier
+of the two also dropped the holders branch; the honest figure is ten files freed, not sixteen.
+Outside the six broad consumers the widest row is seven members. Stage 3's real signature was four primitives, not one: the graphics device manager
 is for the sprite collections it loads, the `Random` for the sound engine, the `GraphicsSet` for the
 animated tiles — all things it passed on rather than called.
 
@@ -189,8 +193,9 @@ recorded under stage 1. The second is structural and changes stages 3 to 6.
 
 **The map counts member accesses, so it cannot see the engine being passed on.** The script greps
 for `<engine reference>.<Member>`. A class that takes a `GameEngine` and only hands it to something
-else never matches, and so never appears. Ten such files exist, and the true number of files
-coupled to the engine is **58, not 50**:
+else never matches, and so never appears. Ten such files existed, and the true number of files
+coupled to the engine was **60, not 50** — 58 as first counted here, before plain `gameEngine` was
+found to be missing from the identifier list too:
 
 `AnimTileEngine`, `Overlays`, `PanelNumbers`, `LeftTunnelEntryEffect`, `RightTunnelEntryEffect`,
 `ScreenEffectBase`, `ProportionalNumbers`, `GameScreenBase`, `HiScores`, `GameComponentBase`.
@@ -291,7 +296,8 @@ have dropped off it entirely.
 
 ```sh
 for f in $(find Starquake.Shared -name "*.cs" -not -path "*/obj/*" -not -name "GameEngine.cs"); do
-  m=$(grep -hoE "\b(GameEngine|_gameEngine|_gameEngineReference|_gameEngineInstance|gameEngineReference|gameEngineInstance|gameEngineRef|_gameEngineRef)\.[A-Za-z_][A-Za-z0-9_]*" "$f" \
+  # "gameEngine" was missing from this list until stage 3, and four files spell it that way.
+  m=$(grep -hoE "\b(GameEngine|gameEngine|_gameEngine|_gameEngineReference|_gameEngineInstance|gameEngineReference|gameEngineInstance|gameEngineRef|_gameEngineRef)\.[A-Za-z_][A-Za-z0-9_]*" "$f" \
       | sed -E 's/^[^.]+\.//' | sort -u | tr '\n' ' ')
   # A class that only passes the engine on accesses no member, so count the holders too or the
   # map reports 50 coupled files where there are 58.
@@ -304,8 +310,11 @@ done
 
 Two ways this under-reports, both of which bit once already:
 
-- **The identifier list** is every name the engine reference goes by. It was checked to be
-  exhaustive as of this document; if a stage introduces another spelling, add it.
+- **The identifier list** was *not* exhaustive, though this document claimed it had been checked.
+  Plain `gameEngine` was missing, and `HiScores`, `PanelNumbers`, `Overlays` and
+  `ProportionalNumbers` all spell it that way — so all four reported no members at all while
+  actually using `ContentResourceManager`, `Font2` or `ShapeDrawer`. Added. Every number in this
+  document that predates stage 3 was computed without it.
 - **A member access is not the only kind of coupling.** The `(holds one, passes it on)` branch above
   catches the ten files that take a `GameEngine` and only hand it to something else. It still does
   not distinguish a class that uses the engine from one that inherits the field from

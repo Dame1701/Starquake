@@ -10,7 +10,7 @@ public class LeftTunnelEntryEffect : ScreenEffectBase
 {
     private int _effectState;
 
-    public LeftTunnelEntryEffect(GameEngine gameEngineReference) : base(gameEngineReference)
+    public LeftTunnelEntryEffect()
     {
         ScreenEffectType = ScreenEffectType.LeftTunnelEntry;
     }

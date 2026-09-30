@@ -10,11 +10,14 @@ namespace Starquake.Engines.ScreenEffects;
 
 public class AdditiveFade : ScreenEffectBase
 {
+    private readonly GameEngine _gameEngine;
+
     private int _effectDurationCounter;
 
     public AdditiveFade(GameEngine gameEngineReference)
-        : base(gameEngineReference)
     {
+        _gameEngine = gameEngineReference;
+
         ScreenEffectType = ScreenEffectType.AdditiveFade;
     }
 
@@ -44,7 +47,7 @@ public class AdditiveFade : ScreenEffectBase
     public override bool Draw(SpriteBatch renderer, RenderViewPort renderViewPortToUse)
     {
         renderer.Begin(SpriteSortMode.Deferred, BlendState.Additive, null, null, null, null,
-            GameEngine.PresentationTransform);
+            _gameEngine.PresentationTransform);
 
         for (var a = 0; a < 10; a++)
         {
