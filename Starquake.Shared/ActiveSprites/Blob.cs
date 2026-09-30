@@ -1219,9 +1219,9 @@ public class Blob : GameComponentBase
                                 }
                                 else if (_blobFireCollisionDirection == FireDeflectedRight)
                                 {
-                                    if (BlobFireY + FireLength > GameEngine.GameScreens.ScreenWidth)
+                                    if (BlobFireX + FireLength > GameEngine.GameScreens.ScreenWidth)
                                     {
-                                        amountToMoveY = 0;
+                                        amountToMoveX = 0;
                                         hitScreenBoundary = true;
                                     }
                                 }
