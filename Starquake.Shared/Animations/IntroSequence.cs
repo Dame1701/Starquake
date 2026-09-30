@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -30,8 +31,6 @@ public class IntroSequence : GameComponentBase
 
     private int _endPauseFrameCount;
     private int _endPauseFrameCounter;
-
-    private MainGameScreen _mainScreen;
 
     private int _preFadeOutPause = 50;
     private int _preFadeOutPauseCounter;
@@ -64,14 +63,15 @@ public class IntroSequence : GameComponentBase
     public int BlobSpaceShipYPos => (int)_blobSpaceShipYPos + GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobsShipName).SpriteHeight / 2;
     public IntroSequenceStage SequenceStage { get; private set; } = IntroSequenceStage.None;
 
-    public void Reset(MainGameScreen mainScreen)
-    {
-        if (_mainScreen == null)
-        {
-            _mainScreen = mainScreen;
-        }
+    /// <summary>
+    ///     The screen the sequence fades up over. Looked up rather than held, so the sequence cannot
+    ///     be built before the screen it needs exists.
+    /// </summary>
+    private MainGameScreen MainScreen => (MainGameScreen)GameEngine.GetGameScreen(GameScreenType.MainGame);
 
-        _mainScreen.ScreenFade = ColourLevels.Full;
+    public void Reset()
+    {
+        MainScreen.ScreenFade = ColourLevels.Full;
 
         _rumbleAmount = 100;
 
@@ -170,21 +170,21 @@ public class IntroSequence : GameComponentBase
 
             if (_preFadeOutPauseCounter >= _preFadeOutPause)
             {
-                if (_mainScreen.ScreenFade > 0)
+                if (MainScreen.ScreenFade > 0)
                 {
-                    if (_mainScreen.ScreenFade - 2 < 0)
+                    if (MainScreen.ScreenFade - 2 < 0)
                     {
-                        _mainScreen.ScreenFade = 0;
+                        MainScreen.ScreenFade = 0;
                     }
                     else
                     {
-                        _mainScreen.ScreenFade = _mainScreen.ScreenFade - 2;
+                        MainScreen.ScreenFade = MainScreen.ScreenFade - 2;
                     }
                 }
                 else
                 {
-                    _mainScreen.ResetScreenFade(2);
-                    _mainScreen.ScreenFade = 0;
+                    MainScreen.ResetScreenFade(2);
+                    MainScreen.ScreenFade = 0;
                     SequenceStage = IntroSequenceStage.CaptionFadeUp;
                 }
             }
@@ -210,15 +210,15 @@ public class IntroSequence : GameComponentBase
         }
         else if (SequenceStage == IntroSequenceStage.CaptionFadeUp)
         {
-            if (_mainScreen.ScreenFade < ColourLevels.Full)
+            if (MainScreen.ScreenFade < ColourLevels.Full)
             {
-                if (_mainScreen.ScreenFade + 3 < ColourLevels.Full)
+                if (MainScreen.ScreenFade + 3 < ColourLevels.Full)
                 {
-                    _mainScreen.ScreenFade = _mainScreen.ScreenFade + 3;
+                    MainScreen.ScreenFade = MainScreen.ScreenFade + 3;
                 }
                 else
                 {
-                    _mainScreen.ScreenFade = ColourLevels.Full;
+                    MainScreen.ScreenFade = ColourLevels.Full;
                 }
             }
             else
@@ -228,15 +228,15 @@ public class IntroSequence : GameComponentBase
         }
         else if (SequenceStage == IntroSequenceStage.CaptionFadeDown)
         {
-            if (_mainScreen.ScreenFade > 0)
+            if (MainScreen.ScreenFade > 0)
             {
-                if (_mainScreen.ScreenFade - 3 > 0)
+                if (MainScreen.ScreenFade - 3 > 0)
                 {
-                    _mainScreen.ScreenFade = _mainScreen.ScreenFade - 3;
+                    MainScreen.ScreenFade = MainScreen.ScreenFade - 3;
                 }
                 else
                 {
-                    _mainScreen.ScreenFade = 0;
+                    MainScreen.ScreenFade = 0;
                 }
             }
             else
@@ -278,11 +278,11 @@ public class IntroSequence : GameComponentBase
                 GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobsShipName).Begin(BlendState.AlphaBlend, gameTime);
                 if (SequenceStage == IntroSequenceStage.Finished || SequenceStage == IntroSequenceStage.CaptionFadeUp || SequenceStage == IntroSequenceStage.EndPause)
                 {
-                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobsShipName).DrawSprite(0, 640, 288, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, _mainScreen.ScreenFade));
+                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobsShipName).DrawSprite(0, 640, 288, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade));
                 }
                 else
                 {
-                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobsShipName).DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, _mainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
+                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobsShipName).DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
                 }
 
                 GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobsShipName).End();
@@ -290,7 +290,7 @@ public class IntroSequence : GameComponentBase
             else
             {
                 GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobsShipName).Begin(BlendState.AlphaBlend, gameTime);
-                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobsShipName).DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, _mainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
+                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobsShipName).DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
                 GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobsShipName).End();
 
                 if (SequenceStage != IntroSequenceStage.Finished && SequenceStage != IntroSequenceStage.EndPause)
@@ -300,30 +300,30 @@ public class IntroSequence : GameComponentBase
                     GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHazardLights").End();
 
                     GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHeadLights").Begin(BlendState.AlphaBlend, gameTime);
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHeadLights").DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, _mainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
+                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHeadLights").DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
                     GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHeadLights").End();
                 }
                 else
                 {
                     GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHazardLights").Begin(BlendState.AlphaBlend, gameTime);
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHazardLights").DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_blobShipHazardLightFlash.FadeLevel * ((double)_mainScreen.ScreenFade / ColourLevels.Full))), 1.0f, _shipRotationSpeed, true, false);
+                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHazardLights").DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_blobShipHazardLightFlash.FadeLevel * ((double)MainScreen.ScreenFade / ColourLevels.Full))), 1.0f, _shipRotationSpeed, true, false);
                     GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHazardLights").End();
 
                     GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHeadLights").Begin(BlendState.AlphaBlend, gameTime);
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHeadLights").DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_blobShipHeadLightFlash.FadeLevel * ((double)_mainScreen.ScreenFade / ColourLevels.Full))), 1.0f, _shipRotationSpeed, true, false);
+                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHeadLights").DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_blobShipHeadLightFlash.FadeLevel * ((double)MainScreen.ScreenFade / ColourLevels.Full))), 1.0f, _shipRotationSpeed, true, false);
                     GameEngine.ContentResourceManager.GetSpriteCollection("BlobsShipHeadLights").End();
                 }
             }
 
             if (SequenceStage == IntroSequenceStage.PreFadePause)
             {
-                GameEngine.BlobKiller.Draw(gameTime, _mainScreen.ScreenFade);
+                GameEngine.BlobKiller.Draw(gameTime, MainScreen.ScreenFade);
             }
         }
         else
         {
             GameEngine.Font2.Begin(BlendState.AlphaBlend);
-            GameEngine.Font2.WriteText(180, 210, "Prepare for mission Starquake ...", 2, Color.White, (byte)_mainScreen.ScreenFade);
+            GameEngine.Font2.WriteText(180, 210, "Prepare for mission Starquake ...", 2, Color.White, (byte)MainScreen.ScreenFade);
             GameEngine.Font2.End();
         }
     }

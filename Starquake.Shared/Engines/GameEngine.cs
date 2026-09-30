@@ -2,7 +2,10 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.Threading;
 using Microsoft.Xna.Framework;
@@ -103,11 +106,10 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     private const int CoreInventoryHandoverScreen = 197;
 
-    private static GameEngine _sInstance;
+    private static GameEngine? _sInstance;
     public string AccessCodesFailedName = "AccessCodesFailed";
     public string AccessCodesGreyName = "AccessCodesGray";
     public string AccessCodesPassedName = "AccessCodesPassed";
-    private GameComponentBase _accessScreen;
 
     public Color BackgroundColour;
 
@@ -122,22 +124,13 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     // Boot graphics
     private SpriteCollection _bootScreen;
 
-    // Animation tiles
-    public SpriteCollection BreakableBridgeAnim;
-    public BreakableBridges BreakableBridgesEngine;
-    private GameComponentBase _cheopsScreen;
+    private BreakableBridges? _breakableBridgesEngine;
 
-    // Test
-    public SpriteCollection CollisionTile;
-
-    // Colour Animation Engine
-    public ColourAnimationEngine ColourAnimationEngine;
-    private GameComponentBase _computerReportScreen;
+    private ColourAnimationEngine? _colourAnimationEngine;
     public readonly ContentManager ContentMgr;
 
     public readonly ResourceManager ContentResourceManager;
     public ConveyerNasties ConveyerNastiesInstance;
-    private GameComponentBase _coreScreen;
     public GameScreenType CurrentGameScreen;
 
     public bool DrawBackgrounds = true;
@@ -151,13 +144,10 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     // Font 2
     public BitmapFont Font2;
-    private GameComponentBase _gameCompleteScreen;
-    private GameComponentBase _gameOverScreen;
-    public GameScreenCollection GameScreens;
+    private GameScreenCollection? _gameScreens;
 
     //public MercuryParticleEngine ParticleEngine;
     public readonly GraphicsDeviceManager GraphicsDeviceMgr;
-    private GameComponentBase _hiScoreScreen;
 
     public readonly bool InTestMode = true;
 
@@ -169,11 +159,9 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     public string LowerScreenTilesName = "LowerScreenTiles";
 
-    // Initialise Game Components
-    private GameComponentBase _mainScreen;
+    private MainGameScreen? _mainScreen;
     public Nasties Nasties;
 
-    private GameComponentBase _optionsScreen;
 
     private GameWindow _parentWindow;
     private bool _particleTestTrigger;
@@ -181,7 +169,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     private bool _paused;
     public string PickupsIlluminatedName = "PickupsIlluminated";
     public string PickupsName = "Pickups";
-    public Blob Player;
+    private Blob? _player;
 
     private PlayerKeySet _playerKeys;
     public string PowerUpsName = "PowerUps";
@@ -205,8 +193,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     public Color ScreenClearColour = Color.Black;
 
-    // Screen Effect engine
-    public ScreenEffectEngine ScreenEffectEngine;
+    private ScreenEffectEngine? _screenEffectEngine;
     private readonly Dictionary<GameScreenType, IGameScreen> _screens;
     public int ScreenXOffset;
     public int ScreenYOffset;
@@ -214,11 +201,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     // Test area
     public Shapes ShapeDrawer;
 
-    // Fonts
-    public ImageFont SqText;
-    private GameComponentBase _teleportScreen;
-    public CoreElement TestElement1;
-    private GameComponentBase _testScreen;
 
     // Tunnel lift animations
     public TunnelLiftAnimationEngine TunnelAnimations;
@@ -259,6 +241,9 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         _playerKeys.Left = Keys.Left;
         _playerKeys.Right = Keys.Right;
         _playerKeys.Fire = Keys.LeftControl;
+
+        DefineContent();
+        Initialise();
     }
 
     public PlayerKeySet PlayerKeys
@@ -267,7 +252,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         set
         {
             _playerKeys = value;
-            if (Player is { BlobsControl: not null })
+            if (_player is { BlobsControl: not null })
             {
                 Player.BlobsControl.PlayerKeySet = value;
 
@@ -310,8 +295,40 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         }
     }
 
+    /// <summary>
+    ///     The one engine, for the few sprites that need the graphics device before they are given
+    ///     a reference to it. Only callable once the engine has been constructed.
+    /// </summary>
+    /// <summary>
+    ///     Everything below is built by the <see cref="GameEngineStatus.Started" /> handler, because
+    ///     each of them needs resources that are still loading before that. Nothing outside the boot
+    ///     screen runs before then, so rather than have several hundred readers ask whether the game
+    ///     has loaded yet, each says so once here and says it by failing loudly.
+    /// </summary>
+    public GameScreenCollection GameScreens => NotBeforeContentLoads(_gameScreens);
+
+    /// <inheritdoc cref="GameScreens" />
+    public Blob Player => NotBeforeContentLoads(_player);
+
+    /// <inheritdoc cref="GameScreens" />
+    public ColourAnimationEngine ColourAnimationEngine => NotBeforeContentLoads(_colourAnimationEngine);
+
+    /// <inheritdoc cref="GameScreens" />
+    public BreakableBridges BreakableBridgesEngine => NotBeforeContentLoads(_breakableBridgesEngine);
+
+    /// <inheritdoc cref="GameScreens" />
+    public ScreenEffectEngine ScreenEffectEngine => NotBeforeContentLoads(_screenEffectEngine);
+
+    /// <inheritdoc cref="GameScreens" />
+    private MainGameScreen MainScreen => NotBeforeContentLoads(_mainScreen);
+
+    private static T NotBeforeContentLoads<T>(T? component, [CallerMemberName] string name = "")
+        where T : class
+        => component ?? throw new InvalidOperationException(
+            $"'{name}' does not exist until the game's content has loaded.");
+
     public static GameEngine GetInstance()
-        => _sInstance;
+        => _sInstance ?? throw new InvalidOperationException("The game engine has not been created yet.");
 
     private void Nasties_OnNastyInteractionWithBlob(NastyInteractionType interactionType, NastyType nastyType)
     {
@@ -336,29 +353,32 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         }
     }
 
-    private void ElectricityNodeGateEngine_OnBlobStruckByElectricity(object sender, EventArgs e)
+    private void ElectricityNodeGateEngine_OnBlobStruckByElectricity(object? sender, EventArgs e)
     {
         Player.KillBlob(false, false);
     }
 
     private void Player_OnScreenChanged(GameScreenType triggerScreen)
     {
-        ((MainGameScreen)_mainScreen).PerformPostScreenChangeActions(triggerScreen, null);
+        MainScreen.PerformPostScreenChangeActions(triggerScreen, null);
     }
 
-    private void Player_OnBlobActionRaised(BlobAction action, object data)
+    private void Player_OnBlobActionRaised(BlobAction action, object? data)
     {
         // inform status panel that something has happened
         BlobStatusPanel.BlobHasPerformedAnAction(action, data);
 
-        if (action == BlobAction.GotPowerUp)
+        if (action == BlobAction.GotPowerUp && data is int powerUpType)
         {
-            _powerUpType = (int)data;
+            _powerUpType = powerUpType;
         }
 
     }
 
-    public void Initialise()
+    [MemberNotNull(nameof(IntroSequence), nameof(BlobStatusPanel), nameof(Elements),
+        nameof(Nasties), nameof(ConveyerNastiesInstance), nameof(ElectricityNodeGateEngine),
+        nameof(TunnelAnimations), nameof(ShapeDrawer))]
+    private void Initialise()
     {
         // Sequences
         IntroSequence = new IntroSequence(this);
@@ -388,7 +408,13 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ShapeDrawer = new Shapes(GraphicsDeviceMgr.GraphicsDevice);
     }
 
-    public void DefineContent()
+    /// <summary>
+    ///     Loads what is needed to draw the loading screen and registers everything else with the
+    ///     resource manager, ready for the background load that <see cref="LoadContent" /> starts.
+    /// </summary>
+    [MemberNotNull(nameof(_bootScreen), nameof(_bootProgressBackground), nameof(_bootProgress),
+        nameof(Scanlines), nameof(Font1), nameof(Font2), nameof(BlobKiller))]
+    private void DefineContent()
     {
         // Load the boot image
         _bootScreen = new SpriteCollection(this, ContentMgr, @"Graphics\\BootScreen2", GameHost.ScreenWidth, GameHost.ScreenHeight);
@@ -611,17 +637,15 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     {
         if (status == GameEngineStatus.Started)
         {
-            SqText = new ImageFont(this, ContentMgr);
-
             // Player (Blob). Built here rather than in Initialise because the three particle
             // effects he carries are resources, and those do not exist until content loads
-            Player = new Blob(this);
+            _player = new Blob(this);
             Player.OnScreenChanged += Player_OnScreenChanged;
             Player.OnBlobActionRaised += Player_OnBlobActionRaised;
 
             // Game Screens. Built here rather than in the constructor because the screen data and
             // the collision map it needs are resources, and those do not exist until content loads
-            GameScreens =
+            _gameScreens =
                 new GameScreenCollection(
                     this,
                     TileMetrics.TilesAcross,
@@ -632,7 +656,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                     TileMetrics.CollisionCellHeight);
 
             // Animation engine
-            ColourAnimationEngine = new ColourAnimationEngine(this);
+            _colourAnimationEngine = new ColourAnimationEngine(this);
 
             // Add the colour animations to the colour animation engine
             ColourAnimationEngine.RegisterTile(new ColourFaderAnimation
@@ -694,38 +718,27 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             ConveyerNastiesInstance.LoadContent(converyerNastyGraphics);
 
             // Initialise Breakable bridges
-            BreakableBridgesEngine = new BreakableBridges(this);
+            _breakableBridgesEngine = new BreakableBridges(this);
 
             // Initialise the gamescreens
             GameScreens.Initialise(null);
 
-            // Setup the presentation screens
-            _optionsScreen = new OptionsScreen(this);
-            _computerReportScreen = new ComputerReportScreen(this);
-            _hiScoreScreen = new HiScoreScreen(this);
-            _gameOverScreen = new GameOverScreen(this);
-            _gameCompleteScreen = new GameCompleteScreen(this);
-            _testScreen = new TestScreen(this);
-
-            // Setup the game screens
+            // Setup the screens. Only the main game screen is kept in a field of its own,
+            // because two places here talk to it directly rather than through the dictionary
             _mainScreen = new MainGameScreen(this);
-            _teleportScreen = new TeleportScreen(this);
-            _coreScreen = new PlanetCoreScreen(this, Elements);
-            _accessScreen = new AccessBoothScreen(this);
-            _cheopsScreen = new CheopsScreen(this);
 
-            _screens.Add(GameScreenType.Options, (IGameScreen)_optionsScreen);
-            _screens.Add(GameScreenType.ComputerReport, (IGameScreen)_computerReportScreen);
-            _screens.Add(GameScreenType.HiScores, (IGameScreen)_hiScoreScreen);
-            _screens.Add(GameScreenType.GameOver, (IGameScreen)_gameOverScreen);
-            _screens.Add(GameScreenType.GameComplete, (IGameScreen)_gameCompleteScreen);
-            _screens.Add(GameScreenType.TestScreen, (IGameScreen)_testScreen);
+            _screens.Add(GameScreenType.Options, new OptionsScreen(this));
+            _screens.Add(GameScreenType.ComputerReport, new ComputerReportScreen(this));
+            _screens.Add(GameScreenType.HiScores, new HiScoreScreen(this));
+            _screens.Add(GameScreenType.GameOver, new GameOverScreen(this));
+            _screens.Add(GameScreenType.GameComplete, new GameCompleteScreen(this));
+            _screens.Add(GameScreenType.TestScreen, new TestScreen(this));
 
-            _screens.Add(GameScreenType.MainGame, (IGameScreen)_mainScreen);
-            _screens.Add(GameScreenType.Teleporter, (IGameScreen)_teleportScreen);
-            _screens.Add(GameScreenType.PlanetCore, (IGameScreen)_coreScreen);
-            _screens.Add(GameScreenType.AccessBooth, (IGameScreen)_accessScreen);
-            _screens.Add(GameScreenType.Cheops, (IGameScreen)_cheopsScreen);
+            _screens.Add(GameScreenType.MainGame, _mainScreen);
+            _screens.Add(GameScreenType.Teleporter, new TeleportScreen(this));
+            _screens.Add(GameScreenType.PlanetCore, new PlanetCoreScreen(this, Elements));
+            _screens.Add(GameScreenType.AccessBooth, new AccessBoothScreen(this));
+            _screens.Add(GameScreenType.Cheops, new CheopsScreen(this));
 
             // Load the content for the screens
             foreach (var screen in _screens)
@@ -734,7 +747,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             }
 
             // Setup the screen engine
-            ScreenEffectEngine = new ScreenEffectEngine(GameHost.ScreenWidth, GameHost.ScreenHeight, this);
+            _screenEffectEngine = new ScreenEffectEngine(GameHost.ScreenWidth, GameHost.ScreenHeight, this);
 
             ScreenEffectEngine.RegisterViewPort(
                 "GameArea",
@@ -776,12 +789,16 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     // Resets the game back to defaults - need to sort all of this out!
     public void Reset()
     {
-        ((IGameScreen)_mainScreen).Reset(null);
+        MainScreen.Reset(null);
     }
 
     public IGameScreen GetGameScreen(GameScreenType gameScreen)
     {
-        _screens.TryGetValue(gameScreen, out var screenToGet);
+        if (!_screens.TryGetValue(gameScreen, out var screenToGet))
+        {
+            throw new InvalidOperationException($"There is no '{gameScreen}' screen.");
+        }
+
         return screenToGet;
     }
 
@@ -1216,6 +1233,9 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
             }
         }
+
+        // Screen effects compose over whatever was just drawn, and only exist once the game does
+        _screenEffectEngine?.Draw();
     }
     
     public void Dispose()

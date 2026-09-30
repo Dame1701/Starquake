@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -78,7 +79,7 @@ public class TestScreen : GameScreenBase, IGameScreen
         _bda.Update(gameTime);
     }
 
-    void IGameScreen.Reset(object data)
+    void IGameScreen.Reset(object? data)
     {
 
     }
@@ -116,7 +117,7 @@ public class TestScreen : GameScreenBase, IGameScreen
         GameEngine.Font1.End();
     }
 
-    void IGameScreen.PerformPostScreenChangeActions(GameScreenType triggeringScreen, object param)
+    void IGameScreen.PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
     {
 
     }

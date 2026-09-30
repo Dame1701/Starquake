@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -94,7 +95,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
 
     public int ScreenFade { get; set; }
 
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
     {
         GameEngine.ContentResourceManager.GetSoundFxEngine().DisablePeriodicBackgroundSounds();
 
@@ -194,7 +195,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
     }
 
     // Resets the game back to defaults
-    public void Reset(object data)
+    public void Reset(object? data)
     {
         _gameStartedTime = DateTime.Now;
         GameEngine.Paused = false;
@@ -203,7 +204,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         GameEngine.GameScreens.Reset();
         GameEngine.Player.Reset();
         GameEngine.Nasties.Reset();
-        GameEngine.IntroSequence.Reset(this);
+        GameEngine.IntroSequence.Reset();
 
         PerformPostScreenChangeActions(GameScreenType.None, false);
     }
@@ -261,7 +262,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
             // Test intro sequence
             if (ToggleKeys.GetPressedKey() == Keys.I)
             {
-                GameEngine.IntroSequence.Reset(this);
+                GameEngine.IntroSequence.Reset();
             }
 
             // Test Unstick routine

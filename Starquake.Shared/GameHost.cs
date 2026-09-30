@@ -123,16 +123,11 @@ public class GameHost : Game
     /// </summary>
     protected override void Initialize()
     {
+        // The engine defines and initialises its own content as it is built
         _gameEngine = new GameEngine(Window, _graphics, Content);
-
-        // Initialise anything that needs exist before we load content
-        _gameEngine.DefineContent();
 
         // This will eventually call LoadContent
         base.Initialize();
-
-        // Initialise the Game Engine
-        _gameEngine.Initialise();
     }
 
     /// <summary>
@@ -232,24 +227,15 @@ public class GameHost : Game
         {
             _gameEngine.Draw(gameTime);
 
-            if (_gameEngine.ScreenEffectEngine != null)
-            {
-                _gameEngine.ScreenEffectEngine.Draw();
-            }
-
             if (_gameEngine.ScanlinesEnabled)
             {
-                // Draw scanlines
-                if (_gameEngine.Scanlines != null)
-                {
-                    // Scanlines overlay the finished picture, so they are scaled and centred
-                    // with it rather than being laid over the letterbox borders as well.
-                    _gameEngine.Scanlines.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime,
-                        _gameEngine.PresentationTransform);
-                    _gameEngine.Scanlines.DrawSprite(0, 0, 0,
-                        new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ColourLevels.Full));
-                    _gameEngine.Scanlines.End();
-                }
+                // Scanlines overlay the finished picture, so they are scaled and centred
+                // with it rather than being laid over the letterbox borders as well.
+                _gameEngine.Scanlines.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime,
+                    _gameEngine.PresentationTransform);
+                _gameEngine.Scanlines.DrawSprite(0, 0, 0,
+                    new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ColourLevels.Full));
+                _gameEngine.Scanlines.End();
             }
         }
     }
