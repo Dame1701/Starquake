@@ -248,8 +248,20 @@ public class CheopsScreen : GameComponentBase, IGameScreen
         GameEngine.Font2.WriteText(298, 100, "CHEOPS PYRAMID", 2, Color.White, ColourLevels.Full);
         GameEngine.Font2.End();
 
-        //gameEngine.SQText.WriteText("CHEOPS PYRAMID", 198, 100, gameTime, Color.White);
+        DrawPyramid(gameTime);
 
+        if (_elementSelectionMode)
+        {
+            DrawElementSelection(gameTime);
+        }
+        else
+        {
+            DrawElementsOnOffer(gameTime);
+        }
+    }
+
+    private void DrawPyramid(GameTime gameTime)
+    {
         if (GameEngine.UsingOldGraphics)
         {
             GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").Begin(BlendState.AlphaBlend, gameTime);
@@ -262,148 +274,159 @@ public class CheopsScreen : GameComponentBase, IGameScreen
             GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").DrawSprite(0, 750, 69);
             GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").End();
         }
+    }
 
-        if (!_elementSelectionMode)
+    /// <summary>
+    ///     What the pyramid is holding, before the player has picked anything to swap for it.
+    /// </summary>
+    private void DrawElementsOnOffer(GameTime gameTime)
+    {
+    {
+        GameEngine.Font2.Begin(BlendState.AlphaBlend);
+        GameEngine.Font2.WriteText(366, 200, "CHEOPS KEY CODE", 2, Color.White, ColourLevels.Full);
+        GameEngine.Font2.End();
+
+        for (var a = 0; a < 2; a++)
         {
-            GameEngine.Font2.Begin(BlendState.AlphaBlend);
-            GameEngine.Font2.WriteText(366, 200, "CHEOPS KEY CODE", 2, Color.White, ColourLevels.Full);
-            GameEngine.Font2.End();
+            _accessCodes[a].Draw(_accessCode[a] + 10, 420 + a * 128, 260, gameTime);
+        }
 
-            for (var a = 0; a < 2; a++)
+        // Draw the result
+        if (_accessCodes[1].Scanned)
+        {
+            // Start the pause timer
+            if (_screenReadWait.Ticks == 0)
             {
-                _accessCodes[a].Draw(_accessCode[a] + 10, 420 + a * 128, 260, gameTime);
+                _screenReadWait = DateTime.Now;
             }
 
-            // Draw the result
-            if (_accessCodes[1].Scanned)
+            if (_codeSucceeded)
             {
-                // Start the pause timer
-                if (_screenReadWait.Ticks == 0)
+                GameEngine.ShapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(187, 498, 40, 40), new Color(0, _resultMessageFade, 0));
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(235, 500, 36, 36), new Color(0, _resultMessageFade, 0));
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(279, 504, 28, 28), new Color(0, _resultMessageFade, 0));
+                GameEngine.ShapeDrawer.End();
+
+                GameEngine.Font2.Begin(BlendState.AlphaBlend);
+                GameEngine.Font2.WriteText(340, 500, "ACCESS AUTHORISED", 2, new Color(0, ColourLevels.Full, 0), (byte)_resultMessageFade);
+                GameEngine.Font2.End();
+
+                GameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(776, 504, 28, 28), new Color(0, _resultMessageFade, 0));
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(812, 500, 36, 36), new Color(0, _resultMessageFade, 0));
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(856, 498, 40, 40), new Color(0, _resultMessageFade, 0));
+                GameEngine.ShapeDrawer.End();
+
+                // Don't allow the sound to be called more than once
+                if (!_soundPlayed)
                 {
-                    _screenReadWait = DateTime.Now;
+                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("AccessSuccess", 1f, false);
+                    _soundPlayed = true;
                 }
+            }
+            else
+            {
+                GameEngine.ShapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(187, 498, 40, 40), new Color(_resultMessageFade, 0, 0, 0));
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(235, 500, 36, 36), new Color(_resultMessageFade, 0, 0, 0));
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(279, 504, 28, 28), new Color(_resultMessageFade, 0, 0, 0));
+                GameEngine.ShapeDrawer.End();
 
-                if (_codeSucceeded)
+                GameEngine.Font2.Begin(BlendState.AlphaBlend);
+                GameEngine.Font2.WriteText(330, 500, "ACCESS CODE INVALID", 2, Color.Red, (byte)_resultMessageFade);
+                GameEngine.Font2.End();
+
+                GameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(776, 504, 28, 28), new Color(_resultMessageFade, 0, 0, 0));
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(812, 500, 36, 36), new Color(_resultMessageFade, 0, 0, 0));
+                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(856, 498, 40, 40), new Color(_resultMessageFade, 0, 0, 0));
+                GameEngine.ShapeDrawer.End();
+
+                // Don't allow the sound to be called more than once
+                if (!_soundPlayed)
                 {
-                    GameEngine.ShapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-                    GameEngine.ShapeDrawer.FillRectangle(new Rectangle(187, 498, 40, 40), new Color(0, _resultMessageFade, 0));
-                    GameEngine.ShapeDrawer.FillRectangle(new Rectangle(235, 500, 36, 36), new Color(0, _resultMessageFade, 0));
-                    GameEngine.ShapeDrawer.FillRectangle(new Rectangle(279, 504, 28, 28), new Color(0, _resultMessageFade, 0));
-                    GameEngine.ShapeDrawer.End();
-
-                    GameEngine.Font2.Begin(BlendState.AlphaBlend);
-                    GameEngine.Font2.WriteText(340, 500, "ACCESS AUTHORISED", 2, new Color(0, ColourLevels.Full, 0), (byte)_resultMessageFade);
-                    GameEngine.Font2.End();
-
-                    GameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
-                    GameEngine.ShapeDrawer.FillRectangle(new Rectangle(776, 504, 28, 28), new Color(0, _resultMessageFade, 0));
-                    GameEngine.ShapeDrawer.FillRectangle(new Rectangle(812, 500, 36, 36), new Color(0, _resultMessageFade, 0));
-                    GameEngine.ShapeDrawer.FillRectangle(new Rectangle(856, 498, 40, 40), new Color(0, _resultMessageFade, 0));
-                    GameEngine.ShapeDrawer.End();
-
-                    // Don't allow the sound to be called more than once
-                    if (!_soundPlayed)
-                    {
-                        GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("AccessSuccess", 1f, false);
-                        _soundPlayed = true;
-                    }
-                }
-                else
-                {
-                    GameEngine.ShapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-                    GameEngine.ShapeDrawer.FillRectangle(new Rectangle(187, 498, 40, 40), new Color(_resultMessageFade, 0, 0, 0));
-                    GameEngine.ShapeDrawer.FillRectangle(new Rectangle(235, 500, 36, 36), new Color(_resultMessageFade, 0, 0, 0));
-                    GameEngine.ShapeDrawer.FillRectangle(new Rectangle(279, 504, 28, 28), new Color(_resultMessageFade, 0, 0, 0));
-                    GameEngine.ShapeDrawer.End();
-
-                    GameEngine.Font2.Begin(BlendState.AlphaBlend);
-                    GameEngine.Font2.WriteText(330, 500, "ACCESS CODE INVALID", 2, Color.Red, (byte)_resultMessageFade);
-                    GameEngine.Font2.End();
-
-                    GameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
-                    GameEngine.ShapeDrawer.FillRectangle(new Rectangle(776, 504, 28, 28), new Color(_resultMessageFade, 0, 0, 0));
-                    GameEngine.ShapeDrawer.FillRectangle(new Rectangle(812, 500, 36, 36), new Color(_resultMessageFade, 0, 0, 0));
-                    GameEngine.ShapeDrawer.FillRectangle(new Rectangle(856, 498, 40, 40), new Color(_resultMessageFade, 0, 0, 0));
-                    GameEngine.ShapeDrawer.End();
-
-                    // Don't allow the sound to be called more than once
-                    if (!_soundPlayed)
-                    {
-                        GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("AccessFailed", 1f, false);
-                        _soundPlayed = true;
-                    }
+                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("AccessFailed", 1f, false);
+                    _soundPlayed = true;
                 }
             }
         }
-        else // We're in selection mode
+    }
+    }
+
+    /// <summary>
+    ///     The five inventory slots the player chooses from once a swap has been started.
+    /// </summary>
+    private void DrawElementSelection(GameTime gameTime)
+    {
+    {
+        GameEngine.Font2.Begin(BlendState.AlphaBlend);
+        GameEngine.Font2.WriteText(378, 190, "EXCHANGE       FOR", 2, Color.White, ColourLevels.Full);
+        GameEngine.Font2.WriteText(65, 266, "1.              2.             3.            4.             5.", 2, Color.OrangeRed, ColourLevels.Full);
+        GameEngine.Font2.WriteText(327, 432, "HIT ANY KEY FROM  TO", 2, Color.CornflowerBlue, ColourLevels.Full);
+        GameEngine.Font2.WriteText(690, 432, "1", 2, Color.White, ColourLevels.Full);
+        GameEngine.Font2.WriteText(783, 432, "5", 2, Color.White, ColourLevels.Full);
+
+        GameEngine.Font2.End();
+
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).Begin(BlendState.AlphaBlend, gameTime);
+
+        // Need to select something from the inventory randomly ignoring access card and key unless they are the only items....
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).DrawSprite((int)GameEngine.Player.BlobInventory[_itemToSwap], 590, 168, Color.White);
+
+        for (var a = 0; a < 5; a++)
         {
-            GameEngine.Font2.Begin(BlendState.AlphaBlend);
-            GameEngine.Font2.WriteText(378, 190, "EXCHANGE       FOR", 2, Color.White, ColourLevels.Full);
-            GameEngine.Font2.WriteText(65, 266, "1.              2.             3.            4.             5.", 2, Color.OrangeRed, ColourLevels.Full);
-            GameEngine.Font2.WriteText(327, 432, "HIT ANY KEY FROM  TO", 2, Color.CornflowerBlue, ColourLevels.Full);
-            GameEngine.Font2.WriteText(690, 432, "1", 2, Color.White, ColourLevels.Full);
-            GameEngine.Font2.WriteText(783, 432, "5", 2, Color.White, ColourLevels.Full);
-
-            GameEngine.Font2.End();
-
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).Begin(BlendState.AlphaBlend, gameTime);
-
-            // Need to select something from the inventory randomly ignoring access card and key unless they are the only items....
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).DrawSprite((int)GameEngine.Player.BlobInventory[_itemToSwap], 590, 168, Color.White);
-
-            for (var a = 0; a < 5; a++)
-            {
-                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).DrawSprite(_itemsToSelect[a].Type, a * 216 + 100, 298, Color.White);
-            }
-
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).End();
-
-            if (Keyboard.GetState().IsKeyDown(Keys.D1))
-            {
-                GameEngine.Player.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[0].Type;
-                GameEngine.GetGameScreen(GameScreenType.MainGame).ScreenFade = 40;
-                GameEngine.CurrentGameScreen = GameScreenType.MainGame;
-                GameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
-                GameEngine.GameScreens.UpdateCollisionMap(false);
-                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
-            }
-            else if (Keyboard.GetState().IsKeyDown(Keys.D2))
-            {
-                GameEngine.Player.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[1].Type;
-                GameEngine.GetGameScreen(GameScreenType.MainGame).ScreenFade = 40;
-                GameEngine.CurrentGameScreen = GameScreenType.MainGame;
-                GameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
-                GameEngine.GameScreens.UpdateCollisionMap(false);
-                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
-            }
-            else if (Keyboard.GetState().IsKeyDown(Keys.D3))
-            {
-                GameEngine.Player.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[2].Type;
-                GameEngine.GetGameScreen(GameScreenType.MainGame).ScreenFade = 40;
-                GameEngine.CurrentGameScreen = GameScreenType.MainGame;
-                GameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
-                GameEngine.GameScreens.UpdateCollisionMap(false);
-                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
-            }
-            else if (Keyboard.GetState().IsKeyDown(Keys.D4))
-            {
-                GameEngine.Player.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[3].Type;
-                GameEngine.GetGameScreen(GameScreenType.MainGame).ScreenFade = 40;
-                GameEngine.CurrentGameScreen = GameScreenType.MainGame;
-                GameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
-                GameEngine.GameScreens.UpdateCollisionMap(false);
-                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
-            }
-            else if (Keyboard.GetState().IsKeyDown(Keys.D5))
-            {
-                GameEngine.Player.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[4].Type;
-                GameEngine.GetGameScreen(GameScreenType.MainGame).ScreenFade = 40;
-                GameEngine.CurrentGameScreen = GameScreenType.MainGame;
-                GameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
-                GameEngine.GameScreens.UpdateCollisionMap(false);
-                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
-            }
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).DrawSprite(_itemsToSelect[a].Type, a * 216 + 100, 298, Color.White);
         }
+
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).End();
+
+        if (Keyboard.GetState().IsKeyDown(Keys.D1))
+        {
+            GameEngine.Player.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[0].Type;
+            GameEngine.GetGameScreen(GameScreenType.MainGame).ScreenFade = 40;
+            GameEngine.CurrentGameScreen = GameScreenType.MainGame;
+            GameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
+            GameEngine.GameScreens.UpdateCollisionMap(false);
+            GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+        }
+        else if (Keyboard.GetState().IsKeyDown(Keys.D2))
+        {
+            GameEngine.Player.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[1].Type;
+            GameEngine.GetGameScreen(GameScreenType.MainGame).ScreenFade = 40;
+            GameEngine.CurrentGameScreen = GameScreenType.MainGame;
+            GameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
+            GameEngine.GameScreens.UpdateCollisionMap(false);
+            GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+        }
+        else if (Keyboard.GetState().IsKeyDown(Keys.D3))
+        {
+            GameEngine.Player.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[2].Type;
+            GameEngine.GetGameScreen(GameScreenType.MainGame).ScreenFade = 40;
+            GameEngine.CurrentGameScreen = GameScreenType.MainGame;
+            GameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
+            GameEngine.GameScreens.UpdateCollisionMap(false);
+            GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+        }
+        else if (Keyboard.GetState().IsKeyDown(Keys.D4))
+        {
+            GameEngine.Player.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[3].Type;
+            GameEngine.GetGameScreen(GameScreenType.MainGame).ScreenFade = 40;
+            GameEngine.CurrentGameScreen = GameScreenType.MainGame;
+            GameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
+            GameEngine.GameScreens.UpdateCollisionMap(false);
+            GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+        }
+        else if (Keyboard.GetState().IsKeyDown(Keys.D5))
+        {
+            GameEngine.Player.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[4].Type;
+            GameEngine.GetGameScreen(GameScreenType.MainGame).ScreenFade = 40;
+            GameEngine.CurrentGameScreen = GameScreenType.MainGame;
+            GameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
+            GameEngine.GameScreens.UpdateCollisionMap(false);
+            GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+        }
+    }
     }
 
     public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)

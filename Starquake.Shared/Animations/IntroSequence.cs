@@ -110,159 +110,198 @@ public class IntroSequence : GameComponentBase
         GameEngine.GameScreens.BlobsShipSmoke2.Reset();
     }
 
+    /// <summary>
+    ///     The stages run in the order they are tested here. InitialPause is its own test rather than part
+    ///     of the chain because it hands straight on to ShipFalling in the same frame.
+    /// </summary>
     public override void Update(GameTime gameTime)
     {
         if (SequenceStage == IntroSequenceStage.InitialPause)
         {
-            if (_startPauseCounter < _startPauseFrameCount)
-            {
-                if (_startPauseCounter == 0)
-                {
-                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobShipFall");
-                }
-
-                _startPauseCounter++;
-            }
-            else
-            {
-                SequenceStage = IntroSequenceStage.ShipFalling;
-            }
+            UpdateInitialPause();
         }
+
         if (SequenceStage == IntroSequenceStage.ShipFalling)
         {
-            //if (sequenceCounter < sequenceFrameCount)
-            if (_blobSpaceShipYPos < _blobSpaceShipEndYPos)
-            {
-                _blobSpaceShipXPos = _blobSpaceShipXPos + _xAmountToMoveEachFrame;
-                _blobSpaceShipYPos = _blobSpaceShipYPos + _yAmountToMoveEachFrame * _acceleration;
-
-                _sequenceCounter++;
-
-                if (_blobSpaceShipYPos + 100 > _blobSpaceShipEndYPos)
-                {
-                    _acceleration = 1f;
-                }
-                else
-                {
-                    _acceleration = _acceleration + 0.1f;
-                }
-            }
-            else
-            {
-                SequenceStage = IntroSequenceStage.ShipExploading;
-                GameEngine.BlobKiller.Trigger(_blobSpaceShipEndXPos, _blobSpaceShipEndYPos, false, 100, 200);
-            }
+            UpdateShipFalling(gameTime);
         }
         else if (SequenceStage == IntroSequenceStage.ShipExploading)
         {
-            SequenceStage = IntroSequenceStage.PreFadePause;
-            _shipExplosionSound = GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobShipExplodes");
-            GameEngine.ScreenClearColour = Color.White;
+            UpdateShipExploding(gameTime);
         }
         else if (SequenceStage == IntroSequenceStage.PreFadePause)
         {
-            GameEngine.ScreenClearColour = Color.Black;
-            if (_shipRotationSpeed > 0)
-            {
-                _shipRotationSpeed = _shipRotationSpeed - 2;
-            }
-
-            if (_preFadeOutPauseCounter >= _preFadeOutPause)
-            {
-                if (MainScreen.ScreenFade > 0)
-                {
-                    if (MainScreen.ScreenFade - 2 < 0)
-                    {
-                        MainScreen.ScreenFade = 0;
-                    }
-                    else
-                    {
-                        MainScreen.ScreenFade = MainScreen.ScreenFade - 2;
-                    }
-                }
-                else
-                {
-                    MainScreen.ResetScreenFade(2);
-                    MainScreen.ScreenFade = 0;
-                    SequenceStage = IntroSequenceStage.CaptionFadeUp;
-                }
-            }
-            else
-            {
-                _preFadeOutPauseCounter++;
-            }
-
-            if (_rumbleAmount > 0)
-            {
-                var xShakeOffset = GameEngine.RandomNumberGenerator.Next(0, (int)_rumbleAmount);
-                var yShakeOffset = GameEngine.RandomNumberGenerator.Next(0, (int)_rumbleAmount);
-
-                _rumbleAmount = _rumbleAmount - 0.5;
-
-                GameEngine.ScreenEffectEngine.MoveViewPort("GameArea", xShakeOffset, yShakeOffset);
-
-                // Play rumble sound
-                _rumbleSound = GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("Rumble", true);
-            }
-
-            GameEngine.BlobKiller.Update(gameTime);
+            UpdatePreFadePause(gameTime);
         }
         else if (SequenceStage == IntroSequenceStage.CaptionFadeUp)
         {
-            if (MainScreen.ScreenFade < ColourLevels.Full)
-            {
-                if (MainScreen.ScreenFade + 3 < ColourLevels.Full)
-                {
-                    MainScreen.ScreenFade = MainScreen.ScreenFade + 3;
-                }
-                else
-                {
-                    MainScreen.ScreenFade = ColourLevels.Full;
-                }
-            }
-            else
-            {
-                SequenceStage = IntroSequenceStage.CaptionFadeDown;
-            }
+            UpdateCaptionFadeUp();
         }
         else if (SequenceStage == IntroSequenceStage.CaptionFadeDown)
         {
+            UpdateCaptionFadeDown();
+        }
+        else if (SequenceStage == IntroSequenceStage.EndPause || SequenceStage == IntroSequenceStage.Finished)
+        {
+            UpdateEndPause();
+        }
+    }
+
+    private void UpdateInitialPause()
+    {
+        if (_startPauseCounter < _startPauseFrameCount)
+        {
+            if (_startPauseCounter == 0)
+            {
+                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobShipFall");
+            }
+
+            _startPauseCounter++;
+        }
+        else
+        {
+            SequenceStage = IntroSequenceStage.ShipFalling;
+        }
+    }
+
+    private void UpdateShipFalling(GameTime gameTime)
+    {
+        //if (sequenceCounter < sequenceFrameCount)
+        if (_blobSpaceShipYPos < _blobSpaceShipEndYPos)
+        {
+            _blobSpaceShipXPos = _blobSpaceShipXPos + _xAmountToMoveEachFrame;
+            _blobSpaceShipYPos = _blobSpaceShipYPos + _yAmountToMoveEachFrame * _acceleration;
+
+            _sequenceCounter++;
+
+            if (_blobSpaceShipYPos + 100 > _blobSpaceShipEndYPos)
+            {
+                _acceleration = 1f;
+            }
+            else
+            {
+                _acceleration = _acceleration + 0.1f;
+            }
+        }
+        else
+        {
+            SequenceStage = IntroSequenceStage.ShipExploading;
+            GameEngine.BlobKiller.Trigger(_blobSpaceShipEndXPos, _blobSpaceShipEndYPos, false, 100, 200);
+        }
+    }
+
+    private void UpdateShipExploding(GameTime gameTime)
+    {
+        SequenceStage = IntroSequenceStage.PreFadePause;
+        _shipExplosionSound = GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobShipExplodes");
+        GameEngine.ScreenClearColour = Color.White;
+    }
+
+    private void UpdatePreFadePause(GameTime gameTime)
+    {
+        GameEngine.ScreenClearColour = Color.Black;
+        if (_shipRotationSpeed > 0)
+        {
+            _shipRotationSpeed = _shipRotationSpeed - 2;
+        }
+
+        if (_preFadeOutPauseCounter >= _preFadeOutPause)
+        {
             if (MainScreen.ScreenFade > 0)
             {
-                if (MainScreen.ScreenFade - 3 > 0)
+                if (MainScreen.ScreenFade - 2 < 0)
                 {
-                    MainScreen.ScreenFade = MainScreen.ScreenFade - 3;
+                    MainScreen.ScreenFade = 0;
                 }
                 else
                 {
-                    MainScreen.ScreenFade = 0;
+                    MainScreen.ScreenFade = MainScreen.ScreenFade - 2;
                 }
             }
             else
             {
-                SequenceStage = IntroSequenceStage.EndPause;
+                MainScreen.ResetScreenFade(2);
+                MainScreen.ScreenFade = 0;
+                SequenceStage = IntroSequenceStage.CaptionFadeUp;
             }
         }
-        else if (SequenceStage == IntroSequenceStage.EndPause || SequenceStage == IntroSequenceStage.Finished)
+        else
         {
-            if (SequenceStage == IntroSequenceStage.EndPause)
-            {
-                if (_endPauseFrameCounter < _endPauseFrameCount)
-                {
-                    _endPauseFrameCounter++;
-                }
-                else
-                {
-                    GameEngine.ContentResourceManager.GetSoundFxEngine().StopSound(_rumbleSound, SoundFade.Fast);
-                    SequenceStage = IntroSequenceStage.Finished;
-                    SequenceRunning = false;
-                }
-            }
-
-            _blobShipHazardLightFlash.Update();
-            _blobShipHeadLightFlash.Update();
+            _preFadeOutPauseCounter++;
         }
 
+        if (_rumbleAmount > 0)
+        {
+            var xShakeOffset = GameEngine.RandomNumberGenerator.Next(0, (int)_rumbleAmount);
+            var yShakeOffset = GameEngine.RandomNumberGenerator.Next(0, (int)_rumbleAmount);
+
+            _rumbleAmount = _rumbleAmount - 0.5;
+
+            GameEngine.ScreenEffectEngine.MoveViewPort("GameArea", xShakeOffset, yShakeOffset);
+
+            // Play rumble sound
+            _rumbleSound = GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("Rumble", true);
+        }
+
+        GameEngine.BlobKiller.Update(gameTime);
+    }
+
+    private void UpdateCaptionFadeUp()
+    {
+        if (MainScreen.ScreenFade < ColourLevels.Full)
+        {
+            if (MainScreen.ScreenFade + 3 < ColourLevels.Full)
+            {
+                MainScreen.ScreenFade = MainScreen.ScreenFade + 3;
+            }
+            else
+            {
+                MainScreen.ScreenFade = ColourLevels.Full;
+            }
+        }
+        else
+        {
+            SequenceStage = IntroSequenceStage.CaptionFadeDown;
+        }
+    }
+
+    private void UpdateCaptionFadeDown()
+    {
+        if (MainScreen.ScreenFade > 0)
+        {
+            if (MainScreen.ScreenFade - 3 > 0)
+            {
+                MainScreen.ScreenFade = MainScreen.ScreenFade - 3;
+            }
+            else
+            {
+                MainScreen.ScreenFade = 0;
+            }
+        }
+        else
+        {
+            SequenceStage = IntroSequenceStage.EndPause;
+        }
+    }
+
+    private void UpdateEndPause()
+    {
+        if (SequenceStage == IntroSequenceStage.EndPause)
+        {
+            if (_endPauseFrameCounter < _endPauseFrameCount)
+            {
+                _endPauseFrameCounter++;
+            }
+            else
+            {
+                GameEngine.ContentResourceManager.GetSoundFxEngine().StopSound(_rumbleSound, SoundFade.Fast);
+                SequenceStage = IntroSequenceStage.Finished;
+                SequenceRunning = false;
+            }
+        }
+
+        _blobShipHazardLightFlash.Update();
+        _blobShipHeadLightFlash.Update();
     }
 
     public override void Draw(GameTime gameTime)

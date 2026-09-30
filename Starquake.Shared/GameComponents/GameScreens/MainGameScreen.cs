@@ -214,102 +214,142 @@ public class MainGameScreen : GameComponentBase, IGameScreen
     {
         if (GameEngine.InTestMode)
         {
-            if (Keyboard.GetState().IsKeyDown(Keys.J))
-            {
-                GameEngine.BlobStatusPanel.Platforms = TestModeSuppliesRestored;
-                GameEngine.BlobStatusPanel.FirePower = TestModeSuppliesRestored;
-            }
-
-            if (Keyboard.GetState().IsKeyDown(Keys.T))
-            {
-                _testRumbleSoundId = GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("Rumble", true);
-            }
-            else if (Keyboard.GetState().IsKeyUp(Keys.R))
-            {
-                if (_testRumbleSoundId != Guid.Empty)
-                {
-                    GameEngine.ContentResourceManager.GetSoundFxEngine()
-                        .StopSound(_testRumbleSoundId, SoundFade.Medium);
-                }
-            }
-
-            // Test quit to game over screen
-            if (ToggleKeys.GetPressedKey() == GameEngine.PlayerKeys.Quit)
-            {
-                GameEngine.CurrentGameScreen = GameScreenType.GameOver;
-                GameEngine.GetGameScreen(GameScreenType.GameOver)
-                    .PerformPostScreenChangeActions(GameScreenType.MainGame, null);
-            }
-
-            // Test game complete screen
-            if (ToggleKeys.GetPressedKey() == Keys.W)
-            {
-                GameEngine.CurrentGameScreen = GameScreenType.GameComplete;
-                GameEngine.GetGameScreen(GameScreenType.GameComplete)
-                    .PerformPostScreenChangeActions(GameScreenType.MainGame, null);
-            }
-
-            // Test completing core
-            if (ToggleKeys.GetPressedKey() == Keys.C)
-            {
-                foreach (var element in GameEngine.Elements.Elements)
-                {
-                    element.ElementState = CoreElementState.Replaced;
-                }
-            }
-
-            // Test intro sequence
-            if (ToggleKeys.GetPressedKey() == Keys.I)
-            {
-                GameEngine.IntroSequence.Reset();
-            }
-
-            // Test Unstick routine
-            if (ToggleKeys.GetPressedKey() == Keys.U)
-            {
-                GameEngine.Player.UnstickBlobFromTiles();
-            }
+            HandleTestModeKeys();
         }
 
-        // Fade screen back up
-        if (!GameEngine.IntroSequence.SequenceRunning ||
-            GameEngine.IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
+        if (GameIsInPlay)
         {
-            if (ScreenFade < ColourLevels.Full)
-            {
-                ScreenFade = ScreenFade + ScreenFadeSpeed;
-            }
-
-            if (ScreenFade > ColourLevels.Full)
-            {
-                ScreenFade = ColourLevels.Full;
-            }
+            FadeScreenBackUp();
         }
 
-        // Update the screen effect engine
         GameEngine.ScreenEffectEngine.Update();
         GameEngine.GameScreens.Update(gameTime);
 
-        if (!GameEngine.IntroSequence.SequenceRunning ||
-            GameEngine.IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
+        if (GameIsInPlay)
         {
-            if (!GameEngine.ScreenEffectEngine.HaltBlobAndNasties)
-            {
-                GameEngine.Player.Update(gameTime);
-            }
+            UpdateBlob(gameTime);
+        }
 
-            // Update blob's death routine. Blob is revived the frame after he reaches Dead, so
-            // the animation's own state has to keep it alive while the explosion fades out
-            if (GameEngine.Player.BlobsState == BlobState.Dead ||
-                GameEngine.Player.BlobsState == BlobState.Dying ||
-                GameEngine.Player.BlobsState == BlobState.Overloading ||
-                GameEngine.BlobKiller.Active)
+        UpdateShipSmoke(gameTime);
+
+        if (GameIsInPlay)
+        {
+            UpdateWorld(gameTime);
+            EndGameIfOutOfLives();
+            ShakeScreen();
+        }
+
+        if (GameEngine.IntroSequence.SequenceRunning ||
+            GameEngine.IntroSequence.SequenceStage == IntroSequenceStage.Finished)
+        {
+            GameEngine.IntroSequence.Update(gameTime);
+        }
+    }
+
+    /// <summary>
+    ///     Whether the blob is under the player's control. The intro sequence flies over the same
+    ///     screen before handing it over, and four separate blocks of this update used to spell that
+    ///     test out.
+    /// </summary>
+    private bool GameIsInPlay =>
+        !GameEngine.IntroSequence.SequenceRunning ||
+        GameEngine.IntroSequence.SequenceStage == IntroSequenceStage.EndPause;
+
+    private void HandleTestModeKeys()
+    {
+        if (Keyboard.GetState().IsKeyDown(Keys.J))
+        {
+            GameEngine.BlobStatusPanel.Platforms = TestModeSuppliesRestored;
+            GameEngine.BlobStatusPanel.FirePower = TestModeSuppliesRestored;
+        }
+
+        if (Keyboard.GetState().IsKeyDown(Keys.T))
+        {
+            _testRumbleSoundId = GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("Rumble", true);
+        }
+        else if (Keyboard.GetState().IsKeyUp(Keys.R))
+        {
+            if (_testRumbleSoundId != Guid.Empty)
             {
-                GameEngine.BlobKiller.Update(gameTime);
+                GameEngine.ContentResourceManager.GetSoundFxEngine()
+                    .StopSound(_testRumbleSoundId, SoundFade.Medium);
             }
         }
 
-        // Update Blob's ship smoke
+        // Test quit to game over screen
+        if (ToggleKeys.GetPressedKey() == GameEngine.PlayerKeys.Quit)
+        {
+            GameEngine.CurrentGameScreen = GameScreenType.GameOver;
+            GameEngine.GetGameScreen(GameScreenType.GameOver)
+                .PerformPostScreenChangeActions(GameScreenType.MainGame, null);
+        }
+
+        // Test game complete screen
+        if (ToggleKeys.GetPressedKey() == Keys.W)
+        {
+            GameEngine.CurrentGameScreen = GameScreenType.GameComplete;
+            GameEngine.GetGameScreen(GameScreenType.GameComplete)
+                .PerformPostScreenChangeActions(GameScreenType.MainGame, null);
+        }
+
+        // Test completing core
+        if (ToggleKeys.GetPressedKey() == Keys.C)
+        {
+            foreach (var element in GameEngine.Elements.Elements)
+            {
+                element.ElementState = CoreElementState.Replaced;
+            }
+        }
+
+        // Test intro sequence
+        if (ToggleKeys.GetPressedKey() == Keys.I)
+        {
+            GameEngine.IntroSequence.Reset();
+        }
+
+        // Test Unstick routine
+        if (ToggleKeys.GetPressedKey() == Keys.U)
+        {
+            GameEngine.Player.UnstickBlobFromTiles();
+        }
+    }
+
+    private void FadeScreenBackUp()
+    {
+        if (ScreenFade < ColourLevels.Full)
+        {
+            ScreenFade = ScreenFade + ScreenFadeSpeed;
+        }
+
+        if (ScreenFade > ColourLevels.Full)
+        {
+            ScreenFade = ColourLevels.Full;
+        }
+    }
+
+    private void UpdateBlob(GameTime gameTime)
+    {
+        if (!GameEngine.ScreenEffectEngine.HaltBlobAndNasties)
+        {
+            GameEngine.Player.Update(gameTime);
+        }
+
+        // Update blob's death routine. Blob is revived the frame after he reaches Dead, so
+        // the animation's own state has to keep it alive while the explosion fades out
+        if (GameEngine.Player.BlobsState == BlobState.Dead ||
+            GameEngine.Player.BlobsState == BlobState.Dying ||
+            GameEngine.Player.BlobsState == BlobState.Overloading ||
+            GameEngine.BlobKiller.Active)
+        {
+            GameEngine.BlobKiller.Update(gameTime);
+        }
+    }
+
+    /// <summary>
+    ///     The smoke from the wreck of the blob's ship, which only exists on the screen it crashed on.
+    /// </summary>
+    private void UpdateShipSmoke(GameTime gameTime)
+    {
         if (GameEngine.GameScreens.ScreenNumber == 8)
         {
             if (GameEngine.GameScreens.BlobsShipSmoke1 != null)
@@ -326,105 +366,104 @@ public class MainGameScreen : GameComponentBase, IGameScreen
                     GameEngine.IntroSequence.BlobSpaceShipYPos, gameTime);
             }
         }
+    }
 
-        if (!GameEngine.IntroSequence.SequenceRunning ||
-            GameEngine.IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
+    private void UpdateWorld(GameTime gameTime)
+    {
+        if (!GameEngine.IntroSequence.SequenceRunning)
         {
-            // Put the delay stuff in here
-            if (!GameEngine.IntroSequence.SequenceRunning)
+            if (!GameEngine.ScreenEffectEngine.HaltBlobAndNasties)
             {
-                if (!GameEngine.ScreenEffectEngine.HaltBlobAndNasties)
-                {
-                    GameEngine.Nasties.Update(gameTime);
-                }
-            }
-
-            GameEngine.TunnelAnimations.Update(gameTime);
-            GameEngine.ConveyerNastiesInstance.Update(gameTime);
-            GameEngine.ElectricityNodeGateEngine.Update();
-
-            // Update breakable bridges
-            GameEngine.BreakableBridgesEngine.Update();
-
-            // No lives left - so finish the game
-            if (GameEngine.Player.BlobsState == BlobState.Gameover)
-            {
-                // Disable the periodic sound engine and kill all soudns immediately
-                GameEngine.ContentResourceManager.GetSoundFxEngine().DisablePeriodicBackgroundSounds(true);
-
-                // Change to gameover screen
-                GameEngine.GetGameScreen(GameScreenType.GameOver)
-                    .PerformPostScreenChangeActions(GameScreenType.MainGame, null);
-                GameEngine.CurrentGameScreen = GameScreenType.GameOver;
-            }
-
-            // Randomly decide when to shake the screen
-            var xShakeOffset = 0;
-            var yShakeOffset = 0;
-
-            if (!GameEngine.IntroSequence.SequenceRunning)
-            {
-                var shakingScreenTime = GameEngine.RandomNumberGenerator.Next(0, ShakeOdds);
-
-                if (shakingScreenTime == ShakeTrigger && !_shakingScreen)
-                {
-                    _shakingScreenCount = GameEngine.RandomNumberGenerator.Next(ShakeShortest, ShakeLongest);
-                    _shakingScreen = true;
-                }
-            }
-
-            if (GameEngine.IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
-            {
-                _shakingScreenCount = IntroShakeDuration;
-                _shakingScreen = true;
-            }
-
-            // Shake the screen, but only if a screen effect is not active
-            if (GameEngine.ScreenEffectEngine.ActiveScreenEffect == null)
-            {
-                if (_shakingScreen)
-                {
-                    xShakeOffset = GameEngine.RandomNumberGenerator.Next(0, 5);
-                    yShakeOffset = GameEngine.RandomNumberGenerator.Next(0, 5);
-
-                    _shakingScreenCounter++;
-
-                    // Play rumble sound
-                    _shakeRumbleSoundId = GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("Rumble", true);
-
-                    if (_shakingScreenCounter > _shakingScreenCount)
-                    {
-                        _shakingScreenCounter = 0;
-                        _shakingScreen = false;
-                    }
-                }
-                else
-                {
-                    if (xShakeOffset > 0)
-                    {
-                        xShakeOffset = xShakeOffset - 1;
-                    }
-
-                    if (yShakeOffset > 0)
-                    {
-                        yShakeOffset = yShakeOffset - 1;
-                    }
-
-                    GameEngine.ContentResourceManager.GetSoundFxEngine()
-                        .StopSound(_shakeRumbleSoundId, SoundFade.Medium);
-                }
-
-                if (yShakeOffset > 0 && xShakeOffset > 0)
-                {
-                    GameEngine.ScreenEffectEngine.MoveViewPort("GameArea", xShakeOffset, yShakeOffset);
-                }
+                GameEngine.Nasties.Update(gameTime);
             }
         }
 
-        if (GameEngine.IntroSequence.SequenceRunning ||
-            GameEngine.IntroSequence.SequenceStage == IntroSequenceStage.Finished)
+        GameEngine.TunnelAnimations.Update(gameTime);
+        GameEngine.ConveyerNastiesInstance.Update(gameTime);
+        GameEngine.ElectricityNodeGateEngine.Update();
+
+        // Update breakable bridges
+        GameEngine.BreakableBridgesEngine.Update();
+    }
+
+    private void EndGameIfOutOfLives()
+    {
+        if (GameEngine.Player.BlobsState == BlobState.Gameover)
         {
-            GameEngine.IntroSequence.Update(gameTime);
+            // Disable the periodic sound engine and kill all soudns immediately
+            GameEngine.ContentResourceManager.GetSoundFxEngine().DisablePeriodicBackgroundSounds(true);
+
+            // Change to gameover screen
+            GameEngine.GetGameScreen(GameScreenType.GameOver)
+                .PerformPostScreenChangeActions(GameScreenType.MainGame, null);
+            GameEngine.CurrentGameScreen = GameScreenType.GameOver;
+        }
+    }
+
+    /// <summary>
+    ///     The occasional rumble. It starts itself at random, always runs once as the intro sequence hands
+    ///     over, and is suppressed while a screen effect owns the viewport.
+    /// </summary>
+    private void ShakeScreen()
+    {
+        var xShakeOffset = 0;
+        var yShakeOffset = 0;
+
+        if (!GameEngine.IntroSequence.SequenceRunning)
+        {
+            var shakingScreenTime = GameEngine.RandomNumberGenerator.Next(0, ShakeOdds);
+
+            if (shakingScreenTime == ShakeTrigger && !_shakingScreen)
+            {
+                _shakingScreenCount = GameEngine.RandomNumberGenerator.Next(ShakeShortest, ShakeLongest);
+                _shakingScreen = true;
+            }
+        }
+
+        if (GameEngine.IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
+        {
+            _shakingScreenCount = IntroShakeDuration;
+            _shakingScreen = true;
+        }
+
+        if (GameEngine.ScreenEffectEngine.ActiveScreenEffect == null)
+        {
+            if (_shakingScreen)
+            {
+                xShakeOffset = GameEngine.RandomNumberGenerator.Next(0, 5);
+                yShakeOffset = GameEngine.RandomNumberGenerator.Next(0, 5);
+
+                _shakingScreenCounter++;
+
+                // Play rumble sound
+                _shakeRumbleSoundId = GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("Rumble", true);
+
+                if (_shakingScreenCounter > _shakingScreenCount)
+                {
+                    _shakingScreenCounter = 0;
+                    _shakingScreen = false;
+                }
+            }
+            else
+            {
+                if (xShakeOffset > 0)
+                {
+                    xShakeOffset = xShakeOffset - 1;
+                }
+
+                if (yShakeOffset > 0)
+                {
+                    yShakeOffset = yShakeOffset - 1;
+                }
+
+                GameEngine.ContentResourceManager.GetSoundFxEngine()
+                    .StopSound(_shakeRumbleSoundId, SoundFade.Medium);
+            }
+
+            if (yShakeOffset > 0 && xShakeOffset > 0)
+            {
+                GameEngine.ScreenEffectEngine.MoveViewPort("GameArea", xShakeOffset, yShakeOffset);
+            }
         }
     }
 

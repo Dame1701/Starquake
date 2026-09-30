@@ -98,175 +98,188 @@ public class Nasties : GameComponentBase
 
     public override void Update(GameTime gameTime)
     {
-        if (GameEngine.Player.BlobsState == BlobState.Normal)
+        if (GameEngine.Player.BlobsState != BlobState.Normal)
         {
-            // Cancel any nasty collision effect
-            GameEngine.Player.BlobTouchedByNasty = false;
+            Reset();
+            return;
+        }
 
-            if (Keyboard.GetState().IsKeyDown(Keys.R))
-            {
+        // Cancel any nasty collision effect
+        GameEngine.Player.BlobTouchedByNasty = false;
+
+        if (Keyboard.GetState().IsKeyDown(Keys.R))
+        {
                 for (var a = 0; a < _nastyCount; a++)
                 {
                     _nasties[a].NastyState = NastyState.Dead;
                 }
+        }
+
+        // Only the first nasty touching blob drains his energy - all of them at once is too quick
+        // and unfair
+        var nastyInteractingWithBlob = false;
+        var nastySpawnedCounter = 0;
+
+        for (var a = 0; a < _nastyCount; a++)
+        {
+            if (_nasties[a].NastyState == NastyState.Normal)
+            {
+                nastySpawnedCounter++;
             }
 
-            // Flag that's set if a nasty is touching Blob already - stops all of them zapping his energy at once which to too quick and unfair
-            var nastyInteractingWithBlob = false;
-            var nastySpawnedCounter = 0;
-
-            for (var a = 0; a < _nastyCount; a++)
+            // Setting the coordinates to a setting less than 0 will suspect all updates
+            if (_nasties[a].XPos <= UnplacedNastyPosition ||
+                _nasties[a].YPos <= UnplacedNastyPosition)
             {
-                if (_nasties[a].NastyState == NastyState.Normal)
+                continue;
+            }
+
+            _nasties[a].Update(gameTime);
+
+            TouchBlob(a, ref nastyInteractingWithBlob);
+            TakeAnyFireHit(a);
+            ElectrifyOnGateContact(a);
+        }
+
+        if (nastySpawnedCounter == _nastyCount)
+        {
+                GameEngine.ContentResourceManager.GetSoundFxEngine().EnablePeriodicBackgroundSounds();
+        }
+
+        if (_nastySmokes != null)
+        {
+                _nastySmokes.Update(gameTime);
+        }
+    }
+
+    /// <summary>
+    ///     The blob's box is pulled in by eight pixels all round so that a near miss is not counted as a
+    ///     touch. Only the first nasty to make contact in a frame raises the event.
+    /// </summary>
+    private void TouchBlob(int a, ref bool nastyInteractingWithBlob)
+    {
+        if (CollisionDetection.Check(
+                GameEngine.Player.BlobXPos + 8,
+                GameEngine.Player.BlobYPos + 8,
+                GameEngine.Player.BlobWidth - 16,
+                GameEngine.Player.BlobHeight - 16,
+                _nasties[a].XPos,
+                _nasties[a].YPos,
+                _nasties[a].NastyWidth,
+                _nasties[a].NastyHeight))
+        {
+            if (_nasties[a].NastyState == NastyState.Normal)
+            {
+                // Raise the event
+                if (OnNastyInteractionWithBlob != null)
                 {
-                    nastySpawnedCounter++;
+                    if (!nastyInteractingWithBlob)
+                    {
+                        nastyInteractingWithBlob = true;
+                        OnNastyInteractionWithBlob(NastyInteractionType.HitBlob, _nasties[a].NastyType);
+                    }
                 }
 
-                // Setting the coordinates to a setting less than 0 will suspect all updates
-                if (_nasties[a].XPos > UnplacedNastyPosition &&
-                    _nasties[a].YPos > UnplacedNastyPosition)
-                {
-                    _nasties[a].Update(gameTime);
+                // Trigger the blob animation
+                GameEngine.Player.BlobTouchedByNasty = true;
+            }
+        }
+    }
 
-                    // Check for a collision between a nasty and Blob and raise an event
-                    // Since we have a reference to Blob directly, we can send the call to animate contact directly
-                    // We raise the event to affect the status panel
-                    // Going to move the offsets etc. in a bit so it's not too precise and unfair!
+    private void TakeAnyFireHit(int a)
+    {
+        if (GameEngine.Player.BlobHasFired)
+        {
+            if (CollisionDetection.Check(
+                    GameEngine.Player.BlobFireX,
+                    GameEngine.Player.BlobFireY,
+                    FireWidth,
+                    FireHeight,
+                    _nasties[a].XPos,
+                    _nasties[a].YPos,
+                    _nasties[a].NastyWidth,
+                    _nasties[a].NastyHeight))
+            {
+                if (_nasties[a].NastyState == NastyState.Normal ||
+                    _nasties[a].NastyState == NastyState.Birth)
+                {
+                    GameEngine.Player.RegisterFireHit();
+                    _nasties[a].NastyState = NastyState.Shot;
+
+                    if (_nasties[a].NastyType == NastyType.Spiky)
+                    {
+                        GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobExplodes");
+                    }
+                    else
+                    {
+                        GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("NastyDeath");
+                    }
+
+                    if (OnNastyInteractionWithBlob != null)
+                    {
+                        OnNastyInteractionWithBlob(NastyInteractionType.BlobShot,
+                            _nasties[a].NastyType);
+                    }
+                }
+            }
+        }
+    }
+
+    private void ElectrifyOnGateContact(int a)
+    {
+        _nasties[a].Smoking = false;
+
+        if (GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers != null)
+        {
+            for (var b = 0;
+                 b < GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers.Length;
+                 b++)
+            {
+                if (GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].ElectricityOn)
+                {
                     if (CollisionDetection.Check(
-                            GameEngine.Player.BlobXPos + 8,
-                            GameEngine.Player.BlobYPos + 8,
-                            GameEngine.Player.BlobWidth - 16,
-                            GameEngine.Player.BlobHeight - 16,
+                            GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
+                                .X,
+                            GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
+                                .Y,
+                            ElectricityArcWidth,
+                            ElectricityArcHeight,
                             _nasties[a].XPos,
                             _nasties[a].YPos,
                             _nasties[a].NastyWidth,
                             _nasties[a].NastyHeight))
                     {
-                        if (_nasties[a].NastyState == NastyState.Normal)
+                        var nastyTravelDirection = CollisionDetection.CheckCollisionDirection(
+                            _nasties[a].Speed,
+                            _nasties[a].XPos,
+                            _nasties[a].YPos,
+                            _nasties[a].NastyWidth,
+                            _nasties[a].NastyHeight,
+                            GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
+                                .X,
+                            GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
+                                .Y,
+                            ElectricityArcWidth,
+                            ElectricityArcHeight);
+
+                        if (nastyTravelDirection != Direction.None &&
+                            _nasties[a].NastyState == NastyState.Normal)
                         {
-                            // Raise the event
-                            if (OnNastyInteractionWithBlob != null)
+                            if (_nastySmokes != null)
                             {
-                                if (!nastyInteractingWithBlob)
-                                {
-                                    nastyInteractingWithBlob = true;
-                                    OnNastyInteractionWithBlob(NastyInteractionType.HitBlob, _nasties[a].NastyType);
-                                }
-                            }
-
-                            // Trigger the blob animation
-                            GameEngine.Player.BlobTouchedByNasty = true;
-                        }
-                    }
-
-                    // Has blob shot a nasty
-                    if (GameEngine.Player.BlobHasFired)
-                    {
-                        if (CollisionDetection.Check(
-                                GameEngine.Player.BlobFireX,
-                                GameEngine.Player.BlobFireY,
-                                FireWidth,
-                                FireHeight,
-                                _nasties[a].XPos,
-                                _nasties[a].YPos,
-                                _nasties[a].NastyWidth,
-                                _nasties[a].NastyHeight))
-                        {
-                            if (_nasties[a].NastyState == NastyState.Normal ||
-                                _nasties[a].NastyState == NastyState.Birth)
-                            {
-                                GameEngine.Player.RegisterFireHit();
-                                _nasties[a].NastyState = NastyState.Shot;
-
-                                if (_nasties[a].NastyType == NastyType.Spiky)
-                                {
-                                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobExplodes");
-                                }
-                                else
-                                {
-                                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("NastyDeath");
-                                }
-
-                                if (OnNastyInteractionWithBlob != null)
-                                {
-                                    OnNastyInteractionWithBlob(NastyInteractionType.BlobShot,
-                                        _nasties[a].NastyType);
-                                }
-                            }
-                        }
-                    }
-
-                    // Has the nasty hit an electricity gate...?
-                    _nasties[a].Smoking = false;
-
-                    if (GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers != null)
-                    {
-                        for (var b = 0;
-                             b < GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers.Length;
-                             b++)
-                        {
-                            if (GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].ElectricityOn)
-                            {
-                                if (CollisionDetection.Check(
-                                        GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
-                                            .X,
-                                        GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
-                                            .Y,
-                                        ElectricityArcWidth,
-                                        ElectricityArcHeight,
-                                        _nasties[a].XPos,
-                                        _nasties[a].YPos,
-                                        _nasties[a].NastyWidth,
-                                        _nasties[a].NastyHeight))
-                                {
-                                    var nastyTravelDirection = CollisionDetection.CheckCollisionDirection(
-                                        _nasties[a].Speed,
-                                        _nasties[a].XPos,
-                                        _nasties[a].YPos,
-                                        _nasties[a].NastyWidth,
-                                        _nasties[a].NastyHeight,
-                                        GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
-                                            .X,
-                                        GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
-                                            .Y,
-                                        ElectricityArcWidth,
-                                        ElectricityArcHeight);
-
-                                    if (nastyTravelDirection != Direction.None &&
-                                        _nasties[a].NastyState == NastyState.Normal)
-                                    {
-                                        if (_nastySmokes != null)
-                                        {
-                                            _nasties[a].Smoking = true;
-                                            _nastySmokes.Start(
-                                                SpriteHelpers.GetSpriteLocationOffset(_nasties[a].Direction,
-                                                    _nasties[a].NastyWidth, _nasties[a].NastyHeight).X +
-                                                _nasties[a].XPos,
-                                                SpriteHelpers.GetSpriteLocationOffset(_nasties[a].Direction,
-                                                    _nasties[a].NastyWidth, _nasties[a].NastyHeight).Y +
-                                                _nasties[a].YPos);
-                                        }
-                                    }
-                                }
+                                _nasties[a].Smoking = true;
+                                _nastySmokes.Start(
+                                    SpriteHelpers.GetSpriteLocationOffset(_nasties[a].Direction,
+                                        _nasties[a].NastyWidth, _nasties[a].NastyHeight).X +
+                                    _nasties[a].XPos,
+                                    SpriteHelpers.GetSpriteLocationOffset(_nasties[a].Direction,
+                                        _nasties[a].NastyWidth, _nasties[a].NastyHeight).Y +
+                                    _nasties[a].YPos);
                             }
                         }
                     }
                 }
             }
-
-            if (nastySpawnedCounter == _nastyCount)
-            {
-                GameEngine.ContentResourceManager.GetSoundFxEngine().EnablePeriodicBackgroundSounds();
-            }
-
-            if (_nastySmokes != null)
-            {
-                _nastySmokes.Update(gameTime);
-            }
-        }
-        else
-        {
-            Reset();
         }
     }
 
