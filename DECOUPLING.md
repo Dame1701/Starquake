@@ -433,8 +433,30 @@ class, which is a different task from decoupling and should not be smuggled into
 what a host does.
 
 So the engine is now what the plan said it should be: a composition root that wires about twenty
-objects once at boot, plus one screen that legitimately talks to all of them. `GameEngine.cs` has
-grown 66 lines, all of it explicit wiring where there used to be `this`.
+objects once at boot, plus one screen that legitimately talks to all of them.
+
+### Two follow-ups, once the coupling was gone
+
+With nothing reaching into the engine any more, two things about it became visible.
+
+**The host/engine boundary leaked, in two places.** `GameHost`'s job is real and separable — it
+derives from MonoGame's `Game` and turns a variable render loop into exactly sixty logic frames a
+second, which MonoGame's own fixed step cannot express. But the composition size lived on the host
+as a pair of consts, when sixteen of the eighteen places that read it are in the game (now
+`Constants.CompositionSize`), and the host drew the CRT scanline overlay by reaching in for the
+engine's sprite collection, flag and transform (now the engine's own last draw call). `GameHost.Draw`
+is one line and the host touches no engine member at all.
+
+**The engine was doing four jobs, and one lifted out cleanly.** A hundred and sixty lines were a
+manifest — what the game loads and the name each thing loads under — touching nothing but the
+resource manager. Now `ContentManifest.RegisterAll`. Three of the eighteen `Define*` methods were
+*not* manifest, though: two build the fonts and the boot sprites and need the content manager and
+graphics device, so they stayed. Measuring which was which was the whole of the work.
+
+`GameEngine.cs` is **1238 lines**, from 1371 at the start — having first grown to 1437, because
+every `this` it used to pass became an explicit argument list. What is left is three jobs: the
+composition root, the frame loop, and an event broker of six small handlers where two objects that
+must not know each other meet. `GameHost` is 214 lines from 240.
 
 ## Where the first pass stopped
 
