@@ -719,7 +719,7 @@ public class Nasty : GameComponentBase
             if (_nastyType == NastyType.CoreGuardian)
             {
                 MoveNastyOneStep(ref amountToMoveX, ref amountToMoveY);
-                DiagonalBouncing(0, 0);
+                DiagonalBouncing();
             }
             else
             {
@@ -756,19 +756,12 @@ public class Nasty : GameComponentBase
                     else if (MovementType == MoveType.DiagonalBouncing)
                     {
                         _constantMovement = true;
-                        if (GameEngine.Player != null)
-                        {
-                            DiagonalBouncing(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos);
-                        }
-                        else
-                        {
-                            DiagonalBouncing(0, 0);
-                        }
+                        DiagonalBouncing();
                     }
                     else if (MovementType == MoveType.DiagonalBouncingInSteps)
                     {
                         _constantMovement = false;
-                        DiagonalBouncingInSteps(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos);
+                        DiagonalBouncingInSteps();
                     }
                     else if (MovementType == MoveType.RandomMovementsAllDirections)
                     {
@@ -906,7 +899,7 @@ public class Nasty : GameComponentBase
         }
     }
 
-    private void DiagonalBouncingInSteps(int blobsXPosition, int blobsYPosition)
+    private void DiagonalBouncingInSteps()
     {
         if (_lastCollisionDirection == Direction.None || Direction == Direction.None)
         {
@@ -991,7 +984,7 @@ public class Nasty : GameComponentBase
         }
     }
 
-    private void DiagonalBouncing(int blobsXPosition, int blobsYPosition)
+    private void DiagonalBouncing()
     {
         if (Direction == Direction.None)
         {

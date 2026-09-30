@@ -2003,7 +2003,7 @@ public class Blob : GameComponentBase
                     GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobOverloadAlarm", 1.0f, false);
                 }
 
-                if (_blobOverloadState < 3 && _blobAlarmSoundCounter < 60)
+                if (_blobOverloadState < OverloadExploded && _blobAlarmSoundCounter < OverloadAlarmFrames)
                 {
                     _blobAlarmSoundCounter++;
                 }
@@ -2018,28 +2018,28 @@ public class Blob : GameComponentBase
                         _blobJumpPlatformEngine.ResetPlatforms();
                         GameEngine.ElectricityNodeGateEngine.Reset();
 
-                        if (_blobOverloadState == 0)
+                        if (_blobOverloadState == OverloadSwelling)
                         {
-                            _blobScale = _blobScale + 0.30f;
+                            _blobScale = _blobScale + OverloadScaleStep;
 
-                            if (_blobScale > 1.6f)
+                            if (_blobScale > OverloadMaxScale)
                             {
-                                _blobOverloadState = 1;
-                                _blobScale = 1.6f;
+                                _blobOverloadState = OverloadShrinking;
+                                _blobScale = OverloadMaxScale;
                             }
                         }
-                        else if (_blobOverloadState == 1)
+                        else if (_blobOverloadState == OverloadShrinking)
                         {
-                            _blobScale = _blobScale - 0.30f;
+                            _blobScale = _blobScale - OverloadScaleStep;
 
-                            if (_blobScale < -1f)
+                            if (_blobScale < OverloadMinScale)
                             {
-                                _blobScale = -1f;
-                                _blobOverloadState = 3;
+                                _blobScale = OverloadMinScale;
+                                _blobOverloadState = OverloadExploded;
                             }
                         }
 
-                        if (_blobOverloadState == 3)
+                        if (_blobOverloadState == OverloadExploded)
                         {
                             GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobExplodes", false);
                             GameEngine.BlobKiller.Trigger(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos, true);
@@ -2054,7 +2054,7 @@ public class Blob : GameComponentBase
             {
                 if (!GameEngine.BlobKiller.Triggered)
                 {
-                    _blobOverloadState = 0;
+                    _blobOverloadState = OverloadSwelling;
                     _blobScale = 1.0f;
                     // If Blob is killed by a spiky tile, we reset his position to when he entered
                     if (_resetBlobToScreenEntryPoint)
@@ -2441,17 +2441,17 @@ public class Blob : GameComponentBase
                 GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName)
                     .Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
 
-                var temp = _blobScale - 0.4f;
-                for (var a = 0; a < 5; a++)
+                var temp = _blobScale - OverloadFlareFirstScale;
+                for (var a = 0; a < OverloadFlareCopies; a++)
                 {
                     if (temp >= 0f)
                     {
                         GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName)
                             .DrawSprite(BlobFrame, _blobXPos, _blobYPos,
-                                ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, 150), temp, 0f);
+                                ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, OverloadFlareAlpha), temp, 0f);
                     }
 
-                    temp += 0.2f;
+                    temp += OverloadFlareScaleStep;
                 }
 
                 GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName).End();
