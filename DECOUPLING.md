@@ -12,6 +12,27 @@ leaves the 40 tests passing, so every stage is independently shippable and a bis
 stages apart. No behaviour changes are smuggled in; where a real defect is found it gets its own
 commit, separate from any move.
 
+## Where this has got to
+
+| Landed | What it did |
+| --- | --- |
+| Stage 1 | The ten swappable sheet names become one `ResourceNames` value object with two instances. Ten public members become one. |
+| Stage 2 | `GetInstance()` and `_sInstance` deleted. `SpritePixelMatrix` takes a `Random` and is the first class off the map entirely. |
+| — | Both survey errors written up under *What the survey missed*, and the metric script corrected. |
+| Stage 4 (part) | `SpriteCollection` takes a `GraphicsDeviceManager` and keeps the `ContentManager` it was already handed; `Clone` needs no argument. `SoundEffectEngine` takes a `ContentManager` and a `Random`. |
+| — | `GameComponentBase` no longer holds an engine for its 22 subclasses. Each holds its own, so each can now be narrowed alone. |
+
+The map is down to 48 coupled files from 58, and the widest row that is not one of the six broad
+consumers is four members. Stage 3 is next, once `ParticleEngine`'s three particle effects are
+narrowed — they want `ScreenEffectEngine`, which is Presentation cluster work, so stage 3 is still
+waiting on a piece of stage 5.
+
+The 21 private `GameEngine` fields the base-class change created are PascalCase, against the
+convention for private fields, and deliberately not renamed: the bodies already spell the field
+that way in every one of those classes, `ScreenEffectBase` already holds its engine under the same
+name, and stages 4 to 6 delete most of these fields anyway. Renaming them would be a large diff in
+service of a name that is going away.
+
 ## Why not just rewrite the constructors
 
 The instinct — inventory what `GameEngine` provides, find every consumer, feed each one its
