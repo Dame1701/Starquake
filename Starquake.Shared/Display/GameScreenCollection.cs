@@ -1687,14 +1687,18 @@ public class GameScreenCollection : GameComponentBase
     ///     Scatters the pick-ups, power-ups, pyramids and core elements over the whole world map. Called
     ///     once at the start of a game, not on a screen change.
     /// </summary>
+    /// <remarks>
+    ///     The scatter used to draw from a Random of its own, seeded from the clock, while the class was
+    ///     already holding one from its constructor. It uses that one now, so a world can be reproduced
+    ///     from the seed that made it - which is the only way a layout described in a bug report can be
+    ///     got back, and the only way any of this can be tested.
+    /// </remarks>
     public void Reset()
     {
         ScreenNumber = WorldMap.ShipWreckScreenNumber;
 
-        var r = new Random((int)DateTime.Now.Ticks);
-
-        List<int> powerUpScreens = ChoosePowerUpScreens(r);
-        PlaceScreenObjects(r, powerUpScreens);
+        List<int> powerUpScreens = ChoosePowerUpScreens();
+        PlaceScreenObjects(powerUpScreens);
 
         var screensContainingCheopsPyramid = new List<GameScreenData>();
         var screensContainingCoreElements = new List<GameScreenData>();
@@ -1711,7 +1715,7 @@ public class GameScreenCollection : GameComponentBase
     ///     Picks the screens a power-up goes on. Only screens that can hold more than one object qualify,
     ///     because a power-up has to share with whatever is already there.
     /// </summary>
-    private List<int> ChoosePowerUpScreens(Random r)
+    private List<int> ChoosePowerUpScreens()
     {
         var powerUpScreens = new List<int>();
 
@@ -1721,7 +1725,7 @@ public class GameScreenCollection : GameComponentBase
             int screenChosen = -1;
             while (screenChosen < 0)
             {
-                int temp = r.Next(0, WorldMap.LastScreenNumber);
+                int temp = _randomNumberGenerator.Next(0, WorldMap.LastScreenNumber);
 
                 // Ensure more than one location
                 if (GetPotentialLocations(temp).Count > 1)
@@ -1744,7 +1748,7 @@ public class GameScreenCollection : GameComponentBase
     ///     Fills in every screen but the core: its pick-ups, its power-up if it drew one, its pyramid and
     ///     its access code.
     /// </summary>
-    private void PlaceScreenObjects(Random r, List<int> powerUpScreens)
+    private void PlaceScreenObjects(List<int> powerUpScreens)
     {
         for (int a = 0; a < _gameScreens.Length; a++)
         {
@@ -1761,12 +1765,12 @@ public class GameScreenCollection : GameComponentBase
 
             if (potentialLocations.Count > 0)
             {
-                PlacePowerUpAndPickUp(a, r, potentialLocations, placePickup);
+                PlacePowerUpAndPickUp(a, potentialLocations, placePickup);
             }
 
             if (potentialLocations.Count > 0)
             {
-                PlaceCheopsPyramid(a, r, potentialLocations);
+                PlaceCheopsPyramid(a, potentialLocations);
             }
 
             AssignAccessBoothCode(a);
@@ -1779,13 +1783,12 @@ public class GameScreenCollection : GameComponentBase
     /// </summary>
     private void PlacePowerUpAndPickUp(
         int screenNumber,
-        Random r,
         List<InteractiveItem> potentialLocations,
         bool placePickup)
     {
-        int powerUpToSelect = r.Next(potentialLocations.Count);
+        int powerUpToSelect = _randomNumberGenerator.Next(potentialLocations.Count);
         _gameScreens[screenNumber].PowerUp = new InteractiveItem(potentialLocations[powerUpToSelect].XLocation,
-            potentialLocations[powerUpToSelect].YLocation, r.Next(8));
+            potentialLocations[powerUpToSelect].YLocation, _randomNumberGenerator.Next(8));
 
         // Take the powerup location out of the list
         potentialLocations.Remove(potentialLocations[powerUpToSelect]);
@@ -1794,7 +1797,7 @@ public class GameScreenCollection : GameComponentBase
         if (placePickup)
         {
             // Now select another location for our pickup
-            int pickUpToSelect = r.Next(potentialLocations.Count);
+            int pickUpToSelect = _randomNumberGenerator.Next(potentialLocations.Count);
 
             // Check to see if this screen has a preferred location
             InteractiveItem? preferredLocation = GetPreferredLocation(screenNumber);
@@ -1802,7 +1805,7 @@ public class GameScreenCollection : GameComponentBase
             // Place the item in the preferred locateion
             if (preferredLocation != null)
             {
-                preferredLocation.Type = r.Next(28);
+                preferredLocation.Type = _randomNumberGenerator.Next(28);
                 _gameScreens[screenNumber].PickUps.Add(preferredLocation);
                 potentialLocations.Remove(potentialLocations[pickUpToSelect]);
             }
@@ -1811,7 +1814,7 @@ public class GameScreenCollection : GameComponentBase
                 // Place it in the normal randomly selected place
                 _gameScreens[screenNumber].PickUps.Add(new InteractiveItem(
                     potentialLocations[pickUpToSelect].XLocation,
-                    potentialLocations[pickUpToSelect].YLocation, r.Next(28)));
+                    potentialLocations[pickUpToSelect].YLocation, _randomNumberGenerator.Next(28)));
                 potentialLocations.Remove(potentialLocations[pickUpToSelect]);
             }
         }
@@ -1823,10 +1826,9 @@ public class GameScreenCollection : GameComponentBase
     /// </summary>
     private void PlaceCheopsPyramid(
         int screenNumber,
-        Random r,
         List<InteractiveItem> potentialLocations)
     {
-        int cheopsLocationToSelect = r.Next(potentialLocations.Count);
+        int cheopsLocationToSelect = _randomNumberGenerator.Next(potentialLocations.Count);
         _gameScreens[screenNumber].CheopsPyramid = new InteractiveItem(
             potentialLocations[cheopsLocationToSelect].XLocation,
             potentialLocations[cheopsLocationToSelect].YLocation, 0);
