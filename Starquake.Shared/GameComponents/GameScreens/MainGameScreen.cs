@@ -2,10 +2,11 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+using System.Linq;
 using System;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Engines;
@@ -225,7 +226,11 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         }
 
         GameEngine.ScreenEffectEngine.Update();
-        GameEngine.GameScreens.Update(gameTime);
+        GameEngine.GameScreens.Update(
+            gameTime,
+            GameEngine.Player.BlobXPos,
+            GameEngine.Player.BlobYPos,
+            GameEngine.Player.BlobInventory.Contains(Collectables.Key));
 
         if (GameIsInPlay)
         {

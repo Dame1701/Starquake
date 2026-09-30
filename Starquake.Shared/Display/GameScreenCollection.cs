@@ -1175,7 +1175,20 @@ public class GameScreenCollection : GameComponentBase
             _ => null
         };
 
-    public override void Update(GameTime gameTime)
+    /// <summary>
+    ///     Stepped with where the blob is and whether it is carrying a key, rather than holding
+    ///     the blob and asking. Two things on the planet follow the blob - the force field on a
+    ///     key-locked door, which turns green when the blob can open it, and Olly's eyes, which
+    ///     drift after it - and neither needs the blob itself, only three values it can be told.
+    ///     <para>
+    ///         Not an override of <see cref="GameComponentBase.Update" /> any more, which it can
+    ///         afford not to be: the planet is only ever stepped by name from
+    ///         <c>MainGameScreen</c>, never polymorphically with the components in the screen
+    ///         directory. Being told instead of asking is what lets the planet be built before the
+    ///         blob rather than after it, which is the whole of the cycle between them.
+    ///     </para>
+    /// </summary>
+    public void Update(GameTime gameTime, int blobXPos, int blobYPos, bool blobHasKey)
     {
         _keyLockDoors ??= GetKeyLockDoors();
 
@@ -1185,13 +1198,13 @@ public class GameScreenCollection : GameComponentBase
 
             foreach (var keyLockDoor in _keyLockDoors)
             {
-                UpdateKeyLockDoor(keyLockDoor, gameTime);
+                UpdateKeyLockDoor(keyLockDoor, gameTime, blobHasKey);
             }
         }
 
         if (ScreenNumber == OllyScreenNumber)
         {
-            TrackBlobWithOllysEyes();
+            TrackBlobWithOllysEyes(blobXPos, blobYPos);
         }
 
         GameEngine.ContentResourceManager.GetAnimationEngine().Update(gameTime);
@@ -1204,7 +1217,7 @@ public class GameScreenCollection : GameComponentBase
     ///     which is why the tiles flip between <see cref="CollisionTileType.NotBlob" /> and
     ///     <see cref="CollisionTileType.EveryoneHits" /> rather than being removed.
     /// </summary>
-    private void UpdateKeyLockDoor(KeyLockDoor keyLockDoor, GameTime gameTime)
+    private void UpdateKeyLockDoor(KeyLockDoor keyLockDoor, GameTime gameTime, bool blobHasKey)
     {
         if (keyLockDoor.CollisionTiles.Count == 0)
         {
@@ -1224,8 +1237,6 @@ public class GameScreenCollection : GameComponentBase
         {
             _keyDoorForceFieldNoAccess!.Update(keyLockDoor.Location.X + 76 + c, keyLockDoor.Location.Y + 48, gameTime);
         }
-
-        var blobHasKey = GameEngine.Player.BlobInventory.Contains(Collectables.Key);
 
         SetForceFieldColour(blobHasKey ? new Color(0, ColourLevels.Full, 0) : new Color(ColourLevels.Full, 0, 0));
 
@@ -1295,10 +1306,10 @@ public class GameScreenCollection : GameComponentBase
     /// <summary>
     ///     Olly's eyes follow the blob about, damped so they drift rather than snap.
     /// </summary>
-    private void TrackBlobWithOllysEyes()
+    private void TrackBlobWithOllysEyes(int blobXPos, int blobYPos)
     {
-        _ollyEyesX = OllyEyesRestX + (GameEngine.Player.BlobXPos - OllyGazeCentreX) / OllyGazeDamping;
-        _ollyEyesY = OllyEyesRestY + GameEngine.Player.BlobYPos / OllyVerticalGazeDamping;
+        _ollyEyesX = OllyEyesRestX + (blobXPos - OllyGazeCentreX) / OllyGazeDamping;
+        _ollyEyesY = OllyEyesRestY + blobYPos / OllyVerticalGazeDamping;
     }
 
     public void DrawCoreElements(int xPos, int yPos, GameTime gameTime)
