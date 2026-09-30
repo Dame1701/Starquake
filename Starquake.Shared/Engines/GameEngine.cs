@@ -689,12 +689,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     private void BuildComponentsNeedingLoadedContent()
     {
-        // Player (Blob). Built here rather than in Initialise because the three particle
-        // effects he carries are resources, and those do not exist until content loads
-        _player = new Blob(this);
-        Player.OnScreenChanged += Player_OnScreenChanged;
-        Player.OnBlobActionRaised += Player_OnBlobActionRaised;
-
         // Game Screens. Built here rather than in the constructor because the screen data and
         // the collision map it needs are resources, and those do not exist until content loads
         _gameScreens =
@@ -716,6 +710,25 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         // The blob's death throes. After the screen collection, which each thrown-off fragment
         // bounces around.
         _blobKiller = new BlobDeathAnimation(ContentResourceManager, GameScreens, GraphicsSet, RandomNumberGenerator);
+
+        // The blob. After the planet it walks around and the death animation it triggers, neither of
+        // which needs the blob back, and built here rather than in Initialise because the three
+        // particle effects he carries are resources that do not exist until content loads.
+        _player = new Blob(
+            ContentResourceManager,
+            ContentMgr,
+            GameScreens,
+            GraphicsDeviceMgr,
+            GraphicsSet,
+            ScreenDirectory,
+            ScreenEffectEngine,
+            BlobStatusPanel,
+            Session,
+            BlobKiller,
+            BreakableBridgesEngine,
+            RandomNumberGenerator);
+        Player.OnScreenChanged += Player_OnScreenChanged;
+        Player.OnBlobActionRaised += Player_OnBlobActionRaised;
 
         // The intro sequence flies the blob's ship in over the planet and blows it up, so it
         // comes after both the planet and the death animation.
@@ -757,6 +770,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             RandomNumberGenerator,
             ConveyerNastiesInstance);
         ElectricityNodeGateEngine.OnBlobStruckByElectricity += ElectricityNodeGateEngine_OnBlobStruckByElectricity;
+        Player.OnBlobDiedAndRespawned += ElectricityNodeGateEngine.Reset;
 
         // The nasties last of the three: they chase the blob, read the planet, and ask the other two
         // where the conveyers and the electricity are.
