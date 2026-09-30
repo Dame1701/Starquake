@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -67,7 +68,7 @@ public class CoreElement
 
     private readonly GameEngine _gameEngine;
     private readonly IntegerSubtractor _screenFlashFader;
-    private IStandardParticleEffect _coreReplacementEffect;
+    private readonly IStandardParticleEffect _coreReplacementEffect;
 
     private bool _elementReplacementStarted;
 
@@ -99,6 +100,8 @@ public class CoreElement
             _fader3 = new ElementFader(_gameEngine, Direction.Down);
         }
 
+        _coreReplacementEffect = (IStandardParticleEffect)_gameEngine.ContentResourceManager.GetParticleEffectInstance("CoreReplacementParticleEffect", ParticleEffectType.Continual, new TimeSpan(0, 0, 0, 0, ReplacementEffectMilliseconds));
+        _coreReplacementEffect.ParticleEffectComplete += coreReplacementEffect_ParticleEffectComplete;
     }
 
     public CoreElementState ElementState { get; set; }
@@ -107,19 +110,13 @@ public class CoreElement
 
     private int FinalElement { get; }
 
-    public event RaiseEffectComplete OnCoreElementReplaced;
+    public event RaiseEffectComplete? OnCoreElementReplaced;
 
     public void SetFadeToZero()
     {
         _fader1.SetFadeToZero();
         _fader2.SetFadeToZero();
         _fader3.SetFadeToZero();
-    }
-
-    public void LoadContent()
-    {
-        _coreReplacementEffect = (IStandardParticleEffect)_gameEngine.ContentResourceManager.GetParticleEffectInstance("CoreReplacementParticleEffect", ParticleEffectType.Continual, new TimeSpan(0, 0, 0, 0, ReplacementEffectMilliseconds));
-        _coreReplacementEffect.ParticleEffectComplete += coreReplacementEffect_ParticleEffectComplete;
     }
 
     private void coreReplacementEffect_ParticleEffectComplete()

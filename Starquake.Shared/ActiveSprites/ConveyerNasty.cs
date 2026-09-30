@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Animations;
@@ -54,8 +55,8 @@ public class ConveyerNasty : GameComponentBase
 
     #region IGameComponent Members
 
-    private SpriteCollection _nastySprite;
-    private IStandardParticleEffect _conveyerNastyDies;
+    private readonly SpriteCollection _nastySprite;
+    private readonly IStandardParticleEffect _conveyerNastyDies;
 
     private Direction _nastyDirection;
 
@@ -64,7 +65,8 @@ public class ConveyerNasty : GameComponentBase
         int xposition,
         int yposition,
         int moveSpeed,
-        bool active) : base(gameEngineReference)
+        bool active,
+        ContentList content) : base(gameEngineReference)
     {
         XLocation = xposition;
         YLocation = yposition;
@@ -81,16 +83,10 @@ public class ConveyerNasty : GameComponentBase
 
         _deathFadeLevel = ColourLevels.Full;
         _deathScale = 1f;
-    }
 
-    public void LoadContent(ContentList content)
-    {
         _nastySprite = new SpriteCollection(GameEngine, GameEngine.ContentMgr, content.GetContent("conveyerNasty"), SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
         _conveyerNastyDies = (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("NastyDies", ParticleEffectType.Triggered, null);
-        if (_conveyerNastyDies != null)
-        {
-            _conveyerNastyDies.ParticleEffectComplete += conveyerNastyDies_ParticleEffectComplete;
-        }
+        _conveyerNastyDies.ParticleEffectComplete += conveyerNastyDies_ParticleEffectComplete;
     }
 
     private void conveyerNastyDies_ParticleEffectComplete()

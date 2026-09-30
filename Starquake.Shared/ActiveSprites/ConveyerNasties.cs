@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Starquake.Collisions;
@@ -16,9 +17,9 @@ public class ConveyerNasties : GameComponentBase
 
     #region IGameComponent Members
 
-    public event RaiseInteractionWithBlob OnNastyInteractionWithBlob;
+    public event RaiseInteractionWithBlob? OnNastyInteractionWithBlob;
 
-    public List<ConveyerNasty> Nasties { get; private set; }
+    public List<ConveyerNasty> Nasties { get; }
 
     public int NastiesActive
     {
@@ -35,25 +36,22 @@ public class ConveyerNasties : GameComponentBase
 
     public ConveyerNasties(GameEngine gameEngineReference) : base(gameEngineReference)
     {
+        Nasties = new List<ConveyerNasty>();
     }
 
     public void LoadContent(ContentList content)
     {
-        Nasties = new List<ConveyerNasty>();
-
         // Create 3 nasties that we will keep re-using
+        Nasties.Clear();
         for (var a = 0; a < 3; a++)
         {
-            var newNasty =
+            Nasties.Add(
                 new ConveyerNasty(GameEngine,
                     0,
                     0,
                     0,
-                    false);
-
-            newNasty.LoadContent(content);
-            Nasties.Add(newNasty);
-
+                    false,
+                    content));
         }
     }
 

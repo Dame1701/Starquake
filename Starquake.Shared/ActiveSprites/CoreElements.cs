@@ -121,7 +121,6 @@ public class CoreElements : GameComponentBase
                 }
                 var randomChoice = GameEngine.RandomNumberGenerator.Next(0, elementsToChoose.Count);
                 Elements[counter] = new CoreElement(GameEngine, elementsToChoose[randomChoice], counter, 6, fadeUp);
-                Elements[counter].LoadContent();
                 Elements[counter].OnCoreElementReplaced += CoreElements_OnCoreElementReplaced;
                 elementsToChoose.RemoveAt(randomChoice);
                 Elements[counter].ElementState = CoreElementState.Missing;
