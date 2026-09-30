@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
@@ -22,9 +23,9 @@ public class OptionsScreen : GameScreenBase, IGameScreen
     #region IGameScreen Members
 
     private bool _definingKeys;
-    private SpriteCollection _backgroundImage;
-    private SpriteCollection _foregroundImage;
-    private List<Option> _options;
+    private readonly SpriteCollection _backgroundImage;
+    private readonly SpriteCollection _foregroundImage;
+    private readonly List<Option> _options;
     private readonly KeyDefiner _keyDefiner;
 
     public bool Success => true;
@@ -37,9 +38,23 @@ public class OptionsScreen : GameScreenBase, IGameScreen
 
         _keyDefiner = new KeyDefiner(gameEngineReference);
         _keyDefiner.KeyDefinitionComplete += keyDefiner_KeyDefinitionComplete;
+
+        _backgroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("OptionScreenBackground");
+        _foregroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("OptionScreenForeground");
+
+        _options =
+        [
+            new Option("1", "Joystick 0", false, Color.White, true),
+            new Option("2", "Cursor Keys, Left Ctrl", true, Color.White),
+            new Option("3", "Keyboard . . O, P, A, Q, SP", false, Color.White),
+            new Option("4", "UDK Keyboard . . " + _keyDefiner.GetKeys(), false, Color.White),
+            new Option("5", "Define your own keys", false, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full)),
+            new Option("0", "Start game", false, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full)),
+            new Option("Q", "Quit", false, Color.White)
+        ];
     }
 
-    private void keyDefiner_KeyDefinitionComplete(object sender, EventArgs e)
+    private void keyDefiner_KeyDefinitionComplete(object? sender, EventArgs e)
     {
         _options[3] = new Option("4", "UDK Keyboard . . " + _keyDefiner.GetKeys(), false, Color.White);
 
@@ -51,18 +66,6 @@ public class OptionsScreen : GameScreenBase, IGameScreen
 
     public override void LoadContent()
     {
-        _backgroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("OptionScreenBackground");
-        _foregroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("OptionScreenForeground");
-
-        _options = new List<Option>();
-        _options.Add(new Option("1", "Joystick 0", false, Color.White, true));
-        _options.Add(new Option("2", "Cursor Keys, Left Ctrl", true, Color.White));
-        _options.Add(new Option("3", "Keyboard . . O, P, A, Q, SP", false, Color.White));
-        _options.Add(new Option("4", "UDK Keyboard . . " + _keyDefiner.GetKeys(), false, Color.White));
-        _options.Add(new Option("5", "Define your own keys", false, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full)));
-        _options.Add(new Option("0", "Start game", false, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full)));
-        _options.Add(new Option("Q", "Quit", false, Color.White));
-
         GameEngine.Font2.Flash = true;
     }
 
@@ -251,12 +254,12 @@ public class OptionsScreen : GameScreenBase, IGameScreen
         _foregroundImage.End();
     }
 
-    public void Reset(object data)
+    public void Reset(object? data)
     {
 
     }
 
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
     {
         ScreenFade = 0;
         ScreenFadeSpeed = 5;

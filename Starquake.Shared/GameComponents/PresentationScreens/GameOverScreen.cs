@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -20,9 +21,9 @@ namespace Starquake.GameComponents.PresentationScreens;
 
 public class GameOverScreen : GameScreenBase, IGameScreen
 {
-    private SpriteCollection _backgroundImage;
+    private readonly SpriteCollection _backgroundImage;
     private bool _fadeComplete;
-    private SpriteCollection _foregroundImage;
+    private readonly SpriteCollection _foregroundImage;
     private TimeSpan _playTime;
 
     public GameOverScreen(GameEngine gameEngineReference)
@@ -30,16 +31,19 @@ public class GameOverScreen : GameScreenBase, IGameScreen
     {
         ScreenFade = 0;
         ScreenFadeSpeed = 5;
+
+        _backgroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("GameOverScreenBackground");
+        _foregroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("GameOverScreenForeground");
     }
 
     public bool Success => true;
 
-    public void Reset(object data)
+    public void Reset(object? data)
     {
 
     }
 
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
     {
         GameEngine.ContentResourceManager.GetSoundFxEngine().DisablePeriodicBackgroundSounds(true);
         var mainGameScreen = GameEngine.GetGameScreen(GameScreenType.MainGame);
@@ -119,11 +123,5 @@ public class GameOverScreen : GameScreenBase, IGameScreen
         }
 
         _foregroundImage.End();
-    }
-
-    public override void LoadContent()
-    {
-        _backgroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("GameOverScreenBackground");
-        _foregroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("GameOverScreenForeground");
     }
 }

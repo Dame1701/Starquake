@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -16,25 +17,28 @@ namespace Starquake.GameComponents.PresentationScreens;
 
 public class GameCompleteScreen : GameScreenBase, IGameScreen
 {
-    private SpriteCollection _backgroundImage;
+    private readonly SpriteCollection _backgroundImage;
     private bool _fadeComplete;
-    private SpriteCollection _foregroundImage;
+    private readonly SpriteCollection _foregroundImage;
 
     public GameCompleteScreen(GameEngine gameEngineReference)
         : base(gameEngineReference)
     {
         ScreenFade = 0;
         ScreenFadeSpeed = 5;
+
+        _backgroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("GameCompleteScreenBackground");
+        _foregroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("GameCompleteScreenForeground");
     }
 
     public bool Success => true;
 
-    public void Reset(object data)
+    public void Reset(object? data)
     {
 
     }
 
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
     {
         _fadeComplete = false;
         ScreenFade = 0;
@@ -92,11 +96,5 @@ public class GameCompleteScreen : GameScreenBase, IGameScreen
         }
 
         _foregroundImage.End();
-    }
-
-    public override void LoadContent()
-    {
-        _backgroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("GameCompleteScreenBackground");
-        _foregroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("GameCompleteScreenForeground");
     }
 }

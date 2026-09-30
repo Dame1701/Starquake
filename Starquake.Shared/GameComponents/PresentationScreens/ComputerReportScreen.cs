@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -19,8 +20,8 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
 
     #region IGameScreen Members
 
-    private SpriteCollection _backgroundImage;
-    private SpriteCollection _foregroundImage;
+    private readonly SpriteCollection _backgroundImage;
+    private readonly SpriteCollection _foregroundImage;
     private bool _fadeComplete;
 
     public bool Success => true;
@@ -30,10 +31,7 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
     {
         ScreenFade = 0;
         ScreenFadeSpeed = 5;
-    }
 
-    public override void LoadContent()
-    {
         _backgroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("ComputerReportScreenBackground");
         _foregroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("ComputerReportScreenForeground");
     }
@@ -109,12 +107,12 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
     }
 
 
-    public void Reset(object data)
+    public void Reset(object? data)
     {
 
     }
 
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
     {
         _fadeComplete = false;
         ScreenFade = 0;

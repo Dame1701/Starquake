@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
@@ -35,7 +36,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
     private bool _elementSelectionMode;
     private bool _soundPlayed;
 
-    private InteractiveItem[] _itemsToSelect;
+    private InteractiveItem[] _itemsToSelect = [];
     private int _itemToSwap;
 
     public int ScreenFade { get; set; }
@@ -61,7 +62,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
         Reset(null);
     }
 
-    public void Reset(object data)
+    public void Reset(object? data)
     {
         _soundPlayed = false;
         _screenReadWait = new DateTime(0);
@@ -162,31 +163,31 @@ public class CheopsScreen : GameComponentBase, IGameScreen
 
             // Get an element from the core if there is one, if there isn't we've completed the game and this should never happen....
             var activeElements = GameEngine.Elements.GetActiveElements();
+            var coreElementSlot = -1;
+            var coreElement = 0;
+
             if (activeElements.Count > 0)
             {
-                _itemsToSelect[GameEngine.RandomNumberGenerator.Next(0, 5)] =
-                    new InteractiveItem(
-                        0,
-                        0,
-                        activeElements[GameEngine.RandomNumberGenerator.Next(0, activeElements.Count)].CurrentElement);
+                coreElementSlot = GameEngine.RandomNumberGenerator.Next(0, 5);
+                coreElement = activeElements[GameEngine.RandomNumberGenerator.Next(0, activeElements.Count)].CurrentElement;
             }
 
-            var populatedSwapItem = false;
+            // The item to swap takes the first slot the core element did not
+            var swapItemSlot = coreElementSlot == 0 ? 1 : 0;
 
-            // Populate the other 3 slots
             for (var a = 0; a < 5; a++)
             {
-                if (_itemsToSelect[a] == null)
+                if (a == coreElementSlot)
                 {
-                    if (!populatedSwapItem)
-                    {
-                        populatedSwapItem = true;
-                        _itemsToSelect[a] = new InteractiveItem(0, 0, (int)GameEngine.Player.BlobInventory[_itemToSwap]);
-                    }
-                    else
-                    {
-                        _itemsToSelect[a] = new InteractiveItem(0, 0, GameEngine.RandomNumberGenerator.Next(0, 28));
-                    }
+                    _itemsToSelect[a] = new InteractiveItem(0, 0, coreElement);
+                }
+                else if (a == swapItemSlot)
+                {
+                    _itemsToSelect[a] = new InteractiveItem(0, 0, (int)GameEngine.Player.BlobInventory[_itemToSwap]);
+                }
+                else
+                {
+                    _itemsToSelect[a] = new InteractiveItem(0, 0, GameEngine.RandomNumberGenerator.Next(0, 28));
                 }
             }
         }
@@ -406,7 +407,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
         }
     }
 
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
     {
 
     }
