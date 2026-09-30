@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -148,7 +149,7 @@ public class StatusPanel : GameComponentBase
 
     private readonly PanelNumbers _panelNumbers;
 
-    private Collectables[] _blobsInventory;
+    private Collectables[]? _blobsInventory;
 
     private double _energyLevel;
     private DateTime _energyTime;

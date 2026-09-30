@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -19,7 +20,7 @@ public class BlobDeathAnimation : GameComponentBase
 
     private readonly Animation _blobDeathParticlesOriginal;
 
-    private IPositionalTriggerParticleEffect _blobFragmentBounceSparks;
+    private IPositionalTriggerParticleEffect? _blobFragmentBounceSparks;
     private bool _drawBlobParts;
 
     public BlobDeathAnimation(GameEngine gameEngineReference)

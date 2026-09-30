@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Structure;
 
@@ -12,7 +13,7 @@ public abstract class ScreenEffectBase
     protected int EffectDuration;
     protected int EffectSpeed;
 
-    protected RenderViewPort EffectSurface;
+    protected RenderViewPort? EffectSurface;
     protected readonly GameEngine GameEngine;
 
     public ScreenEffectBase(GameEngine gameEngineReference)
