@@ -785,12 +785,9 @@ public class Nasty : GameComponentBase
 
     private void MoveNasty()
     {
-        var amountToMoveX = 0;
-        var amountToMoveY = 0;
-
         if (_nastyType == NastyType.CoreGuardian)
         {
-            MoveNastyOneStep(ref amountToMoveX, ref amountToMoveY);
+            MoveNastyOneStep();
             DiagonalBouncing();
         }
         else
@@ -807,7 +804,7 @@ public class Nasty : GameComponentBase
 
                 if (moveOneStep)
                 {
-                    MoveNastyOneStep(ref amountToMoveX, ref amountToMoveY);
+                    MoveNastyOneStep();
                 }
             }
             else
@@ -1334,227 +1331,49 @@ public class Nasty : GameComponentBase
     /// <summary>A one-in-two chance, which is how most of a nasty's mind gets made up.</summary>
     private bool CoinFlip() => GameEngine.RandomNumberGenerator.Next(0, 2) == 0;
 
-    private void MoveNastyOneStep(ref int amountToMoveX, ref int amountToMoveY)
+    /// <summary>
+    ///     Moves a nasty one step the way it is facing, and records what it walked into so that the
+    ///     movement methods know where to send it next.
+    /// </summary>
+    /// <remarks>
+    ///     Every direction is a vertical component, a horizontal one, or both. A diagonal is checked
+    ///     vertically first and then horizontally from where that vertical step left it, which is what
+    ///     lets a nasty pressed diagonally against a wall slide along it rather than stopping dead.
+    ///     This was eight blocks and then eight more, one per direction, saying that twice.
+    /// </remarks>
+    private void MoveNastyOneStep()
     {
-        _lastCollisionDirection = Direction.None;
+        var vertical = VerticalComponent(Direction);
+        var horizontal = HorizontalComponent(Direction);
 
-        if (Direction == Direction.Down)
+        var amountToMoveY = vertical == Direction.None
+            ? 0
+            : DistanceClear(vertical, XPos, YPos);
+
+        var amountToMoveX = horizontal == Direction.None
+            ? 0
+            : DistanceClear(horizontal, XPos, YPos + StepSign(vertical) * amountToMoveY);
+
+        var blockedVertically = vertical != Direction.None && amountToMoveY == 0;
+        var blockedHorizontally = horizontal != Direction.None && amountToMoveX == 0;
+
+        if (blockedVertically || blockedHorizontally)
         {
-            amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Down, XPos, YPos, NastyWidth,
-                NastyHeight, MoveSpeed, false);
-
-            if (amountToMoveY == 0)
-            {
-                _stepsMovedCounter = _stepsToMove;
-            }
-
-            YPos = YPos + amountToMoveY;
-        }
-        else if (Direction == Direction.Up)
-        {
-            amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Up, XPos, YPos, NastyWidth,
-                NastyHeight, MoveSpeed, false);
-
-            if (amountToMoveY == 0)
-            {
-                _stepsMovedCounter = _stepsToMove;
-            }
-
-            YPos = YPos - amountToMoveY;
-        }
-        else if (Direction == Direction.Left)
-        {
-            amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Left, XPos, YPos, NastyWidth,
-                NastyHeight, MoveSpeed, false);
-
-            if (amountToMoveX == 0)
-            {
-                _stepsMovedCounter = _stepsToMove;
-            }
-
-            XPos = XPos - amountToMoveX;
-        }
-        else if (Direction == Direction.Right)
-        {
-            amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Right, XPos, YPos, NastyWidth,
-                NastyHeight, MoveSpeed, false);
-
-            if (amountToMoveX == 0)
-            {
-                _stepsMovedCounter = _stepsToMove;
-            }
-
-            XPos = XPos + amountToMoveX;
-        }
-        else if (Direction == Direction.UpLeft)
-        {
-            amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Up, XPos, YPos, NastyWidth,
-                NastyHeight, MoveSpeed, false);
-            amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Left, XPos, YPos - amountToMoveY,
-                NastyWidth, NastyHeight, MoveSpeed, false);
-
-            if (amountToMoveY == 0)
-            {
-                _stepsMovedCounter = _stepsToMove;
-            }
-            else if (amountToMoveX == 0)
-            {
-                _stepsMovedCounter = _stepsToMove;
-            }
-
-            YPos = YPos - amountToMoveY;
-            XPos = XPos - amountToMoveX;
-        }
-        else if (Direction == Direction.DownLeft)
-        {
-            amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Down, XPos, YPos, NastyWidth,
-                NastyHeight, MoveSpeed, false);
-            amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Left, XPos, YPos + amountToMoveY,
-                NastyWidth, NastyHeight, MoveSpeed, false);
-
-            if (amountToMoveY == 0)
-            {
-                _stepsMovedCounter = _stepsToMove;
-            }
-            else if (amountToMoveX == 0)
-            {
-                _stepsMovedCounter = _stepsToMove;
-            }
-
-            YPos = YPos + amountToMoveY;
-            XPos = XPos - amountToMoveX;
-        }
-        else if (Direction == Direction.UpRight)
-        {
-            amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Up, XPos, YPos, NastyWidth,
-                NastyHeight, MoveSpeed, false);
-            amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Right, XPos, YPos - amountToMoveY,
-                NastyWidth, NastyHeight, MoveSpeed, false);
-
-            if (amountToMoveY == 0)
-            {
-                _stepsMovedCounter = _stepsToMove;
-            }
-            else if (amountToMoveX == 0)
-            {
-                _stepsMovedCounter = _stepsToMove;
-            }
-
-            YPos = YPos - amountToMoveY;
-            XPos = XPos + amountToMoveX;
-        }
-        else if (Direction == Direction.DownRight)
-        {
-            amountToMoveY = GameEngine.GameScreens.CheckCollision(Direction.Down, XPos, YPos, NastyWidth,
-                NastyHeight, MoveSpeed, false);
-            amountToMoveX = GameEngine.GameScreens.CheckCollision(Direction.Right, XPos, YPos + amountToMoveY,
-                NastyWidth, NastyHeight, MoveSpeed, false);
-
-            if (amountToMoveY == 0)
-            {
-                _stepsMovedCounter = _stepsToMove;
-            }
-            else if (amountToMoveX == 0)
-            {
-                _stepsMovedCounter = _stepsToMove;
-            }
-
-            YPos = YPos + amountToMoveY;
-            XPos = XPos + amountToMoveX;
+            _stepsMovedCounter = _stepsToMove;
         }
 
-        if (Direction == Direction.Left)
+        YPos += StepSign(vertical) * amountToMoveY;
+        XPos += StepSign(horizontal) * amountToMoveX;
+
+        // A diagonal stopped on one axis only reports that axis, so the movement methods can turn
+        // along the wall instead of away from it. Stopped on both, it reports the diagonal.
+        _lastCollisionDirection = (blockedVertically, blockedHorizontally) switch
         {
-            if (amountToMoveX == 0)
-            {
-                _lastCollisionDirection = Direction.Left;
-            }
-        }
-        else if (Direction == Direction.Right)
-        {
-            if (amountToMoveX == 0)
-            {
-                _lastCollisionDirection = Direction.Right;
-            }
-        }
-        else if (Direction == Direction.Up)
-        {
-            if (amountToMoveY == 0)
-            {
-                _lastCollisionDirection = Direction.Up;
-            }
-        }
-        else if (Direction == Direction.Down)
-        {
-            if (amountToMoveY == 0)
-            {
-                _lastCollisionDirection = Direction.Down;
-            }
-        }
-        else if (Direction == Direction.UpLeft)
-        {
-            if (amountToMoveY == 0 &&
-                amountToMoveX == 0)
-            {
-                _lastCollisionDirection = Direction.UpLeft;
-            }
-            else if (amountToMoveY == 0)
-            {
-                _lastCollisionDirection = Direction.Up;
-            }
-            else if (amountToMoveX == 0)
-            {
-                _lastCollisionDirection = Direction.Left;
-            }
-        }
-        else if (Direction == Direction.UpRight)
-        {
-            if (amountToMoveY == 0 &&
-                amountToMoveX == 0)
-            {
-                _lastCollisionDirection = Direction.UpRight;
-            }
-            else if (amountToMoveY == 0)
-            {
-                _lastCollisionDirection = Direction.Up;
-            }
-            else if (amountToMoveX == 0)
-            {
-                _lastCollisionDirection = Direction.Right;
-            }
-        }
-        else if (Direction == Direction.DownLeft)
-        {
-            if (amountToMoveY == 0 &&
-                amountToMoveX == 0)
-            {
-                _lastCollisionDirection = Direction.DownLeft;
-            }
-            else if (amountToMoveY == 0)
-            {
-                _lastCollisionDirection = Direction.Down;
-            }
-            else if (amountToMoveX == 0)
-            {
-                _lastCollisionDirection = Direction.Left;
-            }
-        }
-        else if (Direction == Direction.DownRight)
-        {
-            if (amountToMoveY == 0 &&
-                amountToMoveX == 0)
-            {
-                _lastCollisionDirection = Direction.DownRight;
-            }
-            else if (amountToMoveY == 0)
-            {
-                _lastCollisionDirection = Direction.Down;
-            }
-            else if (amountToMoveX == 0)
-            {
-                _lastCollisionDirection = Direction.Right;
-            }
-        }
+            (true, true) => Direction,
+            (true, false) => vertical,
+            (false, true) => horizontal,
+            _ => Direction.None
+        };
 
         if (!_constantMovement)
         {
@@ -1568,6 +1387,38 @@ public class Nasty : GameComponentBase
             }
         }
     }
+
+    private int DistanceClear(Direction direction, int x, int y)
+        => GameEngine.GameScreens.CheckCollision(direction, x, y, NastyWidth, NastyHeight, MoveSpeed, false);
+
+    /// <summary>Which of up and down a direction contains, if either.</summary>
+    private static Direction VerticalComponent(Direction direction)
+        => direction switch
+        {
+            Direction.Up or Direction.UpLeft or Direction.UpRight => Direction.Up,
+            Direction.Down or Direction.DownLeft or Direction.DownRight => Direction.Down,
+            _ => Direction.None
+        };
+
+    /// <summary>Which of left and right a direction contains, if either.</summary>
+    private static Direction HorizontalComponent(Direction direction)
+        => direction switch
+        {
+            Direction.Left or Direction.UpLeft or Direction.DownLeft => Direction.Left,
+            Direction.Right or Direction.UpRight or Direction.DownRight => Direction.Right,
+            _ => Direction.None
+        };
+
+    /// <summary>
+    ///     Which way along its axis a straight direction adds, and nought for anything with no axis.
+    /// </summary>
+    private static int StepSign(Direction direction)
+        => direction switch
+        {
+            Direction.Up or Direction.Left => -1,
+            Direction.Down or Direction.Right => 1,
+            _ => 0
+        };
 
     public void PerformPostChangeScreenActions()
     {
