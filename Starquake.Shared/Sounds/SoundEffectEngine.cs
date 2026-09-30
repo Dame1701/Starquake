@@ -52,7 +52,8 @@ public class SoundEffectEngine(ContentManager content, Random randomNumberGenera
             }
             case SoundEffectInstanceType.Multi:
                 _multiInstanceSoundEffects.Add(soundDesc.ResourceName,
-                    new MultiInstanceSoundEffect(content.Load<SoundEffect>(soundDesc.FilePath), 4,
+                    new MultiInstanceSoundEffect(content.Load<SoundEffect>(soundDesc.FilePath),
+                        soundDesc.MaxInstances,
                         soundDesc.KillOnScreenChange));
                 break;
         }

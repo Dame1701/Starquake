@@ -83,7 +83,7 @@ public abstract class TunnelEntryEffect : ScreenEffectBase
 
         // Kept in terms of the speed the callers ask for, so the pace is still theirs to set: the
         // squeeze takes as long as it would have at that many pixels a frame, and the rest follows.
-        _squeezeFrames = Math.Max(1, effectSurface.MasterWidth / Math.Max(1, effectSpeed));
+        _squeezeFrames = Math.Max(1, effectSurface.MasterWidth / Math.Max(1, EffectSpeed));
         _emergeFrames = Math.Max(1, (int)(_squeezeFrames * EmergeSlowdown));
         _releaseFrame = _squeezeFrames + FramesInTheDark + (int)(_emergeFrames * HeldThroughArrival);
         _frame = 0;
