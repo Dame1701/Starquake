@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.ActiveSprites;
 using Starquake.Animations;
+using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.GameComponents;
 using Starquake.Structure;
@@ -15,7 +16,10 @@ namespace Starquake.Display;
 
 public class StatusPanel : GameComponentBase
 {
-
+    /// <summary>
+    ///     How long the blob goes between losing a bar of energy, in logic frames - four seconds.
+    /// </summary>
+    private const int EnergyDrainFrames = 4 * LogicClock.FramesPerSecond;
 
     /// <summary>
     ///     How much of each supply the blob can hold, and how much it starts a life with. The bars on
@@ -155,7 +159,7 @@ public class StatusPanel : GameComponentBase
     private Collectables[]? _blobsInventory;
 
     private double _energyLevel;
-    private DateTime _energyTime;
+    private int _energyDrainCounter;
     private double _firePower;
 
     private double _platforms;
@@ -398,17 +402,21 @@ public class StatusPanel : GameComponentBase
 
             if (energyMayDrain)
             {
-                // Delete Blob'ss energy one bar every 4 seconds, but only if we're not in a teleporter
+                // Delete Blob's energy one bar every four seconds, but only if we're not in a
+                // teleporter. Counted in logic frames rather than off the clock, so the drain keeps
+                // step with everything else the game moves by a fixed amount per frame.
                 if (_screenDirectory.Current == GameScreenType.MainGame)
                 {
                     if (!_removeEnergyTimerStarted)
                     {
-                        _energyTime = DateTime.Now;
+                        _energyDrainCounter = 0;
                         _removeEnergyTimerStarted = true;
                     }
-                    else if (_removeEnergyTimerStarted)
+                    else
                     {
-                        if (DateTime.Now - _energyTime > new TimeSpan(0, 0, 4))
+                        _energyDrainCounter++;
+
+                        if (_energyDrainCounter > EnergyDrainFrames)
                         {
                             _removeEnergyTimerStarted = false;
                             _energyLevel = _energyLevel - 1;

@@ -23,7 +23,7 @@ public class GameHost : Game
     ///     it does not have to divide into the monitor's refresh rate, and the game runs at this speed
     ///     on every machine regardless of what the display is doing.
     /// </summary>
-    private const double LogicFramesPerSecond = 60.0;
+    private const double LogicFramesPerSecond = LogicClock.FramesPerSecond;
 
     /// <summary>
     ///     How far behind we let the logic clock fall before dropping frames instead of catching up.

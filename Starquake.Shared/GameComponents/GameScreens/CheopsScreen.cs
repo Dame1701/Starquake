@@ -41,12 +41,24 @@ public class CheopsScreen : GameComponentBase, IGameScreen
 
     #region IGameScreen Members
 
+    /// <summary>
+    ///     How long the result is left on screen before the game moves on, in logic frames - one
+    ///     second. It was a DateTime compared against DateTime.Now, which is local time: a DST step
+    ///     or an NTP correction landing in that second turned the pause into an hour.
+    /// </summary>
+    private const int ScreenReadWaitFrames = LogicClock.FramesPerSecond;
+
+    /// <summary>
+    ///     What <see cref="_screenReadWaitFrames" /> holds before the pause has started.
+    /// </summary>
+    private const int ScreenReadNotWaiting = -1;
+
     private int _resultMessageFade;
     private readonly int[] _accessCode;
     private readonly int[] _inventorySlotToScan;
     private readonly KeyScanner[] _accessCodes;
     private bool _codeSucceeded;
-    private DateTime _screenReadWait;
+    private int _screenReadWaitFrames = ScreenReadNotWaiting;
     private bool _elementSelectionMode;
     private bool _soundPlayed;
 
@@ -98,7 +110,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
     public void Reset(object? data)
     {
         _soundPlayed = false;
-        _screenReadWait = new DateTime(0);
+        _screenReadWaitFrames = ScreenReadNotWaiting;
         _resultMessageFade = ColourLevels.Full;
         _elementSelectionMode = false;
 
@@ -287,9 +299,11 @@ public class CheopsScreen : GameComponentBase, IGameScreen
             _resultMessageFade = _randomNumberGenerator.Next(200, 256);
         }
 
-        if (_screenReadWait.Ticks > 0)
+        if (_screenReadWaitFrames >= 0)
         {
-            if (_screenReadWait + new TimeSpan(0, 0, 1) < DateTime.Now)
+            _screenReadWaitFrames++;
+
+            if (_screenReadWaitFrames > ScreenReadWaitFrames)
             {
                 if (_codeSucceeded) // move into selection mode
                 {
@@ -359,9 +373,9 @@ public class CheopsScreen : GameComponentBase, IGameScreen
             if (_accessCodes[1].Scanned)
             {
                 // Start the pause timer
-                if (_screenReadWait.Ticks == 0)
+                if (_screenReadWaitFrames == ScreenReadNotWaiting)
                 {
-                    _screenReadWait = DateTime.Now;
+                    _screenReadWaitFrames = 0;
                 }
 
                 if (_codeSucceeded)

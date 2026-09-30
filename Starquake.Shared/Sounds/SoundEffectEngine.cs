@@ -424,8 +424,11 @@ public class SoundEffectEngine(ContentManager content) : IDisposable
 
         soundToPlay.SoundInstance.Stop();
 
-        // Update the playtime - this should update the master list automatically since we have kept the same reference
-        soundToPlay.PlayStart = DateTime.Now.Ticks;
+        // Update the playtime - this should update the master list automatically since we have kept the same reference.
+        // Environment.TickCount64 rather than DateTime.Now: this only ever answers which of two
+        // instances started first, and a monotonic counter does that without a timezone conversion
+        // and without a clock step being able to reorder them.
+        soundToPlay.PlayStart = Environment.TickCount64;
 
         return soundToPlay;
     }
@@ -435,7 +438,7 @@ public class SoundEffectEngine(ContentManager content) : IDisposable
         var soundToPlay = new SoundEffectInstanceRecord(
             soundName,
             misxf.Sound.CreateInstance(),
-            DateTime.Now.Ticks,
+            Environment.TickCount64,
             0,
             misxf.KillOnScreenChange)
         {

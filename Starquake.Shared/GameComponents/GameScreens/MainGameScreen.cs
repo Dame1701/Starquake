@@ -84,7 +84,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
     private const int AccessBoothFailedSpeed = 3;
     private readonly GameEngine GameEngine;
 
-    private DateTime _gameStartedTime;
+    private int _framesPlayed;
 
     private Guid _shakeRumbleSoundId = Guid.Empty;
 
@@ -167,8 +167,13 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         }
     }
 
+    /// <summary>
+    ///     How long this game has been going, counted in logic frames rather than off the clock so
+    ///     that it measures time the game actually ran for - a stall, a breakpoint or a DST step
+    ///     does not lengthen it.
+    /// </summary>
     public TimeSpan GetPlayTime()
-        => DateTime.Now - _gameStartedTime;
+        => TimeSpan.FromSeconds((double)_framesPlayed / LogicClock.FramesPerSecond);
 
     public void SpritesChanged()
     {
@@ -197,7 +202,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
     // Resets the game back to defaults
     public void Reset(object? data)
     {
-        _gameStartedTime = DateTime.Now;
+        _framesPlayed = 0;
         GameEngine.Session.Paused = false;
         GameEngine.BlobStatusPanel.Reset();
         GameEngine.Elements.Reset();
@@ -213,6 +218,8 @@ public class MainGameScreen : GameComponentBase, IGameScreen
 
     public override void Update(GameTime gameTime)
     {
+        _framesPlayed++;
+
         QuitToGameOverIfAsked();
 
         HandleTestModeKeys();

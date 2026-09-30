@@ -6,6 +6,7 @@ using System;
 using Microsoft.Xna.Framework;
 using ProjectMercury;
 using ProjectMercury.Renderers;
+using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Structure;
 
@@ -19,9 +20,10 @@ public class ContinuousParticleEffect : IStandardParticleEffect
 
     internal readonly SpriteBatchRenderer Renderer;
 
-    private DateTime _effectLastTriggered;
-
-    private DateTime _effectStartTime;
+    /// <summary>
+    ///     How many more logic frames the effect emits for, when it has a duration at all.
+    /// </summary>
+    private int _framesLeftToEmit;
 
     public ContinuousParticleEffect(GraphicsSet graphicsSet, ParticleEffect mercuryParticleEffect,
         SpriteBatchRenderer renderer)
@@ -29,13 +31,16 @@ public class ContinuousParticleEffect : IStandardParticleEffect
         _graphicsSet = graphicsSet;
         MercuryParticleEffect = mercuryParticleEffect;
         Renderer = renderer;
-        EffectDuration = new TimeSpan(0);
         EffectActive = false;
     }
 
+    /// <summary>
+    ///     How long the effect emits for, or null to emit until something stops it. Counted off in
+    ///     logic frames once <see cref="Start" /> converts it, rather than compared against the
+    ///     clock every frame - the game moves everything by a fixed amount per logic frame, and an
+    ///     effect timed off DateTime.Now drifts against the thing it is drawn on.
+    /// </summary>
     public TimeSpan? EffectDuration { get; set; }
-
-    public TimeSpan? TriggerPeriod { get; set; }
 
     public ParticleEffect Effect => MercuryParticleEffect;
     public bool EffectActive { get; private set; }
@@ -45,19 +50,15 @@ public class ContinuousParticleEffect : IStandardParticleEffect
     // Starts an effect that is not triggered
     public void Start()
     {
-        if (!EffectActive)
+        if (EffectActive)
         {
-            EffectActive = true;
-            if (EffectDuration != null)
-            {
-                _effectStartTime = DateTime.Now;
-            }
-
-            if (TriggerPeriod != null)
-            {
-                _effectLastTriggered = DateTime.Now;
-            }
+            return;
         }
+
+        EffectActive = true;
+        _framesLeftToEmit = EffectDuration != null
+            ? LogicClock.Seconds(EffectDuration.Value.TotalSeconds)
+            : 0;
     }
 
     // Stops an effect that is not trigger nor has a duration
@@ -76,52 +77,21 @@ public class ContinuousParticleEffect : IStandardParticleEffect
     {
         if (EffectActive)
         {
-            if (EffectDuration != null)
+            if (EffectDuration == null)
             {
-                if (_effectStartTime + EffectDuration <
-                    DateTime.Now)
-                {
-                    // Continual trigger effects need to allow the particle engine to finish drawing
-                    if (MercuryParticleEffect.ActiveParticlesCount == 0)
-                    {
-                        if (ParticleEffectComplete != null)
-                        {
-                            ParticleEffectComplete();
-                        }
-                        EffectActive = false;
-                    }
-                }
-                else
-                {
-                    if (TriggerPeriod != null)
-                    {
-                        if (DateTime.Now > _effectLastTriggered + TriggerPeriod)
-                        {
-                            MercuryParticleEffect.Trigger(new Vector2(xPos, yPos));
-                            _effectLastTriggered = DateTime.Now;
-                        }
-                    }
-                    else
-                    {
-                        MercuryParticleEffect.Trigger(new Vector2(xPos, yPos));
-                    }
-                }
+                MercuryParticleEffect.Trigger(new Vector2(xPos, yPos));
             }
-            else
+            else if (_framesLeftToEmit > 0)
             {
-                // Trigger always
-                if (TriggerPeriod != null)
-                {
-                    if (DateTime.Now > _effectLastTriggered + TriggerPeriod)
-                    {
-                        MercuryParticleEffect.Trigger(new Vector2(xPos, yPos));
-                        _effectLastTriggered = DateTime.Now;
-                    }
-                }
-                else
-                {
-                    MercuryParticleEffect.Trigger(new Vector2(xPos, yPos));
-                }
+                _framesLeftToEmit--;
+                MercuryParticleEffect.Trigger(new Vector2(xPos, yPos));
+            }
+            else if (MercuryParticleEffect.ActiveParticlesCount == 0)
+            {
+                // The emitting is over, but the particles already in flight have to be allowed to
+                // finish before the effect says it is done
+                ParticleEffectComplete?.Invoke();
+                EffectActive = false;
             }
         }
 
