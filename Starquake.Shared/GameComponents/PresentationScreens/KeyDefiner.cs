@@ -2,12 +2,14 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
 using System.Linq;
-using Microsoft.Xna.Framework;
+using System;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
 using Starquake.Constants;
+using Starquake.ContentManagement;
 using Starquake.Engines;
+using Starquake.Fonts;
 using Starquake.Helpers;
 using Starquake.Input;
 
@@ -16,7 +18,8 @@ namespace Starquake.GameComponents.PresentationScreens;
 public class KeyDefiner
 {
 
-    private readonly GameEngine _gameEngine;
+    private readonly BitmapFont _font;
+    private readonly ResourceManager _resources;
     private readonly string[] _keysToDefine = new[]
     {
         "UP",
@@ -31,9 +34,10 @@ public class KeyDefiner
 
     private int _definedKeyIndex;
 
-    public KeyDefiner(GameEngine gameEngineReference)
+    public KeyDefiner(ResourceManager resources, BitmapFont font)
     {
-        _gameEngine = gameEngineReference;
+        _resources = resources;
+        _font = font;
         DefinedKeys = new[]
         {
             Keys.O,
@@ -91,7 +95,7 @@ public class KeyDefiner
             {
                 if (pressedKey != Keys.None && !KeyAlreadyUsed(pressedKey))
                 {
-                    _gameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+                    _resources.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
                     DefinedKeys[_definedKeyIndex] = pressedKey;
                     _definedKeyIndex++;
                 }
@@ -120,12 +124,12 @@ public class KeyDefiner
 
     public void Draw(GameTime gameTime, int screenFade)
     {
-        _gameEngine.Font2.WriteText(480, 236, "Press a key for:", 2, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
+        _font.WriteText(480, 236, "Press a key for:", 2, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
 
         var keyDefineYPos = 290;
         foreach (var keysToDefine in _keysToDefine)
         {
-            _gameEngine.Font2.WriteText(500, keyDefineYPos, keysToDefine + ":", 2, Color.White, (byte)screenFade);
+            _font.WriteText(500, keyDefineYPos, keysToDefine + ":", 2, Color.White, (byte)screenFade);
             keyDefineYPos += 40;
         }
 
@@ -134,7 +138,7 @@ public class KeyDefiner
         {
             if (definedKey != Keys.None)
             {
-                _gameEngine.Font2.WriteText(660, keyDefineYPos, ToggleKeys.GetFriendlyName(definedKey), 2, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
+                _font.WriteText(660, keyDefineYPos, ToggleKeys.GetFriendlyName(definedKey), 2, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
             }
 
             keyDefineYPos += 40;
@@ -142,7 +146,7 @@ public class KeyDefiner
 
         if (_alldone)
         {
-            _gameEngine.Font2.WriteText(540, 590, "OK ?  ( Y / N )", ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
+            _font.WriteText(540, 590, "OK ?  ( Y / N )", ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
         }
     }
 }

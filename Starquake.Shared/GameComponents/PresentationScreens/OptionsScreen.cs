@@ -35,7 +35,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
         ScreenFade = 0;
         ScreenFadeSpeed = 5;
 
-        _keyDefiner = new KeyDefiner(gameEngineReference);
+        _keyDefiner = new KeyDefiner(gameEngineReference.ContentResourceManager, gameEngineReference.Font2);
         _keyDefiner.KeyDefinitionComplete += keyDefiner_KeyDefinitionComplete;
 
         _backgroundImage = GameEngine.ContentResourceManager.GetSpriteCollection("OptionScreenBackground");

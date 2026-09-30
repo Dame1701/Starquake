@@ -718,7 +718,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                 TileMetrics.CollisionCellWidth,
                 TileMetrics.CollisionCellHeight);
 
-        _colourAnimationEngine = new ColourAnimationEngine(this);
+        _colourAnimationEngine = new ColourAnimationEngine(ContentResourceManager, GameScreens, GraphicsSet);
 
         // Tunnel lift animations. After the screen collection, which it reads the lift shafts from.
         _tunnelAnimations = new TunnelLiftAnimationEngine(ContentResourceManager, GameScreens, GraphicsSet);
@@ -842,7 +842,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     private void RegisterScreenEffectViewPorts()
     {
-        _screenEffectEngine = new ScreenEffectEngine(GameHost.ScreenWidth, GameHost.ScreenHeight, this);
+        _screenEffectEngine = new ScreenEffectEngine(GameHost.ScreenWidth, GameHost.ScreenHeight, GraphicsDeviceMgr, Presentation);
 
         ScreenEffectEngine.RegisterViewPort(
             "GameArea",

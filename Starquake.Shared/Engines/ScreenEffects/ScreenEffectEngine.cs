@@ -2,17 +2,19 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+using System;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
+using Starquake.Display;
 using Starquake.Structure;
 
 namespace Starquake.Engines.ScreenEffects;
 
 public class ScreenEffectEngine : GameComponentBase
 {
-    private readonly GameEngine GameEngine;
+    private readonly GraphicsDeviceManager _graphicsDeviceManager;
+    private readonly PresentationSettings _presentation;
 
     private readonly SpriteBatch _renderer;
     private readonly List<RenderViewPort> _renderViewPorts;
@@ -26,9 +28,11 @@ public class ScreenEffectEngine : GameComponentBase
     public ScreenEffectEngine(
         int screenWidth,
         int screenHeight,
-        GameEngine gameEngineReference)
+        GraphicsDeviceManager graphics,
+        PresentationSettings presentation)
     {
-        GameEngine = gameEngineReference;
+        _graphicsDeviceManager = graphics;
+        _presentation = presentation;
 
         _screenWidth = screenWidth;
         _screenHeight = screenHeight;
@@ -39,9 +43,9 @@ public class ScreenEffectEngine : GameComponentBase
         // Add all of the screen effects we can find - do this eventually through reflection but for now - manually!
         _screenEffects.Add(new LeftTunnelEntryEffect());
         _screenEffects.Add(new RightTunnelEntryEffect());
-        _screenEffects.Add(new AdditiveFade(GameEngine.Presentation));
+        _screenEffects.Add(new AdditiveFade(presentation));
 
-        _renderer = new SpriteBatch(GameEngine.GraphicsDeviceMgr.GraphicsDevice);
+        _renderer = new SpriteBatch(_graphicsDeviceManager.GraphicsDevice);
         HaltBlobAndNasties = false;
     }
     public bool HaltBlobAndNasties { get; private set; }
@@ -74,7 +78,7 @@ public class ScreenEffectEngine : GameComponentBase
     {
         if (FindRenderViewPort(name) == null)
         {
-            _renderViewPorts.Add(new RenderViewPort(GameEngine.GraphicsDeviceMgr, name, xPosition, yPosition, width, height));
+            _renderViewPorts.Add(new RenderViewPort(_graphicsDeviceManager, name, xPosition, yPosition, width, height));
         }
         else
         {
@@ -87,11 +91,11 @@ public class ScreenEffectEngine : GameComponentBase
         var selectedViewPort = GetRenderViewPort(name);
 
         selectedViewPort.Active = true;
-        GameEngine.GraphicsDeviceMgr.GraphicsDevice.SetRenderTarget(selectedViewPort.RenderTarget);
+        _graphicsDeviceManager.GraphicsDevice.SetRenderTarget(selectedViewPort.RenderTarget);
 
         if (clearScreen)
         {
-            GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(Color.Transparent);
+            _graphicsDeviceManager.GraphicsDevice.Clear(Color.Transparent);
         }
     }
 
@@ -157,10 +161,10 @@ public class ScreenEffectEngine : GameComponentBase
     public void Draw()
     {
         // Select the back buffer
-        GameEngine.GraphicsDeviceMgr.GraphicsDevice.SetRenderTarget(null);
+        _graphicsDeviceManager.GraphicsDevice.SetRenderTarget(null);
 
         // Clear the screen
-        GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.Presentation.ScreenClearColour);
+        _graphicsDeviceManager.GraphicsDevice.Clear(_presentation.ScreenClearColour);
 
         foreach (var renderViewPort in _renderViewPorts)
         {
@@ -181,7 +185,7 @@ public class ScreenEffectEngine : GameComponentBase
                     if (useDefaultRenderer)
                     {
                         _renderer.Begin(SpriteSortMode.Deferred, BlendState.Opaque, null, null, null, null,
-                            GameEngine.Presentation.Transform);
+                            _presentation.Transform);
 
                         _renderer.Draw(renderViewPort.RenderTarget, new Rectangle(
                             renderViewPort.XPos,
@@ -195,7 +199,7 @@ public class ScreenEffectEngine : GameComponentBase
                 else
                 {
                     _renderer.Begin(SpriteSortMode.Deferred, BlendState.Opaque, null, null, null, null,
-                        GameEngine.Presentation.Transform);
+                        _presentation.Transform);
 
                     _renderer.Draw(renderViewPort.RenderTarget, new Rectangle(
                         renderViewPort.XPos,

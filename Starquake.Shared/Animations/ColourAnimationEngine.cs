@@ -3,9 +3,11 @@
 // ---------------------------------------------------------
 // -
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 using Starquake.Constants;
+using Starquake.ContentManagement;
+using Starquake.Display;
 using Starquake.Engines;
 using Starquake.Sprites;
 using Starquake.Structure;
@@ -14,13 +16,17 @@ namespace Starquake.Animations;
 
 public class ColourAnimationEngine : GameComponentBase
 {
-    private readonly GameEngine GameEngine;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly ResourceManager _resources;
 
     private readonly List<ColourFaderAnimation> _colourAnimationsRegistered;
 
-    public ColourAnimationEngine(GameEngine gameEngineReference)
+    public ColourAnimationEngine(ResourceManager resources, GameScreenCollection gameScreens, GraphicsSet graphicsSet)
     {
-        GameEngine = gameEngineReference;
+        _resources = resources;
+        _gameScreens = gameScreens;
+        _graphicsSet = graphicsSet;
 
         _colourAnimationsRegistered = new List<ColourFaderAnimation>();
     }
@@ -198,52 +204,52 @@ public class ColourAnimationEngine : GameComponentBase
 
     public void Draw(GameTime gameTime, byte screenFade)
     {
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+        _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
 
-        for (var y = 0; y < GameEngine.GameScreens.TilesDown; y++)
+        for (var y = 0; y < _gameScreens.TilesDown; y++)
         {
-            for (var x = 0; x < GameEngine.GameScreens.TilesAcross; x++)
+            for (var x = 0; x < _gameScreens.TilesAcross; x++)
             {
                 foreach (var colourAnimation in _colourAnimationsRegistered)
                 {
                     if (colourAnimation.Running)
                     {
-                        if (GameEngine.GameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage == colourAnimation.TileNo) // Teleport booths
+                        if (_gameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage == colourAnimation.TileNo) // Teleport booths
                         {
                             // Layer up the tiles to make the intensity deeper
                             for (var b = 0; b < colourAnimation.Intensity; b++)
                             {
-                                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).DrawSprite(colourAnimation.TileNo, x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).SpriteWidth,
-                                    y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).SpriteHeight, colourAnimation.TransitionColour);
+                                _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).DrawSprite(colourAnimation.TileNo, x * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteWidth,
+                                    y * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteHeight, colourAnimation.TransitionColour);
                             }
                         }
                     }
                 }
             }
         }
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).End();
+        _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).End();
     }
 
     public void Draw(SpriteCollection sprites, GameTime gameTime, byte screenFade)
     {
         sprites.Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
 
-        for (var y = 0; y < GameEngine.GameScreens.TilesDown; y++)
+        for (var y = 0; y < _gameScreens.TilesDown; y++)
         {
-            for (var x = 0; x < GameEngine.GameScreens.TilesAcross; x++)
+            for (var x = 0; x < _gameScreens.TilesAcross; x++)
             {
                 foreach (var colourAnimation in _colourAnimationsRegistered)
                 {
                     if (colourAnimation.Running &&
                         colourAnimation.TileNo >= 0)
                     {
-                        if (GameEngine.GameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage == colourAnimation.TileNo) // Teleport booths
+                        if (_gameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage == colourAnimation.TileNo) // Teleport booths
                         {
                             // Layer up the tiles to make the intensity deeper
                             for (var b = 0; b < colourAnimation.Intensity; b++)
                             {
-                                sprites.DrawSprite(colourAnimation.TileNo, x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).SpriteWidth,
-                                    y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).SpriteHeight, colourAnimation.TransitionColour);
+                                sprites.DrawSprite(colourAnimation.TileNo, x * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteWidth,
+                                    y * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteHeight, colourAnimation.TransitionColour);
                             }
                         }
                     }
@@ -255,30 +261,30 @@ public class ColourAnimationEngine : GameComponentBase
 
     public void DrawUpperLayer(GameTime gameTime, byte screenFade)
     {
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.UpperScreenTiles).Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+        _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
 
-        for (var y = 0; y < GameEngine.GameScreens.TilesDown; y++)
+        for (var y = 0; y < _gameScreens.TilesDown; y++)
         {
-            for (var x = 0; x < GameEngine.GameScreens.TilesAcross; x++)
+            for (var x = 0; x < _gameScreens.TilesAcross; x++)
             {
                 foreach (var colourAnimation in _colourAnimationsRegistered)
                 {
                     if (colourAnimation.Running &&
                         colourAnimation.UpperTileToDraw >= 0)
                     {
-                        if (GameEngine.GameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage == colourAnimation.TileNo) // Teleport booths
+                        if (_gameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage == colourAnimation.TileNo) // Teleport booths
                         {
                             // Layer up the tiles to make the intensity deeper
                             for (var b = 0; b < colourAnimation.Intensity; b++)
                             {
-                                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.UpperScreenTiles).DrawSprite(colourAnimation.UpperTileToDraw, x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).SpriteWidth,
-                                    y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.UpperScreenTiles).SpriteHeight, colourAnimation.TransitionColour);
+                                _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).DrawSprite(colourAnimation.UpperTileToDraw, x * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteWidth,
+                                    y * _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).SpriteHeight, colourAnimation.TransitionColour);
                             }
                         }
                     }
                 }
             }
         }
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.UpperScreenTiles).End();
+        _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).End();
     }
 }
