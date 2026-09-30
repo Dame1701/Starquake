@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
+#nullable enable
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -12,10 +12,10 @@ using Starquake.Sprites;
 
 namespace Starquake.Fonts;
 
-public class ImageFont : IDisposable
+public class ImageFont
 {
     private readonly Dictionary<string, int> _letterMap;
-    private SpriteCollection _imageFont;
+    private readonly SpriteCollection _imageFont;
 
     public ImageFont(GameEngine gameEngineRef, ContentManager content)
     {
@@ -61,35 +61,19 @@ public class ImageFont : IDisposable
 
     }
 
-    #region IDisposable Members
-
-    public void Dispose()
-    {
-        if (_imageFont != null)
-        {
-            _imageFont = null;
-        }
-    }
-
-    #endregion
-
     public void WriteText(string text, int xLocation, int yLocation, GameTime time, Color textColour)
     {
-        if (_imageFont != null)
+        _imageFont.Begin(BlendState.AlphaBlend, time);
+        for (var a = 0; a < text.Length; a++)
         {
-            _imageFont.Begin(BlendState.AlphaBlend, time);
-            for (var a = 0; a < text.Length; a++)
+            _letterMap.TryGetValue(text.Substring(a, 1).ToUpper(), out var imageNo);
+
+            if (imageNo > 0)
             {
-                var imageNo = 0;
-                _letterMap.TryGetValue(text.Substring(a, 1).ToUpper(), out imageNo);
-
-                if (imageNo > 0)
-                {
-                    _imageFont.DrawSprite(imageNo - 1, xLocation + a * 36, yLocation, textColour);
-                }
+                _imageFont.DrawSprite(imageNo - 1, xLocation + a * 36, yLocation, textColour);
             }
-
-            _imageFont.End();
         }
+
+        _imageFont.End();
     }
 }

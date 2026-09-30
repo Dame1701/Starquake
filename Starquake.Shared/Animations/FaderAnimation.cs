@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using Starquake.Constants;
 using Starquake.SharedLibs;
@@ -11,13 +12,13 @@ namespace Starquake.Animations;
 public class FaderAnimation
 {
     private readonly int _minFade;
-    private readonly Random _randomGenerator;
+    private readonly Random? _randomGenerator;
     private FadeDirection FadeDirection;
     public int FadeLevel;
     private bool FadeOperational;
     private int _fadeSpeed;
 
-    public FaderAnimation(int fadeSpeed, Random randomGenerator = null, int minFade = 0)
+    public FaderAnimation(int fadeSpeed, Random? randomGenerator = null, int minFade = 0)
     {
         _minFade = minFade;
         _randomGenerator = randomGenerator;

@@ -2,6 +2,8 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
+using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Content;
 
@@ -33,7 +35,7 @@ public class ContentList
             }
         }
 
-        return null;
+        throw new InvalidOperationException($"Content '{contentName}' has not been added to the list.");
     }
 
     public void RemoveContent(string contentName)

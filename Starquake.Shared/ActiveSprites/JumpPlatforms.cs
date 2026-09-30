@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Starquake.Display;
@@ -34,7 +35,7 @@ public class JumpPlatforms
             }
         }
 
-        JumpPlatform newPlatform = null;
+        JumpPlatform? newPlatform = null;
 
         foreach (var platform in _platforms)
         {

@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -17,7 +18,7 @@ public class BitmapFont : IDisposable
 
     private int _flashCounter;
 
-    private SpriteBatch _fontSpriteBatch;
+    private readonly SpriteBatch _fontSpriteBatch;
 
     public BitmapFont(SpriteFont font, SpriteBatch fontSpriteBatch)
     {
@@ -49,11 +50,7 @@ public class BitmapFont : IDisposable
 
     public void Dispose()
     {
-        if (_fontSpriteBatch != null)
-        {
-            _fontSpriteBatch.Dispose();
-            _fontSpriteBatch = null;
-        }
+        _fontSpriteBatch.Dispose();
     }
 
     #endregion

@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using Microsoft.Xna.Framework;
 using Starquake.Engines;
 
@@ -54,7 +55,7 @@ public class SpritePixelMatrix
     {
         if (!Finished)
         {
-            SpritePixel p = null;
+            SpritePixel p;
 
             do
             {
