@@ -7,13 +7,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content;
 using Starquake.ContentManagement;
-using Starquake.Engines;
 using Starquake.Structure;
 
 namespace Starquake.Sounds;
 
-public class SoundEffectEngine(GameEngine gameEngineInstance) : IDisposable
+public class SoundEffectEngine(ContentManager content, Random randomNumberGenerator) : IDisposable
 {
 
     private readonly List<SoundEffectInstanceRecord> _multiInstanceSoundEffectInstances = [];
@@ -40,7 +40,7 @@ public class SoundEffectEngine(GameEngine gameEngineInstance) : IDisposable
         {
             case SoundEffectInstanceType.Single:
             {
-                var sfx = gameEngineInstance.ContentMgr.Load<SoundEffect>(soundDesc.FilePath);
+                var sfx = content.Load<SoundEffect>(soundDesc.FilePath);
                 var soundEffectInstanceRecord = new SoundEffectInstanceRecord(soundDesc.ResourceName,
                     soundDesc.InstanceType, sfx.CreateInstance(), 0, 0, soundDesc.KillOnScreenChange)
                 {
@@ -52,7 +52,7 @@ public class SoundEffectEngine(GameEngine gameEngineInstance) : IDisposable
             }
             case SoundEffectInstanceType.Multi:
                 _multiInstanceSoundEffects.Add(soundDesc.ResourceName,
-                    new MultiInstanceSoundEffect(gameEngineInstance.ContentMgr.Load<SoundEffect>(soundDesc.FilePath), 4,
+                    new MultiInstanceSoundEffect(content.Load<SoundEffect>(soundDesc.FilePath), 4,
                         soundDesc.KillOnScreenChange));
                 break;
         }
@@ -67,7 +67,7 @@ public class SoundEffectEngine(GameEngine gameEngineInstance) : IDisposable
 
         _periodicBackgroundSoundsEnabled = true;
         _periodicSoundTimer = new Timer(PlayPeriodicSound, null,
-            gameEngineInstance.RandomNumberGenerator.Next(1000, 10000), Timeout.Infinite);
+            randomNumberGenerator.Next(1000, 10000), Timeout.Infinite);
     }
 
     public void DisablePeriodicBackgroundSounds(bool killPlayingSounds = false)
@@ -100,7 +100,7 @@ public class SoundEffectEngine(GameEngine gameEngineInstance) : IDisposable
 
         _periodicBackgroundSoundsId = PlaySound("BackgroundSound1", 0.5f, false);
         _periodicSoundTimer = new Timer(PlayPeriodicSound, null,
-            gameEngineInstance.RandomNumberGenerator.Next(10000, 20000), Timeout.Infinite);
+            randomNumberGenerator.Next(10000, 20000), Timeout.Infinite);
     }
 
     /// <summary>

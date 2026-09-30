@@ -52,7 +52,7 @@ public class ResourceManager : StartableGameComponentBase
 
         _particleEngine = new ParticleEngine(_gameEngineInstance);
         _animationTileEngine = new AnimTileEngine(_gameEngineInstance);
-        _soundEngine = new SoundEffectEngine(_gameEngineInstance);
+        _soundEngine = new SoundEffectEngine(_contentManagerInstance, gameEngineInstance.RandomNumberGenerator);
 
         _spriteDescriptions = new List<SpriteDescription>();
         _animSpriteDescriptions = new List<AnimSpriteDescription>();
