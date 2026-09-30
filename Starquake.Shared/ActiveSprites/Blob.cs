@@ -1206,7 +1206,7 @@ public class Blob : GameComponentBase
             .GetSpriteCollection(_graphicsSet.Names.BlobSprites).SpriteWidth;
 
         if (blobRightEdge <= _gameScreens.ScreenWidth ||
-            _gameScreens.ScreenNumber + 1 > WorldMap.ScreenCount)
+            _gameScreens.ScreenNumber + 1 > WorldMap.LastScreenNumber)
         {
             return false;
         }
@@ -1256,7 +1256,7 @@ public class Blob : GameComponentBase
     private bool ChangeScreenOffBottomEdge()
     {
         if (_blobYPos + BlobHeight <= _gameScreens.ScreenHeight ||
-            _gameScreens.ScreenNumber + WorldMap.ScreensAcross > WorldMap.ScreenCount)
+            _gameScreens.ScreenNumber + WorldMap.ScreensAcross > WorldMap.LastScreenNumber)
         {
             return false;
         }

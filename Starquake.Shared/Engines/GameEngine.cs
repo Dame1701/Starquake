@@ -1006,7 +1006,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
         if (Keyboard.GetState().IsKeyDown(Keys.NumPad2))
         {
-            if (GameScreens.ScreenNumber + WorldMap.ScreensAcross <= WorldMap.ScreenCount)
+            if (GameScreens.ScreenNumber + WorldMap.ScreensAcross <= WorldMap.LastScreenNumber)
             {
                 GameScreens.ScreenNumber += WorldMap.ScreensAcross;
                 ScreenDirectory.Get(ScreenDirectory.Current).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
