@@ -376,7 +376,7 @@ public class Blob : GameComponentBase
             graphicsSet,
             randomNumberGenerator,
             screenEffects);
-        BlobsControl = new CustomControl(session.PlayerKeys, this, true);
+        BlobsControl = new CustomControl(session.PlayerKeys, this);
         _blobTouched = false;
         _teleportFadeLevel = ColourLevels.Full;
         _startBlobTeleporting = false;

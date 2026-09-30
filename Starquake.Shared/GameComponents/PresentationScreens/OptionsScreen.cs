@@ -63,7 +63,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
 
         _options =
         [
-            new Option("1", "Joystick 0", false, Color.White, true),
+            new Option("1", "Joypad", false, Color.White, !CustomControl.JoyPadConnected),
             new Option("2", "Cursor Keys, Left Ctrl", true, Color.White),
             new Option("3", "Keyboard . . O, P, A, Q, SP", false, Color.White),
             new Option("4", "UDK Keyboard . . " + _keyDefiner.GetKeys(), false, Color.White),
@@ -95,6 +95,16 @@ public class OptionsScreen : GameScreenBase, IGameScreen
     /// </summary>
     private const int SelectableOptionCount = 4;
 
+    /// <summary>
+    ///     The joypad preset, which is the only one whose availability depends on the hardware.
+    /// </summary>
+    private const int JoyPadOption = 0;
+
+    /// <summary>
+    ///     The preset to fall back on when the pad is pulled out - the cursor keys.
+    /// </summary>
+    private const int DefaultOption = 1;
+
     public override void Update(GameTime gameTime)
     {
         if (_definingKeys)
@@ -103,11 +113,31 @@ public class OptionsScreen : GameScreenBase, IGameScreen
         }
         else
         {
+            FollowTheJoyPad();
             HandleOptionKeys();
             Font.Update();
         }
 
         base.Update(gameTime);
+    }
+
+    /// <summary>
+    ///     A pad can be plugged in or pulled out while this screen is up, so the preset that needs one
+    ///     says every frame whether it is there. Pulling the pad out while its preset is selected moves
+    ///     the selection back to the keyboard, because confirming it would otherwise leave the player
+    ///     with nothing bound at all.
+    /// </summary>
+    private void FollowTheJoyPad()
+    {
+        _options[JoyPadOption].Unavailable = !CustomControl.JoyPadConnected;
+
+        if (!_options[JoyPadOption].Unavailable || !_options[JoyPadOption].Selected)
+        {
+            return;
+        }
+
+        ClearSelectedOptions();
+        _options[DefaultOption].Selected = true;
     }
 
     /// <summary>
@@ -135,7 +165,8 @@ public class OptionsScreen : GameScreenBase, IGameScreen
         // 1 to 4 pick the option of that number, and were four copies of this
         int option = pressed - Keys.D1;
 
-        if (option < 0 || option >= SelectableOptionCount || _options[option].Selected)
+        if (option < 0 || option >= SelectableOptionCount ||
+            _options[option].Selected || _options[option].Unavailable)
         {
             return;
         }
@@ -175,7 +206,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
     {
         return option switch
         {
-            // Joystick: every movement key is unbound, so only pause and quit still answer
+            // Joypad: every movement key is unbound, so the pad is the only thing steering
             0 => new PlayerKeySet
             {
                 Up = Keys.None,
@@ -247,7 +278,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
                 if (opt.Unavailable)
                 {
                     Font.WriteText(optionXPos, optionYPos, opt.ActivationKey + ".", 2, ColourHelper.GetXna4Colour(100, 0, 0), (byte)ScreenFade);
-                    Font.WriteText(optionXPos + 50, optionYPos, opt.OptionText + " (offline)", 2, ColourHelper.GetXna4Colour(100, 0, 0), (byte)ScreenFade);
+                    Font.WriteText(optionXPos + 50, optionYPos, opt.OptionText + " (not connected)", 2, ColourHelper.GetXna4Colour(100, 0, 0), (byte)ScreenFade);
                 }
                 else
                 {

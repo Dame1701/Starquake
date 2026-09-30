@@ -279,15 +279,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         }
 
         Player.BlobsControl.PlayerKeySet = playerKeys;
-
-        // Unbinding every movement key is how the options screen says "use the joypad",
-        // and its joystick option unbinds all five - the four directions and fire.
-        Player.BlobsControl.UseJoyPad =
-            playerKeys.Up == Keys.None &&
-            playerKeys.Down == Keys.None &&
-            playerKeys.Left == Keys.None &&
-            playerKeys.Right == Keys.None &&
-            playerKeys.Fire == Keys.None;
     }
 
     /// <summary>

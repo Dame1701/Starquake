@@ -2,27 +2,31 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Starquake.ActiveSprites;
 
 namespace Starquake.Input;
 
 /// <summary>
-///     What the player is pressing. Every method here reads the keyboard.
+///     What the player is pressing. Every method here reads the keyboard and the first gamepad, and
+///     answers true if either of them says so.
 /// </summary>
 /// <remarks>
-///     There was a joypad once. Each of the five input methods below carried its own commented-out
-///     copy of the same block - read the stick, compare against zero, return - and the five said
-///     nothing the one sentence above them does not. The speed bands and dead zone still named in
-///     this class are what an analogue stick would feed, and are the only trace of it left.
+///     There was a joypad once, reached through DirectInput, and it never worked: the options screen
+///     offered it, the code behind it was commented out, and choosing it left a player who could pause
+///     and quit and nothing else. DesktopGL reaches a pad through SDL instead, so the five methods
+///     below read one now. It is read alongside the keyboard rather than instead of it, so a pad works
+///     whichever key preset is chosen, and the joystick preset is simply the one that binds no keys.
 /// </remarks>
 public class CustomControl
 {
     /// <summary>
-    ///     The range a joystick axis is asked to report over, so that a centred stick reads zero and
-    ///     the two extremes are symmetrical.
+    ///     How far the stick has to be pushed before it counts as a direction. The blob's movement is
+    ///     digital - he is walking or he is not - so the stick is read as a fourth d-pad rather than as
+    ///     an analogue axis, and this is the point at which a lean becomes a step.
     /// </summary>
-    private const int JoystickAxisRange = 100;
+    private const float StickThreshold = 0.5f;
 
     /// <summary>
     ///     How far an analogue stick has to be pushed before the blob steps up to the next speed. The
@@ -56,83 +60,62 @@ public class CustomControl
     /// <inheritdoc cref="CrawlSpeed" />
     private const int FullSpeed = 8;
 
-
-    //DirectInput directInputInstance;
-    //Joystick joystick;
-
     private readonly Blob _blob;
 
-    public CustomControl(PlayerKeySet playerKeys, Blob blob, bool useJoyPad = false)
+    public CustomControl(PlayerKeySet playerKeys, Blob blob)
     {
         _blob = blob;
         PlayerKeySet = playerKeys;
-        /*
-        if (UseJoyPad)
-        {
-            directInputInstance = new DirectInput();
-            playerKeySet = PlayerKeys;
-            InitialiseJoystick();
-        }
-        */
     }
-
-    public bool UseJoyPad { get; set; } = true;
 
     public PlayerKeySet PlayerKeySet { get; set; }
 
-    private void InitialiseJoystick()
-    {
-        /*
-        // Search for device
-        foreach (DeviceInstance device in directInputInstance.GetDevices(DeviceClass.GameController, DeviceEnumerationFlags.AttachedOnly))
-        {
-            // Create device
-            try
-            {
-                joystick = new Joystick(directInputInstance, device.InstanceGuid);
-                break;
-            }
-            catch (DirectInputException)
-            {
-            }
-        }
-
-        if (joystick == null)
-        {
-            // do error for no joystick here
-
-        }
-        else
-        {
-            // get joystick device objects
-            foreach (DeviceObjectInstance deviceObject in joystick.GetObjects())
-            {
-                if ((deviceObject.ObjectType & ObjectDeviceType.Axis) != 0)
-                {
-                    joystick.GetObjectPropertiesById((int)deviceObject.ObjectType).SetRange(-JoystickAxisRange, JoystickAxisRange);
-                }
-            }
-
-            // Acquire device
-            joystick.Acquire();
-        }
-        */
-    }
+    /// <summary>
+    ///     Whether a pad is plugged in at all. The options screen asks so that it can say so, rather
+    ///     than offering a control scheme that answers nothing.
+    /// </summary>
+    public static bool JoyPadConnected
+        => GamePad.GetState(PlayerIndex.One).IsConnected;
 
     public bool MovedUp()
-        => Keyboard.GetState().IsKeyDown(PlayerKeySet.Up);
+        => Keyboard.GetState().IsKeyDown(PlayerKeySet.Up) ||
+           PushedUp(GamePad.GetState(PlayerIndex.One));
 
     public bool MovedDown()
-        => Keyboard.GetState().IsKeyDown(PlayerKeySet.Down);
+        => Keyboard.GetState().IsKeyDown(PlayerKeySet.Down) ||
+           PushedDown(GamePad.GetState(PlayerIndex.One));
 
     public bool MovedLeft()
-        => Keyboard.GetState().IsKeyDown(PlayerKeySet.Left);
+        => Keyboard.GetState().IsKeyDown(PlayerKeySet.Left) ||
+           PushedLeft(GamePad.GetState(PlayerIndex.One));
 
     public bool MovedRight()
-        => Keyboard.GetState().IsKeyDown(PlayerKeySet.Right);
+        => Keyboard.GetState().IsKeyDown(PlayerKeySet.Right) ||
+           PushedRight(GamePad.GetState(PlayerIndex.One));
 
     public bool HasFired()
-        => Keyboard.GetState().IsKeyDown(PlayerKeySet.Fire);
+        => Keyboard.GetState().IsKeyDown(PlayerKeySet.Fire) ||
+           GamePad.GetState(PlayerIndex.One).Buttons.A == ButtonState.Pressed;
+
+    /// <summary>
+    ///     The d-pad and the left stick both count, so a pad can be held either way round. A pad that is
+    ///     not plugged in reports every button released and both sticks centred, so these answer false
+    ///     without needing to be asked whether one is there.
+    /// </summary>
+    private static bool PushedUp(GamePadState pad)
+        => pad.DPad.Up == ButtonState.Pressed || pad.ThumbSticks.Left.Y > StickThreshold;
+
+    /// <inheritdoc cref="PushedUp" />
+    private static bool PushedDown(GamePadState pad)
+        => pad.DPad.Down == ButtonState.Pressed || pad.ThumbSticks.Left.Y < -StickThreshold;
+
+    /// <inheritdoc cref="PushedUp" />
+    private static bool PushedLeft(GamePadState pad)
+        => pad.DPad.Left == ButtonState.Pressed || pad.ThumbSticks.Left.X < -StickThreshold;
+
+    /// <inheritdoc cref="PushedUp" />
+    private static bool PushedRight(GamePadState pad)
+        => pad.DPad.Right == ButtonState.Pressed || pad.ThumbSticks.Left.X > StickThreshold;
 
     private void SetBlobHSpeed(float inputSpeed)
     {
