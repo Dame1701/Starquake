@@ -21,11 +21,24 @@ commit, separate from any move.
 | — | Both survey errors written up under *What the survey missed*, and the metric script corrected. |
 | Stage 4 (part) | `SpriteCollection` takes a `GraphicsDeviceManager` and keeps the `ContentManager` it was already handed; `Clone` needs no argument. `SoundEffectEngine` takes a `ContentManager` and a `Random`. |
 | — | `GameComponentBase` no longer holds an engine for its 22 subclasses. Each holds its own, so each can now be narrowed alone. |
+| — | `UsingOldGraphics` and `ResourceNames` fold into one `GraphicsSet`. Two members become one, and the art set becomes something a class can be handed and read live. |
+| — | The three particle effects stop depending on `ScreenEffectEngine` — its two hooks were identity functions and always had been — and take the `GraphicsSet` alone. `ParticleEngine` follows. |
+| — | `AnimTile` takes the `GraphicsSet`. `AnimTileEngine`'s engine parameter was unused and is deleted. |
+| Bug | `RandomNumberGenerator` was seeded after the resource manager was built, so handing it to the sound engine captured a null. Reordered. Mine, from two commits earlier. |
+| Stage 3 | `ResourceManager(ContentManager, GraphicsDeviceManager, Random, GraphicsSet)`. The cycle is cut and the whole resource subtree is free of the engine. |
 
-The map is down to 48 coupled files from 58, and the widest row that is not one of the six broad
-consumers is four members. Stage 3 is next, once `ParticleEngine`'s three particle effects are
-narrowed — they want `ScreenEffectEngine`, which is Presentation cluster work, so stage 3 is still
-waiting on a piece of stage 5.
+The map is down to **42 coupled files from 58**, and outside the six broad consumers the widest row
+is seven members. Stage 3's real signature was four primitives, not one: the graphics device manager
+is for the sprite collections it loads, the `Random` for the sound engine, the `GraphicsSet` for the
+animated tiles — all things it passed on rather than called.
+
+What made stage 3 reachable was not the three constructors the plan named. It was finding that the
+particle effects' dependency on `ScreenEffectEngine` was two functions that multiply by one, and
+that `AnimTileEngine`'s engine parameter had never been used at all. Two of the three blockers were
+not dependencies.
+
+Stages 5 and 6 are what is left, and they are now the only things left: every row on the map above
+seven members is one of the six broad consumers the plan always said this would come down to.
 
 The 21 private `GameEngine` fields the base-class change created are PascalCase, against the
 convention for private fields, and deliberately not renamed: the bodies already spell the field
@@ -150,6 +163,9 @@ The biggest single win, and the one that makes the rest tractable.
 `ResourceManager` is depended on by 34 files — and it uses exactly one member of the engine,
 `ContentMgr`. Its two children are nearly as thin: `ParticleEngine` needs `ContentMgr` and
 `GraphicsDeviceMgr`; `SoundEffectEngine` needs `ContentMgr` and `RandomNumberGenerator`.
+
+*(As landed: both of those were right, and `ResourceManager` itself needed four primitives rather
+than one. See* Where this has got to.*)*
 
 So the entire resource subtree — the thing a third of the codebase depends on — needs three
 primitives and no engine at all:
