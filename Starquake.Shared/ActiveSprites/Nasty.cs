@@ -102,6 +102,15 @@ public class Nasty : GameComponentBase
     private const int LongestBouncingRun = 80;
 
     /// <summary>
+    ///     The shortest runs of the lot, which is what makes a nasty on
+    ///     <see cref="MoveType.RandomMovement" /> scuttle rather than stride.
+    /// </summary>
+    private const int ShortestScuttle = 1;
+
+    /// <inheritdoc cref="ShortestScuttle" />
+    private const int LongestScuttle = 4;
+
+    /// <summary>
     ///     How quickly a dead nasty shrinks away, and how fast the corpse spins as it goes.
     /// </summary>
     private const float DeathShrinkStep = 0.01f;
@@ -965,549 +974,241 @@ public class Nasty : GameComponentBase
     {
         if (_lastCollisionDirection == Direction.None || Direction == Direction.None)
         {
-            Direction = (Direction)GameEngine.RandomNumberGenerator.Next(4, 8); // Select from last 4
+            Direction = RandomDiagonal();
         }
 
-        if (Direction == Direction.UpLeft)
-        {
-            if (_lastCollisionDirection == Direction.UpLeft)
-            {
-                Direction = Direction.DownRight;
-            }
-            else if (_lastCollisionDirection == Direction.Left)
-            {
-                Direction = Direction.UpRight;
-            }
-            else if (_lastCollisionDirection == Direction.Up)
-            {
-                Direction = Direction.DownLeft;
-            }
-            else
-            {
-                Direction = Direction.DownLeft; // Didn't hit anything, just change direction
-            }
-        }
-        else if (Direction == Direction.UpRight)
-        {
-            if (_lastCollisionDirection == Direction.UpRight)
-            {
-                Direction = Direction.DownLeft;
-            }
-            else if (_lastCollisionDirection == Direction.Right)
-            {
-                Direction = Direction.UpLeft;
-            }
-            else if (_lastCollisionDirection == Direction.Up)
-            {
-                Direction = Direction.DownRight;
-            }
-            else
-            {
-                Direction = Direction.DownRight; // Didn't hit anything, just change direction
-            }
-        }
-        else if (Direction == Direction.DownLeft)
-        {
-            if (_lastCollisionDirection == Direction.DownLeft)
-            {
-                Direction = Direction.UpRight;
-            }
-            else if (_lastCollisionDirection == Direction.Left)
-            {
-                Direction = Direction.DownRight;
-            }
-            else if (_lastCollisionDirection == Direction.Down)
-            {
-                Direction = Direction.UpLeft;
-            }
-            else
-            {
-                Direction = Direction.UpLeft; // Didn't hit anything, just change direction
-            }
-        }
-        else if (Direction == Direction.DownRight)
-        {
-            if (_lastCollisionDirection == Direction.DownRight)
-            {
-                Direction = Direction.UpLeft;
-            }
-            else if (_lastCollisionDirection == Direction.Right)
-            {
-                Direction = Direction.DownLeft;
-            }
-            else if (_lastCollisionDirection == Direction.Down)
-            {
-                Direction = Direction.UpRight;
-            }
-            else
-            {
-                Direction = Direction.UpRight; // Didn't hit anything, just change direction
-            }
-        }
+        // Hitting nothing still turns it away vertically, which is what keeps a nasty set going in
+        // steps from running in a straight line for ever.
+        Direction = Reflected(Direction, _lastCollisionDirection) ?? TurnedAwayVertically(Direction);
     }
 
     private void DiagonalBouncing()
     {
         if (Direction == Direction.None)
         {
-            Direction = (Direction)GameEngine.RandomNumberGenerator.Next(4, 8); // Select from last 4
+            Direction = RandomDiagonal();
         }
 
-        if (Direction == Direction.UpLeft)
+        if (Reflected(Direction, _lastCollisionDirection) is { } reflected)
         {
-            if (_lastCollisionDirection == Direction.UpLeft)
-            {
-                Direction = Direction.DownRight;
-            }
-            else if (_lastCollisionDirection == Direction.Left)
-            {
-                Direction = Direction.UpRight;
-            }
-            else if (_lastCollisionDirection == Direction.Up)
-            {
-                Direction = Direction.DownLeft;
-            }
-        }
-        else if (Direction == Direction.UpRight)
-        {
-            if (_lastCollisionDirection == Direction.UpRight)
-            {
-                Direction = Direction.DownLeft;
-            }
-            else if (_lastCollisionDirection == Direction.Right)
-            {
-                Direction = Direction.UpLeft;
-            }
-            else if (_lastCollisionDirection == Direction.Up)
-            {
-                Direction = Direction.DownRight;
-            }
-        }
-        else if (Direction == Direction.DownLeft)
-        {
-            if (_lastCollisionDirection == Direction.DownLeft)
-            {
-                Direction = Direction.UpRight;
-            }
-            else if (_lastCollisionDirection == Direction.Left)
-            {
-                Direction = Direction.DownRight;
-            }
-            else if (_lastCollisionDirection == Direction.Down)
-            {
-                Direction = Direction.UpLeft;
-            }
-        }
-        else if (Direction == Direction.DownRight)
-        {
-            if (_lastCollisionDirection == Direction.DownRight)
-            {
-                Direction = Direction.UpLeft;
-            }
-            else if (_lastCollisionDirection == Direction.Right)
-            {
-                Direction = Direction.DownLeft;
-            }
-            else if (_lastCollisionDirection == Direction.Down)
-            {
-                Direction = Direction.UpRight;
-            }
+            Direction = reflected;
         }
 
         _stepsToMove = GameEngine.RandomNumberGenerator.Next(ShortestRun, LongestRun);
     }
+
+    /// <summary>
+    ///     Which diagonal a nasty comes off on, given the one it was travelling on and what it just
+    ///     hit, or null if what it hit does not turn it. Walking into the corner sends it straight
+    ///     back the way it came; walking into the wall on one side flips only that side.
+    /// </summary>
+    private static Direction? Reflected(Direction travelling, Direction hit)
+        => (travelling, hit) switch
+        {
+            (Direction.UpLeft, Direction.UpLeft) => Direction.DownRight,
+            (Direction.UpLeft, Direction.Left) => Direction.UpRight,
+            (Direction.UpLeft, Direction.Up) => Direction.DownLeft,
+            (Direction.UpRight, Direction.UpRight) => Direction.DownLeft,
+            (Direction.UpRight, Direction.Right) => Direction.UpLeft,
+            (Direction.UpRight, Direction.Up) => Direction.DownRight,
+            (Direction.DownLeft, Direction.DownLeft) => Direction.UpRight,
+            (Direction.DownLeft, Direction.Left) => Direction.DownRight,
+            (Direction.DownLeft, Direction.Down) => Direction.UpLeft,
+            (Direction.DownRight, Direction.DownRight) => Direction.UpLeft,
+            (Direction.DownRight, Direction.Right) => Direction.DownLeft,
+            (Direction.DownRight, Direction.Down) => Direction.UpRight,
+            _ => null
+        };
+
+    /// <summary>
+    ///     The same diagonal with its up or down half flipped. Anything that is not a diagonal is
+    ///     left alone, which is what the four bouncing ladders used to do by falling off the end.
+    /// </summary>
+    private static Direction TurnedAwayVertically(Direction direction)
+        => direction switch
+        {
+            Direction.UpLeft => Direction.DownLeft,
+            Direction.UpRight => Direction.DownRight,
+            Direction.DownLeft => Direction.UpLeft,
+            Direction.DownRight => Direction.UpRight,
+            _ => direction
+        };
 
     private void RandomUpDownLeftRight(int blobsXPosition, int blobsYPosition)
     {
         if (_lastCollisionDirection == Direction.None || Direction == Direction.None)
         {
-            Direction = (Direction)GameEngine.RandomNumberGenerator.Next(0, 4); // Only select fron first 4
+            Direction = RandomStraightDirection();
         }
 
-        if (_lastCollisionDirection == Direction.Up)
-        {
-            Direction = Direction.Down;
-        }
-        else if (_lastCollisionDirection == Direction.Down)
-        {
-            Direction = Direction.Up;
-        }
-        else if (_lastCollisionDirection == Direction.Left)
-        {
-            Direction = Direction.Right;
-        }
-        else if (_lastCollisionDirection == Direction.Right)
-        {
-            Direction = Direction.Left;
-        }
+        BounceStraightBack();
 
-        // If attracted to blob is turned on
         if (_attractedToBlob)
         {
-            if (XPos < blobsXPosition)
-            {
-                if (_lastCollisionDirection != Direction.Right)
-                {
-                    Direction = Direction.Right;
-                }
-            }
-            else if (XPos > blobsXPosition)
-            {
-                if (_lastCollisionDirection != Direction.Left)
-                {
-                    Direction = Direction.Left;
-                }
-            }
-
-
-            if (YPos < blobsYPosition)
-            {
-                if (_lastCollisionDirection != Direction.Down)
-                {
-                    if (Direction == Direction.Left)
-                    {
-                        Direction = Direction.DownLeft;
-                    }
-                    else if (Direction == Direction.Right)
-                    {
-                        Direction = Direction.DownRight;
-                    }
-                    else
-                    {
-                        Direction = Direction.Down;
-                    }
-                }
-            }
-            else if (YPos > blobsYPosition)
-            {
-                if (_lastCollisionDirection != Direction.Up)
-                {
-                    if (Direction == Direction.Left)
-                    {
-                        Direction = Direction.UpLeft;
-                    }
-                    else if (Direction == Direction.Right)
-                    {
-                        Direction = Direction.UpRight;
-                    }
-                    else
-                    {
-                        Direction = Direction.Up;
-                    }
-                }
-            }
+            HeadTowardsBlob(blobsXPosition, blobsYPosition);
         }
 
         _stepsToMove = GameEngine.RandomNumberGenerator.Next(ShortestRun, LongestRun);
     }
 
+    /// <summary>
+    ///     The same as <see cref="RandomUpDownLeftRight" /> but in much shorter runs, and it forgets
+    ///     which way it was going before it starts chasing. That second difference matters: with no
+    ///     direction to carry in, a nasty level with the blob heads straight at him rather than
+    ///     turning the vertical move into a diagonal.
+    /// </summary>
     private void RandomMovement(int blobsXPosition, int blobsYPosition)
     {
         if (_lastCollisionDirection == Direction.None || Direction == Direction.None)
         {
-            Direction = (Direction)GameEngine.RandomNumberGenerator.Next(0, 4); // Only select fron first 4
+            Direction = RandomStraightDirection();
         }
 
-        if (_lastCollisionDirection == Direction.Up)
-        {
-            Direction = Direction.Down;
-        }
-        else if (_lastCollisionDirection == Direction.Down)
-        {
-            Direction = Direction.Up;
-        }
-        else if (_lastCollisionDirection == Direction.Left)
-        {
-            Direction = Direction.Right;
-        }
-        else if (_lastCollisionDirection == Direction.Right)
-        {
-            Direction = Direction.Left;
-        }
+        BounceStraightBack();
 
-        // If attracted to blob is turned on
         if (_attractedToBlob)
         {
             Direction = Direction.None;
+            HeadTowardsBlob(blobsXPosition, blobsYPosition);
+        }
 
-            if (XPos < blobsXPosition)
-            {
-                if (_lastCollisionDirection != Direction.Right)
-                {
-                    Direction = Direction.Right;
-                }
-            }
-            else if (XPos > blobsXPosition)
-            {
-                if (_lastCollisionDirection != Direction.Left)
-                {
-                    Direction = Direction.Left;
-                }
-            }
+        _stepsToMove = GameEngine.RandomNumberGenerator.Next(ShortestScuttle, LongestScuttle);
+    }
 
+    /// <summary>
+    ///     Turns a nasty that has walked straight into something back the way it came, and leaves one
+    ///     that has hit nothing or hit a corner alone.
+    /// </summary>
+    private void BounceStraightBack()
+        => Direction = _lastCollisionDirection switch
+        {
+            Direction.Up => Direction.Down,
+            Direction.Down => Direction.Up,
+            Direction.Left => Direction.Right,
+            Direction.Right => Direction.Left,
+            _ => Direction
+        };
 
-            if (YPos < blobsYPosition)
+    /// <summary>
+    ///     Points a nasty at the blob - diagonally when he is off in both axes - while refusing to
+    ///     turn into whatever it has just walked into.
+    /// </summary>
+    private void HeadTowardsBlob(int blobsXPosition, int blobsYPosition)
+    {
+        if (XPos < blobsXPosition)
+        {
+            if (_lastCollisionDirection != Direction.Right)
             {
-                if (_lastCollisionDirection != Direction.Down)
-                {
-                    if (Direction == Direction.Left)
-                    {
-                        Direction = Direction.DownLeft;
-                    }
-                    else if (Direction == Direction.Right)
-                    {
-                        Direction = Direction.DownRight;
-                    }
-                    else
-                    {
-                        Direction = Direction.Down;
-                    }
-                }
+                Direction = Direction.Right;
             }
-            else if (YPos > blobsYPosition)
+        }
+        else if (XPos > blobsXPosition)
+        {
+            if (_lastCollisionDirection != Direction.Left)
             {
-                if (_lastCollisionDirection != Direction.Up)
-                {
-                    if (Direction == Direction.Left)
-                    {
-                        Direction = Direction.UpLeft;
-                    }
-                    else if (Direction == Direction.Right)
-                    {
-                        Direction = Direction.UpRight;
-                    }
-                    else
-                    {
-                        Direction = Direction.Up;
-                    }
-                }
+                Direction = Direction.Left;
             }
         }
 
-        _stepsToMove = GameEngine.RandomNumberGenerator.Next(1, 4);
+        if (YPos < blobsYPosition)
+        {
+            if (_lastCollisionDirection != Direction.Down)
+            {
+                Direction = Direction switch
+                {
+                    Direction.Left => Direction.DownLeft,
+                    Direction.Right => Direction.DownRight,
+                    _ => Direction.Down
+                };
+            }
+        }
+        else if (YPos > blobsYPosition)
+        {
+            if (_lastCollisionDirection != Direction.Up)
+            {
+                Direction = Direction switch
+                {
+                    Direction.Left => Direction.UpLeft,
+                    Direction.Right => Direction.UpRight,
+                    _ => Direction.Up
+                };
+            }
+        }
     }
 
     private void RandomMovementsAllDirections(int blobsXPosition, int blobsYPosition)
     {
         if (_lastCollisionDirection == Direction.None || Direction == Direction.None)
         {
-            Direction =
-                (Direction)GameEngine.RandomNumberGenerator.Next(0, 8); // Select from all movement directions
+            Direction = RandomAnyDirection();
         }
 
-        if (!_attractedToBlob)
+        var choices = _attractedToBlob
+            ? WaysTowardsBlob(blobsXPosition, blobsYPosition)
+            : WaysAwayFrom(_lastCollisionDirection);
+
+        if (choices is not null)
         {
-            if (_lastCollisionDirection == Direction.Up)
-            {
-                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
-
-                if (newDirection == 0)
-                {
-                    Direction = Direction.Down;
-                }
-                else if (newDirection == 1)
-                {
-                    Direction = Direction.DownLeft;
-                }
-                else
-                {
-                    Direction = Direction.DownRight;
-                }
-            }
-            else if (_lastCollisionDirection == Direction.Down)
-            {
-                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
-
-                if (newDirection == 0)
-                {
-                    Direction = Direction.Up;
-                }
-                else if (newDirection == 1)
-                {
-                    Direction = Direction.UpLeft;
-                }
-                else
-                {
-                    Direction = Direction.UpRight;
-                }
-            }
-            else if (_lastCollisionDirection == Direction.Left)
-            {
-                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
-
-                if (newDirection == 0)
-                {
-                    Direction = Direction.Right;
-                }
-                else if (newDirection == 1)
-                {
-                    Direction = Direction.DownRight;
-                }
-                else
-                {
-                    Direction = Direction.UpRight;
-                }
-            }
-            else if (_lastCollisionDirection == Direction.Right)
-            {
-                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
-
-                if (newDirection == 0)
-                {
-                    Direction = Direction.Left;
-                }
-                else if (newDirection == 1)
-                {
-                    Direction = Direction.DownLeft;
-                }
-                else
-                {
-                    Direction = Direction.UpLeft;
-                }
-            }
-            else if (_lastCollisionDirection == Direction.UpLeft)
-            {
-                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
-
-                if (newDirection == 0)
-                {
-                    Direction = Direction.Down;
-                }
-                else if (newDirection == 1)
-                {
-                    Direction = Direction.DownLeft;
-                }
-                else
-                {
-                    Direction = Direction.DownRight;
-                }
-            }
-            else if (_lastCollisionDirection == Direction.UpRight)
-            {
-                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
-
-                if (newDirection == 0)
-                {
-                    Direction = Direction.Down;
-                }
-                else if (newDirection == 1)
-                {
-                    Direction = Direction.DownRight;
-                }
-                else
-                {
-                    Direction = Direction.DownLeft;
-                }
-            }
-            else if (_lastCollisionDirection == Direction.DownLeft)
-            {
-                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
-
-                if (newDirection == 0)
-                {
-                    Direction = Direction.Up;
-                }
-                else if (newDirection == 1)
-                {
-                    Direction = Direction.UpLeft;
-                }
-                else
-                {
-                    Direction = Direction.UpRight;
-                }
-            }
-            else if (_lastCollisionDirection == Direction.DownRight)
-            {
-                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
-
-                if (newDirection == 0)
-                {
-                    Direction = Direction.Up;
-                }
-                else if (newDirection == 1)
-                {
-                    Direction = Direction.UpRight;
-                }
-                else
-                {
-                    Direction = Direction.UpLeft;
-                }
-            }
-        }
-        else // Attracted to Blob
-        {
-            if (XPos <= blobsXPosition && YPos <= blobsYPosition)
-            {
-                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
-
-                if (newDirection == 0)
-                {
-                    Direction = Direction.Right;
-                }
-                else if (newDirection == 1)
-                {
-                    Direction = Direction.Down;
-                }
-                else
-                {
-                    Direction = Direction.DownRight;
-                }
-            }
-            else if (XPos <= blobsXPosition && YPos >= blobsYPosition)
-            {
-                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
-
-                if (newDirection == 0)
-                {
-                    Direction = Direction.Right;
-                }
-                else if (newDirection == 1)
-                {
-                    Direction = Direction.Up;
-                }
-                else
-                {
-                    Direction = Direction.UpRight;
-                }
-            }
-            else if (XPos >= blobsXPosition && YPos >= blobsYPosition)
-            {
-                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
-
-                if (newDirection == 0)
-                {
-                    Direction = Direction.Left;
-                }
-                else if (newDirection == 1)
-                {
-                    Direction = Direction.Up;
-                }
-                else
-                {
-                    Direction = Direction.UpLeft;
-                }
-            }
-            else if (XPos >= blobsXPosition && YPos <= blobsYPosition)
-            {
-                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
-
-                if (newDirection == 0)
-                {
-                    Direction = Direction.Left;
-                }
-                else if (newDirection == 1)
-                {
-                    Direction = Direction.Down;
-                }
-                else
-                {
-                    Direction = Direction.DownLeft;
-                }
-            }
+            Direction = choices[GameEngine.RandomNumberGenerator.Next(0, choices.Length)];
         }
 
         _stepsToMove = GameEngine.RandomNumberGenerator.Next(ShortestChasingRun, LongestRun);
     }
+
+    /// <summary>
+    ///     The three ways out of having walked into something from each of the eight directions, or
+    ///     null when nothing was hit. Each one keeps whichever half of the direction was not blocked
+    ///     and reverses the other, so the three are the straight reverse and the two diagonals
+    ///     either side of it.
+    /// </summary>
+    private static Direction[]? WaysAwayFrom(Direction hit)
+        => hit switch
+        {
+            Direction.Up => [Direction.Down, Direction.DownLeft, Direction.DownRight],
+            Direction.Down => [Direction.Up, Direction.UpLeft, Direction.UpRight],
+            Direction.Left => [Direction.Right, Direction.DownRight, Direction.UpRight],
+            Direction.Right => [Direction.Left, Direction.DownLeft, Direction.UpLeft],
+            Direction.UpLeft => [Direction.Down, Direction.DownLeft, Direction.DownRight],
+            Direction.UpRight => [Direction.Down, Direction.DownRight, Direction.DownLeft],
+            Direction.DownLeft => [Direction.Up, Direction.UpLeft, Direction.UpRight],
+            Direction.DownRight => [Direction.Up, Direction.UpRight, Direction.UpLeft],
+            _ => null
+        };
+
+    /// <summary>
+    ///     The three ways towards the blob from whichever quadrant he is in: straight across,
+    ///     straight up or down, and the diagonal between them. The tests are deliberately inclusive
+    ///     on both sides so that a nasty level with the blob in one axis still has a quadrant, which
+    ///     is why this never has to answer "nowhere".
+    /// </summary>
+    private Direction[] WaysTowardsBlob(int blobsXPosition, int blobsYPosition)
+    {
+        if (XPos <= blobsXPosition && YPos <= blobsYPosition)
+        {
+            return [Direction.Right, Direction.Down, Direction.DownRight];
+        }
+
+        if (XPos <= blobsXPosition && YPos >= blobsYPosition)
+        {
+            return [Direction.Right, Direction.Up, Direction.UpRight];
+        }
+
+        if (XPos >= blobsXPosition && YPos >= blobsYPosition)
+        {
+            return [Direction.Left, Direction.Up, Direction.UpLeft];
+        }
+
+        return [Direction.Left, Direction.Down, Direction.DownLeft];
+    }
+
+    /// <summary>One of the four diagonals - the second half of <see cref="Direction" />.</summary>
+    private Direction RandomDiagonal() => (Direction)GameEngine.RandomNumberGenerator.Next(4, 8);
+
+    /// <summary>One of the four straight directions - the first half of <see cref="Direction" />.</summary>
+    private Direction RandomStraightDirection() => (Direction)GameEngine.RandomNumberGenerator.Next(0, 4);
+
+    /// <summary>Any of the eight, but never <see cref="Direction.None" />.</summary>
+    private Direction RandomAnyDirection() => (Direction)GameEngine.RandomNumberGenerator.Next(0, 8);
 
     private void SpikeyMovement(int blobsXPosition, int blobsYPosition)
     {
