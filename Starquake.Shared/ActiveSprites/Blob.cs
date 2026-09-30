@@ -1595,6 +1595,7 @@ public class Blob : GameComponentBase
                         if (BlobFireX < 0)
                         {
                             amountToMoveX = 0;
+                            hitScreenBoundary = true;
                         }
 
                         if (_blobFireCollisionDirection == FireDeflectedLeft)
