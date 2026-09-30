@@ -214,7 +214,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
 
     public override void Update(GameTime gameTime)
     {
-        if (GameEngine.InTestMode)
+        if (TestMode.Enabled)
         {
             HandleTestModeKeys();
         }

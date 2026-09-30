@@ -143,8 +143,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     //public MercuryParticleEngine ParticleEngine;
     public readonly GraphicsDeviceManager GraphicsDeviceMgr;
 
-    public readonly bool InTestMode = true;
-
     // Game Sequences
     public IntroSequence IntroSequence;
 
@@ -910,7 +908,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ToggleBackgroundsIfAsked();
         SwitchGraphicsSetIfAsked();
 
-        if (InTestMode)
+        if (TestMode.Enabled)
         {
             HandleTestModeKeys();
         }
