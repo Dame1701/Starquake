@@ -386,6 +386,59 @@ This is where the honest answer may be "a registry the actors resolve each other
 once after construction", rather than a pretence that the graph is a tree. Decide it with stages
 1–5 landed and the cycle isolated to this one cluster, not now.
 
+## Where it stopped, and what is left
+
+**60 coupled files to 21.** `GameEngine` is 1335 lines and 31 public members, from 1371 and about
+50. 57 tests, from 40. Twenty-nine commits, every one of them building at 0 warnings and 0 errors
+with the tests passing.
+
+What is left is not a tail of leaves. It is four groups, and three of them are where the plan
+always said this would end up.
+
+**The broad consumers, which legitimately keep a wide dependency.** `MainGameScreen` (20 members),
+`Blob` (12), `TeleportScreen` (11), `CheopsScreen` (10), `AccessBoothScreen` (9), `IntroSequence`
+(9), the five presentation screens (7 each), `StatusPanel` (7), `PlanetCoreScreen` (6),
+`GameScreenCollection` (5). These are the game's centre. They still hold the engine rather than
+three or four named things, which is the one part of stage 5 not done — and it is the expensive
+part, because for these classes the dependency is genuinely wide rather than accidentally wide.
+
+**`GameHost`, which is not coupling at all.** It constructs the engine. Holding a reference to the
+thing you own is what a host does.
+
+**`GameScreenBase`, holding an engine it never calls a member on** — the last of the conduits, kept
+only because its six presentation screens still read the inherited field. It goes when they do.
+
+**Four classes blocked on something specific, all identified:**
+
+| Class | Blocked on |
+| --- | --- |
+| `Nasty`, and `Nasties` which builds it | `Paused` — the Session cluster |
+| `JumpPlatform`, and `JumpPlatforms` which builds it | `ScreenEffectEngine`; the blob builds `JumpPlatforms` and the blob is built first |
+| `TestScreen` | the same, built in `BuildGameScreens` one phase before the screen effect engine |
+
+## What actually worked
+
+Worth recording, because it was not what the plan expected.
+
+**The survey was wrong more often than the code was.** Stage 1's ten fields were not constants —
+they were live state behind F8. The map under-reported by ten files because it counted member
+accesses and not the engine being passed on, and by four more because its identifier list was
+missing a spelling it claimed had been checked. `SpriteCollection` appeared on it for a doc comment.
+
+**Half the "dependencies" were not dependencies.** Two identity functions that had returned their
+argument since the initial checkin. An engine parameter never read. A base class holding a
+reference it never used, for 22 subclasses. A duplicated condition in the joypad check. A blob
+asking the engine for itself. None of these were coupling to remove; they were nothing, wearing
+coupling's clothes.
+
+**Construction order was the recurring answer, not a registry.** Five times an "impossible" case
+turned out to be a thing built in the wrong phase for no reason. The plan expected stage 6 to need
+a registry the actors resolve each other through; it needed no such thing. The question that kept
+working: *is this order load-bearing, or just the order someone wrote it in?*
+
+**And when it was a real cycle, the dependent side wanted almost nothing.** The planet held the
+whole blob to ask three questions. Passing three values broke the hub cycle of the entire graph.
+
 ## What this is not
 
 **No DI container, at any stage.** The wiring is already centralised — `GameEngine`'s
