@@ -2,15 +2,16 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading;
-using Microsoft.Xna.Framework;
+using System;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
 using Starquake.ActiveSprites;
 using Starquake.Animations;
 using Starquake.Constants;
@@ -18,9 +19,9 @@ using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
-using Starquake.GameComponents;
 using Starquake.GameComponents.GameScreens;
 using Starquake.GameComponents.PresentationScreens;
+using Starquake.GameComponents;
 using Starquake.Helpers;
 using Starquake.Input;
 using Starquake.SharedLibs;
@@ -235,11 +236,13 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             {
                 Player.BlobsControl.PlayerKeySet = value;
 
-                // Unbinding all four directions is how the options screen says "use the joypad".
+                // Unbinding every movement key is how the options screen says "use the joypad",
+                // and its joystick option unbinds all five - the four directions and fire.
                 if (Player.BlobsControl.PlayerKeySet.Up == Keys.None &&
                     Player.BlobsControl.PlayerKeySet.Down == Keys.None &&
                     Player.BlobsControl.PlayerKeySet.Left == Keys.None &&
-                    Player.BlobsControl.PlayerKeySet.Right == Keys.None)
+                    Player.BlobsControl.PlayerKeySet.Right == Keys.None &&
+                    Player.BlobsControl.PlayerKeySet.Fire == Keys.None)
                 {
                     Player.BlobsControl.UseJoyPad = true;
                 }
@@ -942,10 +945,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ToggleBackgroundsIfAsked();
         SwitchGraphicsSetIfAsked();
 
-        if (TestMode.Enabled)
-        {
-            HandleTestModeKeys();
-        }
+        HandleTestModeKeys();
 
         if (!Paused)
         {
@@ -1038,6 +1038,19 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     }
     }
 
+    /// <summary>
+    ///     The debug keys: F1 kills the blob, F2 refills its lives, F3 runs the fade
+    ///     effect, the numeric keypad steps between screens, and K and L drive the shuttle-tag
+    ///     colour animations. Compiled out of a release build entirely by
+    ///     <see cref="ConditionalAttribute" />, which removes the calls to this rather than leaving
+    ///     a branch that is never taken, so a release has no path to them at all.
+    ///     <para>
+    ///         The keys that are not debug keys are handled elsewhere and stay live in both: F8
+    ///         swaps the artwork, F9 the scanlines, F10 the backdrops, F12 fullscreen, and the
+    ///         player's own pause and quit keys.
+    ///     </para>
+    /// </summary>
+    [Conditional("DEBUG")]
     private void HandleTestModeKeys()
     {
         if (Keyboard.GetState().IsKeyDown(Keys.F1))

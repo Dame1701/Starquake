@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+using System.Diagnostics;
 using System.Linq;
 using System;
 using Microsoft.Xna.Framework.Graphics;
@@ -215,10 +216,9 @@ public class MainGameScreen : GameComponentBase, IGameScreen
 
     public override void Update(GameTime gameTime)
     {
-        if (TestMode.Enabled)
-        {
-            HandleTestModeKeys();
-        }
+        QuitToGameOverIfAsked();
+
+        HandleTestModeKeys();
 
         if (GameIsInPlay)
         {
@@ -262,6 +262,37 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         !GameEngine.IntroSequence.SequenceRunning ||
         GameEngine.IntroSequence.SequenceStage == IntroSequenceStage.EndPause;
 
+    /// <summary>
+    ///     The player's quit key gives up the current game and goes to the game over screen. It
+    ///     lived in <see cref="HandleTestModeKeys" /> under a comment calling it a test, which meant
+    ///     a key the options screen offers in all four layouts only worked while the debug keys
+    ///     were compiled in.
+    /// </summary>
+    private void QuitToGameOverIfAsked()
+    {
+        if (ToggleKeys.GetPressedKey() != GameEngine.PlayerKeys.Quit)
+        {
+            return;
+        }
+
+        GameEngine.ScreenDirectory.Current = GameScreenType.GameOver;
+        GameEngine.ScreenDirectory.Get(GameScreenType.GameOver)
+            .PerformPostScreenChangeActions(GameScreenType.MainGame, null);
+    }
+
+    /// <summary>
+    ///     The debug keys for the main game: J tops up the supplies, T and R the test rumble,
+    ///     W jumps to the game complete screen, C replaces every core element, I restarts the
+    ///     intro and U runs the unstick routine. Compiled out of a release build entirely by
+    ///     <see cref="ConditionalAttribute" />, which removes the calls to this rather than leaving
+    ///     a branch that is never taken, so a release has no path to them at all.
+    ///     <para>
+    ///         The keys that are not debug keys are handled elsewhere and stay live in both: F8
+    ///         swaps the artwork, F9 the scanlines, F10 the backdrops, F12 fullscreen, and the
+    ///         player's own pause and quit keys.
+    ///     </para>
+    /// </summary>
+    [Conditional("DEBUG")]
     private void HandleTestModeKeys()
     {
         if (Keyboard.GetState().IsKeyDown(Keys.J))
@@ -281,14 +312,6 @@ public class MainGameScreen : GameComponentBase, IGameScreen
                 GameEngine.ContentResourceManager.GetSoundFxEngine()
                     .StopSound(_testRumbleSoundId, SoundFade.Medium);
             }
-        }
-
-        // Test quit to game over screen
-        if (ToggleKeys.GetPressedKey() == GameEngine.PlayerKeys.Quit)
-        {
-            GameEngine.ScreenDirectory.Current = GameScreenType.GameOver;
-            GameEngine.ScreenDirectory.Get(GameScreenType.GameOver)
-                .PerformPostScreenChangeActions(GameScreenType.MainGame, null);
         }
 
         // Test game complete screen
