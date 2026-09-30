@@ -1,18 +1,18 @@
 # Fixing what the review found
 
-**Nothing has landed yet.** This is a plan, written the way `REFACTORING.md` and `DECOUPLING.md`
-were written before their stages landed, and it should be rewritten the same way — each phase's
-section replaced with what the work actually decided, as it lands, rather than left as the
-intention.
+**Phases 0 to 3 have landed.** This document was written the way `REFACTORING.md` and
+`DECOUPLING.md` were written before their stages landed, and each finished phase's section has
+been replaced with what the work actually decided, as it landed, rather than left as the
+intention. Phases 4 to 6 are still the plan.
 
 It covers a full review of the game carried out against `ef5a6a3`. Every finding is here; the
 ordering is the point of the document. `ProjectMercury` was out of scope throughout.
 
-The starting state is good and worth naming, because it sets the bar for everything below. The
-solution builds at 0 warnings and 0 errors, the 65 tests pass, there is no `null!` or
-`#pragma warning disable` anywhere in our own code, only six methods exceed 80 lines, and there
-are nine lines of commented-out code in the whole game. What is left is class-level shape, a
-short list of real defects, and a standard that is written down but never checked.
+The starting state was good and is worth naming, because it set the bar for everything below. The
+solution built at 0 warnings and 0 errors, the 65 tests passed, there was no `null!` or
+`#pragma warning disable` anywhere in our own code, only six methods exceeded 80 lines, and there
+were nine lines of commented-out code in the whole game. What was left was class-level shape, a
+short list of real defects, and a standard that was written down but never checked.
 
 ## How this is ordered
 
@@ -22,73 +22,66 @@ Three rules, applied in this priority. Where they conflict, the earlier rule win
 any amount of internal tidiness, and each of those is hours of work rather than days.
 
 **The safety net goes in before the structural work, not after.** Phase 1 makes the build enforce
-the standard `.editorconfig` already declares. Done afterwards, the phase 4 splits can quietly
+the standard `.editorconfig` already declares. Done afterwards, the phase 4 splits could quietly
 reintroduce the 35 violations and nothing would say so.
 
 **Subtract before you move.** Every line deleted in phase 2 is a line phase 4 does not have to
 relocate, re-test or argue about.
 
-Phases 0 to 3 are small and independent — about two working weeks in total, and any of them can
-ship alone. Phase 4 is the expensive one and is where the god-class question is actually settled.
-Phases 5 and 6 are optional in the sense that nothing depends on them.
+Phase 4 is the expensive one and is where the god-class question is actually settled. Phases 5 and
+6 are optional in the sense that nothing depends on them.
 
-Verification for every item is the existing bar:
+Verification for every item is the existing bar, and since phase 1 it is also CI:
 
 ```sh
 dotnet build Starquake.sln                          # must stay at 0 warnings, 0 errors
 dotnet test Starquake.Tests/Starquake.Tests.csproj  # must stay green
 ```
 
-## Phase 0 — stop the bleeding
+## Phase 0 — stop the bleeding *(landed)*
 
-Player-visible wrongness and one latent crash. All of it is small, none of it depends on anything
-else, and each item wants its own commit and its own play-test.
+Player-visible wrongness and one latent crash, one commit and one play-test each.
 
-**0.1 — the three world-edge bounds tests.** `Blob.ChangeScreenOffRightEdge` (`Blob.cs:1208`),
-`Blob.ChangeScreenOffBottomEdge` (`Blob.cs:1259`) and `GameEngine`'s NumPad2 test key all guard
-with `ScreenNumber + n > WorldMap.ScreenCount`. `ScreenCount` is 512 and the screen array is
-exactly that long, so the last valid index is 511 — which `WorldMap` already names
-`LastScreenNumber`. The right-edge test therefore permits 512; the bottom-edge test adds
-`ScreensAcross`, so it permits up to 527. Both dereference the array on the next line. The
-matching left and top tests use `>= 0` and are correct, and `StepBetweenScreens`'s NumPad6
-already uses `< WorldMap.LastScreenNumber`, so these three are the odd ones out rather than a
-convention. Whether it is reachable depends on the level data at the map's right and bottom
-edges, which is exactly why a one-character change here wants its own commit. Carried over from
-`REFACTORING.md`'s follow-ups, re-ranked because it is a crash rather than a wart.
+**0.1 — the three world-edge bounds tests** (`105a07c`). `Blob.ChangeScreenOffRightEdge`,
+`Blob.ChangeScreenOffBottomEdge` and `GameEngine`'s NumPad2 test key all guarded with
+`ScreenNumber + n > WorldMap.ScreenCount`. `ScreenCount` is 512 and the screen array is exactly
+that long, so the last valid index is 511 — which `WorldMap` already names `LastScreenNumber`. The
+right-edge test permitted 512; the bottom-edge test, adding `ScreensAcross`, permitted up to 527.
+Both dereference the array on the next line. The matching left and top tests already used `>= 0`
+and `StepBetweenScreens`'s NumPad6 already used `LastScreenNumber`, so these three were the odd
+ones out rather than a convention.
 
-**0.2 — decide the joystick option.** `OptionsScreen.cs:66` offers *Joystick 0* as control option
-1. Selecting it binds Up, Down, Left, Right and Fire to `Keys.None` and sets
-`CustomControl.UseJoyPad = true` (`GameEngine.cs:283`). `UseJoyPad` is read by nothing.
-`CustomControl`'s five input methods read the keyboard and nothing else — the DirectInput code
-that would have backed them is commented out at `CustomControl.cs:83`. A player who picks option
-1 can pause and quit and do nothing else, with no message saying why. Either remove the option,
-or implement it: `GamePad.GetState(PlayerIndex.One)` works on DesktopGL through SDL and does in
-about fifteen lines what the commented block was reaching for. The decision determines what 2.1
-deletes, so take it first.
+**0.2 — the joystick option is a joypad** (`ca765b6`). Selecting *Joystick 0* bound Up, Down,
+Left, Right and Fire to `Keys.None` and set a `UseJoyPad` flag nothing read, so a player who
+picked it could pause and quit and nothing else, with no message saying why. The decision was to
+implement it rather than remove it: DesktopGL reaches a pad through SDL, so `CustomControl` reads
+`GamePad.GetState(PlayerIndex.One)` — d-pad or left stick past a threshold for the four
+directions, A for fire.
 
-**0.3 — guard `MatchSomeCoreElementsToTheCore`** (`GameScreenCollection.cs:1919`). It draws
-`matchNumber` from `Next(2, 6)` and then indexes `screensContainingCoreElements[a]` for `a` up to
-4 with no `Count` check, and picks from `tempElements` without checking it is non-empty. Safe
-today only because a hundred pick-up screens are generated, not safe by construction. It also
-needs a type check before phase 6 — see *The key and the access card*.
+Two things fell out of doing it that way. The pad is read **alongside** the keyboard rather than
+instead of it, so it works whichever preset is chosen and the `UseJoyPad` flag and the inference
+that set it are both gone; the joystick preset is now simply the one that binds no keys. And the
+preset is offered only when a pad is actually plugged in — pulling one out while its preset is
+selected hands the selection back to the cursor keys, because confirming it otherwise leaves
+nothing bound.
 
-**0.4 — seed the world generator.** `GameScreenCollection.Reset` does
-`var r = new Random((int)DateTime.Now.Ticks)` at line 1694 while the class already holds
-`_randomNumberGenerator` from its constructor (line 212). Use the injected instance. This looks
-cosmetic and is not: it is what makes 4.3 testable and what lets a bad world layout be reproduced
-from a bug report, and the phase 6 test for key placement cannot be written without it.
+**0.3 — `MatchSomeCoreElementsToTheCore` is clamped** (`712bedb`) to the lengths of both lists it
+draws from, rather than trusting `Next(2, 6)` to fit. Neither list is a fixed length: a hundred
+pick-up screens is what made five safe, not construction. The type check the key placement needs
+is still phase 6's — see *The key and the access card*.
 
-**0.5 — three orphaned doc comments.** Each declaration below carries two stacked `<summary>`
-blocks; the compiler keeps the second and the first is silently swallowed.
+**0.4 — the world generator is seeded** (`a0744c7`). `Reset` built a `Random` of its own from
+`DateTime.Now.Ticks` while the class already held one from its constructor — and
+`PlaceCheopsPyramid` used both, the local for the location and the field for the access code. The
+local is gone and the parameter threading it through four methods with it. This is what makes 4.3
+testable and what lets a bad world layout be reproduced from a bug report.
 
-| Where | What happened |
-| --- | --- |
-| `Blob.cs:30` | `BlobMaxItemsHeld`'s summary sits above `TunnelEntrySpeed`, so the constant it describes has no documentation at all |
-| `GameEngine.cs:213` | A summary describing the deleted `GetInstance()` singleton is now attached to `GameScreens`, documenting something that no longer exists |
-| `Nasty.cs:910` | The same summary twice on `UpdateFrameOfMind`, differing only in line wrapping |
-
-All three look like a member sort that moved declarations and left their comments behind. Three
-lines of `awk` find them, and it is worth re-running after any future sort:
+**0.5 — the three orphaned doc comments** (`63554d9`). Each declaration carried two stacked
+`<summary>` blocks and the compiler kept the second. `BlobMaxItemsHeld`'s summary sat above
+`TunnelEntrySpeed`; `GameEngine` carried a summary of the deleted `GetInstance()` singleton on
+`GameScreens`; `UpdateFrameOfMind` had the same summary twice, differing only in line wrapping.
+All three look like a member sort that moved declarations and left their comments behind, so the
+`awk` below is worth re-running after any future sort:
 
 ```sh
 for f in $(find Starquake.Shared SharedLibs -name "*.cs" -not -path "*/obj/*" -not -path "*/bin/*"); do
@@ -96,155 +89,161 @@ for f in $(find Starquake.Shared SharedLibs -name "*.cs" -not -path "*/obj/*" -n
 done
 ```
 
-## Phase 1 — the safety net
+## Phase 1 — the safety net *(landed)*
 
 `.editorconfig` opens by saying its severities exist "so Rider, `dotnet build` and
 `jb inspectcode` all report the same thing and the cleanup we did does not drift back a file at a
-time."
+time." **`dotnet build` did not report them.** Analysers with the `IDE` prefix only run during a
+build when `EnforceCodeStyleInBuild` is set, and nothing set it. The five rules declared as
+kept-at-zero had never been checked by a build, and the game had 35 violations of them.
 
-**`dotnet build` does not report them.** Analysers with the `IDE` prefix only run during a build
-when `EnforceCodeStyleInBuild` is set, and nothing sets it. There is no `Directory.Build.props`.
-The five rules the file declares as kept-at-zero have never been checked by the build, and the
-game code has 35 violations of them.
+**1.1 and 1.2 landed as one commit** (`b10a13c`), because a commit that switches the gate on
+without clearing the findings does not build, and a bisect needs every commit to.
+`Directory.Build.props` sets `EnforceCodeStyleInBuild`, `TreatWarningsAsErrors`, `Nullable`,
+`ImplicitUsings` and `LangVersion` once for the solution. ProjectMercury is excluded through the
+`.editorconfig` section it already had.
 
-**1.1 — add `Directory.Build.props`** setting `EnforceCodeStyleInBuild`, `TreatWarningsAsErrors`,
-`Nullable`, `ImplicitUsings` and `LangVersion` once for the solution. `ImplicitUsings` is
-currently on in `SharedLibs`, `Starquake.Tests` and both ProjectMercury projects and off in
-`Starquake.Shared` and `ScreenEditor`, which is why the game files open with fifteen-line `using`
-blocks and the others do not. Exclude ProjectMercury — it has eight findings of its own and is
-out of scope, and it already has its own `.editorconfig` section to hang that off.
+What the 35 turned out to be, which was not quite what the review predicted:
 
-**1.2 — clear the 35.** Reproduce them with:
+**Five were named, documented constants nobody read** — and in every case the value they described
+was spelled out as a literal a few hundred lines further down. `Blob.FireFadeStep` against a bare
+`16`, `BlobStartXPos`/`BlobStartYPos` against `416` and `414`, and
+`GameScreenCollection.ItemTileXOffset`/`ItemTileYOffset`, which were a second copy of
+`PlacementXInset` and `PlacementYLift` under a different name. So they are used now rather than
+deleted, and the surviving pair says where its numbers come from.
 
-```sh
-dotnet build Starquake.Shared/Starquake.Shared.csproj -f net9.0 -t:Rebuild \
-  -p:EnforceCodeStyleInBuild=true -p:NoWarn=1591
-```
+**`SpriteCollection.Begin`'s unused `gameTime` was the expensive one.** Dropping it left about
+forty private draw helpers whose only use of `gameTime` was passing it on, and the screens above
+them after that — 45 declarations and their call sites in all. Also gone: `ScreenEffectEngine`'s
+`screenWidth`/`screenHeight`, which every caller reads off `CompositionSize` anyway;
+`GameEngine`'s `parentWindow`; `GameScreenCollection`'s `xOffset` and `yOffset`, both passed `0`;
+`JumpPlatforms`' `ContentManager`; and `Main`'s `args`.
 
-| Rule | Count | What they are |
+**`CustomControl`'s two analogue speed-band methods** went with them, and with them its `Blob`
+field — dissolving the `Blob` ↔ `CustomControl` cycle the decoupling work left standing. Worth
+recording, as evidence of what unreferenced code hides: `SetBlobVSpeed`'s band chain had a hole —
+an input between `VerticalDeadZone` (0.1) and `SpeedBand1` (0.2) matched no branch and fell
+through to the final `else`, giving full speed. Invisible only because nothing called it.
+
+**1.3 — `Directory.Packages.props`** (`b9f071c`). MonoGame was pinned in five project files and
+MessagePack in three; two of the five MonoGame references are different flavours of the same
+framework, which have to move together or the heads stop agreeing with the content pipeline.
+
+**1.4 — CI** (`d73c6fe`). `.github/workflows/build.yml` restores, builds and tests on Ubuntu,
+macOS and Windows on every push to `main` and every pull request. Three runners rather than one:
+every project builds on every platform, so one would prove the code compiles, but the packaging
+does not travel — the `.app` bundle and its ad-hoc signature are a macOS-only target. 8.0 is
+installed alongside 9.0 because MGCB is a `net8.0` application.
+
+## Phase 2 — subtract *(landed)*
+
+**2.1 landed inside 1.2**, because the analyser sweep required it — see above.
+
+**2.2 — `IGameScreen.Success` is gone** (`036b437`). Nine classes implemented it, eight answered a
+constant `true`, and nothing read it through the interface. `AccessBoothScreen`'s copy is private.
+
+**2.3 and 2.4 — `SpriteCollection`** (`6a44399`). `Clone` copied two `int[]` by round-tripping
+them through `MessagePackSerializer` and loaded the texture a second time; the constructor invoked
+on the line above computes both arrays from the same sheet's dimensions and loads the same
+texture, so all three assigned a value over an identical one. With the initialiser no longer
+writing them, those three fields are `readonly`. `[Serializable]` and the four `[NonSerialized]`
+attributes went too — `BinaryFormatter` was removed in .NET 9, so they marked nothing.
+
+**2.5 — two dead field initialisers** (`2e220f1`). `Nasties._nastyCount = 1` was overwritten in
+the constructor. `GameScreenCollection._pickUpCount = 100` was never assigned at all — a `const`
+wearing a field's clothing, and a `const` now.
+
+**2.6 — `packages/` deleted** (`64bfa25`). 21 tracked files, 5.7 MB, nothing referencing them.
+
+**2.7 — `Temp/` is `Assets/`** (`0275677`), and the plan was wrong about why. The content pipeline
+does *not* build from it: `Content.mgcb` compiles `Starquake.Shared/Content/`, which holds its own
+copy of nearly all the same files — 175 byte-identical, 17 differing, and five that exist only in
+`Assets` (three `Shaders/*.fx` nothing compiles, two font PNGs the `.spritefont` descriptions
+replaced). So there was nothing in `Content.mgcb` to update. `BUILD.md` now says what the folder
+is, that keeping the two in step is manual, and that they have drifted.
+
+**2.8 — the carried-over follow-ups** (`d31561b`). Three of the four were still there.
+
+`LayJumpPlatformOrJump`'s empty `if (temp == -1) { }`: `GetNewJumpPlatform` never returns `-1`, it
+returns `-1000`, which is now `JumpPlatforms.NoRoomForPlatform` and says why it has to be well
+below any real answer — the position it normally returns can itself be negative mid-screen-change.
+
+`BuildScreenCollisionMap`'s `screenChanged` was confirmed to control only the key-door cache. The
+`!screenChanged` path removed the game-object tiles and the map was replaced wholesale on the next
+line, so that work was discarded — and the removal walked the list by index while removing from
+it, so it would have skipped every second match had it mattered.
+
+`PowerUpIsInTheWay` was **deleted rather than fixed**, which the review did not anticipate. It
+could never fire: it compared a pixel location against a tile index, and with a 96-pixel tile and
+the 64-pixel lift an item is drawn at, the Y test has no solution for any row on the screen.
+Making it fire would not have helped either — during a `Reset` the power-up it reads is the one
+from *before* this generation run, because `PlaceScreenObjects` calls `GetPotentialLocations`
+before `PlacePowerUpAndPickUp` assigns the new one, so a live guard would have excluded a tile
+chosen by the previous game. What actually keeps the two apart is `PlacePowerUpAndPickUp` removing
+the power-up's location from the list before drawing one for the pick-up.
+
+The fourth, `SoundEffectEngine`'s commented-out spin-wait, had already gone with the timer rework
+in `9a490e5`. The review carried it forward stale.
+
+## Phase 3 — time, randomness and threads *(landed)*
+
+**3.1 — `CollisionDetection` statics to locals** (`eaaa1f0`). Eight `private static` fields held
+eight locals of one pure method, which is why test parallelisation was off — and a latent bug in
+the game the moment anything touches collision off the update thread. Parallelisation is back on
+and the `AssemblyInfo.cs` whose only purpose was to disable it is gone. `_distanceX`/`_distanceY`
+were each assigned and immediately reassigned by an `if/else` computing `Math.Abs`, and the method
+ended `if (a && b) return true; return false;`. **The integer division stayed**: `Check` compares
+against `obj1W / 2 + obj2W / 2`, so it is not `Rectangle.Intersects`.
+
+**3.2 — the background rumble's timer** (`69b6d4a`). It drew from the same `System.Random` a dozen
+collaborators use every frame; it uses `Random.Shared` now and the sound engine no longer takes
+one, so `ResourceManager` does not either. It also called `PlaySound` and `GetSoundState` from the
+callback, walking lists the game thread rewrites in `KillSounds` — surviving only because
+"BackgroundSound1" is registered `Single`. The callback now sets a flag and re-arms, and a new
+`SoundEffectEngine.Update`, called once a frame from `GameEngine`, does the playing.
+
+**3.3 — game time is counted in logic frames** (`8b8ad66`). The frame rate was private to
+`GameHost`, which is *why* the places that wanted to wait a second reached for the clock instead;
+it is `LogicClock.FramesPerSecond` now. Converted: the energy drain, the two one-second booth and
+Cheops read delays, the continual particle effects' duration, and play time — which now measures
+time the game actually ran for rather than time that passed. Multi-instance sound age is
+`Environment.TickCount64`: it only answers which of two instances started first.
+
+`ContinuousParticleEffect.TriggerPeriod` went with them — **nothing ever set it**, so four of the
+nineteen `DateTime.Now` calls were in branches that could not run. The one remaining call is the
+world generator's seed, which is what a seed from the clock is for.
+
+**3.4 and 3.5 — one input snapshot a frame** (`41173d8`). `ToggleKeys` was two mutable static
+`Keys` fields, the last global state in the game. It is an instance owned by `GameHost`, which is
+the thing that decides when a logic frame happens. While it is an instance it may as well hold the
+frame's snapshot, which is the same problem's other half: `Keyboard.GetState()` was called three
+times in `ToggleKeys`, five more in `CustomControl` and another fourteen through the engine, the
+screens and the nasties, so two reads could disagree inside one frame. There are exactly two polls
+left in the game and both are on the same line of `ToggleKeys.Update`.
+
+**Nothing static and mutable is left in the game.**
+
+## Where that leaves the four god classes
+
+The numbers below phase 4 quotes were measured against `ef5a6a3`. Phases 0 to 3 moved them a
+little, and not always down — the input snapshot has to be threaded to fifteen constructors, which
+is what replacing global state with a dependency costs:
+
+| Class | Then | Now |
 | --- | --- | --- |
-| IDE0060 | 22 | Unused parameters — `ScreenEffectEngine`'s `screenWidth`/`screenHeight`, `GameEngine`'s `parentWindow`, `ColourAnimationEngine`'s `screenFade` three times, `SpriteCollection.Begin`'s `gameTime` |
-| IDE0051/0052 | 10 | Unused private members — `Blob.FireFadeStep`, `Blob.BlobStartXPos`/`BlobStartYPos`, `GameScreenCollection.ItemTileXOffset`/`ItemTileYOffset`, and `CustomControl`'s four dead joypad members |
-| IDE0044 | 3 | `SpriteCollection`'s three writable-but-never-written fields |
+| `Blob` | 2,218 | 2,210 |
+| `GameScreenCollection` | 1,938 | 1,915 |
+| `Nasty` | 1,646 | 1,642 |
+| `GameEngine` | 1,227 | 1,233 |
 
-Five of those are named, documented constants nobody reads. Expect a handful to be real questions
-rather than deletions rather than a mechanical sweep — `ScreenEffectEngine`'s unused dimensions in
-particular. `ScreenEditor` has two and is otherwise clean, which is itself evidence that the
-standard holds when it is checked.
-
-**1.3 — add `Directory.Packages.props`.** MonoGame 3.8.4.1 is pinned in five project files and
-MessagePack 3.1.10 in three. Central package management makes the next MonoGame bump one line.
-
-**1.4 — add CI.** One GitHub Actions job running `dotnet build` and `dotnet test` across the three
-heads. There is no CI of any kind today, so "0 warnings, 65 tests green" is held by discipline
-alone, and discipline is exactly what a `git bisect` six months from now cannot verify.
-
-**Do not start phase 2 until CI is green on `main`.** From here on every later phase is checked
-by the build rather than by hand.
-
-## Phase 2 — subtract
-
-Pure deletion, no behaviour change. Doing it now leaves phase 4 with roughly 400 fewer lines to
-relocate and one dependency cycle fewer to reason about.
-
-**2.1 — gut `CustomControl`.** About 120 of its 182 lines are the commented-out DirectInput block
-and two dead analogue speed-band methods. Deleting them also removes its `Blob` field, dissolving
-a `Blob` ↔ `CustomControl` cycle the decoupling work left standing. Worth noting before it goes,
-as evidence of what unreferenced code hides: `SetBlobVSpeed`'s band chain has a hole — an input
-between `VerticalDeadZone` (0.1) and `SpeedBand1` (0.2) matches no branch and falls through to the
-final `else`, giving full speed. That is invisible only because nothing calls it. Depends on 0.2.
-
-**2.2 — delete `IGameScreen.Success`.** Nine classes implement it and eight are `=> true`. Nothing
-reads it through the interface. `AccessBoothScreen` is the only class with a real value, uses it
-internally, and passes it on explicitly as `param` rather than relying on the property; its copy
-becomes private.
-
-**2.3 — fix `SpriteCollection.Clone`** (`SpriteCollection.cs:487`). It copies two `int[]` by
-round-tripping them through `MessagePackSerializer` — a deep-clone-via-`BinaryFormatter` idiom
-ported forward. `(int[])x.Clone()` would do it without the round trip, but neither is needed: the
-constructor invoked on the line above already computed both arrays from the same texture's
-dimensions, so the two lines serialise, deserialise and then overwrite identical values. The same
-is true of the `_contentManager.Load<Texture2D>(_imageFilePath)` two lines further down. Delete
-all three.
-
-**2.4 — remove `[Serializable]` and the four `[NonSerialized]` attributes** from
-`SpriteCollection`. `BinaryFormatter` was removed in .NET 9, so they are inert; the real
-serialisation is MessagePack. The stray `using MessagePack;` goes with 2.3.
-
-**2.5 — two dead field initialisers.** `Nasties._nastyCount = 1` (`Nasties.cs:53`) is overwritten
-in the constructor at line 80. `GameScreenCollection._pickUpCount = 100`
-(`GameScreenCollection.cs:211`) is never assigned at all — a `const` wearing a field's clothing,
-which is the exact pattern stage 1 of `DECOUPLING.md` existed to remove.
-
-**2.6 — delete `packages/`.** 21 tracked files, 5.7 MB of `MonoGame.Framework 3.2.99.1-Beta` and
-`3.4.0` binaries from the `packages.config` era. Nothing references them.
-
-**2.7 — rename `Temp/` to `Assets/`.** 197 tracked files, 20 MB. It is the master art and sound
-source the content pipeline builds from, not temporary anything. A folder called `Temp` is one
-confident `rm -rf` away from gone. Update `Content.mgcb` and `BUILD.md` with it.
-
-**2.8 — take the four carried-over follow-ups** from `REFACTORING.md`, each of which already
-carries a `///` saying so: `Blob.LayJumpPlatformOrJump`'s empty `if (temp == -1) { }` with a
-comment about `-1` above a test for `-1000`; `BuildScreenCollisionMap`'s `screenChanged`
-parameter, whose work is discarded on the next line; `GameScreenCollection.PowerUpIsInTheWay`
-comparing a pixel position against a tile index and reading the wrong screen; and
-`SoundEffectEngine`'s commented-out spin-wait labelled "Hack to make the sounds actually stop!".
-
-## Phase 3 — time, randomness and threads
-
-One theme: the game takes its time and its randomness from the wrong places. These are grouped
-because they touch the same handful of files and because two of them block testing.
-
-**3.1 — `CollisionDetection` statics to locals** (`CollisionDetection.cs:12`). Eight
-`private static` fields hold what are plainly eight locals of one pure method. This is why test
-parallelisation is switched off in `Starquake.Tests.csproj`, and it is the one place in the game
-logic where two threads would silently read each other's arithmetic. The method is pure given its
-arguments, so the conversion is mechanical. Two smaller things ride along: `_distanceX` and
-`_distanceY` are each assigned and then immediately reassigned by the `if/else` below (they are
-`Math.Abs`), and the method ends `if (a && b) return true; return false;`.
-
-**Keep the integer division.** `Check` compares against `obj1W / 2 + obj2W / 2` with integer
-division, so it is not `Rectangle.Intersects`, and a rewrite that reaches for the framework
-method will change how odd-width sprites collide.
-
-**3.2 — give the sound timer its own `Random`** (`SoundEffectEngine.cs:157`).
-`PlayPeriodicSound` runs on a thread-pool timer callback and calls `randomNumberGenerator.Next`
-on the same instance `GameEngine` constructs at line 201 and hands to about a dozen collaborators
-that use it every frame. `System.Random` is not thread-safe; concurrent use can corrupt its state
-so that it returns zero indefinitely. The same callback also calls `PlaySound`, which walks
-`_singleInstanceSoundEffectInstances` and drives `SoundEffectInstance` objects the game thread
-stops in `KillSounds` on every screen change.
-
-That second half survives today *only* because "BackgroundSound1" is registered
-`SoundEffectInstanceType.Single` in `ContentManifest.cs:271`. Change that one line to `Multi` and
-the callback starts calling `List.Add` on a list the game thread enumerates. So: a dedicated
-`Random` (or `Random.Shared`), and a flag the update loop acts on rather than the callback
-touching sound instances directly.
-
-**3.3 — replace the 19 `DateTime.Now` calls.** `GameHost` exists specifically to turn a variable
-render loop into exactly sixty logic frames a second, and these ignore it: energy drain
-(`StatusPanel.cs:410`), the six particle trigger periods in `ContinuousParticleEffect`, the
-one-second booth and Cheops read delays (`AccessBoothScreen.cs:120`, `CheopsScreen.cs:293`),
-multi-instance sound age (`SoundEffectEngine.cs:399`), and play time (`MainGameScreen.cs:172`).
-
-Three consequences. The timings drift against the game's own frame rate. `DateTime.Now` is local
-time, so a DST step or an NTP correction can turn `_screenReadWait + 1s < DateTime.Now` into an
-hour-long wait. And it pays a timezone conversion on every call inside the update path. Frame
-counts are the right unit for the game logic; `Environment.TickCount64` will do for the sound
-ages.
-
-**3.4 — make `ToggleKeys` an instance** (`ToggleKeys.cs:16`). Two mutable `static Keys` fields,
-the last global state in the game — it survived the deletion of `GameEngine.GetInstance()` in
-stage 2 of `DECOUPLING.md`. It requires `Update()` to be called exactly once a frame from exactly
-one place, and nothing in the type system says so.
-
-**3.5 — one `Keyboard.GetState()` per frame.** It is called five times in `CustomControl` and
-three in `ToggleKeys`, so two of those reads can disagree within a single frame. Natural to do
-alongside 3.4.
+Phase 4 is untouched by all of this, which is the point of having done it first: the deletions are
+out of the way, the build now enforces the standard the splits could otherwise erode, and the
+world generator is seeded so 4.3 has something to test against.
 
 ## Phase 4 — break up the god classes
 
-Four classes hold 7,029 of the game's 21,998 lines:
+Four classes hold 7,000 of the game's 22,436 lines. These figures were measured against
+`ef5a6a3`; the table above shows where phases 0 to 3 left them.
 
 | Class | Lines | Fields | What it actually does |
 | --- | --- | --- | --- |
@@ -270,13 +269,15 @@ owns the player's entire game state: `PlayerScore`, `BlobLives`, `EnergyLevel`, 
 blob into `Update` rather than holding it. *Payoff: every scoring and power-up rule becomes
 testable with no graphics, and `StatusPanel` goes back to drawing.*
 
-**4.2 — `ScreenCollisionMap` out of `GameScreenCollection`** (about 430 lines).
-`BuildScreenCollisionMap`, the six `Add*CollisionCells` methods, `CheckCollision`,
+**4.2 — `ScreenCollisionMap` out of `GameScreenCollection`** (about 400 lines).
+`UpdateCollisionMap` (called `BuildScreenCollisionMap` before 2.8 merged the two), the five
+`Add*CollisionCells` methods that survived it, `CheckCollision`,
 `CheckRectangles`, `CheckTileByObject`, `StepAllowedBy`, `ClampToScreenBounds`. *Payoff: the
 thing most likely to break when level data changes becomes testable.*
 
 **4.3 — `WorldPopulator` out of `GameScreenCollection`** (about 250 lines). `Reset` and the six
-placement methods. Pure, given the seeded `Random` from 0.4. *Payoff: world generation becomes
+placement methods, which no longer take a `Random` parameter — 0.4 gave them the field.
+Reproducible from a seed, which is the whole of what makes this testable. *Payoff: world generation becomes
 testable and reproducible — and this is where the phase 6 key placement lands.*
 
 **4.4 — `NastyMovement` out of `Nasty`** (lines 847 to 1480). Fourteen behaviours, about 25 of the
@@ -467,7 +468,8 @@ So they can be re-derived rather than taken on trust.
 **The 35 style violations** by building `Starquake.Shared` with
 `-p:EnforceCodeStyleInBuild=true -p:NoWarn=1591 -t:Rebuild` and de-duplicating across the two
 target frameworks. `NoWarn=1591` is needed because `GenerateDocumentationFile` floods the output
-with missing-doc warnings that are not the point.
+with missing-doc warnings that are not the point. Since 1.1 a plain `dotnet build Starquake.sln`
+reports them, as errors.
 
 **The line and field counts** with `wc -l` and a `grep -cE` over the private declarations, and the
 methods over 80 lines with the `awk` script in `REFACTORING.md` — including its known false
