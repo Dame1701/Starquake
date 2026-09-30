@@ -112,7 +112,7 @@ internal class JumpPlatform
             _gameEngine.GraphicsDeviceMgr.GraphicsDevice.SetRenderTarget(_renderTarget);
             _gameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(Color.Transparent);
 
-            if (_gameEngine.UsingOldGraphics)
+            if (_gameEngine.GraphicsSet.IsOriginal)
             {
                 _jumpPlatformOriginal.Begin(BlendState.AlphaBlend, gameTime);
                 _jumpPlatformOriginal.DrawSprite(0, 0, 0, Color.White, _matrix.Matrix);

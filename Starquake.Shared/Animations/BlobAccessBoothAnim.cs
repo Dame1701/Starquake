@@ -146,8 +146,8 @@ public class BlobAccessBoothAnim
     public void Draw(GameTime gameTime)
     {
         // Draw blob animation
-        _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.ResourceNames.BlobSprites).Begin(BlendState.AlphaBlend, gameTime);
-        _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.ResourceNames.BlobSprites).DrawSprite(_blobFrame, _blobX, 192);
-        _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.ResourceNames.BlobSprites).End();
+        _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.BlobSprites).Begin(BlendState.AlphaBlend, gameTime);
+        _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.BlobSprites).DrawSprite(_blobFrame, _blobX, 192);
+        _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.BlobSprites).End();
     }
 }

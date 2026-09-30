@@ -133,7 +133,7 @@ public class ContinuousParticleEffect : IStandardParticleEffect
     public void Draw()
     {
         // We must always call this!
-        if (!_gameEngineReference.UsingOldGraphics)
+        if (_gameEngineReference.GraphicsSet.IsRedrawn)
         {
             Renderer.RenderEffect(MercuryParticleEffect);
         }
@@ -141,7 +141,7 @@ public class ContinuousParticleEffect : IStandardParticleEffect
 
     public void Draw(int screenFade)
     {
-        if (!_gameEngineReference.UsingOldGraphics)
+        if (_gameEngineReference.GraphicsSet.IsRedrawn)
         {
             Renderer.RenderEffect(MercuryParticleEffect, screenFade);
         }

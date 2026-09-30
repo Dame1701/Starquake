@@ -177,12 +177,11 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public readonly Random RandomNumberGenerator;
 
     /// <summary>
-    ///     Which of the two sets of artwork the ten swappable sprite sheets are currently being
-    ///     read from. Swapped wholesale by <see cref="SwitchGraphicsSetIfAsked" /> rather than
-    ///     edited, so anything that has asked for a sheet name is asking again each frame and
-    ///     follows the switch.
+    ///     Which of the two sets of artwork the game is drawn with, and the sheet names that go
+    ///     with it. Switched by <see cref="SwitchGraphicsSetIfAsked" />; read live by everything
+    ///     that draws.
     /// </summary>
-    public ResourceNames ResourceNames = ResourceNames.Redrawn;
+    public readonly GraphicsSet GraphicsSet = new();
 
     public SpriteCollection Scanlines;
     public bool ScanlinesEnabled = true;
@@ -200,8 +199,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     // Tunnel lift animations
     public TunnelLiftAnimationEngine TunnelAnimations;
-
-    public bool UsingOldGraphics;
 
     // Scaling
     public GameEngine(
@@ -502,8 +499,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     private void DefineBlobGraphics()
     {
-        //ContentResourceManager.AddSpriteResource(gameEngine.ResourceNames.BlobSprites, "Graphics\\blobNew", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        //ContentResourceManager.AddSpriteResource(gameEngine.ResourceNames.BlobSprites, "Graphics\\blobNewAlt", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        //ContentResourceManager.AddSpriteResource(gameEngine.GraphicsSet.Names.BlobSprites, "Graphics\\blobNew", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        //ContentResourceManager.AddSpriteResource(gameEngine.GraphicsSet.Names.BlobSprites, "Graphics\\blobNewAlt", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
         ContentResourceManager.AddSpriteResource("BlobSprites", "Graphics\\blobNewAlt2", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
         ContentResourceManager.AddSpriteResource("BlobSpritesOriginal", "Graphics\\BlobOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
 
@@ -1014,12 +1011,10 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     {
     if (ToggleKeys.GetPressedKey() == Keys.F8)
     {
-        UsingOldGraphics = !UsingOldGraphics;
-
-        ResourceNames = UsingOldGraphics ? ResourceNames.Original : ResourceNames.Redrawn;
+        GraphicsSet.Switch();
 
         // The original graphics have no backdrops drawn for them.
-        DrawBackgrounds = !UsingOldGraphics;
+        DrawBackgrounds = GraphicsSet.IsRedrawn;
 
         if (IntroSequence.SequenceStage == IntroSequenceStage.Finished || IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
         {

@@ -224,7 +224,7 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
                 }
             }
 
-            if (!GameEngine.UsingOldGraphics)
+            if (GameEngine.GraphicsSet.IsRedrawn)
             {
                 _electricityAnimation.GetNextFrame();
                 _electricityAnimation2.GetNextFrame();
@@ -236,7 +236,7 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
         }
         else if (_conveyerNasties != null)
         {
-            if (!GameEngine.UsingOldGraphics)
+            if (GameEngine.GraphicsSet.IsRedrawn)
             {
                 _electricityAnimation.GetNextFrame();
                 _electricityAnimation2.GetNextFrame();
@@ -266,7 +266,7 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
                         {
                             if (ElectricityNodeControllers[electricityNodeCounter].ElectricityOn)
                             {
-                                if (!GameEngine.UsingOldGraphics)
+                                if (GameEngine.GraphicsSet.IsRedrawn)
                                 {
                                     GameEngine.ContentResourceManager.GetSpriteCollection("ElectricityNodeElectricity1").Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
                                     GameEngine.ContentResourceManager.GetSpriteCollection("ElectricityNodeElectricity1").DrawSprite(_electricityAnimation.CurrentFrame, secondLayerTile.TileLocation.X + 28, secondLayerTile.TileLocation.Y - 18, Color.White);
@@ -293,7 +293,7 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
                         {
                             if (ElectricityNodeControllers[electricityNodeCounter].ElectricityOn)
                             {
-                                if (!GameEngine.UsingOldGraphics)
+                                if (GameEngine.GraphicsSet.IsRedrawn)
                                 {
                                     GameEngine.ContentResourceManager.GetSpriteCollection("ElectricityNodeElectricity1").Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
                                     GameEngine.ContentResourceManager.GetSpriteCollection("ElectricityNodeElectricity1").DrawSprite(_electricityAnimation.CurrentFrame, secondLayerTile.TileLocation.X + 28, secondLayerTile.TileLocation.Y + 14, Color.White);
@@ -363,7 +363,7 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
         => ElectricityNodeControllers != null &&
            ElectricityNodeControllers.Length > electricityNodeCounter &&
            ElectricityNodeControllers[electricityNodeCounter].ElectricityOn &&
-           !GameEngine.UsingOldGraphics;
+           GameEngine.GraphicsSet.IsRedrawn;
 
     private void DrawLitNode(Point tileLocation, GameTime gameTime)
     {

@@ -127,7 +127,7 @@ public class BlobDeathAnimation : GameComponentBase
             }
         }
 
-        if (GameEngine.UsingOldGraphics)
+        if (GameEngine.GraphicsSet.IsOriginal)
         {
             _blobDeathParticlesOriginal.GetNextFrame();
         }
@@ -140,7 +140,7 @@ public class BlobDeathAnimation : GameComponentBase
 
     public override void Draw(GameTime gameTime, int screenFade)
     {
-        if (GameEngine.UsingOldGraphics)
+        if (GameEngine.GraphicsSet.IsOriginal)
         {
             GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original")
                 .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);

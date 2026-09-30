@@ -425,7 +425,7 @@ public class Nasty : GameComponentBase
     [MemberNotNull(nameof(_nastySprite))]
     private void CheckSpritesInUse()
     {
-        if (GameEngine.UsingOldGraphics)
+        if (GameEngine.GraphicsSet.IsOriginal)
         {
             _nastySprite = _nastySpriteOriginal;
         }
@@ -745,7 +745,7 @@ public class Nasty : GameComponentBase
 
     private void UpdateDeath()
     {
-        if (GameEngine.UsingOldGraphics)
+        if (GameEngine.GraphicsSet.IsOriginal)
         {
             _nastyDiesAnimation.GetNextFrame();
 
@@ -1622,7 +1622,7 @@ public class Nasty : GameComponentBase
             _nastySprite.End();
         }
 
-        if (GameEngine.UsingOldGraphics)
+        if (GameEngine.GraphicsSet.IsOriginal)
         {
             GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original")
                 .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);

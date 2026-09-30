@@ -72,7 +72,7 @@ public class MultiTriggerTimeBasedParticleEffect : IPositionalTriggerParticleEff
 
     public void Draw()
     {
-        if (!_gameEngineReference.UsingOldGraphics)
+        if (_gameEngineReference.GraphicsSet.IsRedrawn)
         {
             // We must always call this!
             if (MercuryParticleEffect.ActiveParticlesCount > 0)
@@ -84,7 +84,7 @@ public class MultiTriggerTimeBasedParticleEffect : IPositionalTriggerParticleEff
 
     public void Draw(int screenFade)
     {
-        if (!_gameEngineReference.UsingOldGraphics)
+        if (_gameEngineReference.GraphicsSet.IsRedrawn)
         {
             // We must always call this!
             if (MercuryParticleEffect.ActiveParticlesCount > 0)

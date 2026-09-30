@@ -295,7 +295,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
 
     private void DrawPyramid(GameTime gameTime)
     {
-        if (GameEngine.UsingOldGraphics)
+        if (GameEngine.GraphicsSet.IsOriginal)
         {
             GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").Begin(BlendState.AlphaBlend, gameTime);
             GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").DrawSprite(0, 750, 69);
@@ -402,17 +402,17 @@ public class CheopsScreen : GameComponentBase, IGameScreen
 
         GameEngine.Font2.End();
 
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.Pickups).Begin(BlendState.AlphaBlend, gameTime);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups).Begin(BlendState.AlphaBlend, gameTime);
 
         // Need to select something from the inventory randomly ignoring access card and key unless they are the only items....
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.Pickups).DrawSprite((int)GameEngine.Player.BlobInventory[_itemToSwap], 590, 168, Color.White);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups).DrawSprite((int)GameEngine.Player.BlobInventory[_itemToSwap], 590, 168, Color.White);
 
         for (var a = 0; a < 5; a++)
         {
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.Pickups).DrawSprite(_itemsToSelect[a].Type, a * 216 + 100, 298, Color.White);
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups).DrawSprite(_itemsToSelect[a].Type, a * 216 + 100, 298, Color.White);
         }
 
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.Pickups).End();
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups).End();
 
         if (Keyboard.GetState().IsKeyDown(Keys.D1))
         {

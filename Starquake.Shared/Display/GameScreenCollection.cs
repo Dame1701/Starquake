@@ -270,10 +270,10 @@ public class GameScreenCollection : GameComponentBase
 
     public IStandardParticleEffect BlobsShipSmoke2 { get; }
 
-    public int ScreenWidth => GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles)
+    public int ScreenWidth => GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
         .SpriteWidth * TilesAcross;
 
-    public int ScreenHeight => GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles)
+    public int ScreenHeight => GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
         .SpriteHeight * TilesDown;
 
     public int PreviousScreenNumber { get; private set; }
@@ -399,9 +399,9 @@ public class GameScreenCollection : GameComponentBase
                 if (_gameScreens[screenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.PreferredCoreLocation)
                 {
                     return new InteractiveItem(
-                        x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles)
+                        x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
                             .SpriteWidth + 32,
-                        y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles)
+                        y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
                             .SpriteHeight + 32, 0);
                 }
             }
@@ -417,7 +417,7 @@ public class GameScreenCollection : GameComponentBase
     private List<InteractiveItem> GetPotentialLocations(int screenNumber)
     {
         var toReturn = new List<InteractiveItem>();
-        var tiles = GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles);
+        var tiles = GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles);
 
         // Start at row 1: nothing above that row is reachable
         for (var y = 1; y < _gameScreens[screenNumber].ScreenTiles.GetLength(1); y++)
@@ -578,10 +578,10 @@ public class GameScreenCollection : GameComponentBase
                             new CollisionTile(
                                 _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage,
                                 x * GameEngine.ContentResourceManager
-                                    .GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles).SpriteWidth +
+                                    .GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).SpriteWidth +
                                 x1 * CollAreaWidth,
                                 y * GameEngine.ContentResourceManager
-                                    .GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles).SpriteHeight +
+                                    .GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).SpriteHeight +
                                 y1 * CollAreaHeight,
                                 CollisionTileType.EveryoneHits));
                     }
@@ -1003,9 +1003,9 @@ public class GameScreenCollection : GameComponentBase
 
     public Point ConvertToScreenCoords(int tileMapXPos, int tileMapYPos)
         => new(
-            tileMapXPos * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles)
+            tileMapXPos * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
                 .SpriteWidth,
-            tileMapYPos * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles)
+            tileMapYPos * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
                 .SpriteHeight);
 
     public List<Point> GetCoordsOfTiles(int tileType)
@@ -1019,9 +1019,9 @@ public class GameScreenCollection : GameComponentBase
                 if (_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage == tileType)
                 {
                     returnedTiles.Add(new Point(
-                        x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles)
+                        x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
                             .SpriteWidth,
-                        y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles)
+                        y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
                             .SpriteHeight));
                 }
             }
@@ -1041,9 +1041,9 @@ public class GameScreenCollection : GameComponentBase
                 if (tileTypes.Contains(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage))
                 {
                     returnedTiles.Add(new Point(
-                        x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles)
+                        x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
                             .SpriteWidth,
-                        y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles)
+                        y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
                             .SpriteHeight));
                 }
             }
@@ -1066,9 +1066,9 @@ public class GameScreenCollection : GameComponentBase
                     {
                         Location = new Point(
                             x * GameEngine.ContentResourceManager
-                                .GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles).SpriteWidth,
+                                .GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).SpriteWidth,
                             y * GameEngine.ContentResourceManager
-                                .GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles).SpriteHeight)
+                                .GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).SpriteHeight)
                     });
                 }
             }
@@ -1088,9 +1088,9 @@ public class GameScreenCollection : GameComponentBase
                 if (_gameScreens[screenNumber].ScreenTiles[x, y].TileImage == tileType)
                 {
                     returnedTiles.Add(new Point(
-                        x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles)
+                        x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
                             .SpriteWidth,
-                        y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles)
+                        y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
                             .SpriteHeight));
                 }
             }
@@ -1113,7 +1113,7 @@ public class GameScreenCollection : GameComponentBase
             return null;
         }
 
-        var tiles = GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles);
+        var tiles = GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles);
 
         // A check along the vertical axis reports where the object's foot sits inside the tile; every
         // other check reports where its top does.
@@ -1305,19 +1305,19 @@ public class GameScreenCollection : GameComponentBase
     {
         var objNo = 0;
 
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.Pickups)
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups)
             .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
         for (var y = 0; y < 3; y++)
         {
             for (var x = 0; x < 3; x++)
             {
-                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.Pickups)
+                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups)
                     .DrawSprite(objNo, x * 64 + xPos, y * 64 + yPos, Color.White);
                 objNo++;
             }
         }
 
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.Pickups).End();
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups).End();
     }
 
     public void Draw(Color colour, GameTime gameTime, bool introSequenceRunning = false,
@@ -1362,7 +1362,7 @@ public class GameScreenCollection : GameComponentBase
         // Avoid the tunnel tiles
         if (tileImage < (int)ActionTiles.AccessForceField)
         {
-            var tiles = GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles);
+            var tiles = GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles);
 
             tiles.Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
             tiles.DrawSprite(tileImage, x * _tileWidth, y * _tileHeight, colour);
@@ -1381,12 +1381,12 @@ public class GameScreenCollection : GameComponentBase
             return;
         }
 
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.PowerUps)
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.PowerUps)
             .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.PowerUps).DrawSprite(
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.PowerUps).DrawSprite(
             CurrentGameScreenData.PowerUp.Type, CurrentGameScreenData.PowerUp.XLocation,
             CurrentGameScreenData.PowerUp.YLocation, colour);
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.PowerUps).End();
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.PowerUps).End();
     }
 
     private void DrawPickUps(Color colour, GameTime gameTime)
@@ -1396,16 +1396,16 @@ public class GameScreenCollection : GameComponentBase
             return;
         }
 
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.Pickups)
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups)
             .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
         foreach (var pickUp in CurrentGameScreenData.PickUps)
         {
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.Pickups).DrawSprite(
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups).DrawSprite(
                 pickUp.Type, pickUp.XLocation,
                 pickUp.YLocation, colour);
         }
 
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.Pickups).End();
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups).End();
     }
 
     private void DrawCheopsPyramid(Color colour, GameTime gameTime)
@@ -1415,7 +1415,7 @@ public class GameScreenCollection : GameComponentBase
             return;
         }
 
-        if (GameEngine.UsingOldGraphics)
+        if (GameEngine.GraphicsSet.IsOriginal)
         {
             GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal")
                 .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
@@ -1440,7 +1440,7 @@ public class GameScreenCollection : GameComponentBase
     /// </summary>
     private void DrawOllyBackground(Color colour, GameTime gameTime)
     {
-        if (ScreenNumber != OllyScreenNumber || GameEngine.UsingOldGraphics)
+        if (ScreenNumber != OllyScreenNumber || GameEngine.GraphicsSet.IsOriginal)
         {
             return;
         }
@@ -1480,8 +1480,8 @@ public class GameScreenCollection : GameComponentBase
             return;
         }
 
-        var upperTiles = GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.UpperScreenTiles);
-        var lowerTiles = GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles);
+        var upperTiles = GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.UpperScreenTiles);
+        var lowerTiles = GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles);
 
         upperTiles.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
         upperTiles.DrawSprite(
@@ -1548,12 +1548,12 @@ public class GameScreenCollection : GameComponentBase
     {
         if (CurrentGameScreenData.ScreenTiles[x, y].TileImage > LastCollidableTile)
         {
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles)
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
                 .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles)
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
                 .DrawSprite(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, x * _tileWidth,
                     y * _tileHeight, colour);
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles).End();
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).End();
         }
     }
 
@@ -1561,7 +1561,7 @@ public class GameScreenCollection : GameComponentBase
     {
         if (ScreenNumber == OllyScreenNumber)
         {
-            if (GameEngine.UsingOldGraphics)
+            if (GameEngine.GraphicsSet.IsOriginal)
             {
                 GameEngine.ContentResourceManager.GetSpriteCollection("OllyOriginal")
                     .Begin(BlendState.AlphaBlend, gameTime);
@@ -1603,7 +1603,7 @@ public class GameScreenCollection : GameComponentBase
 
     public void DrawShadowing(GameTime gameTime)
     {
-        if (!GameEngine.UsingOldGraphics)
+        if (GameEngine.GraphicsSet.IsRedrawn)
         {
             // Status panel shadow
             GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelShadow")

@@ -32,7 +32,7 @@ public class TunnelLiftAnimationEngine : GameComponentBase
     {
         Point[]? tunnelLiftArrowLocations;
 
-        if (!GameEngine.UsingOldGraphics)
+        if (GameEngine.GraphicsSet.IsRedrawn)
         {
             tunnelLiftArrowLocations = GameEngine.GameScreens.GetCoordsOfTiles(new[]
             {
@@ -95,14 +95,14 @@ public class TunnelLiftAnimationEngine : GameComponentBase
     {
         if (_columns != null && _columns.Count > 0)
         {
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.UpperScreenTiles).Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.UpperScreenTiles).Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
 
             foreach (var column in _columns)
             {
-                column.Draw(GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.UpperScreenTiles), screenfade);
+                column.Draw(GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.UpperScreenTiles), screenfade);
             }
 
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.UpperScreenTiles).End();
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.UpperScreenTiles).End();
         }
     }
 }

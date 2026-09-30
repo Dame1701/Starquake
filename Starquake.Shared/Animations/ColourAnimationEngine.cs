@@ -198,7 +198,7 @@ public class ColourAnimationEngine : GameComponentBase
 
     public void Draw(GameTime gameTime, byte screenFade)
     {
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles).Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
 
         for (var y = 0; y < GameEngine.GameScreens.TilesDown; y++)
         {
@@ -213,15 +213,15 @@ public class ColourAnimationEngine : GameComponentBase
                             // Layer up the tiles to make the intensity deeper
                             for (var b = 0; b < colourAnimation.Intensity; b++)
                             {
-                                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles).DrawSprite(colourAnimation.TileNo, x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles).SpriteWidth,
-                                    y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles).SpriteHeight, colourAnimation.TransitionColour);
+                                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).DrawSprite(colourAnimation.TileNo, x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).SpriteWidth,
+                                    y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).SpriteHeight, colourAnimation.TransitionColour);
                             }
                         }
                     }
                 }
             }
         }
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles).End();
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).End();
     }
 
     public void Draw(SpriteCollection sprites, GameTime gameTime, byte screenFade)
@@ -242,8 +242,8 @@ public class ColourAnimationEngine : GameComponentBase
                             // Layer up the tiles to make the intensity deeper
                             for (var b = 0; b < colourAnimation.Intensity; b++)
                             {
-                                sprites.DrawSprite(colourAnimation.TileNo, x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles).SpriteWidth,
-                                    y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles).SpriteHeight, colourAnimation.TransitionColour);
+                                sprites.DrawSprite(colourAnimation.TileNo, x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).SpriteWidth,
+                                    y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).SpriteHeight, colourAnimation.TransitionColour);
                             }
                         }
                     }
@@ -255,7 +255,7 @@ public class ColourAnimationEngine : GameComponentBase
 
     public void DrawUpperLayer(GameTime gameTime, byte screenFade)
     {
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.UpperScreenTiles).Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.UpperScreenTiles).Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
 
         for (var y = 0; y < GameEngine.GameScreens.TilesDown; y++)
         {
@@ -271,14 +271,14 @@ public class ColourAnimationEngine : GameComponentBase
                             // Layer up the tiles to make the intensity deeper
                             for (var b = 0; b < colourAnimation.Intensity; b++)
                             {
-                                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.UpperScreenTiles).DrawSprite(colourAnimation.UpperTileToDraw, x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles).SpriteWidth,
-                                    y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.UpperScreenTiles).SpriteHeight, colourAnimation.TransitionColour);
+                                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.UpperScreenTiles).DrawSprite(colourAnimation.UpperTileToDraw, x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).SpriteWidth,
+                                    y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.UpperScreenTiles).SpriteHeight, colourAnimation.TransitionColour);
                             }
                         }
                     }
                 }
             }
         }
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.UpperScreenTiles).End();
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.UpperScreenTiles).End();
     }
 }

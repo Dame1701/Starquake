@@ -475,7 +475,7 @@ public class StatusPanel : GameComponentBase
         if (_blobsInventory != null)
         {
             // Draw items
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.Pickups).Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups).Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
             for (var a = 0; a < _blobsInventory.Length; a++)
             {
                 // Draw numbers above object
@@ -489,11 +489,11 @@ public class StatusPanel : GameComponentBase
 
                     if (_slotToScan != a) // Don't draw the slot being scanned
                     {
-                        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.Pickups).DrawSprite((int)_blobsInventory[a], InventorySlotSpacing * a + InventoryItemXPos, InventoryItemYPos, Color.White);
+                        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups).DrawSprite((int)_blobsInventory[a], InventorySlotSpacing * a + InventoryItemXPos, InventoryItemYPos, Color.White);
                     }
                 }
             }
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.Pickups).End();
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups).End();
         }
 
         if (_slotToScan >= 0 && _blobsInventory != null)

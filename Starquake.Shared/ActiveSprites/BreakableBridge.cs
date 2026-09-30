@@ -55,7 +55,7 @@ public class BreakableBridge
             _gameEngineReference.GraphicsDeviceMgr.GraphicsDevice.SetRenderTarget(_renderTarget);
             _gameEngineReference.GraphicsDeviceMgr.GraphicsDevice.Clear(Color.Transparent);
 
-            if (_gameEngineReference.UsingOldGraphics)
+            if (_gameEngineReference.GraphicsSet.IsOriginal)
             {
                 _breakableBridgeOriginal.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
                 _breakableBridgeOriginal.DrawSprite(0, 0, 0, Color.White, _matrix.Matrix);

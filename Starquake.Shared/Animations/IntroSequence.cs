@@ -60,9 +60,9 @@ public class IntroSequence : GameComponentBase
         _blobShipHeadLightFlash = new RandomFaderAnimation(4, GameEngine.RandomNumberGenerator, 100);
     }
 
-    public int BlobSpaceShipXPos => (int)_blobSpaceShipXPos + GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.BlobsShip).SpriteWidth / 2;
+    public int BlobSpaceShipXPos => (int)_blobSpaceShipXPos + GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.BlobsShip).SpriteWidth / 2;
 
-    public int BlobSpaceShipYPos => (int)_blobSpaceShipYPos + GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.BlobsShip).SpriteHeight / 2;
+    public int BlobSpaceShipYPos => (int)_blobSpaceShipYPos + GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.BlobsShip).SpriteHeight / 2;
     public IntroSequenceStage SequenceStage { get; private set; } = IntroSequenceStage.None;
 
     /// <summary>
@@ -314,25 +314,25 @@ public class IntroSequence : GameComponentBase
         {
 
 
-            if (GameEngine.UsingOldGraphics)
+            if (GameEngine.GraphicsSet.IsOriginal)
             {
-                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.BlobsShip).Begin(BlendState.AlphaBlend, gameTime);
+                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.BlobsShip).Begin(BlendState.AlphaBlend, gameTime);
                 if (SequenceStage == IntroSequenceStage.Finished || SequenceStage == IntroSequenceStage.CaptionFadeUp || SequenceStage == IntroSequenceStage.EndPause)
                 {
-                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.BlobsShip).DrawSprite(0, 640, 288, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade));
+                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.BlobsShip).DrawSprite(0, 640, 288, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade));
                 }
                 else
                 {
-                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.BlobsShip).DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
+                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.BlobsShip).DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
                 }
 
-                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.BlobsShip).End();
+                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.BlobsShip).End();
             }
             else
             {
-                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.BlobsShip).Begin(BlendState.AlphaBlend, gameTime);
-                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.BlobsShip).DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
-                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.BlobsShip).End();
+                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.BlobsShip).Begin(BlendState.AlphaBlend, gameTime);
+                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.BlobsShip).DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
+                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.BlobsShip).End();
 
                 if (SequenceStage != IntroSequenceStage.Finished && SequenceStage != IntroSequenceStage.EndPause)
                 {

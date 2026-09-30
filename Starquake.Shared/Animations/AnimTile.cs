@@ -44,7 +44,7 @@ public class AnimTile : GameComponentBase
 
     public void Draw(int xPos, int yPos, Color colour, GameTime gameTime)
     {
-        if (!GameEngine.UsingOldGraphics)
+        if (GameEngine.GraphicsSet.IsRedrawn)
         {
             _tileAnimationSpriteSet.Begin(BlendState.AlphaBlend, gameTime);
             _tileAnimationSpriteSet.DrawSprite(TileAnimation.CurrentFrame, xPos, yPos, colour);

@@ -103,7 +103,7 @@ public class TriggeredParticleEffect : IStandardParticleEffect
 
     public void Draw()
     {
-        if (!_gameEngineReference.UsingOldGraphics)
+        if (_gameEngineReference.GraphicsSet.IsRedrawn)
         {
             // We must always call this!
             Renderer.RenderEffect(MercuryParticleEffect);
@@ -112,7 +112,7 @@ public class TriggeredParticleEffect : IStandardParticleEffect
 
     public void Draw(int screenFade)
     {
-        if (!_gameEngineReference.UsingOldGraphics)
+        if (_gameEngineReference.GraphicsSet.IsRedrawn)
         {
             Renderer.RenderEffect(MercuryParticleEffect, screenFade);
         }
