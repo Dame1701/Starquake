@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using Microsoft.Xna.Framework;
 using ProjectMercury;
 using ProjectMercury.Renderers;
@@ -14,14 +15,17 @@ public class TriggeredParticleEffect : IStandardParticleEffect
 {
     private readonly GameEngine _gameEngineReference;
 
-    internal ParticleEffect MercuryParticleEffect;
-    internal SpriteBatchRenderer Renderer;
+    internal readonly ParticleEffect MercuryParticleEffect;
+    internal readonly SpriteBatchRenderer Renderer;
 
     private bool _triggered;
 
-    public TriggeredParticleEffect(GameEngine gameEngineReference)
+    public TriggeredParticleEffect(GameEngine gameEngineReference, ParticleEffect mercuryParticleEffect,
+        SpriteBatchRenderer renderer)
     {
         _gameEngineReference = gameEngineReference;
+        MercuryParticleEffect = mercuryParticleEffect;
+        Renderer = renderer;
         EffectActive = false;
         _triggered = false;
     }
@@ -29,7 +33,7 @@ public class TriggeredParticleEffect : IStandardParticleEffect
 
     public ParticleEffect Effect => MercuryParticleEffect;
 
-    public event RaiseEffectComplete ParticleEffectComplete;
+    public event RaiseEffectComplete? ParticleEffectComplete;
 
     // Starts an effect that is not triggered
     public void Start()

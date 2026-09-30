@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using System.Collections.Generic;
 using ProjectMercury;
@@ -51,67 +52,37 @@ public class ParticleEngine
     ///     Returns a Particle effect based on the effect name given if it's single trigger it will only trigger once
     /// </summary>
     /// <param name="effectName"></param>
-    /// <param name="SingleTrigger"></param>
     /// <param name="duration">
     ///     Single trigger how long until we signal the effect is complete, for non single trigger, how long
     ///     we want to play the routine
     /// </param>
     public ContinuousParticleEffect CreateContinualEffectInstance(string effectName, TimeSpan? duration)
-    {
-        if (_particleEffects.ContainsKey(effectName))
+        => new(_gameEngineInstance, CopyEffect(effectName), _particleRenderer)
         {
-            // Each instance needs its own copy of the effect, otherwise callers sharing
-            // an effect name emit into, and draw from, the same particle pool
-            var cpe = new ContinuousParticleEffect(_gameEngineInstance);
-            cpe.EffectDuration = duration;
-            cpe.MercuryParticleEffect = _particleEffects[effectName].DeepCopy();
-            cpe.MercuryParticleEffect.LoadContent(_gameEngineInstance.ContentMgr);
-            cpe.MercuryParticleEffect.Initialise();
-            cpe.Renderer = _particleRenderer;
-
-            return cpe;
-        }
-
-        throw new InvalidOperationException($"Particle effect '{effectName}' has not been registered.");
-    }
+            EffectDuration = duration
+        };
 
     public MultiTriggerTimeBasedParticleEffect CreateMultiTriggeredTimeBasedEffectInstance(string effectName)
-    {
-        // Deep copy the effect
-        // Return a class like the above but with the single trigger stuff in it
-        // take the single trigger stuff out of the class above to avoid confusiojn
-        // DONE :)
-        if (_particleEffects.ContainsKey(effectName))
-        {
-            var mtpe = new MultiTriggerTimeBasedParticleEffect(_gameEngineInstance);
-            mtpe.MercuryParticleEffect = _particleEffects[effectName].DeepCopy();
-            mtpe.MercuryParticleEffect.LoadContent(_gameEngineInstance.ContentMgr);
-            mtpe.MercuryParticleEffect.Initialise();
-            mtpe.Renderer = _particleRenderer;
-
-            return mtpe;
-        }
-
-        throw new InvalidOperationException($"Particle effect '{effectName}' has not been registered.");
-    }
+        => new(_gameEngineInstance, CopyEffect(effectName), _particleRenderer);
 
     public TriggeredParticleEffect CreateSingleTriggerEffectInstance(string effectName)
-    {
-        // Deep copy the effect
-        // Return a class like the above but with the single trigger stuff in it
-        // take the single trigger stuff out of the class above to avoid confusiojn
-        // DONE :)
-        if (_particleEffects.ContainsKey(effectName))
-        {
-            var tpe = new TriggeredParticleEffect(_gameEngineInstance);
-            tpe.MercuryParticleEffect = _particleEffects[effectName].DeepCopy();
-            tpe.MercuryParticleEffect.LoadContent(_gameEngineInstance.ContentMgr);
-            tpe.MercuryParticleEffect.Initialise();
-            tpe.Renderer = _particleRenderer;
+        => new(_gameEngineInstance, CopyEffect(effectName), _particleRenderer);
 
-            return tpe;
+    /// <summary>
+    ///     Each instance needs its own copy of the effect, otherwise callers sharing an effect name emit into,
+    ///     and draw from, the same particle pool.
+    /// </summary>
+    private ParticleEffect CopyEffect(string effectName)
+    {
+        if (!_particleEffects.TryGetValue(effectName, out var registered))
+        {
+            throw new InvalidOperationException($"Particle effect '{effectName}' has not been registered.");
         }
 
-        throw new InvalidOperationException($"Particle effect '{effectName}' has not been registered.");
+        var copy = registered.DeepCopy();
+        copy.LoadContent(_gameEngineInstance.ContentMgr);
+        copy.Initialise();
+
+        return copy;
     }
 }

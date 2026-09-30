@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using ProjectMercury;
 using Starquake.Structure;
 
@@ -11,7 +12,7 @@ public interface IParticleEffect
 {
     ParticleEffect Effect { get; }
     bool EffectActive { get; }
-    event RaiseEffectComplete ParticleEffectComplete;
+    event RaiseEffectComplete? ParticleEffectComplete;
     void Stop();
     void Reset();
     void Draw();

@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using Microsoft.Xna.Framework;
 using ProjectMercury;
 using ProjectMercury.Renderers;
@@ -13,14 +14,17 @@ namespace Starquake.Particles;
 public class MultiTriggerTimeBasedParticleEffect : IPositionalTriggerParticleEffect
 {
     private readonly GameEngine _gameEngineReference;
-    internal ParticleEffect MercuryParticleEffect;
-    internal SpriteBatchRenderer Renderer;
+    internal readonly ParticleEffect MercuryParticleEffect;
+    internal readonly SpriteBatchRenderer Renderer;
 
-    public MultiTriggerTimeBasedParticleEffect(GameEngine gameEngineReference)
+    public MultiTriggerTimeBasedParticleEffect(GameEngine gameEngineReference,
+        ParticleEffect mercuryParticleEffect, SpriteBatchRenderer renderer)
     {
         _gameEngineReference = gameEngineReference;
+        MercuryParticleEffect = mercuryParticleEffect;
+        Renderer = renderer;
     }
-    public event RaiseEffectComplete ParticleEffectComplete;
+    public event RaiseEffectComplete? ParticleEffectComplete;
 
     public ParticleEffect Effect => MercuryParticleEffect;
 

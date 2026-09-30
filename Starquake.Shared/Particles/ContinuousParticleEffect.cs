@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using Microsoft.Xna.Framework;
 using ProjectMercury;
@@ -19,13 +20,16 @@ public class ContinuousParticleEffect : IStandardParticleEffect
 
     private DateTime _effectStartTime;
 
-    internal ParticleEffect MercuryParticleEffect;
+    internal readonly ParticleEffect MercuryParticleEffect;
 
-    internal SpriteBatchRenderer Renderer;
+    internal readonly SpriteBatchRenderer Renderer;
 
-    public ContinuousParticleEffect(GameEngine gameEngineReference)
+    public ContinuousParticleEffect(GameEngine gameEngineReference, ParticleEffect mercuryParticleEffect,
+        SpriteBatchRenderer renderer)
     {
         _gameEngineReference = gameEngineReference;
+        MercuryParticleEffect = mercuryParticleEffect;
+        Renderer = renderer;
         EffectDuration = new TimeSpan(0);
         EffectActive = false;
     }
@@ -37,7 +41,7 @@ public class ContinuousParticleEffect : IStandardParticleEffect
     public ParticleEffect Effect => MercuryParticleEffect;
     public bool EffectActive { get; private set; }
 
-    public event RaiseEffectComplete ParticleEffectComplete;
+    public event RaiseEffectComplete? ParticleEffectComplete;
 
     // Starts an effect that is not triggered
     public void Start()

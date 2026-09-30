@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using Microsoft.Xna.Framework;
 using Starquake.Animations;
@@ -27,7 +28,7 @@ public class BouncingParticle
         _particleBounce = new BouncingAnimation(gameEngineReference, spriteNo);
     }
 
-    public IStandardParticleEffect Fireball { get; set; }
+    public required IStandardParticleEffect Fireball { get; init; }
 
     public int XPos { get; private set; }
 
@@ -36,9 +37,9 @@ public class BouncingParticle
     public bool Triggered => _particleBounce.Triggered;
 
     // True while the emitter still holds particles, which outlives the bounce itself
-    public bool HasActiveParticles => Fireball is { Effect.ActiveParticlesCount: > 0 };
+    public bool HasActiveParticles => Fireball.Effect.ActiveParticlesCount > 0;
 
-    public IPositionalTriggerParticleEffect SparkEffect { get; set; }
+    public required IPositionalTriggerParticleEffect SparkEffect { get; init; }
 
     public void XBounce()
     {
@@ -220,7 +221,7 @@ public class BouncingParticle
         }
     }
 
-    public void Draw(SpriteCollection spriteToDraw, int screenFade, int spriteNumber = -1)
+    public void Draw(SpriteCollection? spriteToDraw, int screenFade, int spriteNumber = -1)
     {
         if (Triggered && spriteToDraw != null)
         {

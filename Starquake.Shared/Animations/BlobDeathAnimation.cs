@@ -14,6 +14,9 @@ namespace Starquake.Animations;
 
 public class BlobDeathAnimation : GameComponentBase
 {
+    // The six fragment sprites Blob comes apart into. Deliberately not a straight run
+    private static readonly int[] FragmentSpriteNumbers = [0, 1, 1, 2, 3, 5];
+
     private readonly Animation _blobDeathParticlesOriginal;
 
     private IPositionalTriggerParticleEffect _blobFragmentBounceSparks;
@@ -22,15 +25,7 @@ public class BlobDeathAnimation : GameComponentBase
     public BlobDeathAnimation(GameEngine gameEngineReference)
         : base(gameEngineReference)
     {
-        BouncingParticles =
-        [
-            new BouncingParticle(gameEngineReference, 0),
-            new BouncingParticle(gameEngineReference, 1),
-            new BouncingParticle(gameEngineReference, 1),
-            new BouncingParticle(gameEngineReference, 2),
-            new BouncingParticle(gameEngineReference, 3),
-            new BouncingParticle(gameEngineReference, 5)
-        ];
+        BouncingParticles = new List<BouncingParticle>(FragmentSpriteNumbers.Length);
 
         _blobDeathParticlesOriginal = new Animation
         {
@@ -86,12 +81,17 @@ public class BlobDeathAnimation : GameComponentBase
             (IPositionalTriggerParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("FireSparks",
                 ParticleEffectType.TriggeredMultiLocationTimed, null);
 
-        foreach (var t in BouncingParticles)
+        // Each fragment needs its own explosion emitter, but they all spark off the one effect
+        BouncingParticles.Clear();
+        foreach (var fragmentSpriteNumber in FragmentSpriteNumbers)
         {
-            t.Fireball =
-                (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("BlobFragmentExplosion",
-                    ParticleEffectType.Continual, null);
-            t.SparkEffect = _blobFragmentBounceSparks;
+            BouncingParticles.Add(new BouncingParticle(GameEngine, fragmentSpriteNumber)
+            {
+                Fireball =
+                    (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("BlobFragmentExplosion",
+                        ParticleEffectType.Continual, null),
+                SparkEffect = _blobFragmentBounceSparks
+            });
         }
     }
 
