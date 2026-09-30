@@ -69,8 +69,8 @@ so making its fields constructor-set means reordering the composition root.
 | ~~2. Owner-assigned~~ | the four `Particles/*.cs`, `BouncingParticle.cs` | ~10 | **Done**, `abd14e0` |
 | ~~3. Leaf classes~~ | 30 files | ~50 | **Done**, `e536e79`…`d6ca5c6` |
 | ~~4. Mid-size~~ | `JumpPlatform`, `Nasty`, `ElectricityGatesAndNodesEngine`, `PlanetCoreScreen`, `TeleportScreen`, `GameScreenCollection` | 76 | **Done**, `7087eae`…`1703992` |
-| 5. `Blob.cs` | 1 | 27 | Large but self-contained |
-| 6. `GameEngine.cs` and what only it can settle | `GameEngine.cs` (39), `IntroSequence.cs` (1), `MainGameScreen.cs` (2), `TestScreen.cs` (2) | 44 | The composition root; do last |
+| ~~5. `Blob.cs`~~ | 1 | 27 | **Done**, `2086031` |
+| 6. `GameEngine.cs` and what only it can settle | `GameEngine.cs` (40), `IntroSequence.cs` (1), `MainGameScreen.cs` (2), `TestScreen.cs` (2) | 45 | The composition root; all that is left |
 | 7. Flip the project | `Starquake.Shared.csproj` | — | Remove all `#nullable enable` directives |
 
 `IntroSequence` was in stage 3 and is not any more. Its `_mainScreen` is set by
@@ -159,15 +159,13 @@ cleanup here re-introduces one, that file is the place it is recorded.
 
 ## State
 
-Stages 1 to 4 are done, in seventeen commits from `2568943` to `1703992`. Warnings with the
-project switch on are **246 → 71**, and 48 files carry `#nullable enable`. Solution build is at
+Stages 1 to 5 are done, in nineteen commits from `2568943` to `2086031`. Warnings with the
+project switch on are **246 → 45**, and 50 files carry `#nullable enable`. Solution build is at
 0 warnings, 0 errors and the smoke run reaches its twelve seconds.
 
-Five files are left: `Blob.cs` (27), `GameEngine.cs` (39), and one line each in
-`IntroSequence.cs`, `MainGameScreen.cs` and `TestScreen.cs` that only `GameEngine`'s turn can
-settle. Nothing is part-converted: a file either has the directive and is clean, or has not been
-touched. `Blob.cs` went from 21 warnings to 27 during stage 4, not because it got worse but
-because `GameScreenCollection` now states which of its lookups can return nothing.
+Only stage 6 is left: `GameEngine.cs` itself (40), plus one line each in `IntroSequence.cs`,
+`MainGameScreen.cs` and `TestScreen.cs` that only `GameEngine`'s turn can settle. Nothing is
+part-converted: a file either has the directive and is clean, or has not been touched.
 
 What a reader needs that was not true when this plan was written:
 
@@ -181,10 +179,13 @@ What a reader needs that was not true when this plan was written:
   `GetCoordsOfTiles`/`GetKeyLockDoors` give back an empty collection for a screen that has none
   of a tile. `CheckTileByObject` and `GetPreferredLocation` stay nullable, because there not
   finding one is a real answer.
-- **The composition root has started moving.** `GameScreenCollection` is now built in the
-  `GameEngineStatus.Started` handler rather than `GameEngine`'s constructor, because its screen
-  data is a resource. `GameEngine.GameScreens` gave up `readonly` for it and is one more field
-  that handler assigns. Stage 6 settles that whole group, `IntroSequence._mainScreen` included.
+- **The composition root has started moving.** `GameScreenCollection` and `Blob` are now built
+  in the `GameEngineStatus.Started` handler rather than in `GameEngine`'s constructor and
+  `Initialise`, because the resources they need do not exist earlier. `GameEngine.GameScreens`
+  gave up `readonly` for it. Both are now fields that handler assigns, along with the thirty-odd
+  already there; stage 6 settles that whole group, `IntroSequence._mainScreen` included.
+- **`RaiseBlobAction` carries `object?`.** Only `GotPowerUp` carries anything, and `StatusPanel`
+  now treats a power up action without its type as a mistake rather than casting what arrives.
 
 ### Verifying stages 5 and 6
 
@@ -212,7 +213,30 @@ Four, all pre-existing and all fixed where they were found:
   right-only booth screen would never get a code. No screen is right-only, so nothing changed.
 
 A field nothing sets is usually a field nothing reads, but not always — that is the pattern
-behind all four. Expect more in stages 5 and 6.
+behind all four. Expect more in stage 6.
+
+### One open question, deliberately not answered
+
+`Blob.cs`, access booth detection, around line 1755. Each of the two branches detects the booth
+on one side of blob and then hands the booth screen the **map position of the tile on his other
+side**:
+
+```csharp
+if (_tileLeftBlob is { TileNumber: (int)ActionTiles.AccessBoothRight })   // detects on the left
+    …Reset(new object[] { Direction.Left, _tileRightBlob.MapXPosition });  // reports the right
+```
+
+The teleport booth immediately above it uses `_tileRightBlob` throughout, which is what makes
+the crossing look like a slip. That position is not discarded: `AccessBoothScreen.Reset` uses it
+to place blob when he leaves the booth, as `(int)temp[1] * 128` give or take a tile, so reading
+the wrong tile puts him in the wrong place.
+
+It is left exactly as it was, because which tile the booth is meant to be told is a gameplay
+question and walking blob into an access booth is the only way to see which looks right. What
+did change is that both tiles must now be present for either branch to fire, since the branch
+that reads the opposite tile never established it was there — previously that was a crash
+waiting for an empty tile beside blob. If the crossing is a bug, the fix is to read the detected
+tile's own `MapXPosition` in both branches.
 
 Still outstanding and deliberately not part of this plan: unused non-private members (down from
 101, several were removed here where a nullable question could not be answered without them),
