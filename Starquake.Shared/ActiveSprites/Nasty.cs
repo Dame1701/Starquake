@@ -487,171 +487,215 @@ public class Nasty : GameComponentBase
             _attractedToBlob = false;
         }
 
-        // Reset conception variables
         if (NastyState == NastyState.PreConception)
         {
-            _conceptionwaitCounter = GameEngine.RandomNumberGenerator.Next(0, ShortestConceptionWaitOnCoreScreen);
-            NastyState = NastyState.Conception;
-
-            if (!KeepNastyTheSame)
-            {
-                _nastyType = GetRandomNastyType(GameEngine, false);
-            }
-
-            if (_nastyType != NastyType.Spiky)
-            {
-                MovementType = MoveType.RandomMovement;
-            }
-            else
-            {
-                MovementType = MoveType.SpikeyMovement;
-                _spikeyPause = true;
-            }
+            BeginConception();
         }
         else if (NastyState == NastyState.Conception)
         {
-            if (_conceptionwaitCounter > 0)
-            {
-                _conceptionwaitCounter--;
-            }
-            else
-            {
-                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("NastyAppear", 0.1F, false);
-                _movementChangeCounter = 0;
-                _movementChangeCount = 0;
-                _firstMovement = true;
-                _deathFadeLevel = ColourLevels.Full;
-                _deathScale = 1f;
-                _birthFadeLevel = 0;
-                _birthScale = 0f;
-                _birthColourLevel = 0;
-                _birthRotateSpeed = BirthRespawnRotateSpeed;
-                _birthTimer = 0;
-
-                // Select a new location to spawn
-                var newPosition = GetNastySpawnLocation();
-                if (newPosition == new Point(0, 0))
-                {
-                    NastyState = NastyState.Disabled;
-                }
-                else
-                {
-                    XPos = newPosition.X;
-                    YPos = newPosition.Y;
-                }
-
-                NastyState = NastyState.Birth;
-            }
+            WaitToBeBorn();
         }
         else if (NastyState == NastyState.Birth)
         {
-            if (_birthScale < 1.0f)
+            UpdateBirth();
+        }
+        else if (NastyState == NastyState.Shot)
+        {
+            StartDying();
+        }
+        else if (NastyState == NastyState.Dead)
+        {
+            UpdateDeath();
+        }
+
+        UpdateDeathEffects(gameTime);
+
+        if (!ShouldAnimate())
+        {
+            return;
+        }
+
+        _nastyAnim.GetNextFrame();
+
+        ReleaseAttractionIfStuck();
+        MoveNasty();
+        UpdateFrameOfMind();
+    }
+
+    /// <summary>
+    ///     Picks how long this nasty waits to be conceived, and what kind of nasty it is going to be
+    ///     when it gets there.
+    /// </summary>
+    private void BeginConception()
+    {
+        _conceptionwaitCounter = GameEngine.RandomNumberGenerator.Next(0, ShortestConceptionWaitOnCoreScreen);
+        NastyState = NastyState.Conception;
+
+        if (!KeepNastyTheSame)
+        {
+            _nastyType = GetRandomNastyType(GameEngine, false);
+        }
+
+        if (_nastyType != NastyType.Spiky)
+        {
+            MovementType = MoveType.RandomMovement;
+        }
+        else
+        {
+            MovementType = MoveType.SpikeyMovement;
+            _spikeyPause = true;
+        }
+    }
+
+    private void WaitToBeBorn()
+    {
+        if (_conceptionwaitCounter > 0)
+        {
+            _conceptionwaitCounter--;
+        }
+        else
+        {
+            GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("NastyAppear", 0.1F, false);
+            _movementChangeCounter = 0;
+            _movementChangeCount = 0;
+            _firstMovement = true;
+            _deathFadeLevel = ColourLevels.Full;
+            _deathScale = 1f;
+            _birthFadeLevel = 0;
+            _birthScale = 0f;
+            _birthColourLevel = 0;
+            _birthRotateSpeed = BirthRespawnRotateSpeed;
+            _birthTimer = 0;
+
+            // Select a new location to spawn
+            var newPosition = GetNastySpawnLocation();
+            if (newPosition == new Point(0, 0))
             {
-                _birthScale = _birthScale + 1f / BirthPeriod;
+                NastyState = NastyState.Disabled;
+            }
+            else
+            {
+                XPos = newPosition.X;
+                YPos = newPosition.Y;
             }
 
-            if (_birthScale > 1.0f)
-            {
-                _birthScale = 1.0f;
-            }
+            NastyState = NastyState.Birth;
+        }
+    }
+
+    private void UpdateBirth()
+    {
+        if (_birthScale < 1.0f)
+        {
+            _birthScale = _birthScale + 1f / BirthPeriod;
+        }
+
+        if (_birthScale > 1.0f)
+        {
+            _birthScale = 1.0f;
+        }
 
 
-            // Fade the nasty in
-            if (_birthFadeLevel < ColourLevels.Full)
+        // Fade the nasty in
+        if (_birthFadeLevel < ColourLevels.Full)
+        {
+            _birthFadeLevel =
+                _birthFadeLevel +
+                (int)(ColourLevels.Full /
+                      ((double)BirthPeriod /
+                       BirthColourFadeHalf)); // We only have half the time to do the colour fade in 
+        }
+
+
+        // Once we're halfway through fade in the colours
+        if (_birthTimer > BirthPeriod / BirthColourFadeHalf)
+        {
+            if (_birthColourLevel < ColourLevels.Full)
             {
-                _birthFadeLevel =
-                    _birthFadeLevel +
+                _birthColourLevel =
+                    _birthColourLevel +
                     (int)(ColourLevels.Full /
                           ((double)BirthPeriod /
                            BirthColourFadeHalf)); // We only have half the time to do the colour fade in 
             }
 
-
-            // Once we're halfway through fade in the colours
-            if (_birthTimer > BirthPeriod / BirthColourFadeHalf)
+            if (_birthRotateSpeed > BirthEndRotateSpeed)
             {
-                if (_birthColourLevel < ColourLevels.Full)
-                {
-                    _birthColourLevel =
-                        _birthColourLevel +
-                        (int)(ColourLevels.Full /
-                              ((double)BirthPeriod /
-                               BirthColourFadeHalf)); // We only have half the time to do the colour fade in 
-                }
-
-                if (_birthRotateSpeed > BirthEndRotateSpeed)
-                {
-                    _birthRotateSpeed = _birthRotateSpeed - BirthEndRotateSpeed / ((float)BirthPeriod / BirthColourFadeHalf);
-                }
+                _birthRotateSpeed = _birthRotateSpeed - BirthEndRotateSpeed / ((float)BirthPeriod / BirthColourFadeHalf);
             }
-
-            if (_birthFadeLevel > ColourLevels.Full)
-            {
-                _birthFadeLevel = ColourLevels.Full;
-            }
-
-            if (_birthColourLevel > ColourLevels.Full)
-            {
-                _birthColourLevel = ColourLevels.Full;
-            }
-
-            if (_birthTimer > BirthPeriod)
-            {
-                if (_nastySprite.SpriteRotation == 0)
-                {
-                    NastyState = NastyState.Normal;
-                    _birthTimer = 0;
-                }
-            }
-
-            _birthTimer++;
         }
-        else if (NastyState == NastyState.Shot)
-        {
-            _deathFadeLevel = ColourLevels.Full;
-            _deathScale = 1.0f;
 
-            if (_nastyType == NastyType.Spiky ||
-                _nastyType == NastyType.Conveyer)
+        if (_birthFadeLevel > ColourLevels.Full)
+        {
+            _birthFadeLevel = ColourLevels.Full;
+        }
+
+        if (_birthColourLevel > ColourLevels.Full)
+        {
+            _birthColourLevel = ColourLevels.Full;
+        }
+
+        if (_birthTimer > BirthPeriod)
+        {
+            if (_nastySprite.SpriteRotation == 0)
             {
-                _nastyDies.Start();
+                NastyState = NastyState.Normal;
+                _birthTimer = 0;
+            }
+        }
+
+        _birthTimer++;
+    }
+
+    private void StartDying()
+    {
+        _deathFadeLevel = ColourLevels.Full;
+        _deathScale = 1.0f;
+
+        if (_nastyType == NastyType.Spiky ||
+            _nastyType == NastyType.Conveyer)
+        {
+            _nastyDies.Start();
+        }
+        else
+        {
+            NastyHelpers.ApplyNastyColours(_nastyType, _nastyDiesType2.Effect);
+            _nastyDiesType2.Start();
+        }
+
+        NastyState = NastyState.Dead;
+
+        if (GameEngine.RandomNumberGenerator.Next(0, 2) == 0)
+        {
+            _deathAnticlockwise = true;
+        }
+        else
+        {
+            _deathAnticlockwise = false;
+        }
+    }
+
+    private void UpdateDeath()
+    {
+        if (GameEngine.UsingOldGraphics)
+        {
+            _nastyDiesAnimation.GetNextFrame();
+
+            if (_nastyDeadPauseCounter < DeadPauseFrames)
+            {
+                _nastyDeadPauseCounter++;
             }
             else
             {
-                NastyHelpers.ApplyNastyColours(_nastyType, _nastyDiesType2.Effect);
-                _nastyDiesType2.Start();
-            }
-
-            NastyState = NastyState.Dead;
-
-            if (GameEngine.RandomNumberGenerator.Next(0, 2) == 0)
-            {
-                _deathAnticlockwise = true;
-            }
-            else
-            {
-                _deathAnticlockwise = false;
+                NastyState = NastyState.PreConception;
+                _conceptionwaitCounter = GameEngine.RandomNumberGenerator.Next(0, LongestConceptionWait);
+                _nastyDeadPauseCounter = 0;
             }
         }
-        else if (NastyState == NastyState.Dead)
-        {
-            if (GameEngine.UsingOldGraphics)
-            {
-                _nastyDiesAnimation.GetNextFrame();
+    }
 
-                if (_nastyDeadPauseCounter < DeadPauseFrames)
-                {
-                    _nastyDeadPauseCounter++;
-                }
-                else
-                {
-                    NastyState = NastyState.PreConception;
-                    _conceptionwaitCounter = GameEngine.RandomNumberGenerator.Next(0, LongestConceptionWait);
-                    _nastyDeadPauseCounter = 0;
-                }
-            }
-        }
-
+    private void UpdateDeathEffects(GameTime gameTime)
+    {
         if (_nastyDies != null)
         {
             // Update the explosion
@@ -663,7 +707,14 @@ public class Nasty : GameComponentBase
             // Update the splat
             _nastyDiesType2.Update(XPos + SpriteMetrics.HalfSpriteWidth, YPos + SpriteMetrics.HalfSpriteHeight, gameTime);
         }
+    }
 
+    /// <summary>
+    ///     A nasty is only animated once it is fully real - or a quarter of the way through being born,
+    ///     which is where its legs start showing.
+    /// </summary>
+    private bool ShouldAnimate()
+    {
         var updateAnimation = false;
 
         if (NastyState != NastyState.Disabled &&
@@ -680,222 +731,233 @@ public class Nasty : GameComponentBase
             updateAnimation = true;
         }
 
-        if (updateAnimation)
+        return updateAnimation;
+    }
+
+    /// <summary>
+    ///     A nasty chasing the blob with something in the way cannot move at all, so it gives up on the
+    ///     chase after a while rather than grinding against the scenery for ever.
+    /// </summary>
+    private void ReleaseAttractionIfStuck()
+    {
+        if (_nastyType != NastyType.CoreGuardian)
         {
-            // Animate
-            _nastyAnim.GetNextFrame();
-
-            if (_nastyType != NastyType.CoreGuardian)
+            if (_attractedToBlob && _nastyType != NastyType.Spiky)
             {
-                if (_attractedToBlob && _nastyType != NastyType.Spiky)
+                if (_prevXpos == XPos &&
+                    _prevYpos == YPos)
                 {
-                    if (_prevXpos == XPos &&
-                        _prevYpos == YPos)
-                    {
-                        _nastyStuckCounter++;
-                    }
-                    else
-                    {
-                        _nastyStuckCounter = 0;
-                    }
-
-                    // Has nasty been stuck for 1/4 of a second...?
-                    if (_nastyStuckCounter > 15)
-                    {
-                        // Unattract blob
-                        _attractedToBlob = false;
-                        _nastyStuckCounter = 0;
-                    }
-
-                    _prevXpos = XPos;
-                    _prevYpos = YPos;
-                }
-            }
-
-            var amountToMoveX = 0;
-            var amountToMoveY = 0;
-
-            // Do the movement
-            if (_nastyType == NastyType.CoreGuardian)
-            {
-                MoveNastyOneStep(ref amountToMoveX, ref amountToMoveY);
-                DiagonalBouncing();
-            }
-            else
-            {
-                if (_stepsMovedCounter < _stepsToMove)
-                {
-                    var moveOneStep = true;
-
-                    if (MovementType == MoveType.SpikeyMovement && _spikeyPause)
-                    {
-                        moveOneStep = false;
-                        _stepsMovedCounter++;
-                    }
-
-                    if (moveOneStep)
-                    {
-                        MoveNastyOneStep(ref amountToMoveX, ref amountToMoveY);
-                    }
+                    _nastyStuckCounter++;
                 }
                 else
                 {
-                    Direction = Direction.None;
-                    _stepsMovedCounter = 0;
+                    _nastyStuckCounter = 0;
+                }
 
-                    if (MovementType == MoveType.RandomMovement)
+                // Has nasty been stuck for 1/4 of a second...?
+                if (_nastyStuckCounter > 15)
+                {
+                    // Unattract blob
+                    _attractedToBlob = false;
+                    _nastyStuckCounter = 0;
+                }
+
+                _prevXpos = XPos;
+                _prevYpos = YPos;
+            }
+        }
+    }
+
+    private void MoveNasty()
+    {
+        var amountToMoveX = 0;
+        var amountToMoveY = 0;
+
+        if (_nastyType == NastyType.CoreGuardian)
+        {
+            MoveNastyOneStep(ref amountToMoveX, ref amountToMoveY);
+            DiagonalBouncing();
+        }
+        else
+        {
+            if (_stepsMovedCounter < _stepsToMove)
+            {
+                var moveOneStep = true;
+
+                if (MovementType == MoveType.SpikeyMovement && _spikeyPause)
+                {
+                    moveOneStep = false;
+                    _stepsMovedCounter++;
+                }
+
+                if (moveOneStep)
+                {
+                    MoveNastyOneStep(ref amountToMoveX, ref amountToMoveY);
+                }
+            }
+            else
+            {
+                Direction = Direction.None;
+                _stepsMovedCounter = 0;
+
+                if (MovementType == MoveType.RandomMovement)
+                {
+                    _constantMovement = false;
+                    RandomMovement(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos);
+                }
+                else if (MovementType == MoveType.RandomUpDownLeftRight)
+                {
+                    _constantMovement = false;
+                    RandomUpDownLeftRight(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos);
+                }
+                else if (MovementType == MoveType.DiagonalBouncing)
+                {
+                    _constantMovement = true;
+                    DiagonalBouncing();
+                }
+                else if (MovementType == MoveType.DiagonalBouncingInSteps)
+                {
+                    _constantMovement = false;
+                    DiagonalBouncingInSteps();
+                }
+                else if (MovementType == MoveType.RandomMovementsAllDirections)
+                {
+                    _constantMovement = false;
+                    RandomMovementsAllDirections(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos);
+                }
+                else if (MovementType == MoveType.SpikeyMovement)
+                {
+                    _spikeyPause = !_spikeyPause;
+                    _constantMovement = false;
+                    SpikeyMovement(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    ///     How long a nasty keeps to one frame of mind before picking another, and what it picks: whether
+    ///     it chases the blob or wanders, how it moves, which way it sets off and how fast.
+    /// </summary>
+    private void UpdateFrameOfMind()
+    {
+        if (_nastyType != NastyType.CoreGuardian)
+        {
+            if (_movementChangeCounter < _movementChangeCount)
+            {
+                _movementChangeCounter++;
+            }
+            else
+            {
+                var attractionFlag = GameEngine.RandomNumberGenerator.Next(0, 2);
+
+                if (attractionFlag == 0)
+                {
+                    _movementChangeCount = GameEngine.RandomNumberGenerator.Next(WanderingShortest, WanderingLongest);
+                    _attractedToBlob = false;
+                }
+                else
+                {
+                    _movementChangeCount = GameEngine.RandomNumberGenerator.Next(ChasingShortest, ChasingLongest);
+                    _attractedToBlob = true;
+                }
+
+                _movementChangeCounter = 0;
+
+                if (_nastyType == NastyType.Spiky)
+                {
+                    _attractedToBlob = true; // Spiky nasties are always attracted to blob
+                    MovementType = MoveType.SpikeyMovement;
+                }
+                else
+                {
+                    if (_attractedToBlob)
                     {
-                        _constantMovement = false;
-                        RandomMovement(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos);
+                        // just choose from the attraction modes....
+                        MovementType = (MoveType)GameEngine.RandomNumberGenerator.Next(0, 2);
                     }
-                    else if (MovementType == MoveType.RandomUpDownLeftRight)
+                    else
                     {
-                        _constantMovement = false;
-                        RandomUpDownLeftRight(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos);
+                        MovementType = (MoveType)GameEngine.RandomNumberGenerator.Next(0,
+                            Enum.GetValues(typeof(MoveType)).Length - 1);
                     }
-                    else if (MovementType == MoveType.DiagonalBouncing)
+
+                    if (MovementType == MoveType.DiagonalBouncing)
                     {
-                        _constantMovement = true;
-                        DiagonalBouncing();
+                        Direction =
+                            (Direction)GameEngine.RandomNumberGenerator.Next(4, 8); // select from 2nd four
+                    }
+                    else if (MovementType == MoveType.RandomMovement ||
+                             MovementType == MoveType.RandomUpDownLeftRight)
+                    {
+                        Direction =
+                            (Direction)GameEngine.RandomNumberGenerator.Next(0, 4); // select from 1st four
                     }
                     else if (MovementType == MoveType.DiagonalBouncingInSteps)
                     {
-                        _constantMovement = false;
-                        DiagonalBouncingInSteps();
-                    }
-                    else if (MovementType == MoveType.RandomMovementsAllDirections)
-                    {
-                        _constantMovement = false;
-                        RandomMovementsAllDirections(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos);
-                    }
-                    else if (MovementType == MoveType.SpikeyMovement)
-                    {
-                        _spikeyPause = !_spikeyPause;
-                        _constantMovement = false;
-                        SpikeyMovement(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos);
-                    }
-                }
-            }
-
-            // increment the movement change counter
-            if (_nastyType != NastyType.CoreGuardian)
-            {
-                if (_movementChangeCounter < _movementChangeCount)
-                {
-                    _movementChangeCounter++;
-                }
-                else
-                {
-                    var attractionFlag = GameEngine.RandomNumberGenerator.Next(0, 2);
-
-                    if (attractionFlag == 0)
-                    {
-                        _movementChangeCount = GameEngine.RandomNumberGenerator.Next(WanderingShortest, WanderingLongest);
-                        _attractedToBlob = false;
-                    }
-                    else
-                    {
-                        _movementChangeCount = GameEngine.RandomNumberGenerator.Next(ChasingShortest, ChasingLongest);
-                        _attractedToBlob = true;
+                        Direction =
+                            (Direction)GameEngine.RandomNumberGenerator.Next(4, 8); // select from 2nd four
+                        _stepsToMove = GameEngine.RandomNumberGenerator.Next(8, 16);
                     }
 
-                    _movementChangeCounter = 0;
-
-                    if (_nastyType == NastyType.Spiky)
+                    // Create a random speed for the nasty to move
+                    if (!_attractedToBlob)
                     {
-                        _attractedToBlob = true; // Spiky nasties are always attracted to blob
-                        MovementType = MoveType.SpikeyMovement;
-                    }
-                    else
-                    {
-                        if (_attractedToBlob)
+                        if (MovementType == MoveType.DiagonalBouncing ||
+                            MovementType == MoveType.DiagonalBouncingInSteps ||
+                            MovementType == MoveType.RandomUpDownLeftRight)
                         {
-                            // just choose from the attraction modes....
-                            MovementType = (MoveType)GameEngine.RandomNumberGenerator.Next(0, 2);
-                        }
-                        else
-                        {
-                            MovementType = (MoveType)GameEngine.RandomNumberGenerator.Next(0,
-                                Enum.GetValues(typeof(MoveType)).Length - 1);
-                        }
-
-                        if (MovementType == MoveType.DiagonalBouncing)
-                        {
-                            Direction =
-                                (Direction)GameEngine.RandomNumberGenerator.Next(4, 8); // select from 2nd four
+                            MoveSpeed = GameEngine.RandomNumberGenerator.Next(6, 8);
                         }
                         else if (MovementType == MoveType.RandomMovement ||
-                                 MovementType == MoveType.RandomUpDownLeftRight)
+                                 MovementType == MoveType.RandomMovementsAllDirections)
                         {
-                            Direction =
-                                (Direction)GameEngine.RandomNumberGenerator.Next(0, 4); // select from 1st four
-                        }
-                        else if (MovementType == MoveType.DiagonalBouncingInSteps)
-                        {
-                            Direction =
-                                (Direction)GameEngine.RandomNumberGenerator.Next(4, 8); // select from 2nd four
-                            _stepsToMove = GameEngine.RandomNumberGenerator.Next(8, 16);
-                        }
-
-                        // Create a random speed for the nasty to move
-                        if (!_attractedToBlob)
-                        {
-                            if (MovementType == MoveType.DiagonalBouncing ||
-                                MovementType == MoveType.DiagonalBouncingInSteps ||
-                                MovementType == MoveType.RandomUpDownLeftRight)
-                            {
-                                MoveSpeed = GameEngine.RandomNumberGenerator.Next(6, 8);
-                            }
-                            else if (MovementType == MoveType.RandomMovement ||
-                                     MovementType == MoveType.RandomMovementsAllDirections)
-                            {
-                                MoveSpeed = GameEngine.RandomNumberGenerator.Next(2, 4);
-                            }
-                            else
-                            {
-                                MoveSpeed = GameEngine.RandomNumberGenerator.Next(6, 8);
-                            }
+                            MoveSpeed = GameEngine.RandomNumberGenerator.Next(2, 4);
                         }
                         else
                         {
-                            if (MovementType == MoveType.RandomMovement ||
-                                MovementType == MoveType.RandomMovementsAllDirections)
-                            {
-                                MoveSpeed = GameEngine.RandomNumberGenerator.Next(4, 6);
-                            }
-                            else if (MovementType == MoveType.RandomUpDownLeftRight ||
-                                     MovementType == MoveType.DiagonalBouncing ||
-                                     MovementType == MoveType.DiagonalBouncingInSteps)
-                            {
-                                MoveSpeed = GameEngine.RandomNumberGenerator.Next(8, 10);
-                            }
-                            else if (MovementType == MoveType.SpikeyMovement)
-                            {
-                                MoveSpeed = GameEngine.RandomNumberGenerator.Next(4, 6);
-                            }
-                            else
-                            {
-                                MoveSpeed = GameEngine.RandomNumberGenerator.Next(8, 10);
-                            }
+                            MoveSpeed = GameEngine.RandomNumberGenerator.Next(6, 8);
                         }
-
-                        // Change movespeed to 1 if this is the first movement - allows the nasties to sppear moving slowly
-                        if (_firstMovement)
+                    }
+                    else
+                    {
+                        if (MovementType == MoveType.RandomMovement ||
+                            MovementType == MoveType.RandomMovementsAllDirections)
                         {
-                            MoveSpeed = 1;
-                            _movementChangeCount = FirstMovementDuration;
-                            _firstMovement = false;
+                            MoveSpeed = GameEngine.RandomNumberGenerator.Next(4, 6);
                         }
+                        else if (MovementType == MoveType.RandomUpDownLeftRight ||
+                                 MovementType == MoveType.DiagonalBouncing ||
+                                 MovementType == MoveType.DiagonalBouncingInSteps)
+                        {
+                            MoveSpeed = GameEngine.RandomNumberGenerator.Next(8, 10);
+                        }
+                        else if (MovementType == MoveType.SpikeyMovement)
+                        {
+                            MoveSpeed = GameEngine.RandomNumberGenerator.Next(4, 6);
+                        }
+                        else
+                        {
+                            MoveSpeed = GameEngine.RandomNumberGenerator.Next(8, 10);
+                        }
+                    }
+
+                    // Change movespeed to 1 if this is the first movement - allows the nasties to sppear moving slowly
+                    if (_firstMovement)
+                    {
+                        MoveSpeed = 1;
+                        _movementChangeCount = FirstMovementDuration;
+                        _firstMovement = false;
                     }
                 }
             }
-            else
-            {
-                _attractedToBlob = false;
-                _constantMovement = true;
-                MovementType = MoveType.DiagonalBouncing;
-                MoveSpeed = 8;
-            }
+        }
+        else
+        {
+            _attractedToBlob = false;
+            _constantMovement = true;
+            MovementType = MoveType.DiagonalBouncing;
+            MoveSpeed = 8;
         }
     }
 
