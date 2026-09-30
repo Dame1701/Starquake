@@ -57,6 +57,40 @@ public class GameScreenCollection : GameComponentBase
     private const int SceneryTile2 = 121;
 
     /// <summary>
+    ///     Where an item is drawn relative to the tile it stands on: one collision cell in from the
+    ///     tile's left edge, and two cells above its top.
+    /// </summary>
+    private const int PlacementXInset = 32;
+
+    /// <inheritdoc cref="PlacementXInset" />
+    private const int PlacementYLift = 64;
+
+    /// <summary>
+    ///     The tiles no pick-up, power-up or pyramid may be placed on, because each of them already
+    ///     means something to the game - a shuttle, a spike, a bridge, a marker. This was a fifteen-term
+    ///     chain of inequalities.
+    /// </summary>
+    private static readonly HashSet<int> TilesNothingMayBePlacedOn =
+    [
+        (int)ActionTiles.ShuttlePlatform,
+        (int)ActionTiles.RemovedShuttlePlatform,
+        (int)ActionTiles.ElectricityNode,
+        (int)ActionTiles.ShuttleTag1,
+        (int)ActionTiles.ShuttleTag2,
+        (int)ActionTiles.ShuttleTag3,
+        (int)ActionTiles.Spike1,
+        (int)ActionTiles.Spike2,
+        (int)ActionTiles.Spike3,
+        (int)ActionTiles.ElectricityGate,
+        (int)ActionTiles.BlankFiller,
+        (int)ActionTiles.ConveyerNasty,
+        (int)ActionTiles.BreakableBridges,
+        SceneryTile1,
+        SceneryTile2,
+        (int)ActionTiles.PreferredCoreLocation
+    ];
+
+    /// <summary>
     ///     Anything numbered above this is scenery drawn on the upper layer rather than a tile the
     ///     blob can stand on, so the collision map skips it.
     /// </summary>
@@ -67,6 +101,13 @@ public class GameScreenCollection : GameComponentBase
     ///     a nasty, a pickup, a core element - and are tested against a sprite-sized box.
     /// </summary>
     private const int FirstGameObjectImage = 999;
+
+    /// <summary>
+    ///     The box a game object is tested against when checking whether a nasty has ended up embedded
+    ///     in one. Half a sprite, not a whole one, and not a collision cell either - it is its own
+    ///     number and was written inline as a bare 32.
+    /// </summary>
+    private const int GameObjectProbeSize = 32;
 
     /// <summary>
     ///     The eight lower tiles that cast a shadow onto the tile below them, and the upper-layer
@@ -141,6 +182,21 @@ public class GameScreenCollection : GameComponentBase
 
     /// <inheritdoc cref="OllyScreenNumber" />
     private const int OllyGazeDamping = 44;
+
+    /// <inheritdoc cref="OllyScreenNumber" />
+    private const int OllyVerticalGazeDamping = 20;
+
+    /// <summary>
+    ///     The two emitters that make up a key door's force field, and the two quantities it is run at:
+    ///     a dim alpha-blended pass for the body of the field and a bright additive one over the middle.
+    /// </summary>
+    private static readonly string[] ForceFieldEmitterNames = ["Emitter01", "Emitter05"];
+
+    /// <inheritdoc cref="ForceFieldEmitterNames" />
+    private const int DimFieldQuantity = 100;
+
+    /// <inheritdoc cref="ForceFieldEmitterNames" />
+    private const int BrightFieldQuantity = 10;
 
     private readonly List<CollisionTile> _detectedCollisionMap;
     private readonly int _pickUpCount = 100;
@@ -351,94 +407,72 @@ public class GameScreenCollection : GameComponentBase
         return null;
     }
 
+    /// <summary>
+    ///     Every tile on a screen that an item could sit on top of: solid enough to stand on, with a
+    ///     clear space above it, and not one of the tiles that already mean something.
+    /// </summary>
     private List<InteractiveItem> GetPotentialLocations(int screenNumber)
     {
         var toReturn = new List<InteractiveItem>();
+        var tiles = GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName);
 
+        // Start at row 1: nothing above that row is reachable
         for (var y = 1; y < _gameScreens[screenNumber].ScreenTiles.GetLength(1); y++)
         {
             for (var x = 0; x < _gameScreens[screenNumber].ScreenTiles.GetLength(0); x++)
             {
-                if (_gameScreens[screenNumber].ScreenTiles[x, y].TileImage >= 0)
+                var tileImage = _gameScreens[screenNumber].ScreenTiles[x, y].TileImage;
+
+                if (tileImage < 0 || TilesNothingMayBePlacedOn.Contains(tileImage))
                 {
-                    // Valid tile to place above...?
-                    if (
-                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage !=
-                        (int)ActionTiles.ShuttlePlatform &&
-                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage !=
-                        (int)ActionTiles.RemovedShuttlePlatform &&
-                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage !=
-                        (int)ActionTiles.ElectricityNode &&
-                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage != (int)ActionTiles.ShuttleTag1 &&
-                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage != (int)ActionTiles.ShuttleTag2 &&
-                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage != (int)ActionTiles.ShuttleTag3 &&
-                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage != (int)ActionTiles.Spike1 &&
-                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage != (int)ActionTiles.Spike2 &&
-                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage != (int)ActionTiles.Spike3 &&
-                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage !=
-                        (int)ActionTiles.ElectricityGate &&
-                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage != (int)ActionTiles.BlankFiller &&
-                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage != (int)ActionTiles.ConveyerNasty &&
-                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage !=
-                        (int)ActionTiles.BreakableBridges &&
-                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage != SceneryTile1 &&
-                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage != SceneryTile2 &&
-                        _gameScreens[screenNumber].ScreenTiles[x, y].TileImage !=
-                        (int)ActionTiles.PreferredCoreLocation)
-                    {
-                        // Check for powerups in the way - useful for pickup sweep
-                        var powerUpInWay = false;
-                        var powerUpOnScreen = _gameScreens[_screenNumber].PowerUp;
-                        if (powerUpOnScreen != null)
-                        {
-                            if (powerUpOnScreen.XLocation == x + 32 &&
-                                powerUpOnScreen.YLocation == y + 32)
-                            {
-                                powerUpInWay = true;
-                            }
-                        }
-
-                        if (!powerUpInWay)
-                        {
-                            // Anything above it....?
-                            if (_gameScreens[screenNumber].ScreenTiles[x, y - 1].TileImage == -1)
-                            {
-                                // now lets check the collision map and only place on tiles with a collision blocks below the powerup
-                                var locationFound = false;
-
-                                if (_gameScreens[screenNumber].ScreenTiles[x, y].TileImage >= 0)
-                                {
-                                    if (_screenCollisionDataArray[
-                                            _gameScreens[screenNumber].ScreenTiles[x, y].TileImage, 1, 0] == 1 &&
-                                        _screenCollisionDataArray[
-                                            _gameScreens[screenNumber].ScreenTiles[x, y].TileImage, 2, 0] == 1)
-                                    {
-                                        locationFound = true;
-                                    }
-                                }
-                                else
-                                {
-                                    locationFound = false;
-                                }
-
-                                if (locationFound)
-                                {
-                                    toReturn.Add(new InteractiveItem(
-                                        x * GameEngine.ContentResourceManager
-                                            .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth +
-                                        32,
-                                        y * GameEngine.ContentResourceManager
-                                            .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight -
-                                        64, 0));
-                                }
-                            }
-                        }
-                    }
+                    continue;
                 }
+
+                // Check for powerups in the way - useful for pickup sweep
+                if (PowerUpIsInTheWay(x, y))
+                {
+                    continue;
+                }
+
+                // Anything above it....?
+                if (_gameScreens[screenNumber].ScreenTiles[x, y - 1].TileImage != -1)
+                {
+                    continue;
+                }
+
+                // Only place on tiles with collision blocks below the powerup
+                if (_screenCollisionDataArray[tileImage, 1, 0] != 1 ||
+                    _screenCollisionDataArray[tileImage, 2, 0] != 1)
+                {
+                    continue;
+                }
+
+                toReturn.Add(new InteractiveItem(
+                    x * tiles.SpriteWidth + PlacementXInset,
+                    y * tiles.SpriteHeight - PlacementYLift,
+                    0));
             }
         }
 
         return toReturn;
+    }
+
+    /// <summary>
+    ///     Whether the screen's power-up already occupies a tile.
+    /// </summary>
+    /// <remarks>
+    ///     Kept exactly as found, and both of its oddities are deliberate for now: it compares the
+    ///     power-up's pixel location against a tile index, and it reads the power-up of the screen
+    ///     currently being displayed rather than the one being filled in. Either could be a defect and
+    ///     neither belongs in a move.
+    /// </remarks>
+    private bool PowerUpIsInTheWay(int x, int y)
+    {
+        var powerUpOnScreen = _gameScreens[_screenNumber].PowerUp;
+
+        return powerUpOnScreen != null &&
+               powerUpOnScreen.XLocation == x + 32 &&
+               powerUpOnScreen.YLocation == y + 32;
     }
 
     public void SaveData()
@@ -841,7 +875,7 @@ public class GameScreenCollection : GameComponentBase
         bool isBlob)
     {
         var checkMovementAmount = velocity;
-        //int CheckMovementAmount = Velocity;
+
         _detectedCollisionMap.Clear();
 
         // Cycle through the collision map
@@ -850,43 +884,15 @@ public class GameScreenCollection : GameComponentBase
             var colTile = _gameScreens[_screenNumber].CollisionMap[a];
             _detectedCollisionMap.Add(colTile);
 
-            var checkMovementAmountTemp =
-                CollisionDetection.CheckDirection(
-                    playerDirection,
-                    velocity,
-                    playerXPos,
-                    playerYPos,
-                    playerWidth,
-                    playerHeight,
-                    colTile.XPos,
-                    colTile.YPos,
-                    CollAreaWidth,
-                    CollAreaHeight
-                );
-
-
-            if (colTile.CollisionTileType == CollisionTileType.NotBlob &&
-                isBlob)
-            {
-                checkMovementAmountTemp = velocity;
-            }
-
-            if (colTile.TileImage > FirstGameObjectImage && !isBlob)
-            {
-                if (CollisionDetection.Check(
-                        new Rectangle(playerXPos, playerYPos, playerWidth, playerHeight),
-                        new Rectangle(colTile.XPos, colTile.YPos, 32, 32)))
-                {
-                    if ((CollisionObjectType)colTile.TileImage == CollisionObjectType.JumpPlatform ||
-                        (CollisionObjectType)colTile.TileImage == CollisionObjectType.CoreElement ||
-                        (CollisionObjectType)colTile.TileImage == CollisionObjectType.GameObject)
-                    {
-                        // Now see if it's actually embedded
-                        // And if it is, let it out
-                        checkMovementAmountTemp = velocity;
-                    }
-                }
-            }
+            var checkMovementAmountTemp = StepAllowedBy(
+                colTile,
+                playerDirection,
+                playerXPos,
+                playerYPos,
+                playerWidth,
+                playerHeight,
+                velocity,
+                isBlob);
 
             if (checkMovementAmountTemp <= checkMovementAmount)
             {
@@ -894,45 +900,100 @@ public class GameScreenCollection : GameComponentBase
             }
         }
 
-        // Check screen bounds, but only for nasties
         if (!isBlob)
         {
-            if (playerDirection == Direction.Up)
-            {
-                var boundaryDistance = playerYPos - checkMovementAmount;
-                if (boundaryDistance < 0)
-                {
-                    // if we're blob we can change screens!
-                    checkMovementAmount = checkMovementAmount + boundaryDistance;
-                }
-            }
-            else if (playerDirection == Direction.Down)
-            {
-                var boundaryDistance = playerYPos + playerHeight + checkMovementAmount;
-                if (boundaryDistance > ScreenHeight)
-                {
-                    // if we're blob we can change screens!
-                    checkMovementAmount = checkMovementAmount - (boundaryDistance - ScreenHeight);
-                }
-            }
-            else if (playerDirection == Direction.Left)
-            {
-                var boundaryDistance = playerXPos - checkMovementAmount;
-                if (boundaryDistance < 0)
-                {
-                    // if we're blob we can change screens!
-                    checkMovementAmount = checkMovementAmount + boundaryDistance;
-                }
-            }
-            else if (playerDirection == Direction.Right)
-            {
-                var boundaryDistance = playerXPos + playerWidth + checkMovementAmount;
-                if (boundaryDistance > ScreenWidth)
-                {
-                    // if we're blob we can change screens!
-                    checkMovementAmount = checkMovementAmount - (boundaryDistance - ScreenWidth);
-                }
-            }
+            checkMovementAmount = ClampToScreenBounds(
+                playerDirection,
+                playerXPos,
+                playerYPos,
+                playerWidth,
+                playerHeight,
+                checkMovementAmount);
+        }
+
+        return checkMovementAmount;
+    }
+
+    /// <summary>
+    ///     How far one collision tile allows the mover to travel. Two kinds of tile let it pass
+    ///     regardless: those marked <see cref="CollisionTileType.NotBlob" /> when the mover is blob,
+    ///     and a game object a nasty has ended up embedded inside, which is released rather than
+    ///     trapped.
+    /// </summary>
+    private int StepAllowedBy(
+        CollisionTile colTile,
+        Direction playerDirection,
+        int playerXPos,
+        int playerYPos,
+        int playerWidth,
+        int playerHeight,
+        int velocity,
+        bool isBlob)
+    {
+        if (colTile.CollisionTileType == CollisionTileType.NotBlob && isBlob)
+        {
+            return velocity;
+        }
+
+        if (colTile.TileImage > FirstGameObjectImage &&
+            !isBlob &&
+            (CollisionObjectType)colTile.TileImage is CollisionObjectType.JumpPlatform or
+                CollisionObjectType.CoreElement or CollisionObjectType.GameObject &&
+            CollisionDetection.Check(
+                new Rectangle(playerXPos, playerYPos, playerWidth, playerHeight),
+                new Rectangle(colTile.XPos, colTile.YPos, GameObjectProbeSize, GameObjectProbeSize)))
+        {
+            return velocity;
+        }
+
+        return CollisionDetection.CheckDirection(
+            playerDirection,
+            velocity,
+            playerXPos,
+            playerYPos,
+            playerWidth,
+            playerHeight,
+            colTile.XPos,
+            colTile.YPos,
+            CollAreaWidth,
+            CollAreaHeight);
+    }
+
+    /// <summary>
+    ///     Stops a mover at the edge of the screen. Only nasties are clamped: blob walking off an edge
+    ///     is how he changes screens.
+    /// </summary>
+    /// <remarks>
+    ///     This was four arms, one per direction, which were two shapes written twice. Up and left run
+    ///     into nought; down and right run into the screen's own width or height less the mover's size.
+    /// </remarks>
+    private int ClampToScreenBounds(
+        Direction playerDirection,
+        int playerXPos,
+        int playerYPos,
+        int playerWidth,
+        int playerHeight,
+        int checkMovementAmount)
+    {
+        var (position, size, limit) = playerDirection switch
+        {
+            Direction.Up or Direction.Down => (playerYPos, playerHeight, ScreenHeight),
+            Direction.Left or Direction.Right => (playerXPos, playerWidth, ScreenWidth),
+            _ => (0, 0, 0)
+        };
+
+        if (playerDirection is Direction.Up or Direction.Left)
+        {
+            var overshoot = position - checkMovementAmount;
+
+            return overshoot < 0 ? checkMovementAmount + overshoot : checkMovementAmount;
+        }
+
+        if (playerDirection is Direction.Down or Direction.Right)
+        {
+            var overshoot = position + size + checkMovementAmount - limit;
+
+            return overshoot > 0 ? checkMovementAmount - overshoot : checkMovementAmount;
         }
 
         return checkMovementAmount;
@@ -1044,221 +1105,198 @@ public class GameScreenCollection : GameComponentBase
         int playerHeight,
         int velocity)
     {
+        if (ProbeRectangleFor(directionToCheck, playerXPos, playerYPos, playerWidth, playerHeight, velocity)
+            is not { } probe)
+        {
+            return null;
+        }
+
+        var tiles = GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName);
+
+        // A check along the vertical axis reports where the object's foot sits inside the tile; every
+        // other check reports where its top does.
+        var measureFromFoot = directionToCheck is Direction.Up or Direction.Down;
+
         for (var y = 0; y < TilesDown; y++)
         {
             for (var x = 0; x < TilesAcross; x++)
             {
-                if (_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage > -1)
+                if (_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage <= -1)
                 {
-                    var tileRect = new Rectangle(
-                        x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
-                            .SpriteWidth,
-                        y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
-                            .SpriteHeight,
-                        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
-                            .SpriteWidth,
-                        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
-                            .SpriteHeight);
-
-                    var xpos = 0;
-                    var ypos = 0;
-
-                    if (directionToCheck == Direction.Up)
-                    {
-                        if (CollisionDetection.Check(
-                                new Rectangle(playerXPos, playerYPos - velocity, playerWidth, playerHeight),
-                                tileRect))
-                        {
-                            xpos = playerXPos - x * GameEngine.ContentResourceManager
-                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth;
-                            ypos = playerYPos + playerHeight - y * GameEngine.ContentResourceManager
-                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight;
-
-                            return new TileDetected(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, xpos,
-                                ypos, x, y);
-                        }
-                    }
-                    else if (directionToCheck == Direction.Down)
-                    {
-                        if (CollisionDetection.Check(
-                                new Rectangle(playerXPos, playerYPos + playerHeight, playerWidth, velocity),
-                                tileRect))
-                        {
-                            xpos = playerXPos - x * GameEngine.ContentResourceManager
-                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth;
-                            ypos = playerYPos + playerHeight - y * GameEngine.ContentResourceManager
-                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight;
-
-                            return new TileDetected(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, xpos,
-                                ypos, x, y);
-                        }
-                    }
-                    else if (directionToCheck == Direction.Left)
-                    {
-                        if (CollisionDetection.Check(
-                                new Rectangle(playerXPos - velocity, playerYPos, playerWidth, playerHeight),
-                                tileRect))
-                        {
-                            xpos = playerXPos - x * GameEngine.ContentResourceManager
-                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth;
-                            ypos = playerYPos - y * GameEngine.ContentResourceManager
-                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight;
-
-                            return new TileDetected(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, xpos,
-                                ypos, x, y);
-                        }
-                    }
-                    else if (directionToCheck == Direction.Right)
-                    {
-                        if (CollisionDetection.Check(
-                                new Rectangle(playerXPos, playerYPos, playerWidth + velocity, playerHeight),
-                                tileRect))
-                        {
-                            xpos = playerXPos - x * GameEngine.ContentResourceManager
-                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth;
-                            ypos = playerYPos - y * GameEngine.ContentResourceManager
-                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight;
-
-                            return new TileDetected(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, xpos,
-                                ypos, x, y);
-                        }
-                    }
-                    else if (directionToCheck == Direction.None)
-                    {
-                        if (CollisionDetection.Check(
-                                new Rectangle(playerXPos, playerYPos, playerWidth, playerHeight),
-                                tileRect))
-                        {
-                            xpos = playerXPos - x * GameEngine.ContentResourceManager
-                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth;
-                            ypos = playerYPos - y * GameEngine.ContentResourceManager
-                                .GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight;
-
-                            return new TileDetected(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, xpos,
-                                ypos, x, y);
-                        }
-                    }
+                    continue;
                 }
+
+                var tileRect = new Rectangle(
+                    x * tiles.SpriteWidth,
+                    y * tiles.SpriteHeight,
+                    tiles.SpriteWidth,
+                    tiles.SpriteHeight);
+
+                if (!CollisionDetection.Check(probe, tileRect))
+                {
+                    continue;
+                }
+
+                var xpos = playerXPos - x * tiles.SpriteWidth;
+                var ypos = (measureFromFoot ? playerYPos + playerHeight : playerYPos) - y * tiles.SpriteHeight;
+
+                return new TileDetected(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, xpos, ypos, x, y);
             }
         }
-
 
         return null;
     }
 
+    /// <summary>
+    ///     The box to look for a tile in, given which way the object is about to move. Null for a
+    ///     direction that is not checked, which is every diagonal.
+    /// </summary>
+    /// <remarks>
+    ///     The four straight directions each probe a different shape, which is the only real difference
+    ///     between the five arms this replaced: up and left shift the whole box, down probes a thin
+    ///     strip below the object's feet, and right stretches the box rather than shifting it.
+    /// </remarks>
+    private static Rectangle? ProbeRectangleFor(
+        Direction directionToCheck,
+        int playerXPos,
+        int playerYPos,
+        int playerWidth,
+        int playerHeight,
+        int velocity)
+        => directionToCheck switch
+        {
+            Direction.Up => new Rectangle(playerXPos, playerYPos - velocity, playerWidth, playerHeight),
+            Direction.Down => new Rectangle(playerXPos, playerYPos + playerHeight, playerWidth, velocity),
+            Direction.Left => new Rectangle(playerXPos - velocity, playerYPos, playerWidth, playerHeight),
+            Direction.Right => new Rectangle(playerXPos, playerYPos, playerWidth + velocity, playerHeight),
+            Direction.None => new Rectangle(playerXPos, playerYPos, playerWidth, playerHeight),
+            _ => null
+        };
+
     public override void Update(GameTime gameTime)
     {
-        // 419 is the key access door tile
-        if (_keyLockDoors == null)
-        {
-            _keyLockDoors = GetKeyLockDoors();
-        }
+        _keyLockDoors ??= GetKeyLockDoors();
 
-        if (_keyLockDoors != null)
+        if (_keyLockDoors != null && _keyDoorForceFieldNoAccess != null)
         {
-            if (_keyDoorForceFieldNoAccess != null)
+            _keyDoorForceFieldNoAccess.Start();
+
+            foreach (var keyLockDoor in _keyLockDoors)
             {
-                _keyDoorForceFieldNoAccess.Start();
-
-                foreach (var keyLockDoor in _keyLockDoors)
-                {
-                    // Create the collision map
-                    if (keyLockDoor.CollisionTiles.Count == 0) // If the collision map doesn't exist, create it
-                    {
-                        for (var c = 0; c < 3; c++)
-                        {
-                            var keyLockCollisionTile =
-                                new CollisionTile(
-                                    (int)CollisionObjectType.KeyAccessDoor, // Random image that's meaningless
-                                    keyLockDoor.Location.X + 48,
-                                    keyLockDoor.Location.Y + c * 32,
-                                    CollisionTileType.None);
-
-                            // Add the tile to the keylock door so we can remove it later
-                            keyLockDoor.CollisionTiles.Add(keyLockCollisionTile);
-
-                            // Add the tile to the collision map
-                            _gameScreens[ScreenNumber].CollisionMap.Add(keyLockCollisionTile);
-                        }
-                    }
-
-                    _keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseColour =
-                        new Color(100, 100, 100).ToVector3();
-                    _keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseQuantity = 100;
-                    _keyDoorForceFieldNoAccess.Effect["Emitter01"].BlendMode = EmitterBlendMode.Alpha;
-
-                    _keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseColour =
-                        new Color(100, 100, 100).ToVector3();
-                    _keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseQuantity = 100;
-                    _keyDoorForceFieldNoAccess.Effect["Emitter05"].BlendMode = EmitterBlendMode.Alpha;
-
-                    for (var c = 0; c < 4; c++)
-                    {
-                        _keyDoorForceFieldNoAccess.Update(keyLockDoor.Location.X + 52 + c,
-                            keyLockDoor.Location.Y + 48, gameTime);
-                    }
-
-                    for (var c = 0; c < 4; c++)
-                    {
-                        _keyDoorForceFieldNoAccess.Update(keyLockDoor.Location.X + 76 + c,
-                            keyLockDoor.Location.Y + 48, gameTime);
-                    }
-
-                    // Change colour of the gate depending on whether blob has the access key or not
-                    if (GameEngine.Player.BlobInventory.Contains(Collectables.Key))
-                    {
-                        _keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseColour =
-                            new Color(0, ColourLevels.Full, 0).ToVector3();
-                        _keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseColour =
-                            new Color(0, ColourLevels.Full, 0).ToVector3();
-
-                        // Change collision tiles to anyone but Blob
-                        foreach (var collisionTile in keyLockDoor.CollisionTiles)
-                        {
-                            // Remove the tile from screen and from the key door lock collection
-                            collisionTile.CollisionTileType = CollisionTileType.NotBlob;
-                        }
-                    }
-                    else
-                    {
-                        _keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseColour =
-                            new Color(ColourLevels.Full, 0, 0).ToVector3();
-                        _keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseColour =
-                            new Color(ColourLevels.Full, 0, 0).ToVector3();
-
-                        // Change collision tiles to everyone
-                        foreach (var collisionTile in keyLockDoor.CollisionTiles)
-                        {
-                            // Remove the tile from screen and from the key door lock collection
-                            collisionTile.CollisionTileType = CollisionTileType.EveryoneHits;
-                        }
-                    }
-
-                    _keyDoorForceFieldNoAccess.Effect["Emitter01"].ReleaseQuantity = 10;
-                    _keyDoorForceFieldNoAccess.Effect["Emitter01"].BlendMode = EmitterBlendMode.Add;
-                    _keyDoorForceFieldNoAccess.Effect["Emitter05"].ReleaseQuantity = 10;
-                    _keyDoorForceFieldNoAccess.Effect["Emitter05"].BlendMode = EmitterBlendMode.Add;
-
-                    for (var c = 0; c < 12; c++)
-                    {
-                        _keyDoorForceFieldNoAccess.Update(keyLockDoor.Location.X + 60 + c,
-                            keyLockDoor.Location.Y + 48, gameTime);
-                    }
-                }
+                UpdateKeyLockDoor(keyLockDoor, gameTime);
             }
         }
 
         if (ScreenNumber == OllyScreenNumber)
         {
-            _ollyEyesX = OllyEyesRestX;
-            _ollyEyesY = OllyEyesRestY;
-
-            _ollyEyesX = _ollyEyesX + (GameEngine.Player.BlobXPos - OllyGazeCentreX) / OllyGazeDamping;
-            _ollyEyesY = _ollyEyesY + GameEngine.Player.BlobYPos / 20;
+            TrackBlobWithOllysEyes();
         }
 
         GameEngine.ContentResourceManager.GetAnimationEngine().Update(gameTime);
         GameEngine.ColourAnimationEngine.Update(gameTime);
+    }
+
+    /// <summary>
+    ///     One key-locked door: its force field, and whether it lets blob through. Green and passable
+    ///     to him if he is carrying the key, red and solid if not - and solid to nasties either way,
+    ///     which is why the tiles flip between <see cref="CollisionTileType.NotBlob" /> and
+    ///     <see cref="CollisionTileType.EveryoneHits" /> rather than being removed.
+    /// </summary>
+    private void UpdateKeyLockDoor(KeyLockDoor keyLockDoor, GameTime gameTime)
+    {
+        if (keyLockDoor.CollisionTiles.Count == 0)
+        {
+            AddKeyLockDoorCollisionTiles(keyLockDoor);
+        }
+
+        // The field is drawn twice: a dim grey pass for the body of it, then a bright additive pass
+        // over the middle, which is what gives it its core.
+        SetForceFieldEmitters(new Color(100, 100, 100), DimFieldQuantity, EmitterBlendMode.Alpha);
+
+        for (var c = 0; c < 4; c++)
+        {
+            _keyDoorForceFieldNoAccess!.Update(keyLockDoor.Location.X + 52 + c, keyLockDoor.Location.Y + 48, gameTime);
+        }
+
+        for (var c = 0; c < 4; c++)
+        {
+            _keyDoorForceFieldNoAccess!.Update(keyLockDoor.Location.X + 76 + c, keyLockDoor.Location.Y + 48, gameTime);
+        }
+
+        var blobHasKey = GameEngine.Player.BlobInventory.Contains(Collectables.Key);
+
+        SetForceFieldColour(blobHasKey ? new Color(0, ColourLevels.Full, 0) : new Color(ColourLevels.Full, 0, 0));
+
+        foreach (var collisionTile in keyLockDoor.CollisionTiles)
+        {
+            collisionTile.CollisionTileType = blobHasKey
+                ? CollisionTileType.NotBlob
+                : CollisionTileType.EveryoneHits;
+        }
+
+        SetForceFieldEmitters(null, BrightFieldQuantity, EmitterBlendMode.Add);
+
+        for (var c = 0; c < 12; c++)
+        {
+            _keyDoorForceFieldNoAccess!.Update(keyLockDoor.Location.X + 60 + c, keyLockDoor.Location.Y + 48, gameTime);
+        }
+    }
+
+    private void AddKeyLockDoorCollisionTiles(KeyLockDoor keyLockDoor)
+    {
+        for (var c = 0; c < 3; c++)
+        {
+            var keyLockCollisionTile =
+                new CollisionTile(
+                    (int)CollisionObjectType.KeyAccessDoor, // Random image that's meaningless
+                    keyLockDoor.Location.X + 48,
+                    keyLockDoor.Location.Y + c * 32,
+                    CollisionTileType.None);
+
+            // Add the tile to the keylock door so we can remove it later
+            keyLockDoor.CollisionTiles.Add(keyLockCollisionTile);
+
+            // Add the tile to the collision map
+            _gameScreens[ScreenNumber].CollisionMap.Add(keyLockCollisionTile);
+        }
+    }
+
+    /// <summary>
+    ///     The force field is two emitters that are always set together, so this sets both.
+    ///     <paramref name="colour" /> is null to leave the colour as it is.
+    /// </summary>
+    private void SetForceFieldEmitters(Color? colour, int quantity, EmitterBlendMode blendMode)
+    {
+        foreach (var name in ForceFieldEmitterNames)
+        {
+            var emitter = _keyDoorForceFieldNoAccess!.Effect[name];
+
+            if (colour is { } releaseColour)
+            {
+                emitter.ReleaseColour = releaseColour.ToVector3();
+            }
+
+            emitter.ReleaseQuantity = quantity;
+            emitter.BlendMode = blendMode;
+        }
+    }
+
+    /// <inheritdoc cref="SetForceFieldEmitters" />
+    private void SetForceFieldColour(Color colour)
+    {
+        foreach (var name in ForceFieldEmitterNames)
+        {
+            _keyDoorForceFieldNoAccess!.Effect[name].ReleaseColour = colour.ToVector3();
+        }
+    }
+
+    /// <summary>
+    ///     Olly's eyes follow the blob about, damped so they drift rather than snap.
+    /// </summary>
+    private void TrackBlobWithOllysEyes()
+    {
+        _ollyEyesX = OllyEyesRestX + (GameEngine.Player.BlobXPos - OllyGazeCentreX) / OllyGazeDamping;
+        _ollyEyesY = OllyEyesRestY + GameEngine.Player.BlobYPos / OllyVerticalGazeDamping;
     }
 
     public void DrawCoreElements(int xPos, int yPos, GameTime gameTime)
@@ -1287,98 +1325,120 @@ public class GameScreenCollection : GameComponentBase
         {
             for (var x = 0; x < TilesAcross; x++)
             {
-                if (_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage > -1 &&
-                    _gameScreens[_screenNumber].ScreenTiles[x, y].TileImage !=
-                    (int)ActionTiles.BlankFiller && // The blank spacer tile
-                    _gameScreens[_screenNumber].ScreenTiles[x, y].TileImage !=
-                    (int)ActionTiles.ConveyerNasty && // Tile representing conveyer nasties
-                    _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)ActionTiles.TunnelLiftTile &&
-                    _gameScreens[_screenNumber].ScreenTiles[x, y].TileImage !=
-                    (int)ActionTiles.PreferredCoreLocation) // Tile representing preferred pickup location
-
-                {
-                    // Avoid the tunnel tiles
-                    if (_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage < (int)ActionTiles.AccessForceField)
-                    {
-                        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
-                            .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
-                        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
-                            .DrawSprite(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, x * _tileWidth,
-                                y * _tileHeight, colour);
-                        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName)
-                            .End();
-                    }
-
-                    // Draw animation portions
-                    GameEngine.ContentResourceManager.GetAnimationEngine().Draw(
-                        _gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, x * _tileWidth, y * _tileHeight,
-                        colour, gameTime);
-                }
+                DrawLowerTile(x, y, colour, gameTime);
             }
         }
 
-        // Draw Animation engine normal layer
         GameEngine.ColourAnimationEngine.Draw(gameTime, colour.A);
 
-        // Draw Powerups
-        if ((!introSequenceRunning || introSequenceStage == IntroSequenceStage.EndPause) &&
-            CurrentGameScreenData.PowerUp != null)
+        // The intro sequence flies over a screen whose objects have not been placed yet
+        var objectsArePlaced = !introSequenceRunning || introSequenceStage == IntroSequenceStage.EndPause;
+
+        if (objectsArePlaced)
         {
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PowerUpsName)
-                .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PowerUpsName).DrawSprite(
-                CurrentGameScreenData.PowerUp.Type, CurrentGameScreenData.PowerUp.XLocation,
-                CurrentGameScreenData.PowerUp.YLocation, colour);
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PowerUpsName).End();
+            DrawPowerUp(colour, gameTime);
+            DrawPickUps(colour, gameTime);
+            DrawCheopsPyramid(colour, gameTime);
         }
 
-        // Draw Pickups
-        if ((!introSequenceRunning || introSequenceStage == IntroSequenceStage.EndPause) &&
-            CurrentGameScreenData.PickUps != null)
-        {
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName)
-                .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
-            foreach (var pickUp in CurrentGameScreenData.PickUps)
-            {
-                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).DrawSprite(
-                    pickUp.Type, pickUp.XLocation,
-                    pickUp.YLocation, colour);
-            }
+        DrawOllyBackground(colour, gameTime);
+    }
 
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).End();
+    private void DrawLowerTile(int x, int y, Color colour, GameTime gameTime)
+    {
+        var tileImage = _gameScreens[_screenNumber].ScreenTiles[x, y].TileImage;
+
+        if (tileImage <= -1 || tileImage is
+            (int)ActionTiles.BlankFiller or            // The blank spacer tile
+            (int)ActionTiles.ConveyerNasty or          // Tile representing conveyer nasties
+            (int)ActionTiles.TunnelLiftTile or
+            (int)ActionTiles.PreferredCoreLocation)    // Tile representing preferred pickup location
+        {
+            return;
         }
 
-        // Draw Cheops pyramids
-        if ((!introSequenceRunning || introSequenceStage == IntroSequenceStage.EndPause) &&
-            CurrentGameScreenData.CheopsPyramid != null)
+        // Avoid the tunnel tiles
+        if (tileImage < (int)ActionTiles.AccessForceField)
         {
-            if (GameEngine.UsingOldGraphics)
-            {
-                GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal")
-                    .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").DrawSprite(0,
-                    CurrentGameScreenData.CheopsPyramid.XLocation, CurrentGameScreenData.CheopsPyramid.YLocation,
-                    colour);
-                GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").End();
-            }
-            else
-            {
-                GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid")
-                    .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").DrawSprite(0,
-                    CurrentGameScreenData.CheopsPyramid.XLocation, CurrentGameScreenData.CheopsPyramid.YLocation,
-                    colour);
-                GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").End();
-            }
+            var tiles = GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName);
+
+            tiles.Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
+            tiles.DrawSprite(tileImage, x * _tileWidth, y * _tileHeight, colour);
+            tiles.End();
         }
 
-        // Draw olly background
-        if (ScreenNumber != OllyScreenNumber)
+        // Draw animation portions
+        GameEngine.ContentResourceManager.GetAnimationEngine()
+            .Draw(tileImage, x * _tileWidth, y * _tileHeight, colour, gameTime);
+    }
+
+    private void DrawPowerUp(Color colour, GameTime gameTime)
+    {
+        if (CurrentGameScreenData.PowerUp == null)
+        {
+            return;
+        }
+
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PowerUpsName)
+            .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PowerUpsName).DrawSprite(
+            CurrentGameScreenData.PowerUp.Type, CurrentGameScreenData.PowerUp.XLocation,
+            CurrentGameScreenData.PowerUp.YLocation, colour);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PowerUpsName).End();
+    }
+
+    private void DrawPickUps(Color colour, GameTime gameTime)
+    {
+        if (CurrentGameScreenData.PickUps == null)
+        {
+            return;
+        }
+
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName)
+            .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
+        foreach (var pickUp in CurrentGameScreenData.PickUps)
+        {
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).DrawSprite(
+                pickUp.Type, pickUp.XLocation,
+                pickUp.YLocation, colour);
+        }
+
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).End();
+    }
+
+    private void DrawCheopsPyramid(Color colour, GameTime gameTime)
+    {
+        if (CurrentGameScreenData.CheopsPyramid == null)
         {
             return;
         }
 
         if (GameEngine.UsingOldGraphics)
+        {
+            GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal")
+                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+            GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").DrawSprite(0,
+                CurrentGameScreenData.CheopsPyramid.XLocation, CurrentGameScreenData.CheopsPyramid.YLocation,
+                colour);
+            GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").End();
+        }
+        else
+        {
+            GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid")
+                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+            GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").DrawSprite(0,
+                CurrentGameScreenData.CheopsPyramid.XLocation, CurrentGameScreenData.CheopsPyramid.YLocation,
+                colour);
+            GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").End();
+        }
+    }
+
+    /// <summary>
+    ///     Olly has no backdrop in the original graphics, which is why the old set skips this.
+    /// </summary>
+    private void DrawOllyBackground(Color colour, GameTime gameTime)
+    {
+        if (ScreenNumber != OllyScreenNumber || GameEngine.UsingOldGraphics)
         {
             return;
         }
@@ -1638,101 +1698,121 @@ public class GameScreenCollection : GameComponentBase
     {
         for (var a = 0; a < _gameScreens.Length; a++)
         {
-            if (a != WorldMap.CoreScreenNumber) // Core Screen
+            // The core screen is seeded differently and is left out of the scatter
+            if (a == WorldMap.CoreScreenNumber)
             {
-                // Setup Powerups and pickups
-                //
-                // Get a list of potential locations
-                // Start at line 1 - blob can't get stuff above here....
-                _gameScreens[a].PickUps = new List<InteractiveItem>();
+                continue;
+            }
 
-                var potentialLocations = GetPotentialLocations(a);
-                var placePickup = false;
-                foreach (var powerUpScreen in powerUpScreens)
-                {
-                    // Does the screen we're currently on match a power up screen designated in our list?
-                    if (a == powerUpScreen)
-                    {
-                        // Yep so we can place a powerup here...
-                        placePickup = true;
-                    }
-                }
+            _gameScreens[a].PickUps = new List<InteractiveItem>();
 
-                if (potentialLocations.Count > 0)
-                {
-                    var powerUpToSelect = r.Next(potentialLocations.Count);
-                    _gameScreens[a].PowerUp = new InteractiveItem(potentialLocations[powerUpToSelect].XLocation,
-                        potentialLocations[powerUpToSelect].YLocation, r.Next(8));
+            var potentialLocations = GetPotentialLocations(a);
+            var placePickup = powerUpScreens.Contains(a);
 
-                    // Take the powerup location out of the list
-                    potentialLocations.Remove(potentialLocations[powerUpToSelect]);
+            if (potentialLocations.Count > 0)
+            {
+                PlacePowerUpAndPickUp(a, r, potentialLocations, placePickup);
+            }
 
-                    // Place a pickup
-                    if (placePickup)
-                    {
-                        // Now select another location for our pickup
-                        var pickUpToSelect = r.Next(potentialLocations.Count);
+            if (potentialLocations.Count > 0)
+            {
+                PlaceCheopsPyramid(a, r, potentialLocations);
+            }
 
-                        // Check to see if this screen has a preferred location
-                        var preferredLocation = GetPreferredLocation(a);
+            AssignAccessBoothCode(a);
+        }
+    }
 
-                        // Place the item in the preferred locateion
-                        if (preferredLocation != null)
-                        {
-                            preferredLocation.Type = r.Next(28);
-                            _gameScreens[a].PickUps.Add(preferredLocation);
-                            potentialLocations.Remove(potentialLocations[pickUpToSelect]);
-                        }
-                        else
-                        {
-                            // Place it in the normal randomly selected place
-                            _gameScreens[a].PickUps.Add(new InteractiveItem(
-                                potentialLocations[pickUpToSelect].XLocation,
-                                potentialLocations[pickUpToSelect].YLocation, r.Next(28)));
-                            potentialLocations.Remove(potentialLocations[pickUpToSelect]);
-                        }
-                    }
-                }
+    /// <summary>
+    ///     The power-up first, then a pick-up on a different tile if this screen drew one. Each takes its
+    ///     location out of the list so the two cannot land on top of each other.
+    /// </summary>
+    private void PlacePowerUpAndPickUp(
+        int screenNumber,
+        Random r,
+        List<InteractiveItem> potentialLocations,
+        bool placePickup)
+    {
+        var powerUpToSelect = r.Next(potentialLocations.Count);
+        _gameScreens[screenNumber].PowerUp = new InteractiveItem(potentialLocations[powerUpToSelect].XLocation,
+            potentialLocations[powerUpToSelect].YLocation, r.Next(8));
 
-                // Add a cheops pyramid
-                // Note in the final version we'll randomly decide if we are to place one on a particular screeen...
-                // Probably need a system to ensure that we place a minimum amount of these guys....
-                if (potentialLocations.Count > 0)
-                {
-                    var cheopsLocationToSelect = r.Next(potentialLocations.Count);
-                    _gameScreens[a].CheopsPyramid = new InteractiveItem(
-                        potentialLocations[cheopsLocationToSelect].XLocation,
-                        potentialLocations[cheopsLocationToSelect].YLocation, 0);
+        // Take the powerup location out of the list
+        potentialLocations.Remove(potentialLocations[powerUpToSelect]);
 
-                    // Setup the access code for the pyramid
-                    // Ensure we get a unique code
-                    string cheopsAccessCode;
-                    do
-                    {
-                        cheopsAccessCode = GameEngine.RandomNumberGenerator.Next(CheopsCodeLowest, CheopsCodeExclusiveUpperBound).ToString();
-                    } while (!CheckAccessCodeValidity(cheopsAccessCode));
+        // Place a pickup
+        if (placePickup)
+        {
+            // Now select another location for our pickup
+            var pickUpToSelect = r.Next(potentialLocations.Count);
 
-                    _gameScreens[a].CheopsAccessCode = cheopsAccessCode;
-                }
+            // Check to see if this screen has a preferred location
+            var preferredLocation = GetPreferredLocation(screenNumber);
 
-                // Setup access booth codes
-                var leftBooths = GetCoordsOfTiles((int)ActionTiles.AccessBoothLeft, a);
-                var rightBooths = GetCoordsOfTiles((int)ActionTiles.AccessBoothRight, a);
-                var accessBooths = leftBooths.Count > 0 ? leftBooths : rightBooths;
-
-                if (accessBooths.Count > 0)
-                {
-                    // Ensure we get a unique code
-                    string accessCode;
-                    do
-                    {
-                        accessCode = GameEngine.RandomNumberGenerator.Next(AccessCodeLowest, AccessCodeExclusiveUpperBound).ToString();
-                    } while (!CheckAccessCodeValidity(accessCode));
-
-                    _gameScreens[a].AccessCode = accessCode;
-                }
+            // Place the item in the preferred locateion
+            if (preferredLocation != null)
+            {
+                preferredLocation.Type = r.Next(28);
+                _gameScreens[screenNumber].PickUps.Add(preferredLocation);
+                potentialLocations.Remove(potentialLocations[pickUpToSelect]);
+            }
+            else
+            {
+                // Place it in the normal randomly selected place
+                _gameScreens[screenNumber].PickUps.Add(new InteractiveItem(
+                    potentialLocations[pickUpToSelect].XLocation,
+                    potentialLocations[pickUpToSelect].YLocation, r.Next(28)));
+                potentialLocations.Remove(potentialLocations[pickUpToSelect]);
             }
         }
+    }
+
+    /// <summary>
+    ///     Every screen with room gets one at this stage. Reset thins them down to CMaxCheops afterwards,
+    ///     which is why there is no attempt to be selective here.
+    /// </summary>
+    private void PlaceCheopsPyramid(
+        int screenNumber,
+        Random r,
+        List<InteractiveItem> potentialLocations)
+    {
+        var cheopsLocationToSelect = r.Next(potentialLocations.Count);
+        _gameScreens[screenNumber].CheopsPyramid = new InteractiveItem(
+            potentialLocations[cheopsLocationToSelect].XLocation,
+            potentialLocations[cheopsLocationToSelect].YLocation, 0);
+
+        // Setup the access code for the pyramid
+        // Ensure we get a unique code
+        string cheopsAccessCode;
+        do
+        {
+            cheopsAccessCode = GameEngine.RandomNumberGenerator.Next(CheopsCodeLowest, CheopsCodeExclusiveUpperBound).ToString();
+        } while (!CheckAccessCodeValidity(cheopsAccessCode));
+
+        _gameScreens[screenNumber].CheopsAccessCode = cheopsAccessCode;
+    }
+
+    /// <summary>
+    ///     A screen with a booth on either side gets one code, which is what the booth on the far side of
+    ///     the door asks for.
+    /// </summary>
+    private void AssignAccessBoothCode(int screenNumber)
+    {
+    var leftBooths = GetCoordsOfTiles((int)ActionTiles.AccessBoothLeft, screenNumber);
+    var rightBooths = GetCoordsOfTiles((int)ActionTiles.AccessBoothRight, screenNumber);
+    var accessBooths = leftBooths.Count > 0 ? leftBooths : rightBooths;
+
+    if (accessBooths.Count > 0)
+    {
+        // Ensure we get a unique code
+        string accessCode;
+        do
+        {
+            accessCode = GameEngine.RandomNumberGenerator.Next(AccessCodeLowest, AccessCodeExclusiveUpperBound).ToString();
+        } while (!CheckAccessCodeValidity(accessCode));
+
+        _gameScreens[screenNumber].AccessCode = accessCode;
+    }
     }
 
     private void CollectScreensWithCheopsAndCoreElements(
