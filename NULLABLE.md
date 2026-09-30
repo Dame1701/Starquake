@@ -65,20 +65,21 @@ so making its fields constructor-set means reordering the composition root.
 
 | Stage | Files | Members | Notes |
 | --- | --- | --- | --- |
-| 1. Delete the dead | `Fonts/XnaFont.cs`, `Fonts/XnaFontUv.cs`, `GameEngine.TextWriter` | ~10 | Confirm no references first |
-| 2. Owner-assigned → `required` | the four `Particles/*.cs`, `BouncingParticle.cs` | ~10 | Technique 2 |
-| 3. Leaf classes, 1–2 members each | 23 files, see list below | ~30 | Technique 3 |
-| 4. Mid-size | `JumpPlatform`, `ElectricityGatesAndNodesEngine`, `Nasty`, `GameScreenCollection`, `PlanetCoreScreen`, `TeleportScreen` | ~36 | |
-| 5. `Blob.cs` | 1 | 14 | Large but self-contained |
-| 6. `GameEngine.cs` | 1 | 36 | The composition root; do last |
+| ~~1. Delete the dead~~ | `Fonts/XnaFont.cs`, `Fonts/XnaFontUv.cs`, `GameEngine.TextWriter` | ~10 | **Done**, `2568943` |
+| ~~2. Owner-assigned~~ | the four `Particles/*.cs`, `BouncingParticle.cs` | ~10 | **Done**, `abd14e0` |
+| ~~3. Leaf classes~~ | 30 files | ~50 | **Done**, `e536e79`…`d6ca5c6` |
+| 4. Mid-size | `JumpPlatform` (4), `Nasty` (6), `ElectricityGatesAndNodesEngine` (8), `PlanetCoreScreen` (11), `TeleportScreen` (11), `GameScreenCollection` (36) | 76 | |
+| 5. `Blob.cs` | 1 | 21 | Large but self-contained |
+| 6. `GameEngine.cs` and what only it can settle | `GameEngine.cs` (40), `IntroSequence.cs` (1), `MainGameScreen.cs` (2), `TestScreen.cs` (2) | 45 | The composition root; do last |
 | 7. Flip the project | `Starquake.Shared.csproj` | — | Remove all `#nullable enable` directives |
 
-Stage 3 files, fewest members first: `ConveyerNasties`, `CoreElement`, `BlobDeathAnimation`,
-`ColourFaderAnimation`, `IntroSequence`, `TunnelLiftAnimationEngine`, `ResourceManager`,
-`StatusPanel`, `ScreenEffectBase`, `CheopsScreen`, `GameHost`, `CustomControl`, `HiScore`,
-`SoundEffectEngine`, `ConveyerNasty`, `ScreenEffectEngine`, `ComputerReportScreen`,
-`GameCompleteScreen`, `GameOverScreen`, `HiScoreScreen`, `OptionsScreen`,
-`StartableGameComponentBase`.
+`IntroSequence` was in stage 3 and is not any more. Its `_mainScreen` is set by
+`Reset(MainGameScreen)` and then dereferenced unchecked at twenty sites, so the honest fix is
+the constructor — but `IntroSequence` is built in `GameEngine.Initialise` and `MainGameScreen`
+in the `GameEngineStatus.Started` handler, so that means reordering the composition root, which
+is stage 6's job. `MainGameScreen` and `TestScreen` are there for a smaller reason: their
+`Reset` and `PerformPostScreenChangeActions` need to match `IGameScreen`'s optional data
+parameter, which is a one-line change each once their file is converted.
 
 To regenerate the member list at any point, add `<Nullable>enable</Nullable>` to
 `Starquake.Shared.csproj`, run the build below, then **revert the csproj** — it is a
@@ -151,17 +152,35 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 Severities for the inspections that are already at zero are pinned in `.editorconfig`; if a
 cleanup here re-introduces one, that file is the place it is recorded.
 
-## State when this plan was written
+## State
 
-Six commits landed, `ea1b21d` through `67eb015`. Solution build is at **0 warnings, 0 errors**.
-ReSharper issues in our own code went 1,055 → 735, and possible null dereferences 33 → 2 (both
-remaining are in the dead `XnaFont`).
+Stages 1 to 3 are done, in eleven commits from `2568943` to `d6ca5c6`. Warnings with the
+project switch on are **246 → 142**, and 42 files carry `#nullable enable`. Solution build is
+at 0 warnings, 0 errors and the smoke run reaches its twelve seconds.
 
-**One uncommitted change is in the working tree:** a one-line edit in
-`Starquake.Shared/ActiveSprites/BouncingParticle.cs` that turns on the blob-part sprites during
-the death animation. It is finished and approved, just not committed. Commit it before starting,
-so it does not get mixed into stage 2, which touches the same file.
+Everything still outstanding is in stages 4 to 7 and lives in eleven files, listed in the table
+above. Nothing is left part-converted: a file either has the directive and is clean, or has not
+been touched.
 
-Still outstanding after this plan, and deliberately not part of it: 101 unused non-private
-members, 75 primary-constructor suggestions (declined — they would undo the `readonly` work in
-`e7af430` and break the `_camelCase` field convention), and 32 invalid XML doc comments.
+Four things worth knowing before picking up stage 4:
+
+- **`IGameScreen.Reset` and `PerformPostScreenChangeActions` take `object?` now**, as does
+  `GameComponentBase.Initialise`. Implementations in files without the directive are still
+  compatible, but every file converted from here on has to match those signatures, which shows
+  up as CS8767 rather than as anything to think about.
+- **`ResourceManager`'s lookups throw.** `GetSpriteCollection`, `GetDataResource` and
+  `GetParticleEffectInstance` no longer return null for a name they do not know, so sprite and
+  data fields taken from them are honestly non-null. This is what found the two misspelt
+  resource names in `DefineContent`.
+- **Two bugs turned up on the way** and are fixed: `CustomControl` dropped the `PlayerKeySet`
+  its constructor was given, and `PickupsIlluminatedName` was spelt without its final d.
+  Expect more of these in stages 4 to 6; a field that is never set is usually never read
+  either, but not always.
+- **`TestScreen` never calls `LoadContent` on its own `BlobDeathAnimation`**, which is why its
+  fragment list is now empty rather than six particles with a null `Fireball`. Left alone
+  deliberately; it is a debug screen and not part of this work.
+
+Still outstanding and deliberately not part of this plan: unused non-private members (down from
+101, several were removed here where a nullable question could not be answered without them),
+75 primary-constructor suggestions (declined — they would undo the `readonly` work in `e7af430`
+and break the `_camelCase` field convention), and 32 invalid XML doc comments.
