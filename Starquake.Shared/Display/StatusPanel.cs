@@ -404,11 +404,11 @@ public class StatusPanel : GameComponentBase
                     }
                 }
 
-                if (GameEngine.BlobStatusPanel.EnergyLevel <= 0)
+                if (EnergyLevel <= 0)
                 {
                     // Lose a life and put us into the overloading state
                     GameEngine.Player.KillBlob(false, true);
-                    GameEngine.BlobStatusPanel.EnergyLevel = 0;
+                    EnergyLevel = 0;
                 }
             }
 
