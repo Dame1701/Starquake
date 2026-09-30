@@ -4,31 +4,36 @@
 // -
 using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using ProjectMercury;
 using ProjectMercury.Renderers;
-using Starquake.Engines;
+using Starquake.ContentManagement;
 
 namespace Starquake.Particles;
 
 public class ParticleEngine
 {
-    private readonly GameEngine _gameEngineInstance;
+    private readonly ContentManager _contentManager;
+    private readonly GraphicsSet _graphicsSet;
     private readonly Dictionary<string, ParticleEffect> _particleEffects;
 
     private readonly SpriteBatchRenderer _particleRenderer;
 
-    public ParticleEngine(GameEngine gameEngineInstance)
+    public ParticleEngine(ContentManager content, GraphicsDeviceManager graphics, GraphicsSet graphicsSet)
     {
-        _gameEngineInstance = gameEngineInstance;
+        _contentManager = content;
+        _graphicsSet = graphicsSet;
+
         _particleRenderer = new SpriteBatchRenderer();
-        _particleRenderer.GraphicsDeviceService = _gameEngineInstance.GraphicsDeviceMgr;
+        _particleRenderer.GraphicsDeviceService = graphics;
 
         _particleEffects = new Dictionary<string, ParticleEffect>();
     }
 
     public void AddEffect(string effectName, string effectPath)
     {
-        var temp = _gameEngineInstance.ContentMgr.Load<ParticleEffect>(effectPath);
+        var temp = _contentManager.Load<ParticleEffect>(effectPath);
         _particleEffects.Add(effectName, temp);
     }
 
@@ -36,10 +41,10 @@ public class ParticleEngine
     {
         foreach (var pe in _particleEffects.Values)
         {
-            pe.LoadContent(_gameEngineInstance.ContentMgr);
+            pe.LoadContent(_contentManager);
         }
 
-        _particleRenderer.LoadContent(_gameEngineInstance.ContentMgr);
+        _particleRenderer.LoadContent(_contentManager);
 
         foreach (var pe in _particleEffects.Values)
         {
@@ -56,16 +61,16 @@ public class ParticleEngine
     ///     we want to play the routine
     /// </param>
     public ContinuousParticleEffect CreateContinualEffectInstance(string effectName, TimeSpan? duration)
-        => new(_gameEngineInstance, CopyEffect(effectName), _particleRenderer)
+        => new(_graphicsSet, CopyEffect(effectName), _particleRenderer)
         {
             EffectDuration = duration
         };
 
     public MultiTriggerTimeBasedParticleEffect CreateMultiTriggeredTimeBasedEffectInstance(string effectName)
-        => new(_gameEngineInstance, CopyEffect(effectName), _particleRenderer);
+        => new(_graphicsSet, CopyEffect(effectName), _particleRenderer);
 
     public TriggeredParticleEffect CreateSingleTriggerEffectInstance(string effectName)
-        => new(_gameEngineInstance, CopyEffect(effectName), _particleRenderer);
+        => new(_graphicsSet, CopyEffect(effectName), _particleRenderer);
 
     /// <summary>
     ///     Each instance needs its own copy of the effect, otherwise callers sharing an effect name emit into,
@@ -79,7 +84,7 @@ public class ParticleEngine
         }
 
         var copy = registered.DeepCopy();
-        copy.LoadContent(_gameEngineInstance.ContentMgr);
+        copy.LoadContent(_contentManager);
         copy.Initialise();
 
         return copy;

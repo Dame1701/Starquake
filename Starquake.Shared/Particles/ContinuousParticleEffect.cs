@@ -6,14 +6,14 @@ using System;
 using Microsoft.Xna.Framework;
 using ProjectMercury;
 using ProjectMercury.Renderers;
-using Starquake.Engines;
+using Starquake.ContentManagement;
 using Starquake.Structure;
 
 namespace Starquake.Particles;
 
 public class ContinuousParticleEffect : IStandardParticleEffect
 {
-    private readonly GameEngine _gameEngineReference;
+    private readonly GraphicsSet _graphicsSet;
 
     private DateTime _effectLastTriggered;
 
@@ -23,10 +23,10 @@ public class ContinuousParticleEffect : IStandardParticleEffect
 
     internal readonly SpriteBatchRenderer Renderer;
 
-    public ContinuousParticleEffect(GameEngine gameEngineReference, ParticleEffect mercuryParticleEffect,
+    public ContinuousParticleEffect(GraphicsSet graphicsSet, ParticleEffect mercuryParticleEffect,
         SpriteBatchRenderer renderer)
     {
-        _gameEngineReference = gameEngineReference;
+        _graphicsSet = graphicsSet;
         MercuryParticleEffect = mercuryParticleEffect;
         Renderer = renderer;
         EffectDuration = new TimeSpan(0);
@@ -97,13 +97,13 @@ public class ContinuousParticleEffect : IStandardParticleEffect
                     {
                         if (DateTime.Now > _effectLastTriggered + TriggerPeriod)
                         {
-                            MercuryParticleEffect.Trigger(new Vector2(_gameEngineReference.ScreenEffectEngine.GetParticleX(xPos), _gameEngineReference.ScreenEffectEngine.GetParticleY(yPos)));
+                            MercuryParticleEffect.Trigger(new Vector2(xPos, yPos));
                             _effectLastTriggered = DateTime.Now;
                         }
                     }
                     else
                     {
-                        MercuryParticleEffect.Trigger(new Vector2(_gameEngineReference.ScreenEffectEngine.GetParticleX(xPos), _gameEngineReference.ScreenEffectEngine.GetParticleY(yPos)));
+                        MercuryParticleEffect.Trigger(new Vector2(xPos, yPos));
                     }
                 }
             }
@@ -114,13 +114,13 @@ public class ContinuousParticleEffect : IStandardParticleEffect
                 {
                     if (DateTime.Now > _effectLastTriggered + TriggerPeriod)
                     {
-                        MercuryParticleEffect.Trigger(new Vector2(_gameEngineReference.ScreenEffectEngine.GetParticleX(xPos), _gameEngineReference.ScreenEffectEngine.GetParticleY(yPos)));
+                        MercuryParticleEffect.Trigger(new Vector2(xPos, yPos));
                         _effectLastTriggered = DateTime.Now;
                     }
                 }
                 else
                 {
-                    MercuryParticleEffect.Trigger(new Vector2(_gameEngineReference.ScreenEffectEngine.GetParticleX(xPos), _gameEngineReference.ScreenEffectEngine.GetParticleY(yPos)));
+                    MercuryParticleEffect.Trigger(new Vector2(xPos, yPos));
                 }
             }
         }
@@ -133,7 +133,7 @@ public class ContinuousParticleEffect : IStandardParticleEffect
     public void Draw()
     {
         // We must always call this!
-        if (_gameEngineReference.GraphicsSet.IsRedrawn)
+        if (_graphicsSet.IsRedrawn)
         {
             Renderer.RenderEffect(MercuryParticleEffect);
         }
@@ -141,7 +141,7 @@ public class ContinuousParticleEffect : IStandardParticleEffect
 
     public void Draw(int screenFade)
     {
-        if (_gameEngineReference.GraphicsSet.IsRedrawn)
+        if (_graphicsSet.IsRedrawn)
         {
             Renderer.RenderEffect(MercuryParticleEffect, screenFade);
         }

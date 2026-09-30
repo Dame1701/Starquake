@@ -5,24 +5,24 @@
 using Microsoft.Xna.Framework;
 using ProjectMercury;
 using ProjectMercury.Renderers;
-using Starquake.Engines;
+using Starquake.ContentManagement;
 using Starquake.Structure;
 
 namespace Starquake.Particles;
 
 public class TriggeredParticleEffect : IStandardParticleEffect
 {
-    private readonly GameEngine _gameEngineReference;
+    private readonly GraphicsSet _graphicsSet;
 
     internal readonly ParticleEffect MercuryParticleEffect;
     internal readonly SpriteBatchRenderer Renderer;
 
     private bool _triggered;
 
-    public TriggeredParticleEffect(GameEngine gameEngineReference, ParticleEffect mercuryParticleEffect,
+    public TriggeredParticleEffect(GraphicsSet graphicsSet, ParticleEffect mercuryParticleEffect,
         SpriteBatchRenderer renderer)
     {
-        _gameEngineReference = gameEngineReference;
+        _graphicsSet = graphicsSet;
         MercuryParticleEffect = mercuryParticleEffect;
         Renderer = renderer;
         EffectActive = false;
@@ -69,7 +69,7 @@ public class TriggeredParticleEffect : IStandardParticleEffect
         {
             if (!_triggered)
             {
-                var position = new Vector2(_gameEngineReference.ScreenEffectEngine.GetParticleX(xPos), _gameEngineReference.ScreenEffectEngine.GetParticleY(yPos));
+                var position = new Vector2(xPos, yPos);
                 MercuryParticleEffect.Trigger(ref position);
 
                 // Workaround for a bizzare bug that seems to stop the particle from working
@@ -103,7 +103,7 @@ public class TriggeredParticleEffect : IStandardParticleEffect
 
     public void Draw()
     {
-        if (_gameEngineReference.GraphicsSet.IsRedrawn)
+        if (_graphicsSet.IsRedrawn)
         {
             // We must always call this!
             Renderer.RenderEffect(MercuryParticleEffect);
@@ -112,7 +112,7 @@ public class TriggeredParticleEffect : IStandardParticleEffect
 
     public void Draw(int screenFade)
     {
-        if (_gameEngineReference.GraphicsSet.IsRedrawn)
+        if (_graphicsSet.IsRedrawn)
         {
             Renderer.RenderEffect(MercuryParticleEffect, screenFade);
         }

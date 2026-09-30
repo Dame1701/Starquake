@@ -140,12 +140,6 @@ public class ScreenEffectEngine : GameComponentBase
         }
     }
 
-    public int GetParticleX(int xPos)
-        => xPos;
-
-    public int GetParticleY(int yPos)
-        => yPos;
-
     public void Update()
     {
         if (ActiveScreenEffect != null)

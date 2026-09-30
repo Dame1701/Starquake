@@ -50,7 +50,7 @@ public class ResourceManager : StartableGameComponentBase
         _gameEngineInstance = gameEngineInstance;
         _contentManagerInstance = gameEngineInstance.ContentMgr;
 
-        _particleEngine = new ParticleEngine(_gameEngineInstance);
+        _particleEngine = new ParticleEngine(_contentManagerInstance, gameEngineInstance.GraphicsDeviceMgr, gameEngineInstance.GraphicsSet);
         _animationTileEngine = new AnimTileEngine(_gameEngineInstance);
         _soundEngine = new SoundEffectEngine(_contentManagerInstance, gameEngineInstance.RandomNumberGenerator);
 

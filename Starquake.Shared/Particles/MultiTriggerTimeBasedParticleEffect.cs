@@ -5,21 +5,21 @@
 using Microsoft.Xna.Framework;
 using ProjectMercury;
 using ProjectMercury.Renderers;
-using Starquake.Engines;
+using Starquake.ContentManagement;
 using Starquake.Structure;
 
 namespace Starquake.Particles;
 
 public class MultiTriggerTimeBasedParticleEffect : IPositionalTriggerParticleEffect
 {
-    private readonly GameEngine _gameEngineReference;
+    private readonly GraphicsSet _graphicsSet;
     internal readonly ParticleEffect MercuryParticleEffect;
     internal readonly SpriteBatchRenderer Renderer;
 
-    public MultiTriggerTimeBasedParticleEffect(GameEngine gameEngineReference,
+    public MultiTriggerTimeBasedParticleEffect(GraphicsSet graphicsSet,
         ParticleEffect mercuryParticleEffect, SpriteBatchRenderer renderer)
     {
-        _gameEngineReference = gameEngineReference;
+        _graphicsSet = graphicsSet;
         MercuryParticleEffect = mercuryParticleEffect;
         Renderer = renderer;
     }
@@ -29,7 +29,7 @@ public class MultiTriggerTimeBasedParticleEffect : IPositionalTriggerParticleEff
 
     public void Start(int xPos, int yPos)
     {
-        var position = new Vector2(_gameEngineReference.ScreenEffectEngine.GetParticleX(xPos), _gameEngineReference.ScreenEffectEngine.GetParticleY(yPos));
+        var position = new Vector2(xPos, yPos);
         MercuryParticleEffect.Trigger(ref position);
     }
 
@@ -72,7 +72,7 @@ public class MultiTriggerTimeBasedParticleEffect : IPositionalTriggerParticleEff
 
     public void Draw()
     {
-        if (_gameEngineReference.GraphicsSet.IsRedrawn)
+        if (_graphicsSet.IsRedrawn)
         {
             // We must always call this!
             if (MercuryParticleEffect.ActiveParticlesCount > 0)
@@ -84,7 +84,7 @@ public class MultiTriggerTimeBasedParticleEffect : IPositionalTriggerParticleEff
 
     public void Draw(int screenFade)
     {
-        if (_gameEngineReference.GraphicsSet.IsRedrawn)
+        if (_graphicsSet.IsRedrawn)
         {
             // We must always call this!
             if (MercuryParticleEffect.ActiveParticlesCount > 0)
