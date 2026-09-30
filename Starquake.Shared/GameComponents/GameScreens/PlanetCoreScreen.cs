@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
@@ -79,15 +80,15 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
     private int _blankingTilesOpacity;
     private int _coreAlienCount = MaxCoreAliens;
 
-    private List<Nasty> _coreAliens;
+    private readonly List<Nasty> _coreAliens;
     private IStandardParticleEffect _coreComputationEffect;
 
     //private MercuryParticleEngine.MercuryParticleEffect coreVortex;
     private IStandardParticleEffect _coreSparks;
 
-    private CoreElements _elements;
+    private readonly CoreElements _elements;
 
-    private Queue<int> _elementsToReplace;
+    private readonly Queue<int> _elementsToReplace = new();
     private int _entryTime;
 
     private bool _justEnteredCore = true;
@@ -96,17 +97,35 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
     private bool _replacingElements;
 
 
-    public PlanetCoreScreen(GameEngine gameEngineReference)
+    public PlanetCoreScreen(GameEngine gameEngineReference, CoreElements elements)
         : base(gameEngineReference)
     {
+        _elements = elements;
+        _elements.OnCoreElementReplaced += elements_OnCoreElementReplaced;
+        _elements.LoadContent();
 
+        _randomNumberGenerator = new Random((int)DateTime.Now.Ticks);
+
+        _coreAliens = new List<Nasty>();
+        for (var a = 0; a < _coreAlienCount; a++)
+        {
+            var coreAlien = new Nasty(
+                GameEngine,
+                0,
+                0,
+                CoreElementsToReplace);
+
+            coreAlien.NastyType = NastyType.CoreGuardian;
+            _coreAliens.Add(coreAlien);
+        }
+
+        _coreComputationEffect = (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("BinaryEffect", ParticleEffectType.Continual, null);
+        _coreSparks = (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("CoreSparks", ParticleEffectType.Continual, null);
     }
-
-    public GameScreenCollection GameScreens { get; set; }
 
     public bool Success => true;
 
-    public void Reset(object data)
+    public void Reset(object? data)
     {
     }
 
@@ -123,17 +142,11 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
 
         _elements.Update(gameTime);
 
-        if (_coreSparks != null)
-        {
-            _coreSparks.Start();
-            _coreSparks.Update(CoreCentreX, CoreCentreY, gameTime);
-        }
+        _coreSparks.Start();
+        _coreSparks.Update(CoreCentreX, CoreCentreY, gameTime);
 
-        if (_coreComputationEffect != null)
-        {
-            _coreComputationEffect.Start();
-            _coreComputationEffect.Update(CoreCentreX, CoreCentreY, gameTime);
-        }
+        _coreComputationEffect.Start();
+        _coreComputationEffect.Update(CoreCentreX, CoreCentreY, gameTime);
     }
 
     public override void Update(GameTime gameTime)
@@ -142,12 +155,12 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
         {
             _blankingTilesOpacity = ColourLevels.Full;
             _replacingElements = false;
-            Initialise(null);
+            EnterCore();
             _justEnteredCore = false;
 
             CalculateCoreAlienCount();
 
-            _elementsToReplace = new Queue<int>();
+            _elementsToReplace.Clear();
 
             // Check to see if blob is carrying any elements to replace
             var activeElements = _elements.GetActiveElements();
@@ -268,69 +281,41 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
 
     #region IGameScreen Members
 
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
     {
         throw new NotImplementedException();
     }
 
     #endregion
 
-    public override void LoadContent()
+    /// <summary>
+    ///     Puts the core screen and its guardians in place for a blob that has just arrived.
+    /// </summary>
+    private void EnterCore()
     {
-        _elements.LoadContent();
-        _coreAliens = new List<Nasty>();
-        _randomNumberGenerator = new Random((int)DateTime.Now.Ticks);
+        GameEngine.GameScreens.ScreenNumber = WorldMap.CoreScreenNumber;
+
+        // Add the collision map for the core elements
+        GameEngine.GameScreens.CurrentGameScreenData.CollisionMap.AddRange(_elements.GetCollisionMap());
+
+        var potentialLocations = GameEngine.GameScreens.GetNastyPotentialLocations();
+        if (potentialLocations.Count < _coreAlienCount)
+        {
+            _coreAlienCount = potentialLocations.Count;
+        }
 
         for (var a = 0; a < _coreAlienCount; a++)
         {
-            var coreAlien = new Nasty(
-                GameEngine,
-                0,
-                0,
-                CoreElementsToReplace);
-
-            coreAlien.NastyType = NastyType.CoreGuardian;
-            coreAlien.Initialise(null);
-            _coreAliens.Add(coreAlien);
-        }
-        _coreComputationEffect = (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("BinaryEffect", ParticleEffectType.Continual, null);
-        _coreSparks = (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("CoreSparks", ParticleEffectType.Continual, null);
-    }
-
-    public override void Initialise(object data)
-    {
-        if (data != null)
-        {
-            _elements = (CoreElements)data;
-            _elements.OnCoreElementReplaced += elements_OnCoreElementReplaced;
-        }
-        else
-        {
-            GameEngine.GameScreens.ScreenNumber = WorldMap.CoreScreenNumber;
-
-            // Add the collision map for the core elements
-            GameEngine.GameScreens.CurrentGameScreenData.CollisionMap.AddRange(_elements.GetCollisionMap());
-
-            var potentialLocations = GameEngine.GameScreens.GetNastyPotentialLocations();
-            if (potentialLocations.Count < _coreAlienCount)
-            {
-                _coreAlienCount = potentialLocations.Count;
-            }
-
-            for (var a = 0; a < _coreAlienCount; a++)
-            {
-                _coreAliens[a].XPos = potentialLocations[a].X;
-                _coreAliens[a].YPos = potentialLocations[a].Y;
-                _coreAliens[a].NastyType = NastyType.CoreGuardian;
-                _coreAliens[a].NastyState = NastyState.Normal;
-            }
+            _coreAliens[a].XPos = potentialLocations[a].X;
+            _coreAliens[a].YPos = potentialLocations[a].Y;
+            _coreAliens[a].NastyType = NastyType.CoreGuardian;
+            _coreAliens[a].NastyState = NastyState.Normal;
         }
     }
 
     private void elements_OnCoreElementReplaced()
     {
-        if (_elementsToReplace != null &&
-            _elementsToReplace.Count > 0)
+        if (_elementsToReplace.Count > 0)
         {
             _elements.ReplaceElement(_elementsToReplace.Dequeue());
         }

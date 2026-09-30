@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
@@ -20,7 +21,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
     #region IGameScreen Members
 
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
     {
         throw new NotImplementedException();
     }
@@ -29,16 +30,21 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
     #region IGameComponent Members
 
-    private SpriteCollection _teleportSprites;
-    private SpriteCollection _teleportDistort;
-    private SpriteCollection _teleportMonitorScreen;
-    private SpriteCollection _teleportMonitorScreenDistortion;
-    private TeleportCodeLetter[] _teleportCodeLetters;
+    private readonly SpriteCollection _teleportSprites;
+    private readonly SpriteCollection _teleportDistort;
+    private readonly SpriteCollection _teleportMonitorScreen;
+    private readonly SpriteCollection _teleportMonitorScreenDistortion;
+    private readonly TeleportCodeLetter[] _teleportCodeLetters;
     private readonly Dictionary<int, string> _teleportCodes;
+    /// <summary>
+    ///     The destination code as typed so far, one underscore per letter still to be entered.
+    /// </summary>
+    private const string EmptyCode = "_____";
+
     private int _teleportMonitorScreenDistortionYPos;
-    private string _teleportCode;
-    private string _currentCode;
-    private string _previousCode;
+    private string? _teleportCode;
+    private string _currentCode = EmptyCode;
+    private string _previousCode = string.Empty;
     private bool _keyPressed;
     private int _keyIdPressed;
     private bool _attemptingTeleport;
@@ -84,11 +90,24 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         _teleportCodes.Add(499, "palma");
         _teleportCodes.Add(461, "aisle");
         _teleportCodes.Add(506, "exeon");
+
+        _teleportSprites = new SpriteCollection(GameEngine, GameEngine.ContentMgr, "Graphics\\TeleportEntry", 62, 62);
+        _teleportDistort = new SpriteCollection(GameEngine, GameEngine.ContentMgr, "Graphics\\TeleportDistort", 44, 29);
+        _teleportMonitorScreen = new SpriteCollection(GameEngine, GameEngine.ContentMgr, "Graphics\\TeleportInfoMonitor", 268, 210);
+        _teleportMonitorScreenDistortion = new SpriteCollection(GameEngine, GameEngine.ContentMgr, "Graphics\\TeleportInfoMonitorDistortion", 230, 30);
+
+        _teleportMonitorScreenDistortionYPos = GameEngine.ScreenYOffset + 28;
+
+        _teleportCodeLetters = new TeleportCodeLetter[5];
+        for (var a = 0; a < 5; a++)
+        {
+            _teleportCodeLetters[a] = new TeleportCodeLetter(_currentCode[a].ToString(), new Point(350 + a * 70, 400));
+        }
     }
 
-    public void Reset(object data)
+    public void Reset(object? data)
     {
-        _currentCode = "_____";
+        _currentCode = EmptyCode;
 
         _keyPressed = false;
         _keyIdPressed = 0;
@@ -99,16 +118,6 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
         _oldOffsetX = GameEngine.ScreenXOffset;
         _oldOffsetY = GameEngine.ScreenYOffset;
-    }
-
-    public override void LoadContent()
-    {
-        _teleportSprites = new SpriteCollection(GameEngine, GameEngine.ContentMgr, "Graphics\\TeleportEntry", 62, 62);
-        _teleportDistort = new SpriteCollection(GameEngine, GameEngine.ContentMgr, "Graphics\\TeleportDistort", 44, 29);
-        _teleportMonitorScreen = new SpriteCollection(GameEngine, GameEngine.ContentMgr, "Graphics\\TeleportInfoMonitor", 268, 210);
-        _teleportMonitorScreenDistortion = new SpriteCollection(GameEngine, GameEngine.ContentMgr, "Graphics\\TeleportInfoMonitorDistortion", 230, 30);
-
-        _teleportMonitorScreenDistortionYPos = GameEngine.ScreenYOffset + 28;
     }
 
     public override void Update(GameTime gameTime)
@@ -232,23 +241,10 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
         _teleportCodes.TryGetValue(GameEngine.GameScreens.ScreenNumber, out _teleportCode);
 
-        if (_teleportCodeLetters == null)
+        for (var a = 0; a < 5; a++)
         {
-            _teleportCodeLetters = new TeleportCodeLetter[5];
-
-            for (var a = 0; a < 5; a++)
-            {
-                _teleportCodeLetters[a] = new TeleportCodeLetter(_currentCode[a].ToString(), new Point(350 + a * 70, 400));
-            }
-
-        }
-        else
-        {
-            for (var a = 0; a < 5; a++)
-            {
-                _teleportCodeLetters[a].Letter = _currentCode[a].ToString();
-                _teleportCodeLetters[a].Location = new Point(350 + a * 70, 400);
-            }
+            _teleportCodeLetters[a].Letter = _currentCode[a].ToString();
+            _teleportCodeLetters[a].Location = new Point(350 + a * 70, 400);
         }
     }
 
@@ -289,7 +285,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         // Draw text
         if (!_attemptingTeleport)
         {
-            _previousCode = _teleportCode;
+            _previousCode = _teleportCode ?? string.Empty;
         }
 
         GameEngine.Font2.Begin(BlendState.AlphaBlend);
@@ -345,17 +341,14 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         }
 
         // Draw codes
-        if (_teleportCodeLetters != null)
+        var teleportLetterLocation = 290;
+
+        for (var a = 0; a < 5; a++)
         {
-            var teleportLetterLocation = 290;
+            GameEngine.Font2.WriteText(teleportLetterLocation, 412, _teleportCodeLetters[a].Letter, 2, new Color(36, 16, 4), (byte)ScreenFade, new Vector2(1f, 0.5f), SpriteEffects.FlipVertically);
 
-            for (var a = 0; a < 5; a++)
-            {
-                GameEngine.Font2.WriteText(teleportLetterLocation, 412, _teleportCodeLetters[a].Letter, 2, new Color(36, 16, 4), (byte)ScreenFade, new Vector2(1f, 0.5f), SpriteEffects.FlipVertically);
-
-                GameEngine.Font2.WriteText(teleportLetterLocation, 380, _teleportCodeLetters[a].Letter, 2, new Color(ColourLevels.Full, 180, 0), (byte)ScreenFade);
-                teleportLetterLocation += 50;
-            }
+            GameEngine.Font2.WriteText(teleportLetterLocation, 380, _teleportCodeLetters[a].Letter, 2, new Color(ColourLevels.Full, 180, 0), (byte)ScreenFade);
+            teleportLetterLocation += 50;
         }
 
         GameEngine.Font2.End();

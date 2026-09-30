@@ -714,11 +714,9 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             // Setup the game screens
             _mainScreen = new MainGameScreen(this);
             _teleportScreen = new TeleportScreen(this);
-            _coreScreen = new PlanetCoreScreen(this);
+            _coreScreen = new PlanetCoreScreen(this, Elements);
             _accessScreen = new AccessBoothScreen(this);
             _cheopsScreen = new CheopsScreen(this);
-
-            _coreScreen.Initialise(Elements);
 
             _screens.Add(GameScreenType.Options, (IGameScreen)_optionsScreen);
             _screens.Add(GameScreenType.ComputerReport, (IGameScreen)_computerReportScreen);
