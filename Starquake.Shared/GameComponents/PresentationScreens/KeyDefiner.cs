@@ -2,8 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
-using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Starquake.Constants;
@@ -19,8 +17,8 @@ public class KeyDefiner
 
     private readonly BitmapFont _font;
     private readonly ToggleKeys _input;
-    private readonly string[] _keysToDefine = new[]
-    {
+    private readonly string[] _keysToDefine =
+    [
         "UP",
         "DOWN",
         "LEFT",
@@ -28,10 +26,10 @@ public class KeyDefiner
         "FIRE",
         "PAUSE",
         "QUIT"
-    };
-    private readonly ResourceManager _resources;
-    private bool _alldone;
+    ];
 
+    private readonly ResourceManager _resources;
+    private bool _allDone;
     private int _definedKeyIndex;
 
     public KeyDefiner(ResourceManager resources, BitmapFont font, ToggleKeys input)
@@ -39,8 +37,8 @@ public class KeyDefiner
         _resources = resources;
         _font = font;
         _input = input;
-        DefinedKeys = new[]
-        {
+        DefinedKeys =
+        [
             Keys.O,
             Keys.P,
             Keys.A,
@@ -48,7 +46,7 @@ public class KeyDefiner
             Keys.Space,
             Keys.H,
             Keys.Escape
-        };
+        ];
     }
     public Keys[] DefinedKeys { get; }
 
@@ -69,7 +67,7 @@ public class KeyDefiner
     public void Reset()
     {
         _definedKeyIndex = 0;
-        _alldone = false;
+        _allDone = false;
         for (int a = 0; a < DefinedKeys.Length; a++)
         {
             DefinedKeys[a] = Keys.None;
@@ -90,7 +88,7 @@ public class KeyDefiner
     {
         Keys pressedKey = _input.GetPressedKey();
 
-        if (!_alldone)
+        if (!_allDone)
         {
             if (_definedKeyIndex < DefinedKeys.Length)
             {
@@ -105,7 +103,7 @@ public class KeyDefiner
             {
                 if (KeyDefinitionComplete != null)
                 {
-                    _alldone = true;
+                    _allDone = true;
 
                 }
             }
@@ -145,7 +143,7 @@ public class KeyDefiner
             keyDefineYPos += 40;
         }
 
-        if (_alldone)
+        if (_allDone)
         {
             _font.WriteText(540, 590, "OK ?  (Y / N )", ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
         }

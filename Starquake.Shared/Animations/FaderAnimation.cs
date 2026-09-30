@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
 using Starquake.Constants;
 using Starquake.SharedLibs;
 
@@ -13,16 +12,16 @@ public class FaderAnimation
     private readonly int _minFade;
     private readonly Random? _randomGenerator;
     private int _fadeSpeed;
-    private FadeDirection FadeDirection;
+    private FadeDirection _fadeDirection;
     public int FadeLevel;
-    private bool FadeOperational;
+    private bool _fadeOperational;
 
     public FaderAnimation(int fadeSpeed, Random? randomGenerator = null, int minFade = 0)
     {
         _minFade = minFade;
         _randomGenerator = randomGenerator;
-        FadeOperational = false;
-        FadeDirection = FadeDirection.FadeUp;
+        _fadeOperational = false;
+        _fadeDirection = FadeDirection.FadeUp;
         FadeLevel = _minFade;
         _fadeSpeed = fadeSpeed;
     }
@@ -34,9 +33,9 @@ public class FaderAnimation
             _fadeSpeed = fadeSpeed;
         }
 
-        if (FadeOperational || _randomGenerator == null)
+        if (_fadeOperational || _randomGenerator == null)
         {
-            if (FadeDirection == FadeDirection.FadeUp)
+            if (_fadeDirection == FadeDirection.FadeUp)
             {
                 if (FadeLevel < ColourLevels.Full)
                 {
@@ -45,10 +44,10 @@ public class FaderAnimation
                 else
                 {
                     FadeLevel = ColourLevels.Full;
-                    FadeDirection = FadeDirection.FadeDown;
+                    _fadeDirection = FadeDirection.FadeDown;
                 }
             }
-            else if (FadeDirection == FadeDirection.FadeDown)
+            else if (_fadeDirection == FadeDirection.FadeDown)
             {
                 if (FadeLevel > _minFade)
                 {
@@ -57,8 +56,8 @@ public class FaderAnimation
                 else
                 {
                     FadeLevel = _minFade;
-                    FadeDirection = FadeDirection.FadeUp;
-                    FadeOperational = false;
+                    _fadeDirection = FadeDirection.FadeUp;
+                    _fadeOperational = false;
                 }
             }
         }
@@ -66,7 +65,7 @@ public class FaderAnimation
         {
             if (_randomGenerator.Next(0, 110) == 100)
             {
-                FadeOperational = true;
+                _fadeOperational = true;
             }
         }
     }

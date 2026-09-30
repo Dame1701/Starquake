@@ -67,7 +67,7 @@ public class GameScreenBase : GameComponentBase
         // Fade screen back up
         if (ScreenFade < ColourLevels.Full)
         {
-            ScreenFade = ScreenFade + ScreenFadeSpeed;
+            ScreenFade += ScreenFadeSpeed;
         }
 
         if (ScreenFade > ColourLevels.Full)

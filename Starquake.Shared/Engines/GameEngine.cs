@@ -32,40 +32,10 @@ namespace Starquake.Engines;
 public class GameEngine : StartableGameComponentBase, IDisposable
 {
     /// <summary>
-    ///     How much of a channel the boot screen fades in by, and the progress bar background fades
-    ///     out by, each logic frame. <see cref="ColourLevels.Full" /> divided by this is how many
-    ///     frames the fade lasts.
-    /// </summary>
-    private const int BootFadeStep = 4;
-
-    /// <summary>
     ///     A percentage, complete. The loader reports its progress as one, so this is what it reports
     ///     when there is nothing left to load.
     /// </summary>
     private const int FullyLoadedPercent = 100;
-
-    /// <summary>
-    ///     How wide the boot progress bar is at full, in the one-pixel-wide slices it is drawn from,
-    ///     and where the first slice goes. Each slice is drawn two pixels further right than the last.
-    /// </summary>
-    private const int BootProgressBarSlices = 519;
-
-    /// <inheritdoc cref="BootProgressBarSlices" />
-    private const int BootProgressBarXPos = 122;
-
-    /// <inheritdoc cref="BootProgressBarSlices" />
-    private const int BootProgressBarYPos = 661;
-
-    /// <inheritdoc cref="BootProgressBarSlices" />
-    private const int BootProgressBarSliceSpacing = 2;
-
-    /// <summary>
-    ///     Where the progress bar's backing plate sits on the boot screen.
-    /// </summary>
-    private const int BootProgressBackgroundXPos = 116;
-
-    /// <inheritdoc cref="BootProgressBackgroundXPos" />
-    private const int BootProgressBackgroundYPos = 657;
 
     /// <summary>
     ///     Where the pause banner is drawn, in playfield coordinates.
@@ -74,15 +44,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     /// <inheritdoc cref="PausedOverlayXPos" />
     private const int PausedOverlayYPos = 200;
-
-    /// <summary>
-    ///     Test-mode cheats: how many lives F2 hands back, and how long the screen-stepping keys wait
-    ///     between screens so that holding one down steps rather than races.
-    /// </summary>
-    private const int TestModeLivesRestored = 5;
-
-    /// <inheritdoc cref="TestModeLivesRestored" />
-    private const int TestModeScreenStepDelayMs = 100;
 
     /// <summary>
     ///     What shooting a nasty is worth.
@@ -134,11 +95,22 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public readonly ScreenDirectory ScreenDirectory = new();
 
     private BlobDeathAnimation? _blobKiller;
-    private SpriteCollection _bootProgress;
-    private SpriteCollection _bootProgressBackground;
-    // Boot graphics
-    private SpriteCollection _bootScreen;
 
+    /// <summary>
+    ///     The boot screen. Built before anything else, because it is what is on screen while
+    ///     everything else is being loaded.
+    /// </summary>
+    private LoadingScreen _loadingScreen;
+
+    /// <summary>
+    ///     The four keys that work anywhere. Built once the game can act on them.
+    /// </summary>
+    private GlobalHotkeys _hotkeys;
+
+    /// <summary>
+    ///     The debug keys, in a debug build. Null in a release one, which never builds it.
+    /// </summary>
+    private TestModeKeys? _testModeKeys;
     private BreakableBridges? _breakableBridgesEngine;
     private ConveyerNasties? _conveyerNastiesInstance;
 
@@ -147,11 +119,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     // Game Sequences
     private IntroSequence? _introSequence;
-
-    // Loading screen
-    private int _bootProgressBackgroundFade = ColourLevels.Full;
-
-    private int _loadingScreenFade;
 
     private MainGameScreen? _mainScreen;
     private Nasties? _nasties;
@@ -356,7 +323,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     }
 
-    [MemberNotNull(nameof(BlobStatusPanel), nameof(Stats), nameof(Elements),
+    [MemberNotNull(nameof(BlobStatusPanel), nameof(Stats), nameof(Elements), nameof(_hotkeys),
         nameof(ShapeDrawer))]
     private void Initialise()
     {
@@ -367,6 +334,16 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         _session = new GameSession();
         _session.OnPausedChanged += Session_OnPausedChanged;
         _session.OnPlayerKeysChanged += Session_OnPlayerKeysChanged;
+
+        _hotkeys = new GlobalHotkeys(
+            Input,
+            ScreenDirectory,
+            Session,
+            Presentation,
+            _graphicsSet,
+            _graphicsDeviceMgr,
+            ContentResourceManager,
+            ArtworkSwapped);
 
         // Core Elements
         Elements = new CoreElements(Stats, ContentResourceManager, _graphicsSet, Presentation, RandomNumberGenerator);
@@ -388,11 +365,10 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     ///     The registration order is kept exactly as it was found. <see cref="DefineScreenData" /> is the
     ///     one place it is known to matter, and the rest was not worth risking to tidy.
     /// </remarks>
-    [MemberNotNull(nameof(_bootScreen), nameof(_bootProgressBackground), nameof(_bootProgress),
-        nameof(_scanlines), nameof(Font1), nameof(Font2))]
+    [MemberNotNull(nameof(_loadingScreen), nameof(_scanlines), nameof(Font1), nameof(Font2))]
     private void DefineContent()
     {
-        DefineBootGraphics();
+        _loadingScreen = new LoadingScreen(_graphicsDeviceMgr, ContentMgr, Presentation, Input);
 
         Status = GameEngineStatus.StartingGraphicsLoaded;
 
@@ -401,23 +377,30 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ContentManifest.RegisterAll(ContentResourceManager);
     }
 
-    [MemberNotNull(nameof(_bootScreen), nameof(_bootProgressBackground), nameof(_bootProgress),
-        nameof(_scanlines))]
-    private void DefineBootGraphics()
+    /// <summary>
+    ///     The artwork has just been swapped, so whatever is drawing has to pick up the new sheets.
+    ///     Only the main game screen caches anything derived from them, and only once the intro has
+    ///     finished flying the ship in.
+    /// </summary>
+    private void ArtworkSwapped()
     {
-        _bootScreen = new SpriteCollection(_graphicsDeviceMgr, ContentMgr, @"Graphics\\BootScreen2", CompositionSize.Width, CompositionSize.Height);
-        _bootProgressBackground = new SpriteCollection(_graphicsDeviceMgr, ContentMgr, @"Graphics\\ProgressBarBackground", 1046, 32);
-        _bootProgress = new SpriteCollection(_graphicsDeviceMgr, ContentMgr, @"Graphics\\BootProgress", 1, 24);
-        _scanlines = new SpriteCollection(_graphicsDeviceMgr, ContentMgr, @"Graphics\\Scanlines2", CompositionSize.Width, CompositionSize.Height);
+        if (IntroSequence.SequenceStage is IntroSequenceStage.Finished or IntroSequenceStage.EndPause)
+        {
+            ((MainGameScreen)ScreenDirectory.Get(GameScreenType.MainGame)).SpritesChanged();
+        }
     }
 
-    [MemberNotNull(nameof(Font1), nameof(Font2))]
+    /// <summary>
+    ///     The two things the engine draws itself: the fonts every screen writes with, and the CRT
+    ///     scanline overlay laid over the finished picture. The loading screen loads its own.
+    /// </summary>
+    [MemberNotNull(nameof(Font1), nameof(Font2), nameof(_scanlines))]
     private void DefineFonts()
     {
         Font1 = new BitmapFont(ContentMgr.Load<SpriteFont>("Fonts\\elektoraSmall"), new SpriteBatch(_graphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
         Font2 = new BitmapFont(ContentMgr.Load<SpriteFont>("Fonts\\elektoraMedium"), new SpriteBatch(_graphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
+        _scanlines = new SpriteCollection(_graphicsDeviceMgr, ContentMgr, @"Graphics\Scanlines2", CompositionSize.Width, CompositionSize.Height);
     }
-
 
     /// <summary>
     ///     Captures all status changes from game components. Everything the game cannot build until its
@@ -557,6 +540,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             NastiesPerScreen,
             Input);
         Nasties.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
+
+        BuildTestModeKeys();
     }
 
     /// <summary>
@@ -785,11 +770,24 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
         if (Status == GameEngineStatus.StartingGraphicsLoaded)
         {
-            FadeUpTheLoadingScreen();
+            if (_loadingScreen.FadeUp())
+            {
+                Status = GameEngineStatus.Starting;
+                LoadContent();
+            }
         }
         else if (Status == GameEngineStatus.ContentLoaded)
         {
-            WaitToLeaveTheLoadingScreen();
+            // The hop back onto the main thread. The loading task raises ContentLoaded from the
+            // thread pool, and everything BuildComponentsNeedingLoadedContent builds has to be
+            // built here.
+            if (_loadingScreen.WaitForAKey())
+            {
+                ContentResourceManager_OnGameComponentStatusChanged(
+                    "Content loaded",
+                    FullyLoadedPercent,
+                    GameEngineStatus.Started);
+            }
         }
         else if (Status == GameEngineStatus.StartGame)
         {
@@ -797,60 +795,9 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         }
     }
 
-    /// <summary>
-    ///     Holds the finished loading screen until a key is pressed, fading the progress bar out
-    ///     while it waits. The wait is deliberate - it has been here since the first commit - so the
-    ///     boot screen is something to look at and leave rather than something that vanishes.
-    ///     <para>
-    ///         It is also the hop back onto the main thread. The loading task raises
-    ///         <see cref="GameEngineStatus.ContentLoaded" /> from the thread pool, and everything
-    ///         <see cref="BuildComponentsNeedingLoadedContent" /> builds has to be built here.
-    ///     </para>
-    /// </summary>
-    private void WaitToLeaveTheLoadingScreen()
-    {
-        // Fade out the progress bar background
-        if (_bootProgressBackgroundFade > 0)
-        {
-            _bootProgressBackgroundFade -= BootFadeStep;
-        }
-
-        if (_bootProgressBackgroundFade < 0)
-        {
-            _bootProgressBackgroundFade = 0;
-        }
-
-        if (Input.GetPressedKey() != Keys.None)
-        {
-            ContentResourceManager_OnGameComponentStatusChanged(
-                "Content loaded",
-                FullyLoadedPercent,
-                GameEngineStatus.Started);
-        }
-    }
-
-    private void FadeUpTheLoadingScreen()
-    {
-        _loadingScreenFade += BootFadeStep;
-
-        if (_loadingScreenFade > ColourLevels.Full)
-        {
-            _loadingScreenFade = ColourLevels.Full;
-        }
-
-        if (_loadingScreenFade == ColourLevels.Full)
-        {
-            Status = GameEngineStatus.Starting;
-            LoadContent();
-        }
-    }
-
     private void UpdateRunningGame(GameTime gameTime)
     {
-        TogglePauseIfAsked();
-        ToggleFullScreenIfAsked();
-        ToggleBackgroundsIfAsked();
-        SwitchGraphicsSetIfAsked();
+        _hotkeys.Update();
 
         HandleTestModeKeys();
 
@@ -861,174 +808,19 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     }
 
     /// <summary>
-    ///     The teleporter is deliberately not pausable - it is the one in-play screen where standing
-    ///     still is the point, so pausing it would do nothing and only confuse.
-    /// </summary>
-    private void TogglePauseIfAsked()
-    {
-        if (ScreenDirectory.Current == GameScreenType.Cheops ||
-            ScreenDirectory.Current == GameScreenType.MainGame ||
-            ScreenDirectory.Current == GameScreenType.PlanetCore ||
-            ScreenDirectory.Current == GameScreenType.Teleporter ||
-            ScreenDirectory.Current == GameScreenType.AccessBooth)
-        {
-            if (ScreenDirectory.Current != GameScreenType.Teleporter)
-            {
-                if (Input.GetPressedKey() == Session.PlayerKeys.Pause)
-                {
-                    Session.Paused = !Session.Paused;
-
-                    if (Session.Paused)
-                    {
-                        ContentResourceManager.GetSoundFxEngine().KillSounds(true);
-                    }
-                }
-            }
-        }
-    }
-
-    /// <remarks>
-    ///     A toggle rather than IsKeyDown: held down, that flipped fullscreen once per logic frame for
-    ///     as long as the key was held. The game pauses itself afterwards so the player does not die
-    ///     while the window is resizing - on every in-play screen but the teleporter, which cannot pause.
-    /// </remarks>
-    private void ToggleFullScreenIfAsked()
-    {
-        if (Input.GetPressedKey() == Keys.F12)
-        {
-            if (ScreenDirectory.Current is
-                GameScreenType.Cheops or
-                GameScreenType.MainGame or
-                GameScreenType.PlanetCore or
-                GameScreenType.AccessBooth)
-            {
-                // Automatically pause the game after switching to or from fullscreen so the player doesn't die unexpectantly
-                if (!Session.Paused)
-                {
-                    Session.Paused = true;
-                }
-            }
-
-            try
-            {
-                ToggleFullScreen();
-            }
-            catch { }
-        }
-    }
-
-    private void ToggleBackgroundsIfAsked()
-    {
-        if (Input.GetPressedKey() == Keys.F10)
-        {
-            if (ScreenDirectory.Current == GameScreenType.MainGame)
-            {
-                Presentation.DrawBackgrounds = !Presentation.DrawBackgrounds;
-            }
-        }
-    }
-
-    private void SwitchGraphicsSetIfAsked()
-    {
-        if (Input.GetPressedKey() == Keys.F8)
-        {
-            _graphicsSet.Switch();
-
-            // The original graphics have no backdrops drawn for them.
-            Presentation.DrawBackgrounds = _graphicsSet.IsRedrawn;
-
-            if (IntroSequence.SequenceStage == IntroSequenceStage.Finished || IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
-            {
-                ((MainGameScreen)ScreenDirectory.Get(GameScreenType.MainGame)).SpritesChanged();
-            }
-
-            ContentResourceManager.GetSoundFxEngine().PlaySound("AccessSuccess", 1f, false);
-        }
-    }
-
-    /// <summary>
-    ///     The debug keys: F1 kills the blob, F2 refills its lives, F3 runs the fade
-    ///     effect, the numeric keypad steps between screens, and K and L drive the shuttle-tag
-    ///     colour animations. Compiled out of a release build entirely by
-    ///     <see cref="ConditionalAttribute" />, which removes the calls to this rather than leaving
-    ///     a branch that is never taken, so a release has no path to them at all.
-    ///     <para>
-    ///         The keys that are not debug keys are handled elsewhere and stay live in both: F8
-    ///         swaps the artwork, F9 the scanlines, F10 the backdrops, F12 fullscreen, and the
-    ///         player's own pause and quit keys.
-    ///     </para>
+    ///     The debug keys, which only exist in a debug build - both this and
+    ///     <see cref="BuildTestModeKeys" /> are removed at the call site by
+    ///     <see cref="ConditionalAttribute" />, so a release has no path to them.
     /// </summary>
     [Conditional("DEBUG")]
     private void HandleTestModeKeys()
-    {
-        if (Input.KeyboardState.IsKeyDown(Keys.F1))
-        {
-            if (Player.BlobsState == BlobState.Normal)
-            {
-                Player.KillBlob(false, false);
-            }
-        }
+        => _testModeKeys?.Update();
 
-        // Give us some lives back (Testing)
-        if (Input.KeyboardState.IsKeyDown(Keys.F2))
-        {
-            Stats.BlobLives = TestModeLivesRestored;
-            Player.BlobsState = BlobState.Dead;
-        }
-
-        if (Input.GetPressedKey() == Keys.F3)
-        {
-            ScreenEffectEngine.ExecuteScreenEffect(ScreenEffectType.AdditiveFade, -1, 50, false);
-        }
-
-        if (ScreenDirectory.Current == GameScreenType.MainGame)
-        {
-            StepBetweenScreens();
-        }
-    }
-
-    private void StepBetweenScreens()
-    {
-        if (Input.KeyboardState.IsKeyDown(Keys.NumPad4))
-        {
-            if (GameScreens.ScreenNumber > 0)
-            {
-                GameScreens.ScreenNumber--;
-                ScreenDirectory.Get(ScreenDirectory.Current).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
-                Thread.Sleep(TestModeScreenStepDelayMs);
-            }
-        }
-
-        if (Input.KeyboardState.IsKeyDown(Keys.NumPad6))
-        {
-            if (GameScreens.ScreenNumber < WorldMap.LastScreenNumber)
-            {
-                GameScreens.ScreenNumber++;
-                ScreenDirectory.Get(ScreenDirectory.Current).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
-                Thread.Sleep(TestModeScreenStepDelayMs);
-            }
-        }
-
-        if (Input.KeyboardState.IsKeyDown(Keys.NumPad8))
-        {
-            if (GameScreens.ScreenNumber - WorldMap.ScreensAcross >= 0)
-            {
-                GameScreens.ScreenNumber -= WorldMap.ScreensAcross;
-                ScreenDirectory.Get(ScreenDirectory.Current).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
-                Thread.Sleep(TestModeScreenStepDelayMs);
-            }
-        }
-
-        if (Input.KeyboardState.IsKeyDown(Keys.NumPad2))
-        {
-            if (GameScreens.ScreenNumber + WorldMap.ScreensAcross <= WorldMap.LastScreenNumber)
-            {
-                GameScreens.ScreenNumber += WorldMap.ScreensAcross;
-                ScreenDirectory.Get(ScreenDirectory.Current).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
-                Thread.Sleep(TestModeScreenStepDelayMs);
-            }
-        }
-    }
+    /// <inheritdoc cref="HandleTestModeKeys" />
+    [Conditional("DEBUG")]
+    private void BuildTestModeKeys()
+        => _testModeKeys = new TestModeKeys(
+            Input, Player, Stats, ScreenEffectEngine, ScreenDirectory, GameScreens);
 
     private void UpdateActiveScreen(GameTime gameTime)
     {
@@ -1103,38 +895,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         Presentation.Recalculate(backBuffer.BackBufferWidth, backBuffer.BackBufferHeight);
     }
 
-    /// <summary>
-    ///     Go fullscreen at the resolution the desktop is already running at, so the picture is
-    ///     composed for the display it lands on instead of being stretched up from the windowed
-    ///     size. The game itself never changes size: it always composes at
-    ///     <see cref="CompositionSize.Width" /> x <see cref="CompositionSize.Height" /> and
-    ///     Presentation.Transform scales that onto whatever back buffer we end up with.
-    ///     HardwareModeSwitch has to be on. Borderless (the false case) looks like the friendlier
-    ///     option, but on macOS it produces a window clamped to the desktop area *below* the menu
-    ///     bar - a back buffer 39 points short, sat 39 points down the screen, with the picture
-    ///     centred inside that rather than inside the display.
-    /// </summary>
-    private void ToggleFullScreen()
-    {
-        _graphicsDeviceMgr.HardwareModeSwitch = true;
-
-        if (_graphicsDeviceMgr.IsFullScreen)
-        {
-            _graphicsDeviceMgr.PreferredBackBufferWidth = CompositionSize.Width;
-            _graphicsDeviceMgr.PreferredBackBufferHeight = CompositionSize.Height;
-        }
-        else
-        {
-            DisplayMode? desktop = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
-
-            _graphicsDeviceMgr.PreferredBackBufferWidth = desktop.Width;
-            _graphicsDeviceMgr.PreferredBackBufferHeight = desktop.Height;
-        }
-
-        _graphicsDeviceMgr.IsFullScreen = !_graphicsDeviceMgr.IsFullScreen;
-        _graphicsDeviceMgr.ApplyChanges();
-    }
-
     public void Draw(GameTime gameTime)
     {
         CalculatePresentationTransform();
@@ -1163,52 +923,11 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                 Overlays.Paused(PausedOverlayXPos, PausedOverlayYPos, ShapeDrawer, Font2);
             }
         }
-        else
+        else if (Status is GameEngineStatus.Starting or
+                 GameEngineStatus.StartingGraphicsLoaded or
+                 GameEngineStatus.ContentLoaded)
         {
-            // We're starting up so draw some nice progress bars and graphics etc.
-            // The viewport has to be the whole back buffer, not the composition size: the
-            // boot screen is scaled up into it by Presentation.Transform like everything else,
-            // and a viewport any smaller would just clip the result.
-            PresentationParameters? backBuffer = _graphicsDeviceMgr.GraphicsDevice.PresentationParameters;
-
-            var vp = new Viewport();
-            vp.X = 0;
-            vp.Y = 0;
-            vp.Width = backBuffer.BackBufferWidth;
-            vp.Height = backBuffer.BackBufferHeight;
-
-            _graphicsDeviceMgr.GraphicsDevice.Viewport = vp;
-            _graphicsDeviceMgr.GraphicsDevice.Clear(Presentation.ScreenClearColour);
-
-
-            if (Status == GameEngineStatus.Starting ||
-                Status == GameEngineStatus.StartingGraphicsLoaded ||
-                Status == GameEngineStatus.ContentLoaded)
-            {
-                _bootScreen.Begin(BlendState.Opaque, Presentation.Transform);
-                _bootScreen.DrawSpriteUnscaled(0, 0, 0, _loadingScreenFade);
-                _bootScreen.End();
-
-                _bootProgressBackground.Begin(BlendState.AlphaBlend, Presentation.Transform);
-                _bootProgressBackground.DrawSpriteUnscaled(0, BootProgressBackgroundXPos, BootProgressBackgroundYPos, _bootProgressBackgroundFade);
-                _bootProgressBackground.End();
-
-                // Draw the status percentage
-                _bootProgress.Begin(BlendState.AlphaBlend, Presentation.Transform);
-                int percentBarWidth = (int)(BootProgressBarSlices / (double)FullyLoadedPercent * PercentComplete);
-
-                for (int a = 0; a < percentBarWidth; a++)
-                {
-                    _bootProgress.DrawSpriteUnscaled(0, BootProgressBarXPos + a * BootProgressBarSliceSpacing, BootProgressBarYPos, _bootProgressBackgroundFade);
-                }
-
-                _bootProgress.End();
-                //Vector2 statusMessageSize = Font1.MeasureString(statusMessage);
-                //Font1.Begin(BlendState.AlphaBlend);
-                //Font1.WriteText((int)(1280 - statusMessageSize.X) / 2, 620, statusMessage, Color.White, ColourLevels.Full);
-                //Font1.End();
-
-            }
+            _loadingScreen.Draw(PercentComplete, FullyLoadedPercent);
         }
 
         // Screen effects compose over whatever was just drawn, and only exist once the game does

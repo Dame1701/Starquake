@@ -2,8 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -22,9 +20,6 @@ namespace Starquake.GameComponents.PresentationScreens;
 public class OptionsScreen : GameScreenBase, IGameScreen
 {
     private readonly GameSession _session;
-
-
-    #region IGameScreen Members
 
     private bool _definingKeys;
     private readonly SpriteCollection _backgroundImage;
@@ -314,7 +309,6 @@ public class OptionsScreen : GameScreenBase, IGameScreen
 
     public void Reset(object? data)
     {
-
     }
 
     public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
@@ -322,7 +316,4 @@ public class OptionsScreen : GameScreenBase, IGameScreen
         ScreenFade = 0;
         ScreenFadeSpeed = 5;
     }
-
-    #endregion
-
 }

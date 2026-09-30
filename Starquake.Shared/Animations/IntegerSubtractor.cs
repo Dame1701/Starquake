@@ -56,7 +56,7 @@ public class IntegerSubtractor : AnimationTrigger
         {
             if (Modifier > _finalValue)
             {
-                Modifier = Modifier - _stepSize;
+                Modifier -= _stepSize;
             }
 
             if (Modifier <= _finalValue)

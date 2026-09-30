@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -22,13 +21,9 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
 {
     private readonly Random _randomNumberGenerator;
 
-
-    #region IGameScreen Members
-
     private readonly SpriteCollection _backgroundImage;
     private readonly SpriteCollection _foregroundImage;
     private bool _fadeComplete;
-
 
     public ComputerReportScreen(
         ResourceManager resources,
@@ -127,10 +122,8 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
         _foregroundImage.End();
     }
 
-
     public void Reset(object? data)
     {
-
     }
 
     public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
@@ -139,7 +132,4 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
         ScreenFade = 0;
         ScreenFadeSpeed = 5;
     }
-
-    #endregion
-
 }

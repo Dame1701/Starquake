@@ -2,8 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
-using System.Collections.Generic;
 using Starquake.Structure;
 
 namespace Starquake.GameComponents;
@@ -45,16 +43,14 @@ public sealed class ScreenDirectory
     ///     draw run every frame regardless of what <see cref="Current" /> has been set to, and have
     ///     always simply skipped a screen they could not find.
     /// </summary>
-    public IGameScreen? CurrentScreen
-        => _screens.TryGetValue(Current, out IGameScreen? screen) ? screen : null;
+    public IGameScreen? CurrentScreen => _screens.GetValueOrDefault(Current);
 
     /// <summary>
     ///     Registers the component that draws one screen. Registering the same screen twice throws,
     ///     as the dictionary underneath always did - two components claiming one screen means one of
     ///     them would never be drawn and nothing would say so.
     /// </summary>
-    public void Add(GameScreenType gameScreen, IGameScreen screen)
-        => _screens.Add(gameScreen, screen);
+    public void Add(GameScreenType gameScreen, IGameScreen screen) => _screens.Add(gameScreen, screen);
 
     /// <summary>
     ///     The component that draws one screen. Throws rather than returning null: a screen asking
@@ -63,11 +59,8 @@ public sealed class ScreenDirectory
     /// </summary>
     public IGameScreen Get(GameScreenType gameScreen)
     {
-        if (!_screens.TryGetValue(gameScreen, out IGameScreen? screenToGet))
-        {
-            throw new InvalidOperationException($"There is no '{gameScreen}' screen.");
-        }
-
-        return screenToGet;
+        return !_screens.TryGetValue(gameScreen, out IGameScreen? screenToGet)
+            ? throw new InvalidOperationException($"There is no '{gameScreen}' screen.")
+            : screenToGet;
     }
 }

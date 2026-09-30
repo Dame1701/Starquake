@@ -20,7 +20,6 @@ namespace Starquake.GameComponents.PresentationScreens;
 
 public class GameCompleteScreen : GameScreenBase, IGameScreen
 {
-
     private readonly SpriteCollection _backgroundImage;
     private readonly CoreElements _elements;
     private readonly SpriteCollection _foregroundImage;
@@ -56,7 +55,6 @@ public class GameCompleteScreen : GameScreenBase, IGameScreen
 
     public void Reset(object? data)
     {
-
     }
 
     public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)

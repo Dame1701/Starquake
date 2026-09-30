@@ -6,7 +6,6 @@ namespace Starquake.Animations;
 
 public class Animation
 {
-
     private int _currentFrame;
 
     private int _delayCounter;

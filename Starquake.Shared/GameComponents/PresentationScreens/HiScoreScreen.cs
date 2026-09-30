@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -61,7 +60,6 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
 
     public void Reset(object? data)
     {
-
     }
 
     public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)

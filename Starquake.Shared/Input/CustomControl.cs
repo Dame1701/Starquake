@@ -45,21 +45,21 @@ public class CustomControl
         => _input.KeyboardState.IsKeyDown(PlayerKeySet.Up) ||
            PushedUp(_input.GamePadState);
 
-    public bool MovedDown()
-        => _input.KeyboardState.IsKeyDown(PlayerKeySet.Down) ||
-           PushedDown(_input.GamePadState);
+    public bool MovedDown() =>
+        _input.KeyboardState.IsKeyDown(PlayerKeySet.Down) ||
+        PushedDown(_input.GamePadState);
 
-    public bool MovedLeft()
-        => _input.KeyboardState.IsKeyDown(PlayerKeySet.Left) ||
-           PushedLeft(_input.GamePadState);
+    public bool MovedLeft() =>
+        _input.KeyboardState.IsKeyDown(PlayerKeySet.Left) ||
+        PushedLeft(_input.GamePadState);
 
-    public bool MovedRight()
-        => _input.KeyboardState.IsKeyDown(PlayerKeySet.Right) ||
-           PushedRight(_input.GamePadState);
+    public bool MovedRight() =>
+        _input.KeyboardState.IsKeyDown(PlayerKeySet.Right) ||
+        PushedRight(_input.GamePadState);
 
-    public bool HasFired()
-        => _input.KeyboardState.IsKeyDown(PlayerKeySet.Fire) ||
-           _input.GamePadState.Buttons.A == ButtonState.Pressed;
+    public bool HasFired() =>
+        _input.KeyboardState.IsKeyDown(PlayerKeySet.Fire) ||
+        _input.GamePadState.Buttons.A == ButtonState.Pressed;
 
     /// <summary>
     ///     The d-pad and the left stick both count, so a pad can be held either way round. A pad that is
