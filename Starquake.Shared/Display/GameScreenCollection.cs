@@ -306,7 +306,7 @@ public class GameScreenCollection : GameComponentBase
         {
             PreviousScreenNumber = _screenNumber;
             _screenNumber = value;
-            BuildScreenCollisionMap(true);
+            UpdateCollisionMap(true);
         }
     }
 
@@ -320,7 +320,7 @@ public class GameScreenCollection : GameComponentBase
     public override void Initialise(object? data)
     {
         // Setup Collision map, we're using 8 x 8 blocks for each collision area for improved accuracy
-        BuildScreenCollisionMap(true);
+        UpdateCollisionMap(true);
     }
 
     public int GetPercentageOfScreensVisited()
@@ -435,6 +435,20 @@ public class GameScreenCollection : GameComponentBase
     ///     Every tile on a screen that an item could sit on top of: solid enough to stand on, with a
     ///     clear space above it, and not one of the tiles that already mean something.
     /// </summary>
+    /// <remarks>
+    ///     There was a PowerUpIsInTheWay guard here, meant to stop a pick-up landing on the tile the
+    ///     power-up stands on. It could never fire: it compared the power-up's pixel location against
+    ///     a tile index, and with a 96-pixel tile and the 64-pixel lift an item is drawn at, the Y
+    ///     test has no solution for any row on the screen. It also read the power-up of the screen
+    ///     being displayed rather than the one being filled in.
+    ///
+    ///     Making it fire would not have helped. During a Reset the power-up it would read is the one
+    ///     from before this generation run, because PlaceScreenObjects calls this method before
+    ///     PlacePowerUpAndPickUp assigns the new one - so a live guard would exclude a tile chosen by
+    ///     the previous game. What actually keeps the two apart is PlacePowerUpAndPickUp taking the
+    ///     power-up's location out of this list before drawing a location for the pick-up, and this
+    ///     returns one location per tile, so removing the location removes the tile.
+    /// </remarks>
     private List<InteractiveItem> GetPotentialLocations(int screenNumber)
     {
         var toReturn = new List<InteractiveItem>();
@@ -448,12 +462,6 @@ public class GameScreenCollection : GameComponentBase
                 int tileImage = _gameScreens[screenNumber].ScreenTiles[x, y].TileImage;
 
                 if (tileImage < 0 || TilesNothingMayBePlacedOn.Contains(tileImage))
-                {
-                    continue;
-                }
-
-                // Check for powerups in the way - useful for pickup sweep
-                if (PowerUpIsInTheWay(x, y))
                 {
                     continue;
                 }
@@ -481,24 +489,6 @@ public class GameScreenCollection : GameComponentBase
         return toReturn;
     }
 
-    /// <summary>
-    ///     Whether the screen's power-up already occupies a tile.
-    /// </summary>
-    /// <remarks>
-    ///     Kept exactly as found, and both of its oddities are deliberate for now: it compares the
-    ///     power-up's pixel location against a tile index, and it reads the power-up of the screen
-    ///     currently being displayed rather than the one being filled in. Either could be a defect and
-    ///     neither belongs in a move.
-    /// </remarks>
-    private bool PowerUpIsInTheWay(int x, int y)
-    {
-        InteractiveItem? powerUpOnScreen = _gameScreens[_screenNumber].PowerUp;
-
-        return powerUpOnScreen != null &&
-               powerUpOnScreen.XLocation == x + 32 &&
-               powerUpOnScreen.YLocation == y + 32;
-    }
-
     public void SaveData()
     {
         byte[] gameScreensData = MessagePackSerializer.Serialize(_gameScreens);
@@ -523,24 +513,26 @@ public class GameScreenCollection : GameComponentBase
         //var newCollisionData = MessagePackSerializer.Deserialize<int[,,]>(collisionData);
     }
 
+    /// <summary>
+    ///     Rebuilds the collision map for the screen being shown.
+    /// </summary>
+    /// <param name="screenChanged">
+    ///     Whether this is a new screen rather than a change on the one already up. All it controls is
+    ///     the key-door cache: the doors are found once per screen and held.
+    /// </param>
+    /// <remarks>
+    ///     It used to control more, or appear to. The false path first removed the game-object tiles
+    ///     from the map, and the map was then replaced wholesale on the very next line, so that work
+    ///     was thrown away - and the removal walked the list with an index while removing from it, so
+    ///     it would have skipped every second match had it mattered. The two paths also differed in
+    ///     whether the screen's objects went straight into the map or into a list appended to it
+    ///     afterwards, which put the same tiles in the same order either way.
+    /// </remarks>
     public void UpdateCollisionMap(bool screenChanged)
     {
-        BuildScreenCollisionMap(screenChanged);
-    }
-
-    private void BuildScreenCollisionMap(bool screenChanged)
-    {
-        // Special cases such as jump platforms are held back and appended once the map is rebuilt
-        var collisionsToAppend = new List<CollisionTile>();
-
         if (screenChanged)
         {
             _keyLockDoors = null;
-        }
-
-        if (!screenChanged)
-        {
-            RemoveGameObjectCollisionTiles();
         }
 
         _gameScreens[ScreenNumber].CollisionMap = new List<CollisionTile>();
@@ -562,24 +554,7 @@ public class GameScreenCollection : GameComponentBase
             }
         }
 
-        AddScreenObjectCollisionTiles(screenChanged, collisionsToAppend);
-
-        _gameScreens[ScreenNumber].CollisionMap.AddRange(collisionsToAppend);
-    }
-
-    /// <summary>
-    ///     Game object collision tiles are about to be rebuilt, so the stale ones come off first.
-    /// </summary>
-    private void RemoveGameObjectCollisionTiles()
-    {
-        for (int a = 0; a < _gameScreens[ScreenNumber].CollisionMap.Count; a++)
-        {
-            if (_gameScreens[ScreenNumber].CollisionMap[a].TileImage == (int)CollisionObjectType.GameObject)
-            {
-                // Remove any game object collision tiles becuase we are about to update them
-                _gameScreens[ScreenNumber].CollisionMap.Remove(_gameScreens[ScreenNumber].CollisionMap[a]);
-            }
-        }
+        AddScreenObjectCollisionTiles();
     }
 
     /// <summary>
@@ -775,9 +750,9 @@ public class GameScreenCollection : GameComponentBase
     ///     The power-up, the pick-ups and the pyramid. On a screen change these go straight onto the map
     ///     just rebuilt; otherwise they are held back and appended to it.
     /// </summary>
-    private void AddScreenObjectCollisionTiles(bool screenChanged, List<CollisionTile> collisionsToAppend)
+    private void AddScreenObjectCollisionTiles()
     {
-        List<CollisionTile> objectCollisions = screenChanged ? _gameScreens[ScreenNumber].CollisionMap : collisionsToAppend;
+        List<CollisionTile> objectCollisions = _gameScreens[ScreenNumber].CollisionMap;
 
         InteractiveItem? powerUp = _gameScreens[ScreenNumber].PowerUp;
         if (powerUp != null)

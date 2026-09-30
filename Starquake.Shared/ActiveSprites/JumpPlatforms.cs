@@ -15,6 +15,13 @@ namespace Starquake.ActiveSprites;
 
 public class JumpPlatforms
 {
+    /// <summary>
+    ///     What <see cref="GetNewJumpPlatform" /> answers when there is no room for one. It has to be
+    ///     well below any real answer rather than -1, because the position it normally returns can
+    ///     itself be negative while the blob is crossing between screens.
+    /// </summary>
+    public const int NoRoomForPlatform = -1000;
+
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsDeviceManager _graphicsDeviceManager;
     private readonly GraphicsSet _graphicsSet;
@@ -48,8 +55,7 @@ public class JumpPlatforms
         {
             if (_gameScreens.CheckRectangles(xPos, position.Y - 64, width, height, true) >= 0)
             {
-                // If there is a collision, return a failure int i.e. -1000, needs to be a big number because we can have minus amounts when changing screen
-                return -1000;
+                return NoRoomForPlatform;
             }
         }
 

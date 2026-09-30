@@ -745,18 +745,13 @@ public class Blob : GameComponentBase
                 {
                     if (!_blobOnShuttlePad)
                     {
-                        int temp = _blobJumpPlatformEngine.GetNewJumpPlatform(_blobXPos, _blobYPos,
+                        int newYPos = _blobJumpPlatformEngine.GetNewJumpPlatform(_blobXPos, _blobYPos,
                             BlobWidth,
                             BlobHeight, true);
 
-                        if (temp == -1)
+                        if (newYPos != JumpPlatforms.NoRoomForPlatform)
                         {
-                        }
-
-                        // If -1 is returned from this routine, the collision check failed
-                        if (temp != -1000)
-                        {
-                            _blobYPos = temp;
+                            _blobYPos = newYPos;
 
                             _resources.GetSoundFxEngine()
                                 .PlaySound("BlobJumps", 0.3f, false);
