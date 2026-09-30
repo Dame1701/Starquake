@@ -90,10 +90,10 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
         {
             if (_screenReadWait + new TimeSpan(0, 0, 1) < DateTime.Now)
             {
-                GameEngine.GetGameScreen(GameScreenType.MainGame).ScreenFade = 40;
-                GameEngine.GetGameScreen(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.AccessBooth, Success);
+                GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
+                GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.AccessBooth, Success);
 
-                GameEngine.CurrentGameScreen = GameScreenType.MainGame;
+                GameEngine.ScreenDirectory.Current = GameScreenType.MainGame;
             }
         }
     }

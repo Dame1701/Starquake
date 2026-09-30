@@ -143,8 +143,8 @@ public class OptionsScreen : GameScreenBase, IGameScreen
         }
 
         GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.Presentation.ScreenClearColour);
-        GameEngine.CurrentGameScreen = GameScreenType.ComputerReport;
-        GameEngine.GetGameScreen(GameScreenType.ComputerReport).PerformPostScreenChangeActions(GameScreenType.Options, null);
+        GameEngine.ScreenDirectory.Current = GameScreenType.ComputerReport;
+        GameEngine.ScreenDirectory.Get(GameScreenType.ComputerReport).PerformPostScreenChangeActions(GameScreenType.Options, null);
     }
 
     /// <summary>

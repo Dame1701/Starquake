@@ -40,10 +40,10 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
         if (ToggleKeys.GetPressedKey() != Keys.None)
         {
             GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.Presentation.ScreenClearColour);
-            GameEngine.CurrentGameScreen = GameScreenType.MainGame;
+            GameEngine.ScreenDirectory.Current = GameScreenType.MainGame;
 
-            GameEngine.GetGameScreen(GameScreenType.MainGame).Reset(null);
-            GameEngine.GetGameScreen(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.ComputerReport, false);
+            GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).Reset(null);
+            GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.ComputerReport, false);
         }
 
         if (ScreenFade >= ColourLevels.Full)

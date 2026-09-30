@@ -49,8 +49,8 @@ public class GameCompleteScreen : GameScreenBase, IGameScreen
         if (ToggleKeys.GetPressedKey() != Keys.None)
         {
             GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.Presentation.ScreenClearColour);
-            GameEngine.CurrentGameScreen = GameScreenType.GameOver;
-            GameEngine.GetGameScreen(GameScreenType.GameOver).PerformPostScreenChangeActions(GameScreenType.GameComplete, null);
+            GameEngine.ScreenDirectory.Current = GameScreenType.GameOver;
+            GameEngine.ScreenDirectory.Get(GameScreenType.GameOver).PerformPostScreenChangeActions(GameScreenType.GameComplete, null);
         }
 
         base.Update(gameTime);

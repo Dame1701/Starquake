@@ -260,15 +260,15 @@ public class TeleportScreen : GameComponentBase, IGameScreen
                 GameEngine.Player.BlobYPos = teleporterLocation[0].Y + 32;
             }
 
-            GameEngine.GetGameScreen(GameScreenType.MainGame).ScreenFade = 0;
+            GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).ScreenFade = 0;
 
             // only do this if the teleport was successful
             if (_codeRecognised && _currentCode != _previousCode.ToUpper())
             {
-                GameEngine.GetGameScreen(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.Teleporter, null);
+                GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.Teleporter, null);
                 GameEngine.GameScreens.UpdateCollisionMap(true);
             }
-            GameEngine.CurrentGameScreen = GameScreenType.MainGame;
+            GameEngine.ScreenDirectory.Current = GameScreenType.MainGame;
         }
     }
 

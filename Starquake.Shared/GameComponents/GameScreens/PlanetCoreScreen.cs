@@ -208,9 +208,9 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
         if (!_replacingElements && _entryTime > CoreVisitFrames)
         {
             GameEngine.GameScreens.ScreenNumber = WorldMap.CoreApproachScreenNumber;
-            GameEngine.CurrentGameScreen = GameScreenType.MainGame;
+            GameEngine.ScreenDirectory.Current = GameScreenType.MainGame;
             GameEngine.Player.BlobXPos = GameEngine.GameScreens.ScreenWidth - GameEngine.Player.BlobWidth;
-            GameEngine.GetGameScreen(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.PlanetCore, null);
+            GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.PlanetCore, null);
 
             _justEnteredCore = true;
             GameEngine.Presentation.BackgroundColour = Color.Black;
@@ -218,8 +218,8 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
         else if (!_replacingElements && GameEngine.Elements.GetElementsReplacedCount() == CoreElementsToReplace)
         {
             // Finished the game!
-            GameEngine.CurrentGameScreen = GameScreenType.GameComplete;
-            GameEngine.GetGameScreen(GameScreenType.GameComplete).PerformPostScreenChangeActions(GameScreenType.MainGame, null);
+            GameEngine.ScreenDirectory.Current = GameScreenType.GameComplete;
+            GameEngine.ScreenDirectory.Get(GameScreenType.GameComplete).PerformPostScreenChangeActions(GameScreenType.MainGame, null);
         }
         else
         {

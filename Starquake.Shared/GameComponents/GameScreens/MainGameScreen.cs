@@ -134,7 +134,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
 
         if (GameEngine.GameScreens.ScreenNumber == WorldMap.CoreScreenNumber)
         {
-            GameEngine.CurrentGameScreen = GameScreenType.PlanetCore;
+            GameEngine.ScreenDirectory.Current = GameScreenType.PlanetCore;
         }
 
         if (triggeringScreen == GameScreenType.Teleporter)
@@ -281,16 +281,16 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         // Test quit to game over screen
         if (ToggleKeys.GetPressedKey() == GameEngine.PlayerKeys.Quit)
         {
-            GameEngine.CurrentGameScreen = GameScreenType.GameOver;
-            GameEngine.GetGameScreen(GameScreenType.GameOver)
+            GameEngine.ScreenDirectory.Current = GameScreenType.GameOver;
+            GameEngine.ScreenDirectory.Get(GameScreenType.GameOver)
                 .PerformPostScreenChangeActions(GameScreenType.MainGame, null);
         }
 
         // Test game complete screen
         if (ToggleKeys.GetPressedKey() == Keys.W)
         {
-            GameEngine.CurrentGameScreen = GameScreenType.GameComplete;
-            GameEngine.GetGameScreen(GameScreenType.GameComplete)
+            GameEngine.ScreenDirectory.Current = GameScreenType.GameComplete;
+            GameEngine.ScreenDirectory.Get(GameScreenType.GameComplete)
                 .PerformPostScreenChangeActions(GameScreenType.MainGame, null);
         }
 
@@ -396,9 +396,9 @@ public class MainGameScreen : GameComponentBase, IGameScreen
             GameEngine.ContentResourceManager.GetSoundFxEngine().DisablePeriodicBackgroundSounds(true);
 
             // Change to gameover screen
-            GameEngine.GetGameScreen(GameScreenType.GameOver)
+            GameEngine.ScreenDirectory.Get(GameScreenType.GameOver)
                 .PerformPostScreenChangeActions(GameScreenType.MainGame, null);
-            GameEngine.CurrentGameScreen = GameScreenType.GameOver;
+            GameEngine.ScreenDirectory.Current = GameScreenType.GameOver;
         }
     }
 

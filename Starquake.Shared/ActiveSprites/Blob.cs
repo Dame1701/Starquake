@@ -773,8 +773,8 @@ public class Blob : GameComponentBase
                 if (accessingCheops)
                 {
                     // Do something with the pyramid.....
-                    GameEngine.GetGameScreen(GameScreenType.Cheops).Reset(null);
-                    GameEngine.CurrentGameScreen = GameScreenType.Cheops;
+                    GameEngine.ScreenDirectory.Get(GameScreenType.Cheops).Reset(null);
+                    GameEngine.ScreenDirectory.Current = GameScreenType.Cheops;
                 }
                 else
                 {
@@ -1266,9 +1266,9 @@ public class Blob : GameComponentBase
                 if (_tileRightBlob.XPosition >= 24 &&
                     _tileRightBlob.YPosition == 32)
                 {
-                    GameEngine.CurrentGameScreen = GameScreenType.Teleporter;
+                    GameEngine.ScreenDirectory.Current = GameScreenType.Teleporter;
 
-                    GameEngine.GetGameScreen(GameScreenType.Teleporter).Reset(null);
+                    GameEngine.ScreenDirectory.Get(GameScreenType.Teleporter).Reset(null);
                     _blobXPos = _tileRightBlob.MapXPosition * TileMetrics.TileWidth + TeleportBoothXOffset;
                     BlobFrame = BlobWalkRightFirstFrame;
                 }
@@ -1288,12 +1288,12 @@ public class Blob : GameComponentBase
             if (_tileLeftBlob.XPosition <= 46 &&
                 _tileLeftBlob.YPosition == 32)
             {
-                GameEngine.GetGameScreen(GameScreenType.AccessBooth).Reset(new object[]
+                GameEngine.ScreenDirectory.Get(GameScreenType.AccessBooth).Reset(new object[]
                 {
                     Direction.Left,
                     _tileRightBlob.MapXPosition
                 });
-                GameEngine.CurrentGameScreen = GameScreenType.AccessBooth;
+                GameEngine.ScreenDirectory.Current = GameScreenType.AccessBooth;
             }
         }
 
@@ -1303,12 +1303,12 @@ public class Blob : GameComponentBase
             if (_tileRightBlob.XPosition >= 24 &&
                 _tileRightBlob.YPosition == 32)
             {
-                GameEngine.GetGameScreen(GameScreenType.AccessBooth).Reset(new object[]
+                GameEngine.ScreenDirectory.Get(GameScreenType.AccessBooth).Reset(new object[]
                 {
                     Direction.Right,
                     _tileLeftBlob.MapXPosition
                 });
-                GameEngine.CurrentGameScreen = GameScreenType.AccessBooth;
+                GameEngine.ScreenDirectory.Current = GameScreenType.AccessBooth;
             }
         }
     }

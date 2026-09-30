@@ -45,7 +45,7 @@ public class GameOverScreen : GameScreenBase, IGameScreen
     public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
     {
         GameEngine.ContentResourceManager.GetSoundFxEngine().DisablePeriodicBackgroundSounds(true);
-        var mainGameScreen = GameEngine.GetGameScreen(GameScreenType.MainGame);
+        var mainGameScreen = GameEngine.ScreenDirectory.Get(GameScreenType.MainGame);
         _playTime = ((MainGameScreen)mainGameScreen).GetPlayTime();
 
         _fadeComplete = false;
@@ -64,8 +64,8 @@ public class GameOverScreen : GameScreenBase, IGameScreen
             };
 
             GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.Presentation.ScreenClearColour);
-            GameEngine.CurrentGameScreen = GameScreenType.HiScores;
-            GameEngine.GetGameScreen(GameScreenType.HiScores).PerformPostScreenChangeActions(GameScreenType.GameOver, playersScore);
+            GameEngine.ScreenDirectory.Current = GameScreenType.HiScores;
+            GameEngine.ScreenDirectory.Get(GameScreenType.HiScores).PerformPostScreenChangeActions(GameScreenType.GameOver, playersScore);
         }
         base.Update(gameTime);
     }

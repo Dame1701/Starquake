@@ -266,8 +266,8 @@ public class CheopsScreen : GameComponentBase, IGameScreen
                 }
                 else // Kick you out
                 {
-                    GameEngine.GetGameScreen(GameScreenType.MainGame).ScreenFade = 40;
-                    GameEngine.CurrentGameScreen = GameScreenType.MainGame;
+                    GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
+                    GameEngine.ScreenDirectory.Current = GameScreenType.MainGame;
                 }
             }
         }
@@ -417,8 +417,8 @@ public class CheopsScreen : GameComponentBase, IGameScreen
         if (Keyboard.GetState().IsKeyDown(Keys.D1))
         {
             GameEngine.Player.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[0].Type;
-            GameEngine.GetGameScreen(GameScreenType.MainGame).ScreenFade = 40;
-            GameEngine.CurrentGameScreen = GameScreenType.MainGame;
+            GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
+            GameEngine.ScreenDirectory.Current = GameScreenType.MainGame;
             GameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
             GameEngine.GameScreens.UpdateCollisionMap(false);
             GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
@@ -426,8 +426,8 @@ public class CheopsScreen : GameComponentBase, IGameScreen
         else if (Keyboard.GetState().IsKeyDown(Keys.D2))
         {
             GameEngine.Player.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[1].Type;
-            GameEngine.GetGameScreen(GameScreenType.MainGame).ScreenFade = 40;
-            GameEngine.CurrentGameScreen = GameScreenType.MainGame;
+            GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
+            GameEngine.ScreenDirectory.Current = GameScreenType.MainGame;
             GameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
             GameEngine.GameScreens.UpdateCollisionMap(false);
             GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
@@ -435,8 +435,8 @@ public class CheopsScreen : GameComponentBase, IGameScreen
         else if (Keyboard.GetState().IsKeyDown(Keys.D3))
         {
             GameEngine.Player.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[2].Type;
-            GameEngine.GetGameScreen(GameScreenType.MainGame).ScreenFade = 40;
-            GameEngine.CurrentGameScreen = GameScreenType.MainGame;
+            GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
+            GameEngine.ScreenDirectory.Current = GameScreenType.MainGame;
             GameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
             GameEngine.GameScreens.UpdateCollisionMap(false);
             GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
@@ -444,8 +444,8 @@ public class CheopsScreen : GameComponentBase, IGameScreen
         else if (Keyboard.GetState().IsKeyDown(Keys.D4))
         {
             GameEngine.Player.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[3].Type;
-            GameEngine.GetGameScreen(GameScreenType.MainGame).ScreenFade = 40;
-            GameEngine.CurrentGameScreen = GameScreenType.MainGame;
+            GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
+            GameEngine.ScreenDirectory.Current = GameScreenType.MainGame;
             GameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
             GameEngine.GameScreens.UpdateCollisionMap(false);
             GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
@@ -453,8 +453,8 @@ public class CheopsScreen : GameComponentBase, IGameScreen
         else if (Keyboard.GetState().IsKeyDown(Keys.D5))
         {
             GameEngine.Player.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[4].Type;
-            GameEngine.GetGameScreen(GameScreenType.MainGame).ScreenFade = 40;
-            GameEngine.CurrentGameScreen = GameScreenType.MainGame;
+            GameEngine.ScreenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
+            GameEngine.ScreenDirectory.Current = GameScreenType.MainGame;
             GameEngine.GameScreens.CurrentGameScreenData.CheopsPyramid = null;
             GameEngine.GameScreens.UpdateCollisionMap(false);
             GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);

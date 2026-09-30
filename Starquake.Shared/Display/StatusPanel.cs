@@ -387,7 +387,7 @@ public class StatusPanel : GameComponentBase
             if (!GameEngine.IntroSequence.SequenceRunning || GameEngine.IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
             {
                 // Delete Blob'ss energy one bar every 4 seconds, but only if we're not in a teleporter
-                if (GameEngine.CurrentGameScreen == GameScreenType.MainGame)
+                if (GameEngine.ScreenDirectory.Current == GameScreenType.MainGame)
                 {
                     if (!_removeEnergyTimerStarted)
                     {
