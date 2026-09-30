@@ -1,221 +1,166 @@
 ﻿# Putting the game on the nullable standard
 
-A work plan, written to be picked up cold. Everything needed to start is in this file.
+**Done.** `Starquake.Shared` has `<Nullable>enable</Nullable>` in its `.csproj`, the solution
+builds at 0 warnings and 0 errors, and no file carries a `#nullable enable` directive any more.
+Twenty three commits, `2568943` through `15eb567`.
 
-## The goal, and the one rule
+Kept because the reasoning is worth having: the rule the conversion followed, what the warnings
+turned out to be, the traps that cost time, the bugs it turned up, and the one question it
+deliberately left open.
 
-`Starquake.Shared` is the last project with `<Nullable>` off. Turning it on reports 246
-warnings, because the code was written before nullable reference types existed and so never
-says what may be null. The job is to make it say so.
+## The rule it followed
 
-**The rule: no `null!`, and no `?` added just to silence a warning.** Both of those tell the
-compiler to stop asking without answering the question, which is the whole point of the
-exercise. A `?` goes on a member only when null genuinely means something — "this screen has
-no power-up" — and every such member should have callers that check it. If nothing checks it,
-it is not nullable, and the fix is to make it non-null rather than to annotate it.
+**No `null!`, and no `?` added just to silence a warning.** Both tell the compiler to stop
+asking without answering the question. A `?` went on a member only where null genuinely means
+something and callers check it. Where nothing checked, the member was made non-null instead.
 
-This is not a rewrite. It is about 90 field declarations and 40 construction sites across 35
-files, plus roughly ten members that simply get deleted. Field *use* sites do not change: a
-field keeps its name whether the constructor sets it or `LoadContent` does.
+The rule held. There is no `null!` anywhere in our own code, and the one place it was reached
+for — casting the power up type in `StatusPanel` — became a check that throws instead.
 
-## Work one file at a time, not one project at a time
+## What the 246 warnings actually were
 
-Do **not** set `<Nullable>enable</Nullable>` in `Starquake.Shared.csproj` until the very end.
-Instead put `#nullable enable` at the top of a single file, fix that file, and commit. The
-build stays at zero warnings the whole way through, every commit is reviewable, and anything
-that breaks the game bisects to one class.
+Almost none were a question about null. They were the same few shapes repeated:
 
-When the last file has the directive, move the setting into the `.csproj` and delete the
-directives in one final commit.
+**A member assigned by a second phase that ran immediately after the first.** The dominant case,
+about ninety fields. `LoadContent` or `Initialise` was called on the line after the constructor,
+so the half-built state the pattern exists to allow never lasted long enough for anyone to
+observe. Folding each into the constructor made the field `readonly` and the warning went with
+the method.
 
-## The three techniques
+**A member nothing ever set.** `XnaFont` and `ImageFont` were whole types reachable only through
+one such field. `ColourFaderAnimation.Name` had five `ColourAnimationEngine` overloads that
+existed only to look animations up by it, so their loops could never match. Deleting beat
+annotating, and it deleted the methods too.
 
-**1. Delete it.** Some members are never assigned anywhere and never read. `XnaFont` is the
-clearest case: the entire type is reachable only through `GameEngine.TextWriter`, a field that
-is never assigned and never read. Deleting beats annotating.
+**A lookup returning null for a name that was simply wrong.** `ResourceManager`'s three,
+`ContentList.GetContent`, `ScreenEffectEngine.GetRenderViewPort`, `GameEngine.GetGameScreen`.
+No caller checked — the 380 `GetSpriteCollection` calls dereference on the spot — so a wrong
+name surfaced as a null reference inside a draw call rather than as the missing registration it
+was. They throw now.
 
-**2. `required` with an object initialiser.** For a member the *owner* fills in straight after
-construction — `BouncingParticle.Fireball`, set by `BlobDeathAnimation.LoadContent`, or
-`ContinuousParticleEffect.MercuryParticleEffect`, set by `ParticleEngine`:
+**A lookup returning null for an empty result.** `GameScreenCollection`'s four tile lookups and
+`Blob.GetCollisionObjects` returned null rather than an empty list, so every caller asked twice:
+once for null, once for the count. They return empty collections.
+
+**A member that really was optional.** The minority, and they kept their `?`: the periodic sound
+timer, a screen's teleport code, the tiles around Blob, every event with no obliged subscriber,
+`StatusPanel`'s inventory before Blob has moved.
+
+## The one place the pattern was structural
+
+Six of `GameEngine`'s fields — `GameScreens`, `Player`, `ColourAnimationEngine`,
+`BreakableBridgesEngine`, `ScreenEffectEngine` and the main game screen — cannot be
+constructor-set by any reordering, because each needs resources that load on a background
+worker. This is the case this plan expected to solve by moving the composition root and could
+not.
+
+Annotating them nullable was measured rather than argued about: **187 warnings across twenty
+files**, because of several hundred readers only two ever check, and both of those are defensive
+rather than meaningful. So each is a private nullable field behind one non-null property:
 
 ```csharp
-public required IStandardParticleEffect Fireball { get; init; }
+private GameScreenCollection? _gameScreens;
+public GameScreenCollection GameScreens => NotBeforeContentLoads(_gameScreens);
 ```
 
-and the owner constructs with `new BouncingParticle(engine, 0) { Fireball = …, SparkEffect = … }`.
-Honest, non-null, no bang. The cost is moving the construction to where the value is known,
-which usually means out of a constructor and into `LoadContent`.
+The `?` is on a field where null genuinely means "content is still loading" and it *is* checked,
+once, by the property — which fails with the name of the thing asked for too early instead of a
+null reference somewhere further on. Callers are unchanged and the public surface tells the
+truth.
 
-**3. Pass content to the constructor.** The main group. A component is currently constructed
-empty and filled later by `LoadContent` or `Initialise`. Give the constructor what it needs and
-make the field `readonly`. The object cannot exist in a half-built state, so the field cannot be
-null, and the two-phase pattern disappears with the warning.
+`DefineContent` and `Initialise` were a different problem wearing the same warning: both already
+ran inside `GameHost.Initialize` immediately after the constructor, so the constructor calls them
+itself and they declare what they populate with `[MemberNotNull]`, which the compiler checks.
+`JumpPlatform.Reset` and `Nasty.CheckSpritesInUse` use the same attribute for the one field each
+genuinely does re-assign per allocation.
 
-Where a member really is optional, leave it `?` and make sure callers check. `GameScreenData`
-is the worked example, in commit `67eb015`: `ScreenTiles` and `CollisionMap` became non-nullable
-because nothing ever checked them, while `PickUps` and `PowerUp` stayed nullable because seven
-call sites do.
-
-## Order of work
-
-Leaf classes first, so that by the time `GameEngine` is converted everything it composes already
-has honest signatures. `GameEngine` is last and is the only genuinely hard one: `DefineContent()`
-at line 411 constructs everything and a separate private `LoadContent()` at line 782 runs later,
-so making its fields constructor-set means reordering the composition root.
-
-| Stage | Files | Members | Notes |
-| --- | --- | --- | --- |
-| ~~1. Delete the dead~~ | `Fonts/XnaFont.cs`, `Fonts/XnaFontUv.cs`, `GameEngine.TextWriter` | ~10 | **Done**, `2568943` |
-| ~~2. Owner-assigned~~ | the four `Particles/*.cs`, `BouncingParticle.cs` | ~10 | **Done**, `abd14e0` |
-| ~~3. Leaf classes~~ | 30 files | ~50 | **Done**, `e536e79`…`d6ca5c6` |
-| ~~4. Mid-size~~ | `JumpPlatform`, `Nasty`, `ElectricityGatesAndNodesEngine`, `PlanetCoreScreen`, `TeleportScreen`, `GameScreenCollection` | 76 | **Done**, `7087eae`…`1703992` |
-| ~~5. `Blob.cs`~~ | 1 | 27 | **Done**, `2086031` |
-| 6. `GameEngine.cs` and what only it can settle | `GameEngine.cs` (40), `IntroSequence.cs` (1), `MainGameScreen.cs` (2), `TestScreen.cs` (2) | 45 | The composition root; all that is left |
-| 7. Flip the project | `Starquake.Shared.csproj` | — | Remove all `#nullable enable` directives |
-
-`IntroSequence` was in stage 3 and is not any more. Its `_mainScreen` is set by
-`Reset(MainGameScreen)` and then dereferenced unchecked at twenty sites, so the honest fix is
-the constructor — but `IntroSequence` is built in `GameEngine.Initialise` and `MainGameScreen`
-in the `GameEngineStatus.Started` handler, so that means reordering the composition root, which
-is stage 6's job. `MainGameScreen` and `TestScreen` are there for a smaller reason: their
-`Reset` and `PerformPostScreenChangeActions` need to match `IGameScreen`'s optional data
-parameter, which is a one-line change each once their file is converted.
-
-To regenerate the member list at any point, add `<Nullable>enable</Nullable>` to
-`Starquake.Shared.csproj`, run the build below, then **revert the csproj** — it is a
-measurement, not a change:
-
-```bash
-dotnet build Starquake.Shared/Starquake.Shared.csproj -p:TargetFramework=net9.0 \
-  --no-incremental -v n --nologo 2>&1 \
-  | grep -oE "/Users/[^(]+\([0-9]+,[0-9]+\): warning CS[0-9]+: [^[]*" | sort -u
-```
-
-## Verifying each step
+## Verifying it
 
 There are **no tests in this repository**. `TestScreen.cs` is a game screen, not a test project.
-The only safety nets are a clean build and launching the game, so run both every time:
 
 ```bash
-dotnet build Starquake.sln -v q --nologo              # must end: 0 Warning(s), 0 Error(s)
+dotnet build Starquake.sln --no-incremental -v q --nologo   # must end: 0 Warning(s), 0 Error(s)
+dotnet build Starquake.Mac/Starquake.Mac.csproj -v q --nologo        # refills Content, see below
 timeout 12 dotnet run --project Starquake.Mac/Starquake.Mac.csproj --no-build
 # exit code 124 means it ran the full 12s without throwing; any other code, read the output
 ```
 
-The smoke run matters more than it looks: content loading happens at startup, so a broken
-constructor or a missing resource shows up immediately rather than at the first draw.
+**Use `--no-incremental` for any warning check.** An incremental build of an edited tree
+reported `0 Warning(s)` while a clean build of the same tree reported three. Two `dotnet build`
+invocations in one command line is enough to do it: the second is a no-op and prints a count
+that belongs to nothing.
+
+**The twelve second run only proves content loads.** It stops on the boot screen waiting for a
+keypress, and everything the engine builds after that — every screen, Blob, the colour animation
+and screen effect engines — is past it. To reach them, temporarily replace the keypress test at
+the "Wait for a keypress before leaving the loading screen" comment with `if (true)`, run for
+twenty seconds and check the log has no exceptions. Put it back before committing. Stages 4, 5
+and 6 were all verified this way and it is the only reason their reordering can be trusted.
+
+Past that the game sits on the options screen, and `GameScreens.Reset()` — which places every
+pickup, powerup and access code — needs a keypress to start a game. Nothing automated drives
+that, so **no gameplay is covered by any of this**. A question about the screen data is better
+answered by a temporary probe in a constructor that runs at load time, which is how the access
+booth count below was settled.
 
 ## Traps found the hard way
 
-**Do not run `jb cleanupcode`.** It was tried on this solution and produced 34 build errors: it
-strips `using MessagePack;` from the `SharedLibs` serialisation types while leaving
-`[MessagePackObject]` and `[Key]` behind. It also cannot do the conversions anyone would want it
-for — zero `for`→`foreach`, zero primary constructors — it only reformats. `jb inspectcode` is
-fine and is what found this work.
-
-**The measurement build empties the content output.** The `--no-incremental` build above
-deletes `Starquake.Mac/bin/Debug/net9.0/Content/Graphics` and MGCB's cache then believes it is
-still up to date, so the next `--no-build` smoke run dies with a missing `BootScreen2.xnb`. It
-looks exactly like a broken constructor and is not. Rebuild the head project without
-`--no-build` once to refill it:
+**A solution build will not refill the content folder.** An `--no-incremental` build deletes
+`Starquake.Mac/bin/Debug/net9.0/Content/Graphics` and MGCB's cache then believes it is up to
+date, so the next `--no-build` run dies on a missing `BootScreen2.xnb` and looks exactly like a
+broken constructor. A full solution build succeeds, includes that project, and leaves the folder
+empty anyway. Only building the head project on its own puts it back:
 
 ```bash
 dotnet build Starquake.Mac/Starquake.Mac.csproj -v q --nologo
+ls Starquake.Mac/bin/Debug/net9.0/Content/Graphics | wc -l   # 0 means this is what happened
 ```
 
-A solution build will **not** put it back, even though it succeeds and includes that project:
-`ls Starquake.Mac/bin/Debug/net9.0/Content/Graphics | wc -l` still gives 0. It has to be the
-head project on its own. Worth checking that count whenever a smoke run dies on a missing
-`.xnb`, before reading anything into the stack trace.
+This cost four confusing crashes across the conversion, three of them after it was written down.
+
+**Do not run `jb cleanupcode`.** It produced 34 build errors: it strips `using MessagePack;`
+from the `SharedLibs` serialisation types while leaving `[MessagePackObject]` and `[Key]` behind.
+It also cannot do the conversions anyone would want it for — zero `for`→`foreach`, zero primary
+constructors — it only reformats. `jb inspectcode` is fine and is what found this work.
 
 **File encodings differ by project.** Our own sources are UTF-8 **with BOM** and LF endings; read
 and write them as `utf-8-sig`. `ProjectMercury` sources are **Latin-1** and will raise
 `UnicodeDecodeError` if opened as UTF-8. This is why `grep` treats some Mercury files as binary.
 
-**`ProjectMercury` is out of scope.** It is a 2009 fork kept deliberately unmodernised, with
-`<Nullable>disable</Nullable>` and an explanatory comment in both its `.csproj` files. Leave it
-alone.
+**`ProjectMercury` is out of scope.** A 2009 fork kept deliberately unmodernised, with
+`<Nullable>disable</Nullable>` and an explanatory comment in both its `.csproj` files.
 
 **`ScreenEditor/Program.cs` `BuildAvaloniaApp` must stay public.** Nothing in the solution calls
 it except `Main`, so every inspection suggests making it private. The Avalonia visual designer
-finds it by name at runtime. The same caution applies to anything reachable only from `.axaml` —
-check the XAML before tightening a member in `ScreenEditor`.
+finds it by name at runtime. The same caution applies to anything reachable only from `.axaml`.
 
-**A resource name that is not registered now throws.** `ParticleEngine` raises
-`InvalidOperationException` rather than returning null. If a new effect is added, register it in
-`GameEngine.DefineContent` or the game will fail loudly at startup — which is the intent.
+**A name that is not registered now throws.** If a new sprite, sound, data resource or particle
+effect is added, register it in `GameEngine.DefineContent` or the game fails loudly at startup,
+which is the intent. That is what caught the two misspelt names below.
 
-## Conventions
+## Bugs it turned up
 
-Commit messages are imperative and sentence case with no prefix, and the body explains *why*,
-not *what* — see `git log` for this session's six commits. End every commit message with:
+Five, all pre-existing, all fixed where they were found. Every one is the same shape: a member
+nothing sets is usually a member nothing reads, but not always.
 
-```
-Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
-```
+- **`CustomControl` dropped the `PlayerKeySet` its constructor was handed**, assigning only the
+  engine reference. So the key set was null until the player redefined their keys on the options
+  screen, while `MovedUp`, `MovedDown`, `MovedLeft`, `MovedRight` and `HasFired` all read
+  straight off it with no guard.
+- **`PickupsIlluminatedName` was spelt `"PickupsIlluminate"`**, missing its final d, and only the
+  F8 graphics toggle ever corrected it — so `CoreElement`'s illuminated element draw could not
+  work until F8 had been pressed twice.
+- **`AccessCodesGreyName` asked for `Grey`** where the resource is registered as `Gray`, at its
+  declaration and in both branches of that toggle. Nothing reads it yet, which is the only reason
+  it went unnoticed.
+- **The access booth `else if` in `GameScreenCollection.Reset` repeated the `if` above it**, so
+  its `AccessBoothRight` lookup could never run and a right-only booth screen would never get a
+  code. Counting tiles across all 512 screens says no screen is right-only — seven have both, one
+  has only a left — so the branch was unreachable and fixing it changed no outcome.
+- **`BlobDeathAnimation`'s `_drawBlobParts` guard could never be met**, so the death animation
+  bought a sprite batch and drew nothing. Fixed in `725abeb`, just before this work started.
 
-Severities for the inspections that are already at zero are pinned in `.editorconfig`; if a
-cleanup here re-introduces one, that file is the place it is recorded.
-
-## State
-
-Stages 1 to 5 are done, in nineteen commits from `2568943` to `2086031`. Warnings with the
-project switch on are **246 → 45**, and 50 files carry `#nullable enable`. Solution build is at
-0 warnings, 0 errors and the smoke run reaches its twelve seconds.
-
-Only stage 6 is left: `GameEngine.cs` itself (40), plus one line each in `IntroSequence.cs`,
-`MainGameScreen.cs` and `TestScreen.cs` that only `GameEngine`'s turn can settle. Nothing is
-part-converted: a file either has the directive and is clean, or has not been touched.
-
-What a reader needs that was not true when this plan was written:
-
-- **`IGameScreen.Reset` and `PerformPostScreenChangeActions` take `object?`**, as does
-  `GameComponentBase.Initialise`. Unconverted implementations are still compatible; converting
-  one means matching those, which shows up as CS8767.
-- **Lookups throw rather than return null** where a name is simply wrong: `ResourceManager`'s
-  three, `ContentList.GetContent`, and `ScreenEffectEngine.GetRenderViewPort`. Fields taken from
-  them are honestly non-null. This is what found the two misspelt resource names.
-- **Tile lookups return empty rather than null.** `GameScreenCollection`'s four
-  `GetCoordsOfTiles`/`GetKeyLockDoors` give back an empty collection for a screen that has none
-  of a tile. `CheckTileByObject` and `GetPreferredLocation` stay nullable, because there not
-  finding one is a real answer.
-- **The composition root has started moving.** `GameScreenCollection` and `Blob` are now built
-  in the `GameEngineStatus.Started` handler rather than in `GameEngine`'s constructor and
-  `Initialise`, because the resources they need do not exist earlier. `GameEngine.GameScreens`
-  gave up `readonly` for it. Both are now fields that handler assigns, along with the thirty-odd
-  already there; stage 6 settles that whole group, `IntroSequence._mainScreen` included.
-- **`RaiseBlobAction` carries `object?`.** Only `GotPowerUp` carries anything, and `StatusPanel`
-  now treats a power up action without its type as a mistake rather than casting what arrives.
-
-### Verifying stages 5 and 6
-
-The twelve second smoke run stops on the boot screen waiting for a keypress, so it proves
-content loads and nothing else. Everything `GameEngine` builds in the `Started` handler — every
-screen, the colour animation engine, the screen effect engine — is past that point and is
-exactly what stage 6 touches. To reach it, temporarily replace the keypress test at the "Wait
-for a keypress before leaving the loading screen" comment with `if (true)`, run for twenty
-seconds, and check the log is free of exceptions. Put it back before committing. This is how
-stage 4 verified the core and teleport screens.
-
-Past that the game sits on the options screen, and `GameScreens.Reset()`, which places every
-pickup, powerup and access code, needs a keypress to start a game. Nothing yet drives that. A
-question about the screen data itself is better answered by a temporary probe in a constructor
-that runs at load, which is how the access booth count in `1703992` was settled.
-
-### Bugs found so far
-
-Four, all pre-existing and all fixed where they were found:
-
-- `CustomControl` dropped the `PlayerKeySet` its constructor was handed.
-- `PickupsIlluminatedName` was spelt without its final d.
-- `AccessCodesGreyName` asked for `Grey` where the resource is `Gray`.
-- The access booth `else if` in `GameScreenCollection.Reset` repeated the `if` above it, so a
-  right-only booth screen would never get a code. No screen is right-only, so nothing changed.
-
-A field nothing sets is usually a field nothing reads, but not always — that is the pattern
-behind all four. Expect more in stage 6.
-
-### One open question, deliberately not answered
+## The one question left open
 
 `Blob.cs`, access booth detection, around line 1755. Each of the two branches detects the booth
 on one side of blob and then hands the booth screen the **map position of the tile on his other
@@ -226,19 +171,46 @@ if (_tileLeftBlob is { TileNumber: (int)ActionTiles.AccessBoothRight })   // det
     …Reset(new object[] { Direction.Left, _tileRightBlob.MapXPosition });  // reports the right
 ```
 
-The teleport booth immediately above it uses `_tileRightBlob` throughout, which is what makes
-the crossing look like a slip. That position is not discarded: `AccessBoothScreen.Reset` uses it
-to place blob when he leaves the booth, as `(int)temp[1] * 128` give or take a tile, so reading
-the wrong tile puts him in the wrong place.
+The teleport booth immediately above it uses `_tileRightBlob` throughout, which is what makes the
+crossing look like a slip. The position is not discarded: `AccessBoothScreen.Reset` uses it to
+place blob when he leaves the booth, as `(int)temp[1] * 128` give or take a tile, so reading the
+wrong tile puts him in the wrong place.
 
-It is left exactly as it was, because which tile the booth is meant to be told is a gameplay
-question and walking blob into an access booth is the only way to see which looks right. What
-did change is that both tiles must now be present for either branch to fire, since the branch
-that reads the opposite tile never established it was there — previously that was a crash
-waiting for an empty tile beside blob. If the crossing is a bug, the fix is to read the detected
-tile's own `MapXPosition` in both branches.
+Left exactly as it was, because which tile the booth is meant to be told is a question about the
+game and walking blob into a booth is the only way to see which looks right. What did change is
+that both tiles must now be present for either branch to fire, since the branch reading the
+opposite tile never established it was there — previously that was a crash waiting for an empty
+tile beside blob. If the crossing is a bug, the fix is to read the detected tile's own
+`MapXPosition` in both branches.
 
-Still outstanding and deliberately not part of this plan: unused non-private members (down from
-101, several were removed here where a nullable question could not be answered without them),
-75 primary-constructor suggestions (declined — they would undo the `readonly` work in `e7af430`
-and break the `_camelCase` field convention), and 32 invalid XML doc comments.
+## Also worth knowing
+
+- **`TestScreen` never calls `LoadContent` on its own `BlobDeathAnimation`**, so its fragment
+  list is empty where it used to be six particles with a null `Fireball` that would have thrown
+  on the first trigger. Left alone: it is a debug screen and was not part of this work.
+- **`Nasties.LoadContent` takes a `ContentList` it no longer reads**, since `Nasty` gets its own
+  sprites now. Kept only because `MainGameScreen` passes one. That belongs with the unused
+  members below.
+
+## Still outstanding, deliberately not part of this
+
+- Unused non-private members, down from 101 — several were removed here where a nullable question
+  could not be answered without deciding whether anything read them.
+- 75 primary-constructor suggestions. Declined: they would undo the `readonly` work in `e7af430`
+  and break the `_camelCase` field convention.
+- 32 invalid XML doc comments.
+- Severities for the inspections that are already at zero are pinned in `.editorconfig`; if a
+  cleanup re-introduces one, that file is where it is recorded.
+
+## Commit index
+
+| Stage | Commits |
+| --- | --- |
+| 1. Delete the dead | `2568943` |
+| 2. Owner-assigned particles | `abd14e0` |
+| 3. Leaf classes, 30 files | `e536e79`, `b9a95ed`, `0c7d494`, `842b626`, `270e7ab`, `dea3db8`, `3aa0916`, `0e8d08c`, `30e553e`, `d6ca5c6` |
+| 4. Mid-size, 6 files | `7087eae`, `dc44a51`, `f25f308`, `1703992` |
+| 5. `Blob.cs` | `2086031` |
+| 6. `GameEngine.cs` and the last three | `8acad72` |
+| 7. Flip the project | `15eb567` |
+| Plan upkeep | `e7ffe4b`, `e36455c`, `2cee64d`, `46d0378`, `39fb903` |
