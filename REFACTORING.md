@@ -1,8 +1,8 @@
 # Making the code say what the comments say
 
-**Stages 1 and 2 landed.** Stages 3 and 4 are still a plan. This document is meant to become a
-record the way `NULLABLE.md` did — as each stage lands, its section is rewritten to say what it
-actually decided rather than what it intended.
+**Stages 1 to 3 landed.** Stage 4 is still a plan. This document is meant to become a record the
+way `NULLABLE.md` did — as each stage lands, its section is rewritten to say what it actually
+decided rather than what it intended.
 
 The goal is the clean-code one: fewer comments, because the code says it instead. In this
 codebase that means one specific move, made many times — a long method whose `//` comments act
@@ -53,6 +53,7 @@ what stage 2 left them at:
 | Method | Lines | Now |
 | --- | --- | --- |
 | `Blob.Update` | 1,564 | 36 |
+| `Blob.UpdateFire` (was part of it) | 608 | gone — see stage 3 |
 | `Nasty.Update` | 432 | 425 |
 | `GameEngine.Update` | 306 | 306 |
 | `Nasty.SpikeyMovement` | 241 | 241 |
@@ -84,21 +85,23 @@ for f in $(find Starquake.Shared SharedLibs -name "*.cs" -not -path "*/obj/*" -n
 done | sort -rn
 ```
 
-## There are no tests
+## Tests
 
-No test project in the solution. That decides the order of what follows: the stages that are
-pure code motion are safe without tests and come first, and the one stage that rewrites live
-collision maths comes last, behind the offer of a test project.
+There were none when this was written, and that decided the order: the stages that are pure code
+motion are safe without tests and came first, and the one stage that rewrites live collision maths
+came last, behind the offer of a test project. Stage 3 took that offer up, so there is now a
+`Starquake.Tests` project — see that stage for what is in it and why it is shaped the way it is.
 
 Verification for every stage is at minimum:
 
 ```sh
-dotnet build Starquake.sln    # must stay at 0 warnings, 0 errors
+dotnet build Starquake.sln                          # must stay at 0 warnings, 0 errors
+dotnet test Starquake.Tests/Starquake.Tests.csproj  # must stay green
 ```
 
 Zero warnings is the current state and the bar — the nullable work got it there (`NULLABLE.md`)
-and a refactor must not spend it. Beyond the build, stages 2 and 4 want the game launched and
-the touched behaviour exercised by hand.
+and a refactor must not spend it. Beyond that, stages 2 and 4 want the game launched and the
+touched behaviour exercised by hand.
 
 ---
 
@@ -236,37 +239,110 @@ is data, and already as clear as it is going to get.
 
 ---
 
-## Stage 3 — collapse the fire duplication
+## Stage 3 — collapse the fire duplication — **done**
 
-The highest-value change in the codebase and the only one that rewrites live logic. Stage 2 has
-landed, so this now operates on `Blob.UpdateFire` — 608 lines, the whole of what is left of the
-old `Update` — rather than on a slice of a 1,564-line method.
+Four commits. `66e7b0e` added the test project the plan said to offer first, `2082656` and
+`482b2ba` dealt with what reading all six branches side by side turned up, and `5febc34` did the
+collapse.
 
-`Blob.UpdateFire` (`Blob.cs:1127`) is one behaviour written six times. Line numbers below are as
-of `76a192c`:
+`Blob.UpdateFire` was 608 lines and is now 20, calling into `BlobFire` — 242 lines including its
+documentation. `Blob.cs` went from 2,723 lines to 2,133, and no method in it exceeds 80 lines any
+more.
 
-| Branch | Lines | Roughly |
-| --- | --- | --- |
-| on shuttle, `Direction.Up` | 1140-1260 | 121 |
-| on shuttle, `Direction.Down` | 1261-1381 | 121 |
-| on shuttle, `Direction.Left` | 1382-1509 | 128 |
-| on shuttle, `Direction.Right` | 1510-1643 | 134 |
-| on foot, `Direction.Left` | 1646-1683 | 38 |
-| on foot, `Direction.Right` | 1684-1721 | 38 |
+### The shape
 
-Every one of them does the same three things: step the shot along its axis, deflect it to a
-random diagonal if it hits scenery, and kill it at the screen edge. The four shuttle branches
-differ only in which axis is primary and which sign each delta carries. About 580 lines should
-become something on the order of 80.
+A shot is an axis plus a sign. Fired up is the vertical axis with a sign of -1; fired right is the
+horizontal axis with a sign of +1. Deflecting reverses the sign on the axis it was fired along and
+opens up the other one, so a shot fired up that hits the ceiling comes back down and away to one
+side. Every boundary test is then derived from the sign — a negative sign stops at nought, a
+positive one stops at the screen's edge less the shot's own length — which is the point: the
+`Up`/`Down` asymmetry that produced the stage 1c bug is no longer something you can write.
 
-The shape to aim for is a direction expressed as a delta — a `Point`, or an axis plus sign —
-with the boundary test derived from it rather than written out per branch. Then the `Up`/`Down`
-asymmetry that produced the 1c bug is not expressible.
+`BlobFire` knows nothing but its own position. Everything else it asks an `IFireSurroundings` for:
+the screen's size, how far it may travel in a direction, which way to deflect, and where to throw
+sparks. `Blob`'s private nested `FireSurroundings` is the only implementation in the game; the
+tests supply the other one. That is what lets the maths run without a screen, a content pipeline
+or a graphics device, and it is the only interface introduced by any of this.
 
-**This is where a test project earns its keep.** `SharedLibs` has no MonoGame dependency, so the
-stepping and boundary maths can be exercised headlessly. Recommend adding one before this stage
-and ask before starting it — a silent regression here is a shot that passes through walls, which
-is not something a build catches and not something a casual play-test notices either.
+### Two more drifts, found by reading all six together
+
+Exactly what the plan predicted, and both got their own commit before the collapse so that a
+bisect can tell them from the move.
+
+`2082656` — the `Left` and `Right` shuttle branches still wrote a bare `24` where
+`FireSparksYOffset` is 24. The same unfinished extraction as stage 1a, three commits later.
+
+`482b2ba` — of the eight screen-edge checks across the four shuttle branches, seven set
+`hitScreenBoundary` and one did not. So a shot fired right off a shuttle pad, deflected, and then
+run off the **left** edge threw its impact sparks at the edge, where the other seven go quietly.
+Cosmetic, and invisible unless you line all eight up.
+
+That makes three defects in six copies of one behaviour, none of which a build or a play-test
+would have surfaced. The case for this stage was not hypothetical.
+
+### Two asymmetries that were real, and stayed
+
+Not every difference between the six branches was drift, and the collapse had to keep the two that
+were not.
+
+**The point-blank push-through** — which stops a shot dying on the spot when the blob is standing
+over a collectable — exists only for shots fired along the horizontal axis. Vertical shots from a
+shuttle never had it. That looks accidental rather than intended, but adding it to vertical shots
+changes what the game does, so `BlobFire` keeps the axis test and `Advance`'s documentation says
+why. A follow-up, if anyone wants it.
+
+**The distance a shot has travelled** counts horizontal movement only. Four of the six branches
+add `amountToMoveX` to it and the two vertical ones add nothing — but their `amountToMoveX` is
+always nought, so the two are the same rule written twice, and the unified `DistanceTravelled +=
+stepX` reproduces all six. The only thing that reads it is the push-through check, so counting one
+axis is all it needs.
+
+### How the collapse was verified
+
+Two ways, because a build proves nothing here.
+
+25 tests in `Starquake.Tests/BlobFireTests.cs` pin the axes, the four straight screen edges, the
+eight deflected ones, the difference between deflecting off a shuttle and dying on foot, the
+push-through applying horizontally and not vertically, and what happens when the blob fires in a
+direction nothing travels along. Two of them are the cases that would have caught the two drifts.
+
+Beyond that, the six old branches were ported mechanically into a throwaway harness — only the
+dependency calls rewritten — and run against `BlobFire` over every firing direction, every
+deflection state, both screen sizes and a spread of on- and off-screen positions, with a fake that
+answers both implementations identically for the same question. **2,359,054 frames compared,
+no differences** in position, distance travelled, deflection state, whether the shot was still
+alive, or the exact sequence of spark positions. The harness was not committed: it exists to
+retire one risk once, and keeping a 600-line copy of deleted code in the repo to guard code that
+now has its own tests would be the worse trade.
+
+### The test project
+
+`Starquake.Tests`, xunit, single-targeted at `net9.0` and referencing `Starquake.Shared`'s `net9.0`
+build. That pulls MonoGame DesktopGL into the test process, which is harmless headlessly because
+SDL is not loaded until something constructs a `Game` or a `GraphicsDevice`. A test that needs a
+`GraphicsDevice` does not belong in it. `RollForward=Major`, for the same reason the four heads set
+it — there is no 9.0 runtime installed on this machine.
+
+It also covers `CollisionDetection`, the primitive every moving thing in the game is stepped by and
+the one the fire maths sits directly on. Those tests characterise what it currently decides rather
+than what a rectangle overlap test ideally would: it compares centre distances with truncating
+integer division, so two boxes of odd size can overlap by a pixel and not count as touching. Pinned,
+not corrected.
+
+Test parallelisation is off, and this is the reason: `CollisionDetection` keeps its intermediate
+values in **static fields**, so two tests calling it at once can read each other's working. That
+wants fixing — it is a latent bug in the game too the moment anything touches collision off the
+update thread — but in its own commit.
+
+Verification for the whole solution is now:
+
+```sh
+dotnet build Starquake.sln                        # 0 warnings, 0 errors
+dotnet test Starquake.Tests/Starquake.Tests.csproj  # 40 tests
+```
+
+---
+
 
 ---
 
