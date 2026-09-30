@@ -2,16 +2,19 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+using System;
 using Microsoft.Xna.Framework;
-using Starquake.Engines;
 
 namespace Starquake.Sprites;
 
 public class SpritePixelMatrix
 {
+    private readonly Random _randomNumberGenerator;
 
-    public SpritePixelMatrix(int size)
+    public SpritePixelMatrix(int size, Random randomNumberGenerator)
     {
+        _randomNumberGenerator = randomNumberGenerator;
+
         Matrix = new SpritePixel[size];
 
         for (var a = 0; a < Matrix.Length; a++)
@@ -58,7 +61,7 @@ public class SpritePixelMatrix
 
             do
             {
-                p = Matrix[GameEngine.GetInstance().RandomNumberGenerator.Next(0, Matrix.Length)];
+                p = Matrix[_randomNumberGenerator.Next(0, Matrix.Length)];
             } while (p.Colour != Color.White);
 
             p.Colour = colour;

@@ -105,8 +105,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     private const int CoreInventoryHandoverScreen = 197;
 
-    private static GameEngine? _sInstance;
-
     public Color BackgroundColour;
 
     public BlobDeathAnimation BlobKiller;
@@ -211,8 +209,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         GraphicsDeviceManager graphics,
         ContentManager content)
     {
-        _sInstance = this;
-
         _parentWindow = parentWindow;
 
         Paused = false;
@@ -323,9 +319,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         where T : class
         => component ?? throw new InvalidOperationException(
             $"'{name}' does not exist until the game's content has loaded.");
-
-    public static GameEngine GetInstance()
-        => _sInstance ?? throw new InvalidOperationException("The game engine has not been created yet.");
 
     private void Nasties_OnNastyInteractionWithBlob(NastyInteractionType interactionType, NastyType nastyType)
     {

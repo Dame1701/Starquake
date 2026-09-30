@@ -99,16 +99,24 @@ now.
 
 ## Stage 2 — delete the static
 
-Five call sites, three files, and all five want one of two things:
+**Done.** Five call sites, three files, and all five wanted one of two things:
 
 - `BreakableBridge.cs:32,34` and `JumpPlatform.cs:33,44` — `GraphicsDeviceMgr.GraphicsDevice`
 - `SpritePixelMatrix.cs:61` — `RandomNumberGenerator`
 
-Both classes already receive a `GameEngine`, so this is passing a narrower thing they could have
-had all along. Then `_sInstance` and `GetInstance()` are deleted.
+The two sprite classes already received a `GameEngine`, so those four were passing a narrower thing
+they could have had all along — and in `BreakableBridge` the very next method was already reaching
+`GraphicsDevice` through the reference it held, so the static was the odd one out in its own file.
 
-Small, but it buys an invariant every later stage leans on: after this, **the only route to the
-engine is a constructor parameter**, so the dependency map is the whole truth.
+`SpritePixelMatrix` was the exception the plan had wrong: it takes no `GameEngine` and never did,
+only an `int size`. So rather than narrowing an existing reference it gains a `Random` parameter,
+and the two places that construct one hand it the engine's. That also finishes stage 4's job for
+this class early — it is the first to drop off the dependency map entirely.
+
+`_sInstance`, the assignment in the constructor, and `GetInstance()` are gone. The only `static`
+left in `GameEngine` is a private generic guard, so the invariant every later stage leans on now
+holds: **the only route to the engine is a constructor parameter**, and the dependency map is the
+whole truth.
 
 ## Stage 3 — cut the resource cycle
 

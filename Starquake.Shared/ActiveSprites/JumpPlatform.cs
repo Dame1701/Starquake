@@ -30,7 +30,7 @@ internal class JumpPlatform
 
     public JumpPlatform(GameEngine gameEngineRef, ContentManager content, Point position)
     {
-        _textureDrawer = new SpriteBatch(GameEngine.GetInstance().GraphicsDeviceMgr.GraphicsDevice);
+        _textureDrawer = new SpriteBatch(gameEngineRef.GraphicsDeviceMgr.GraphicsDevice);
         _gameEngine = gameEngineRef;
 
         _jumpPlatform = gameEngineRef.ContentResourceManager.GetSpriteCollection("JumpPlatforms").Clone(_gameEngine);
@@ -41,7 +41,7 @@ internal class JumpPlatform
 
         // The platform is always drawn at one sprite's size, so the target it is composed
         // onto never has to change; only the pixel matrix eaten away by the dissolve does
-        _renderTarget = new RenderTarget2D(GameEngine.GetInstance().GraphicsDeviceMgr.GraphicsDevice, _jumpPlatform.SpriteWidth, _jumpPlatform.SpriteHeight);
+        _renderTarget = new RenderTarget2D(gameEngineRef.GraphicsDeviceMgr.GraphicsDevice, _jumpPlatform.SpriteWidth, _jumpPlatform.SpriteHeight);
 
         // A platform that has not been allocated to a screen still sits at a position, and
         // JumpPlatforms replaces both tiles every time it hands this platform out again
@@ -78,7 +78,7 @@ internal class JumpPlatform
     [MemberNotNull(nameof(_matrix))]
     public void Reset()
     {
-        _matrix = new SpritePixelMatrix(_jumpPlatform.SpriteWidth * _jumpPlatform.SpriteHeight);
+        _matrix = new SpritePixelMatrix(_jumpPlatform.SpriteWidth * _jumpPlatform.SpriteHeight, _gameEngine.RandomNumberGenerator);
         PlatformActive = false;
         ReadyToAllocate = true;
         _dissolveTime = 100;

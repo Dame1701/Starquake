@@ -29,9 +29,9 @@ public class BreakableBridge
         _breakableBridge = _gameEngineReference.ContentResourceManager.GetSpriteCollection("BreakableBridge");
         _breakableBridgeOriginal = _gameEngineReference.ContentResourceManager.GetSpriteCollection("BreakableBridgeOriginal");
 
-        _textureDrawer = new SpriteBatch(GameEngine.GetInstance().GraphicsDeviceMgr.GraphicsDevice);
-        _matrix = new SpritePixelMatrix(_breakableBridge.SpriteWidth * _breakableBridge.SpriteHeight);
-        _renderTarget = new RenderTarget2D(GameEngine.GetInstance().GraphicsDeviceMgr.GraphicsDevice, _breakableBridge.SpriteWidth, _breakableBridge.SpriteHeight);
+        _textureDrawer = new SpriteBatch(gameEngineReference.GraphicsDeviceMgr.GraphicsDevice);
+        _matrix = new SpritePixelMatrix(_breakableBridge.SpriteWidth * _breakableBridge.SpriteHeight, gameEngineReference.RandomNumberGenerator);
+        _renderTarget = new RenderTarget2D(gameEngineReference.GraphicsDeviceMgr.GraphicsDevice, _breakableBridge.SpriteWidth, _breakableBridge.SpriteHeight);
 
         _xPos = xPos;
         _yPos = yPos;
