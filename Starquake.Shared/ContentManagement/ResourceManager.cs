@@ -4,9 +4,8 @@
 // -
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.Threading.Tasks;
 using System.IO;
-using System.Threading;
 using MessagePack;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -46,6 +45,8 @@ public class ResourceManager : StartableGameComponentBase
 
     private readonly List<SpriteDescription> _spriteDescriptions;
 
+    private volatile Exception? _loadFailure;
+
     public ResourceManager(
         ContentManager content,
         GraphicsDeviceManager graphics,
@@ -68,20 +69,73 @@ public class ResourceManager : StartableGameComponentBase
         _resources = new Dictionary<string, object>();
     }
 
+    /// <summary>
+    ///     Starts loading everything that has been registered, on a background thread, and returns
+    ///     at once. The caller keeps drawing the loading screen and watches <c>Status</c> for
+    ///     <see cref="GameEngineStatus.ContentLoaded" />.
+    ///     <para>
+    ///         Loading off the main thread is safe here because MonoGame marshals the graphics work
+    ///         back for us: <c>Texture2D</c> does its GL calls through
+    ///         <c>Threading.BlockOnUIThread</c>, and the queue that feeds is pumped once per
+    ///         iteration of the platform's run loop - which keeps turning, because the main thread
+    ///         is busy animating the loading screen rather than waiting for this. The one graphics
+    ///         call MonoGame does <em>not</em> marshal, constructing a <c>SpriteBatch</c>, is
+    ///         deferred to the first draw - see <c>SpriteCollection.Sprites</c>.
+    ///     </para>
+    /// </summary>
     public void LoadContent()
     {
         _resources.Clear();
-
-        var backgroundWorker = new BackgroundWorker();
-        backgroundWorker.DoWork += backgroundWorker_DoWork;
-        backgroundWorker.RunWorkerCompleted += backgroundWorker_RunWorkerCompleted;
 
         UpdateStatus(
             "Loading content....",
             0,
             GameEngineStatus.Starting);
 
-        backgroundWorker.RunWorkerAsync();
+        _ = LoadContentInBackground();
+    }
+
+    private async Task LoadContentInBackground()
+    {
+        try
+        {
+            await Task.Run(LoadEverything).ConfigureAwait(false);
+
+            // A beat on the finished loading screen before the game appears. Awaited rather than
+            // slept through, so it holds the pause without parking a thread-pool thread on it.
+            await Task.Delay(LaunchPauseMs).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            // The BackgroundWorker this replaced put the exception in RunWorkerCompletedEventArgs
+            // and nothing ever looked at it, so a failure to load left the game running on missing
+            // content and failing somewhere else entirely. Rethrowing on the main thread means a
+            // missing file says so, at the point it went wrong.
+            _loadFailure = exception;
+
+            return;
+        }
+
+        UpdateStatus(
+            "Launching Game.....",
+            FullyLoadedPercent,
+            GameEngineStatus.ContentLoaded);
+    }
+
+    /// <summary>
+    ///     Rethrows anything the background load threw, on whichever thread asks. Called from the
+    ///     game's update so a load failure surfaces in the loop rather than vanishing.
+    /// </summary>
+    public void ThrowIfLoadFailed()
+    {
+        var failure = _loadFailure;
+
+        if (failure != null)
+        {
+            _loadFailure = null;
+
+            throw new InvalidOperationException("The game's content could not be loaded.", failure);
+        }
     }
 
     public void Initialise()
@@ -89,28 +143,8 @@ public class ResourceManager : StartableGameComponentBase
         _particleEngine.LoadContent();
     }
 
-    private void backgroundWorker_RunWorkerCompleted(object? sender, RunWorkerCompletedEventArgs e)
+    private void LoadEverything()
     {
-        if (sender is BackgroundWorker backgroundWorker)
-        {
-            backgroundWorker.DoWork -= backgroundWorker_DoWork;
-            backgroundWorker.RunWorkerCompleted -= backgroundWorker_RunWorkerCompleted;
-            backgroundWorker.Dispose();
-        }
-
-        UpdateStatus(
-            "Launching Game.....",
-            100,
-            GameEngineStatus.ContentLoaded);
-    }
-
-    private void backgroundWorker_DoWork(object? sender, DoWorkEventArgs e)
-    {
-        UpdateStatus(
-            "Loading content....",
-            0,
-            GameEngineStatus.Starting);
-
         int totalComponentsToLoad =
             _spriteDescriptions.Count +
             _dataDescriptions.Count +
@@ -132,7 +166,6 @@ public class ResourceManager : StartableGameComponentBase
             FullyLoadedPercent,
             GameEngineStatus.Starting);
 
-        Thread.Sleep(LaunchPauseMs);
     }
 
     private void LoadSpriteResources(int totalComponentsToLoad, ref int componentsLoaded)

@@ -752,6 +752,10 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     public void Update(GameTime gameTime)
     {
+        // Anything the background content load threw comes out here, on this thread, rather than
+        // being lost on the one that threw it.
+        ContentResourceManager.ThrowIfLoadFailed();
+
         if (ToggleKeys.GetPressedKey() == Keys.F9)
         {
             Presentation.ScanlinesEnabled = !Presentation.ScanlinesEnabled;

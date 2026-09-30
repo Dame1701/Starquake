@@ -34,7 +34,7 @@ public class SpriteCollection
     private Texture2D _spriteImages;
 
     [NonSerialized]
-    private SpriteBatch _sprites;
+    private SpriteBatch? _sprites;
 
     private int[] _spriteTexturePosX;
 
@@ -50,7 +50,6 @@ public class SpriteCollection
         SpriteWidth = spriteWidth;
         SpriteHeight = spriteHeight;
 
-        _sprites = new SpriteBatch(_graphicsDeviceManager.GraphicsDevice);
         _spriteImages = content.Load<Texture2D>(imageFilePath);
 
         int noHorizontalImages = _spriteImages.Width / spriteWidth;
@@ -115,17 +114,17 @@ public class SpriteCollection
     /// </param>
     public void Begin(BlendState blendState, GameTime gameTime, Matrix? transform = null)
     {
-        _sprites.Begin(SpriteSortMode.Deferred, blendState, null, null, null, null, transform);
+        Sprites.Begin(SpriteSortMode.Deferred, blendState, null, null, null, null, transform);
     }
 
     public void Begin(BlendState blendState, SpriteSortMode sortMode, GameTime gameTime, Matrix? transform = null)
     {
-        _sprites.Begin(sortMode, blendState, null, null, null, null, transform);
+        Sprites.Begin(sortMode, blendState, null, null, null, null, transform);
     }
 
     public void DrawSpriteUnscaled(int spriteNumber, int xPosition, int yPosition)
     {
-        _sprites.Draw(
+        Sprites.Draw(
             _spriteImages,
             new Vector2(xPosition, yPosition),
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
@@ -140,7 +139,7 @@ public class SpriteCollection
 
     public void DrawSpriteUnscaled(int spriteNumber, int xPosition, int yPosition, int fade)
     {
-        _sprites.Draw(
+        Sprites.Draw(
             _spriteImages,
             new Vector2(xPosition, yPosition),
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
@@ -158,7 +157,7 @@ public class SpriteCollection
         const float hScaling = 1f;
         const float vScaling = 1f;
 
-        _sprites.Draw(
+        Sprites.Draw(
             _spriteImages,
             new Vector2(xPosition * hScaling, yPosition * vScaling),
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
@@ -176,7 +175,7 @@ public class SpriteCollection
         const float hScaling = 1f;
         const float vScaling = 1f;
 
-        _sprites.Draw(
+        Sprites.Draw(
             _spriteImages,
             new Vector2(xPosition * hScaling, yPosition * vScaling),
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
@@ -205,7 +204,7 @@ public class SpriteCollection
             {
                 if (matrix[a].IsOn)
                 {
-                    _sprites.Draw(
+                    Sprites.Draw(
                         _spriteImages,
                         new Vector2((xPosition + x) * hScaling, (yPosition + y) * vScaling),
                         new Rectangle(_spriteTexturePosX[spriteNumber] + x, _spriteTexturePosY[spriteNumber] + y,
@@ -236,7 +235,7 @@ public class SpriteCollection
         const float hScaling = 1f;
         const float vScaling = 1f;
 
-        _sprites.Draw(
+        Sprites.Draw(
             _spriteImages,
             new Vector2(xPosition * hScaling, yPosition * vScaling),
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], width, height),
@@ -253,7 +252,7 @@ public class SpriteCollection
         const float hScaling = 1f;
         const float vScaling = 1f;
 
-        _sprites.Draw(
+        Sprites.Draw(
             _spriteImages,
             new Vector2(xPosition * hScaling, yPosition * vScaling),
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
@@ -277,7 +276,7 @@ public class SpriteCollection
             SpriteWidth >= subSpriteArea.Width + subSpriteArea.X &&
             SpriteHeight >= subSpriteArea.Height + subSpriteArea.Y)
         {
-            _sprites.Draw(
+            Sprites.Draw(
                 _spriteImages,
                 new Vector2(xPosition * hScaling, yPosition * vScaling),
                 new Rectangle(
@@ -300,7 +299,7 @@ public class SpriteCollection
         const float hScaling = 1f;
         const float vScaling = 1f;
 
-        _sprites.Draw(_spriteImages,
+        Sprites.Draw(_spriteImages,
             new Vector2((float)((xPosition + SpriteWidth / 2.0) * hScaling),
                 (float)(yPosition + SpriteHeight / 2.0) * vScaling),
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
@@ -319,7 +318,7 @@ public class SpriteCollection
         const float hScaling = 1f;
         const float vScaling = 1f;
 
-        _sprites.Draw(_spriteImages,
+        Sprites.Draw(_spriteImages,
             new Vector2((float)((xPosition + SpriteWidth / 2.0) * hScaling),
                 (float)(yPosition + SpriteHeight / 2.0) * vScaling),
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
@@ -338,7 +337,7 @@ public class SpriteCollection
         const float hScaling = 1f;
         const float vScaling = 1f;
 
-        _sprites.Draw(_spriteImages,
+        Sprites.Draw(_spriteImages,
             new Vector2((xPosition + originX) * hScaling, (yPosition + originY) * vScaling),
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
                 SpriteHeight),
@@ -356,7 +355,7 @@ public class SpriteCollection
         const float hScaling = 1f;
         const float vScaling = 1f;
 
-        _sprites.Draw(_spriteImages,
+        Sprites.Draw(_spriteImages,
             new Vector2((xPosition + originX) * hScaling, (yPosition + originY) * vScaling),
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
                 SpriteHeight),
@@ -384,7 +383,7 @@ public class SpriteCollection
             _rotationSpeed = rotationSpeed;
         }
 
-        _sprites.Draw(_spriteImages,
+        Sprites.Draw(_spriteImages,
             new Vector2((float)((xPosition + SpriteWidth / 2.0) * hScaling),
                 (float)((yPosition + SpriteHeight / 2.0) * vScaling)),
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
@@ -413,7 +412,7 @@ public class SpriteCollection
             _rotationSpeed = rotationSpeed;
         }
 
-        _sprites.Draw(_spriteImages,
+        Sprites.Draw(_spriteImages,
             new Vector2((float)(xPosition + SpriteWidth / 2.0) * hScaling,
                 (float)(yPosition + SpriteHeight / 2.0) * vScaling),
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
@@ -427,7 +426,7 @@ public class SpriteCollection
 
     public void End()
     {
-        _sprites.End();
+        Sprites.End();
         Update();
     }
 
@@ -458,6 +457,20 @@ public class SpriteCollection
             }
         }
     }
+
+    /// <summary>
+    ///     The batch this collection draws through, built on first use rather than on construction.
+    ///     <para>
+    ///         Content is loaded on a background thread, and MonoGame marshals texture creation to
+    ///         the main thread for us - <c>Texture2D</c> does its GL work through
+    ///         <c>Threading.BlockOnUIThread</c>. <c>SpriteBatch</c> does not: its constructor builds
+    ///         a <c>SpriteEffect</c> and a <c>SpriteBatcher</c> directly, so constructing one off the
+    ///         main thread touches the graphics context from the wrong thread. Every draw call is on
+    ///         the main thread, so deferring it to the first one puts it where it belongs.
+    ///     </para>
+    /// </summary>
+    private SpriteBatch Sprites
+        => _sprites ??= new SpriteBatch(_graphicsDeviceManager.GraphicsDevice);
 
     public SpriteCollection Clone()
     {
