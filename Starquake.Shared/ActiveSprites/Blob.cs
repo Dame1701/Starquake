@@ -25,12 +25,6 @@ namespace Starquake.ActiveSprites;
 
 public class Blob : GameComponentBase
 {
-
-
-    /// <summary>
-    ///     How many things the blob can carry. Picking something up pushes the whole inventory along
-    ///     one and drops whatever falls off the end.
-    /// </summary>
     /// <summary>
     ///     How fast the tunnel transition plays, in pixels of play area a frame. It sets the pace of
     ///     the whole passage rather than a literal step, since
@@ -39,6 +33,10 @@ public class Blob : GameComponentBase
     /// </summary>
     private const int TunnelEntrySpeed = 64;
 
+    /// <summary>
+    ///     How many things the blob can carry. Picking something up pushes the whole inventory along
+    ///     one and drops whatever falls off the end.
+    /// </summary>
     private const int BlobMaxItemsHeld = 4;
 
     /// <summary>

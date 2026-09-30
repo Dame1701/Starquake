@@ -912,10 +912,6 @@ public class Nasty : GameComponentBase
     ///     How long a nasty keeps to one frame of mind before picking another, and what it picks: whether
     ///     it chases the blob or wanders, how it moves, which way it sets off and how fast.
     /// </summary>
-    /// <summary>
-    ///     How long a nasty keeps to one frame of mind before picking another, and what it picks:
-    ///     whether it chases the blob or wanders, how it moves, which way it sets off and how fast.
-    /// </summary>
     private void UpdateFrameOfMind()
     {
         if (_nastyType == NastyType.CoreGuardian)

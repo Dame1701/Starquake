@@ -211,10 +211,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     }
 
     /// <summary>
-    ///     The one engine, for the few sprites that need the graphics device before they are given
-    ///     a reference to it. Only callable once the engine has been constructed.
-    /// </summary>
-    /// <summary>
     ///     Everything below is built by the <see cref="GameEngineStatus.Started" /> handler, because
     ///     each of them needs resources that are still loading before that. Nothing outside the boot
     ///     screen runs before then, so rather than have several hundred readers ask whether the game
