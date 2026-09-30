@@ -21,6 +21,14 @@ namespace Starquake.ContentManagement;
 
 public class ResourceManager : StartableGameComponentBase
 {
+    /// <summary>
+    ///     The percentage reported once everything has loaded, and how long the "Launching Game" message
+    ///     is left up before the game takes over - long enough to be read rather than flash past.
+    /// </summary>
+    private const int FullyLoadedPercent = 100;
+
+    /// <inheritdoc cref="FullyLoadedPercent" />
+    private const int LaunchPauseMs = 500;
 
     private readonly AnimTileEngine _animationTileEngine;
     private readonly ContentManager _contentManagerInstance;
@@ -105,93 +113,114 @@ public class ResourceManager : StartableGameComponentBase
 
         var componentsLoaded = 0;
 
-        // Sprite Resources
-        foreach (var t in _spriteDescriptions)
-        {
-            UpdateStatus(
-                "Loading content, sprite set: '" + t.ResourceName + "'",
-                (int)(componentsLoaded / (double)totalComponentsToLoad * 100),
-                GameEngineStatus.Starting);
-
-            var sc =
-                new SpriteCollection(
-                    _gameEngineInstance,
-                    _contentManagerInstance,
-                    t.FilePath,
-                    t.Width,
-                    t.Height);
-
-            _resources.Add(t.ResourceName, sc);
-            componentsLoaded++;
-        }
-
-        // Anim Sprite Resources
-        foreach (var t in _animSpriteDescriptions)
-        {
-            UpdateStatus(
-                "Loading content, anim sprite set: '" + t.ResourceName + "'",
-                (int)(componentsLoaded / (double)totalComponentsToLoad * 100),
-                GameEngineStatus.Starting);
-
-            var sc =
-                new SpriteCollection(
-                    _gameEngineInstance,
-                    _contentManagerInstance,
-                    t.FilePath,
-                    t.Width,
-                    t.Height);
-
-            _animationTileEngine.AnimTilesList.Add(new AnimTile(_gameEngineInstance, t.TileToAnimate, sc, t.Delay));
-            componentsLoaded++;
-        }
+        LoadSpriteResources(totalComponentsToLoad, ref componentsLoaded);
+        LoadAnimatedSpriteResources(totalComponentsToLoad, ref componentsLoaded);
 
         _particleEngine.LoadContent();
 
-        // Data Resources
-        // TODO this is hacked in right now need to improve
-        using (var fs = new FileStream(_dataDescriptions[0].FilePath, FileMode.Open, FileAccess.Read))
-        {
-            // Read the length of the first array
-            var lengthBuffer = new byte[sizeof(int)];
-            fs.ReadExactly(lengthBuffer, 0, sizeof(int));
-            var gameScreensArraySize = BitConverter.ToInt32(lengthBuffer, 0);
-
-            // Read the first array
-            var gameScreensData = new byte[gameScreensArraySize];
-            fs.ReadExactly(gameScreensData, 0, gameScreensArraySize);
-
-            // Read the length of the second array
-            fs.ReadExactly(lengthBuffer, 0, sizeof(int));
-            var collisionTilesArraySize = BitConverter.ToInt32(lengthBuffer, 0);
-
-            // Read the second array
-            var collisionTilesData = new byte[collisionTilesArraySize];
-            fs.ReadExactly(collisionTilesData, 0, collisionTilesArraySize);
-
-            _resources.Add(_dataDescriptions[0].ResourceName, MessagePackSerializer.Deserialize<GameScreenData[]>(gameScreensData));
-            _resources.Add(_dataDescriptions[1].ResourceName, MessagePackSerializer.Deserialize<int[,,]>(collisionTilesData));
-        }
-
-        // Sound resources
-        foreach (var t in _soundDescriptions)
-        {
-            UpdateStatus(
-                "Loading content, sound effect: '" + t.ResourceName + "'",
-                (int)(componentsLoaded / (double)totalComponentsToLoad * 100),
-                GameEngineStatus.Starting);
-
-            _soundEngine.LoadSoundEffect(t);
-
-            componentsLoaded++;
-        }
+        LoadScreenData();
+        LoadSoundResources(totalComponentsToLoad, ref componentsLoaded);
 
         UpdateStatus(
             "Launching Game.....",
-            100,
+            FullyLoadedPercent,
             GameEngineStatus.Starting);
 
-        Thread.Sleep(500);
+        Thread.Sleep(LaunchPauseMs);
     }
+
+    private void LoadSpriteResources(int totalComponentsToLoad, ref int componentsLoaded)
+    {
+        foreach (var t in _spriteDescriptions)
+        {
+            ReportProgress("sprite set", t.ResourceName, totalComponentsToLoad, componentsLoaded);
+
+            _resources.Add(t.ResourceName, LoadSpriteCollection(t.FilePath, t.Width, t.Height));
+            componentsLoaded++;
+        }
+    }
+
+    private void LoadAnimatedSpriteResources(int totalComponentsToLoad, ref int componentsLoaded)
+    {
+        foreach (var t in _animSpriteDescriptions)
+        {
+            ReportProgress("anim sprite set", t.ResourceName, totalComponentsToLoad, componentsLoaded);
+
+            _animationTileEngine.AnimTilesList.Add(
+                new AnimTile(
+                    _gameEngineInstance,
+                    t.TileToAnimate,
+                    LoadSpriteCollection(t.FilePath, t.Width, t.Height),
+                    t.Delay));
+            componentsLoaded++;
+        }
+    }
+
+    private void LoadSoundResources(int totalComponentsToLoad, ref int componentsLoaded)
+    {
+        foreach (var t in _soundDescriptions)
+        {
+            ReportProgress("sound effect", t.ResourceName, totalComponentsToLoad, componentsLoaded);
+
+            _soundEngine.LoadSoundEffect(t);
+            componentsLoaded++;
+        }
+    }
+
+    /// <summary>
+    ///     The screens and the collision map they share, read straight out of one file with a plain
+    ///     FileStream rather than through the content pipeline.
+    /// </summary>
+    /// <remarks>
+    ///     Both arrays live in the same file, length-prefixed, and must be read in the order they were
+    ///     written - which is why the two data resources are registered in order and read by index here.
+    /// </remarks>
+    private void LoadScreenData()
+    {
+        using var fs = new FileStream(_dataDescriptions[0].FilePath, FileMode.Open, FileAccess.Read);
+
+        // Read the length of the first array
+        var lengthBuffer = new byte[sizeof(int)];
+        fs.ReadExactly(lengthBuffer, 0, sizeof(int));
+        var gameScreensArraySize = BitConverter.ToInt32(lengthBuffer, 0);
+
+        // Read the first array
+        var gameScreensData = new byte[gameScreensArraySize];
+        fs.ReadExactly(gameScreensData, 0, gameScreensArraySize);
+
+        // Read the length of the second array
+        fs.ReadExactly(lengthBuffer, 0, sizeof(int));
+        var collisionTilesArraySize = BitConverter.ToInt32(lengthBuffer, 0);
+
+        // Read the second array
+        var collisionTilesData = new byte[collisionTilesArraySize];
+        fs.ReadExactly(collisionTilesData, 0, collisionTilesArraySize);
+
+        _resources.Add(
+            _dataDescriptions[0].ResourceName,
+            MessagePackSerializer.Deserialize<GameScreenData[]>(gameScreensData));
+        _resources.Add(
+            _dataDescriptions[1].ResourceName,
+            MessagePackSerializer.Deserialize<int[,,]>(collisionTilesData));
+    }
+
+    /// <summary>
+    ///     Builds one sprite collection. SpriteDescription and AnimSpriteDescription are unrelated types
+    ///     that happen to carry the same three values, so this takes the values rather than either type.
+    /// </summary>
+    private SpriteCollection LoadSpriteCollection(string filePath, int width, int height)
+        => new(
+            _gameEngineInstance,
+            _contentManagerInstance,
+            filePath,
+            width,
+            height);
+
+    private void ReportProgress(string kindOfThing, string resourceName, int totalComponentsToLoad, int componentsLoaded)
+        => UpdateStatus(
+            $"Loading content, {kindOfThing}: '{resourceName}'",
+            (int)(componentsLoaded / (double)totalComponentsToLoad * 100),
+            GameEngineStatus.Starting);
 
     public void AddSpriteResource(string resourceName, string filePath, int spriteWidth, int spriteHeight)
     {

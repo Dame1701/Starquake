@@ -7,6 +7,15 @@ using Starquake.Engines;
 
 namespace Starquake.Input;
 
+/// <summary>
+///     What the player is pressing. Every method here reads the keyboard.
+/// </summary>
+/// <remarks>
+///     There was a joypad once. Each of the five input methods below carried its own commented-out
+///     copy of the same block - read the stick, compare against zero, return - and the five said
+///     nothing the one sentence above them does not. The speed bands and dead zone still named in
+///     this class are what an analogue stick would feed, and are the only trace of it left.
+/// </remarks>
 public class CustomControl
 {
     /// <summary>
@@ -111,74 +120,18 @@ public class CustomControl
     }
 
     public bool MovedUp()
-        /*
-        if (useJoyPad && joystick !=null)
-        {
-            if (joystick.GetCurrentState().Y < 0)
-            {
-                return true;
-            }
-
-            return false;
-        }
-        */
         => Keyboard.GetState().IsKeyDown(PlayerKeySet.Up);
 
     public bool MovedDown()
-        /*
-        if (useJoyPad && joystick != null)
-        {
-            if (joystick.GetCurrentState().Y > 0)
-            {
-                return true;
-            }
-
-            return false;
-        }
-        */
         => Keyboard.GetState().IsKeyDown(PlayerKeySet.Down);
 
     public bool MovedLeft()
-        /*
-        if (useJoyPad && joystick != null)
-        {
-            if (joystick.GetCurrentState().X < 0)
-            {
-                return true;
-            }
-
-            return false;
-        }
-        */
         => Keyboard.GetState().IsKeyDown(PlayerKeySet.Left);
 
     public bool MovedRight()
-        /*
-        if (useJoyPad && joystick != null)
-        {
-            if (joystick.GetCurrentState().X > 0)
-            {
-                return true;
-            }
-
-            return false;
-        }
-        */
         => Keyboard.GetState().IsKeyDown(PlayerKeySet.Right);
 
     public bool HasFired()
-        /*
-        if (useJoyPad && joystick != null)
-        {
-            if (joystick.GetCurrentState().IsPressed(0) ||
-                joystick.GetCurrentState().IsPressed(1))
-            {
-                return true;
-            }
-
-            return false;
-        }
-        */
         => Keyboard.GetState().IsKeyDown(PlayerKeySet.Fire);
 
     private void SetBlobHSpeed(float inputSpeed)

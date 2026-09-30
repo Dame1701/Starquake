@@ -231,131 +231,138 @@ public class SoundEffectEngine(GameEngine gameEngineInstance) : IDisposable
 
     public Guid PlaySound(string soundName, float volume, bool looped)
     {
-        Guid singleInstanceId;
-        SoundEffectInstanceRecord? soundEffectInstanceRecord = null;
+        var singleInstance = FindSingleInstance(soundName);
 
+        if (singleInstance != null)
+        {
+            singleInstance.Volume = volume;
+
+            return PlaySingleInstance(singleInstance, volume, looped);
+        }
+
+        return PlayMultiInstance(soundName, volume);
+    }
+
+    /// <summary>
+    ///     The one instance reserved for a sound that may only play once at a time, or null if this
+    ///     sound is not one of those.
+    /// </summary>
+    private SoundEffectInstanceRecord? FindSingleInstance(string soundName)
+    {
         foreach (var t in _singleInstanceSoundEffectInstances)
         {
-            if (t.SoundName != soundName)
+            if (t.SoundName == soundName)
             {
-                continue;
+                return t;
             }
-
-            soundEffectInstanceRecord = t;
-            soundEffectInstanceRecord.Volume = volume;
-            break;
         }
 
-        if (soundEffectInstanceRecord != null)
+        return null;
+    }
+
+    /// <summary>
+    ///     Plays the sound on its own reserved instance. A one-shot is restarted from the beginning if it
+    ///     is already going; a looping one is left alone unless it has stopped.
+    /// </summary>
+    private static Guid PlaySingleInstance(SoundEffectInstanceRecord record, float volume, bool looped)
+    {
+        if (record.SoundInstance == null)
         {
-            if (soundEffectInstanceRecord.SoundInstance == null)
-            {
-                return Guid.Empty;
-            }
-
-            singleInstanceId = soundEffectInstanceRecord.Id;
-
-            // If the sound is currently playing or paused, reset it
-            if (!looped)
-            {
-                if (soundEffectInstanceRecord.SoundInstance.State == SoundState.Playing ||
-                    soundEffectInstanceRecord.SoundInstance.State == SoundState.Paused)
-                {
-                    soundEffectInstanceRecord.SoundInstance.Stop(true);
-
-                    // Hack to make the sounds actually stop!
-                    //do { } while (soundEffectInstanceRecord.SoundInstance.State != SoundState.Stopped);
-                }
-            }
-
-            // Play the sound
-            soundEffectInstanceRecord.SoundInstance.Volume = volume;
-
-            if (!looped)
-            {
-                soundEffectInstanceRecord.SoundInstance.Play();
-            }
-            else if (soundEffectInstanceRecord.SoundInstance.State == SoundState.Stopped ||
-                     soundEffectInstanceRecord.SoundInstance.State == SoundState.Paused)
-            {
-                soundEffectInstanceRecord.SoundInstance.Play();
-            }
+            return Guid.Empty;
         }
-        else
+
+        // If the sound is currently playing or paused, reset it
+        if (!looped && record.SoundInstance.State is SoundState.Playing or SoundState.Paused)
         {
-            // Multi instance sound effects
-            if (!_multiInstanceSoundEffects.TryGetValue(soundName, out var misxf))
-            {
-                return Guid.Empty;
-            }
-
-            // Create a new instance, but maybe keep a list of all instances created so we can put a max seal of the number of instances per sound allowed
-            if (misxf == null)
-            {
-                return Guid.Empty;
-            }
-
-            // Check number of active slots
-            SoundEffectInstanceRecord soundToPlay;
-            var temp = new List<SoundEffectInstanceRecord>();
-
-            foreach (var t in _multiInstanceSoundEffectInstances)
-            {
-                if (t.SoundName == soundName)
-                {
-                    temp.Add(t);
-                }
-            }
-
-            if (temp.Count > 1 && temp.Count >= misxf.MaxInstances)
-            {
-                // Kill off the one playing the longest
-                soundToPlay = temp[0];
-                for (var a = 1; a < temp.Count; a++)
-                {
-                    if (temp[a].PlayStart < soundToPlay.PlayStart)
-                    {
-                        soundToPlay = temp[a];
-                    }
-                }
-
-                // Stop the sound playing
-                soundToPlay?.SoundInstance.Stop();
-
-                // Update the playtime - this should update the master list automatically since we have kept the same reference
-                if (soundToPlay != null)
-                {
-                    soundToPlay.PlayStart = DateTime.Now.Ticks;
-                }
-            }
-            else
-            {
-                // Only create a new one if we have remaining slots
-                soundToPlay = new SoundEffectInstanceRecord(soundName, SoundEffectInstanceType.Multi,
-                    misxf.Sound.CreateInstance(), DateTime.Now.Ticks, 0, misxf.KillOnScreenChange)
-                {
-                    // Set the ID of the sound we're playing
-                    Id = Guid.NewGuid()
-                };
-
-                // Record the instance
-                _multiInstanceSoundEffectInstances.Add(soundToPlay);
-            }
-
-            // Play the sound
-            if (soundToPlay == null)
-            {
-                return Guid.Empty;
-            }
-
-            soundToPlay.SoundInstance.Volume = volume;
-            soundToPlay.SoundInstance.Play();
-
-            // Return the ID of the multisound
-            return soundToPlay.Id;
+            record.SoundInstance.Stop(true);
         }
 
-        return singleInstanceId;
+        // Play the sound
+        record.SoundInstance.Volume = volume;
+
+        if (!looped || record.SoundInstance.State is SoundState.Stopped or SoundState.Paused)
+        {
+            record.SoundInstance.Play();
+        }
+
+        return record.Id;
+    }
+
+    /// <summary>
+    ///     Plays a sound that may overlap with itself, on a new instance if there is room for one and on
+    ///     the oldest of the existing ones if there is not.
+    /// </summary>
+    private Guid PlayMultiInstance(string soundName, float volume)
+    {
+        // Create a new instance, but maybe keep a list of all instances created so we can put a max seal of the number of instances per sound allowed
+        if (!_multiInstanceSoundEffects.TryGetValue(soundName, out var misxf) || misxf == null)
+        {
+            return Guid.Empty;
+        }
+
+        var playing = new List<SoundEffectInstanceRecord>();
+
+        foreach (var t in _multiInstanceSoundEffectInstances)
+        {
+            if (t.SoundName == soundName)
+            {
+                playing.Add(t);
+            }
+        }
+
+        var soundToPlay = playing.Count > 1 && playing.Count >= misxf.MaxInstances
+            ? StealLongestPlaying(playing)
+            : CreateNewInstance(soundName, misxf);
+
+        soundToPlay.SoundInstance.Volume = volume;
+        soundToPlay.SoundInstance.Play();
+
+        // Return the ID of the multisound
+        return soundToPlay.Id;
+    }
+
+    /// <summary>
+    ///     Takes over the instance that has been playing longest, which is the one a listener is least
+    ///     likely to notice being cut off.
+    /// </summary>
+    private static SoundEffectInstanceRecord StealLongestPlaying(List<SoundEffectInstanceRecord> playing)
+    {
+        var soundToPlay = playing[0];
+
+        for (var a = 1; a < playing.Count; a++)
+        {
+            if (playing[a].PlayStart < soundToPlay.PlayStart)
+            {
+                soundToPlay = playing[a];
+            }
+        }
+
+        soundToPlay.SoundInstance.Stop();
+
+        // Update the playtime - this should update the master list automatically since we have kept the same reference
+        soundToPlay.PlayStart = DateTime.Now.Ticks;
+
+        return soundToPlay;
+    }
+
+    private SoundEffectInstanceRecord CreateNewInstance(string soundName, MultiInstanceSoundEffect misxf)
+    {
+        var soundToPlay = new SoundEffectInstanceRecord(
+            soundName,
+            SoundEffectInstanceType.Multi,
+            misxf.Sound.CreateInstance(),
+            DateTime.Now.Ticks,
+            0,
+            misxf.KillOnScreenChange)
+        {
+            // Set the ID of the sound we're playing
+            Id = Guid.NewGuid()
+        };
+
+        // Record the instance
+        _multiInstanceSoundEffectInstances.Add(soundToPlay);
+
+        return soundToPlay;
     }
 
     public Guid PlaySound(string soundName)

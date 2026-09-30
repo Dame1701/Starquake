@@ -83,141 +83,132 @@ public class BouncingParticle
         _particleBounce.Reset();
     }
 
+    /// <summary>
+    ///     Reads as an axis at the call site: <c>StepAlongAxis(Vertical, p.Y)</c>.
+    /// </summary>
+    private const bool Vertical = true;
+
+    /// <inheritdoc cref="Vertical" />
+    private const bool Horizontal = false;
+
+    /// <summary>
+    ///     The part is one collision cell across, and a step is never allowed to be longer than that -
+    ///     a longer one could pass straight through a wall without ever being tested inside it.
+    /// </summary>
+    private const int ParticleSize = 32;
+
+    /// <summary>
+    ///     Where the fireball trails from, measured in from the part's top left corner.
+    /// </summary>
+    private const int FireballXOffset = 20;
+
+    /// <inheritdoc cref="FireballXOffset" />
+    private const int FireballYOffset = 5;
+
     public void Update(GameTime gameTime)
     {
-        if (_particleBounce.Triggered)
-        {
-            var p = _particleBounce.Update();
-
-            int xSpeed;
-            int ySpeed;
-
-            if (p.Y > 0)
-            {
-                // Ensure we don't move more than the size of the collision tilemap
-                if (p.Y > 32)
-                {
-                    p.Y = 32;
-                }
-
-                ySpeed = _gameEngine.GameScreens.CheckCollision(Direction.Down, XPos, YPos, 32, 32, p.Y, true);
-
-                if (ySpeed == 0)
-                {
-                    YPos = _oldYPos;
-                    _particleBounce.YBounce();
-                    SparkEffect.Start(XPos, YPos);
-                }
-
-                // Keep the parts within the screen bounds, makes for a better effect
-                if (YPos > _gameEngine.GameScreens.ScreenHeight - 32)
-                {
-                    YPos = _gameEngine.GameScreens.ScreenHeight - 32;
-                    _particleBounce.YBounce();
-                    SparkEffect.Start(XPos, YPos);
-                }
-            }
-            else
-            {
-                // Ensure we don't move more than the size of the collision tilemap
-                if (p.Y < -32)
-                {
-                    p.Y = -32;
-                }
-
-                // Absolute value used here to convert the negative to positive for col routine
-                ySpeed = _gameEngine.GameScreens.CheckCollision(Direction.Up, XPos, YPos, 32, 32, Math.Abs(p.Y),
-                    true);
-
-                if (ySpeed == 0)
-                {
-                    YPos = _oldYPos;
-                    _particleBounce.YBounce();
-                    SparkEffect.Start(XPos, YPos);
-                }
-
-                // Convert back to negative number
-                ySpeed = -ySpeed;
-
-                // Keep the parts within the screen bounds, makes for a better effect
-                if (YPos < 32)
-                {
-                    YPos = 32;
-                    _particleBounce.YBounce();
-                    SparkEffect.Start(XPos, YPos);
-                }
-            }
-
-            YPos = YPos + ySpeed;
-            _oldYPos = YPos;
-
-            if (p.X > 0)
-            {
-                // Ensure we don't move more than the size of the collision tilemap
-                if (p.X > 32)
-                {
-                    p.X = 32;
-                }
-
-                xSpeed = _gameEngine.GameScreens.CheckCollision(Direction.Right, XPos, YPos, 32, 32, p.X, true);
-                if (xSpeed == 0)
-                {
-                    XPos = _oldXPos;
-                    _particleBounce.XBounce();
-                    SparkEffect.Start(XPos, YPos);
-                }
-
-                // Keep the parts within the screen bounds, makes for a better effect
-                if (XPos > _gameEngine.GameScreens.ScreenWidth - 32)
-                {
-                    XPos = _gameEngine.GameScreens.ScreenWidth - 32;
-                    _particleBounce.XBounce();
-                    SparkEffect.Start(XPos, YPos);
-                }
-            }
-            else
-            {
-                // Ensure we don't move more than the size of the collision tilemap
-                if (p.X < -32)
-                {
-                    p.X = -32;
-                }
-
-                // Absolute value used here to convert the negative to positive for col routine
-                xSpeed = _gameEngine.GameScreens.CheckCollision(Direction.Left, XPos, YPos, 32, 32, Math.Abs(p.X),
-                    true);
-                if (xSpeed == 0)
-                {
-                    XPos = _oldXPos;
-                    _particleBounce.XBounce();
-                    SparkEffect.Start(XPos, YPos);
-                }
-
-                // Convert back to negative number
-                xSpeed = -xSpeed;
-
-                // Keep the parts within the screen bounds, makes for a better effect
-                if (XPos < 32)
-                {
-                    XPos = 32;
-                    _particleBounce.XBounce();
-                    SparkEffect.Start(XPos, YPos);
-                }
-            }
-
-            XPos += xSpeed;
-            _oldXPos = XPos;
-
-            Fireball.Update(XPos + 20, YPos + 5, gameTime);
-        }
-        else
+        if (!_particleBounce.Triggered)
         {
             // The bounce has finished, so stop releasing particles, but keep updating the
             // effect so the ones still in flight age, move and retire rather than freezing
             // in the emitter's buffer
             Fireball.Stop();
-            Fireball.Update(XPos + 20, YPos + 5, gameTime);
+            Fireball.Update(XPos + FireballXOffset, YPos + FireballYOffset, gameTime);
+
+            return;
         }
+
+        var p = _particleBounce.Update();
+
+        // Vertically first, and the horizontal step is then taken from where that left it
+        YPos += StepAlongAxis(Vertical, p.Y);
+        _oldYPos = YPos;
+
+        XPos += StepAlongAxis(Horizontal, p.X);
+        _oldXPos = XPos;
+
+        Fireball.Update(XPos + FireballXOffset, YPos + FireballYOffset, gameTime);
+    }
+
+    /// <summary>
+    ///     Moves the part one step along one axis, bouncing it off anything it meets and off the edges
+    ///     of the screen, and returns how far it actually got.
+    /// </summary>
+    /// <remarks>
+    ///     This was four blocks - one per axis per direction - which were the same twelve lines with the
+    ///     axis and the sign swapped. The sign is what decides everything: which way to probe, whether
+    ///     the result is negated, and which of the two screen edges is the one to stop at.
+    /// </remarks>
+    private int StepAlongAxis(bool vertical, int requestedStep)
+    {
+        var movingPositive = requestedStep > 0;
+
+        // Ensure we don't move more than the size of the collision tilemap
+        var step = movingPositive
+            ? Math.Min(requestedStep, ParticleSize)
+            : Math.Max(requestedStep, -ParticleSize);
+
+        var direction = vertical
+            ? movingPositive ? Direction.Down : Direction.Up
+            : movingPositive ? Direction.Right : Direction.Left;
+
+        // Absolute value used here to convert the negative to positive for col routine
+        var speed = _gameEngine.GameScreens.CheckCollision(
+            direction,
+            XPos,
+            YPos,
+            ParticleSize,
+            ParticleSize,
+            Math.Abs(step),
+            true);
+
+        if (speed == 0)
+        {
+            BounceBackTo(vertical, vertical ? _oldYPos : _oldXPos);
+        }
+
+        if (!movingPositive)
+        {
+            // Convert back to negative number
+            speed = -speed;
+        }
+
+        var position = vertical ? YPos : XPos;
+        var screenSize = vertical
+            ? _gameEngine.GameScreens.ScreenHeight
+            : _gameEngine.GameScreens.ScreenWidth;
+
+        // Keep the parts within the screen bounds, makes for a better effect
+        if (movingPositive && position > screenSize - ParticleSize)
+        {
+            BounceBackTo(vertical, screenSize - ParticleSize);
+        }
+        else if (!movingPositive && position < ParticleSize)
+        {
+            BounceBackTo(vertical, ParticleSize);
+        }
+
+        return speed;
+    }
+
+    /// <summary>
+    ///     Puts the part back where it can be, turns it around on that axis and throws a spark from
+    ///     where it struck.
+    /// </summary>
+    private void BounceBackTo(bool vertical, int position)
+    {
+        if (vertical)
+        {
+            YPos = position;
+            _particleBounce.YBounce();
+        }
+        else
+        {
+            XPos = position;
+            _particleBounce.XBounce();
+        }
+
+        SparkEffect.Start(XPos, YPos);
     }
 
     public void Draw(SpriteCollection? spriteToDraw, int screenFade, int spriteNumber = -1)

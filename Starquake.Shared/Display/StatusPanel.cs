@@ -248,88 +248,124 @@ public class StatusPanel : GameComponentBase
 
     public void BlobHasPerformedAnAction(BlobAction action, object? data)
     {
-        if (action == BlobAction.FiredLazer)
+        switch (action)
         {
-            FirePower--;
-        }
-        else if (action == BlobAction.LaidPlatform)
-        {
-            Platforms = Platforms - 1;
-        }
-        else if (action == BlobAction.GotPowerUp)
-        {
-            // The only action that carries anything, and what it carries is the power up's type
-            if (data is not int powerUpType)
+            case BlobAction.FiredLazer:
             {
-                throw new ArgumentException(
-                    "A power up action needs the type of power up collected.", nameof(data));
-            }
+                FirePower--;
 
-            if (powerUpType == PowerUpEnergyMedium)
-            {
-                EnergyLevel = EnergyLevel + MediumTopUp;
-                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp2", false);
+                break;
             }
-            else if (powerUpType == PowerUpEnergySmall)
+            case BlobAction.LaidPlatform:
             {
-                EnergyLevel = EnergyLevel + SmallTopUp;
-                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp2", false);
+                Platforms--;
+
+                break;
             }
-            else if (powerUpType == PowerUpEnergyFull)
+            case BlobAction.GotPowerUp:
             {
-                EnergyLevel = EnergyLevel + FullTopUp;
-                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp2", false);
-            }
-            else if (powerUpType == PowerUpFirePowerMedium)
-            {
-                FirePower = FirePower + MediumTopUp;
-                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp3", 0.5f, false);
-            }
-            else if (powerUpType == PowerUpFirePowerSmall)
-            {
-                FirePower = FirePower + SmallTopUp;
-                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp3", 0.5f, false);
-            }
-            else if (powerUpType == PowerUpPlatforms)
-            {
-                Platforms = Platforms + SmallTopUp;
-                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp1", false);
-            }
-            else if (powerUpType == PowerUpWhateverIsLowest)
-            {
-                if (BlobLives == 0)
+                // The only action that carries anything, and what it carries is the power up's type
+                if (data is not int powerUpType)
                 {
-                    BlobLives++;
-                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("LifePowerUp", false); // Extra life
+                    throw new ArgumentException(
+                        "A power up action needs the type of power up collected.", nameof(data));
                 }
-                else if (
-                    Platforms * PlatformCost <= EnergyLevel && // Top Up Jump Platforms
-                    Platforms * PlatformCost <= FirePower)
-                {
-                    Platforms = Platforms + SmallTopUp;
-                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp1", false);
-                }
-                else if (
-                    FirePower <= Platforms * PlatformCost && // Fire power
-                    FirePower <= EnergyLevel)
-                {
-                    FirePower = FirePower + MediumTopUp;
-                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp3", 0.5f, false);
-                }
-                else if (
-                    EnergyLevel <= Platforms * PlatformCost && // Energy
-                    EnergyLevel <= FirePower)
-                {
-                    EnergyLevel = EnergyLevel + LargeTopUp;
-                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp2", false);
-                }
-            }
-            else if (powerUpType == PowerUpExtraLife)
-            {
-                BlobLives++;
-                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("LifePowerUp", false);
+
+                CollectPowerUp(powerUpType);
+
+                break;
             }
         }
+    }
+
+    private void CollectPowerUp(int powerUpType)
+    {
+        if (powerUpType == PowerUpEnergyMedium)
+        {
+            TopUpEnergy(MediumTopUp);
+        }
+        else if (powerUpType == PowerUpEnergySmall)
+        {
+            TopUpEnergy(SmallTopUp);
+        }
+        else if (powerUpType == PowerUpEnergyFull)
+        {
+            TopUpEnergy(FullTopUp);
+        }
+        else if (powerUpType == PowerUpFirePowerMedium)
+        {
+            TopUpFirePower(MediumTopUp);
+        }
+        else if (powerUpType == PowerUpFirePowerSmall)
+        {
+            TopUpFirePower(SmallTopUp);
+        }
+        else if (powerUpType == PowerUpPlatforms)
+        {
+            TopUpPlatforms(SmallTopUp);
+        }
+        else if (powerUpType == PowerUpWhateverIsLowest)
+        {
+            TopUpWhateverIsLowest();
+        }
+        else if (powerUpType == PowerUpExtraLife)
+        {
+            GiveExtraLife();
+        }
+    }
+
+    /// <summary>
+    ///     The wildcard power up. A life if the blob has none left, otherwise whichever of his three
+    ///     supplies he is shortest of - and platforms are compared at their energy cost rather than
+    ///     their count, since one platform is worth several units of anything else.
+    /// </summary>
+    private void TopUpWhateverIsLowest()
+    {
+        if (BlobLives == 0)
+        {
+            GiveExtraLife();
+
+            return;
+        }
+
+        var platformsWorth = Platforms * PlatformCost;
+
+        if (platformsWorth <= EnergyLevel && platformsWorth <= FirePower)
+        {
+            TopUpPlatforms(SmallTopUp);
+        }
+        else if (FirePower <= platformsWorth && FirePower <= EnergyLevel)
+        {
+            TopUpFirePower(MediumTopUp);
+        }
+        else if (EnergyLevel <= platformsWorth && EnergyLevel <= FirePower)
+        {
+            TopUpEnergy(LargeTopUp);
+        }
+    }
+
+    private void TopUpEnergy(int amount)
+    {
+        EnergyLevel += amount;
+        GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp2", false);
+    }
+
+    private void TopUpFirePower(int amount)
+    {
+        FirePower += amount;
+        GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp3", 0.5f, false);
+    }
+
+    private void TopUpPlatforms(int amount)
+    {
+        Platforms += amount;
+        GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("PowerUp1", false);
+    }
+
+    private void GiveExtraLife()
+    {
+        BlobLives++;
+        GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("LifePowerUp", false);
     }
 
     public void PerformPostChangeScreenActions()
