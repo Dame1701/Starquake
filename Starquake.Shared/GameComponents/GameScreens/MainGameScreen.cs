@@ -143,7 +143,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         {
             ScreenFadeSpeed = 16;
             GameEngine.Player.TriggerBlobTeleportedAnimation();
-            GameEngine.ColourAnimationEngine.Start((int)ActionTiles.TeleportBooth, TeleporterAnimationLoops); // Animate the teleporter colour
+            GameEngine.GameScreens.ColourAnimations.Start((int)ActionTiles.TeleportBooth, TeleporterAnimationLoops); // Animate the teleporter colour
         }
 
         if (triggeringScreen == GameScreenType.AccessBooth)
@@ -155,13 +155,13 @@ public class MainGameScreen : GameComponentBase, IGameScreen
 
                 if (success)
                 {
-                    GameEngine.ColourAnimationEngine.Start((int)ActionTiles.AccessBoothLeft, AccessBoothAnimationLoops, new Color(0, ColourLevels.Full, 0), AccessBoothPassedSpeed);
-                    GameEngine.ColourAnimationEngine.Start((int)ActionTiles.AccessBoothRight, AccessBoothAnimationLoops, new Color(0, ColourLevels.Full, 0), AccessBoothPassedSpeed);
+                    GameEngine.GameScreens.ColourAnimations.Start((int)ActionTiles.AccessBoothLeft, AccessBoothAnimationLoops, new Color(0, ColourLevels.Full, 0), AccessBoothPassedSpeed);
+                    GameEngine.GameScreens.ColourAnimations.Start((int)ActionTiles.AccessBoothRight, AccessBoothAnimationLoops, new Color(0, ColourLevels.Full, 0), AccessBoothPassedSpeed);
                 }
                 else
                 {
-                    GameEngine.ColourAnimationEngine.Start((int)ActionTiles.AccessBoothLeft, AccessBoothAnimationLoops, new Color(ColourLevels.Full, 0, 0), AccessBoothFailedSpeed);
-                    GameEngine.ColourAnimationEngine.Start((int)ActionTiles.AccessBoothRight, AccessBoothAnimationLoops, new Color(ColourLevels.Full, 0, 0), AccessBoothFailedSpeed);
+                    GameEngine.GameScreens.ColourAnimations.Start((int)ActionTiles.AccessBoothLeft, AccessBoothAnimationLoops, new Color(ColourLevels.Full, 0, 0), AccessBoothFailedSpeed);
+                    GameEngine.GameScreens.ColourAnimations.Start((int)ActionTiles.AccessBoothRight, AccessBoothAnimationLoops, new Color(ColourLevels.Full, 0, 0), AccessBoothFailedSpeed);
                 }
             }
         }

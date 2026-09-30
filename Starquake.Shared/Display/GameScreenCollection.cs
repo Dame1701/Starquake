@@ -2,18 +2,19 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System;
 using MessagePack;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 using ProjectMercury.Emitters;
 using Starquake.ActiveSprites;
+using Starquake.Animations;
 using Starquake.Collisions;
 using Starquake.Constants;
-using Starquake.Engines;
+using Starquake.ContentManagement;
 using Starquake.Particles;
 using Starquake.SharedLibs;
 using Starquake.Structure;
@@ -22,7 +23,11 @@ namespace Starquake.Display;
 
 public class GameScreenCollection : GameComponentBase
 {
-    private readonly GameEngine GameEngine;
+    private readonly CoreElements _elements;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
+
 
     /// <summary>
     ///     How many Cheops pyramids and core elements are scattered across the map at the start of a
@@ -223,10 +228,28 @@ public class GameScreenCollection : GameComponentBase
 
     private int _tileWidth;
 
-    public GameScreenCollection(GameEngine gameEngineRef, int tilesAcross, int tilesDown, int xOffset, int yOffset,
-        int collAreaWidth, int collAreaHeight)
+    public GameScreenCollection(
+        ResourceManager resources,
+        GraphicsSet graphicsSet,
+        CoreElements elements,
+        Random randomNumberGenerator,
+        int tilesAcross,
+        int tilesDown,
+        int xOffset,
+        int yOffset,
+        int collAreaWidth,
+        int collAreaHeight)
     {
-        GameEngine = gameEngineRef;
+        _resources = resources;
+        _graphicsSet = graphicsSet;
+        _elements = elements;
+        _randomNumberGenerator = randomNumberGenerator;
+
+        // The colour animations are animations of this planet's own tiles, and nothing but the
+        // planet and the main screen drives them - so the planet owns one and hands itself to it.
+        // That is the last cycle in the graph: the animation engine needs the planet to read tiles
+        // from, and the planet was reaching back through the engine to find the animation engine.
+        ColourAnimations = new ColourAnimationEngine(resources, this, graphicsSet);
 
         _oldXoffset = xOffset;
         _oldYoffset = yOffset;
@@ -240,19 +263,19 @@ public class GameScreenCollection : GameComponentBase
         _detectedCollisionMap = new List<CollisionTile>();
 
         // Load screen data
-        _gameScreens = (GameScreenData[])GameEngine.ContentResourceManager.GetDataResource("GameScreens");
+        _gameScreens = (GameScreenData[])_resources.GetDataResource("GameScreens");
         _screenCollisionDataArray =
-            (int[,,])GameEngine.ContentResourceManager.GetDataResource("ScreenCollisionData");
+            (int[,,])_resources.GetDataResource("ScreenCollisionData");
 
         BlobsShipSmoke1 =
-            (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume",
+            (IStandardParticleEffect)_resources.GetParticleEffectInstance("BasicSmokePlume",
                 ParticleEffectType.Continual, null);
         BlobsShipSmoke2 =
-            (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume2",
+            (IStandardParticleEffect)_resources.GetParticleEffectInstance("BasicSmokePlume2",
                 ParticleEffectType.Continual, null);
 
         _keyDoorForceFieldNoAccess =
-            (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("ForceField",
+            (IStandardParticleEffect)_resources.GetParticleEffectInstance("ForceField",
                 ParticleEffectType.Continual, null);
 
         // Make this better in the future...?
@@ -270,10 +293,16 @@ public class GameScreenCollection : GameComponentBase
 
     public IStandardParticleEffect BlobsShipSmoke2 { get; }
 
-    public int ScreenWidth => GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
+    /// <summary>
+    ///     The tiles on this planet that pulse through colours. Owned here because they are this
+    ///     planet's tiles; <c>MainGameScreen</c> starts them for the teleporter and access booths.
+    /// </summary>
+    public ColourAnimationEngine ColourAnimations { get; }
+
+    public int ScreenWidth => _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
         .SpriteWidth * TilesAcross;
 
-    public int ScreenHeight => GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
+    public int ScreenHeight => _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
         .SpriteHeight * TilesDown;
 
     public int PreviousScreenNumber { get; private set; }
@@ -399,9 +428,9 @@ public class GameScreenCollection : GameComponentBase
                 if (_gameScreens[screenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.PreferredCoreLocation)
                 {
                     return new InteractiveItem(
-                        x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
+                        x * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
                             .SpriteWidth + 32,
-                        y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
+                        y * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
                             .SpriteHeight + 32, 0);
                 }
             }
@@ -417,7 +446,7 @@ public class GameScreenCollection : GameComponentBase
     private List<InteractiveItem> GetPotentialLocations(int screenNumber)
     {
         var toReturn = new List<InteractiveItem>();
-        var tiles = GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles);
+        var tiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
 
         // Start at row 1: nothing above that row is reachable
         for (var y = 1; y < _gameScreens[screenNumber].ScreenTiles.GetLength(1); y++)
@@ -577,11 +606,11 @@ public class GameScreenCollection : GameComponentBase
                         _gameScreens[ScreenNumber].CollisionMap.Add(
                             new CollisionTile(
                                 _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage,
-                                x * GameEngine.ContentResourceManager
-                                    .GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).SpriteWidth +
+                                x * _resources
+                                    .GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteWidth +
                                 x1 * CollAreaWidth,
-                                y * GameEngine.ContentResourceManager
-                                    .GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).SpriteHeight +
+                                y * _resources
+                                    .GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteHeight +
                                 y1 * CollAreaHeight,
                                 CollisionTileType.EveryoneHits));
                     }
@@ -811,9 +840,9 @@ public class GameScreenCollection : GameComponentBase
                             gameScreen.ScreenTiles[x, y].TileImage = (int)ActionTiles.RemovedShuttlePlatform;
 
                             // Trigger Colour animation
-                            GameEngine.ColourAnimationEngine.Start((int)ActionTiles.ShuttleTag1, -1);
-                            GameEngine.ColourAnimationEngine.Start((int)ActionTiles.ShuttleTag3, -1);
-                            GameEngine.ColourAnimationEngine.Start((int)ActionTiles.ShuttleTag2, -1);
+                            ColourAnimations.Start((int)ActionTiles.ShuttleTag1, -1);
+                            ColourAnimations.Start((int)ActionTiles.ShuttleTag3, -1);
+                            ColourAnimations.Start((int)ActionTiles.ShuttleTag2, -1);
                         }
                     }
                     else
@@ -823,9 +852,9 @@ public class GameScreenCollection : GameComponentBase
                             gameScreen.ScreenTiles[x, y].TileImage = (int)ActionTiles.ShuttlePlatform;
 
                             // Cancel Colour animation
-                            GameEngine.ColourAnimationEngine.Stop((int)ActionTiles.ShuttleTag1);
-                            GameEngine.ColourAnimationEngine.Stop((int)ActionTiles.ShuttleTag3);
-                            GameEngine.ColourAnimationEngine.Stop((int)ActionTiles.ShuttleTag2);
+                            ColourAnimations.Stop((int)ActionTiles.ShuttleTag1);
+                            ColourAnimations.Stop((int)ActionTiles.ShuttleTag3);
+                            ColourAnimations.Stop((int)ActionTiles.ShuttleTag2);
                         }
                     }
                 }
@@ -1003,9 +1032,9 @@ public class GameScreenCollection : GameComponentBase
 
     public Point ConvertToScreenCoords(int tileMapXPos, int tileMapYPos)
         => new(
-            tileMapXPos * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
+            tileMapXPos * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
                 .SpriteWidth,
-            tileMapYPos * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
+            tileMapYPos * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
                 .SpriteHeight);
 
     public List<Point> GetCoordsOfTiles(int tileType)
@@ -1019,9 +1048,9 @@ public class GameScreenCollection : GameComponentBase
                 if (_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage == tileType)
                 {
                     returnedTiles.Add(new Point(
-                        x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
+                        x * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
                             .SpriteWidth,
-                        y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
+                        y * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
                             .SpriteHeight));
                 }
             }
@@ -1041,9 +1070,9 @@ public class GameScreenCollection : GameComponentBase
                 if (tileTypes.Contains(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage))
                 {
                     returnedTiles.Add(new Point(
-                        x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
+                        x * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
                             .SpriteWidth,
-                        y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
+                        y * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
                             .SpriteHeight));
                 }
             }
@@ -1065,10 +1094,10 @@ public class GameScreenCollection : GameComponentBase
                     returnedTiles.Add(new KeyLockDoor
                     {
                         Location = new Point(
-                            x * GameEngine.ContentResourceManager
-                                .GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).SpriteWidth,
-                            y * GameEngine.ContentResourceManager
-                                .GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).SpriteHeight)
+                            x * _resources
+                                .GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteWidth,
+                            y * _resources
+                                .GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteHeight)
                     });
                 }
             }
@@ -1088,9 +1117,9 @@ public class GameScreenCollection : GameComponentBase
                 if (_gameScreens[screenNumber].ScreenTiles[x, y].TileImage == tileType)
                 {
                     returnedTiles.Add(new Point(
-                        x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
+                        x * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
                             .SpriteWidth,
-                        y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
+                        y * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
                             .SpriteHeight));
                 }
             }
@@ -1113,7 +1142,7 @@ public class GameScreenCollection : GameComponentBase
             return null;
         }
 
-        var tiles = GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles);
+        var tiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
 
         // A check along the vertical axis reports where the object's foot sits inside the tile; every
         // other check reports where its top does.
@@ -1207,8 +1236,8 @@ public class GameScreenCollection : GameComponentBase
             TrackBlobWithOllysEyes(blobXPos, blobYPos);
         }
 
-        GameEngine.ContentResourceManager.GetAnimationEngine().Update(gameTime);
-        GameEngine.ColourAnimationEngine.Update(gameTime);
+        _resources.GetAnimationEngine().Update(gameTime);
+        ColourAnimations.Update(gameTime);
     }
 
     /// <summary>
@@ -1316,19 +1345,19 @@ public class GameScreenCollection : GameComponentBase
     {
         var objNo = 0;
 
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups)
+        _resources.GetSpriteCollection(_graphicsSet.Names.Pickups)
             .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
         for (var y = 0; y < 3; y++)
         {
             for (var x = 0; x < 3; x++)
             {
-                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups)
+                _resources.GetSpriteCollection(_graphicsSet.Names.Pickups)
                     .DrawSprite(objNo, x * 64 + xPos, y * 64 + yPos, Color.White);
                 objNo++;
             }
         }
 
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups).End();
+        _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
     }
 
     public void Draw(Color colour, GameTime gameTime, bool introSequenceRunning = false,
@@ -1342,7 +1371,7 @@ public class GameScreenCollection : GameComponentBase
             }
         }
 
-        GameEngine.ColourAnimationEngine.Draw(gameTime, colour.A);
+        ColourAnimations.Draw(gameTime, colour.A);
 
         // The intro sequence flies over a screen whose objects have not been placed yet
         var objectsArePlaced = !introSequenceRunning || introSequenceStage == IntroSequenceStage.EndPause;
@@ -1373,7 +1402,7 @@ public class GameScreenCollection : GameComponentBase
         // Avoid the tunnel tiles
         if (tileImage < (int)ActionTiles.AccessForceField)
         {
-            var tiles = GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles);
+            var tiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
 
             tiles.Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
             tiles.DrawSprite(tileImage, x * _tileWidth, y * _tileHeight, colour);
@@ -1381,7 +1410,7 @@ public class GameScreenCollection : GameComponentBase
         }
 
         // Draw animation portions
-        GameEngine.ContentResourceManager.GetAnimationEngine()
+        _resources.GetAnimationEngine()
             .Draw(tileImage, x * _tileWidth, y * _tileHeight, colour, gameTime);
     }
 
@@ -1392,12 +1421,12 @@ public class GameScreenCollection : GameComponentBase
             return;
         }
 
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.PowerUps)
+        _resources.GetSpriteCollection(_graphicsSet.Names.PowerUps)
             .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.PowerUps).DrawSprite(
+        _resources.GetSpriteCollection(_graphicsSet.Names.PowerUps).DrawSprite(
             CurrentGameScreenData.PowerUp.Type, CurrentGameScreenData.PowerUp.XLocation,
             CurrentGameScreenData.PowerUp.YLocation, colour);
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.PowerUps).End();
+        _resources.GetSpriteCollection(_graphicsSet.Names.PowerUps).End();
     }
 
     private void DrawPickUps(Color colour, GameTime gameTime)
@@ -1407,16 +1436,16 @@ public class GameScreenCollection : GameComponentBase
             return;
         }
 
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups)
+        _resources.GetSpriteCollection(_graphicsSet.Names.Pickups)
             .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
         foreach (var pickUp in CurrentGameScreenData.PickUps)
         {
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups).DrawSprite(
+            _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite(
                 pickUp.Type, pickUp.XLocation,
                 pickUp.YLocation, colour);
         }
 
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.Pickups).End();
+        _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
     }
 
     private void DrawCheopsPyramid(Color colour, GameTime gameTime)
@@ -1426,23 +1455,23 @@ public class GameScreenCollection : GameComponentBase
             return;
         }
 
-        if (GameEngine.GraphicsSet.IsOriginal)
+        if (_graphicsSet.IsOriginal)
         {
-            GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal")
+            _resources.GetSpriteCollection("CheopsPyramidOriginal")
                 .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-            GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").DrawSprite(0,
+            _resources.GetSpriteCollection("CheopsPyramidOriginal").DrawSprite(0,
                 CurrentGameScreenData.CheopsPyramid.XLocation, CurrentGameScreenData.CheopsPyramid.YLocation,
                 colour);
-            GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramidOriginal").End();
+            _resources.GetSpriteCollection("CheopsPyramidOriginal").End();
         }
         else
         {
-            GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid")
+            _resources.GetSpriteCollection("CheopsPyramid")
                 .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-            GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").DrawSprite(0,
+            _resources.GetSpriteCollection("CheopsPyramid").DrawSprite(0,
                 CurrentGameScreenData.CheopsPyramid.XLocation, CurrentGameScreenData.CheopsPyramid.YLocation,
                 colour);
-            GameEngine.ContentResourceManager.GetSpriteCollection("CheopsPyramid").End();
+            _resources.GetSpriteCollection("CheopsPyramid").End();
         }
     }
 
@@ -1451,16 +1480,16 @@ public class GameScreenCollection : GameComponentBase
     /// </summary>
     private void DrawOllyBackground(Color colour, GameTime gameTime)
     {
-        if (ScreenNumber != OllyScreenNumber || GameEngine.GraphicsSet.IsOriginal)
+        if (ScreenNumber != OllyScreenNumber || _graphicsSet.IsOriginal)
         {
             return;
         }
 
-        GameEngine.ContentResourceManager.GetSpriteCollection("OllyBackground")
+        _resources.GetSpriteCollection("OllyBackground")
             .Begin(BlendState.AlphaBlend, gameTime);
-        GameEngine.ContentResourceManager.GetSpriteCollection("OllyBackground")
+        _resources.GetSpriteCollection("OllyBackground")
             .DrawSprite(0, 382, 146, colour);
-        GameEngine.ContentResourceManager.GetSpriteCollection("OllyBackground").End();
+        _resources.GetSpriteCollection("OllyBackground").End();
     }
 
     public void DrawUpperLayer(Color colour, GameTime gameTime)
@@ -1477,7 +1506,7 @@ public class GameScreenCollection : GameComponentBase
         DrawOlly(colour, gameTime);
         DrawKeyDoorForceFields();
 
-        GameEngine.ColourAnimationEngine.DrawUpperLayer(gameTime, colour.A);
+        ColourAnimations.DrawUpperLayer(gameTime, colour.A);
     }
 
     /// <summary>
@@ -1491,8 +1520,8 @@ public class GameScreenCollection : GameComponentBase
             return;
         }
 
-        var upperTiles = GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.UpperScreenTiles);
-        var lowerTiles = GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles);
+        var upperTiles = _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles);
+        var lowerTiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
 
         upperTiles.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
         upperTiles.DrawSprite(
@@ -1559,12 +1588,12 @@ public class GameScreenCollection : GameComponentBase
     {
         if (CurrentGameScreenData.ScreenTiles[x, y].TileImage > LastCollidableTile)
         {
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
+            _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
                 .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles)
+            _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
                 .DrawSprite(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, x * _tileWidth,
                     y * _tileHeight, colour);
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.GraphicsSet.Names.LowerScreenTiles).End();
+            _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).End();
         }
     }
 
@@ -1572,31 +1601,31 @@ public class GameScreenCollection : GameComponentBase
     {
         if (ScreenNumber == OllyScreenNumber)
         {
-            if (GameEngine.GraphicsSet.IsOriginal)
+            if (_graphicsSet.IsOriginal)
             {
-                GameEngine.ContentResourceManager.GetSpriteCollection("OllyOriginal")
+                _resources.GetSpriteCollection("OllyOriginal")
                     .Begin(BlendState.AlphaBlend, gameTime);
-                GameEngine.ContentResourceManager.GetSpriteCollection("OllyOriginal")
+                _resources.GetSpriteCollection("OllyOriginal")
                     .DrawSprite(0, 384, 100, colour);
-                GameEngine.ContentResourceManager.GetSpriteCollection("OllyOriginal").End();
+                _resources.GetSpriteCollection("OllyOriginal").End();
             }
             else
             {
-                GameEngine.ContentResourceManager.GetSpriteCollection("OllyLower")
+                _resources.GetSpriteCollection("OllyLower")
                     .Begin(BlendState.AlphaBlend, gameTime);
-                GameEngine.ContentResourceManager.GetSpriteCollection("OllyLower").DrawSprite(0, 382, 146, colour);
-                GameEngine.ContentResourceManager.GetSpriteCollection("OllyLower").End();
+                _resources.GetSpriteCollection("OllyLower").DrawSprite(0, 382, 146, colour);
+                _resources.GetSpriteCollection("OllyLower").End();
 
-                GameEngine.ContentResourceManager.GetSpriteCollection("OllyEyes")
+                _resources.GetSpriteCollection("OllyEyes")
                     .Begin(BlendState.AlphaBlend, gameTime);
-                GameEngine.ContentResourceManager.GetSpriteCollection("OllyEyes")
+                _resources.GetSpriteCollection("OllyEyes")
                     .DrawSprite(0, _ollyEyesX, _ollyEyesY, colour);
-                GameEngine.ContentResourceManager.GetSpriteCollection("OllyEyes").End();
+                _resources.GetSpriteCollection("OllyEyes").End();
 
-                GameEngine.ContentResourceManager.GetSpriteCollection("OllyUpper")
+                _resources.GetSpriteCollection("OllyUpper")
                     .Begin(BlendState.AlphaBlend, gameTime);
-                GameEngine.ContentResourceManager.GetSpriteCollection("OllyUpper").DrawSprite(0, 450, 166, colour);
-                GameEngine.ContentResourceManager.GetSpriteCollection("OllyUpper").End();
+                _resources.GetSpriteCollection("OllyUpper").DrawSprite(0, 450, 166, colour);
+                _resources.GetSpriteCollection("OllyUpper").End();
             }
         }
     }
@@ -1614,14 +1643,14 @@ public class GameScreenCollection : GameComponentBase
 
     public void DrawShadowing(GameTime gameTime)
     {
-        if (GameEngine.GraphicsSet.IsRedrawn)
+        if (_graphicsSet.IsRedrawn)
         {
             // Status panel shadow
-            GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelShadow")
+            _resources.GetSpriteCollection("StatusPanelShadow")
                 .Begin(BlendState.AlphaBlend, gameTime);
-            GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelShadow")
+            _resources.GetSpriteCollection("StatusPanelShadow")
                 .DrawSprite(0, 0, 0, Color.White);
-            GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelShadow").End();
+            _resources.GetSpriteCollection("StatusPanelShadow").End();
         }
     }
 
@@ -1799,7 +1828,7 @@ public class GameScreenCollection : GameComponentBase
         string cheopsAccessCode;
         do
         {
-            cheopsAccessCode = GameEngine.RandomNumberGenerator.Next(CheopsCodeLowest, CheopsCodeExclusiveUpperBound).ToString();
+            cheopsAccessCode = _randomNumberGenerator.Next(CheopsCodeLowest, CheopsCodeExclusiveUpperBound).ToString();
         } while (!CheckAccessCodeValidity(cheopsAccessCode));
 
         _gameScreens[screenNumber].CheopsAccessCode = cheopsAccessCode;
@@ -1821,7 +1850,7 @@ public class GameScreenCollection : GameComponentBase
         string accessCode;
         do
         {
-            accessCode = GameEngine.RandomNumberGenerator.Next(AccessCodeLowest, AccessCodeExclusiveUpperBound).ToString();
+            accessCode = _randomNumberGenerator.Next(AccessCodeLowest, AccessCodeExclusiveUpperBound).ToString();
         } while (!CheckAccessCodeValidity(accessCode));
 
         _gameScreens[screenNumber].AccessCode = accessCode;
@@ -1868,7 +1897,7 @@ public class GameScreenCollection : GameComponentBase
     {
         while (screens.Count > maximum)
         {
-            var screen = screens[GameEngine.RandomNumberGenerator.Next(0, screens.Count)];
+            var screen = screens[_randomNumberGenerator.Next(0, screens.Count)];
 
             removeFrom(screen);
             screens.Remove(screen);
@@ -1883,17 +1912,17 @@ public class GameScreenCollection : GameComponentBase
     {
         var tempElements = new List<CoreElement>();
 
-        for (var a = 0; a < GameEngine.Elements.GetActiveElements().Count; a++)
+        for (var a = 0; a < _elements.GetActiveElements().Count; a++)
         {
-            tempElements.Add(GameEngine.Elements.GetActiveElements()[a]);
+            tempElements.Add(_elements.GetActiveElements()[a]);
         }
 
         // Make a random number of the core elements on the map match what we need
-        var matchNumber = GameEngine.RandomNumberGenerator.Next(2, 6);
+        var matchNumber = _randomNumberGenerator.Next(2, 6);
 
         for (var a = 0; a < matchNumber; a++)
         {
-            var elementIndex = GameEngine.RandomNumberGenerator.Next(0, tempElements.Count);
+            var elementIndex = _randomNumberGenerator.Next(0, tempElements.Count);
             screensContainingCoreElements[a].PickUps[0].Type = tempElements[elementIndex].CurrentElement;
             tempElements.Remove(tempElements[elementIndex]);
         }

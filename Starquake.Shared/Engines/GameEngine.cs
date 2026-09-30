@@ -120,7 +120,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     private BreakableBridges? _breakableBridgesEngine;
 
-    private ColourAnimationEngine? _colourAnimationEngine;
     public readonly ContentManager ContentMgr;
 
     public readonly ResourceManager ContentResourceManager;
@@ -268,9 +267,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     /// <inheritdoc cref="GameScreens" />
     public Blob Player => NotBeforeContentLoads(_player);
-
-    /// <inheritdoc cref="GameScreens" />
-    public ColourAnimationEngine ColourAnimationEngine => NotBeforeContentLoads(_colourAnimationEngine);
 
     /// <inheritdoc cref="GameScreens" />
     public BreakableBridges BreakableBridgesEngine => NotBeforeContentLoads(_breakableBridgesEngine);
@@ -703,15 +699,16 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         // the collision map it needs are resources, and those do not exist until content loads
         _gameScreens =
             new GameScreenCollection(
-                this,
+                ContentResourceManager,
+                GraphicsSet,
+                Elements,
+                RandomNumberGenerator,
                 TileMetrics.TilesAcross,
                 TileMetrics.TilesDown,
                 0,
                 0,
                 TileMetrics.CollisionCellWidth,
                 TileMetrics.CollisionCellHeight);
-
-        _colourAnimationEngine = new ColourAnimationEngine(ContentResourceManager, GameScreens, GraphicsSet);
 
         // Tunnel lift animations. After the screen collection, which it reads the lift shafts from.
         _tunnelAnimations = new TunnelLiftAnimationEngine(ContentResourceManager, GameScreens, GraphicsSet);
@@ -781,7 +778,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     private void RegisterColourAnimations()
     {
-        ColourAnimationEngine.RegisterTile(new ColourFaderAnimation
+        GameScreens.ColourAnimations.RegisterTile(new ColourFaderAnimation
         {
             TileNo = (int)ActionTiles.TeleportBooth,
             UpperTileToDraw = 7,
@@ -789,7 +786,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             TransitionColour = new Color(0, 0, ColourLevels.Full),
             Speed = 8
         }); // Teleport booths
-        ColourAnimationEngine.RegisterTile(new ColourFaderAnimation
+        GameScreens.ColourAnimations.RegisterTile(new ColourFaderAnimation
         {
             TileNo = (int)ActionTiles.AccessBoothLeft,
             UpperTileToDraw = 9,
@@ -797,7 +794,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             TransitionColour = new Color(0, ColourLevels.Full, 0),
             Speed = 32
         }); // Access tunnel left
-        ColourAnimationEngine.RegisterTile(new ColourFaderAnimation
+        GameScreens.ColourAnimations.RegisterTile(new ColourFaderAnimation
         {
             TileNo = (int)ActionTiles.AccessBoothRight,
             UpperTileToDraw = 10,
@@ -805,7 +802,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             TransitionColour = new Color(ColourLevels.Full, 0, 0),
             Speed = 32
         }); // Access tunnel right
-        ColourAnimationEngine.RegisterTile(new ColourFaderAnimation
+        GameScreens.ColourAnimations.RegisterTile(new ColourFaderAnimation
         {
             TileNo = (int)ActionTiles.ShuttleTag1,
             UpperTileToDraw = -1,
@@ -813,7 +810,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             TransitionColour = new Color(ColourLevels.Full, ColourLevels.Full, 0),
             Speed = 16
         }); // Yellow teleport tag
-        ColourAnimationEngine.RegisterTile(new ColourFaderAnimation
+        GameScreens.ColourAnimations.RegisterTile(new ColourFaderAnimation
         {
             TileNo = (int)ActionTiles.ShuttleTag3,
             UpperTileToDraw = -1,
@@ -821,7 +818,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             TransitionColour = new Color(ColourLevels.Full, 0, 0),
             Speed = 16
         }); // Red teleport tag
-        ColourAnimationEngine.RegisterTile(new ColourFaderAnimation
+        GameScreens.ColourAnimations.RegisterTile(new ColourFaderAnimation
         {
             TileNo = (int)ActionTiles.ShuttleTag2,
             UpperTileToDraw = -1,
@@ -1223,16 +1220,16 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     {
             if (ToggleKeys.GetPressedKey() == Keys.K)
             {
-                ColourAnimationEngine.Start((int)ActionTiles.ShuttleTag1, -1);
-                ColourAnimationEngine.Start((int)ActionTiles.ShuttleTag3, -1);
-                ColourAnimationEngine.Start((int)ActionTiles.ShuttleTag2, -1);
+                GameScreens.ColourAnimations.Start((int)ActionTiles.ShuttleTag1, -1);
+                GameScreens.ColourAnimations.Start((int)ActionTiles.ShuttleTag3, -1);
+                GameScreens.ColourAnimations.Start((int)ActionTiles.ShuttleTag2, -1);
             }
 
             if (ToggleKeys.GetPressedKey() == Keys.L)
             {
-                ColourAnimationEngine.Stop((int)ActionTiles.ShuttleTag1);
-                ColourAnimationEngine.Stop((int)ActionTiles.ShuttleTag3);
-                ColourAnimationEngine.Stop((int)ActionTiles.ShuttleTag2);
+                GameScreens.ColourAnimations.Stop((int)ActionTiles.ShuttleTag1);
+                GameScreens.ColourAnimations.Stop((int)ActionTiles.ShuttleTag3);
+                GameScreens.ColourAnimations.Stop((int)ActionTiles.ShuttleTag2);
             }
     }
 
