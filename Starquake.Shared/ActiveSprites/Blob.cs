@@ -1126,7 +1126,7 @@ public class Blob : GameComponentBase
 
         GameEngine.GameScreens.ScreenNumber--;
         _blobXPos = GameEngine.GameScreens.ScreenWidth - GameEngine.ContentResourceManager
-            .GetSpriteCollection(GameEngine.BlobSpritesName).SpriteWidth;
+            .GetSpriteCollection(GameEngine.ResourceNames.BlobSprites).SpriteWidth;
 
         RaiseScreenChangedToMainGame();
 
@@ -1136,7 +1136,7 @@ public class Blob : GameComponentBase
     private bool ChangeScreenOffRightEdge()
     {
         var blobRightEdge = _blobXPos + GameEngine.ContentResourceManager
-            .GetSpriteCollection(GameEngine.BlobSpritesName).SpriteWidth;
+            .GetSpriteCollection(GameEngine.ResourceNames.BlobSprites).SpriteWidth;
 
         if (blobRightEdge <= GameEngine.GameScreens.ScreenWidth ||
             GameEngine.GameScreens.ScreenNumber + 1 > WorldMap.ScreenCount)
@@ -1177,7 +1177,7 @@ public class Blob : GameComponentBase
             _blobYPos = _blobJumpPlatformEngine.GetNewJumpPlatform(
                 _blobXPos,
                 GameEngine.GameScreens.ScreenHeight - GameEngine.ContentResourceManager
-                    .GetSpriteCollection(GameEngine.BlobSpritesName).SpriteHeight,
+                    .GetSpriteCollection(GameEngine.ResourceNames.BlobSprites).SpriteHeight,
                 0,
                 0,
                 false);
@@ -1857,13 +1857,13 @@ public class Blob : GameComponentBase
 
     private void DrawBlobSprite(GameTime gameTime, int screenFade)
     {
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName)
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.BlobSprites)
             .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName).DrawSprite(BlobFrame,
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.BlobSprites).DrawSprite(BlobFrame,
             _blobXPos, _blobYPos,
             ColourHelper.GetXna4Colour(ColourLevels.Full, (byte)_blobEnergyDrainCounter, (byte)_blobEnergyDrainCounter,
                 (byte)(_teleportFadeLevel * ((double)screenFade / ColourLevels.Full))), 1f, 0f);
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName).End();
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.BlobSprites).End();
     }
 
     private void DrawShuttle(GameTime gameTime, int screenFade)
@@ -1976,13 +1976,13 @@ public class Blob : GameComponentBase
         // Make blob flicker
         if (_blobAlarmSoundCounter % 2 == 0)
         {
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName)
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.BlobSprites)
                 .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName).DrawSprite(
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.BlobSprites).DrawSprite(
                 BlobFrame, _blobXPos, _blobYPos,
                 ColourHelper.GetXna4Colour(ColourLevels.Full, (byte)_blobEnergyDrainCounter, (byte)_blobEnergyDrainCounter,
                     (byte)(_teleportFadeLevel * ((double)screenFade / ColourLevels.Full))), 1f, 0f);
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName).End();
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.BlobSprites).End();
         }
 
         if (_blobOnShuttle)
@@ -1997,7 +1997,7 @@ public class Blob : GameComponentBase
 
     private void DrawOverloadFlare(GameTime gameTime)
     {
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName)
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.BlobSprites)
             .Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
 
         var temp = _blobScale - OverloadFlareFirstScale;
@@ -2005,7 +2005,7 @@ public class Blob : GameComponentBase
         {
             if (temp >= 0f)
             {
-                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName)
+                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.BlobSprites)
                     .DrawSprite(BlobFrame, _blobXPos, _blobYPos,
                         ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, OverloadFlareAlpha), temp, 0f);
             }
@@ -2013,7 +2013,7 @@ public class Blob : GameComponentBase
             temp += OverloadFlareScaleStep;
         }
 
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName).End();
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.BlobSprites).End();
     }
 
     public void DrawUpper(int screenFade)

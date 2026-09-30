@@ -94,14 +94,14 @@ public class TunnelLiftAnimationEngine : GameComponentBase
     {
         if (_columns != null && _columns.Count > 0)
         {
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.UpperScreenTiles).Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
 
             foreach (var column in _columns)
             {
-                column.Draw(GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName), screenfade);
+                column.Draw(GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.UpperScreenTiles), screenfade);
             }
 
-            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).End();
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.UpperScreenTiles).End();
         }
     }
 }

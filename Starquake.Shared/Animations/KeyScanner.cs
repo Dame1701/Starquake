@@ -101,9 +101,9 @@ public class KeyScanner
     public void Draw(int codeNumber, int xPos, int yPos, GameTime gameTime)
     {
         // Draw the code keys
-        _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).Begin(BlendState.AlphaBlend, gameTime);
-        _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).DrawSprite(codeNumber, xPos + 2, yPos + 6, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
-        _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.PickupsName).End();
+        _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.ResourceNames.Pickups).Begin(BlendState.AlphaBlend, gameTime);
+        _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.ResourceNames.Pickups).DrawSprite(codeNumber, xPos + 2, yPos + 6, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
+        _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.ResourceNames.Pickups).End();
 
         var height = 0;
         if (_scanLineY > 64)
@@ -120,16 +120,16 @@ public class KeyScanner
         {
             if (_matched)
             {
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.AccessCodesPassedName).Begin(BlendState.AlphaBlend, gameTime);
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.AccessCodesPassedName).DrawSpriteSubSection(codeNumber, xPos + 2, yPos + 6, new Rectangle(0, 0, 64, height), ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.AccessCodesPassedName).End();
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.ResourceNames.AccessCodesPassed).Begin(BlendState.AlphaBlend, gameTime);
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.ResourceNames.AccessCodesPassed).DrawSpriteSubSection(codeNumber, xPos + 2, yPos + 6, new Rectangle(0, 0, 64, height), ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.ResourceNames.AccessCodesPassed).End();
 
             }
             else
             {
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.AccessCodesFailedName).Begin(BlendState.AlphaBlend, gameTime);
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.AccessCodesFailedName).DrawSpriteSubSection(codeNumber, xPos + 2, yPos + 6, new Rectangle(0, 0, 64, height), ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.AccessCodesFailedName).End();
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.ResourceNames.AccessCodesFailed).Begin(BlendState.AlphaBlend, gameTime);
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.ResourceNames.AccessCodesFailed).DrawSpriteSubSection(codeNumber, xPos + 2, yPos + 6, new Rectangle(0, 0, 64, height), ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
+                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.ResourceNames.AccessCodesFailed).End();
             }
 
             // Draw the scanlines

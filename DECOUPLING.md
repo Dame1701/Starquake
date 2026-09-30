@@ -70,14 +70,32 @@ a slice of `GameEngine` has moved the coupling, not removed it.
 
 ## Stage 1 — subtract the things that were never dependencies
 
-Zero risk, pure deletion, and it shrinks every later stage.
+**Done.** Not quite as written: the survey that produced this plan was wrong about these fields.
 
-The ten `public string *Name` fields (`GameEngine.cs:109-206`) are assigned at their declaration
-and **nowhere else in the solution** — verified. They are `const` with extra steps. Move them to
-`Starquake.Shared/Constants/ResourceNames.cs`.
+The ten `public string *Name` fields (`GameEngine.cs:109-206`) are *not* assigned only at their
+declaration. `SwitchGraphicsSetIfAsked` reassigned all ten on F8, swapping every swappable sheet
+between the redrawn artwork and the original 1985 graphics. They are mutable state, not `const`
+with extra steps, and moving them to a static class would have deleted the F8 toggle.
 
-This removes ten of the ~50 public members and thins fifteen consumers' dependency lists on its
-own: `BlobAccessBoothAnim` drops from 2 to 1, `KeyScanner` from 5 to 3, `CoreElement` from 6 to 3.
+What is true is the thing underneath: the ten names carry no independent state. They are a pure
+function of `UsingOldGraphics` — one bit, read ten ways. So instead of ten constants there is now
+one immutable value object with exactly two instances, `ResourceNames.Redrawn` and
+`ResourceNames.Original`, in `Starquake.Shared/Constants/ResourceNames.cs`. `GameEngine` holds one
+field pointing at whichever is in play, and F8 swaps the pointer instead of rewriting ten strings.
+Both name sets are spelled out in full rather than derived by appending `Original`, so searching
+for a sheet name still finds the place it is asked for as well as the place it is loaded.
+
+Ten of the ~50 public members become one, and the consumers thin as predicted where they wanted a
+name and something else — `KeyScanner` 5 to 3, `CoreElement` 6 to 3, `GameScreenCollection` 10 to
+7. The ones that wanted *only* a name do not thin, because they still reach through the engine for
+the art set: `BlobAccessBoothAnim` stays at 2 rather than dropping to 1. Those go when the
+Resources cluster is collapsed in stage 3, which is where `ResourceNames` belongs in the end -
+it is the same art-set selection `UsingOldGraphics` is, and the two should not stay separate
+members.
+
+One loose end found on the way: `AccessCodesGrey` is written by the toggle and read nowhere in the
+solution. It is kept, since it is part of the art set and the sheet exists, but it is dead as of
+now.
 
 ## Stage 2 — delete the static
 
@@ -111,8 +129,9 @@ ResourceManager(ContentManager)
 
 Change those three constructors and the `engine → ResourceManager → engine` cycle is gone.
 `GameEngine` keeps constructing them; it is the composition root and should be. `Font1`/`Font2`
-and `UsingOldGraphics` (15 files — it selects between art sets) belong here too, and folding them
-in collapses the whole Resources cluster into one narrow dependency.
+and the art-set selection — `UsingOldGraphics` (15 files) together with the `ResourceNames` stage
+1 left behind, which are one decision held as two members — belong here too, and folding them in
+collapses the whole Resources cluster into one narrow dependency.
 
 ## Stage 4 — inject the leaf primitives
 

@@ -325,14 +325,14 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
     private void DrawTeleportPad(GameTime gameTime)
     {
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).Begin(BlendState.AlphaBlend, gameTime);
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).DrawSprite(397, 550, 96, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles).Begin(BlendState.AlphaBlend, gameTime);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles).DrawSprite(397, 550, 96, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
 
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).End();
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles).End();
 
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).Begin(BlendState.AlphaBlend, gameTime);
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).DrawSprite(7, 550, 96, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).End();
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.UpperScreenTiles).Begin(BlendState.AlphaBlend, gameTime);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.UpperScreenTiles).DrawSprite(7, 550, 96, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.UpperScreenTiles).End();
     }
 
     private void DrawConsoleText()

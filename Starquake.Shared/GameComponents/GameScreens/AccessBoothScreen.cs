@@ -123,19 +123,19 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
 
     private void DrawBoothDoors(GameTime gameTime)
     {
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).Begin(BlendState.AlphaBlend, gameTime);
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).DrawSprite(399, 380, 160);
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).DrawSprite(400, 508, 160);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles).Begin(BlendState.AlphaBlend, gameTime);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles).DrawSprite(399, 380, 160);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles).DrawSprite(400, 508, 160);
 
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).End();
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.LowerScreenTiles).End();
     }
 
     private void DrawDoorHighlights(GameTime gameTime)
     {
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).Begin(BlendState.AlphaBlend, gameTime);
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).DrawSprite(9, 380, 160);
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).DrawSprite(10, 508, 160);
-        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).End();
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.UpperScreenTiles).Begin(BlendState.AlphaBlend, gameTime);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.UpperScreenTiles).DrawSprite(9, 380, 160);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.UpperScreenTiles).DrawSprite(10, 508, 160);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.ResourceNames.UpperScreenTiles).End();
     }
 
     /// <summary>

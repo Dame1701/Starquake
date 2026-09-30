@@ -106,15 +106,10 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     private const int CoreInventoryHandoverScreen = 197;
 
     private static GameEngine? _sInstance;
-    public string AccessCodesFailedName = "AccessCodesFailed";
-    public string AccessCodesGreyName = "AccessCodesGray";
-    public string AccessCodesPassedName = "AccessCodesPassed";
 
     public Color BackgroundColour;
 
     public BlobDeathAnimation BlobKiller;
-    public string BlobSpritesName = "BlobSprites";
-    public string BlobsShipName = "BlobsShip";
 
     public StatusPanel BlobStatusPanel;
     private SpriteCollection _bootProgress;
@@ -156,8 +151,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     // Loading screen
     private int _loadingScreenFade;
 
-    public string LowerScreenTilesName = "LowerScreenTiles";
-
     private MainGameScreen? _mainScreen;
     public Nasties Nasties;
 
@@ -166,12 +159,9 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     private bool _particleTestTrigger;
 
     private bool _paused;
-    public string PickupsIlluminatedName = "PickupsIlluminated";
-    public string PickupsName = "Pickups";
     private Blob? _player;
 
     private PlayerKeySet _playerKeys;
-    public string PowerUpsName = "PowerUps";
 
     private int _powerUpType;
 
@@ -187,6 +177,15 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public Matrix PresentationTransform = Matrix.Identity;
 
     public readonly Random RandomNumberGenerator;
+
+    /// <summary>
+    ///     Which of the two sets of artwork the ten swappable sprite sheets are currently being
+    ///     read from. Swapped wholesale by <see cref="SwitchGraphicsSetIfAsked" /> rather than
+    ///     edited, so anything that has asked for a sheet name is asking again each frame and
+    ///     follows the switch.
+    /// </summary>
+    public ResourceNames ResourceNames = ResourceNames.Redrawn;
+
     public SpriteCollection Scanlines;
     public bool ScanlinesEnabled = true;
 
@@ -203,7 +202,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     // Tunnel lift animations
     public TunnelLiftAnimationEngine TunnelAnimations;
-    public string UpperScreenTilesName = "UpperScreenTiles";
 
     public bool UsingOldGraphics;
 
@@ -511,8 +509,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     private void DefineBlobGraphics()
     {
-        //ContentResourceManager.AddSpriteResource(gameEngine.BlobSpritesName, "Graphics\\blobNew", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        //ContentResourceManager.AddSpriteResource(gameEngine.BlobSpritesName, "Graphics\\blobNewAlt", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        //ContentResourceManager.AddSpriteResource(gameEngine.ResourceNames.BlobSprites, "Graphics\\blobNew", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        //ContentResourceManager.AddSpriteResource(gameEngine.ResourceNames.BlobSprites, "Graphics\\blobNewAlt", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
         ContentResourceManager.AddSpriteResource("BlobSprites", "Graphics\\blobNewAlt2", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
         ContentResourceManager.AddSpriteResource("BlobSpritesOriginal", "Graphics\\BlobOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
 
@@ -1025,36 +1023,10 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     {
         UsingOldGraphics = !UsingOldGraphics;
 
-        if (UsingOldGraphics)
-        {
-            LowerScreenTilesName = "LowerScreenTilesOriginal";
-            UpperScreenTilesName = "UpperScreenTilesOriginal";
-            BlobSpritesName = "BlobSpritesOriginal";
-            PowerUpsName = "PowerUpsOriginal";
-            BlobsShipName = "BlobsShipOriginal";
-            AccessCodesFailedName = "AccessCodesFailedOriginal";
-            AccessCodesPassedName = "AccessCodesPassedOriginal";
-            AccessCodesGreyName = "AccessCodesGrayOriginal";
-            PickupsIlluminatedName = "PickupsIlluminatedOriginal";
-            PickupsName = "PickupsOriginal";
+        ResourceNames = UsingOldGraphics ? ResourceNames.Original : ResourceNames.Redrawn;
 
-            DrawBackgrounds = false;
-        }
-        else
-        {
-            LowerScreenTilesName = "LowerScreenTiles";
-            UpperScreenTilesName = "UpperScreenTiles";
-            BlobSpritesName = "BlobSprites";
-            PowerUpsName = "PowerUps";
-            BlobsShipName = "BlobsShip";
-            AccessCodesFailedName = "AccessCodesFailed";
-            AccessCodesPassedName = "AccessCodesPassed";
-            AccessCodesGreyName = "AccessCodesGray";
-            PickupsIlluminatedName = "PickupsIlluminated";
-            PickupsName = "Pickups";
-
-            DrawBackgrounds = true;
-        }
+        // The original graphics have no backdrops drawn for them.
+        DrawBackgrounds = !UsingOldGraphics;
 
         if (IntroSequence.SequenceStage == IntroSequenceStage.Finished || IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
         {
