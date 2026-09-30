@@ -402,26 +402,39 @@ and each lands at four to nine constructor parameters.
 | — | Building `ScreenEffectEngine` split from registering its view ports — the engine needs a graphics device, the view ports need dimensions known only after content loads, and they were being built together to suit the later. That unblocked `JumpPlatform` and `JumpPlatforms`. |
 | **Presentation screens** | All five use *exactly* the same six members, so those six go on `GameScreenBase` — five of five consumers using six of six is a real cluster, as against the actors where fifteen classes each want two of eleven. The last conduit goes with it. |
 
-**60 coupled files to 10.** `GameEngine` is 30 public members, from about 50.
+**60 coupled files to 2.** `GameEngine` is 29 public members, from about 50.
+
+### The remaining seven, and the last cycles
+
+| Landed | What it took |
+| --- | --- |
+| `TeleportScreen` (11), `CheopsScreen` (10), `AccessBoothScreen` (9), `PlanetCoreScreen` (9) | Nothing moved — all four are built in the last phase, so everything already existed. `PlanetCoreScreen` also had a `Random` assigned and never read, and took `CoreElements` while separately reading `GameEngine.Elements`, which is the same object. |
+| `StatusPanel` (4) | A true cycle with `Blob`: the blob reads its supplies off the panel, the panel drains its energy and revives it. The blob becomes a parameter of `Update` rather than a field, and the panel is told whether the intro allows energy to drain. |
+| `IntroSequence` (9) | Wants the planet and the death animation, was built before both. Moved. |
+| `GameScreenCollection` (4) | The `ColourAnimationEngine` cycle the first pass left untouched. Broken by **ownership**: the colour animations are animations of this planet's tiles and the planet drives all nine call sites, so the planet builds one and hands itself to it. |
+| `Blob` (12) | Two of its three blockers were ordering only. The third was one line — it called `ElectricityNodeGateEngine.Reset()` on respawn, so it now raises `OnBlobDiedAndRespawned` and the engine subscribes the reset. `FireSurroundings`, the interface this plan held up as the model, was *still* taking a whole engine; it now takes the planet and a `Random`. |
+
+Every cycle in the graph is cut. The techniques, in the order they kept working: **check whether the
+order is load-bearing** (most cases); **pass values instead of the object** (the planet ← blob);
+**own the thing you drive** (the planet → colour animations); **raise an event instead of calling**
+(the blob → electricity, the session → sound and blob).
 
 ### What is left, and why
 
-Eight of the ten are the broad consumers the plan always said this would come down to, and they
-divide into two kinds:
+Two files, and both are deliberate.
 
-- **`MainGameScreen` (19 members) should keep the engine.** It uses all eleven actors, because it
-  *is* the main game — it drives the blob, the nasties, the bridges, the lifts, the animations and
-  the effects every frame. Its alternatives are an eighteen-parameter constructor or a bag object
-  existing solely for it. If it should be smaller, the job is splitting a 610-line class, which is
-  a different task from decoupling.
-- **The other seven are ordinary work**, not design questions: `Blob`, `TeleportScreen`,
-  `CheopsScreen`, `PlanetCoreScreen`, `AccessBoothScreen`, `IntroSequence`, `StatusPanel`,
-  `GameScreenCollection`. Each would take five to eleven named things. Nothing blocks them — the
-  cycles are cut and the ordering is sorted. It is typing, one class at a time, and the pattern is
-  now established five times over.
+**`MainGameScreen` (18 members) keeps the engine.** It uses every actor, because it *is* the main
+game — it drives the blob, the nasties, the bridges, the lifts, the animations and the effects every
+frame. Its alternatives are an eighteen-parameter constructor or a bag object existing solely for
+it, and both are worse than the reference. If it should be smaller, the job is splitting a 610-line
+class, which is a different task from decoupling and should not be smuggled into it.
 
-`GameHost` is the tenth and is not coupling: it constructs the engine, and holding a reference to
-what you own is what a host does.
+**`GameHost` is not coupling.** It constructs the engine, and holding a reference to what you own is
+what a host does.
+
+So the engine is now what the plan said it should be: a composition root that wires about twenty
+objects once at boot, plus one screen that legitimately talks to all of them. `GameEngine.cs` has
+grown 66 lines, all of it explicit wiring where there used to be `this`.
 
 ## Where the first pass stopped
 
