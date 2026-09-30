@@ -30,33 +30,39 @@ public class BlobAccessBoothAnim
         _startPoint = startPoint;
         _endPoint = endPoint;
 
-        _animLeft = new Animation();
-        _animLeft.FirstFrame = 0;
-        _animLeft.CurrentFrame = 0;
-        _animLeft.LastFrame = 3;
-        _animLeft.Yoyo = false;
-        _animLeft.Delay = 2;
-        _animLeft.Repeat = true;
-        _animLeft.AnimateForwards = false;
+        _animLeft = new Animation
+        {
+            FirstFrame = 0,
+            CurrentFrame = 0,
+            LastFrame = 3,
+            Yoyo = false,
+            Delay = 2,
+            Repeat = true,
+            AnimateForwards = false
+        };
 
-        _animRight = new Animation();
-        _animRight.FirstFrame = 7;
-        _animRight.CurrentFrame = 7;
-        _animRight.LastFrame = 10;
-        _animRight.Yoyo = false;
-        _animRight.Delay = 2;
-        _animRight.Repeat = true;
-        _animRight.AnimateForwards = true;
+        _animRight = new Animation
+        {
+            FirstFrame = 7,
+            CurrentFrame = 7,
+            LastFrame = 10,
+            Yoyo = false,
+            Delay = 2,
+            Repeat = true,
+            AnimateForwards = true
+        };
 
-        _animTurn = new Animation();
-        _animTurn.FirstFrame = 4;
-        _animTurn.CurrentFrame = 4;
-        _animTurn.LastFrame = 10;
-        _animTurn.Yoyo = false;
-        _animTurn.Delay = 2;
-        _animTurn.Repeat = false;
-        _animTurn.AnimateForwards = false;
-        _animTurn.Finished = false;
+        _animTurn = new Animation
+        {
+            FirstFrame = 4,
+            CurrentFrame = 4,
+            LastFrame = 10,
+            Yoyo = false,
+            Delay = 2,
+            Repeat = false,
+            AnimateForwards = false,
+            Finished = false
+        };
     }
 
     public void Reset(Direction startingDirection)

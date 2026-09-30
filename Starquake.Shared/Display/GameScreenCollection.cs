@@ -19,6 +19,7 @@ using Starquake.Particles;
 using Starquake.SharedLibs;
 using Starquake.Sprites;
 using Starquake.Structure;
+using Starquake.WorldGeneration;
 
 namespace Starquake.Display;
 
@@ -27,44 +28,9 @@ public class GameScreenCollection : GameComponentBase
 
 
     /// <summary>
-    ///     How many Cheops pyramids and core elements are scattered across the map at the start of a
-    ///     game.
-    /// </summary>
-    private const int CMaxCheops = 40;
-
-    /// <inheritdoc cref="CMaxCheops" />
-    private const int CMaxCoreElements = 18;
-
-    /// <summary>
     ///     A whole percentage, used for reporting how much of the map has been explored.
     /// </summary>
     private const int FullPercentage = 100;
-
-    /// <summary>
-    ///     The two tiles the map uses as plain scenery either side of a doorway. They are recognised
-    ///     by number only so that an item is never placed on top of one.
-    /// </summary>
-    private const int SceneryTile1 = 120;
-
-    /// <inheritdoc cref="SceneryTile1" />
-    private const int SceneryTile2 = 121;
-
-    /// <summary>
-    ///     How many of the 512 screens are given a pick-up. It was a readonly field with an
-    ///     initialiser and no other assignment - a const wearing a field's clothing.
-    /// </summary>
-    private const int PickUpCount = 100;
-
-    /// <summary>
-    ///     Where an item is drawn relative to the tile it stands on: one collision cell in from the
-    ///     tile's left edge, and two cells above its top. There was a second, unread pair of these
-    ///     saying the same thing in terms of the cell size; this is the pair that is used, so it is
-    ///     the one that says where the numbers come from.
-    /// </summary>
-    private const int PlacementXInset = TileMetrics.CollisionCellWidth;
-
-    /// <inheritdoc cref="PlacementXInset" />
-    private const int PlacementYLift = TileMetrics.CollisionCellHeight * 2;
 
     /// <summary>
     ///     Anything numbered above this is scenery drawn on the upper layer rather than a tile the
@@ -113,22 +79,6 @@ public class GameScreenCollection : GameComponentBase
     private const int RightTunnelMouthSprite = 12;
 
     /// <summary>
-    ///     The range the two kinds of access code are drawn from: a two digit code for a Cheops
-    ///     pyramid, a three digit one for an access booth. The upper bound is exclusive, as
-    ///     Random.Next takes it.
-    /// </summary>
-    private const int CheopsCodeLowest = 10;
-
-    /// <inheritdoc cref="CheopsCodeLowest" />
-    private const int CheopsCodeExclusiveUpperBound = 100;
-
-    /// <inheritdoc cref="CheopsCodeLowest" />
-    private const int AccessCodeLowest = 100;
-
-    /// <inheritdoc cref="CheopsCodeLowest" />
-    private const int AccessCodeExclusiveUpperBound = 1000;
-
-    /// <summary>
     ///     Olly, the eye that watches the blob from the wall of one particular screen, and the screen
     ///     it lives on. Its pupil tracks the blob across the room at a fraction of the blob's speed.
     /// </summary>
@@ -156,31 +106,6 @@ public class GameScreenCollection : GameComponentBase
     private const int BrightFieldQuantity = 10;
 
     /// <summary>
-    ///     The tiles no pick-up, power-up or pyramid may be placed on, because each of them already
-    ///     means something to the game - a shuttle, a spike, a bridge, a marker. This was a fifteen-term
-    ///     chain of inequalities.
-    /// </summary>
-    private static readonly HashSet<int> TilesNothingMayBePlacedOn =
-    [
-        (int)ActionTiles.ShuttlePlatform,
-        (int)ActionTiles.RemovedShuttlePlatform,
-        (int)ActionTiles.ElectricityNode,
-        (int)ActionTiles.ShuttleTag1,
-        (int)ActionTiles.ShuttleTag2,
-        (int)ActionTiles.ShuttleTag3,
-        (int)ActionTiles.Spike1,
-        (int)ActionTiles.Spike2,
-        (int)ActionTiles.Spike3,
-        (int)ActionTiles.ElectricityGate,
-        (int)ActionTiles.BlankFiller,
-        (int)ActionTiles.ConveyerNasty,
-        (int)ActionTiles.BreakableBridges,
-        SceneryTile1,
-        SceneryTile2,
-        (int)ActionTiles.PreferredCoreLocation
-    ];
-
-    /// <summary>
     ///     The two emitters that make up a key door's force field, and the two quantities it is run at:
     ///     a dim alpha-blended pass for the body of the field and a bright additive one over the middle.
     /// </summary>
@@ -192,7 +117,7 @@ public class GameScreenCollection : GameComponentBase
     private readonly GraphicsSet _graphicsSet;
 
     private readonly IStandardParticleEffect _keyDoorForceFieldNoAccess;
-    private readonly Random _randomNumberGenerator;
+    private readonly WorldPopulator _worldPopulator;
     private readonly ResourceManager _resources;
 
     private readonly int _tileHeight;
@@ -222,7 +147,6 @@ public class GameScreenCollection : GameComponentBase
         _resources = resources;
         _graphicsSet = graphicsSet;
         _elements = elements;
-        _randomNumberGenerator = randomNumberGenerator;
 
         // The colour animations are animations of this planet's own tiles, and nothing but the
         // planet and the main screen drives them - so the planet owns one and hands itself to it.
@@ -243,6 +167,8 @@ public class GameScreenCollection : GameComponentBase
         Collisions = new ScreenCollisionMap(
             _gameScreens,
             (int[,,])_resources.GetDataResource("ScreenCollisionData"));
+
+        _worldPopulator = new WorldPopulator(_gameScreens, Collisions, randomNumberGenerator);
 
         BlobsShipSmoke1 =
             (IStandardParticleEffect)_resources.GetParticleEffectInstance("BasicSmokePlume",
@@ -329,33 +255,6 @@ public class GameScreenCollection : GameComponentBase
 
         return (int)Math.Ceiling(screensVisited / (double)_gameScreens.Length * FullPercentage);
     }
-
-
-    private bool CheckAccessCodeValidity(string accessCode)
-    {
-        bool unique = true;
-
-        for (int a = 0; a < accessCode.Length; a++)
-        {
-            for (int b = 0; b < accessCode.Length; b++)
-            {
-                if (accessCode.Substring(b, 1) == accessCode.Substring(a, 1) &&
-                    a != b)
-                {
-                    unique = false;
-                    break;
-                }
-            }
-
-            if (!unique)
-            {
-                break;
-            }
-        }
-
-        return unique;
-    }
-
     // Scan the screen for collision tiles
     public List<Point> GetNastyPotentialLocations()
     {
@@ -401,83 +300,6 @@ public class GameScreenCollection : GameComponentBase
         }
 
         return potentialLocations;
-    }
-
-    private InteractiveItem? GetPreferredLocation(int screenNumber)
-    {
-        for (int y = 1; y < _gameScreens[screenNumber].ScreenTiles.GetLength(1); y++)
-        {
-            for (int x = 0; x < _gameScreens[screenNumber].ScreenTiles.GetLength(0); x++)
-            {
-                if (_gameScreens[screenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.PreferredCoreLocation)
-                {
-                    return new InteractiveItem(
-                        x * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
-                            .SpriteWidth + 32,
-                        y * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
-                            .SpriteHeight + 32, 0);
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /// <summary>
-    ///     Every tile on a screen that an item could sit on top of: solid enough to stand on, with a
-    ///     clear space above it, and not one of the tiles that already mean something.
-    /// </summary>
-    /// <remarks>
-    ///     There was a PowerUpIsInTheWay guard here, meant to stop a pick-up landing on the tile the
-    ///     power-up stands on. It could never fire: it compared the power-up's pixel location against
-    ///     a tile index, and with a 96-pixel tile and the 64-pixel lift an item is drawn at, the Y
-    ///     test has no solution for any row on the screen. It also read the power-up of the screen
-    ///     being displayed rather than the one being filled in.
-    ///
-    ///     Making it fire would not have helped. During a Reset the power-up it would read is the one
-    ///     from before this generation run, because PlaceScreenObjects calls this method before
-    ///     PlacePowerUpAndPickUp assigns the new one - so a live guard would exclude a tile chosen by
-    ///     the previous game. What actually keeps the two apart is PlacePowerUpAndPickUp taking the
-    ///     power-up's location out of this list before drawing a location for the pick-up, and this
-    ///     returns one location per tile, so removing the location removes the tile.
-    /// </remarks>
-    private List<InteractiveItem> GetPotentialLocations(int screenNumber)
-    {
-        var toReturn = new List<InteractiveItem>();
-        SpriteCollection tiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
-
-        // Start at row 1: nothing above that row is reachable
-        for (int y = 1; y < _gameScreens[screenNumber].ScreenTiles.GetLength(1); y++)
-        {
-            for (int x = 0; x < _gameScreens[screenNumber].ScreenTiles.GetLength(0); x++)
-            {
-                int tileImage = _gameScreens[screenNumber].ScreenTiles[x, y].TileImage;
-
-                if (tileImage < 0 || TilesNothingMayBePlacedOn.Contains(tileImage))
-                {
-                    continue;
-                }
-
-                // Anything above it....?
-                if (_gameScreens[screenNumber].ScreenTiles[x, y - 1].TileImage != -1)
-                {
-                    continue;
-                }
-
-                // Only place on tiles with collision blocks below the powerup
-                if (!Collisions.CanStandOnTopOf(tileImage))
-                {
-                    continue;
-                }
-
-                toReturn.Add(new InteractiveItem(
-                    x * tiles.SpriteWidth + PlacementXInset,
-                    y * tiles.SpriteHeight - PlacementYLift,
-                    0));
-            }
-        }
-
-        return toReturn;
     }
 
     public void SaveData()
@@ -648,28 +470,6 @@ public class GameScreenCollection : GameComponentBase
                             y * _resources
                                 .GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteHeight)
                     });
-                }
-            }
-        }
-
-        return returnedTiles;
-    }
-
-    private List<Point> GetCoordsOfTiles(int tileType, int screenNumber)
-    {
-        var returnedTiles = new List<Point>();
-
-        for (int y = 0; y < TilesDown; y++)
-        {
-            for (int x = 0; x < TilesAcross; x++)
-            {
-                if (_gameScreens[screenNumber].ScreenTiles[x, y].TileImage == tileType)
-                {
-                    returnedTiles.Add(new Point(
-                        x * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
-                            .SpriteWidth,
-                        y * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
-                            .SpriteHeight));
                 }
             }
         }
@@ -1178,262 +978,21 @@ public class GameScreenCollection : GameComponentBase
     }
 
     /// <summary>
-    ///     Scatters the pick-ups, power-ups, pyramids and core elements over the whole world map. Called
-    ///     once at the start of a game, not on a screen change.
+    ///     Starts a new game on this planet: the blob back at the wreck, and the whole map scattered
+    ///     with things to find.
     /// </summary>
-    /// <remarks>
-    ///     The scatter used to draw from a Random of its own, seeded from the clock, while the class was
-    ///     already holding one from its constructor. It uses that one now, so a world can be reproduced
-    ///     from the seed that made it - which is the only way a layout described in a bug report can be
-    ///     got back, and the only way any of this can be tested.
-    /// </remarks>
     public void Reset()
     {
         ScreenNumber = WorldMap.ShipWreckScreenNumber;
 
-        List<int> powerUpScreens = ChoosePowerUpScreens();
-        PlaceScreenObjects(powerUpScreens);
-
-        var screensContainingCheopsPyramid = new List<GameScreenData>();
-        var screensContainingCoreElements = new List<GameScreenData>();
-        CollectScreensWithCheopsAndCoreElements(screensContainingCheopsPyramid, screensContainingCoreElements);
-
-        TrimTo(screensContainingCheopsPyramid, CMaxCheops, screen => screen.CheopsPyramid = null);
-        TrimTo(screensContainingCoreElements, CMaxCoreElements,
-            screen => screen.PickUps = new List<InteractiveItem>());
-
-        MatchSomeCoreElementsToTheCore(screensContainingCoreElements);
-    }
-
-    /// <summary>
-    ///     Picks the screens a power-up goes on. Only screens that can hold more than one object qualify,
-    ///     because a power-up has to share with whatever is already there.
-    /// </summary>
-    private List<int> ChoosePowerUpScreens()
-    {
-        var powerUpScreens = new List<int>();
-
-        for (int a = 0; a < PickUpCount; a++)
+        // The elements the core is asking for are read off here rather than in the populator,
+        // which would drag the graphics in behind them.
+        var coreElementsWanted = new List<int>();
+        foreach (CoreElement element in _elements.GetActiveElements())
         {
-            // Only place on screens where we can have more than 1 object
-            int screenChosen = -1;
-            while (screenChosen < 0)
-            {
-                int temp = _randomNumberGenerator.Next(0, WorldMap.LastScreenNumber);
-
-                // Ensure more than one location
-                if (GetPotentialLocations(temp).Count > 1)
-                {
-                    // Ensure we haven't chosen this screen already
-                    if (!powerUpScreens.Contains(temp))
-                    {
-                        screenChosen = temp;
-                    }
-                }
-            }
-
-            powerUpScreens.Add(screenChosen);
+            coreElementsWanted.Add(element.CurrentElement);
         }
 
-        return powerUpScreens;
-    }
-
-    /// <summary>
-    ///     Fills in every screen but the core: its pick-ups, its power-up if it drew one, its pyramid and
-    ///     its access code.
-    /// </summary>
-    private void PlaceScreenObjects(List<int> powerUpScreens)
-    {
-        for (int a = 0; a < _gameScreens.Length; a++)
-        {
-            // The core screen is seeded differently and is left out of the scatter
-            if (a == WorldMap.CoreScreenNumber)
-            {
-                continue;
-            }
-
-            _gameScreens[a].PickUps = new List<InteractiveItem>();
-
-            List<InteractiveItem> potentialLocations = GetPotentialLocations(a);
-            bool placePickup = powerUpScreens.Contains(a);
-
-            if (potentialLocations.Count > 0)
-            {
-                PlacePowerUpAndPickUp(a, potentialLocations, placePickup);
-            }
-
-            if (potentialLocations.Count > 0)
-            {
-                PlaceCheopsPyramid(a, potentialLocations);
-            }
-
-            AssignAccessBoothCode(a);
-        }
-    }
-
-    /// <summary>
-    ///     The power-up first, then a pick-up on a different tile if this screen drew one. Each takes its
-    ///     location out of the list so the two cannot land on top of each other.
-    /// </summary>
-    private void PlacePowerUpAndPickUp(
-        int screenNumber,
-        List<InteractiveItem> potentialLocations,
-        bool placePickup)
-    {
-        int powerUpToSelect = _randomNumberGenerator.Next(potentialLocations.Count);
-        _gameScreens[screenNumber].PowerUp = new InteractiveItem(potentialLocations[powerUpToSelect].XLocation,
-            potentialLocations[powerUpToSelect].YLocation, _randomNumberGenerator.Next(8));
-
-        // Take the powerup location out of the list
-        potentialLocations.Remove(potentialLocations[powerUpToSelect]);
-
-        // Place a pickup
-        if (placePickup)
-        {
-            // Now select another location for our pickup
-            int pickUpToSelect = _randomNumberGenerator.Next(potentialLocations.Count);
-
-            // Check to see if this screen has a preferred location
-            InteractiveItem? preferredLocation = GetPreferredLocation(screenNumber);
-
-            // Place the item in the preferred locateion
-            if (preferredLocation != null)
-            {
-                preferredLocation.Type = _randomNumberGenerator.Next(28);
-                _gameScreens[screenNumber].PickUps.Add(preferredLocation);
-                potentialLocations.Remove(potentialLocations[pickUpToSelect]);
-            }
-            else
-            {
-                // Place it in the normal randomly selected place
-                _gameScreens[screenNumber].PickUps.Add(new InteractiveItem(
-                    potentialLocations[pickUpToSelect].XLocation,
-                    potentialLocations[pickUpToSelect].YLocation, _randomNumberGenerator.Next(28)));
-                potentialLocations.Remove(potentialLocations[pickUpToSelect]);
-            }
-        }
-    }
-
-    /// <summary>
-    ///     Every screen with room gets one at this stage. Reset thins them down to CMaxCheops afterwards,
-    ///     which is why there is no attempt to be selective here.
-    /// </summary>
-    private void PlaceCheopsPyramid(
-        int screenNumber,
-        List<InteractiveItem> potentialLocations)
-    {
-        int cheopsLocationToSelect = _randomNumberGenerator.Next(potentialLocations.Count);
-        _gameScreens[screenNumber].CheopsPyramid = new InteractiveItem(
-            potentialLocations[cheopsLocationToSelect].XLocation,
-            potentialLocations[cheopsLocationToSelect].YLocation, 0);
-
-        // Setup the access code for the pyramid
-        // Ensure we get a unique code
-        string cheopsAccessCode;
-        do
-        {
-            cheopsAccessCode = _randomNumberGenerator.Next(CheopsCodeLowest, CheopsCodeExclusiveUpperBound).ToString();
-        } while (!CheckAccessCodeValidity(cheopsAccessCode));
-
-        _gameScreens[screenNumber].CheopsAccessCode = cheopsAccessCode;
-    }
-
-    /// <summary>
-    ///     A screen with a booth on either side gets one code, which is what the booth on the far side of
-    ///     the door asks for.
-    /// </summary>
-    private void AssignAccessBoothCode(int screenNumber)
-    {
-        List<Point> leftBooths = GetCoordsOfTiles((int)ActionTiles.AccessBoothLeft, screenNumber);
-        List<Point> rightBooths = GetCoordsOfTiles((int)ActionTiles.AccessBoothRight, screenNumber);
-        List<Point> accessBooths = leftBooths.Count > 0 ? leftBooths : rightBooths;
-
-        if (accessBooths.Count > 0)
-        {
-            // Ensure we get a unique code
-            string accessCode;
-            do
-            {
-                accessCode = _randomNumberGenerator.Next(AccessCodeLowest, AccessCodeExclusiveUpperBound).ToString();
-            } while (!CheckAccessCodeValidity(accessCode));
-
-            _gameScreens[screenNumber].AccessCode = accessCode;
-        }
-    }
-
-    private void CollectScreensWithCheopsAndCoreElements(
-        List<GameScreenData> screensContainingCheopsPyramid,
-        List<GameScreenData> screensContainingCoreElements)
-    {
-        for (int a = 0; a < _gameScreens.Length; a++)
-        {
-            // Only add screens with a cheops pyramid assigned
-            if (_gameScreens[a].CheopsPyramid != null)
-            {
-                screensContainingCheopsPyramid.Add(_gameScreens[a]);
-            }
-
-            // Only add screens with a core element assigned
-            if (_gameScreens[a].PickUps.Count > 0)
-            {
-                foreach (InteractiveItem pickUp in _gameScreens[a].PickUps)
-                {
-                    if ((Collectables)pickUp.Type != Collectables.AccessCard &&
-                        (Collectables)pickUp.Type != Collectables.Key)
-                    {
-                        screensContainingCoreElements.Add(_gameScreens[a]);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    ///     Thins a list of screens down to at most <paramref name="maximum" /> of them by picking one at
-    ///     random and stripping what it was listed for. The pyramids and the core elements were two copies
-    ///     of this loop differing only in what they cleared.
-    /// </summary>
-    private void TrimTo(
-        List<GameScreenData> screens,
-        int maximum,
-        Action<GameScreenData> removeFrom)
-    {
-        while (screens.Count > maximum)
-        {
-            GameScreenData screen = screens[_randomNumberGenerator.Next(0, screens.Count)];
-
-            removeFrom(screen);
-            screens.Remove(screen);
-        }
-    }
-
-    /// <summary>
-    ///     Between two and five of the core elements lying about the map are set to ones the core actually
-    ///     wants, so that a game is always winnable without being trivially so.
-    /// </summary>
-    private void MatchSomeCoreElementsToTheCore(List<GameScreenData> screensContainingCoreElements)
-    {
-        var tempElements = new List<CoreElement>();
-
-        for (int a = 0; a < _elements.GetActiveElements().Count; a++)
-        {
-            tempElements.Add(_elements.GetActiveElements()[a]);
-        }
-
-        // Make a random number of the core elements on the map match what we need. Neither list is a
-        // fixed length - one is however many screens the generator gave a pick-up to, the other however
-        // many elements the core still wants - so the draw is clamped to what is actually there rather
-        // than trusted to fit. A hundred pick-up screens is what makes five safe today, not construction.
-        int matchesToMake = Math.Min(
-            _randomNumberGenerator.Next(2, 6),
-            Math.Min(screensContainingCoreElements.Count, tempElements.Count));
-
-        for (int a = 0; a < matchesToMake; a++)
-        {
-            int elementIndex = _randomNumberGenerator.Next(0, tempElements.Count);
-            screensContainingCoreElements[a].PickUps[0].Type = tempElements[elementIndex].CurrentElement;
-            tempElements.Remove(tempElements[elementIndex]);
-        }
+        _worldPopulator.Populate(coreElementsWanted);
     }
 }
