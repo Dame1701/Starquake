@@ -118,7 +118,7 @@ public class CoreElement
 
     public void LoadContent()
     {
-        _coreReplacementEffect = _gameEngine.ContentResourceManager.GetParticleEffectInstance("CoreReplacementParticleEffect", ParticleEffectType.Continual, new TimeSpan(0, 0, 0, 0, ReplacementEffectMilliseconds)) as IStandardParticleEffect;
+        _coreReplacementEffect = (IStandardParticleEffect)_gameEngine.ContentResourceManager.GetParticleEffectInstance("CoreReplacementParticleEffect", ParticleEffectType.Continual, new TimeSpan(0, 0, 0, 0, ReplacementEffectMilliseconds));
         _coreReplacementEffect.ParticleEffectComplete += coreReplacementEffect_ParticleEffectComplete;
     }
 

@@ -185,15 +185,15 @@ public class GameScreenCollection : GameComponentBase
             (int[,,])GameEngine.ContentResourceManager.GetDataResource("ScreenCollisionData");
 
         BlobsShipSmoke1 =
-            GameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume",
-                ParticleEffectType.Continual, null) as IStandardParticleEffect;
+            (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume",
+                ParticleEffectType.Continual, null);
         BlobsShipSmoke2 =
-            GameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume2",
-                ParticleEffectType.Continual, null) as IStandardParticleEffect;
+            (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume2",
+                ParticleEffectType.Continual, null);
 
         _keyDoorForceFieldNoAccess =
-            GameEngine.ContentResourceManager.GetParticleEffectInstance("ForceField",
-                ParticleEffectType.Continual, null) as IStandardParticleEffect;
+            (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("ForceField",
+                ParticleEffectType.Continual, null);
 
         // Make this better in the future...?
         _tileWidth = TileMetrics.TileWidth;
@@ -1800,12 +1800,11 @@ public class GameScreenCollection : GameComponentBase
             }
 
             // Only add screens with a core element assigned
-            if (_gameScreens[a].PickUps != null &&
-                _gameScreens[a].PickUps.Count > 0)
+            if (_gameScreens[a].PickUps.Count > 0)
             {
                 foreach (var pickUp in _gameScreens[a].PickUps)
                 {
-                    if ((Collectables)pickUp.Type != Collectables.AccessCard ||
+                    if ((Collectables)pickUp.Type != Collectables.AccessCard &&
                         (Collectables)pickUp.Type != Collectables.Key)
                     {
                         screensContainingCoreElements.Add(_gameScreens[a]);

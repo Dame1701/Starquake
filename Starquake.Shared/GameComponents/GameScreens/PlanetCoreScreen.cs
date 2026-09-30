@@ -296,15 +296,15 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
             coreAlien.Initialise(null);
             _coreAliens.Add(coreAlien);
         }
-        _coreComputationEffect = GameEngine.ContentResourceManager.GetParticleEffectInstance("BinaryEffect", ParticleEffectType.Continual, null) as IStandardParticleEffect;
-        _coreSparks = GameEngine.ContentResourceManager.GetParticleEffectInstance("CoreSparks", ParticleEffectType.Continual, null) as IStandardParticleEffect;
+        _coreComputationEffect = (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("BinaryEffect", ParticleEffectType.Continual, null);
+        _coreSparks = (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("CoreSparks", ParticleEffectType.Continual, null);
     }
 
     public override void Initialise(object data)
     {
         if (data != null)
         {
-            _elements = data as CoreElements;
+            _elements = (CoreElements)data;
             _elements.OnCoreElementReplaced += elements_OnCoreElementReplaced;
         }
         else

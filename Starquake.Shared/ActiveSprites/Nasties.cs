@@ -52,8 +52,8 @@ public class Nasties : GameComponentBase
         _nastyCount = nastyCount;
         _nasties = new List<Nasty>();
         _nastySmokes =
-            GameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume",
-                ParticleEffectType.TriggeredMultiLocationTimed, null) as IPositionalTriggerParticleEffect;
+            (IPositionalTriggerParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume",
+                ParticleEffectType.TriggeredMultiLocationTimed, null);
 
         // Create double the number needed for screen swap operations
         for (var a = 0; a < _nastyCount * 2; a++)

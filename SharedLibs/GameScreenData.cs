@@ -25,11 +25,14 @@ public sealed class GameScreenData
             }
         }
     }
+    // Not nullable: every consumer indexes these straight off, and none of them checks.
+    // An unpopulated screen is an empty one, not a null one. PickUps and PowerUp below stay
+    // nullable, because there null genuinely means the screen has none.
     [Key(0)]
-    public ScreenTile[,]? ScreenTiles { get; set; }
+    public ScreenTile[,] ScreenTiles { get; set; } = new ScreenTile[0, 0];
 
     [Key(1)]
-    public List<CollisionTile>? CollisionMap { get; set; }
+    public List<CollisionTile> CollisionMap { get; set; } = [];
 
     [IgnoreMember]
     public bool KeepNastiesTheSame { get; set; }

@@ -83,14 +83,14 @@ public class BlobDeathAnimation : GameComponentBase
     public override void LoadContent()
     {
         _blobFragmentBounceSparks =
-            GameEngine.ContentResourceManager.GetParticleEffectInstance("FireSparks",
-                ParticleEffectType.TriggeredMultiLocationTimed, null) as IPositionalTriggerParticleEffect;
+            (IPositionalTriggerParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("FireSparks",
+                ParticleEffectType.TriggeredMultiLocationTimed, null);
 
         foreach (var t in BouncingParticles)
         {
             t.Fireball =
-                GameEngine.ContentResourceManager.GetParticleEffectInstance("BlobFragmentExplosion",
-                    ParticleEffectType.Continual, null) as IStandardParticleEffect;
+                (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("BlobFragmentExplosion",
+                    ParticleEffectType.Continual, null);
             t.SparkEffect = _blobFragmentBounceSparks;
         }
     }

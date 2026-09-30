@@ -86,7 +86,7 @@ public class ConveyerNasty : GameComponentBase
     public void LoadContent(ContentList content)
     {
         _nastySprite = new SpriteCollection(GameEngine, GameEngine.ContentMgr, content.GetContent("conveyerNasty"), SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        _conveyerNastyDies = GameEngine.ContentResourceManager.GetParticleEffectInstance("NastyDies", ParticleEffectType.Triggered, null) as IStandardParticleEffect;
+        _conveyerNastyDies = (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("NastyDies", ParticleEffectType.Triggered, null);
         if (_conveyerNastyDies != null)
         {
             _conveyerNastyDies.ParticleEffectComplete += conveyerNastyDies_ParticleEffectComplete;

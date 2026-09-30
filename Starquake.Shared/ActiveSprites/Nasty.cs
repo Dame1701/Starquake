@@ -346,13 +346,13 @@ public class Nasty : GameComponentBase
 
         CheckSpritesInUse();
 
-        _nastyDies = GameEngine.ContentResourceManager.GetParticleEffectInstance("NastyDies",
-            ParticleEffectType.Triggered, null) as IStandardParticleEffect;
+        _nastyDies = (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("NastyDies",
+            ParticleEffectType.Triggered, null);
         _nastyDies.ParticleEffectComplete += nastyDies_ParticleEffectComplete;
 
         _nastyDiesType2 =
-            GameEngine.ContentResourceManager.GetParticleEffectInstance("NastySplat",
-                ParticleEffectType.Triggered, null) as IStandardParticleEffect;
+            (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("NastySplat",
+                ParticleEffectType.Triggered, null);
         _nastyDiesType2.ParticleEffectComplete += nastyDies_ParticleEffectComplete;
     }
 

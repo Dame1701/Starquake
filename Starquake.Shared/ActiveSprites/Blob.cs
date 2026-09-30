@@ -436,15 +436,15 @@ public class Blob : GameComponentBase
     public void LoadContent(ContentList content)
     {
         _blobTeleporterBeam =
-            GameEngine.ContentResourceManager.GetParticleEffectInstance("BeamMeUp_Small",
-                ParticleEffectType.Triggered, null) as IStandardParticleEffect;
+            (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("BeamMeUp_Small",
+                ParticleEffectType.Triggered, null);
         _blobFireTrail =
-            GameEngine.ContentResourceManager.GetParticleEffectInstance("FireTrail", ParticleEffectType.Continual,
-                null) as IStandardParticleEffect;
+            (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("FireTrail", ParticleEffectType.Continual,
+                null);
 
         _blobFireSparks =
-            GameEngine.ContentResourceManager.GetParticleEffectInstance("FireSparks",
-                ParticleEffectType.TriggeredMultiLocationTimed, null) as IPositionalTriggerParticleEffect;
+            (IPositionalTriggerParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("FireSparks",
+                ParticleEffectType.TriggeredMultiLocationTimed, null);
 
         if (_blobTeleporterBeam != null)
         {
