@@ -7,10 +7,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using MessagePack;
 using Starquake.Animations;
-using Starquake.Engines;
 using Starquake.Particles;
 using Starquake.SharedLibs;
 using Starquake.Sounds;
@@ -32,7 +32,8 @@ public class ResourceManager : StartableGameComponentBase
 
     private readonly AnimTileEngine _animationTileEngine;
     private readonly ContentManager _contentManagerInstance;
-    private readonly GameEngine _gameEngineInstance;
+    private readonly GraphicsDeviceManager _graphicsDeviceManager;
+    private readonly GraphicsSet _graphicsSet;
     private readonly List<AnimSpriteDescription> _animSpriteDescriptions;
     private readonly List<DataDescription> _dataDescriptions;
     private readonly ParticleEngine _particleEngine;
@@ -45,14 +46,19 @@ public class ResourceManager : StartableGameComponentBase
 
     private readonly List<SpriteDescription> _spriteDescriptions;
 
-    public ResourceManager(GameEngine gameEngineInstance)
+    public ResourceManager(
+        ContentManager content,
+        GraphicsDeviceManager graphics,
+        Random randomNumberGenerator,
+        GraphicsSet graphicsSet)
     {
-        _gameEngineInstance = gameEngineInstance;
-        _contentManagerInstance = gameEngineInstance.ContentMgr;
+        _contentManagerInstance = content;
+        _graphicsDeviceManager = graphics;
+        _graphicsSet = graphicsSet;
 
-        _particleEngine = new ParticleEngine(_contentManagerInstance, gameEngineInstance.GraphicsDeviceMgr, gameEngineInstance.GraphicsSet);
+        _particleEngine = new ParticleEngine(content, graphics, graphicsSet);
         _animationTileEngine = new AnimTileEngine();
-        _soundEngine = new SoundEffectEngine(_contentManagerInstance, gameEngineInstance.RandomNumberGenerator);
+        _soundEngine = new SoundEffectEngine(content, randomNumberGenerator);
 
         _spriteDescriptions = new List<SpriteDescription>();
         _animSpriteDescriptions = new List<AnimSpriteDescription>();
@@ -148,7 +154,7 @@ public class ResourceManager : StartableGameComponentBase
 
             _animationTileEngine.AnimTilesList.Add(
                 new AnimTile(
-                    _gameEngineInstance.GraphicsSet,
+                    _graphicsSet,
                     t.TileToAnimate,
                     LoadSpriteCollection(t.FilePath, t.Width, t.Height),
                     t.Delay));
@@ -210,7 +216,7 @@ public class ResourceManager : StartableGameComponentBase
     /// </summary>
     private SpriteCollection LoadSpriteCollection(string filePath, int width, int height)
         => new(
-            _gameEngineInstance.GraphicsDeviceMgr,
+            _graphicsDeviceManager,
             _contentManagerInstance,
             filePath,
             width,

@@ -218,7 +218,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         // Before the resource manager, which hands it to the sound engine.
         RandomNumberGenerator = new Random((int)DateTime.Now.Ticks);
 
-        ContentResourceManager = new ResourceManager(this);
+        ContentResourceManager = new ResourceManager(content, graphics, RandomNumberGenerator, GraphicsSet);
         ContentResourceManager.OnGameComponentStatusChanged += ContentResourceManager_OnGameComponentStatusChanged;
 
         _screens = new Dictionary<GameScreenType, IGameScreen>();
