@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,7 @@ public class SoundEffectEngine(GameEngine gameEngineInstance) : IDisposable
     private readonly List<SoundEffectInstanceRecord> _singleInstanceSoundEffectInstances = [];
     private bool _periodicBackgroundSoundsEnabled;
     private Guid _periodicBackgroundSoundsId = Guid.Empty;
-    private Timer _periodicSoundTimer;
+    private Timer? _periodicSoundTimer;
 
     public void Dispose()
     {
@@ -91,7 +92,7 @@ public class SoundEffectEngine(GameEngine gameEngineInstance) : IDisposable
         _periodicBackgroundSoundsEnabled = false;
     }
 
-    private void PlayPeriodicSound(object state)
+    private void PlayPeriodicSound(object? state)
     {
         if (GetSoundState(_periodicBackgroundSoundsId) == SoundState.Playing)
         {
@@ -232,7 +233,7 @@ public class SoundEffectEngine(GameEngine gameEngineInstance) : IDisposable
     public Guid PlaySound(string soundName, float volume, bool looped)
     {
         Guid singleInstanceId;
-        SoundEffectInstanceRecord soundEffectInstanceRecord = null;
+        SoundEffectInstanceRecord? soundEffectInstanceRecord = null;
 
         foreach (var t in _singleInstanceSoundEffectInstances)
         {

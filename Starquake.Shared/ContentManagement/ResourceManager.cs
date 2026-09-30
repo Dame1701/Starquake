@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
+using Microsoft.Xna.Framework.Content;
 using MessagePack;
 using Starquake.Animations;
 using Starquake.Engines;
@@ -23,6 +24,8 @@ public class ResourceManager : StartableGameComponentBase
 {
 
     private readonly AnimTileEngine _animationTileEngine;
+    private readonly ContentManager _contentManagerInstance;
+    private readonly GameEngine _gameEngineInstance;
     private readonly List<AnimSpriteDescription> _animSpriteDescriptions;
     private readonly List<DataDescription> _dataDescriptions;
     private readonly ParticleEngine _particleEngine;
@@ -36,11 +39,13 @@ public class ResourceManager : StartableGameComponentBase
     private readonly List<SpriteDescription> _spriteDescriptions;
 
     public ResourceManager(GameEngine gameEngineInstance)
-        : base(gameEngineInstance)
     {
-        _particleEngine = new ParticleEngine(GameEngineInstance);
-        _animationTileEngine = new AnimTileEngine(GameEngineInstance);
-        _soundEngine = new SoundEffectEngine(GameEngineInstance);
+        _gameEngineInstance = gameEngineInstance;
+        _contentManagerInstance = gameEngineInstance.ContentMgr;
+
+        _particleEngine = new ParticleEngine(_gameEngineInstance);
+        _animationTileEngine = new AnimTileEngine(_gameEngineInstance);
+        _soundEngine = new SoundEffectEngine(_gameEngineInstance);
 
         _spriteDescriptions = new List<SpriteDescription>();
         _animSpriteDescriptions = new List<AnimSpriteDescription>();
@@ -111,8 +116,8 @@ public class ResourceManager : StartableGameComponentBase
 
             var sc =
                 new SpriteCollection(
-                    GameEngineInstance,
-                    ContentManagerInstance,
+                    _gameEngineInstance,
+                    _contentManagerInstance,
                     t.FilePath,
                     t.Width,
                     t.Height);
@@ -131,13 +136,13 @@ public class ResourceManager : StartableGameComponentBase
 
             var sc =
                 new SpriteCollection(
-                    GameEngineInstance,
-                    ContentManagerInstance,
+                    _gameEngineInstance,
+                    _contentManagerInstance,
                     t.FilePath,
                     t.Width,
                     t.Height);
 
-            _animationTileEngine.AnimTilesList.Add(new AnimTile(GameEngineInstance, t.TileToAnimate, sc, t.Delay));
+            _animationTileEngine.AnimTilesList.Add(new AnimTile(_gameEngineInstance, t.TileToAnimate, sc, t.Delay));
             componentsLoaded++;
         }
 

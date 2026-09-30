@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
@@ -19,7 +20,7 @@ public class TunnelLiftAnimationEngine : GameComponentBase
     /// </summary>
     private const int ColumnStartStagger = 15;
 
-    private List<TunnelLiftAnimationColumn> _columns;
+    private List<TunnelLiftAnimationColumn>? _columns;
 
     public TunnelLiftAnimationEngine(GameEngine engine)
         : base(engine)
@@ -29,7 +30,7 @@ public class TunnelLiftAnimationEngine : GameComponentBase
 
     public void PerformPostChangeScreenActions()
     {
-        Point[] tunnelLiftArrowLocations = null;
+        Point[]? tunnelLiftArrowLocations;
 
         if (!GameEngine.UsingOldGraphics)
         {

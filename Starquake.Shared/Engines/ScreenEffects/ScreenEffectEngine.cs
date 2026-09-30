@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
@@ -16,8 +17,6 @@ public class ScreenEffectEngine : GameComponentBase
     private readonly SpriteBatch _renderer;
     private readonly List<RenderViewPort> _renderViewPorts;
     private readonly List<ScreenEffectBase> _screenEffects;
-
-    private RenderViewPort _activeViewPort;
 
 
     private int _screenHeight;
@@ -46,7 +45,7 @@ public class ScreenEffectEngine : GameComponentBase
     }
     public bool HaltBlobAndNasties { get; private set; }
 
-    public ScreenEffectBase ActiveScreenEffect { get; private set; }
+    public ScreenEffectBase? ActiveScreenEffect { get; private set; }
 
     public ScreenEffectType CurrentScreenEffect
     {
@@ -72,7 +71,7 @@ public class ScreenEffectEngine : GameComponentBase
         int width,
         int height)
     {
-        if (GetRenderViewPort(name) == null)
+        if (FindRenderViewPort(name) == null)
         {
             _renderViewPorts.Add(new RenderViewPort(GameEngine, name, xPosition, yPosition, width, height));
         }
@@ -86,20 +85,12 @@ public class ScreenEffectEngine : GameComponentBase
     {
         var selectedViewPort = GetRenderViewPort(name);
 
-        if (selectedViewPort != null)
-        {
-            selectedViewPort.Active = true;
-            _activeViewPort = selectedViewPort;
-            GameEngine.GraphicsDeviceMgr.GraphicsDevice.SetRenderTarget(selectedViewPort.RenderTarget);
+        selectedViewPort.Active = true;
+        GameEngine.GraphicsDeviceMgr.GraphicsDevice.SetRenderTarget(selectedViewPort.RenderTarget);
 
-            if (clearScreen)
-            {
-                GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(Color.Transparent);
-            }
-        }
-        else
+        if (clearScreen)
         {
-            throw new Exception("Could not find a RenderViewPort with the same name '" + name + "'");
+            GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(Color.Transparent);
         }
     }
 
@@ -110,7 +101,7 @@ public class ScreenEffectEngine : GameComponentBase
         viewPort.YPos = viewPort.MasterYPos + yOffset;
     }
 
-    private RenderViewPort GetRenderViewPort(string name)
+    private RenderViewPort? FindRenderViewPort(string name)
     {
         foreach (var renderViewPort in _renderViewPorts)
         {
@@ -122,6 +113,10 @@ public class ScreenEffectEngine : GameComponentBase
 
         return null;
     }
+
+    private RenderViewPort GetRenderViewPort(string name)
+        => FindRenderViewPort(name)
+           ?? throw new InvalidOperationException($"Could not find a RenderViewPort named '{name}'.");
 
     public void ExecuteScreenEffect(ScreenEffectType screenEffectToExecute, int effectSpeed, int effectDuration, bool haltBlobAndNasties)
     {

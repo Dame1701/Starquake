@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -48,7 +49,7 @@ public class GameHost : Game
 
     private readonly GraphicsDeviceManager _graphics;
     private readonly GameTime _logicGameTime = new();
-    private GameEngine _gameEngine;
+    private GameEngine? _gameEngine;
 
     /// <summary>
     ///     Real time banked since the last logic frame, plus the logic clock the game sees. The game
@@ -90,7 +91,7 @@ public class GameHost : Game
     ///     composes at its fixed size and GameEngine.PresentationTransform scales that onto whatever
     ///     the back buffer now is.
     /// </summary>
-    private void Window_ClientSizeChanged(object sender, EventArgs e)
+    private void Window_ClientSizeChanged(object? sender, EventArgs e)
     {
         if (_graphics == null ||
             _resizingBackBuffer ||
@@ -143,7 +144,7 @@ public class GameHost : Game
         _graphics.GraphicsDevice.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
 
         // If the game has already started and we're reloading content then it sounds like the graphics device has lost its handle. Time to bail with an error
-        if (_gameEngine.Status == GameEngineStatus.Started)
+        if (_gameEngine is { Status: GameEngineStatus.Started })
         {
             throw new Exception(
                 "The graphics device was unable to reinitialise. This is usually caused by a faulty video driver or corrupted state. Try rebooting you machine or finding an updated driver.");
