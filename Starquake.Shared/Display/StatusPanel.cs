@@ -146,8 +146,6 @@ public class StatusPanel : GameComponentBase
 
     private readonly KeyScanner _inventoryScanner;
 
-    private readonly PanelNumbers _panelNumbers;
-
     private Collectables[]? _blobsInventory;
 
     private double _energyLevel;
@@ -225,11 +223,9 @@ public class StatusPanel : GameComponentBase
 
     #region IGameComponent Members
 
-    public StatusPanel(GameEngine gameEngineRef)
-        : base(gameEngineRef)
+    public StatusPanel(GameEngine gameEngineRef) : base(gameEngineRef)
     {
         _inventoryScanner = new KeyScanner(gameEngineRef, false);
-        _panelNumbers = new PanelNumbers();
     }
 
     public void LoadContent(ContentList content)
@@ -413,15 +409,19 @@ public class StatusPanel : GameComponentBase
 
     public void ScanSlot(int slotNo)
     {
-        if (slotNo >= 0 && slotNo <= 3) // && slotToScan == -1)
+        if (slotNo is >= 0 and <= 3) // && slotToScan == -1)
         {
-            if (!_inventoryScanner.ScanStarted ||
-                _inventoryScanner.Scanned)
+            if (_inventoryScanner is
+                {
+                    ScanStarted: true,
+                    Scanned: false
+                })
             {
-                _inventoryScanner.Reset(true);
-                _inventoryScanner.StartScan();
-                _slotToScan = slotNo;
+                return;
             }
+            _inventoryScanner.Reset(true);
+            _inventoryScanner.StartScan();
+            _slotToScan = slotNo;
         }
     }
 
@@ -441,11 +441,11 @@ public class StatusPanel : GameComponentBase
                 // Draw numbers above object
                 if (_blobsInventory[a] == Collectables.None)
                 {
-                    _panelNumbers.Draw(InventorySlotSpacing * a + InventoryNumberXPos, InventoryNumberYPos, (a + 1).ToString(), GameEngine, gameTime, Color.White);
+                    PanelNumbers.Draw(InventorySlotSpacing * a + InventoryNumberXPos, InventoryNumberYPos, (a + 1).ToString(), GameEngine, gameTime, Color.White);
                 }
                 else
                 {
-                    _panelNumbers.Draw(InventorySlotSpacing * a + InventoryNumberXPos, InventoryNumberYPos, (a + 1).ToString(), GameEngine, gameTime, Color.OrangeRed);
+                    PanelNumbers.Draw(InventorySlotSpacing * a + InventoryNumberXPos, InventoryNumberYPos, (a + 1).ToString(), GameEngine, gameTime, Color.OrangeRed);
 
                     if (_slotToScan != a) // Don't draw the slot being scanned
                     {
@@ -475,10 +475,10 @@ public class StatusPanel : GameComponentBase
         GameEngine.ContentResourceManager.GetSpriteCollection("AmmoBar").End();
 
         // Draw score
-        _panelNumbers.Draw(ScoreXPos, ScoreYPos, PlayerScore.ToString("000000"), GameEngine, gameTime, Color.White);
+        PanelNumbers.Draw(ScoreXPos, ScoreYPos, PlayerScore.ToString("000000"), GameEngine, gameTime, Color.White);
 
         // Draw remaining lives
-        _panelNumbers.Draw(LivesXPos, LivesYPos, BlobLives.ToString("00"), GameEngine, gameTime, Color.White);
+        PanelNumbers.Draw(LivesXPos, LivesYPos, BlobLives.ToString("00"), GameEngine, gameTime, Color.White);
 
         // draw overlay
         GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelOverlay").Begin(BlendState.AlphaBlend, gameTime);

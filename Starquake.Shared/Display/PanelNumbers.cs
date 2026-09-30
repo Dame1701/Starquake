@@ -10,7 +10,7 @@ namespace Starquake.Display;
 
 public class PanelNumbers
 {
-    public void Draw(int xPos, int yPos, string score, GameEngine gameEngine, GameTime gameTime, Color color)
+    public static void Draw(int xPos, int yPos, string score, GameEngine gameEngine, GameTime gameTime, Color color)
     {
         gameEngine.ContentResourceManager.GetSpriteCollection("PanelNumbers").Begin(BlendState.AlphaBlend, gameTime);
         for (var a = 0; a < score.Length; a++)

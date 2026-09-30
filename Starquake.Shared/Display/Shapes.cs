@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -19,42 +19,13 @@ public class Shapes : SpriteBatch
         : base(graphicsDevice)
     {
         WhiteTexture = new Texture2D(GraphicsDevice, 1, 1);
-        WhiteTexture.SetData(new[]
-        {
-            Color.White
-        });
+        WhiteTexture.SetData([Color.White]);
     }
     /// <summary>
     ///     The texture used when drawing rectangles, lines and other
     ///     primitives. This is a 1x1 white texture created at runtime.
     /// </summary>
     private Texture2D WhiteTexture { get; }
-
-    /// <summary>
-    ///     Draw a line between the two supplied points.
-    /// </summary>
-    /// <param name="start">Starting point.</param>
-    /// <param name="end">End point.</param>
-    /// <param name="color">The draw color.</param>
-    public void DrawLine(Vector2 start, Vector2 end, Color color)
-    {
-        var length = (end - start).Length();
-        var rotation = (float)Math.Atan2(end.Y - start.Y, end.X - start.X);
-        Draw(WhiteTexture, start, null, color, rotation, Vector2.Zero, new Vector2(length, 1), SpriteEffects.None, 0);
-    }
-
-    /// <summary>
-    ///     Draw a rectangle.
-    /// </summary>
-    /// <param name="rectangle">The rectangle to draw.</param>
-    /// <param name="color">The draw color.</param>
-    public void DrawRectangle(Rectangle rectangle, Color color)
-    {
-        Draw(WhiteTexture, new Rectangle(rectangle.Left, rectangle.Top, rectangle.Width, 1), color);
-        Draw(WhiteTexture, new Rectangle(rectangle.Left, rectangle.Bottom, rectangle.Width, 1), color);
-        Draw(WhiteTexture, new Rectangle(rectangle.Left, rectangle.Top, 1, rectangle.Height), color);
-        Draw(WhiteTexture, new Rectangle(rectangle.Right, rectangle.Top, 1, rectangle.Height + 1), color);
-    }
 
     /// <summary>
     ///     Fill a rectangle.

@@ -1287,30 +1287,21 @@ public class GameScreenCollection : GameComponentBase
         }
 
         // Draw olly background
-        if (ScreenNumber == OllyScreenNumber)
+        if (ScreenNumber != OllyScreenNumber)
         {
-            if (!GameEngine.UsingOldGraphics)
-            {
-                GameEngine.ContentResourceManager.GetSpriteCollection("OllyBackground")
-                    .Begin(BlendState.AlphaBlend, gameTime);
-                GameEngine.ContentResourceManager.GetSpriteCollection("OllyBackground")
-                    .DrawSprite(0, 382, 146, colour);
-                GameEngine.ContentResourceManager.GetSpriteCollection("OllyBackground").End();
-            }
+            return;
         }
 
-        // Draw Collision map (Debug only)
-        /*
-        gameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
-
-        for (int a = 0; a < detectedCollisionMap.Count; a++)
+        if (GameEngine.UsingOldGraphics)
         {
-            CollisionTile colTile = detectedCollisionMap[a];
-            gameEngine.ShapeDrawer.FillRectangle(new Rectangle(colTile.XPos, colTile.YPos, collAreaWidth, collAreaHeight), ColourHelper.GetXNA4Colour(ColourLevels.Full, 0, 0, 100));
+            return;
         }
 
-        gameEngine.ShapeDrawer.End();
-        */
+        GameEngine.ContentResourceManager.GetSpriteCollection("OllyBackground")
+            .Begin(BlendState.AlphaBlend, gameTime);
+        GameEngine.ContentResourceManager.GetSpriteCollection("OllyBackground")
+            .DrawSprite(0, 382, 146, colour);
+        GameEngine.ContentResourceManager.GetSpriteCollection("OllyBackground").End();
     }
 
     public void DrawUpperLayer(Color colour, GameTime gameTime)
