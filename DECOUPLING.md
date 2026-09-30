@@ -28,6 +28,28 @@ commit, separate from any move.
 | Stage 3 | `ResourceManager(ContentManager, GraphicsDeviceManager, Random, GraphicsSet)`. The cycle is cut and the whole resource subtree is free of the engine. |
 | — | `ScreenEffectBase` stops holding an engine it never called a member on. `LeftTunnelEntryEffect` and `RightTunnelEntryEffect` took one, passed it to the base, and never read it; both constructors now take nothing. `AdditiveFade`, the only one that wanted it, holds its own. |
 | — | The metric script's identifier list was missing plain `gameEngine`, which under-reported four files as using no members at all. Fixed, and the counts restated against it. |
+| Stage 5 (Presentation) | Seven loose fields become one `PresentationSettings`, and the transform calculation moves with them — nine tests now pin the uniform scale and the even border, which needed a graphics device before. `AdditiveFade` drops the engine entirely. |
+| Stage 5 (World) | Two clusters, not one: eleven files want the planet, five the director, eight both. `ScreenDirectory` takes `CurrentGameScreen` and `GetGameScreen`; eight tests pin the throwing and lenient lookups apart. `GameScreens` — the planet — is still to do. |
+| Bug | The joypad check listed five conditions and the fifth repeated the third. Dead as written; removed behaviour-preserving, with the likely intent (`Fire`) raised rather than assumed. |
+| — | `InTestMode` was the last constant wearing a field's clothing. Now `TestMode.Enabled`. |
+
+**50 → 46 coupled files**, and `GameEngine`'s public surface is down to 31 members from about 50.
+
+### What is left of stage 5
+
+`GameScreens` — the planet, wanted by nineteen files — and the Session cluster. Session is more
+entangled than the plan expected, and not by accident:
+
+- `Paused` is not plain state. Its setter starts and stops the periodic background sounds, and it
+  is assigned during construction *before* `ContentResourceManager` exists, which is what the null
+  check in the setter is really for.
+- `PlayerKeys` is not plain state either. Its setter pushes the key set into `Player.BlobsControl`
+  and decides keyboard against joypad — so it depends on the blob.
+
+`BlobStatusPanel` is the only one of the four that is simply a reference, and moving it into a
+`GameSession` would re-home it rather than narrow anything. So Session wants the sound engine and
+the blob, which means it is stage 6 work wearing a stage 5 label. Better done once the actor graph
+is decided than forced into a settings object now.
 
 The map is down to **50 coupled files from 60**, measured with the corrected script at both ends.
 The 58 and 42 quoted earlier were both computed with the incomplete identifier list and the earlier
