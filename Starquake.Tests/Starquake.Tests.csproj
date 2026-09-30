@@ -7,9 +7,9 @@
   when something constructs a Game or a GraphicsDevice, which no test does. A test that
   needs a GraphicsDevice does not belong here.
 
-  CollisionDetection keeps its intermediate values in static fields, so two tests calling
-  it at the same time can read each other's working. Parallelisation is off until that is
-  fixed rather than the tests being written around it.
+  The tests run in parallel, which is xunit's default. They used to be held serial by an
+  AssemblyInfo.cs that said why: CollisionDetection kept its intermediate values in static
+  fields, so two tests calling it at once could read each other's working. Those are locals.
 -->
 <Project Sdk="Microsoft.NET.Sdk">
 
