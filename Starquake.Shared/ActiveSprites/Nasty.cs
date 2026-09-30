@@ -111,6 +111,12 @@ public class Nasty : GameComponentBase
     private const int LongestScuttle = 4;
 
     /// <summary>
+    ///     Added to the run a spiky nasty sets itself so that it goes a little past the blob. Without
+    ///     it they get stuck on the scenery.
+    /// </summary>
+    private const int SpikeyOvershoot = 10;
+
+    /// <summary>
     ///     How quickly a dead nasty shrinks away, and how fast the corpse spins as it goes.
     /// </summary>
     private const float DeathShrinkStep = 0.01f;
@@ -1210,246 +1216,123 @@ public class Nasty : GameComponentBase
     /// <summary>Any of the eight, but never <see cref="Direction.None" />.</summary>
     private Direction RandomAnyDirection() => (Direction)GameEngine.RandomNumberGenerator.Next(0, 8);
 
+    /// <summary>
+    ///     A spiky nasty goes at the blob along whichever axis he is further away on, sometimes cuts
+    ///     the corner diagonally instead, and if it has just walked into something it takes the other
+    ///     axis. Then it rests for a while, which is the other half of the
+    ///     <see cref="_spikeyPause" /> cycle and the reason it is beatable.
+    /// </summary>
+    /// <remarks>
+    ///     This was four blocks of the same 55 lines, one per quadrant the blob can be in, with the
+    ///     directions and the subtractions swapped round. What is left is the two directions that
+    ///     point at him and the diagonal between them.
+    /// </remarks>
     private void SpikeyMovement(int blobsXPosition, int blobsYPosition)
     {
-        var stepsFromBlob = 0;
-
-        if (!_spikeyPause)
-        {
-            if (XPos <= blobsXPosition && YPos <= blobsYPosition)
-            {
-                var distanceX = blobsXPosition - XPos;
-                var distanceY = blobsYPosition - YPos;
-
-                if (distanceX > distanceY)
-                {
-                    Direction = Direction.Right;
-                    stepsFromBlob = blobsXPosition - XPos;
-                }
-                else if (distanceY > distanceX)
-                {
-                    Direction = Direction.Down;
-                    stepsFromBlob = blobsYPosition - YPos;
-                }
-
-                if (GameEngine.RandomNumberGenerator.Next(0, 2) == 0)
-                {
-                    if (Direction == Direction.Down)
-                    {
-                        Direction = Direction.DownRight;
-                        stepsFromBlob = blobsYPosition - YPos;
-                    }
-                    else if (Direction == Direction.Right)
-                    {
-                        Direction = Direction.DownRight;
-                        stepsFromBlob = blobsXPosition - XPos;
-                    }
-                }
-
-                if (_lastCollisionDirection == Direction.Right)
-                {
-                    Direction = Direction.Down;
-                    stepsFromBlob = blobsYPosition - YPos;
-                }
-                else if (_lastCollisionDirection == Direction.Down)
-                {
-                    Direction = Direction.Right;
-                    stepsFromBlob = blobsXPosition - XPos;
-                }
-                else if (_lastCollisionDirection == Direction.DownRight)
-                {
-                    if (GameEngine.RandomNumberGenerator.Next(0, 2) == 0)
-                    {
-                        Direction = Direction.Right;
-                        stepsFromBlob = blobsXPosition - XPos;
-                    }
-                    else
-                    {
-                        Direction = Direction.Down;
-                        stepsFromBlob = blobsYPosition - YPos;
-                    }
-                }
-            }
-            else if (XPos <= blobsXPosition && YPos >= blobsYPosition)
-            {
-                var distanceX = blobsXPosition - XPos;
-                var distanceY = YPos - blobsYPosition;
-
-                if (distanceX > distanceY)
-                {
-                    Direction = Direction.Right;
-                    stepsFromBlob = blobsXPosition - XPos;
-                }
-                else if (distanceY > distanceX)
-                {
-                    Direction = Direction.Up;
-                    stepsFromBlob = YPos - blobsYPosition;
-                }
-
-                if (GameEngine.RandomNumberGenerator.Next(0, 2) == 0)
-                {
-                    if (Direction == Direction.Right)
-                    {
-                        Direction = Direction.UpRight;
-                        stepsFromBlob = blobsXPosition - XPos;
-                    }
-                    else if (Direction == Direction.Up)
-                    {
-                        Direction = Direction.UpRight;
-                        stepsFromBlob = YPos - blobsYPosition;
-                    }
-                }
-
-                if (_lastCollisionDirection == Direction.Up)
-                {
-                    Direction = Direction.Right;
-                    stepsFromBlob = blobsXPosition - XPos;
-                }
-                else if (_lastCollisionDirection == Direction.Right)
-                {
-                    Direction = Direction.Up;
-                    stepsFromBlob = YPos - blobsYPosition;
-                }
-                else if (_lastCollisionDirection == Direction.UpRight)
-                {
-                    if (GameEngine.RandomNumberGenerator.Next(0, 2) == 0)
-                    {
-                        Direction = Direction.Right;
-                        stepsFromBlob = blobsXPosition - XPos;
-                    }
-                    else
-                    {
-                        Direction = Direction.Up;
-                        stepsFromBlob = YPos - blobsYPosition;
-                    }
-                }
-            }
-            else if (XPos >= blobsXPosition && YPos >= blobsYPosition)
-            {
-                var distanceX = XPos - blobsXPosition;
-                var distanceY = YPos - blobsYPosition;
-
-                if (distanceX > distanceY)
-                {
-                    Direction = Direction.Left;
-                    stepsFromBlob = XPos - blobsXPosition;
-                }
-                else if (distanceY > distanceX)
-                {
-                    Direction = Direction.Up;
-                    stepsFromBlob = YPos - blobsYPosition;
-                }
-
-                if (GameEngine.RandomNumberGenerator.Next(0, 2) == 0)
-                {
-                    if (Direction == Direction.Left)
-                    {
-                        Direction = Direction.UpLeft;
-                        stepsFromBlob = XPos - blobsXPosition;
-                    }
-                    else if (Direction == Direction.Up)
-                    {
-                        Direction = Direction.UpLeft;
-                        stepsFromBlob = YPos - blobsYPosition;
-                    }
-                }
-
-                if (_lastCollisionDirection == Direction.Up)
-                {
-                    Direction = Direction.Left;
-                    stepsFromBlob = XPos - blobsXPosition;
-                }
-                else if (_lastCollisionDirection == Direction.Left)
-                {
-                    Direction = Direction.Up;
-                    stepsFromBlob = YPos - blobsYPosition;
-                }
-                else if (_lastCollisionDirection == Direction.UpLeft)
-                {
-                    if (GameEngine.RandomNumberGenerator.Next(0, 2) == 0)
-                    {
-                        Direction = Direction.Left;
-                        stepsFromBlob = XPos - blobsXPosition;
-                    }
-                    else
-                    {
-                        Direction = Direction.Up;
-                        stepsFromBlob = YPos - blobsYPosition;
-                    }
-                }
-            }
-            else if (XPos >= blobsXPosition && YPos <= blobsYPosition)
-            {
-                var distanceX = XPos - blobsXPosition;
-                var distanceY = blobsYPosition - YPos;
-
-                if (distanceX > distanceY)
-                {
-                    Direction = Direction.Left;
-                    stepsFromBlob = XPos - blobsXPosition;
-                }
-                else if (distanceY > distanceX)
-                {
-                    Direction = Direction.Down;
-                    stepsFromBlob = blobsYPosition - YPos;
-                }
-
-                if (GameEngine.RandomNumberGenerator.Next(0, 2) == 0)
-                {
-                    if (Direction == Direction.Left)
-                    {
-                        Direction = Direction.DownLeft;
-                        stepsFromBlob = XPos - blobsXPosition;
-                    }
-                    else if (Direction == Direction.Down)
-                    {
-                        Direction = Direction.DownLeft;
-                        stepsFromBlob = blobsYPosition - YPos;
-                    }
-                }
-
-                if (_lastCollisionDirection == Direction.Down)
-                {
-                    Direction = Direction.Left;
-                    stepsFromBlob = XPos - blobsXPosition;
-                }
-                else if (_lastCollisionDirection == Direction.Left)
-                {
-                    Direction = Direction.Down;
-                    stepsFromBlob = blobsYPosition - YPos;
-                }
-                else if (_lastCollisionDirection == Direction.DownLeft)
-                {
-                    if (GameEngine.RandomNumberGenerator.Next(0, 2) == 0)
-                    {
-                        Direction = Direction.Left;
-                        stepsFromBlob = XPos - blobsXPosition;
-                    }
-                    else
-                    {
-                        Direction = Direction.Down;
-                        stepsFromBlob = blobsYPosition - YPos;
-                    }
-                }
-            }
-        }
-        else
+        if (_spikeyPause)
         {
             Direction = Direction.None;
+            _stepsToMove = GameEngine.RandomNumberGenerator.Next(ShortestBouncingRun, LongestBouncingRun);
+            return;
         }
 
-        if (!_spikeyPause)
+        var acrossToBlob = XPos <= blobsXPosition ? Direction.Right : Direction.Left;
+        var alongToBlob = VerticalDirectionTowardsBlob(blobsXPosition, blobsYPosition);
+        var cornerToBlob = Diagonal(acrossToBlob, alongToBlob);
+
+        var distanceX = Math.Abs(blobsXPosition - XPos);
+        var distanceY = Math.Abs(blobsYPosition - YPos);
+        var stepsFromBlob = 0;
+
+        if (distanceX > distanceY)
         {
-            _stepsToMove = GameEngine.RandomNumberGenerator.Next(
-                              (int)(stepsFromBlob / (double)MoveSpeed / 2),
-                              (int)(stepsFromBlob / (double)MoveSpeed)) +
-                          10; // An additional 10 to stop the spiky lads from getting stuck on scenary
+            Direction = acrossToBlob;
+            stepsFromBlob = distanceX;
         }
-        else
+        else if (distanceY > distanceX)
         {
-            _stepsToMove = GameEngine.RandomNumberGenerator.Next(ShortestBouncingRun, LongestBouncingRun);
+            Direction = alongToBlob;
+            stepsFromBlob = distanceY;
         }
+
+        // Half the time it cuts the corner rather than closing one axis at a time.
+        if (CoinFlip())
+        {
+            if (Direction == acrossToBlob)
+            {
+                Direction = cornerToBlob;
+                stepsFromBlob = distanceX;
+            }
+            else if (Direction == alongToBlob)
+            {
+                Direction = cornerToBlob;
+                stepsFromBlob = distanceY;
+            }
+        }
+
+        // It walked into something last step, so try a way it has not just been stopped.
+        if (_lastCollisionDirection == acrossToBlob)
+        {
+            Direction = alongToBlob;
+            stepsFromBlob = distanceY;
+        }
+        else if (_lastCollisionDirection == alongToBlob)
+        {
+            Direction = acrossToBlob;
+            stepsFromBlob = distanceX;
+        }
+        else if (_lastCollisionDirection == cornerToBlob)
+        {
+            if (CoinFlip())
+            {
+                Direction = acrossToBlob;
+                stepsFromBlob = distanceX;
+            }
+            else
+            {
+                Direction = alongToBlob;
+                stepsFromBlob = distanceY;
+            }
+        }
+
+        _stepsToMove = GameEngine.RandomNumberGenerator.Next(
+                           (int)(stepsFromBlob / (double)MoveSpeed / 2),
+                           (int)(stepsFromBlob / (double)MoveSpeed)) +
+                       SpikeyOvershoot;
     }
+
+    /// <summary>
+    ///     Which of up and down points at the blob.
+    /// </summary>
+    /// <remarks>
+    ///     The four quadrant tests this replaced were an if/else chain with inclusive bounds on both
+    ///     sides, so a nasty exactly level with the blob fell into whichever arm matched first: down
+    ///     if it was to his left, up if it was to his right. That is an artefact of the order they
+    ///     were written in rather than anything intended, but tidying it changes what the game does,
+    ///     so it is reproduced here instead.
+    /// </remarks>
+    private Direction VerticalDirectionTowardsBlob(int blobsXPosition, int blobsYPosition)
+    {
+        if (XPos <= blobsXPosition)
+        {
+            return YPos <= blobsYPosition ? Direction.Down : Direction.Up;
+        }
+
+        return YPos < blobsYPosition ? Direction.Down : Direction.Up;
+    }
+
+    /// <summary>The diagonal made of one horizontal and one vertical direction.</summary>
+    private static Direction Diagonal(Direction across, Direction along)
+        => (across, along) switch
+        {
+            (Direction.Right, Direction.Down) => Direction.DownRight,
+            (Direction.Right, _) => Direction.UpRight,
+            (_, Direction.Down) => Direction.DownLeft,
+            _ => Direction.UpLeft
+        };
+
+    /// <summary>A one-in-two chance, which is how most of a nasty's mind gets made up.</summary>
+    private bool CoinFlip() => GameEngine.RandomNumberGenerator.Next(0, 2) == 0;
 
     private void MoveNastyOneStep(ref int amountToMoveX, ref int amountToMoveY)
     {
