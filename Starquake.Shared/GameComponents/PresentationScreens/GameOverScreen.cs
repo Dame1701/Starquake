@@ -41,14 +41,16 @@ public class GameOverScreen : GameScreenBase, IGameScreen
         ScreenDirectory screenDirectory,
         StatusPanel statusPanel,
         CoreElements elements,
-        GameScreenCollection gameScreens)
+        GameScreenCollection gameScreens,
+        ToggleKeys input)
         : base(
             resources,
             font,
             graphics,
             presentation,
             screenEffects,
-            screenDirectory)
+            screenDirectory,
+            input)
     {
         _statusPanel = statusPanel;
         _elements = elements;
@@ -80,7 +82,7 @@ public class GameOverScreen : GameScreenBase, IGameScreen
 
     public override void Update(GameTime gameTime)
     {
-        if (ToggleKeys.GetPressedKey() != Keys.None)
+        if (Input.GetPressedKey() != Keys.None)
         {
             var playersScore = new HiScore
             {

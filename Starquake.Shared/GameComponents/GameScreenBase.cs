@@ -8,6 +8,7 @@ using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
+using Starquake.Input;
 using Starquake.Structure;
 
 namespace Starquake.GameComponents;
@@ -33,6 +34,12 @@ public class GameScreenBase : GameComponentBase
     protected readonly ScreenDirectory ScreenDirectory;
     protected readonly ScreenEffectEngine ScreenEffects;
 
+    /// <summary>
+    ///     The frame's input, read once by <c>GameHost</c>. Every page acts on a key press, so this
+    ///     is the seventh thing all of them need.
+    /// </summary>
+    protected readonly ToggleKeys Input;
+
     protected int ScreenFadeSpeed;
 
     protected GameScreenBase(
@@ -41,8 +48,10 @@ public class GameScreenBase : GameComponentBase
         GraphicsDeviceManager graphics,
         PresentationSettings presentation,
         ScreenEffectEngine screenEffects,
-        ScreenDirectory screenDirectory)
+        ScreenDirectory screenDirectory,
+        ToggleKeys input)
     {
+        Input = input;
         Resources = resources;
         Font = font;
         GraphicsDeviceManager = graphics;

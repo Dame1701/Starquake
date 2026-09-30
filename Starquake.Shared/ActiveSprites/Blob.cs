@@ -353,7 +353,8 @@ public class Blob : GameComponentBase
         GameSession session,
         BlobDeathAnimation blobKiller,
         BreakableBridges breakableBridges,
-        Random randomNumberGenerator)
+        Random randomNumberGenerator,
+        ToggleKeys input)
     {
         _resources = resources;
         _gameScreens = gameScreens;
@@ -372,7 +373,7 @@ public class Blob : GameComponentBase
             graphicsSet,
             randomNumberGenerator,
             screenEffects);
-        BlobsControl = new CustomControl(session.PlayerKeys);
+        BlobsControl = new CustomControl(session.PlayerKeys, input);
         _blobTouched = false;
         _teleportFadeLevel = ColourLevels.Full;
         _startBlobTeleporting = false;

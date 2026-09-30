@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Input;
 using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Input;
 using Starquake.Display;
 using Starquake.Helpers;
 using Starquake.Particles;
@@ -48,6 +49,7 @@ public class Nasties : GameComponentBase
     private readonly ElectricityGatesAndNodesEngine _electricityNodeGates;
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsSet _graphicsSet;
+    private readonly ToggleKeys _input;
 
     private readonly List<Nasty> _nasties;
     private readonly int _nastyCount;
@@ -66,7 +68,8 @@ public class Nasties : GameComponentBase
         Random randomNumberGenerator,
         ConveyerNasties conveyerNasties,
         ElectricityGatesAndNodesEngine electricityNodeGates,
-        int nastyCount)
+        int nastyCount,
+        ToggleKeys input)
     {
         _resources = resources;
         _gameScreens = gameScreens;
@@ -76,6 +79,7 @@ public class Nasties : GameComponentBase
         _randomNumberGenerator = randomNumberGenerator;
         _conveyerNasties = conveyerNasties;
         _electricityNodeGates = electricityNodeGates;
+        _input = input;
 
         _nastyCount = nastyCount;
         _nasties = new List<Nasty>();
@@ -140,7 +144,7 @@ public class Nasties : GameComponentBase
         // Cancel any nasty collision effect
         _blob.BlobTouchedByNasty = false;
 
-        if (Keyboard.GetState().IsKeyDown(Keys.R))
+        if (_input.KeyboardState.IsKeyDown(Keys.R))
         {
             for (int a = 0; a < _nastyCount; a++)
             {

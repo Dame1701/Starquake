@@ -33,14 +33,16 @@ public class GameCompleteScreen : GameScreenBase, IGameScreen
         PresentationSettings presentation,
         ScreenEffectEngine screenEffects,
         ScreenDirectory screenDirectory,
-        CoreElements elements)
+        CoreElements elements,
+        ToggleKeys input)
         : base(
             resources,
             font,
             graphics,
             presentation,
             screenEffects,
-            screenDirectory)
+            screenDirectory,
+            input)
     {
         _elements = elements;
 
@@ -66,7 +68,7 @@ public class GameCompleteScreen : GameScreenBase, IGameScreen
 
     public override void Update(GameTime gameTime)
     {
-        if (ToggleKeys.GetPressedKey() != Keys.None)
+        if (Input.GetPressedKey() != Keys.None)
         {
             GraphicsDeviceManager.GraphicsDevice.Clear(Presentation.ScreenClearColour);
             ScreenDirectory.Current = GameScreenType.GameOver;

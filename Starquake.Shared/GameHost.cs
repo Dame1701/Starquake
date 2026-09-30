@@ -35,6 +35,12 @@ public class GameHost : Game
     private static readonly TimeSpan LogicFrameLength = TimeSpan.FromTicks((long)(TimeSpan.TicksPerSecond / LogicFramesPerSecond));
 
     private readonly GraphicsDeviceManager _graphics;
+
+    /// <summary>
+    ///     The frame's input. Owned here because this is what decides when a logic frame happens,
+    ///     and it has to be read exactly once per frame from exactly one place.
+    /// </summary>
+    private readonly ToggleKeys _input = new();
     private readonly GameTime _logicGameTime = new();
     private GameEngine? _gameEngine;
 
@@ -113,7 +119,7 @@ public class GameHost : Game
     protected override void Initialize()
     {
         // The engine defines and initialises its own content as it is built
-        _gameEngine = new GameEngine(_graphics, Content);
+        _gameEngine = new GameEngine(_graphics, Content, _input);
 
         // This will eventually call LoadContent
         base.Initialize();
@@ -181,18 +187,18 @@ public class GameHost : Game
         // This must happen here, outside of the whole game eco system. It has to run per logic
         // frame rather than per rendered frame: a toggled key is only reported for the one call
         // after the release, so polling it more often than the game reads it swallows keypresses.
-        ToggleKeys.Update();
+        _input.Update();
 
         // Switch to fullscreen if Ctrl and Enter touched
         if (_gameEngine?.Status is GameEngineStatus.StartingGraphicsLoaded or GameEngineStatus.Started or GameEngineStatus.ContentLoaded or GameEngineStatus.StartGame)
         {
             // Allows the game to exit
-            if (ToggleKeys.GetPressedKey() == Keys.Escape)
+            if (_input.GetPressedKey() == Keys.Escape)
             {
                 Exit();
             }
 
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+            if (_input.GamePadState.Buttons.Back == ButtonState.Pressed)
             {
                 Exit();
             }

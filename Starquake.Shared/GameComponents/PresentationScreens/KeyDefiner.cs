@@ -18,6 +18,7 @@ public class KeyDefiner
 {
 
     private readonly BitmapFont _font;
+    private readonly ToggleKeys _input;
     private readonly string[] _keysToDefine = new[]
     {
         "UP",
@@ -33,10 +34,11 @@ public class KeyDefiner
 
     private int _definedKeyIndex;
 
-    public KeyDefiner(ResourceManager resources, BitmapFont font)
+    public KeyDefiner(ResourceManager resources, BitmapFont font, ToggleKeys input)
     {
         _resources = resources;
         _font = font;
+        _input = input;
         DefinedKeys = new[]
         {
             Keys.O,
@@ -86,7 +88,7 @@ public class KeyDefiner
 
     public void Update()
     {
-        Keys pressedKey = ToggleKeys.GetPressedKey();
+        Keys pressedKey = _input.GetPressedKey();
 
         if (!_alldone)
         {

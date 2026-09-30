@@ -37,14 +37,16 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
         PresentationSettings presentation,
         ScreenEffectEngine screenEffects,
         ScreenDirectory screenDirectory,
-        StatusPanel statusPanel)
+        StatusPanel statusPanel,
+        ToggleKeys input)
         : base(
             resources,
             font,
             graphics,
             presentation,
             screenEffects,
-            screenDirectory)
+            screenDirectory,
+            input)
     {
         _statusPanel = statusPanel;
 
@@ -95,7 +97,7 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
     {
         if (!_gotHighScore)
         {
-            if (ToggleKeys.GetPressedKey() != Keys.None)
+            if (Input.GetPressedKey() != Keys.None)
             {
                 GraphicsDeviceManager.GraphicsDevice.Clear(Presentation.ScreenClearColour);
                 ScreenDirectory.Current = GameScreenType.Options;
@@ -104,9 +106,9 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
         }
         else
         {
-            if (ToggleKeys.GetPressedKey() != Keys.None)
+            if (Input.GetPressedKey() != Keys.None)
             {
-                string keyPressedString = ToggleKeys.GetPressedKey().ToString().ToUpper();
+                string keyPressedString = Input.GetPressedKey().ToString().ToUpper();
                 int keyPressed = TextHelper.GetAsciiCode(keyPressedString);
 
                 if (_playersHighScore.Name.Length < 6)
@@ -117,19 +119,19 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
                         _playersHighScore.Name = _playersHighScore.Name + keyPressedString;
                     }
 
-                    if (ToggleKeys.GetPressedKey() == Keys.Space)
+                    if (Input.GetPressedKey() == Keys.Space)
                     {
                         _playersHighScore.Name = _playersHighScore.Name + " ";
                     }
                 }
 
-                if (ToggleKeys.GetPressedKey() == Keys.Enter)
+                if (Input.GetPressedKey() == Keys.Enter)
                 {
                     _gotHighScore = false;
                 }
 
 
-                if (ToggleKeys.GetPressedKey() == Keys.Back)
+                if (Input.GetPressedKey() == Keys.Back)
                 {
                     if (_playersHighScore.Name.Length > 0)
                     {

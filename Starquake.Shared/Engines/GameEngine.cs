@@ -189,8 +189,10 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     // Scaling
     public GameEngine(
         GraphicsDeviceManager graphics,
-        ContentManager content)
+        ContentManager content,
+        ToggleKeys input)
     {
+        Input = input;
         // Setup graphics device and content management
         _graphicsDeviceMgr = graphics;
         ContentMgr = content;
@@ -210,6 +212,12 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         DefineContent();
         Initialise();
     }
+
+    /// <summary>
+    ///     The frame's input, read once by <c>GameHost</c> and shared by everything that acts on it,
+    ///     so no two readers can disagree about what is held down.
+    /// </summary>
+    public ToggleKeys Input { get; }
 
     /// <summary>
     ///     Everything below is built by the <see cref="GameEngineStatus.Started" /> handler, because
@@ -479,7 +487,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             Session,
             BlobKiller,
             BreakableBridgesEngine,
-            RandomNumberGenerator);
+            RandomNumberGenerator,
+            Input);
         Player.OnScreenChanged += Player_OnScreenChanged;
         Player.OnBlobActionRaised += Player_OnBlobActionRaised;
 
@@ -536,7 +545,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             RandomNumberGenerator,
             ConveyerNastiesInstance,
             ElectricityNodeGateEngine,
-            NastiesPerScreen);
+            NastiesPerScreen,
+            Input);
         Nasties.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
     }
 
@@ -612,7 +622,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             Presentation,
             ScreenEffectEngine,
             ScreenDirectory,
-            Session));
+            Session,
+            Input));
         ScreenDirectory.Add(GameScreenType.ComputerReport, new ComputerReportScreen(
             ContentResourceManager,
             Font2,
@@ -620,7 +631,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             Presentation,
             ScreenEffectEngine,
             ScreenDirectory,
-            RandomNumberGenerator));
+            RandomNumberGenerator,
+            Input));
         ScreenDirectory.Add(GameScreenType.HiScores, new HiScoreScreen(
             ContentResourceManager,
             Font2,
@@ -628,7 +640,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             Presentation,
             ScreenEffectEngine,
             ScreenDirectory,
-            BlobStatusPanel));
+            BlobStatusPanel,
+            Input));
         ScreenDirectory.Add(GameScreenType.GameOver, new GameOverScreen(
             ContentResourceManager,
             Font2,
@@ -638,7 +651,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             ScreenDirectory,
             BlobStatusPanel,
             Elements,
-            GameScreens));
+            GameScreens,
+            Input));
         ScreenDirectory.Add(GameScreenType.GameComplete, new GameCompleteScreen(
             ContentResourceManager,
             Font2,
@@ -646,7 +660,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             Presentation,
             ScreenEffectEngine,
             ScreenDirectory,
-            Elements));
+            Elements,
+            Input));
 
         ScreenDirectory.Add(GameScreenType.MainGame, _mainScreen);
         ScreenDirectory.Add(GameScreenType.Teleporter, new TeleportScreen(
@@ -658,7 +673,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             Presentation,
             RandomNumberGenerator,
             ScreenDirectory,
-            ShapeDrawer));
+            ShapeDrawer,
+            Input));
         ScreenDirectory.Add(GameScreenType.PlanetCore, new PlanetCoreScreen(
             ContentResourceManager,
             GameScreens,
@@ -689,7 +705,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             Player,
             RandomNumberGenerator,
             ScreenDirectory,
-            ShapeDrawer));
+            ShapeDrawer,
+            Input));
 
         foreach (IGameScreen screen in ScreenDirectory.All)
         {
@@ -752,7 +769,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         // where it is acted on, because the sound effect instances belong to this thread.
         ContentResourceManager.GetSoundFxEngine().Update();
 
-        if (ToggleKeys.GetPressedKey() == Keys.F9)
+        if (Input.GetPressedKey() == Keys.F9)
         {
             Presentation.ScanlinesEnabled = !Presentation.ScanlinesEnabled;
         }
@@ -794,7 +811,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             _bootProgressBackgroundFade = 0;
         }
 
-        if (ToggleKeys.GetPressedKey() != Keys.None)
+        if (Input.GetPressedKey() != Keys.None)
         {
             ContentResourceManager_OnGameComponentStatusChanged(
                 "Content loaded",
@@ -848,7 +865,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         {
             if (ScreenDirectory.Current != GameScreenType.Teleporter)
             {
-                if (ToggleKeys.GetPressedKey() == Session.PlayerKeys.Pause)
+                if (Input.GetPressedKey() == Session.PlayerKeys.Pause)
                 {
                     Session.Paused = !Session.Paused;
 
@@ -868,7 +885,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     /// </remarks>
     private void ToggleFullScreenIfAsked()
     {
-        if (ToggleKeys.GetPressedKey() == Keys.F12)
+        if (Input.GetPressedKey() == Keys.F12)
         {
             if (ScreenDirectory.Current is
                 GameScreenType.Cheops or
@@ -893,7 +910,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     private void ToggleBackgroundsIfAsked()
     {
-        if (ToggleKeys.GetPressedKey() == Keys.F10)
+        if (Input.GetPressedKey() == Keys.F10)
         {
             if (ScreenDirectory.Current == GameScreenType.MainGame)
             {
@@ -904,7 +921,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     private void SwitchGraphicsSetIfAsked()
     {
-        if (ToggleKeys.GetPressedKey() == Keys.F8)
+        if (Input.GetPressedKey() == Keys.F8)
         {
             _graphicsSet.Switch();
 
@@ -935,7 +952,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     [Conditional("DEBUG")]
     private void HandleTestModeKeys()
     {
-        if (Keyboard.GetState().IsKeyDown(Keys.F1))
+        if (Input.KeyboardState.IsKeyDown(Keys.F1))
         {
             if (Player.BlobsState == BlobState.Normal)
             {
@@ -944,13 +961,13 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         }
 
         // Give us some lives back (Testing)
-        if (Keyboard.GetState().IsKeyDown(Keys.F2))
+        if (Input.KeyboardState.IsKeyDown(Keys.F2))
         {
             BlobStatusPanel.BlobLives = TestModeLivesRestored;
             Player.BlobsState = BlobState.Dead;
         }
 
-        if (ToggleKeys.GetPressedKey() == Keys.F3)
+        if (Input.GetPressedKey() == Keys.F3)
         {
             ScreenEffectEngine.ExecuteScreenEffect(ScreenEffectType.AdditiveFade, -1, 50, false);
         }
@@ -963,7 +980,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     private void StepBetweenScreens()
     {
-        if (Keyboard.GetState().IsKeyDown(Keys.NumPad4))
+        if (Input.KeyboardState.IsKeyDown(Keys.NumPad4))
         {
             if (GameScreens.ScreenNumber > 0)
             {
@@ -973,7 +990,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             }
         }
 
-        if (Keyboard.GetState().IsKeyDown(Keys.NumPad6))
+        if (Input.KeyboardState.IsKeyDown(Keys.NumPad6))
         {
             if (GameScreens.ScreenNumber < WorldMap.LastScreenNumber)
             {
@@ -983,7 +1000,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             }
         }
 
-        if (Keyboard.GetState().IsKeyDown(Keys.NumPad8))
+        if (Input.KeyboardState.IsKeyDown(Keys.NumPad8))
         {
             if (GameScreens.ScreenNumber - WorldMap.ScreensAcross >= 0)
             {
@@ -993,7 +1010,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             }
         }
 
-        if (Keyboard.GetState().IsKeyDown(Keys.NumPad2))
+        if (Input.KeyboardState.IsKeyDown(Keys.NumPad2))
         {
             if (GameScreens.ScreenNumber + WorldMap.ScreensAcross <= WorldMap.LastScreenNumber)
             {

@@ -13,6 +13,7 @@ using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Fonts;
+using Starquake.Input;
 using Starquake.SharedLibs;
 using Starquake.Structure;
 
@@ -36,6 +37,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
     private readonly ResourceManager _resources;
     private readonly ScreenDirectory _screenDirectory;
     private readonly Shapes _shapeDrawer;
+    private readonly ToggleKeys _input;
     private readonly StatusPanel _statusPanel;
 
 
@@ -78,7 +80,8 @@ public class CheopsScreen : GameComponentBase, IGameScreen
         Blob blob,
         Random randomNumberGenerator,
         ScreenDirectory screenDirectory,
-        Shapes shapeDrawer)
+        Shapes shapeDrawer,
+        ToggleKeys input)
     {
         _statusPanel = statusPanel;
         _resources = resources;
@@ -90,6 +93,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
         _randomNumberGenerator = randomNumberGenerator;
         _screenDirectory = screenDirectory;
         _shapeDrawer = shapeDrawer;
+        _input = input;
 
         _accessCode = new int[2]
         {
@@ -459,7 +463,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
 
             _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
 
-            if (Keyboard.GetState().IsKeyDown(Keys.D1))
+            if (_input.KeyboardState.IsKeyDown(Keys.D1))
             {
                 _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[0].Type;
                 _screenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
@@ -468,7 +472,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
                 _gameScreens.UpdateCollisionMap(false);
                 _resources.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
             }
-            else if (Keyboard.GetState().IsKeyDown(Keys.D2))
+            else if (_input.KeyboardState.IsKeyDown(Keys.D2))
             {
                 _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[1].Type;
                 _screenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
@@ -477,7 +481,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
                 _gameScreens.UpdateCollisionMap(false);
                 _resources.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
             }
-            else if (Keyboard.GetState().IsKeyDown(Keys.D3))
+            else if (_input.KeyboardState.IsKeyDown(Keys.D3))
             {
                 _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[2].Type;
                 _screenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
@@ -486,7 +490,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
                 _gameScreens.UpdateCollisionMap(false);
                 _resources.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
             }
-            else if (Keyboard.GetState().IsKeyDown(Keys.D4))
+            else if (_input.KeyboardState.IsKeyDown(Keys.D4))
             {
                 _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[3].Type;
                 _screenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
@@ -495,7 +499,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
                 _gameScreens.UpdateCollisionMap(false);
                 _resources.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
             }
-            else if (Keyboard.GetState().IsKeyDown(Keys.D5))
+            else if (_input.KeyboardState.IsKeyDown(Keys.D5))
             {
                 _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[4].Type;
                 _screenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;

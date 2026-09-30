@@ -37,14 +37,16 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
         PresentationSettings presentation,
         ScreenEffectEngine screenEffects,
         ScreenDirectory screenDirectory,
-        Random randomNumberGenerator)
+        Random randomNumberGenerator,
+        ToggleKeys input)
         : base(
             resources,
             font,
             graphics,
             presentation,
             screenEffects,
-            screenDirectory)
+            screenDirectory,
+            input)
     {
         _randomNumberGenerator = randomNumberGenerator;
 
@@ -57,7 +59,7 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
 
     public override void Update(GameTime gameTime)
     {
-        if (ToggleKeys.GetPressedKey() != Keys.None)
+        if (Input.GetPressedKey() != Keys.None)
         {
             GraphicsDeviceManager.GraphicsDevice.Clear(Presentation.ScreenClearColour);
             ScreenDirectory.Current = GameScreenType.MainGame;

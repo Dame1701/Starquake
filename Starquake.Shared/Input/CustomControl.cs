@@ -17,6 +17,10 @@ namespace Starquake.Input;
 ///     and quit and nothing else. DesktopGL reaches a pad through SDL instead, so the five methods
 ///     below read one now. It is read alongside the keyboard rather than instead of it, so a pad works
 ///     whichever key preset is chosen, and the joystick preset is simply the one that binds no keys.
+///     <para>
+///         Both come from the one snapshot the frame began with rather than being polled here, so
+///         the five methods cannot disagree with each other or with ToggleKeys inside a frame.
+///     </para>
 /// </remarks>
 public class CustomControl
 {
@@ -27,39 +31,35 @@ public class CustomControl
     /// </summary>
     private const float StickThreshold = 0.5f;
 
-    public CustomControl(PlayerKeySet playerKeys)
+    private readonly ToggleKeys _input;
+
+    public CustomControl(PlayerKeySet playerKeys, ToggleKeys input)
     {
         PlayerKeySet = playerKeys;
+        _input = input;
     }
 
     public PlayerKeySet PlayerKeySet { get; set; }
 
-    /// <summary>
-    ///     Whether a pad is plugged in at all. The options screen asks so that it can say so, rather
-    ///     than offering a control scheme that answers nothing.
-    /// </summary>
-    public static bool JoyPadConnected
-        => GamePad.GetState(PlayerIndex.One).IsConnected;
-
     public bool MovedUp()
-        => Keyboard.GetState().IsKeyDown(PlayerKeySet.Up) ||
-           PushedUp(GamePad.GetState(PlayerIndex.One));
+        => _input.KeyboardState.IsKeyDown(PlayerKeySet.Up) ||
+           PushedUp(_input.GamePadState);
 
     public bool MovedDown()
-        => Keyboard.GetState().IsKeyDown(PlayerKeySet.Down) ||
-           PushedDown(GamePad.GetState(PlayerIndex.One));
+        => _input.KeyboardState.IsKeyDown(PlayerKeySet.Down) ||
+           PushedDown(_input.GamePadState);
 
     public bool MovedLeft()
-        => Keyboard.GetState().IsKeyDown(PlayerKeySet.Left) ||
-           PushedLeft(GamePad.GetState(PlayerIndex.One));
+        => _input.KeyboardState.IsKeyDown(PlayerKeySet.Left) ||
+           PushedLeft(_input.GamePadState);
 
     public bool MovedRight()
-        => Keyboard.GetState().IsKeyDown(PlayerKeySet.Right) ||
-           PushedRight(GamePad.GetState(PlayerIndex.One));
+        => _input.KeyboardState.IsKeyDown(PlayerKeySet.Right) ||
+           PushedRight(_input.GamePadState);
 
     public bool HasFired()
-        => Keyboard.GetState().IsKeyDown(PlayerKeySet.Fire) ||
-           GamePad.GetState(PlayerIndex.One).Buttons.A == ButtonState.Pressed;
+        => _input.KeyboardState.IsKeyDown(PlayerKeySet.Fire) ||
+           _input.GamePadState.Buttons.A == ButtonState.Pressed;
 
     /// <summary>
     ///     The d-pad and the left stick both count, so a pad can be held either way round. A pad that is

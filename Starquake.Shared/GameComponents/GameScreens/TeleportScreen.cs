@@ -13,6 +13,7 @@ using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Fonts;
+using Starquake.Input;
 using Starquake.Sprites;
 using Starquake.Structure;
 
@@ -29,6 +30,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
     private readonly ResourceManager _resources;
     private readonly ScreenDirectory _screenDirectory;
     private readonly Shapes _shapeDrawer;
+    private readonly ToggleKeys _input;
 
 
     #region IGameScreen Members
@@ -77,7 +79,8 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         PresentationSettings presentation,
         Random randomNumberGenerator,
         ScreenDirectory screenDirectory,
-        Shapes shapeDrawer)
+        Shapes shapeDrawer,
+        ToggleKeys input)
     {
         _resources = resources;
         _font = font;
@@ -88,6 +91,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         _randomNumberGenerator = randomNumberGenerator;
         _screenDirectory = screenDirectory;
         _shapeDrawer = shapeDrawer;
+        _input = input;
 
         _keyFades = new FaderAnimation[16];
         _powerSupplyFader = new FaderAnimation(1, null, 100);
@@ -162,7 +166,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
             RunTeleportAttempt();
         }
 
-        if (!Keyboard.GetState().IsKeyDown((Keys)_keyIdPressed))
+        if (!_input.KeyboardState.IsKeyDown((Keys)_keyIdPressed))
         {
             _keyPressed = false;
         }
@@ -184,7 +188,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
     {
         for (int a = 65; a < 91; a++)
         {
-            if (Keyboard.GetState().IsKeyDown((Keys)a))
+            if (_input.KeyboardState.IsKeyDown((Keys)a))
             {
                 _resources.GetSoundFxEngine().PlaySound("TeleportKeyClick", 0.5f, false);
 

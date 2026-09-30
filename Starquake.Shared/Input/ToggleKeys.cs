@@ -2,42 +2,65 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace Starquake.Input;
 
 /// <summary>
-///     This class allows checking for keys that have been pressed down and then released. This is useful for when we don't
-///     want to do an action until
-///     the key that has been pressed has been released
+///     The frame's input, read once. Its main job is the keys that have been pressed down and then
+///     released, which is what the game acts on for anything that should happen once rather than for
+///     as long as a key is held.
 /// </summary>
-public static class ToggleKeys
+/// <remarks>
+///     This was two mutable static fields, the last global state in the game - it survived the
+///     deletion of GameEngine.GetInstance() in stage 2 of DECOUPLING.md. It required Update to be
+///     called exactly once a frame from exactly one place and nothing in the type system said so.
+///     It is an instance now, owned by GameHost, which is the thing that decides when a logic frame
+///     happens.
+///     <para>
+///         The snapshot Update takes is public because everything reading input this frame should
+///         read the same one. Keyboard.GetState() was called three times here and five more in
+///         CustomControl, so two of those reads could disagree inside one frame.
+///     </para>
+/// </remarks>
+public class ToggleKeys
 {
-    private static Keys _pressedKey = Keys.None;
-    private static Keys _toggledKey = Keys.None;
+    private Keys _heldKey = Keys.None;
+    private Keys _toggledKey = Keys.None;
 
-    public static Keys GetPressedKey()
-    {
-        Keys temp = _toggledKey;
-        return temp;
-    }
+    /// <summary>
+    ///     The keyboard and first gamepad as they were when this frame began.
+    /// </summary>
+    public KeyboardState KeyboardState { get; private set; }
 
-    public static void Update()
+    /// <inheritdoc cref="KeyboardState" />
+    public GamePadState GamePadState { get; private set; }
+
+    /// <summary>
+    ///     The key released this frame, if exactly one was down and has just come up.
+    /// </summary>
+    public Keys GetPressedKey()
+        => _toggledKey;
+
+    public void Update()
     {
+        KeyboardState = Keyboard.GetState();
+        GamePadState = GamePad.GetState(PlayerIndex.One);
+
         _toggledKey = Keys.None;
 
-        if (Keyboard.GetState().GetPressedKeys().Length == 1)
+        Keys[] pressedKeys = KeyboardState.GetPressedKeys();
+
+        if (pressedKeys.Length == 1)
         {
-            _pressedKey = Keyboard.GetState().GetPressedKeys()[0];
+            _heldKey = pressedKeys[0];
         }
 
-        if (_pressedKey != Keys.None)
+        if (_heldKey != Keys.None && KeyboardState.IsKeyUp(_heldKey))
         {
-            if (Keyboard.GetState().IsKeyUp(_pressedKey))
-            {
-                _toggledKey = _pressedKey;
-                _pressedKey = Keys.None;
-            }
+            _toggledKey = _heldKey;
+            _heldKey = Keys.None;
         }
     }
 

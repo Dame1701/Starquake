@@ -40,21 +40,23 @@ public class OptionsScreen : GameScreenBase, IGameScreen
         PresentationSettings presentation,
         ScreenEffectEngine screenEffects,
         ScreenDirectory screenDirectory,
-        GameSession session)
+        GameSession session,
+        ToggleKeys input)
         : base(
             resources,
             font,
             graphics,
             presentation,
             screenEffects,
-            screenDirectory)
+            screenDirectory,
+            input)
     {
         _session = session;
 
         ScreenFade = 0;
         ScreenFadeSpeed = 5;
 
-        _keyDefiner = new KeyDefiner(Resources, Font);
+        _keyDefiner = new KeyDefiner(Resources, Font, Input);
         _keyDefiner.KeyDefinitionComplete += keyDefiner_KeyDefinitionComplete;
 
         _backgroundImage = Resources.GetSpriteCollection("OptionScreenBackground");
@@ -62,7 +64,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
 
         _options =
         [
-            new Option("1", "Joypad", false, Color.White, !CustomControl.JoyPadConnected),
+            new Option("1", "Joypad", false, Color.White, !Input.GamePadState.IsConnected),
             new Option("2", "Cursor Keys, Left Ctrl", true, Color.White),
             new Option("3", "Keyboard . . O, P, A, Q, SP", false, Color.White),
             new Option("4", "UDK Keyboard . . " + _keyDefiner.GetKeys(), false, Color.White),
@@ -122,13 +124,13 @@ public class OptionsScreen : GameScreenBase, IGameScreen
 
     /// <summary>
     ///     A pad can be plugged in or pulled out while this screen is up, so the preset that needs one
-    ///     says every frame whether it is there. Pulling the pad out while its preset is selected moves
+    ///     says every frame whether it is there, from the same snapshot everything else reads. Pulling the pad out while its preset is selected moves
     ///     the selection back to the keyboard, because confirming it would otherwise leave the player
     ///     with nothing bound at all.
     /// </summary>
     private void FollowTheJoyPad()
     {
-        _options[JoyPadOption].Unavailable = !CustomControl.JoyPadConnected;
+        _options[JoyPadOption].Unavailable = !Input.GamePadState.IsConnected;
 
         if (!_options[JoyPadOption].Unavailable || !_options[JoyPadOption].Selected)
         {
@@ -145,7 +147,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
     /// </summary>
     private void HandleOptionKeys()
     {
-        Keys pressed = ToggleKeys.GetPressedKey();
+        Keys pressed = Input.GetPressedKey();
 
         if (pressed == Keys.D0)
         {

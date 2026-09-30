@@ -274,7 +274,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
     /// </summary>
     private void QuitToGameOverIfAsked()
     {
-        if (ToggleKeys.GetPressedKey() != GameEngine.Session.PlayerKeys.Quit)
+        if (GameEngine.Input.GetPressedKey() != GameEngine.Session.PlayerKeys.Quit)
         {
             return;
         }
@@ -299,17 +299,17 @@ public class MainGameScreen : GameComponentBase, IGameScreen
     [Conditional("DEBUG")]
     private void HandleTestModeKeys()
     {
-        if (Keyboard.GetState().IsKeyDown(Keys.J))
+        if (GameEngine.Input.KeyboardState.IsKeyDown(Keys.J))
         {
             GameEngine.BlobStatusPanel.Platforms = TestModeSuppliesRestored;
             GameEngine.BlobStatusPanel.FirePower = TestModeSuppliesRestored;
         }
 
-        if (Keyboard.GetState().IsKeyDown(Keys.T))
+        if (GameEngine.Input.KeyboardState.IsKeyDown(Keys.T))
         {
             _testRumbleSoundId = GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("Rumble", true);
         }
-        else if (Keyboard.GetState().IsKeyUp(Keys.R))
+        else if (GameEngine.Input.KeyboardState.IsKeyUp(Keys.R))
         {
             if (_testRumbleSoundId != Guid.Empty)
             {
@@ -319,7 +319,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         }
 
         // Test game complete screen
-        if (ToggleKeys.GetPressedKey() == Keys.W)
+        if (GameEngine.Input.GetPressedKey() == Keys.W)
         {
             GameEngine.ScreenDirectory.Current = GameScreenType.GameComplete;
             GameEngine.ScreenDirectory.Get(GameScreenType.GameComplete)
@@ -327,7 +327,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         }
 
         // Test completing core
-        if (ToggleKeys.GetPressedKey() == Keys.C)
+        if (GameEngine.Input.GetPressedKey() == Keys.C)
         {
             foreach (CoreElement element in GameEngine.Elements.Elements)
             {
@@ -336,13 +336,13 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         }
 
         // Test intro sequence
-        if (ToggleKeys.GetPressedKey() == Keys.I)
+        if (GameEngine.Input.GetPressedKey() == Keys.I)
         {
             GameEngine.IntroSequence.Reset();
         }
 
         // Test Unstick routine
-        if (ToggleKeys.GetPressedKey() == Keys.U)
+        if (GameEngine.Input.GetPressedKey() == Keys.U)
         {
             GameEngine.Player.UnstickBlobFromTiles();
         }
