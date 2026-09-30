@@ -58,7 +58,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
 
         for (var a = 0; a < _accessCodes.Length; a++)
         {
-            _accessCodes[a] = new KeyScanner(GameEngine, true);
+            _accessCodes[a] = new KeyScanner(GameEngine.ContentResourceManager, GameEngine.GraphicsSet, GameEngine.RandomNumberGenerator, true);
         }
 
         Reset(null);

@@ -3,8 +3,11 @@
 // ---------------------------------------------------------
 // -
 using System.Collections.Generic;
+using System;
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
+using Starquake.ContentManagement;
+using Starquake.Display;
 using Starquake.Engines;
 using Starquake.SharedLibs;
 using Starquake.Structure;
@@ -13,7 +16,11 @@ namespace Starquake.ActiveSprites;
 
 public class CoreElements : GameComponentBase
 {
-    private readonly GameEngine GameEngine;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly PresentationSettings _presentation;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
+    private readonly StatusPanel _statusPanel;
 
     /// <summary>
     ///     The core is a three by three block of elements sitting in the middle of the core room.
@@ -35,9 +42,18 @@ public class CoreElements : GameComponentBase
     /// </summary>
     private const int ScoreForCompletingCore = 10000;
 
-    public CoreElements(GameEngine gameEngineReference)
+    public CoreElements(
+        StatusPanel statusPanel,
+        ResourceManager resources,
+        GraphicsSet graphicsSet,
+        PresentationSettings presentation,
+        Random randomNumberGenerator)
     {
-        GameEngine = gameEngineReference;
+        _statusPanel = statusPanel;
+        _resources = resources;
+        _graphicsSet = graphicsSet;
+        _presentation = presentation;
+        _randomNumberGenerator = randomNumberGenerator;
 
         Elements = new CoreElement[9];
         Reset();
@@ -73,7 +89,7 @@ public class CoreElements : GameComponentBase
             if (Elements[a].CurrentElement == elementNoToReplace)
             {
                 // You get a healthy 10,000 points for each element replaced!
-                GameEngine.BlobStatusPanel.PlayerScore = GameEngine.BlobStatusPanel.PlayerScore + ScoreForCompletingCore;
+                _statusPanel.PlayerScore = _statusPanel.PlayerScore + ScoreForCompletingCore;
 
                 Elements[a].ElementState = CoreElementState.Replacing;
                 var test = Elements[a].CurrentElement;
@@ -122,8 +138,8 @@ public class CoreElements : GameComponentBase
                 {
                     fadeUp = false;
                 }
-                var randomChoice = GameEngine.RandomNumberGenerator.Next(0, elementsToChoose.Count);
-                Elements[counter] = new CoreElement(GameEngine, elementsToChoose[randomChoice], counter, 6, fadeUp);
+                var randomChoice = _randomNumberGenerator.Next(0, elementsToChoose.Count);
+                Elements[counter] = new CoreElement(_resources, _graphicsSet, _presentation, _randomNumberGenerator, elementsToChoose[randomChoice], counter, 6, fadeUp);
                 Elements[counter].OnCoreElementReplaced += CoreElements_OnCoreElementReplaced;
                 elementsToChoose.RemoveAt(randomChoice);
                 Elements[counter].ElementState = CoreElementState.Missing;

@@ -229,7 +229,7 @@ public class StatusPanel : GameComponentBase
     {
         GameEngine = gameEngineRef;
 
-        _inventoryScanner = new KeyScanner(gameEngineRef, false);
+        _inventoryScanner = new KeyScanner(gameEngineRef.ContentResourceManager, gameEngineRef.GraphicsSet, gameEngineRef.RandomNumberGenerator, false);
     }
 
     public void LoadContent(ContentList content)

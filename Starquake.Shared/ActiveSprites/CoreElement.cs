@@ -3,10 +3,12 @@
 // ---------------------------------------------------------
 // -
 using System;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 using Starquake.Animations;
 using Starquake.Constants;
+using Starquake.ContentManagement;
+using Starquake.Display;
 using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Particles;
@@ -65,7 +67,10 @@ public class CoreElement
 
     private readonly FloatAdder _finalElementUpScaler;
 
-    private readonly GameEngine _gameEngine;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly PresentationSettings _presentation;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
     private readonly IntegerSubtractor _screenFlashFader;
     private readonly IStandardParticleEffect _coreReplacementEffect;
 
@@ -74,7 +79,15 @@ public class CoreElement
     private int _xPos;
     private int _yPos;
 
-    public CoreElement(GameEngine gameEngineInstance, int currentElement, int finalElement, int fadeSpeed, bool startFadeUp)
+    public CoreElement(
+        ResourceManager resources,
+        GraphicsSet graphicsSet,
+        PresentationSettings presentation,
+        Random randomNumberGenerator,
+        int currentElement,
+        int finalElement,
+        int fadeSpeed,
+        bool startFadeUp)
     {
         _currentElementDownScaler = new FloatSubtractor(ElementShrinkFrom, ElementScaleTo, ElementShrinkStep, false);
         _finalElementUpScaler = new FloatAdder(0, ElementScaleTo, ElementGrowStep, false);
@@ -84,22 +97,25 @@ public class CoreElement
         ElementState = CoreElementState.Missing;
         this.CurrentElement = currentElement;
         this.FinalElement = finalElement;
-        _gameEngine = gameEngineInstance;
+        _resources = resources;
+        _graphicsSet = graphicsSet;
+        _presentation = presentation;
+        _randomNumberGenerator = randomNumberGenerator;
 
         if (startFadeUp)
         {
-            _fader1 = new ElementFader(_gameEngine.RandomNumberGenerator, Direction.Up);
-            _fader2 = new ElementFader(_gameEngine.RandomNumberGenerator, Direction.Down);
-            _fader3 = new ElementFader(_gameEngine.RandomNumberGenerator, Direction.Up);
+            _fader1 = new ElementFader(_randomNumberGenerator, Direction.Up);
+            _fader2 = new ElementFader(_randomNumberGenerator, Direction.Down);
+            _fader3 = new ElementFader(_randomNumberGenerator, Direction.Up);
         }
         else
         {
-            _fader1 = new ElementFader(_gameEngine.RandomNumberGenerator, Direction.Down);
-            _fader2 = new ElementFader(_gameEngine.RandomNumberGenerator, Direction.Up);
-            _fader3 = new ElementFader(_gameEngine.RandomNumberGenerator, Direction.Down);
+            _fader1 = new ElementFader(_randomNumberGenerator, Direction.Down);
+            _fader2 = new ElementFader(_randomNumberGenerator, Direction.Up);
+            _fader3 = new ElementFader(_randomNumberGenerator, Direction.Down);
         }
 
-        _coreReplacementEffect = (IStandardParticleEffect)_gameEngine.ContentResourceManager.GetParticleEffectInstance("CoreReplacementParticleEffect", ParticleEffectType.Continual, new TimeSpan(0, 0, 0, 0, ReplacementEffectMilliseconds));
+        _coreReplacementEffect = (IStandardParticleEffect)_resources.GetParticleEffectInstance("CoreReplacementParticleEffect", ParticleEffectType.Continual, new TimeSpan(0, 0, 0, 0, ReplacementEffectMilliseconds));
         _coreReplacementEffect.ParticleEffectComplete += coreReplacementEffect_ParticleEffectComplete;
     }
 
@@ -170,7 +186,7 @@ public class CoreElement
         }
         if (_screenFlashFader.Triggered)
         {
-            _gameEngine.Presentation.BackgroundColour = ColourHelper.GetXna4Colour(_screenFlashFader.ByteModifier, _screenFlashFader.ByteModifier, _screenFlashFader.ByteModifier);
+            _presentation.BackgroundColour = ColourHelper.GetXna4Colour(_screenFlashFader.ByteModifier, _screenFlashFader.ByteModifier, _screenFlashFader.ByteModifier);
             _screenFlashFader.Update();
         }
 
@@ -185,15 +201,15 @@ public class CoreElement
     {
         if (ElementState == CoreElementState.Replaced)
         {
-            _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.Pickups).Begin(BlendState.AlphaBlend, gameTime);
-            _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.Pickups).DrawSprite(FinalElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)fade));
-            _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.Pickups).End();
+            _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).Begin(BlendState.AlphaBlend, gameTime);
+            _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite(FinalElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)fade));
+            _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
         }
         else if (ElementState == CoreElementState.Missing)
         {
-            _gameEngine.ContentResourceManager.GetSpriteCollection("AccessCodesGray").Begin(BlendState.AlphaBlend, gameTime);
-            _gameEngine.ContentResourceManager.GetSpriteCollection("AccessCodesGray").DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)fade));
-            _gameEngine.ContentResourceManager.GetSpriteCollection("AccessCodesGray").End();
+            _resources.GetSpriteCollection("AccessCodesGray").Begin(BlendState.AlphaBlend, gameTime);
+            _resources.GetSpriteCollection("AccessCodesGray").DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)fade));
+            _resources.GetSpriteCollection("AccessCodesGray").End();
         }
     }
 
@@ -206,23 +222,23 @@ public class CoreElement
         {
             if (replacingElement)
             {
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.Pickups).Begin(BlendState.Additive, gameTime);
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.Pickups).DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MissingElementAlpha));
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.Pickups).End();
+                _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).Begin(BlendState.Additive, gameTime);
+                _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MissingElementAlpha));
+                _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
             }
             else
             {
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.Pickups).Begin(BlendState.Additive, gameTime);
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.Pickups).DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_fader1.FadeLevel));
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.Pickups).End();
+                _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).Begin(BlendState.Additive, gameTime);
+                _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_fader1.FadeLevel));
+                _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
 
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.AccessCodesFailed).Begin(BlendState.AlphaBlend, gameTime);
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.AccessCodesFailed).DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_fader2.FadeLevel));
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.AccessCodesFailed).End();
+                _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesFailed).Begin(BlendState.AlphaBlend, gameTime);
+                _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesFailed).DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_fader2.FadeLevel));
+                _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesFailed).End();
 
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.AccessCodesPassed).Begin(BlendState.AlphaBlend, gameTime);
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.AccessCodesPassed).DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_fader3.FadeLevel));
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.AccessCodesPassed).End();
+                _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesPassed).Begin(BlendState.AlphaBlend, gameTime);
+                _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesPassed).DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_fader3.FadeLevel));
+                _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesPassed).End();
             }
         }
         else if (ElementState == CoreElementState.Replacing)
@@ -232,27 +248,27 @@ public class CoreElement
                 _elementReplacementStarted = true;
             }
 
-            _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.PickupsIlluminated).Begin(BlendState.Additive, gameTime);
-            _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.PickupsIlluminated).DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, _elementFader.ByteModifier), _currentElementDownScaler.Modifier, 0);
-            _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.PickupsIlluminated).End();
+            _resources.GetSpriteCollection(_graphicsSet.Names.PickupsIlluminated).Begin(BlendState.Additive, gameTime);
+            _resources.GetSpriteCollection(_graphicsSet.Names.PickupsIlluminated).DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, _elementFader.ByteModifier), _currentElementDownScaler.Modifier, 0);
+            _resources.GetSpriteCollection(_graphicsSet.Names.PickupsIlluminated).End();
 
-            _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.Pickups).Begin(BlendState.Additive, gameTime);
-            _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.Pickups).DrawSprite(FinalElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)(ColourLevels.Full - _elementFader.ByteModifier)), _finalElementUpScaler.Modifier, 0);
-            _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.Pickups).End();
+            _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).Begin(BlendState.Additive, gameTime);
+            _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite(FinalElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)(ColourLevels.Full - _elementFader.ByteModifier)), _finalElementUpScaler.Modifier, 0);
+            _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
         }
         else if (ElementState == CoreElementState.Replaced)
         {
             if (replacingElement)
             {
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.Pickups).Begin(BlendState.Additive, gameTime);
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.Pickups).DrawSprite(FinalElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MissingElementAlpha));
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.Pickups).End();
+                _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).Begin(BlendState.Additive, gameTime);
+                _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite(FinalElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MissingElementAlpha));
+                _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
             }
             else
             {
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.Pickups).Begin(BlendState.Additive, gameTime);
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.Pickups).DrawSprite(FinalElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ColourLevels.Full));
-                _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.Pickups).End();
+                _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).Begin(BlendState.Additive, gameTime);
+                _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite(FinalElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ColourLevels.Full));
+                _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
             }
         }
 

@@ -2,8 +2,9 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
+using Starquake.ContentManagement;
 using Starquake.Engines;
 using Starquake.Structure;
 
@@ -15,16 +16,18 @@ public class BlobAccessBoothAnim
     private readonly Animation _animRight;
     private readonly Animation _animTurn;
     private readonly int _endPoint;
-    private readonly GameEngine _gameEngine;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly ResourceManager _resources;
     private readonly int _startPoint;
 
     private Direction _blobDirection;
     private int _blobFrame;
     private int _blobX;
 
-    public BlobAccessBoothAnim(GameEngine gameEngineReference, int startPoint, int endPoint)
+    public BlobAccessBoothAnim(ResourceManager resources, GraphicsSet graphicsSet, int startPoint, int endPoint)
     {
-        _gameEngine = gameEngineReference;
+        _resources = resources;
+        _graphicsSet = graphicsSet;
         _startPoint = startPoint;
         _endPoint = endPoint;
 
@@ -146,8 +149,8 @@ public class BlobAccessBoothAnim
     public void Draw(GameTime gameTime)
     {
         // Draw blob animation
-        _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.BlobSprites).Begin(BlendState.AlphaBlend, gameTime);
-        _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.BlobSprites).DrawSprite(_blobFrame, _blobX, 192);
-        _gameEngine.ContentResourceManager.GetSpriteCollection(_gameEngine.GraphicsSet.Names.BlobSprites).End();
+        _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites).Begin(BlendState.AlphaBlend, gameTime);
+        _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites).DrawSprite(_blobFrame, _blobX, 192);
+        _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites).End();
     }
 }

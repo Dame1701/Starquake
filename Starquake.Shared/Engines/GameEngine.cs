@@ -363,7 +363,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         BlobStatusPanel.Initialise(null);
 
         // Core Elements
-        Elements = new CoreElements(this);
+        Elements = new CoreElements(BlobStatusPanel, ContentResourceManager, GraphicsSet, Presentation, RandomNumberGenerator);
 
         // Nasties
         Nasties = new Nasties(this, NastiesPerScreen);

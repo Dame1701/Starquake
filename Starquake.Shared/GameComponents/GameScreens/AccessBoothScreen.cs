@@ -43,11 +43,11 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
 
         for (var a = 0; a < _accessCodes.Length; a++)
         {
-            _accessCodes[a] = new KeyScanner(GameEngine, true);
+            _accessCodes[a] = new KeyScanner(GameEngine.ContentResourceManager, GameEngine.GraphicsSet, GameEngine.RandomNumberGenerator, true);
         }
 
-        _blobAnim1 = new BlobAccessBoothAnim(gameEngineReference, 164, 800);
-        _blobAnim2 = new BlobAccessBoothAnim(gameEngineReference, 164, 800);
+        _blobAnim1 = new BlobAccessBoothAnim(gameEngineReference.ContentResourceManager, gameEngineReference.GraphicsSet, 164, 800);
+        _blobAnim2 = new BlobAccessBoothAnim(gameEngineReference.ContentResourceManager, gameEngineReference.GraphicsSet, 164, 800);
 
         Reset(null);
     }
