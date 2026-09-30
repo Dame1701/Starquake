@@ -51,7 +51,7 @@ public class ResourceManager : StartableGameComponentBase
         _contentManagerInstance = gameEngineInstance.ContentMgr;
 
         _particleEngine = new ParticleEngine(_contentManagerInstance, gameEngineInstance.GraphicsDeviceMgr, gameEngineInstance.GraphicsSet);
-        _animationTileEngine = new AnimTileEngine(_gameEngineInstance);
+        _animationTileEngine = new AnimTileEngine();
         _soundEngine = new SoundEffectEngine(_contentManagerInstance, gameEngineInstance.RandomNumberGenerator);
 
         _spriteDescriptions = new List<SpriteDescription>();
@@ -148,7 +148,7 @@ public class ResourceManager : StartableGameComponentBase
 
             _animationTileEngine.AnimTilesList.Add(
                 new AnimTile(
-                    _gameEngineInstance,
+                    _gameEngineInstance.GraphicsSet,
                     t.TileToAnimate,
                     LoadSpriteCollection(t.FilePath, t.Width, t.Height),
                     t.Delay));

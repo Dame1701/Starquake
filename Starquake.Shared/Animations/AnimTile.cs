@@ -4,7 +4,7 @@
 // -
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Starquake.Engines;
+using Starquake.ContentManagement;
 using Starquake.Sprites;
 using Starquake.Structure;
 
@@ -12,13 +12,13 @@ namespace Starquake.Animations;
 
 public class AnimTile : GameComponentBase
 {
-    private readonly GameEngine GameEngine;
+    private readonly GraphicsSet _graphicsSet;
 
     private readonly SpriteCollection _tileAnimationSpriteSet;
 
-    public AnimTile(GameEngine gameEngineReference, int screenTileRef, SpriteCollection tileAnimationSpriteSet, int delay)
+    public AnimTile(GraphicsSet graphicsSet, int screenTileRef, SpriteCollection tileAnimationSpriteSet, int delay)
     {
-        GameEngine = gameEngineReference;
+        _graphicsSet = graphicsSet;
 
         this.ScreenTileRef = screenTileRef;
         _tileAnimationSpriteSet = tileAnimationSpriteSet;
@@ -44,7 +44,7 @@ public class AnimTile : GameComponentBase
 
     public void Draw(int xPos, int yPos, Color colour, GameTime gameTime)
     {
-        if (GameEngine.GraphicsSet.IsRedrawn)
+        if (_graphicsSet.IsRedrawn)
         {
             _tileAnimationSpriteSet.Begin(BlendState.AlphaBlend, gameTime);
             _tileAnimationSpriteSet.DrawSprite(TileAnimation.CurrentFrame, xPos, yPos, colour);

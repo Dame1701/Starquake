@@ -4,19 +4,14 @@
 // -
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using Starquake.Engines;
 using Starquake.Structure;
 
 namespace Starquake.Animations;
 
 public class AnimTileEngine : GameComponentBase
 {
-    private readonly GameEngine GameEngine;
-
-    public AnimTileEngine(GameEngine gameEngineReference)
+    public AnimTileEngine()
     {
-        GameEngine = gameEngineReference;
-
         AnimTilesList = new List<AnimTile>();
     }
     public List<AnimTile> AnimTilesList { get; }
