@@ -1592,7 +1592,7 @@ public class Blob : GameComponentBase
                 if (_blobOverloadState == OverloadExploded)
                 {
                     GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobExplodes", false);
-                    GameEngine.BlobKiller.Trigger(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos, true);
+                    GameEngine.BlobKiller.Trigger(BlobXPos, BlobYPos, true);
                     BlobsState = BlobState.Dying;
                 }
             }
