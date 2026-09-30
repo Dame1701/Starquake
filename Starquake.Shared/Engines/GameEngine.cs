@@ -215,10 +215,12 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ContentMgr = content;
         BackgroundColour = Color.Black;
 
+        // Before the resource manager, which hands it to the sound engine.
+        RandomNumberGenerator = new Random((int)DateTime.Now.Ticks);
+
         ContentResourceManager = new ResourceManager(this);
         ContentResourceManager.OnGameComponentStatusChanged += ContentResourceManager_OnGameComponentStatusChanged;
 
-        RandomNumberGenerator = new Random((int)DateTime.Now.Ticks);
         _screens = new Dictionary<GameScreenType, IGameScreen>();
 
         // Starting screen will be the title screen later.....
