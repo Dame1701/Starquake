@@ -829,7 +829,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ScreenDirectory.Add(GameScreenType.HiScores, new HiScoreScreen(this));
         ScreenDirectory.Add(GameScreenType.GameOver, new GameOverScreen(this));
         ScreenDirectory.Add(GameScreenType.GameComplete, new GameCompleteScreen(this));
-        ScreenDirectory.Add(GameScreenType.TestScreen, new TestScreen(this));
 
         ScreenDirectory.Add(GameScreenType.MainGame, _mainScreen);
         ScreenDirectory.Add(GameScreenType.Teleporter, new TeleportScreen(this));
@@ -1067,27 +1066,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             BlobStatusPanel.BlobLives = TestModeLivesRestored;
             Player.BlobsState = BlobState.Dead;
         }
-
-        // Reset screen to it's original dimensions
-        if (ToggleKeys.GetPressedKey() == Keys.F11)
-        {
-            if (!GraphicsDeviceMgr.IsFullScreen)
-            {
-                /*
-                System.Windows.Forms.Form f = System.Windows.Forms.Form.FromHandle(parentWindow.Handle) as System.Windows.Forms.Form;
-
-                if (f != null)
-                {
-                    f.ClientSize = new System.Drawing.Size(Starquake.ScreenWidth, Starquake.ScreenHeight);
-                    GraphicsDeviceMgr.GraphicsDevice.PresentationParameters.BackBufferWidth = parentWindow.ClientBounds.Width;
-                    GraphicsDeviceMgr.GraphicsDevice.PresentationParameters.BackBufferHeight = parentWindow.ClientBounds.Height;
-                    GraphicsDeviceMgr.GraphicsDevice.Reset(GraphicsDeviceMgr.GraphicsDevice.PresentationParameters);
-                    GraphicsDeviceMgr.ApplyChanges();
-                }
-                */
-            }
-        }
-
 
         if (ToggleKeys.GetPressedKey() == Keys.F3)
         {

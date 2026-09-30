@@ -14,7 +14,6 @@ public enum GameScreenType
     MainGame,
     Options,
     ComputerReport,
-    TestScreen,
     HiScores,
     GameOver,
     GameComplete
