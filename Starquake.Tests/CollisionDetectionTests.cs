@@ -21,11 +21,11 @@ public class CollisionDetectionTests
     public void Check_BoxesInTheSamePlace_Collide()
     {
         // Arrange
-        var mover = TestData.BoxAtOrigin;
-        var obstacle = TestData.BoxAtOrigin;
+        Rectangle mover = TestData.BoxAtOrigin;
+        Rectangle obstacle = TestData.BoxAtOrigin;
 
         // Act
-        var collided = CollisionDetection.Check(mover, obstacle);
+        bool collided = CollisionDetection.Check(mover, obstacle);
 
         // Assert
         Assert.True(collided);
@@ -38,7 +38,7 @@ public class CollisionDetectionTests
         var obstacleOverlappingByOnePixel = new Rectangle(TestData.BoxSize - 1, 0, TestData.BoxSize, TestData.BoxSize);
 
         // Act
-        var collided = CollisionDetection.Check(TestData.BoxAtOrigin, obstacleOverlappingByOnePixel);
+        bool collided = CollisionDetection.Check(TestData.BoxAtOrigin, obstacleOverlappingByOnePixel);
 
         // Assert
         Assert.True(collided);
@@ -51,7 +51,7 @@ public class CollisionDetectionTests
         var obstacleAgainstTheRightEdge = new Rectangle(TestData.BoxSize, 0, TestData.BoxSize, TestData.BoxSize);
 
         // Act
-        var collided = CollisionDetection.Check(TestData.BoxAtOrigin, obstacleAgainstTheRightEdge);
+        bool collided = CollisionDetection.Check(TestData.BoxAtOrigin, obstacleAgainstTheRightEdge);
 
         // Assert
         Assert.False(collided);
@@ -64,7 +64,7 @@ public class CollisionDetectionTests
         var obstacleFarBelow = new Rectangle(0, TestData.WellClear, TestData.BoxSize, TestData.BoxSize);
 
         // Act
-        var collided = CollisionDetection.Check(TestData.BoxAtOrigin, obstacleFarBelow);
+        bool collided = CollisionDetection.Check(TestData.BoxAtOrigin, obstacleFarBelow);
 
         // Assert
         Assert.False(collided);
@@ -77,7 +77,7 @@ public class CollisionDetectionTests
         var obstacleFarAway = new Rectangle(TestData.WellClear, TestData.WellClear, TestData.BoxSize, TestData.BoxSize);
 
         // Act
-        var collided = CollisionDetection.Check(TestData.BoxAtOrigin, obstacleFarAway);
+        bool collided = CollisionDetection.Check(TestData.BoxAtOrigin, obstacleFarAway);
 
         // Assert
         Assert.False(collided);
@@ -91,7 +91,7 @@ public class CollisionDetectionTests
         var halvesLoseTheOverlap = new Rectangle(oddSize - 1, 0, oddSize, oddSize);
 
         // Act
-        var collided = CollisionDetection.Check(new Rectangle(0, 0, oddSize, oddSize), halvesLoseTheOverlap);
+        bool collided = CollisionDetection.Check(new Rectangle(0, 0, oddSize, oddSize), halvesLoseTheOverlap);
 
         // Assert
         Assert.False(collided);
@@ -108,7 +108,7 @@ public class CollisionDetectionTests
         var obstacleWellClear = new Rectangle(TestData.WellClear, TestData.WellClear, TestData.BoxSize, TestData.BoxSize);
 
         // Act
-        var allowed = CollisionDetection.CheckDirection(
+        int allowed = CollisionDetection.CheckDirection(
             direction,
             TestData.Velocity,
             0, 0, TestData.BoxSize, TestData.BoxSize,
@@ -131,7 +131,7 @@ public class CollisionDetectionTests
         int obstacleY)
     {
         // Act
-        var allowed = CollisionDetection.CheckDirection(
+        int allowed = CollisionDetection.CheckDirection(
             direction,
             TestData.Velocity,
             moverX, moverY, TestData.BoxSize, TestData.BoxSize,
@@ -148,7 +148,7 @@ public class CollisionDetectionTests
         const int moverY = TestData.BoxSize;
 
         // Act
-        var allowed = CollisionDetection.CheckDirection(
+        int allowed = CollisionDetection.CheckDirection(
             Direction.Up,
             TestData.Velocity,
             0, moverY, TestData.BoxSize, TestData.BoxSize,
@@ -168,7 +168,7 @@ public class CollisionDetectionTests
         var obstacleWellClear = new Rectangle(TestData.WellClear, TestData.WellClear, TestData.BoxSize, TestData.BoxSize);
 
         // Act
-        var allowed = CollisionDetection.CheckDirection(
+        int allowed = CollisionDetection.CheckDirection(
             direction,
             TestData.Velocity,
             0, 0, TestData.BoxSize, TestData.BoxSize,

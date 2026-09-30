@@ -34,7 +34,7 @@ public sealed class ResourceNames
         AccessCodesPassed = "AccessCodesPassed",
         AccessCodesGrey = "AccessCodesGray",
         PickupsIlluminated = "PickupsIlluminated",
-        Pickups = "Pickups",
+        Pickups = "Pickups"
     };
 
     /// <summary>
@@ -51,7 +51,7 @@ public sealed class ResourceNames
         AccessCodesPassed = "AccessCodesPassedOriginal",
         AccessCodesGrey = "AccessCodesGrayOriginal",
         PickupsIlluminated = "PickupsIlluminatedOriginal",
-        Pickups = "PickupsOriginal",
+        Pickups = "PickupsOriginal"
     };
 
     private ResourceNames()

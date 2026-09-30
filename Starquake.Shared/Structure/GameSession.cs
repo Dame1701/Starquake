@@ -39,18 +39,6 @@ public sealed class GameSession
     };
 
     /// <summary>
-    ///     Raised whenever <see cref="Paused" /> is set, with the value it was set to. The engine
-    ///     answers it by stopping and restarting the periodic background sounds.
-    /// </summary>
-    public event Action<bool>? OnPausedChanged;
-
-    /// <summary>
-    ///     Raised whenever <see cref="PlayerKeys" /> is set, with the new set. The engine answers it
-    ///     by handing the set to the blob's control and deciding keyboard against joypad.
-    /// </summary>
-    public event Action<PlayerKeySet>? OnPlayerKeysChanged;
-
-    /// <summary>
     ///     Whether play is suspended. The blob and the nasties stop stepping, and the paused banner
     ///     is drawn over the game.
     /// </summary>
@@ -77,4 +65,16 @@ public sealed class GameSession
             OnPlayerKeysChanged?.Invoke(value);
         }
     }
+
+    /// <summary>
+    ///     Raised whenever <see cref="Paused" /> is set, with the value it was set to. The engine
+    ///     answers it by stopping and restarting the periodic background sounds.
+    /// </summary>
+    public event Action<bool>? OnPausedChanged;
+
+    /// <summary>
+    ///     Raised whenever <see cref="PlayerKeys" /> is set, with the new set. The engine answers it
+    ///     by handing the set to the blob's control and deciding keyboard against joypad.
+    /// </summary>
+    public event Action<PlayerKeySet>? OnPlayerKeysChanged;
 }

@@ -77,7 +77,7 @@ public class HiScores
     /// <returns></returns>
     public bool GotHighScore(int score)
     {
-        foreach (var scoreItem in _scores)
+        foreach (HiScore scoreItem in _scores)
         {
             if (score > scoreItem.Score)
             {
@@ -91,7 +91,7 @@ public class HiScores
     // Insert a player into the table
     public void AddScoreToTable(HiScore scoreToAdd)
     {
-        for (var a = 0; a < _scores.Count; a++)
+        for (int a = 0; a < _scores.Count; a++)
         {
             if (scoreToAdd.Score > _scores[a].Score)
             {
@@ -108,18 +108,18 @@ public class HiScores
 
     public void Draw(ResourceManager resources, BitmapFont font, GameTime gameTime, int xPos, int yPos, int fade)
     {
-        var currentYPos = yPos;
-        var currentXPos = xPos;
+        int currentYPos = yPos;
+        int currentXPos = xPos;
 
-        for (var a = 0; a < _scores.Count; a++)
+        for (int a = 0; a < _scores.Count; a++)
         {
             if (a % 2 == 0)
             {
-                ProportionalNumbers.Draw(currentXPos, currentYPos, (a + 1) + ".", resources, gameTime, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, fade));
+                ProportionalNumbers.Draw(currentXPos, currentYPos, a + 1 + ".", resources, gameTime, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, fade));
             }
             else
             {
-                ProportionalNumbers.Draw(currentXPos, currentYPos, (a + 1) + ".", resources, gameTime, ColourHelper.GetXna4Colour(150, 150, 150, fade));
+                ProportionalNumbers.Draw(currentXPos, currentYPos, a + 1 + ".", resources, gameTime, ColourHelper.GetXna4Colour(150, 150, 150, fade));
             }
 
             currentYPos = currentYPos + 50;
@@ -128,7 +128,7 @@ public class HiScores
         font.Begin(BlendState.AlphaBlend);
         currentYPos = yPos;
 
-        for (var a = 0; a < _scores.Count; a++)
+        for (int a = 0; a < _scores.Count; a++)
         {
             if (a % 2 == 0)
             {
@@ -144,7 +144,7 @@ public class HiScores
 
         currentYPos = yPos;
 
-        for (var a = 0; a < _scores.Count; a++)
+        for (int a = 0; a < _scores.Count; a++)
         {
             if (a % 2 == 0)
             {

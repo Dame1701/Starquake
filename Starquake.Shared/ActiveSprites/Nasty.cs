@@ -2,15 +2,15 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System.Diagnostics.CodeAnalysis;
 using System;
-using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.Animations;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
-using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Particles;
 using Starquake.Sprites;
@@ -20,12 +20,6 @@ namespace Starquake.ActiveSprites;
 
 public class Nasty : GameComponentBase
 {
-    private readonly Blob _blob;
-    private readonly GameScreenCollection _gameScreens;
-    private readonly GraphicsSet _graphicsSet;
-    private readonly Random _randomNumberGenerator;
-    private readonly ResourceManager _resources;
-    private readonly GameSession _session;
 
     // The number of frames for the birth to appear (60 frames = 1 second)
     private const int BirthPeriod = 60;
@@ -195,9 +189,22 @@ public class Nasty : GameComponentBase
 
     /// <inheritdoc cref="ShotNastyGrey" />
     private const int ConveyerNastyGreen = 100;
+    private readonly Blob _blob;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsSet _graphicsSet;
 
     // Animation
     private readonly Animation _nastyAnim;
+    private readonly IStandardParticleEffect _nastyDies;
+
+    private readonly Animation _nastyDiesAnimation;
+    private readonly IStandardParticleEffect _nastyDiesType2;
+
+    private readonly SpriteCollection _nastySpriteNew;
+    private readonly SpriteCollection _nastySpriteOriginal;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
+    private readonly GameSession _session;
 
     private bool _attractedToBlob; // They got through phases of being attracted to Blob
     private int _birthColourLevel;
@@ -227,19 +234,12 @@ public class Nasty : GameComponentBase
     // Behaviour
 
     private int _nastyDeadPauseCounter;
-    private readonly IStandardParticleEffect _nastyDies;
-
-    private readonly Animation _nastyDiesAnimation;
-    private readonly IStandardParticleEffect _nastyDiesType2;
     //bool attractedToBlobFlag;
 
 
     // When shot monsters usually dissappear for good but there is a small chance they'll regenerate
     // Tech stuff
     private SpriteCollection _nastySprite;
-
-    private readonly SpriteCollection _nastySpriteNew;
-    private readonly SpriteCollection _nastySpriteOriginal;
 
     /// <summary>
     ///     If the nasty is attracted to blob but something is in the way it won't be able to move
@@ -423,11 +423,11 @@ public class Nasty : GameComponentBase
     private Point GetNastySpawnLocation()
     {
         // Get all locations where we can have nasties from the current game screen
-        var potentialLocations = _gameScreens.GetNastyPotentialLocations();
+        List<Point> potentialLocations = _gameScreens.GetNastyPotentialLocations();
 
         if (potentialLocations.Count > 0)
         {
-            var nastyLocationIndex = _randomNumberGenerator.Next(0, potentialLocations.Count);
+            int nastyLocationIndex = _randomNumberGenerator.Next(0, potentialLocations.Count);
 
             // Return a location
             return new Point(potentialLocations[nastyLocationIndex].X + SpriteMetrics.HalfSpriteWidth,
@@ -485,7 +485,7 @@ public class Nasty : GameComponentBase
     public static NastyType GetRandomNastyType(Random randomNumberGenerator)
     {
         // Go to more than max nasty types to increase chance of four spiky nasties
-        var temp = randomNumberGenerator.Next(0, 16);
+        int temp = randomNumberGenerator.Next(0, 16);
 
         if (temp == 0)
         {
@@ -644,7 +644,7 @@ public class Nasty : GameComponentBase
             _birthTimer = 0;
 
             // Select a new location to spawn
-            var newPosition = GetNastySpawnLocation();
+            Point newPosition = GetNastySpawnLocation();
             if (newPosition == new Point(0, 0))
             {
                 NastyState = NastyState.Disabled;
@@ -791,7 +791,7 @@ public class Nasty : GameComponentBase
     /// </summary>
     private bool ShouldAnimate()
     {
-        var updateAnimation = false;
+        bool updateAnimation = false;
 
         if (NastyState != NastyState.Disabled &&
             NastyState != NastyState.PreConception &&
@@ -855,7 +855,7 @@ public class Nasty : GameComponentBase
         {
             if (_stepsMovedCounter < _stepsToMove)
             {
-                var moveOneStep = true;
+                bool moveOneStep = true;
 
                 if (MovementType == MoveType.SpikeyMovement && _spikeyPause)
                 {
@@ -941,7 +941,7 @@ public class Nasty : GameComponentBase
 
     private void ChooseNewFrameOfMind()
     {
-        var wandering = CoinFlip();
+        bool wandering = CoinFlip();
 
         _attractedToBlob = !wandering;
         _movementChangeCount = wandering
@@ -1017,7 +1017,7 @@ public class Nasty : GameComponentBase
     /// </remarks>
     private int ChooseMoveSpeed()
     {
-        var randomWalk = MovementType is MoveType.RandomMovement or MoveType.RandomMovementsAllDirections;
+        bool randomWalk = MovementType is MoveType.RandomMovement or MoveType.RandomMovementsAllDirections;
 
         if (!_attractedToBlob)
         {
@@ -1204,7 +1204,7 @@ public class Nasty : GameComponentBase
             Direction = RandomAnyDirection();
         }
 
-        var choices = _attractedToBlob
+        Direction[]? choices = _attractedToBlob
             ? WaysTowardsBlob(blobsXPosition, blobsYPosition)
             : WaysAwayFrom(_lastCollisionDirection);
 
@@ -1291,13 +1291,13 @@ public class Nasty : GameComponentBase
             return;
         }
 
-        var acrossToBlob = XPos <= blobsXPosition ? Direction.Right : Direction.Left;
-        var alongToBlob = VerticalDirectionTowardsBlob(blobsXPosition, blobsYPosition);
-        var cornerToBlob = Diagonal(acrossToBlob, alongToBlob);
+        Direction acrossToBlob = XPos <= blobsXPosition ? Direction.Right : Direction.Left;
+        Direction alongToBlob = VerticalDirectionTowardsBlob(blobsXPosition, blobsYPosition);
+        Direction cornerToBlob = Diagonal(acrossToBlob, alongToBlob);
 
-        var distanceX = Math.Abs(blobsXPosition - XPos);
-        var distanceY = Math.Abs(blobsYPosition - YPos);
-        var stepsFromBlob = 0;
+        int distanceX = Math.Abs(blobsXPosition - XPos);
+        int distanceY = Math.Abs(blobsYPosition - YPos);
+        int stepsFromBlob = 0;
 
         if (distanceX > distanceY)
         {
@@ -1401,19 +1401,19 @@ public class Nasty : GameComponentBase
     /// </remarks>
     private void MoveNastyOneStep()
     {
-        var vertical = VerticalComponent(Direction);
-        var horizontal = HorizontalComponent(Direction);
+        Direction vertical = VerticalComponent(Direction);
+        Direction horizontal = HorizontalComponent(Direction);
 
-        var amountToMoveY = vertical == Direction.None
+        int amountToMoveY = vertical == Direction.None
             ? 0
             : DistanceClear(vertical, XPos, YPos);
 
-        var amountToMoveX = horizontal == Direction.None
+        int amountToMoveX = horizontal == Direction.None
             ? 0
             : DistanceClear(horizontal, XPos, YPos + StepSign(vertical) * amountToMoveY);
 
-        var blockedVertically = vertical != Direction.None && amountToMoveY == 0;
-        var blockedHorizontally = horizontal != Direction.None && amountToMoveX == 0;
+        bool blockedVertically = vertical != Direction.None && amountToMoveY == 0;
+        bool blockedHorizontally = horizontal != Direction.None && amountToMoveX == 0;
 
         if (blockedVertically || blockedHorizontally)
         {
@@ -1501,7 +1501,7 @@ public class Nasty : GameComponentBase
     {
         CheckSpritesInUse();
 
-        var nastyImage = (int)_nastyType * FramesPerNasty;
+        int nastyImage = (int)_nastyType * FramesPerNasty;
 
         if (_nastyType == NastyType.CoreGuardian)
         {

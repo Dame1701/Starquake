@@ -35,15 +35,32 @@ public sealed class EditorDocument
     /// </summary>
     public const int EmptyTile = -1;
 
-    private readonly GameScreenData[] _screens;
-
-    private int[,,] _collisionMasks;
-
     public EditorDocument(GameScreenData[] screens, int[,,] collisionMasks)
     {
-        _screens = screens;
-        _collisionMasks = collisionMasks;
+        Screens = screens;
+        CollisionMasks = collisionMasks;
     }
+
+    /// <summary>
+    ///     Where this map was loaded from, and where <c>Save</c> will put it back. Null for a map that
+    ///     has been created but never written.
+    /// </summary>
+    public string? FilePath { get; set; }
+
+    /// <summary>
+    ///     Whether there are edits that have not been written to <see cref="FilePath" /> yet.
+    /// </summary>
+    public bool IsDirty { get; set; }
+
+    public GameScreenData[] Screens { get; }
+
+    public int[,,] CollisionMasks { get; private set; }
+
+    /// <summary>
+    ///     How many tile images the collision masks cover. A tile sheet with more tiles than this can
+    ///     still be painted with; <see cref="EnsureCollisionCapacity" /> grows the masks to match.
+    /// </summary>
+    private int CollisionTileCount => CollisionMasks.GetLength(0);
 
     /// <summary>
     ///     Raised whenever a single tile on a screen changes, so that views holding a rendered copy of
@@ -58,33 +75,12 @@ public sealed class EditorDocument
     public event Action<int>? CollisionMaskChanged;
 
     /// <summary>
-    ///     Where this map was loaded from, and where <c>Save</c> will put it back. Null for a map that
-    ///     has been created but never written.
-    /// </summary>
-    public string? FilePath { get; set; }
-
-    /// <summary>
-    ///     Whether there are edits that have not been written to <see cref="FilePath" /> yet.
-    /// </summary>
-    public bool IsDirty { get; set; }
-
-    public GameScreenData[] Screens => _screens;
-
-    public int[,,] CollisionMasks => _collisionMasks;
-
-    /// <summary>
-    ///     How many tile images the collision masks cover. A tile sheet with more tiles than this can
-    ///     still be painted with; <see cref="EnsureCollisionCapacity" /> grows the masks to match.
-    /// </summary>
-    private int CollisionTileCount => _collisionMasks.GetLength(0);
-
-    /// <summary>
     ///     An empty planet: every screen present but blank, and every tile passable.
     /// </summary>
     public static EditorDocument CreateEmpty()
     {
         var screens = new GameScreenData[WorldMap.ScreenCount];
-        for (var screen = 0; screen < screens.Length; screen++)
+        for (int screen = 0; screen < screens.Length; screen++)
         {
             screens[screen] = new GameScreenData(TileMetrics.TilesAcross, TileMetrics.TilesDown)
             {
@@ -92,7 +88,7 @@ public sealed class EditorDocument
             };
         }
 
-        var masks = new int[TunnelTiles.LastMouth + 1,
+        int[,,] masks = new int[TunnelTiles.LastMouth + 1,
             TileMetrics.CollisionCellsAcrossTile,
             TileMetrics.CollisionCellsDownTile];
 
@@ -101,13 +97,13 @@ public sealed class EditorDocument
 
     public int GetTile(int screen, int x, int y)
     {
-        var tiles = _screens[screen].ScreenTiles;
+        ScreenTile[,]? tiles = Screens[screen].ScreenTiles;
         return tiles is null ? EmptyTile : tiles[x, y].TileImage;
     }
 
     public void SetTile(int screen, int x, int y, int tileImage)
     {
-        var tiles = _screens[screen].ScreenTiles;
+        ScreenTile[,]? tiles = Screens[screen].ScreenTiles;
         if (tiles is null || tiles[x, y].TileImage == tileImage)
         {
             return;
@@ -125,7 +121,7 @@ public sealed class EditorDocument
     public bool IsSolid(int tileImage, int cellX, int cellY)
         => tileImage >= 0 &&
            tileImage < CollisionTileCount &&
-           _collisionMasks[tileImage, cellX, cellY] == 1;
+           CollisionMasks[tileImage, cellX, cellY] == 1;
 
     public void SetSolid(int tileImage, int cellX, int cellY, bool solid)
     {
@@ -134,13 +130,13 @@ public sealed class EditorDocument
             return;
         }
 
-        var value = solid ? 1 : 0;
-        if (_collisionMasks[tileImage, cellX, cellY] == value)
+        int value = solid ? 1 : 0;
+        if (CollisionMasks[tileImage, cellX, cellY] == value)
         {
             return;
         }
 
-        _collisionMasks[tileImage, cellX, cellY] = value;
+        CollisionMasks[tileImage, cellX, cellY] = value;
         IsDirty = true;
         CollisionMaskChanged?.Invoke(tileImage);
     }
@@ -157,22 +153,22 @@ public sealed class EditorDocument
             return;
         }
 
-        var grown = new int[tileCount,
-            _collisionMasks.GetLength(1),
-            _collisionMasks.GetLength(2)];
+        int[,,] grown = new int[tileCount,
+            CollisionMasks.GetLength(1),
+            CollisionMasks.GetLength(2)];
 
-        for (var tile = 0; tile < CollisionTileCount; tile++)
+        for (int tile = 0; tile < CollisionTileCount; tile++)
         {
-            for (var x = 0; x < _collisionMasks.GetLength(1); x++)
+            for (int x = 0; x < CollisionMasks.GetLength(1); x++)
             {
-                for (var y = 0; y < _collisionMasks.GetLength(2); y++)
+                for (int y = 0; y < CollisionMasks.GetLength(2); y++)
                 {
-                    grown[tile, x, y] = _collisionMasks[tile, x, y];
+                    grown[tile, x, y] = CollisionMasks[tile, x, y];
                 }
             }
         }
 
-        _collisionMasks = grown;
+        CollisionMasks = grown;
         IsDirty = true;
     }
 
@@ -182,12 +178,12 @@ public sealed class EditorDocument
     /// </summary>
     public int[] CaptureScreen(int screen)
     {
-        var captured = new int[TileMetrics.TilesAcross * TileMetrics.TilesDown];
-        var index = 0;
+        int[] captured = new int[TileMetrics.TilesAcross * TileMetrics.TilesDown];
+        int index = 0;
 
-        for (var y = 0; y < TileMetrics.TilesDown; y++)
+        for (int y = 0; y < TileMetrics.TilesDown; y++)
         {
-            for (var x = 0; x < TileMetrics.TilesAcross; x++)
+            for (int x = 0; x < TileMetrics.TilesAcross; x++)
             {
                 captured[index++] = GetTile(screen, x, y);
             }
@@ -198,11 +194,11 @@ public sealed class EditorDocument
 
     public void RestoreScreen(int screen, int[] tiles)
     {
-        var index = 0;
+        int index = 0;
 
-        for (var y = 0; y < TileMetrics.TilesDown; y++)
+        for (int y = 0; y < TileMetrics.TilesDown; y++)
         {
-            for (var x = 0; x < TileMetrics.TilesAcross; x++)
+            for (int x = 0; x < TileMetrics.TilesAcross; x++)
             {
                 SetTile(screen, x, y, tiles[index++]);
             }
@@ -215,9 +211,9 @@ public sealed class EditorDocument
     /// </summary>
     public bool IsScreenEmpty(int screen)
     {
-        for (var y = 0; y < TileMetrics.TilesDown; y++)
+        for (int y = 0; y < TileMetrics.TilesDown; y++)
         {
-            for (var x = 0; x < TileMetrics.TilesAcross; x++)
+            for (int x = 0; x < TileMetrics.TilesAcross; x++)
             {
                 if (GetTile(screen, x, y) != EmptyTile)
                 {

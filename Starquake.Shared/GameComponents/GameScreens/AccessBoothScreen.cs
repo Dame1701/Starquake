@@ -3,39 +3,38 @@
 // ---------------------------------------------------------
 // -
 using System;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.ActiveSprites;
 using Starquake.Animations;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Fonts;
-using Starquake.GameComponents;
 using Starquake.Structure;
 
 namespace Starquake.GameComponents.GameScreens;
 
 public class AccessBoothScreen : GameComponentBase, IGameScreen
 {
-    private readonly Blob _blob;
-    private readonly BitmapFont _font;
-    private readonly GameScreenCollection _gameScreens;
-    private readonly GraphicsSet _graphicsSet;
-    private readonly Random _randomNumberGenerator;
-    private readonly ResourceManager _resources;
-    private readonly ScreenDirectory _screenDirectory;
-    private readonly Shapes _shapeDrawer;
-    private readonly StatusPanel _statusPanel;
 
 
     private readonly int[] _accessCode;
 
     private readonly KeyScanner[] _accessCodes;
+    private readonly Blob _blob;
 
     private readonly BlobAccessBoothAnim _blobAnim1;
     private readonly BlobAccessBoothAnim _blobAnim2;
+    private readonly BitmapFont _font;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsSet _graphicsSet;
     private readonly int[] _inventorySlotToScan;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
+    private readonly ScreenDirectory _screenDirectory;
+    private readonly Shapes _shapeDrawer;
+    private readonly StatusPanel _statusPanel;
 
     private int _resultMessageFade;
     private DateTime _screenReadWait;
@@ -71,7 +70,7 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
         _accessCodes = new KeyScanner[3];
         _inventorySlotToScan = new int[3];
 
-        for (var a = 0; a < _accessCodes.Length; a++)
+        for (int a = 0; a < _accessCodes.Length; a++)
         {
             _accessCodes[a] = new KeyScanner(_resources, _graphicsSet, _randomNumberGenerator, true);
         }
@@ -101,7 +100,7 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
         }
 
         // Follow with the subsequent ones...
-        for (var a = 0; a < _accessCodes.Length; a++)
+        for (int a = 0; a < _accessCodes.Length; a++)
         {
             if (_accessCodes[a].Scanned)
             {
@@ -142,7 +141,7 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
 
         DrawDoorHighlights(gameTime);
 
-        for (var a = 0; a < 3; a++)
+        for (int a = 0; a < 3; a++)
         {
             _accessCodes[a].Draw(_accessCode[a] + 10, 348 + a * 128, 364, gameTime);
         }
@@ -264,7 +263,7 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
     {
         if (_gameScreens.CurrentGameScreenData.AccessCode != null)
         {
-            for (var a = 0; a < _accessCode.Length; a++)
+            for (int a = 0; a < _accessCode.Length; a++)
             {
                 _accessCode[a] = int.Parse(_gameScreens.CurrentGameScreenData.AccessCode.Substring(a, 1));
             }
@@ -278,9 +277,9 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
     {
         Success = true;
 
-        for (var b = 0; b < _accessCode.Length; b++)
+        for (int b = 0; b < _accessCode.Length; b++)
         {
-            var match = false;
+            bool match = false;
 
             int a;
             for (a = 0; a < _blob.BlobInventory.Length; a++)
@@ -318,41 +317,41 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
     /// </summary>
     private void MoveBlobToTheBoothDoor(object data)
     {
-    {
-        var temp = data as object[];
-
-        if (temp != null)
         {
+            object[]? temp = data as object[];
 
-            if ((Direction)temp[0] == Direction.Left)
+            if (temp != null)
             {
-                if (Success)
+
+                if ((Direction)temp[0] == Direction.Left)
                 {
-                    _blob.BlobXPos = ((int)temp[1] - 1) * 128 + 16;
-                    _blob.BlobFrame = 0;
+                    if (Success)
+                    {
+                        _blob.BlobXPos = ((int)temp[1] - 1) * 128 + 16;
+                        _blob.BlobFrame = 0;
+                    }
+                    else
+                    {
+                        _blob.BlobXPos = (int)temp[1] * 128 + 48;
+                        _blob.BlobFrame = 0;
+                    }
                 }
-                else
+                else if ((Direction)temp[0] == Direction.Right)
                 {
-                    _blob.BlobXPos = (int)temp[1] * 128 + 48;
-                    _blob.BlobFrame = 0;
+                    if (Success)
+                    {
+                        _blob.BlobXPos = ((int)temp[1] + 1) * 128 + 48;
+                        _blob.BlobFrame = 10;
+                    }
+                    else
+                    {
+                        _blob.BlobXPos = (int)temp[1] * 128 + 16;
+                        _blob.BlobFrame = 10;
+                    }
                 }
             }
-            else if ((Direction)temp[0] == Direction.Right)
-            {
-                if (Success)
-                {
-                    _blob.BlobXPos = ((int)temp[1] + 1) * 128 + 48;
-                    _blob.BlobFrame = 10;
-                }
-                else
-                {
-                    _blob.BlobXPos = (int)temp[1] * 128 + 16;
-                    _blob.BlobFrame = 10;
-                }
-            }
+
         }
-
-    }
     }
 
     public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)

@@ -72,13 +72,13 @@ public sealed class TileSheet : IDisposable
 
     public static TileSheet Load(string path)
     {
-        using var stream = File.OpenRead(path);
-        var bitmap = WriteableBitmap.Decode(stream);
+        using FileStream stream = File.OpenRead(path);
+        WriteableBitmap bitmap = WriteableBitmap.Decode(stream);
 
-        var tilesAcross = Math.Max(1, bitmap.PixelSize.Width / TileMetrics.TileWidth);
-        var tilesDown = Math.Max(1, bitmap.PixelSize.Height / TileMetrics.TileHeight);
+        int tilesAcross = Math.Max(1, bitmap.PixelSize.Width / TileMetrics.TileWidth);
+        int tilesDown = Math.Max(1, bitmap.PixelSize.Height / TileMetrics.TileHeight);
 
-        var thumbnailColours = BuildThumbnailColours(bitmap, tilesAcross, tilesDown);
+        uint[] thumbnailColours = BuildThumbnailColours(bitmap, tilesAcross, tilesDown);
 
         return new TileSheet(path, bitmap, tilesAcross, tilesDown, thumbnailColours);
     }
@@ -88,8 +88,8 @@ public sealed class TileSheet : IDisposable
     /// </summary>
     private Rect SourceRect(int tileImage)
     {
-        var row = tileImage / TilesAcross;
-        var column = tileImage - row * TilesAcross;
+        int row = tileImage / TilesAcross;
+        int column = tileImage - row * TilesAcross;
 
         return new Rect(
             column * TileMetrics.TileWidth,
@@ -116,46 +116,46 @@ public sealed class TileSheet : IDisposable
 
     private static uint[] BuildThumbnailColours(WriteableBitmap bitmap, int tilesAcross, int tilesDown)
     {
-        var tileCount = tilesAcross * tilesDown;
-        var colours = new uint[tileCount * ThumbnailCellsAcross * ThumbnailCellsDown];
+        int tileCount = tilesAcross * tilesDown;
+        uint[] colours = new uint[tileCount * ThumbnailCellsAcross * ThumbnailCellsDown];
 
-        var cellWidth = TileMetrics.TileWidth / ThumbnailCellsAcross;
-        var cellHeight = TileMetrics.TileHeight / ThumbnailCellsDown;
+        int cellWidth = TileMetrics.TileWidth / ThumbnailCellsAcross;
+        int cellHeight = TileMetrics.TileHeight / ThumbnailCellsDown;
 
-        using var frame = bitmap.Lock();
+        using ILockedFramebuffer frame = bitmap.Lock();
 
         // Both byte orders turn up depending on the platform's preferred format, and the only
         // difference that makes here is whether red or blue comes first.
-        var redFirst = frame.Format == PixelFormat.Rgba8888;
+        bool redFirst = frame.Format == PixelFormat.Rgba8888;
 
         unsafe
         {
-            var pixels = (byte*)frame.Address;
+            byte* pixels = (byte*)frame.Address;
 
-            for (var tile = 0; tile < tileCount; tile++)
+            for (int tile = 0; tile < tileCount; tile++)
             {
-                var tileRow = tile / tilesAcross;
-                var tileColumn = tile - tileRow * tilesAcross;
+                int tileRow = tile / tilesAcross;
+                int tileColumn = tile - tileRow * tilesAcross;
 
-                for (var cellY = 0; cellY < ThumbnailCellsDown; cellY++)
+                for (int cellY = 0; cellY < ThumbnailCellsDown; cellY++)
                 {
-                    for (var cellX = 0; cellX < ThumbnailCellsAcross; cellX++)
+                    for (int cellX = 0; cellX < ThumbnailCellsAcross; cellX++)
                     {
-                        var left = tileColumn * TileMetrics.TileWidth + cellX * cellWidth;
-                        var top = tileRow * TileMetrics.TileHeight + cellY * cellHeight;
+                        int left = tileColumn * TileMetrics.TileWidth + cellX * cellWidth;
+                        int top = tileRow * TileMetrics.TileHeight + cellY * cellHeight;
 
                         long red = 0;
                         long green = 0;
                         long blue = 0;
                         long alpha = 0;
 
-                        for (var y = top; y < top + cellHeight; y++)
+                        for (int y = top; y < top + cellHeight; y++)
                         {
-                            var row = pixels + (long)y * frame.RowBytes;
+                            byte* row = pixels + (long)y * frame.RowBytes;
 
-                            for (var x = left; x < left + cellWidth; x++)
+                            for (int x = left; x < left + cellWidth; x++)
                             {
-                                var pixel = row + (long)x * 4;
+                                byte* pixel = row + (long)x * 4;
 
                                 blue += redFirst ? pixel[2] : pixel[0];
                                 green += pixel[1];
@@ -164,7 +164,7 @@ public sealed class TileSheet : IDisposable
                             }
                         }
 
-                        var samples = cellWidth * cellHeight;
+                        int samples = cellWidth * cellHeight;
 
                         colours[(tile * ThumbnailCellsDown + cellY) * ThumbnailCellsAcross + cellX] =
                             (uint)(alpha / samples) << 24 |

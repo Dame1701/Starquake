@@ -17,9 +17,9 @@ public sealed class GameScreenData
     public GameScreenData(int tilesAcross, int tilesDown)
     {
         ScreenTiles = new ScreenTile[tilesAcross, tilesDown];
-        for (var y = 0; y < tilesDown; y++)
+        for (int y = 0; y < tilesDown; y++)
         {
-            for (var x = 0; x < tilesAcross; x++)
+            for (int x = 0; x < tilesAcross; x++)
             {
                 ScreenTiles[x, y] = new ScreenTile(-1);
             }

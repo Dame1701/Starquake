@@ -71,7 +71,7 @@ public sealed class CompoundEdit(string name, IReadOnlyList<IEdit> edits) : IEdi
     public void Undo(EditorDocument document)
     {
         // Backwards, so that overlapping edits unwind in the order they were laid down.
-        for (var index = edits.Count - 1; index >= 0; index--)
+        for (int index = edits.Count - 1; index >= 0; index--)
         {
             edits[index].Undo(document);
         }
@@ -79,7 +79,7 @@ public sealed class CompoundEdit(string name, IReadOnlyList<IEdit> edits) : IEdi
 
     public void Redo(EditorDocument document)
     {
-        foreach (var edit in edits)
+        foreach (IEdit edit in edits)
         {
             edit.Redo(document);
         }
@@ -105,8 +105,6 @@ public sealed class UndoStack
     private List<IEdit>? _batch;
     private string _batchName = string.Empty;
 
-    public event EventHandler? Changed;
-
     public bool CanUndo => _done.Count > 0;
 
     public bool CanRedo => _undone.Count > 0;
@@ -114,6 +112,8 @@ public sealed class UndoStack
     public string UndoDescription => CanUndo ? "Undo " + _done[^1].Name : "Undo";
 
     public string RedoDescription => CanRedo ? "Redo " + _undone[^1].Name : "Redo";
+
+    public event EventHandler? Changed;
 
     /// <summary>
     ///     Starts gathering edits into one history entry. Every <see cref="Record" /> until
@@ -139,7 +139,7 @@ public sealed class UndoStack
 
     public void Commit()
     {
-        var batch = _batch;
+        List<IEdit>? batch = _batch;
         _batch = null;
 
         if (batch is null || batch.Count == 0)
@@ -157,7 +157,7 @@ public sealed class UndoStack
             return;
         }
 
-        var edit = _done[^1];
+        IEdit edit = _done[^1];
         _done.RemoveAt(_done.Count - 1);
         edit.Undo(document);
         _undone.Add(edit);
@@ -172,7 +172,7 @@ public sealed class UndoStack
             return;
         }
 
-        var edit = _undone[^1];
+        IEdit edit = _undone[^1];
         _undone.RemoveAt(_undone.Count - 1);
         edit.Redo(document);
         _done.Add(edit);

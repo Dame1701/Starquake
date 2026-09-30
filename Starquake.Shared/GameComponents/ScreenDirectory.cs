@@ -46,7 +46,7 @@ public sealed class ScreenDirectory
     ///     always simply skipped a screen they could not find.
     /// </summary>
     public IGameScreen? CurrentScreen
-        => _screens.TryGetValue(Current, out var screen) ? screen : null;
+        => _screens.TryGetValue(Current, out IGameScreen? screen) ? screen : null;
 
     /// <summary>
     ///     Registers the component that draws one screen. Registering the same screen twice throws,
@@ -63,7 +63,7 @@ public sealed class ScreenDirectory
     /// </summary>
     public IGameScreen Get(GameScreenType gameScreen)
     {
-        if (!_screens.TryGetValue(gameScreen, out var screenToGet))
+        if (!_screens.TryGetValue(gameScreen, out IGameScreen? screenToGet))
         {
             throw new InvalidOperationException($"There is no '{gameScreen}' screen.");
         }

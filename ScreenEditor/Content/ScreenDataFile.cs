@@ -30,10 +30,10 @@ public static class ScreenDataFile
 
     public static EditorDocument Load(string path)
     {
-        using var stream = File.OpenRead(path);
+        using FileStream stream = File.OpenRead(path);
 
-        var screens = MessagePackSerializer.Deserialize<GameScreenData[]>(ReadBlob(stream));
-        var collisionMasks = MessagePackSerializer.Deserialize<int[,,]>(ReadBlob(stream));
+        GameScreenData[] screens = MessagePackSerializer.Deserialize<GameScreenData[]>(ReadBlob(stream));
+        int[,,] collisionMasks = MessagePackSerializer.Deserialize<int[,,]>(ReadBlob(stream));
 
         return new EditorDocument(screens, collisionMasks)
         {
@@ -48,14 +48,14 @@ public static class ScreenDataFile
     /// </summary>
     public static void Save(EditorDocument document, string path)
     {
-        var screensBlob = MessagePackSerializer.Serialize(document.Screens);
-        var collisionBlob = MessagePackSerializer.Serialize(document.CollisionMasks);
+        byte[] screensBlob = MessagePackSerializer.Serialize(document.Screens);
+        byte[] collisionBlob = MessagePackSerializer.Serialize(document.CollisionMasks);
 
         // Build the whole file before touching the old one, so that a failure part way through
         // serialising cannot leave a truncated map behind.
-        var temporaryPath = path + ".tmp";
+        string temporaryPath = path + ".tmp";
 
-        using (var stream = File.Create(temporaryPath))
+        using (FileStream stream = File.Create(temporaryPath))
         {
             WriteBlob(stream, screensBlob);
             WriteBlob(stream, collisionBlob);
@@ -63,7 +63,7 @@ public static class ScreenDataFile
 
         if (File.Exists(path))
         {
-            var backupPath = path + ".bak";
+            string backupPath = path + ".bak";
             File.Copy(path, backupPath, true);
         }
 
@@ -75,10 +75,10 @@ public static class ScreenDataFile
 
     private static byte[] ReadBlob(Stream stream)
     {
-        var lengthBuffer = new byte[sizeof(int)];
+        byte[] lengthBuffer = new byte[sizeof(int)];
         stream.ReadExactly(lengthBuffer, 0, sizeof(int));
 
-        var blob = new byte[BitConverter.ToInt32(lengthBuffer, 0)];
+        byte[] blob = new byte[BitConverter.ToInt32(lengthBuffer, 0)];
         stream.ReadExactly(blob, 0, blob.Length);
 
         return blob;

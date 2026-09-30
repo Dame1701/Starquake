@@ -2,26 +2,21 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System.Collections.Generic;
 using System;
-using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.Animations;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
-using Starquake.Engines;
+using Starquake.Sprites;
 using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
 
 public class ElectricityGatesAndNodesEngine : GameComponentBase
 {
-    private readonly Blob _blob;
-    private readonly GameScreenCollection _gameScreens;
-    private readonly GraphicsSet _graphicsSet;
-    private readonly Random _randomNumberGenerator;
-    private readonly ResourceManager _resources;
 
     /// <summary>
     ///     The live part of an electricity node, as an inset from the tile it is drawn on. The arc
@@ -107,11 +102,16 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
 
     /// <inheritdoc cref="ConveyerArcYOffset" />
     private const float ConveyerArcScale = 0.5f;
+    private readonly Blob _blob;
 
     private readonly ConveyerNasties _conveyerNasties;
     private readonly Animation _electricityAnimation;
     private readonly Animation _electricityAnimation2;
     private readonly Animation _electricityAnimationOriginal;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
 
     private List<SecondLayerTile>? _secondLayerTiles;
     public ElectricityRandomiser[]? ElectricityNodeControllers { get; private set; }
@@ -167,9 +167,9 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
     {
         if (_secondLayerTiles != null)
         {
-            var electricityNodeCounter = 0;
+            int electricityNodeCounter = 0;
 
-            foreach (var secondLayerTile in _secondLayerTiles)
+            foreach (SecondLayerTile secondLayerTile in _secondLayerTiles)
             {
                 if (secondLayerTile.TileType == TileType.ElectricityGate ||
                     secondLayerTile.TileType == TileType.ElectricityNode)
@@ -191,12 +191,12 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
     {
         if (ElectricityNodeControllers != null)
         {
-            var electricityNodeCounter = 0;
+            int electricityNodeCounter = 0;
             _secondLayerTiles = _gameScreens.GetListOfSecondLayerTiles();
 
             if (_secondLayerTiles != null)
             {
-                foreach (var secondLayerTile in _secondLayerTiles)
+                foreach (SecondLayerTile secondLayerTile in _secondLayerTiles)
                 {
 
                     if (secondLayerTile.TileType == TileType.ElectricityNode)
@@ -269,9 +269,9 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
     {
         if (_secondLayerTiles != null && _secondLayerTiles.Count > 0)
         {
-            var electricityNodeCounter = 0;
+            int electricityNodeCounter = 0;
 
-            foreach (var secondLayerTile in _secondLayerTiles)
+            foreach (SecondLayerTile secondLayerTile in _secondLayerTiles)
             {
                 if (secondLayerTile.TileType == TileType.ElectricityNode)
                 {
@@ -333,13 +333,13 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
     public void DrawUpperLayer(GameTime gameTime, int screenFade)
     {
         // Draw electricity nodes etc bottom layer
-        var secondLayerTiles = _gameScreens.GetListOfSecondLayerTiles();
+        List<SecondLayerTile>? secondLayerTiles = _gameScreens.GetListOfSecondLayerTiles();
 
         if (secondLayerTiles != null && secondLayerTiles.Count > 0)
         {
-            var electricityNodeCounter = 0;
+            int electricityNodeCounter = 0;
 
-            foreach (var secondLayerTile in secondLayerTiles)
+            foreach (SecondLayerTile secondLayerTile in secondLayerTiles)
             {
                 if (secondLayerTile.TileType is not (TileType.ElectricityNode or TileType.ElectricityGate))
                 {
@@ -416,7 +416,7 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
 
     private void DrawConveyerNastyArcs(GameTime gameTime)
     {
-        foreach (var nasty in _conveyerNasties!.Nasties)
+        foreach (ConveyerNasty nasty in _conveyerNasties!.Nasties)
         {
             if (!nasty.NastyActive)
             {
@@ -449,11 +449,15 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
     /// </summary>
     private void DrawLightPair(string spriteName, Point left, Point right, GameTime gameTime)
     {
-        var lights = _resources.GetSpriteCollection(spriteName);
+        SpriteCollection lights = _resources.GetSpriteCollection(spriteName);
 
         lights.Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
 
-        foreach (var at in new[] { left, right })
+        foreach (Point at in new[]
+                 {
+                     left,
+                     right
+                 })
         {
             lights.DrawSprite(0, at.X, at.Y, Color.Blue);
             lights.DrawSprite(0, at.X, at.Y, Color.Cyan);
@@ -464,7 +468,7 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
 
     private void DrawArc(string spriteName, int frame, Point at, GameTime gameTime)
     {
-        var arc = _resources.GetSpriteCollection(spriteName);
+        SpriteCollection arc = _resources.GetSpriteCollection(spriteName);
 
         arc.Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
         arc.DrawSprite(frame, at.X, at.Y, Color.White);
@@ -475,7 +479,7 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
     {
         var controllers = new ElectricityRandomiser[count];
 
-        for (var a = 0; a < count; a++)
+        for (int a = 0; a < count; a++)
         {
             controllers[a] = new ElectricityRandomiser(_resources, _randomNumberGenerator)
             {

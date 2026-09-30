@@ -47,7 +47,7 @@ public class TunnelLiftAnimationColumn
 
     public void Update()
     {
-        foreach (var section in _sections)
+        foreach (TunnelLiftAnimationSection section in _sections)
         {
             section.Update();
         }
@@ -55,7 +55,7 @@ public class TunnelLiftAnimationColumn
 
     public void Draw(SpriteCollection tunnelSprites, int screenfade)
     {
-        foreach (var section in _sections)
+        foreach (TunnelLiftAnimationSection section in _sections)
         {
             if (section.Intensity > ColourLevels.Full)
             {

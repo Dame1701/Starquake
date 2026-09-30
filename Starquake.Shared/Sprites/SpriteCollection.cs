@@ -18,10 +18,10 @@ public class SpriteCollection
 
     private bool _clockWise = true;
 
-    private byte _fade;
-
     [NonSerialized]
     private ContentManager _contentManager;
+
+    private byte _fade;
 
     [NonSerialized]
     private GraphicsDeviceManager _graphicsDeviceManager;
@@ -47,30 +47,30 @@ public class SpriteCollection
         _graphicsDeviceManager = graphics;
         _contentManager = content;
 
-        this.SpriteWidth = spriteWidth;
-        this.SpriteHeight = spriteHeight;
+        SpriteWidth = spriteWidth;
+        SpriteHeight = spriteHeight;
 
         _sprites = new SpriteBatch(_graphicsDeviceManager.GraphicsDevice);
         _spriteImages = content.Load<Texture2D>(imageFilePath);
 
-        var noHorizontalImages = _spriteImages.Width / spriteWidth;
-        var noVerticalImages = _spriteImages.Height / spriteHeight;
+        int noHorizontalImages = _spriteImages.Width / spriteWidth;
+        int noVerticalImages = _spriteImages.Height / spriteHeight;
 
         SpriteCount = noHorizontalImages * noVerticalImages;
 
         _spriteTexturePosX = new int[SpriteCount];
         _spriteTexturePosY = new int[SpriteCount];
 
-        var counter = 0;
+        int counter = 0;
         _fade = ColourLevels.Full;
 
         // Generate Coordinates for the textures of the tiles found
-        for (var y = 0; y < noVerticalImages; y++)
+        for (int y = 0; y < noVerticalImages; y++)
         {
-            for (var x = 0; x < noHorizontalImages; x++)
+            for (int x = 0; x < noHorizontalImages; x++)
             {
-                _spriteTexturePosX[counter] = x * this.SpriteWidth;
-                _spriteTexturePosY[counter] = y * this.SpriteHeight;
+                _spriteTexturePosX[counter] = x * SpriteWidth;
+                _spriteTexturePosY[counter] = y * SpriteHeight;
                 counter++;
             }
         }
@@ -192,16 +192,16 @@ public class SpriteCollection
             const float hScaling = 1f;
             const float vScaling = 1f;
 
-            var x = 0;
-            var y = 0;
+            int x = 0;
+            int y = 0;
 
-            var blockMultiplier = 1;
+            int blockMultiplier = 1;
             if (blockSize > 1)
             {
                 blockMultiplier = 2;
             }
 
-            for (var a = 0; a < matrix.Length; a += blockSize * blockMultiplier)
+            for (int a = 0; a < matrix.Length; a += blockSize * blockMultiplier)
             {
                 if (matrix[a].IsOn)
                 {

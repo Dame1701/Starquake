@@ -2,13 +2,13 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System;
 using MessagePack;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using ProjectMercury.Emitters;
 using Starquake.ActiveSprites;
 using Starquake.Animations;
@@ -17,16 +17,13 @@ using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Particles;
 using Starquake.SharedLibs;
+using Starquake.Sprites;
 using Starquake.Structure;
 
 namespace Starquake.Display;
 
 public class GameScreenCollection : GameComponentBase
 {
-    private readonly CoreElements _elements;
-    private readonly GraphicsSet _graphicsSet;
-    private readonly Random _randomNumberGenerator;
-    private readonly ResourceManager _resources;
 
 
     /// <summary>
@@ -70,31 +67,6 @@ public class GameScreenCollection : GameComponentBase
 
     /// <inheritdoc cref="PlacementXInset" />
     private const int PlacementYLift = 64;
-
-    /// <summary>
-    ///     The tiles no pick-up, power-up or pyramid may be placed on, because each of them already
-    ///     means something to the game - a shuttle, a spike, a bridge, a marker. This was a fifteen-term
-    ///     chain of inequalities.
-    /// </summary>
-    private static readonly HashSet<int> TilesNothingMayBePlacedOn =
-    [
-        (int)ActionTiles.ShuttlePlatform,
-        (int)ActionTiles.RemovedShuttlePlatform,
-        (int)ActionTiles.ElectricityNode,
-        (int)ActionTiles.ShuttleTag1,
-        (int)ActionTiles.ShuttleTag2,
-        (int)ActionTiles.ShuttleTag3,
-        (int)ActionTiles.Spike1,
-        (int)ActionTiles.Spike2,
-        (int)ActionTiles.Spike3,
-        (int)ActionTiles.ElectricityGate,
-        (int)ActionTiles.BlankFiller,
-        (int)ActionTiles.ConveyerNasty,
-        (int)ActionTiles.BreakableBridges,
-        SceneryTile1,
-        SceneryTile2,
-        (int)ActionTiles.PreferredCoreLocation
-    ];
 
     /// <summary>
     ///     Anything numbered above this is scenery drawn on the upper layer rather than a tile the
@@ -192,24 +164,58 @@ public class GameScreenCollection : GameComponentBase
     /// <inheritdoc cref="OllyScreenNumber" />
     private const int OllyVerticalGazeDamping = 20;
 
-    /// <summary>
-    ///     The two emitters that make up a key door's force field, and the two quantities it is run at:
-    ///     a dim alpha-blended pass for the body of the field and a bright additive one over the middle.
-    /// </summary>
-    private static readonly string[] ForceFieldEmitterNames = ["Emitter01", "Emitter05"];
-
     /// <inheritdoc cref="ForceFieldEmitterNames" />
     private const int DimFieldQuantity = 100;
 
     /// <inheritdoc cref="ForceFieldEmitterNames" />
     private const int BrightFieldQuantity = 10;
 
+    /// <summary>
+    ///     The tiles no pick-up, power-up or pyramid may be placed on, because each of them already
+    ///     means something to the game - a shuttle, a spike, a bridge, a marker. This was a fifteen-term
+    ///     chain of inequalities.
+    /// </summary>
+    private static readonly HashSet<int> TilesNothingMayBePlacedOn =
+    [
+        (int)ActionTiles.ShuttlePlatform,
+        (int)ActionTiles.RemovedShuttlePlatform,
+        (int)ActionTiles.ElectricityNode,
+        (int)ActionTiles.ShuttleTag1,
+        (int)ActionTiles.ShuttleTag2,
+        (int)ActionTiles.ShuttleTag3,
+        (int)ActionTiles.Spike1,
+        (int)ActionTiles.Spike2,
+        (int)ActionTiles.Spike3,
+        (int)ActionTiles.ElectricityGate,
+        (int)ActionTiles.BlankFiller,
+        (int)ActionTiles.ConveyerNasty,
+        (int)ActionTiles.BreakableBridges,
+        SceneryTile1,
+        SceneryTile2,
+        (int)ActionTiles.PreferredCoreLocation
+    ];
+
+    /// <summary>
+    ///     The two emitters that make up a key door's force field, and the two quantities it is run at:
+    ///     a dim alpha-blended pass for the body of the field and a bright additive one over the middle.
+    /// </summary>
+    private static readonly string[] ForceFieldEmitterNames = ["Emitter01", "Emitter05"];
+
     private readonly List<CollisionTile> _detectedCollisionMap;
-    private readonly int _pickUpCount = 100;
+    private readonly CoreElements _elements;
 
     private readonly GameScreenData[] _gameScreens;
+    private readonly GraphicsSet _graphicsSet;
 
     private readonly IStandardParticleEffect _keyDoorForceFieldNoAccess;
+    private readonly int _pickUpCount = 100;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
+
+    private readonly int[,,] _screenCollisionDataArray;
+    private readonly int _tileHeight;
+
+    private readonly int _tileWidth;
 
     private List<KeyLockDoor>? _keyLockDoors;
 
@@ -221,12 +227,7 @@ public class GameScreenCollection : GameComponentBase
     private int _ollyEyesX;
     private int _ollyEyesY;
 
-    private readonly int[,,] _screenCollisionDataArray;
-
     private int _screenNumber;
-    private int _tileHeight;
-
-    private int _tileWidth;
 
     public GameScreenCollection(
         ResourceManager resources,
@@ -254,11 +255,11 @@ public class GameScreenCollection : GameComponentBase
         _oldXoffset = xOffset;
         _oldYoffset = yOffset;
 
-        this.TilesAcross = tilesAcross;
-        this.TilesDown = tilesDown;
+        TilesAcross = tilesAcross;
+        TilesDown = tilesDown;
 
-        this.CollAreaWidth = collAreaWidth;
-        this.CollAreaHeight = collAreaHeight;
+        CollAreaWidth = collAreaWidth;
+        CollAreaHeight = collAreaHeight;
 
         _detectedCollisionMap = new List<CollisionTile>();
 
@@ -333,9 +334,9 @@ public class GameScreenCollection : GameComponentBase
 
     public int GetPercentageOfScreensVisited()
     {
-        var screensVisited = 0;
+        int screensVisited = 0;
 
-        foreach (var gameScreen in _gameScreens)
+        foreach (GameScreenData gameScreen in _gameScreens)
         {
             if (gameScreen.ScreenVisited)
             {
@@ -349,11 +350,11 @@ public class GameScreenCollection : GameComponentBase
 
     private bool CheckAccessCodeValidity(string accessCode)
     {
-        var unique = true;
+        bool unique = true;
 
-        for (var a = 0; a < accessCode.Length; a++)
+        for (int a = 0; a < accessCode.Length; a++)
         {
-            for (var b = 0; b < accessCode.Length; b++)
+            for (int b = 0; b < accessCode.Length; b++)
             {
                 if (accessCode.Substring(b, 1) == accessCode.Substring(a, 1) &&
                     a != b)
@@ -377,20 +378,20 @@ public class GameScreenCollection : GameComponentBase
     {
         List<Point> potentialLocations = [];
 
-        for (var y = 0; y < TilesDown; y++)
+        for (int y = 0; y < TilesDown; y++)
         {
-            for (var x = 0; x < TilesAcross; x++)
+            for (int x = 0; x < TilesAcross; x++)
             {
                 if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == -1)
                 {
-                    var addLocation = true;
+                    bool addLocation = true;
 
                     // Now check the collision map for this tile
-                    for (var y1 = 0; y1 < TileMetrics.CollisionCellsDownTile; y1++)
+                    for (int y1 = 0; y1 < TileMetrics.CollisionCellsDownTile; y1++)
                     {
-                        for (var x1 = 0; x1 < TileMetrics.CollisionCellsAcrossTile; x1++)
+                        for (int x1 = 0; x1 < TileMetrics.CollisionCellsAcrossTile; x1++)
                         {
-                            foreach (var collisionTile in _gameScreens[ScreenNumber].CollisionMap)
+                            foreach (CollisionTile collisionTile in _gameScreens[ScreenNumber].CollisionMap)
                             {
                                 if (collisionTile.XPos ==
                                     x * _tileWidth + x1 * CollAreaWidth &&
@@ -421,9 +422,9 @@ public class GameScreenCollection : GameComponentBase
 
     private InteractiveItem? GetPreferredLocation(int screenNumber)
     {
-        for (var y = 1; y < _gameScreens[screenNumber].ScreenTiles.GetLength(1); y++)
+        for (int y = 1; y < _gameScreens[screenNumber].ScreenTiles.GetLength(1); y++)
         {
-            for (var x = 0; x < _gameScreens[screenNumber].ScreenTiles.GetLength(0); x++)
+            for (int x = 0; x < _gameScreens[screenNumber].ScreenTiles.GetLength(0); x++)
             {
                 if (_gameScreens[screenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.PreferredCoreLocation)
                 {
@@ -446,14 +447,14 @@ public class GameScreenCollection : GameComponentBase
     private List<InteractiveItem> GetPotentialLocations(int screenNumber)
     {
         var toReturn = new List<InteractiveItem>();
-        var tiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
+        SpriteCollection tiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
 
         // Start at row 1: nothing above that row is reachable
-        for (var y = 1; y < _gameScreens[screenNumber].ScreenTiles.GetLength(1); y++)
+        for (int y = 1; y < _gameScreens[screenNumber].ScreenTiles.GetLength(1); y++)
         {
-            for (var x = 0; x < _gameScreens[screenNumber].ScreenTiles.GetLength(0); x++)
+            for (int x = 0; x < _gameScreens[screenNumber].ScreenTiles.GetLength(0); x++)
             {
-                var tileImage = _gameScreens[screenNumber].ScreenTiles[x, y].TileImage;
+                int tileImage = _gameScreens[screenNumber].ScreenTiles[x, y].TileImage;
 
                 if (tileImage < 0 || TilesNothingMayBePlacedOn.Contains(tileImage))
                 {
@@ -500,7 +501,7 @@ public class GameScreenCollection : GameComponentBase
     /// </remarks>
     private bool PowerUpIsInTheWay(int x, int y)
     {
-        var powerUpOnScreen = _gameScreens[_screenNumber].PowerUp;
+        InteractiveItem? powerUpOnScreen = _gameScreens[_screenNumber].PowerUp;
 
         return powerUpOnScreen != null &&
                powerUpOnScreen.XLocation == x + 32 &&
@@ -509,8 +510,8 @@ public class GameScreenCollection : GameComponentBase
 
     public void SaveData()
     {
-        var gameScreensData = MessagePackSerializer.Serialize(_gameScreens);
-        var collisionData = MessagePackSerializer.Serialize(_screenCollisionDataArray);
+        byte[] gameScreensData = MessagePackSerializer.Serialize(_gameScreens);
+        byte[] collisionData = MessagePackSerializer.Serialize(_screenCollisionDataArray);
 
         using (var fs = new FileStream("SQScreenData.dat", FileMode.Create, FileAccess.Write))
         {
@@ -553,9 +554,9 @@ public class GameScreenCollection : GameComponentBase
 
         _gameScreens[ScreenNumber].CollisionMap = new List<CollisionTile>();
 
-        for (var y = 0; y < TilesDown; y++)
+        for (int y = 0; y < TilesDown; y++)
         {
-            for (var x = 0; x < TilesAcross; x++)
+            for (int x = 0; x < TilesAcross; x++)
             {
                 if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage <= -1)
                 {
@@ -580,14 +581,14 @@ public class GameScreenCollection : GameComponentBase
     /// </summary>
     private void RemoveGameObjectCollisionTiles()
     {
-            for (var a = 0; a < _gameScreens[ScreenNumber].CollisionMap.Count; a++)
+        for (int a = 0; a < _gameScreens[ScreenNumber].CollisionMap.Count; a++)
+        {
+            if (_gameScreens[ScreenNumber].CollisionMap[a].TileImage == (int)CollisionObjectType.GameObject)
             {
-                if (_gameScreens[ScreenNumber].CollisionMap[a].TileImage == (int)CollisionObjectType.GameObject)
-                {
-                    // Remove any game object collision tiles becuase we are about to update them
-                    _gameScreens[ScreenNumber].CollisionMap.Remove(_gameScreens[ScreenNumber].CollisionMap[a]);
-                }
+                // Remove any game object collision tiles becuase we are about to update them
+                _gameScreens[ScreenNumber].CollisionMap.Remove(_gameScreens[ScreenNumber].CollisionMap[a]);
             }
+        }
     }
 
     /// <summary>
@@ -596,26 +597,26 @@ public class GameScreenCollection : GameComponentBase
     /// </summary>
     private void AddTileCollisionCells(int x, int y)
     {
-            for (var y1 = 0; y1 < TileMetrics.CollisionCellsDownTile; y1++)
+        for (int y1 = 0; y1 < TileMetrics.CollisionCellsDownTile; y1++)
+        {
+            for (int x1 = 0; x1 < TileMetrics.CollisionCellsAcrossTile; x1++)
             {
-                for (var x1 = 0; x1 < TileMetrics.CollisionCellsAcrossTile; x1++)
+                if (_screenCollisionDataArray[_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage, x1,
+                        y1] == 1)
                 {
-                    if (_screenCollisionDataArray[_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage, x1,
-                            y1] == 1)
-                    {
-                        _gameScreens[ScreenNumber].CollisionMap.Add(
-                            new CollisionTile(
-                                _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage,
-                                x * _resources
-                                    .GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteWidth +
-                                x1 * CollAreaWidth,
-                                y * _resources
-                                    .GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteHeight +
-                                y1 * CollAreaHeight,
-                                CollisionTileType.EveryoneHits));
-                    }
+                    _gameScreens[ScreenNumber].CollisionMap.Add(
+                        new CollisionTile(
+                            _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage,
+                            x * _resources
+                                .GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteWidth +
+                            x1 * CollAreaWidth,
+                            y * _resources
+                                .GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteHeight +
+                            y1 * CollAreaHeight,
+                            CollisionTileType.EveryoneHits));
                 }
             }
+        }
     }
 
     /// <summary>
@@ -624,33 +625,33 @@ public class GameScreenCollection : GameComponentBase
     /// </summary>
     private void AddInteriorCollisionCells(int x, int y)
     {
-            if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.TeleportBooth ||
-                _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.AccessBoothLeft ||
-                _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.AccessBoothRight ||
-                _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.TunnelLiftTop1 ||
-                _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.TunnelLiftShaft1 ||
-                _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.TunnelLiftShaft2 ||
-                _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.TunnelLiftShaft3 ||
-                _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.TunnelLiftTop2 ||
-                _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.TunnelLiftTop3)
-            {
-                // Cover the whole tile since it doesn't matter - nasties can't touch any of it anyway
-                var tileX = x * TileMetrics.TileWidth;
-                var tileY = y * TileMetrics.TileHeight;
+        if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.TeleportBooth ||
+            _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.AccessBoothLeft ||
+            _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.AccessBoothRight ||
+            _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.TunnelLiftTop1 ||
+            _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.TunnelLiftShaft1 ||
+            _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.TunnelLiftShaft2 ||
+            _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.TunnelLiftShaft3 ||
+            _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.TunnelLiftTop2 ||
+            _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.TunnelLiftTop3)
+        {
+            // Cover the whole tile since it doesn't matter - nasties can't touch any of it anyway
+            int tileX = x * TileMetrics.TileWidth;
+            int tileY = y * TileMetrics.TileHeight;
 
-                for (var a = 0; a < TileMetrics.CollisionCellsDownTile; a++)
+            for (int a = 0; a < TileMetrics.CollisionCellsDownTile; a++)
+            {
+                for (int b = 0; b < TileMetrics.CollisionCellsAcrossTile; b++)
                 {
-                    for (var b = 0; b < TileMetrics.CollisionCellsAcrossTile; b++)
-                    {
-                        _gameScreens[ScreenNumber].CollisionMap.Add(
-                            new CollisionTile(
-                                (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                b * TileMetrics.CollisionCellWidth + tileX,
-                                a * TileMetrics.CollisionCellHeight + tileY,
-                                CollisionTileType.NotBlob));
-                    }
+                    _gameScreens[ScreenNumber].CollisionMap.Add(
+                        new CollisionTile(
+                            (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                            b * TileMetrics.CollisionCellWidth + tileX,
+                            a * TileMetrics.CollisionCellHeight + tileY,
+                            CollisionTileType.NotBlob));
                 }
             }
+        }
     }
 
     /// <summary>
@@ -659,40 +660,40 @@ public class GameScreenCollection : GameComponentBase
     /// </summary>
     private void AddCentralSpikeCollisionCells(int x, int y)
     {
-        var tileX = x * TileMetrics.TileWidth;
-        var tileY = y * TileMetrics.TileHeight;
+        int tileX = x * TileMetrics.TileWidth;
+        int tileY = y * TileMetrics.TileHeight;
 
-            if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.Spike2 ||
-                _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.Spike3)
-            {
-                _gameScreens[ScreenNumber].CollisionMap.Add(
-                    new CollisionTile(
-                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                        TileMetrics.CollisionCellWidth + tileX,
-                        TileMetrics.CollisionCellHeight + tileY,
-                        CollisionTileType.NotBlob));
+        if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.Spike2 ||
+            _gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.Spike3)
+        {
+            _gameScreens[ScreenNumber].CollisionMap.Add(
+                new CollisionTile(
+                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                    TileMetrics.CollisionCellWidth + tileX,
+                    TileMetrics.CollisionCellHeight + tileY,
+                    CollisionTileType.NotBlob));
 
-                _gameScreens[ScreenNumber].CollisionMap.Add(
-                    new CollisionTile(
-                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                        TileMetrics.CollisionCellWidth + tileX,
-                        TileMetrics.CollisionCellHeight * 2 + tileY,
-                        CollisionTileType.NotBlob));
+            _gameScreens[ScreenNumber].CollisionMap.Add(
+                new CollisionTile(
+                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                    TileMetrics.CollisionCellWidth + tileX,
+                    TileMetrics.CollisionCellHeight * 2 + tileY,
+                    CollisionTileType.NotBlob));
 
-                _gameScreens[ScreenNumber].CollisionMap.Add(
-                    new CollisionTile(
-                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                        TileMetrics.CollisionCellWidth * 2 + tileX,
-                        TileMetrics.CollisionCellHeight + tileY,
-                        CollisionTileType.NotBlob));
+            _gameScreens[ScreenNumber].CollisionMap.Add(
+                new CollisionTile(
+                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                    TileMetrics.CollisionCellWidth * 2 + tileX,
+                    TileMetrics.CollisionCellHeight + tileY,
+                    CollisionTileType.NotBlob));
 
-                _gameScreens[ScreenNumber].CollisionMap.Add(
-                    new CollisionTile(
-                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                        TileMetrics.CollisionCellWidth * 2 + tileX,
-                        TileMetrics.CollisionCellHeight * 2 + tileY,
-                        CollisionTileType.NotBlob));
-            }
+            _gameScreens[ScreenNumber].CollisionMap.Add(
+                new CollisionTile(
+                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                    TileMetrics.CollisionCellWidth * 2 + tileX,
+                    TileMetrics.CollisionCellHeight * 2 + tileY,
+                    CollisionTileType.NotBlob));
+        }
     }
 
     /// <summary>
@@ -701,82 +702,82 @@ public class GameScreenCollection : GameComponentBase
     /// </summary>
     private void AddWallSpikeCollisionCells(int x, int y)
     {
-        var tileX = x * TileMetrics.TileWidth;
-        var tileY = y * TileMetrics.TileHeight;
+        int tileX = x * TileMetrics.TileWidth;
+        int tileY = y * TileMetrics.TileHeight;
 
-            if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.Spike1)
-            {
-                _gameScreens[ScreenNumber].CollisionMap.Add(
-                    new CollisionTile(
-                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                        TileMetrics.CollisionCellWidth * 2 + tileX,
-                        tileY,
-                        CollisionTileType.NotBlob));
+        if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.Spike1)
+        {
+            _gameScreens[ScreenNumber].CollisionMap.Add(
+                new CollisionTile(
+                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                    TileMetrics.CollisionCellWidth * 2 + tileX,
+                    tileY,
+                    CollisionTileType.NotBlob));
 
-                _gameScreens[ScreenNumber].CollisionMap.Add(
-                    new CollisionTile(
-                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                        TileMetrics.CollisionCellWidth * 3 + tileX,
-                        tileY,
-                        CollisionTileType.NotBlob));
+            _gameScreens[ScreenNumber].CollisionMap.Add(
+                new CollisionTile(
+                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                    TileMetrics.CollisionCellWidth * 3 + tileX,
+                    tileY,
+                    CollisionTileType.NotBlob));
 
-                _gameScreens[ScreenNumber].CollisionMap.Add(
-                    new CollisionTile(
-                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                        TileMetrics.CollisionCellWidth * 2 + tileX,
-                        TileMetrics.CollisionCellHeight + tileY,
-                        CollisionTileType.NotBlob));
+            _gameScreens[ScreenNumber].CollisionMap.Add(
+                new CollisionTile(
+                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                    TileMetrics.CollisionCellWidth * 2 + tileX,
+                    TileMetrics.CollisionCellHeight + tileY,
+                    CollisionTileType.NotBlob));
 
-                _gameScreens[ScreenNumber].CollisionMap.Add(
-                    new CollisionTile(
-                        (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                        TileMetrics.CollisionCellWidth * 3 + tileX,
-                        TileMetrics.CollisionCellHeight + tileY,
-                        CollisionTileType.NotBlob));
-            }
+            _gameScreens[ScreenNumber].CollisionMap.Add(
+                new CollisionTile(
+                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                    TileMetrics.CollisionCellWidth * 3 + tileX,
+                    TileMetrics.CollisionCellHeight + tileY,
+                    CollisionTileType.NotBlob));
+        }
     }
 
     private void AddSecretPassageCollisionCells(int x, int y)
     {
-        var tileX = x * TileMetrics.TileWidth;
-        var tileY = y * TileMetrics.TileHeight;
+        int tileX = x * TileMetrics.TileWidth;
+        int tileY = y * TileMetrics.TileHeight;
 
-            for (var a = 0; a < TunnelTiles.MouthPairs; a++)
+        for (int a = 0; a < TunnelTiles.MouthPairs; a++)
+        {
+            int tunnelTile = a + TunnelTiles.FirstMouth;
+            if (tunnelTile % 2 == 0)
             {
-                var tunnelTile = a + TunnelTiles.FirstMouth;
-                if (tunnelTile % 2 == 0)
+                // Left passages
+                if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == tunnelTile)
                 {
-                    // Left passages
-                    if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == tunnelTile)
+                    for (int b = 0; b < 3; b++)
                     {
-                        for (var b = 0; b < 3; b++)
-                        {
-                            _gameScreens[ScreenNumber].CollisionMap.Add(
-                                new CollisionTile(
-                                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                    tileX,
-                                    b * 32 + tileY,
-                                    CollisionTileType.NotBlob));
-                        }
-                    }
-                }
-                else
-                {
-                    // Right passages
-                    if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == tunnelTile)
-                    {
-                        for (var b = 0; b < 3; b++)
-                        {
-                            _gameScreens[ScreenNumber].CollisionMap.Add(
-                                new CollisionTile(
-                                    (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                    tileX + 96,
-                                    b * 32 + tileY,
-                                    CollisionTileType.NotBlob));
-                        }
+                        _gameScreens[ScreenNumber].CollisionMap.Add(
+                            new CollisionTile(
+                                (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                                tileX,
+                                b * 32 + tileY,
+                                CollisionTileType.NotBlob));
                     }
                 }
             }
+            else
+            {
+                // Right passages
+                if (_gameScreens[ScreenNumber].ScreenTiles[x, y].TileImage == tunnelTile)
+                {
+                    for (int b = 0; b < 3; b++)
+                    {
+                        _gameScreens[ScreenNumber].CollisionMap.Add(
+                            new CollisionTile(
+                                (int)CollisionObjectType.GameObject, // Random image that's meaningless
+                                tileX + 96,
+                                b * 32 + tileY,
+                                CollisionTileType.NotBlob));
+                    }
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -785,20 +786,20 @@ public class GameScreenCollection : GameComponentBase
     /// </summary>
     private void AddScreenObjectCollisionTiles(bool screenChanged, List<CollisionTile> collisionsToAppend)
     {
-        var objectCollisions = screenChanged ? _gameScreens[ScreenNumber].CollisionMap : collisionsToAppend;
+        List<CollisionTile> objectCollisions = screenChanged ? _gameScreens[ScreenNumber].CollisionMap : collisionsToAppend;
 
-        var powerUp = _gameScreens[ScreenNumber].PowerUp;
+        InteractiveItem? powerUp = _gameScreens[ScreenNumber].PowerUp;
         if (powerUp != null)
         {
             AddObjectCollisionTiles(objectCollisions, powerUp);
         }
 
-        foreach (var pickUp in _gameScreens[ScreenNumber].PickUps)
+        foreach (InteractiveItem pickUp in _gameScreens[ScreenNumber].PickUps)
         {
             AddObjectCollisionTiles(objectCollisions, pickUp);
         }
 
-        var cheopsPyramid = _gameScreens[ScreenNumber].CheopsPyramid;
+        InteractiveItem? cheopsPyramid = _gameScreens[ScreenNumber].CheopsPyramid;
         if (cheopsPyramid != null)
         {
             AddObjectCollisionTiles(objectCollisions, cheopsPyramid);
@@ -811,9 +812,9 @@ public class GameScreenCollection : GameComponentBase
     /// </summary>
     private static void AddObjectCollisionTiles(List<CollisionTile> collisionMap, InteractiveItem item)
     {
-        for (var y = 0; y < 2; y++)
+        for (int y = 0; y < 2; y++)
         {
-            for (var x = 0; x < 2; x++)
+            for (int x = 0; x < 2; x++)
             {
                 collisionMap.Add(
                     new CollisionTile(
@@ -827,11 +828,11 @@ public class GameScreenCollection : GameComponentBase
 
     public void ChangeShuttlePlatformState(bool padRemoved)
     {
-        foreach (var gameScreen in _gameScreens)
+        foreach (GameScreenData gameScreen in _gameScreens)
         {
-            for (var y = 0; y < TilesDown; y++)
+            for (int y = 0; y < TilesDown; y++)
             {
-                for (var x = 0; x < TilesAcross; x++)
+                for (int x = 0; x < TilesAcross; x++)
                 {
                     if (padRemoved)
                     {
@@ -869,10 +870,10 @@ public class GameScreenCollection : GameComponentBase
         int playerHeight,
         bool isBlob)
     {
-        var collide = false;
+        bool collide = false;
 
         // Cycle through the collision map
-        foreach (var collisionTile in _gameScreens[_screenNumber].CollisionMap)
+        foreach (CollisionTile collisionTile in _gameScreens[_screenNumber].CollisionMap)
         {
             collide =
                 CollisionDetection.Check(
@@ -906,16 +907,16 @@ public class GameScreenCollection : GameComponentBase
         int velocity,
         bool isBlob)
     {
-        var checkMovementAmount = velocity;
+        int checkMovementAmount = velocity;
 
         _detectedCollisionMap.Clear();
 
         // Cycle through the collision map
-        foreach (var colTile in _gameScreens[_screenNumber].CollisionMap)
+        foreach (CollisionTile colTile in _gameScreens[_screenNumber].CollisionMap)
         {
             _detectedCollisionMap.Add(colTile);
 
-            var checkMovementAmountTemp = StepAllowedBy(
+            int checkMovementAmountTemp = StepAllowedBy(
                 colTile,
                 playerDirection,
                 playerXPos,
@@ -969,7 +970,8 @@ public class GameScreenCollection : GameComponentBase
         if (colTile.TileImage > FirstGameObjectImage &&
             !isBlob &&
             (CollisionObjectType)colTile.TileImage is CollisionObjectType.JumpPlatform or
-                CollisionObjectType.CoreElement or CollisionObjectType.GameObject &&
+            CollisionObjectType.CoreElement or
+            CollisionObjectType.GameObject &&
             CollisionDetection.Check(
                 new Rectangle(playerXPos, playerYPos, playerWidth, playerHeight),
                 new Rectangle(colTile.XPos, colTile.YPos, GameObjectProbeSize, GameObjectProbeSize)))
@@ -1006,7 +1008,7 @@ public class GameScreenCollection : GameComponentBase
         int playerHeight,
         int checkMovementAmount)
     {
-        var (position, size, limit) = playerDirection switch
+        (int position, int size, int limit) = playerDirection switch
         {
             Direction.Up or Direction.Down => (playerYPos, playerHeight, ScreenHeight),
             Direction.Left or Direction.Right => (playerXPos, playerWidth, ScreenWidth),
@@ -1015,14 +1017,14 @@ public class GameScreenCollection : GameComponentBase
 
         if (playerDirection is Direction.Up or Direction.Left)
         {
-            var overshoot = position - checkMovementAmount;
+            int overshoot = position - checkMovementAmount;
 
             return overshoot < 0 ? checkMovementAmount + overshoot : checkMovementAmount;
         }
 
         if (playerDirection is Direction.Down or Direction.Right)
         {
-            var overshoot = position + size + checkMovementAmount - limit;
+            int overshoot = position + size + checkMovementAmount - limit;
 
             return overshoot > 0 ? checkMovementAmount - overshoot : checkMovementAmount;
         }
@@ -1041,9 +1043,9 @@ public class GameScreenCollection : GameComponentBase
     {
         var returnedTiles = new List<Point>();
 
-        for (var y = 0; y < TilesDown; y++)
+        for (int y = 0; y < TilesDown; y++)
         {
-            for (var x = 0; x < TilesAcross; x++)
+            for (int x = 0; x < TilesAcross; x++)
             {
                 if (_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage == tileType)
                 {
@@ -1063,9 +1065,9 @@ public class GameScreenCollection : GameComponentBase
     {
         var returnedTiles = new List<Point>();
 
-        for (var y = 0; y < TilesDown; y++)
+        for (int y = 0; y < TilesDown; y++)
         {
-            for (var x = 0; x < TilesAcross; x++)
+            for (int x = 0; x < TilesAcross; x++)
             {
                 if (tileTypes.Contains(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage))
                 {
@@ -1085,9 +1087,9 @@ public class GameScreenCollection : GameComponentBase
     {
         var returnedTiles = new List<KeyLockDoor>();
 
-        for (var y = 0; y < TilesDown; y++)
+        for (int y = 0; y < TilesDown; y++)
         {
-            for (var x = 0; x < TilesAcross; x++)
+            for (int x = 0; x < TilesAcross; x++)
             {
                 if (_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.AccessForceField)
                 {
@@ -1110,9 +1112,9 @@ public class GameScreenCollection : GameComponentBase
     {
         var returnedTiles = new List<Point>();
 
-        for (var y = 0; y < TilesDown; y++)
+        for (int y = 0; y < TilesDown; y++)
         {
-            for (var x = 0; x < TilesAcross; x++)
+            for (int x = 0; x < TilesAcross; x++)
             {
                 if (_gameScreens[screenNumber].ScreenTiles[x, y].TileImage == tileType)
                 {
@@ -1142,15 +1144,15 @@ public class GameScreenCollection : GameComponentBase
             return null;
         }
 
-        var tiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
+        SpriteCollection tiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
 
         // A check along the vertical axis reports where the object's foot sits inside the tile; every
         // other check reports where its top does.
-        var measureFromFoot = directionToCheck is Direction.Up or Direction.Down;
+        bool measureFromFoot = directionToCheck is Direction.Up or Direction.Down;
 
-        for (var y = 0; y < TilesDown; y++)
+        for (int y = 0; y < TilesDown; y++)
         {
-            for (var x = 0; x < TilesAcross; x++)
+            for (int x = 0; x < TilesAcross; x++)
             {
                 if (_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage <= -1)
                 {
@@ -1168,8 +1170,8 @@ public class GameScreenCollection : GameComponentBase
                     continue;
                 }
 
-                var xpos = playerXPos - x * tiles.SpriteWidth;
-                var ypos = (measureFromFoot ? playerYPos + playerHeight : playerYPos) - y * tiles.SpriteHeight;
+                int xpos = playerXPos - x * tiles.SpriteWidth;
+                int ypos = (measureFromFoot ? playerYPos + playerHeight : playerYPos) - y * tiles.SpriteHeight;
 
                 return new TileDetected(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, xpos, ypos, x, y);
             }
@@ -1225,7 +1227,7 @@ public class GameScreenCollection : GameComponentBase
         {
             _keyDoorForceFieldNoAccess.Start();
 
-            foreach (var keyLockDoor in _keyLockDoors)
+            foreach (KeyLockDoor keyLockDoor in _keyLockDoors)
             {
                 UpdateKeyLockDoor(keyLockDoor, gameTime, blobHasKey);
             }
@@ -1257,19 +1259,19 @@ public class GameScreenCollection : GameComponentBase
         // over the middle, which is what gives it its core.
         SetForceFieldEmitters(new Color(100, 100, 100), DimFieldQuantity, EmitterBlendMode.Alpha);
 
-        for (var c = 0; c < 4; c++)
+        for (int c = 0; c < 4; c++)
         {
             _keyDoorForceFieldNoAccess!.Update(keyLockDoor.Location.X + 52 + c, keyLockDoor.Location.Y + 48, gameTime);
         }
 
-        for (var c = 0; c < 4; c++)
+        for (int c = 0; c < 4; c++)
         {
             _keyDoorForceFieldNoAccess!.Update(keyLockDoor.Location.X + 76 + c, keyLockDoor.Location.Y + 48, gameTime);
         }
 
         SetForceFieldColour(blobHasKey ? new Color(0, ColourLevels.Full, 0) : new Color(ColourLevels.Full, 0, 0));
 
-        foreach (var collisionTile in keyLockDoor.CollisionTiles)
+        foreach (CollisionTile collisionTile in keyLockDoor.CollisionTiles)
         {
             collisionTile.CollisionTileType = blobHasKey
                 ? CollisionTileType.NotBlob
@@ -1278,7 +1280,7 @@ public class GameScreenCollection : GameComponentBase
 
         SetForceFieldEmitters(null, BrightFieldQuantity, EmitterBlendMode.Add);
 
-        for (var c = 0; c < 12; c++)
+        for (int c = 0; c < 12; c++)
         {
             _keyDoorForceFieldNoAccess!.Update(keyLockDoor.Location.X + 60 + c, keyLockDoor.Location.Y + 48, gameTime);
         }
@@ -1286,7 +1288,7 @@ public class GameScreenCollection : GameComponentBase
 
     private void AddKeyLockDoorCollisionTiles(KeyLockDoor keyLockDoor)
     {
-        for (var c = 0; c < 3; c++)
+        for (int c = 0; c < 3; c++)
         {
             var keyLockCollisionTile =
                 new CollisionTile(
@@ -1309,9 +1311,9 @@ public class GameScreenCollection : GameComponentBase
     /// </summary>
     private void SetForceFieldEmitters(Color? colour, int quantity, EmitterBlendMode blendMode)
     {
-        foreach (var name in ForceFieldEmitterNames)
+        foreach (string name in ForceFieldEmitterNames)
         {
-            var emitter = _keyDoorForceFieldNoAccess!.Effect[name];
+            Emitter? emitter = _keyDoorForceFieldNoAccess!.Effect[name];
 
             if (colour is { } releaseColour)
             {
@@ -1326,7 +1328,7 @@ public class GameScreenCollection : GameComponentBase
     /// <inheritdoc cref="SetForceFieldEmitters" />
     private void SetForceFieldColour(Color colour)
     {
-        foreach (var name in ForceFieldEmitterNames)
+        foreach (string name in ForceFieldEmitterNames)
         {
             _keyDoorForceFieldNoAccess!.Effect[name].ReleaseColour = colour.ToVector3();
         }
@@ -1343,13 +1345,13 @@ public class GameScreenCollection : GameComponentBase
 
     public void DrawCoreElements(int xPos, int yPos, GameTime gameTime)
     {
-        var objNo = 0;
+        int objNo = 0;
 
         _resources.GetSpriteCollection(_graphicsSet.Names.Pickups)
             .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-        for (var y = 0; y < 3; y++)
+        for (int y = 0; y < 3; y++)
         {
-            for (var x = 0; x < 3; x++)
+            for (int x = 0; x < 3; x++)
             {
                 _resources.GetSpriteCollection(_graphicsSet.Names.Pickups)
                     .DrawSprite(objNo, x * 64 + xPos, y * 64 + yPos, Color.White);
@@ -1363,9 +1365,9 @@ public class GameScreenCollection : GameComponentBase
     public void Draw(Color colour, GameTime gameTime, bool introSequenceRunning = false,
         IntroSequenceStage introSequenceStage = IntroSequenceStage.None)
     {
-        for (var y = 0; y < TilesDown; y++)
+        for (int y = 0; y < TilesDown; y++)
         {
-            for (var x = 0; x < TilesAcross; x++)
+            for (int x = 0; x < TilesAcross; x++)
             {
                 DrawLowerTile(x, y, colour, gameTime);
             }
@@ -1374,7 +1376,7 @@ public class GameScreenCollection : GameComponentBase
         ColourAnimations.Draw(gameTime, colour.A);
 
         // The intro sequence flies over a screen whose objects have not been placed yet
-        var objectsArePlaced = !introSequenceRunning || introSequenceStage == IntroSequenceStage.EndPause;
+        bool objectsArePlaced = !introSequenceRunning || introSequenceStage == IntroSequenceStage.EndPause;
 
         if (objectsArePlaced)
         {
@@ -1388,13 +1390,13 @@ public class GameScreenCollection : GameComponentBase
 
     private void DrawLowerTile(int x, int y, Color colour, GameTime gameTime)
     {
-        var tileImage = _gameScreens[_screenNumber].ScreenTiles[x, y].TileImage;
+        int tileImage = _gameScreens[_screenNumber].ScreenTiles[x, y].TileImage;
 
         if (tileImage <= -1 || tileImage is
-            (int)ActionTiles.BlankFiller or            // The blank spacer tile
-            (int)ActionTiles.ConveyerNasty or          // Tile representing conveyer nasties
-            (int)ActionTiles.TunnelLiftTile or
-            (int)ActionTiles.PreferredCoreLocation)    // Tile representing preferred pickup location
+                (int)ActionTiles.BlankFiller or // The blank spacer tile
+                (int)ActionTiles.ConveyerNasty or // Tile representing conveyer nasties
+                (int)ActionTiles.TunnelLiftTile or
+                (int)ActionTiles.PreferredCoreLocation) // Tile representing preferred pickup location
         {
             return;
         }
@@ -1402,7 +1404,7 @@ public class GameScreenCollection : GameComponentBase
         // Avoid the tunnel tiles
         if (tileImage < (int)ActionTiles.AccessForceField)
         {
-            var tiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
+            SpriteCollection tiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
 
             tiles.Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
             tiles.DrawSprite(tileImage, x * _tileWidth, y * _tileHeight, colour);
@@ -1438,7 +1440,7 @@ public class GameScreenCollection : GameComponentBase
 
         _resources.GetSpriteCollection(_graphicsSet.Names.Pickups)
             .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
-        foreach (var pickUp in CurrentGameScreenData.PickUps)
+        foreach (InteractiveItem pickUp in CurrentGameScreenData.PickUps)
         {
             _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite(
                 pickUp.Type, pickUp.XLocation,
@@ -1494,9 +1496,9 @@ public class GameScreenCollection : GameComponentBase
 
     public void DrawUpperLayer(Color colour, GameTime gameTime)
     {
-        for (var y = 0; y < TilesDown; y++)
+        for (int y = 0; y < TilesDown; y++)
         {
-            for (var x = 0; x < TilesAcross; x++)
+            for (int x = 0; x < TilesAcross; x++)
             {
                 DrawUpperTilePatch(x, y, colour, gameTime);
                 DrawTunnelEntrance(x, y, colour, gameTime);
@@ -1520,8 +1522,8 @@ public class GameScreenCollection : GameComponentBase
             return;
         }
 
-        var upperTiles = _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles);
-        var lowerTiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
+        SpriteCollection upperTiles = _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles);
+        SpriteCollection lowerTiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
 
         upperTiles.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
         upperTiles.DrawSprite(
@@ -1543,25 +1545,43 @@ public class GameScreenCollection : GameComponentBase
     /// </remarks>
     private static (int Sprite, int RowOffset)? UpperLayerPatchFor(int tileImage)
     {
-        if (tileImage is ShadowTile1 or ShadowTile2 or ShadowTile3 or ShadowTile4 or
-            ShadowTile5 or ShadowTile6 or ShadowTile7 or ShadowTile8)
+        if (tileImage is ShadowTile1 or
+            ShadowTile2 or
+            ShadowTile3 or
+            ShadowTile4 or
+            ShadowTile5 or
+            ShadowTile6 or
+            ShadowTile7 or
+            ShadowTile8)
         {
             return (ShadowSprite, 1);
         }
 
         if (tileImage is
-            TunnelTiles.LeftMouth1 or TunnelTiles.LeftMouth2 or TunnelTiles.LeftMouth3 or
-            TunnelTiles.LeftMouth4 or TunnelTiles.LeftMouth5 or TunnelTiles.LeftMouth6 or
-            TunnelTiles.LeftMouth7 or TunnelTiles.LeftMouth8 or TunnelTiles.LeftMouth9 or
+            TunnelTiles.LeftMouth1 or
+            TunnelTiles.LeftMouth2 or
+            TunnelTiles.LeftMouth3 or
+            TunnelTiles.LeftMouth4 or
+            TunnelTiles.LeftMouth5 or
+            TunnelTiles.LeftMouth6 or
+            TunnelTiles.LeftMouth7 or
+            TunnelTiles.LeftMouth8 or
+            TunnelTiles.LeftMouth9 or
             TunnelTiles.LeftMouth10)
         {
             return (LeftTunnelMouthSprite, 0);
         }
 
         if (tileImage is
-            TunnelTiles.RightMouth1 or TunnelTiles.RightMouth2 or TunnelTiles.RightMouth3 or
-            TunnelTiles.RightMouth4 or TunnelTiles.RightMouth5 or TunnelTiles.RightMouth6 or
-            TunnelTiles.RightMouth7 or TunnelTiles.RightMouth8 or TunnelTiles.RightMouth9 or
+            TunnelTiles.RightMouth1 or
+            TunnelTiles.RightMouth2 or
+            TunnelTiles.RightMouth3 or
+            TunnelTiles.RightMouth4 or
+            TunnelTiles.RightMouth5 or
+            TunnelTiles.RightMouth6 or
+            TunnelTiles.RightMouth7 or
+            TunnelTiles.RightMouth8 or
+            TunnelTiles.RightMouth9 or
             TunnelTiles.RightMouth10)
         {
             return (RightTunnelMouthSprite, 0);
@@ -1658,11 +1678,11 @@ public class GameScreenCollection : GameComponentBase
     {
         var tilesToReturn = new List<SecondLayerTile>();
 
-        for (var y = 0; y < TilesDown; y++)
+        for (int y = 0; y < TilesDown; y++)
         {
-            for (var x = 0; x < TilesAcross; x++)
+            for (int x = 0; x < TilesAcross; x++)
             {
-                var tileType = _gameScreens[_screenNumber].ScreenTiles[x, y].TileImage;
+                int tileType = _gameScreens[_screenNumber].ScreenTiles[x, y].TileImage;
                 var tiletypeFound = (TileType)tileType;
 
                 if (Enum.IsDefined(typeof(TileType), tiletypeFound))
@@ -1685,7 +1705,7 @@ public class GameScreenCollection : GameComponentBase
 
         var r = new Random((int)DateTime.Now.Ticks);
 
-        var powerUpScreens = ChoosePowerUpScreens(r);
+        List<int> powerUpScreens = ChoosePowerUpScreens(r);
         PlaceScreenObjects(r, powerUpScreens);
 
         var screensContainingCheopsPyramid = new List<GameScreenData>();
@@ -1707,13 +1727,13 @@ public class GameScreenCollection : GameComponentBase
     {
         var powerUpScreens = new List<int>();
 
-        for (var a = 0; a < _pickUpCount; a++)
+        for (int a = 0; a < _pickUpCount; a++)
         {
             // Only place on screens where we can have more than 1 object
-            var screenChosen = -1;
+            int screenChosen = -1;
             while (screenChosen < 0)
             {
-                var temp = r.Next(0, WorldMap.LastScreenNumber);
+                int temp = r.Next(0, WorldMap.LastScreenNumber);
 
                 // Ensure more than one location
                 if (GetPotentialLocations(temp).Count > 1)
@@ -1738,7 +1758,7 @@ public class GameScreenCollection : GameComponentBase
     /// </summary>
     private void PlaceScreenObjects(Random r, List<int> powerUpScreens)
     {
-        for (var a = 0; a < _gameScreens.Length; a++)
+        for (int a = 0; a < _gameScreens.Length; a++)
         {
             // The core screen is seeded differently and is left out of the scatter
             if (a == WorldMap.CoreScreenNumber)
@@ -1748,8 +1768,8 @@ public class GameScreenCollection : GameComponentBase
 
             _gameScreens[a].PickUps = new List<InteractiveItem>();
 
-            var potentialLocations = GetPotentialLocations(a);
-            var placePickup = powerUpScreens.Contains(a);
+            List<InteractiveItem> potentialLocations = GetPotentialLocations(a);
+            bool placePickup = powerUpScreens.Contains(a);
 
             if (potentialLocations.Count > 0)
             {
@@ -1775,7 +1795,7 @@ public class GameScreenCollection : GameComponentBase
         List<InteractiveItem> potentialLocations,
         bool placePickup)
     {
-        var powerUpToSelect = r.Next(potentialLocations.Count);
+        int powerUpToSelect = r.Next(potentialLocations.Count);
         _gameScreens[screenNumber].PowerUp = new InteractiveItem(potentialLocations[powerUpToSelect].XLocation,
             potentialLocations[powerUpToSelect].YLocation, r.Next(8));
 
@@ -1786,10 +1806,10 @@ public class GameScreenCollection : GameComponentBase
         if (placePickup)
         {
             // Now select another location for our pickup
-            var pickUpToSelect = r.Next(potentialLocations.Count);
+            int pickUpToSelect = r.Next(potentialLocations.Count);
 
             // Check to see if this screen has a preferred location
-            var preferredLocation = GetPreferredLocation(screenNumber);
+            InteractiveItem? preferredLocation = GetPreferredLocation(screenNumber);
 
             // Place the item in the preferred locateion
             if (preferredLocation != null)
@@ -1818,7 +1838,7 @@ public class GameScreenCollection : GameComponentBase
         Random r,
         List<InteractiveItem> potentialLocations)
     {
-        var cheopsLocationToSelect = r.Next(potentialLocations.Count);
+        int cheopsLocationToSelect = r.Next(potentialLocations.Count);
         _gameScreens[screenNumber].CheopsPyramid = new InteractiveItem(
             potentialLocations[cheopsLocationToSelect].XLocation,
             potentialLocations[cheopsLocationToSelect].YLocation, 0);
@@ -1840,28 +1860,28 @@ public class GameScreenCollection : GameComponentBase
     /// </summary>
     private void AssignAccessBoothCode(int screenNumber)
     {
-    var leftBooths = GetCoordsOfTiles((int)ActionTiles.AccessBoothLeft, screenNumber);
-    var rightBooths = GetCoordsOfTiles((int)ActionTiles.AccessBoothRight, screenNumber);
-    var accessBooths = leftBooths.Count > 0 ? leftBooths : rightBooths;
+        List<Point> leftBooths = GetCoordsOfTiles((int)ActionTiles.AccessBoothLeft, screenNumber);
+        List<Point> rightBooths = GetCoordsOfTiles((int)ActionTiles.AccessBoothRight, screenNumber);
+        List<Point> accessBooths = leftBooths.Count > 0 ? leftBooths : rightBooths;
 
-    if (accessBooths.Count > 0)
-    {
-        // Ensure we get a unique code
-        string accessCode;
-        do
+        if (accessBooths.Count > 0)
         {
-            accessCode = _randomNumberGenerator.Next(AccessCodeLowest, AccessCodeExclusiveUpperBound).ToString();
-        } while (!CheckAccessCodeValidity(accessCode));
+            // Ensure we get a unique code
+            string accessCode;
+            do
+            {
+                accessCode = _randomNumberGenerator.Next(AccessCodeLowest, AccessCodeExclusiveUpperBound).ToString();
+            } while (!CheckAccessCodeValidity(accessCode));
 
-        _gameScreens[screenNumber].AccessCode = accessCode;
-    }
+            _gameScreens[screenNumber].AccessCode = accessCode;
+        }
     }
 
     private void CollectScreensWithCheopsAndCoreElements(
         List<GameScreenData> screensContainingCheopsPyramid,
         List<GameScreenData> screensContainingCoreElements)
     {
-        for (var a = 0; a < _gameScreens.Length; a++)
+        for (int a = 0; a < _gameScreens.Length; a++)
         {
             // Only add screens with a cheops pyramid assigned
             if (_gameScreens[a].CheopsPyramid != null)
@@ -1872,7 +1892,7 @@ public class GameScreenCollection : GameComponentBase
             // Only add screens with a core element assigned
             if (_gameScreens[a].PickUps.Count > 0)
             {
-                foreach (var pickUp in _gameScreens[a].PickUps)
+                foreach (InteractiveItem pickUp in _gameScreens[a].PickUps)
                 {
                     if ((Collectables)pickUp.Type != Collectables.AccessCard &&
                         (Collectables)pickUp.Type != Collectables.Key)
@@ -1897,7 +1917,7 @@ public class GameScreenCollection : GameComponentBase
     {
         while (screens.Count > maximum)
         {
-            var screen = screens[_randomNumberGenerator.Next(0, screens.Count)];
+            GameScreenData screen = screens[_randomNumberGenerator.Next(0, screens.Count)];
 
             removeFrom(screen);
             screens.Remove(screen);
@@ -1912,17 +1932,17 @@ public class GameScreenCollection : GameComponentBase
     {
         var tempElements = new List<CoreElement>();
 
-        for (var a = 0; a < _elements.GetActiveElements().Count; a++)
+        for (int a = 0; a < _elements.GetActiveElements().Count; a++)
         {
             tempElements.Add(_elements.GetActiveElements()[a]);
         }
 
         // Make a random number of the core elements on the map match what we need
-        var matchNumber = _randomNumberGenerator.Next(2, 6);
+        int matchNumber = _randomNumberGenerator.Next(2, 6);
 
-        for (var a = 0; a < matchNumber; a++)
+        for (int a = 0; a < matchNumber; a++)
         {
-            var elementIndex = _randomNumberGenerator.Next(0, tempElements.Count);
+            int elementIndex = _randomNumberGenerator.Next(0, tempElements.Count);
             screensContainingCoreElements[a].PickUps[0].Type = tempElements[elementIndex].CurrentElement;
             tempElements.Remove(tempElements[elementIndex]);
         }

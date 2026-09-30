@@ -12,8 +12,8 @@ public class TextHelper
     {
         if (character.Length == 1)
         {
-            var ascii = Encoding.ASCII;
-            var encodedBytes = ascii.GetBytes(character);
+            Encoding ascii = Encoding.ASCII;
+            byte[] encodedBytes = ascii.GetBytes(character);
 
             return encodedBytes[0];
         }

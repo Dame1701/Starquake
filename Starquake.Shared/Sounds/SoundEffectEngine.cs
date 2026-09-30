@@ -111,7 +111,7 @@ public class SoundEffectEngine(ContentManager content, Random randomNumberGenera
         if (!paused)
         {
             // kill single instance sounds
-            foreach (var soundEffectInstanceRecord in _singleInstanceSoundEffectInstances)
+            foreach (SoundEffectInstanceRecord soundEffectInstanceRecord in _singleInstanceSoundEffectInstances)
             {
                 if (!soundEffectInstanceRecord.KillOnScreenChange)
                 {
@@ -125,7 +125,7 @@ public class SoundEffectEngine(ContentManager content, Random randomNumberGenera
             }
 
             // kill multi instance sounds
-            foreach (var soundEffectInstanceRecord in _multiInstanceSoundEffectInstances)
+            foreach (SoundEffectInstanceRecord soundEffectInstanceRecord in _multiInstanceSoundEffectInstances)
             {
                 if (!soundEffectInstanceRecord.KillOnScreenChange)
                 {
@@ -141,7 +141,7 @@ public class SoundEffectEngine(ContentManager content, Random randomNumberGenera
         else
         {
             // kill single instance sounds
-            foreach (var soundEffectInstanceRecord in _singleInstanceSoundEffectInstances)
+            foreach (SoundEffectInstanceRecord soundEffectInstanceRecord in _singleInstanceSoundEffectInstances)
             {
                 if (soundEffectInstanceRecord.SoundInstance.State != SoundState.Stopped)
                 {
@@ -150,7 +150,7 @@ public class SoundEffectEngine(ContentManager content, Random randomNumberGenera
             }
 
             // kill multi instance sounds
-            foreach (var soundEffectInstanceRecord in _multiInstanceSoundEffectInstances)
+            foreach (SoundEffectInstanceRecord soundEffectInstanceRecord in _multiInstanceSoundEffectInstances)
             {
                 if (soundEffectInstanceRecord.SoundInstance.State != SoundState.Stopped)
                 {
@@ -162,7 +162,7 @@ public class SoundEffectEngine(ContentManager content, Random randomNumberGenera
 
     public void StopSound(Guid id, SoundFade soundFade)
     {
-        var soundEffectInstanceRecord = _singleInstanceSoundEffectInstances.FirstOrDefault(sfx => sfx.Id == id);
+        SoundEffectInstanceRecord? soundEffectInstanceRecord = _singleInstanceSoundEffectInstances.FirstOrDefault(sfx => sfx.Id == id);
         if (soundEffectInstanceRecord != null)
         {
             if (soundEffectInstanceRecord.SoundInstance.State != SoundState.Playing)
@@ -205,7 +205,7 @@ public class SoundEffectEngine(ContentManager content, Random randomNumberGenera
             return;
         }
 
-        foreach (var t in _multiInstanceSoundEffectInstances)
+        foreach (SoundEffectInstanceRecord t in _multiInstanceSoundEffectInstances)
         {
             if (t.Id != id)
             {
@@ -231,7 +231,7 @@ public class SoundEffectEngine(ContentManager content, Random randomNumberGenera
 
     public Guid PlaySound(string soundName, float volume, bool looped)
     {
-        var singleInstance = FindSingleInstance(soundName);
+        SoundEffectInstanceRecord? singleInstance = FindSingleInstance(soundName);
 
         if (singleInstance != null)
         {
@@ -249,7 +249,7 @@ public class SoundEffectEngine(ContentManager content, Random randomNumberGenera
     /// </summary>
     private SoundEffectInstanceRecord? FindSingleInstance(string soundName)
     {
-        foreach (var t in _singleInstanceSoundEffectInstances)
+        foreach (SoundEffectInstanceRecord t in _singleInstanceSoundEffectInstances)
         {
             if (t.SoundName == soundName)
             {
@@ -295,14 +295,14 @@ public class SoundEffectEngine(ContentManager content, Random randomNumberGenera
     private Guid PlayMultiInstance(string soundName, float volume)
     {
         // Create a new instance, but maybe keep a list of all instances created so we can put a max seal of the number of instances per sound allowed
-        if (!_multiInstanceSoundEffects.TryGetValue(soundName, out var misxf) || misxf == null)
+        if (!_multiInstanceSoundEffects.TryGetValue(soundName, out MultiInstanceSoundEffect? misxf) || misxf == null)
         {
             return Guid.Empty;
         }
 
         var playing = new List<SoundEffectInstanceRecord>();
 
-        foreach (var t in _multiInstanceSoundEffectInstances)
+        foreach (SoundEffectInstanceRecord t in _multiInstanceSoundEffectInstances)
         {
             if (t.SoundName == soundName)
             {
@@ -310,7 +310,7 @@ public class SoundEffectEngine(ContentManager content, Random randomNumberGenera
             }
         }
 
-        var soundToPlay = playing.Count > 1 && playing.Count >= misxf.MaxInstances
+        SoundEffectInstanceRecord soundToPlay = playing.Count > 1 && playing.Count >= misxf.MaxInstances
             ? StealLongestPlaying(playing)
             : CreateNewInstance(soundName, misxf);
 
@@ -327,9 +327,9 @@ public class SoundEffectEngine(ContentManager content, Random randomNumberGenera
     /// </summary>
     private static SoundEffectInstanceRecord StealLongestPlaying(List<SoundEffectInstanceRecord> playing)
     {
-        var soundToPlay = playing[0];
+        SoundEffectInstanceRecord soundToPlay = playing[0];
 
-        for (var a = 1; a < playing.Count; a++)
+        for (int a = 1; a < playing.Count; a++)
         {
             if (playing[a].PlayStart < soundToPlay.PlayStart)
             {
@@ -370,7 +370,7 @@ public class SoundEffectEngine(ContentManager content, Random randomNumberGenera
 
     private SoundState GetSoundState(Guid id)
     {
-        var soundEffectInstanceRecord = _singleInstanceSoundEffectInstances
+        SoundEffectInstanceRecord? soundEffectInstanceRecord = _singleInstanceSoundEffectInstances
             .FirstOrDefault(sfx => sfx.Id == id);
 
         return soundEffectInstanceRecord != null ? soundEffectInstanceRecord.SoundInstance.State : SoundState.Stopped;

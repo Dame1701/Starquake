@@ -2,10 +2,10 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System.Collections.Generic;
 using System;
-using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.Display;
 using Starquake.Structure;
 
@@ -88,7 +88,7 @@ public class ScreenEffectEngine : GameComponentBase
 
     public void SelectRenderViewPort(string name, bool clearScreen = true)
     {
-        var selectedViewPort = GetRenderViewPort(name);
+        RenderViewPort selectedViewPort = GetRenderViewPort(name);
 
         selectedViewPort.Active = true;
         _graphicsDeviceManager.GraphicsDevice.SetRenderTarget(selectedViewPort.RenderTarget);
@@ -101,14 +101,14 @@ public class ScreenEffectEngine : GameComponentBase
 
     public void MoveViewPort(string name, int xOffset, int yOffset)
     {
-        var viewPort = GetRenderViewPort(name);
+        RenderViewPort viewPort = GetRenderViewPort(name);
         viewPort.XPos = viewPort.MasterXPos + xOffset;
         viewPort.YPos = viewPort.MasterYPos + yOffset;
     }
 
     private RenderViewPort? FindRenderViewPort(string name)
     {
-        foreach (var renderViewPort in _renderViewPorts)
+        foreach (RenderViewPort renderViewPort in _renderViewPorts)
         {
             if (renderViewPort.Name.ToLower() == name.ToLower())
             {
@@ -126,19 +126,19 @@ public class ScreenEffectEngine : GameComponentBase
     public void ExecuteScreenEffect(ScreenEffectType screenEffectToExecute, int effectSpeed, int effectDuration, bool haltBlobAndNasties)
     {
         // Only allow one effect to execute at a time - may need to implement an overrride system....
-        foreach (var screenEffect in _screenEffects)
+        foreach (ScreenEffectBase screenEffect in _screenEffects)
         {
             screenEffect.Reset();
             ActiveScreenEffect = null;
         }
 
-        foreach (var screenEffect in _screenEffects)
+        foreach (ScreenEffectBase screenEffect in _screenEffects)
         {
             if (screenEffect.ScreenEffectType == screenEffectToExecute)
             {
                 ActiveScreenEffect = screenEffect;
                 ActiveScreenEffect.TriggerEffect(GetRenderViewPort("GameArea"), effectSpeed, effectDuration);
-                this.HaltBlobAndNasties = haltBlobAndNasties;
+                HaltBlobAndNasties = haltBlobAndNasties;
                 break;
             }
         }
@@ -166,7 +166,7 @@ public class ScreenEffectEngine : GameComponentBase
         // Clear the screen
         _graphicsDeviceManager.GraphicsDevice.Clear(_presentation.ScreenClearColour);
 
-        foreach (var renderViewPort in _renderViewPorts)
+        foreach (RenderViewPort renderViewPort in _renderViewPorts)
         {
             if (renderViewPort.Active)
             {
@@ -174,7 +174,7 @@ public class ScreenEffectEngine : GameComponentBase
                 if (renderViewPort.Name.ToLower() == "gamearea")
                 {
                     // Run the alternative renderer if we need to
-                    var useDefaultRenderer = true;
+                    bool useDefaultRenderer = true;
 
                     if (ActiveScreenEffect != null)
                     {

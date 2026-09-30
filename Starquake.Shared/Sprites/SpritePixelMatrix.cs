@@ -17,7 +17,7 @@ public class SpritePixelMatrix
 
         Matrix = new SpritePixel[size];
 
-        for (var a = 0; a < Matrix.Length; a++)
+        for (int a = 0; a < Matrix.Length; a++)
         {
             if (Matrix[a] == null)
             {
@@ -35,7 +35,7 @@ public class SpritePixelMatrix
     {
         get
         {
-            foreach (var matrix in Matrix)
+            foreach (SpritePixel matrix in Matrix)
             {
                 if (matrix.IsOn)
                 {

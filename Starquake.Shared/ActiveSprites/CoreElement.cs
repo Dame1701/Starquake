@@ -3,13 +3,12 @@
 // ---------------------------------------------------------
 // -
 using System;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.Animations;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
-using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Particles;
 using Starquake.Structure;
@@ -56,6 +55,7 @@ public class CoreElement
     ///     gaps without disappearing altogether.
     /// </summary>
     private const int MissingElementAlpha = 50;
+    private readonly IStandardParticleEffect _coreReplacementEffect;
 
 
     private readonly FloatSubtractor _currentElementDownScaler;
@@ -72,7 +72,6 @@ public class CoreElement
     private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
     private readonly IntegerSubtractor _screenFlashFader;
-    private readonly IStandardParticleEffect _coreReplacementEffect;
 
     private bool _elementReplacementStarted;
 
@@ -95,8 +94,8 @@ public class CoreElement
         _screenFlashFader = new IntegerSubtractor(ColourLevels.Full, ColourLevels.None, ScreenFlashFadeStep, true);
 
         ElementState = CoreElementState.Missing;
-        this.CurrentElement = currentElement;
-        this.FinalElement = finalElement;
+        CurrentElement = currentElement;
+        FinalElement = finalElement;
         _resources = resources;
         _graphicsSet = graphicsSet;
         _presentation = presentation;

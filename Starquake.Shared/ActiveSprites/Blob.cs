@@ -2,11 +2,11 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework;
 using Starquake.Animations;
 using Starquake.Collisions;
 using Starquake.Constants;
@@ -25,18 +25,6 @@ namespace Starquake.ActiveSprites;
 
 public class Blob : GameComponentBase
 {
-    private readonly BlobDeathAnimation _blobKiller;
-    private readonly BreakableBridges _breakableBridges;
-    private readonly ContentManager _contentManager;
-    private readonly GameScreenCollection _gameScreens;
-    private readonly GraphicsDeviceManager _graphicsDeviceManager;
-    private readonly GraphicsSet _graphicsSet;
-    private readonly Random _randomNumberGenerator;
-    private readonly ResourceManager _resources;
-    private readonly ScreenDirectory _screenDirectory;
-    private readonly ScreenEffectEngine _screenEffects;
-    private readonly GameSession _session;
-    private readonly StatusPanel _statusPanel;
 
 
     /// <summary>
@@ -274,14 +262,35 @@ public class Blob : GameComponentBase
 
     /// <inheritdoc cref="TunnelExitLeftXOffset" />
     private const int TunnelExitYOffset = 32;
-
-    private readonly JumpPlatforms _blobJumpPlatformEngine;
-    private int _blobAlarmSoundCounter;
     private readonly Animation _blobAnimFire1;
     private readonly Animation _blobAnimFire2;
 
     private readonly Animation _blobAnimLeft;
     private readonly Animation _blobAnimRight;
+
+    private readonly BlobFire _blobFire;
+    private readonly IPositionalTriggerParticleEffect _blobFireSparks;
+    private readonly IStandardParticleEffect _blobFireTrail;
+
+    private readonly JumpPlatforms _blobJumpPlatformEngine;
+    private readonly BlobDeathAnimation _blobKiller;
+
+    private readonly Animation _blobShuttleAnim;
+
+    private readonly IStandardParticleEffect _blobTeleporterBeam;
+    private readonly BreakableBridges _breakableBridges;
+    private readonly ContentManager _contentManager;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsDeviceManager _graphicsDeviceManager;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
+    private readonly ScreenDirectory _screenDirectory;
+    private readonly ScreenEffectEngine _screenEffects;
+    private readonly GameSession _session;
+    private readonly StatusPanel _statusPanel;
+    private readonly List<ResetTile> _tilesToReset = [];
+    private int _blobAlarmSoundCounter;
 
     private bool _blobCanFire = true;
     private int _blobDistanceFallen;
@@ -291,11 +300,7 @@ public class Blob : GameComponentBase
 
     private int _blobFallSpeed = BlobInitialFallSpeed;
     private Guid _blobFallsSoundId;
-
-    private readonly BlobFire _blobFire;
     private int _blobFireFade;
-    private readonly IPositionalTriggerParticleEffect _blobFireSparks;
-    private readonly IStandardParticleEffect _blobFireTrail;
 
     private int _blobFrameOnEntry;
     private bool _blobOnShuttle;
@@ -307,11 +312,7 @@ public class Blob : GameComponentBase
     private float _blobScale = 1f;
 
     private Point _blobScreenEntryLocation;
-
-    private readonly Animation _blobShuttleAnim;
     private Direction _blobsLastAnimDirection = Direction.None;
-
-    private readonly IStandardParticleEffect _blobTeleporterBeam;
     private int _blobTotalDistanceFallen;
     private bool _blobTouched;
 
@@ -337,7 +338,6 @@ public class Blob : GameComponentBase
     private TileDetected? _tileBelowBlob;
     private TileDetected? _tileLeftBlob;
     private TileDetected? _tileRightBlob;
-    private readonly List<ResetTile> _tilesToReset = [];
 
     public Blob(
         ResourceManager resources,
@@ -412,7 +412,7 @@ public class Blob : GameComponentBase
         BlobInventory = new Collectables[BlobMaxItemsHeld];
 
         // Clear inventory items
-        for (var a = 0; a < BlobInventory.Length; a++)
+        for (int a = 0; a < BlobInventory.Length; a++)
         {
             BlobInventory[a] = Collectables.None;
         }
@@ -515,7 +515,7 @@ public class Blob : GameComponentBase
 
     public override void Update(GameTime gameTime)
     {
-        var changedScreens = false;
+        bool changedScreens = false;
 
         switch (BlobsState)
         {
@@ -577,7 +577,7 @@ public class Blob : GameComponentBase
         UpdateFire();
         StopFireEffects();
 
-        var changedScreens = ChangeScreenIfOffEdge();
+        bool changedScreens = ChangeScreenIfOffEdge();
 
         DetectSurroundingTiles();
         DetectShuttlePad();
@@ -647,7 +647,7 @@ public class Blob : GameComponentBase
                 _blobAnimLeft.GetNextFrame();
             }
 
-            var amountToMove = _gameScreens.CheckCollision(Direction.Left, _blobXPos, _blobYPos,
+            int amountToMove = _gameScreens.CheckCollision(Direction.Left, _blobXPos, _blobYPos,
                 BlobWidth, BlobHeight, BlobHSpeed, true);
             if (amountToMove > 0)
             {
@@ -683,7 +683,7 @@ public class Blob : GameComponentBase
                 _blobAnimRight.GetNextFrame();
             }
 
-            var amountToMove = _gameScreens.CheckCollision(Direction.Right, _blobXPos, _blobYPos,
+            int amountToMove = _gameScreens.CheckCollision(Direction.Right, _blobXPos, _blobYPos,
                 BlobWidth, BlobHeight, BlobHSpeed, true);
             if (amountToMove > 0)
             {
@@ -747,7 +747,7 @@ public class Blob : GameComponentBase
                 {
                     if (!_blobOnShuttlePad)
                     {
-                        var temp = _blobJumpPlatformEngine.GetNewJumpPlatform(_blobXPos, _blobYPos,
+                        int temp = _blobJumpPlatformEngine.GetNewJumpPlatform(_blobXPos, _blobYPos,
                             BlobWidth,
                             BlobHeight, true);
 
@@ -764,7 +764,9 @@ public class Blob : GameComponentBase
                                 .PlaySound("BlobJumps", 0.3f, false);
 
                             if (OnBlobActionRaised != null)
+                            {
                                 OnBlobActionRaised(BlobAction.LaidPlatform, null);
+                            }
                         }
                     }
                 }
@@ -789,7 +791,7 @@ public class Blob : GameComponentBase
 
     private void AccessInventory()
     {
-        var accessingCheops = false;
+        bool accessingCheops = false;
         if (_gameScreens.CurrentGameScreenData.CheopsPyramid != null)
         {
             if (CollisionDetection.Check(
@@ -809,8 +811,8 @@ public class Blob : GameComponentBase
         }
 
         // Ensure Blob isn't going through a force field
-        var inAccessForceField = false;
-        var forceFieldTile = _gameScreens.CheckTileByObject(Direction.None, _blobXPos,
+        bool inAccessForceField = false;
+        TileDetected? forceFieldTile = _gameScreens.CheckTileByObject(Direction.None, _blobXPos,
             _blobYPos, BlobWidth, BlobHeight, 0);
 
         if (forceFieldTile is { TileNumber: (int)ActionTiles.AccessForceField })
@@ -839,7 +841,7 @@ public class Blob : GameComponentBase
 
                     _inventoryAccessed = true;
 
-                    var itemDropped = DropLastHeldItem();
+                    InteractiveItem? itemDropped = DropLastHeldItem();
                     ShuffleInventoryAlong();
                     PickUpItemUnderfoot(itemDropped);
 
@@ -878,9 +880,9 @@ public class Blob : GameComponentBase
             return null;
         }
 
-        var itemXPos = _blobXPos / _gameScreens.CollAreaWidth *
+        int itemXPos = _blobXPos / _gameScreens.CollAreaWidth *
                        _gameScreens.CollAreaWidth;
-        var itemYPos = _blobYPos / _gameScreens.CollAreaHeight *
+        int itemYPos = _blobYPos / _gameScreens.CollAreaHeight *
                        _gameScreens.CollAreaHeight;
 
         var droppedItem = new InteractiveItem(itemXPos, itemYPos, (int)BlobInventory[^1]);
@@ -895,7 +897,7 @@ public class Blob : GameComponentBase
 
     private void ShuffleInventoryAlong()
     {
-        for (var b = BlobInventory.Length - 1; b > 0; b--)
+        for (int b = BlobInventory.Length - 1; b > 0; b--)
         {
             BlobInventory[b] = BlobInventory[b - 1];
             BlobInventory[b - 1] = Collectables.None;
@@ -906,7 +908,7 @@ public class Blob : GameComponentBase
     {
         if (_gameScreens.CurrentGameScreenData.PickUps != null)
         {
-            for (var a = 0; a < _gameScreens.CurrentGameScreenData.PickUps.Count; a++)
+            for (int a = 0; a < _gameScreens.CurrentGameScreenData.PickUps.Count; a++)
             {
                 if (!CollisionDetection.Check(
                         _blobXPos,
@@ -922,9 +924,9 @@ public class Blob : GameComponentBase
                 }
 
                 // Make sure it's not what we just dropped....
-                var pickupItem = !(itemDropped != null &&
-                                   itemDropped ==
-                                   _gameScreens.CurrentGameScreenData.PickUps[a]);
+                bool pickupItem = !(itemDropped != null &&
+                                    itemDropped ==
+                                    _gameScreens.CurrentGameScreenData.PickUps[a]);
 
                 if (!pickupItem)
                 {
@@ -978,7 +980,7 @@ public class Blob : GameComponentBase
     {
         if (!_inTunnelLift) // Can't fall if we are in a tunnel lift
         {
-            var falling = _gameScreens.CheckCollision(Direction.Down, _blobXPos, _blobYPos,
+            int falling = _gameScreens.CheckCollision(Direction.Down, _blobXPos, _blobYPos,
                 BlobWidth, BlobHeight, _blobFallSpeed, true);
 
             if (falling > 0)
@@ -1001,7 +1003,7 @@ public class Blob : GameComponentBase
             }
 
             // Fall - arrrgh!!!
-            var fallDistance = _gameScreens.CheckCollision(Direction.Down, _blobXPos, _blobYPos,
+            int fallDistance = _gameScreens.CheckCollision(Direction.Down, _blobXPos, _blobYPos,
                 BlobWidth, BlobHeight, _blobFallSpeed, true);
 
             if (fallDistance > 0 && _blobTotalDistanceFallen > FallSoundDistance)
@@ -1033,7 +1035,7 @@ public class Blob : GameComponentBase
     {
         if (BlobsControl.MovedRight())
         {
-            for (var a = 0; a < fallDistance; a++)
+            for (int a = 0; a < fallDistance; a++)
             {
                 if (_gameScreens.CheckCollision(Direction.Down, _blobXPos + BlobWidth,
                         _blobYPos + a, BlobWidth + 1, BlobHeight, 1, true) == 0)
@@ -1044,7 +1046,9 @@ public class Blob : GameComponentBase
                         fallDistance = a;
 
                         if (fallDistance == 0)
+                        {
                             fallDistance = 1;
+                        }
 
                         break;
                     }
@@ -1054,7 +1058,7 @@ public class Blob : GameComponentBase
 
         if (BlobsControl.MovedLeft())
         {
-            for (var a = 0; a < fallDistance; a++)
+            for (int a = 0; a < fallDistance; a++)
             {
                 if (_gameScreens.CheckCollision(Direction.Down, _blobXPos - BlobWidth,
                         _blobYPos + a, BlobWidth + 1, BlobHeight, 1, true) == 0)
@@ -1065,7 +1069,9 @@ public class Blob : GameComponentBase
                         fallDistance = a;
 
                         if (fallDistance == 0)
+                        {
                             fallDistance = 1;
+                        }
 
                         break;
                     }
@@ -1143,7 +1149,7 @@ public class Blob : GameComponentBase
     ///     collectable dies on the spot.
     /// </summary>
     private int? PointBlankReach()
-        => CheckForBlobCollisionWithObject(new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight), out var offset)
+        => CheckForBlobCollisionWithObject(new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight), out int offset)
             ? offset + BlobWidth / 2
             : null;
 
@@ -1167,7 +1173,7 @@ public class Blob : GameComponentBase
     /// </summary>
     private bool ChangeScreenIfOffEdge()
     {
-        var changedScreens = ChangeScreenOffLeftEdge();
+        bool changedScreens = ChangeScreenOffLeftEdge();
 
         changedScreens |= ChangeScreenOffRightEdge();
         changedScreens |= ChangeScreenOffTopEdge();
@@ -1194,7 +1200,7 @@ public class Blob : GameComponentBase
 
     private bool ChangeScreenOffRightEdge()
     {
-        var blobRightEdge = _blobXPos + _resources
+        int blobRightEdge = _blobXPos + _resources
             .GetSpriteCollection(_graphicsSet.Names.BlobSprites).SpriteWidth;
 
         if (blobRightEdge <= _gameScreens.ScreenWidth ||
@@ -1371,12 +1377,18 @@ public class Blob : GameComponentBase
 
     private bool DetectLeftHandTunnel()
     {
-        var changedScreens = false;
+        bool changedScreens = false;
 
         if (_tileLeftBlob?.TileNumber is
-            TunnelTiles.LeftMouth1 or TunnelTiles.LeftMouth2 or TunnelTiles.LeftMouth3 or
-            TunnelTiles.LeftMouth4 or TunnelTiles.LeftMouth5 or TunnelTiles.LeftMouth6 or
-            TunnelTiles.LeftMouth7 or TunnelTiles.LeftMouth8 or TunnelTiles.LeftMouth9 or
+            TunnelTiles.LeftMouth1 or
+            TunnelTiles.LeftMouth2 or
+            TunnelTiles.LeftMouth3 or
+            TunnelTiles.LeftMouth4 or
+            TunnelTiles.LeftMouth5 or
+            TunnelTiles.LeftMouth6 or
+            TunnelTiles.LeftMouth7 or
+            TunnelTiles.LeftMouth8 or
+            TunnelTiles.LeftMouth9 or
             TunnelTiles.LeftMouth10)
         {
             if (_tileLeftBlob.XPosition <= 32 && _tileLeftBlob.YPosition == 32)
@@ -1401,12 +1413,18 @@ public class Blob : GameComponentBase
 
     private bool DetectRightHandTunnel()
     {
-        var changedScreens = false;
+        bool changedScreens = false;
 
         if (_tileRightBlob?.TileNumber is
-            TunnelTiles.RightMouth1 or TunnelTiles.RightMouth2 or TunnelTiles.RightMouth3 or
-            TunnelTiles.RightMouth4 or TunnelTiles.RightMouth5 or TunnelTiles.RightMouth6 or
-            TunnelTiles.RightMouth7 or TunnelTiles.RightMouth8 or TunnelTiles.RightMouth9 or
+            TunnelTiles.RightMouth1 or
+            TunnelTiles.RightMouth2 or
+            TunnelTiles.RightMouth3 or
+            TunnelTiles.RightMouth4 or
+            TunnelTiles.RightMouth5 or
+            TunnelTiles.RightMouth6 or
+            TunnelTiles.RightMouth7 or
+            TunnelTiles.RightMouth8 or
+            TunnelTiles.RightMouth9 or
             TunnelTiles.RightMouth10)
         {
             if (_tileRightBlob.XPosition >= 32 && _tileRightBlob.YPosition == 32)
@@ -1459,8 +1477,10 @@ public class Blob : GameComponentBase
         {
             switch (_tileAboveBlob.TileNumber)
             {
-                case (int)ActionTiles.TunnelLiftShaft1 or (int)ActionTiles.TunnelLiftShaft2 or
-                    (int)ActionTiles.TunnelLiftTile or (int)ActionTiles.TunnelLiftShaft3:
+                case (int)ActionTiles.TunnelLiftShaft1 or
+                    (int)ActionTiles.TunnelLiftShaft2 or
+                    (int)ActionTiles.TunnelLiftTile or
+                    (int)ActionTiles.TunnelLiftShaft3:
                 {
                     if (_tileAboveBlob.XPosition == 32)
                     {
@@ -1474,7 +1494,8 @@ public class Blob : GameComponentBase
 
                     break;
                 }
-                case (int)ActionTiles.TunnelLiftTop1 or (int)ActionTiles.TunnelLiftTop2 or
+                case (int)ActionTiles.TunnelLiftTop1 or
+                    (int)ActionTiles.TunnelLiftTop2 or
                     (int)ActionTiles.TunnelLiftTop3:
                 {
                     if (_tileAboveBlob.YPosition == 96)
@@ -1489,9 +1510,10 @@ public class Blob : GameComponentBase
 
         if (_inTunnelLift)
         {
-            var moveBlob = true;
+            bool moveBlob = true;
             if (_tileAboveBlob?.TileNumber is (int)ActionTiles.TunnelLiftShaft1 or
-                (int)ActionTiles.TunnelLiftShaft2 or (int)ActionTiles.TunnelLiftShaft3)
+                (int)ActionTiles.TunnelLiftShaft2 or
+                (int)ActionTiles.TunnelLiftShaft3)
             {
                 if (_tileAboveBlob.YPosition == 96)
                 {
@@ -1534,7 +1556,7 @@ public class Blob : GameComponentBase
 
     private void CheckSpikes()
     {
-        var tileIntersectingBlob =
+        TileDetected? tileIntersectingBlob =
             _gameScreens.CheckTileByObject(Direction.None, _blobXPos, _blobYPos, BlobWidth,
                 BlobHeight, 0);
 
@@ -1674,9 +1696,13 @@ public class Blob : GameComponentBase
                 _blobFallSpeed = BlobInitialFallSpeed;
 
                 if (_blobOnShuttle)
+                {
                     BlobHeight = BlobHeightOnShuttle;
+                }
                 else
+                {
                     BlobHeight = SpriteMetrics.SpriteHeight;
+                }
             }
 
             _resetBlobToScreenEntryPoint = false;
@@ -1705,9 +1731,9 @@ public class Blob : GameComponentBase
 
     private void UnstickFromEdge(Direction edge)
     {
-        var caughtOn = EdgeProbe(edge);
-        var oppositeEdge = EdgeProbe(OppositeOf(edge));
-        var push = PushAwayFrom(edge);
+        Rectangle caughtOn = EdgeProbe(edge);
+        Rectangle oppositeEdge = EdgeProbe(OppositeOf(edge));
+        Point push = PushAwayFrom(edge);
 
         if (!IsInsideScenery(caughtOn) || IsInsideScenery(oppositeEdge))
         {
@@ -1715,7 +1741,7 @@ public class Blob : GameComponentBase
         }
 
         // Walk the probe away from the edge until it comes free, and move him that far
-        var distanceToMove = 0;
+        int distanceToMove = 0;
 
         while (IsInsideScenery(new Rectangle(
                    caughtOn.X + push.X * distanceToMove,
@@ -1792,9 +1818,9 @@ public class Blob : GameComponentBase
         {
             if (_directionGoingThroughTunnel == Direction.Left)
             {
-                for (var a = TunnelTiles.RightMouth1; a <= TunnelTiles.LastMouth; a += TunnelTiles.MouthStride)
+                for (int a = TunnelTiles.RightMouth1; a <= TunnelTiles.LastMouth; a += TunnelTiles.MouthStride)
                 {
-                    var tiles = _gameScreens.GetCoordsOfTiles(a);
+                    List<Point> tiles = _gameScreens.GetCoordsOfTiles(a);
 
                     if (tiles is not { Count: 1 })
                     {
@@ -1808,9 +1834,9 @@ public class Blob : GameComponentBase
             }
             else if (_directionGoingThroughTunnel == Direction.Right)
             {
-                for (var a = TunnelTiles.FirstMouth; a <= TunnelTiles.LastMouth + 1; a += TunnelTiles.MouthStride)
+                for (int a = TunnelTiles.FirstMouth; a <= TunnelTiles.LastMouth + 1; a += TunnelTiles.MouthStride)
                 {
-                    var tiles = _gameScreens.GetCoordsOfTiles(a);
+                    List<Point> tiles = _gameScreens.GetCoordsOfTiles(a);
 
                     if (tiles is not { Count: 1 })
                     {
@@ -1826,13 +1852,15 @@ public class Blob : GameComponentBase
             _directionGoingThroughTunnel = Direction.None;
         }
 
-        foreach (var t in _tilesToReset)
+        foreach (ResetTile t in _tilesToReset)
         {
-            var screenTiles = _gameScreens.GetGameScreen(t.ScreenNumber).ScreenTiles;
+            ScreenTile[,]? screenTiles = _gameScreens.GetGameScreen(t.ScreenNumber).ScreenTiles;
             if (screenTiles != null)
+            {
                 screenTiles[
                     t.TileToReset.MapXPosition,
                     t.TileToReset.MapYPosition].TileImage = t.TileToReset.TileNumber;
+            }
         }
 
         _tilesToReset.Clear();
@@ -1895,15 +1923,21 @@ public class Blob : GameComponentBase
             }
 
             if (_blobEnergyDrainCounter > 0)
+            {
                 _blobEnergyDrainCounter -= EnergyDrainFadeStep;
+            }
 
             if (_blobEnergyDrainCounter < 0)
+            {
                 _blobEnergyDrainCounter = 0;
+            }
         }
         else
         {
             if (_blobEnergyDrainCounter < ColourLevels.Full)
+            {
                 _blobEnergyDrainCounter += EnergyDrainFadeStep;
+            }
 
             if (_blobEnergyDrainCounter > ColourLevels.Full)
             {
@@ -2059,8 +2093,8 @@ public class Blob : GameComponentBase
         _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites)
             .Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
 
-        var temp = _blobScale - OverloadFlareFirstScale;
-        for (var a = 0; a < OverloadFlareCopies; a++)
+        float temp = _blobScale - OverloadFlareFirstScale;
+        for (int a = 0; a < OverloadFlareCopies; a++)
         {
             if (temp >= 0f)
             {
@@ -2115,7 +2149,7 @@ public class Blob : GameComponentBase
             temp.Add(_gameScreens.CurrentGameScreenData.CheopsPyramid);
         }
 
-        foreach (var t in _gameScreens.CurrentGameScreenData.PickUps)
+        foreach (InteractiveItem t in _gameScreens.CurrentGameScreenData.PickUps)
         {
             temp.Add(t);
         }
@@ -2132,7 +2166,7 @@ public class Blob : GameComponentBase
     {
         offset = 0;
 
-        foreach (var t in GetCollisionObjects())
+        foreach (InteractiveItem t in GetCollisionObjects())
         {
             if (!CollisionDetection.Check(blobsPosition, new Rectangle(t.XLocation, t.YLocation, SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight)))
             {

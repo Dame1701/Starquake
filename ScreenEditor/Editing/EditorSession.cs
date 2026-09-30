@@ -36,10 +36,6 @@ public sealed class EditorSession : ViewModelBase
 
     private int _currentScreen;
 
-    private EditorDocument _document;
-
-    private HashSet<int>? _tilesInUse;
-
     private string _hoverStatus = string.Empty;
 
     private double _paletteTileWidth = 64;
@@ -58,6 +54,8 @@ public sealed class EditorSession : ViewModelBase
 
     private string _tileFilter = string.Empty;
 
+    private HashSet<int>? _tilesInUse;
+
     private EditorTool _tool = EditorTool.Paint;
 
     private bool _usedTilesOnly;
@@ -66,23 +64,13 @@ public sealed class EditorSession : ViewModelBase
 
     public EditorSession()
     {
-        _document = EditorDocument.CreateEmpty();
-        AttachDocument(_document);
+        Document = EditorDocument.CreateEmpty();
+        AttachDocument(Document);
     }
-
-    /// <summary>
-    ///     Raised when a view's picture of the map is no longer accurate and needs drawing again.
-    /// </summary>
-    public event EventHandler? Invalidated;
-
-    /// <summary>
-    ///     Raised when the map itself has been swapped out, rather than merely edited.
-    /// </summary>
-    public event EventHandler? DocumentReplaced;
 
     public UndoStack Undo { get; } = new();
 
-    public EditorDocument Document => _document;
+    public EditorDocument Document { get; private set; }
 
     public TileSheet? Sheet
     {
@@ -97,7 +85,7 @@ public sealed class EditorSession : ViewModelBase
         get => _currentScreen;
         set
         {
-            var clamped = Math.Clamp(value, 0, _document.Screens.Length - 1);
+            int clamped = Math.Clamp(value, 0, Document.Screens.Length - 1);
             if (clamped == _currentScreen)
             {
                 return;
@@ -123,7 +111,7 @@ public sealed class EditorSession : ViewModelBase
     {
         get
         {
-            var description = "Screen " + _currentScreen + "  ·  column " + ScreenColumn + ", row " + ScreenRow;
+            string description = "Screen " + _currentScreen + "  ·  column " + ScreenColumn + ", row " + ScreenRow;
 
             return _currentScreen switch
             {
@@ -262,11 +250,21 @@ public sealed class EditorSession : ViewModelBase
 
     public bool CanPaste => _clipboard is not null;
 
+    /// <summary>
+    ///     Raised when a view's picture of the map is no longer accurate and needs drawing again.
+    /// </summary>
+    public event EventHandler? Invalidated;
+
+    /// <summary>
+    ///     Raised when the map itself has been swapped out, rather than merely edited.
+    /// </summary>
+    public event EventHandler? DocumentReplaced;
+
     public void SetDocument(EditorDocument document)
     {
-        DetachDocument(_document);
+        DetachDocument(Document);
 
-        _document = document;
+        Document = document;
         AttachDocument(document);
 
         Undo.Clear();
@@ -288,7 +286,7 @@ public sealed class EditorSession : ViewModelBase
         Sheet?.Dispose();
         Sheet = sheet;
 
-        _document.EnsureCollisionCapacity(sheet.TileCount);
+        Document.EnsureCollisionCapacity(sheet.TileCount);
 
         if (!sheet.Contains(_selectedTile))
         {
@@ -328,20 +326,20 @@ public sealed class EditorSession : ViewModelBase
                 break;
 
             case EditorTool.Pick:
-                SelectedTile = _document.GetTile(_currentScreen, x, y);
+                SelectedTile = Document.GetTile(_currentScreen, x, y);
                 break;
         }
     }
 
     private void PaintTile(int x, int y, int tileImage)
     {
-        var existing = _document.GetTile(_currentScreen, x, y);
+        int existing = Document.GetTile(_currentScreen, x, y);
         if (existing == tileImage)
         {
             return;
         }
 
-        _document.SetTile(_currentScreen, x, y, tileImage);
+        Document.SetTile(_currentScreen, x, y, tileImage);
         Undo.Record(new TileEdit(_currentScreen, x, y, existing, tileImage));
     }
 
@@ -351,7 +349,7 @@ public sealed class EditorSession : ViewModelBase
     /// </summary>
     private void FloodFill(int x, int y, int tileImage)
     {
-        var target = _document.GetTile(_currentScreen, x, y);
+        int target = Document.GetTile(_currentScreen, x, y);
         if (target == tileImage)
         {
             return;
@@ -362,11 +360,11 @@ public sealed class EditorSession : ViewModelBase
 
         while (pending.Count > 0)
         {
-            var (cellX, cellY) = pending.Pop();
+            (int cellX, int cellY) = pending.Pop();
 
             if (cellX < 0 || cellY < 0 ||
                 cellX >= TileMetrics.TilesAcross || cellY >= TileMetrics.TilesDown ||
-                _document.GetTile(_currentScreen, cellX, cellY) != target)
+                Document.GetTile(_currentScreen, cellX, cellY) != target)
             {
                 continue;
             }
@@ -382,13 +380,13 @@ public sealed class EditorSession : ViewModelBase
 
     public void ToggleCollision(int tileImage, int cellX, int cellY)
     {
-        var solid = !_document.IsSolid(tileImage, cellX, cellY);
+        bool solid = !Document.IsSolid(tileImage, cellX, cellY);
 
-        _document.SetSolid(tileImage, cellX, cellY, solid);
+        Document.SetSolid(tileImage, cellX, cellY, solid);
         Undo.Record(new CollisionEdit(tileImage, cellX, cellY, solid));
     }
 
-    public void CopyScreen() => _clipboard = _document.CaptureScreen(_currentScreen);
+    public void CopyScreen() => _clipboard = Document.CaptureScreen(_currentScreen);
 
     public void PasteScreen()
     {
@@ -402,7 +400,7 @@ public sealed class EditorSession : ViewModelBase
 
     public void ClearScreen()
     {
-        var blank = new int[TileMetrics.TilesAcross * TileMetrics.TilesDown];
+        int[] blank = new int[TileMetrics.TilesAcross * TileMetrics.TilesDown];
         Array.Fill(blank, EditorDocument.EmptyTile);
 
         ReplaceScreen(blank, "clear");
@@ -414,7 +412,7 @@ public sealed class EditorSession : ViewModelBase
     /// </summary>
     public void FloodScreen()
     {
-        var filled = new int[TileMetrics.TilesAcross * TileMetrics.TilesDown];
+        int[] filled = new int[TileMetrics.TilesAcross * TileMetrics.TilesDown];
         Array.Fill(filled, _selectedTile);
 
         ReplaceScreen(filled, "fill screen");
@@ -427,8 +425,8 @@ public sealed class EditorSession : ViewModelBase
     /// </summary>
     public void MoveScreen(int columns, int rows)
     {
-        var column = ScreenColumn + columns;
-        var row = ScreenRow + rows;
+        int column = ScreenColumn + columns;
+        int row = ScreenRow + rows;
 
         if (column < 0 || column >= WorldMap.ScreensAcross ||
             row < 0 || row >= WorldMap.ScreensDown)
@@ -441,15 +439,15 @@ public sealed class EditorSession : ViewModelBase
 
     private void ReplaceScreen(int[] tiles, string name)
     {
-        var existing = _document.CaptureScreen(_currentScreen);
+        int[] existing = Document.CaptureScreen(_currentScreen);
         if (existing.SequenceEqual(tiles))
         {
             return;
         }
 
-        var replacement = (int[])tiles.Clone();
+        int[] replacement = (int[])tiles.Clone();
 
-        _document.RestoreScreen(_currentScreen, replacement);
+        Document.RestoreScreen(_currentScreen, replacement);
         Undo.Record(new ScreenEdit(_currentScreen, existing, replacement));
         Undo.Commit();
     }
@@ -509,11 +507,11 @@ public sealed class EditorSession : ViewModelBase
             return;
         }
 
-        var inUse = _usedTilesOnly ? TilesInUse() : null;
-        var filter = _tileFilter.Trim();
+        HashSet<int>? inUse = _usedTilesOnly ? TilesInUse() : null;
+        string filter = _tileFilter.Trim();
         var visible = new List<int>(Sheet.TileCount);
 
-        for (var tile = 0; tile < Sheet.TileCount; tile++)
+        for (int tile = 0; tile < Sheet.TileCount; tile++)
         {
             if (inUse is not null && !inUse.Contains(tile))
             {
@@ -539,7 +537,7 @@ public sealed class EditorSession : ViewModelBase
             return true;
         }
 
-        var name = TileCatalogue.SpecialName(tileImage);
+        string? name = TileCatalogue.SpecialName(tileImage);
 
         return name is not null && name.Contains(filter, StringComparison.OrdinalIgnoreCase);
     }
@@ -553,13 +551,13 @@ public sealed class EditorSession : ViewModelBase
 
         var tiles = new HashSet<int>();
 
-        for (var screen = 0; screen < _document.Screens.Length; screen++)
+        for (int screen = 0; screen < Document.Screens.Length; screen++)
         {
-            for (var y = 0; y < TileMetrics.TilesDown; y++)
+            for (int y = 0; y < TileMetrics.TilesDown; y++)
             {
-                for (var x = 0; x < TileMetrics.TilesAcross; x++)
+                for (int x = 0; x < TileMetrics.TilesAcross; x++)
                 {
-                    tiles.Add(_document.GetTile(screen, x, y));
+                    tiles.Add(Document.GetTile(screen, x, y));
                 }
             }
         }

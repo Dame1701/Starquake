@@ -6,7 +6,6 @@ using System;
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
-using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Sprites;
 

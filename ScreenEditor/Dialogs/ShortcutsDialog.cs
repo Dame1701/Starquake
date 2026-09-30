@@ -48,10 +48,13 @@ public sealed class ShortcutsDialog : Window
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         Background = new SolidColorBrush(EditorColours.Panel);
 
-        var rows = new StackPanel { Spacing = 2 };
-        var lastGroup = string.Empty;
+        var rows = new StackPanel
+        {
+            Spacing = 2
+        };
+        string lastGroup = string.Empty;
 
-        foreach (var (group, keys, meaning) in Shortcuts)
+        foreach ((string group, string keys, string meaning) in Shortcuts)
         {
             if (group != lastGroup)
             {
@@ -60,7 +63,10 @@ public sealed class ShortcutsDialog : Window
                 rows.Children.Add(new TextBlock
                 {
                     Text = group.ToUpperInvariant(),
-                    Classes = { "header" },
+                    Classes =
+                    {
+                        "header"
+                    },
                     Margin = new Thickness(0, rows.Children.Count == 0 ? 0 : 16, 0, 4)
                 });
             }
@@ -76,7 +82,10 @@ public sealed class ShortcutsDialog : Window
             HorizontalAlignment = HorizontalAlignment.Right,
             HorizontalContentAlignment = HorizontalAlignment.Center,
             Margin = new Thickness(0, 20, 0, 0),
-            Classes = { "primary" }
+            Classes =
+            {
+                "primary"
+            }
         };
 
         close.Click += (_, _) => Close();

@@ -3,11 +3,10 @@
 // ---------------------------------------------------------
 // -
 using System;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.ContentManagement;
 using Starquake.Engines.ScreenEffects;
-using Starquake.Engines;
 using Starquake.Sprites;
 
 namespace Starquake.ActiveSprites;
@@ -19,9 +18,9 @@ public class BreakableBridge
     private readonly SpriteCollection _breakableBridgeOriginal;
     private readonly GraphicsDeviceManager _graphicsDeviceManager;
     private readonly GraphicsSet _graphicsSet;
-    private readonly ScreenEffectEngine _screenEffects;
     private readonly SpritePixelMatrix _matrix;
     private readonly RenderTarget2D _renderTarget;
+    private readonly ScreenEffectEngine _screenEffects;
     private readonly SpriteBatch _textureDrawer;
 
     private readonly int _xPos;
@@ -55,7 +54,7 @@ public class BreakableBridge
 
     public void Update()
     {
-        for (var a = 0; a < 200; a++)
+        for (int a = 0; a < 200; a++)
         {
             _matrix.SetRandomPixel(Color.Transparent);
         }

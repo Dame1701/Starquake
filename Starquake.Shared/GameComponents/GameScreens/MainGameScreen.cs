@@ -2,12 +2,13 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+using System;
 using System.Diagnostics;
 using System.Linq;
-using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework;
+using Starquake.ActiveSprites;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Engines;
@@ -20,7 +21,6 @@ namespace Starquake.GameComponents.GameScreens;
 
 public class MainGameScreen : GameComponentBase, IGameScreen
 {
-    private readonly GameEngine GameEngine;
 
     /// <summary>
     ///     How fast a screen fades up when the blob walks onto it, in colour channel levels a frame.
@@ -82,6 +82,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
 
     /// <inheritdoc cref="TeleporterAnimationLoops" />
     private const int AccessBoothFailedSpeed = 3;
+    private readonly GameEngine GameEngine;
 
     private DateTime _gameStartedTime;
 
@@ -151,7 +152,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
             // Test colour animation engine
             if (param != null)
             {
-                var success = (bool)param;
+                bool success = (bool)param;
 
                 if (success)
                 {
@@ -325,7 +326,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         // Test completing core
         if (ToggleKeys.GetPressedKey() == Keys.C)
         {
-            foreach (var element in GameEngine.Elements.Elements)
+            foreach (CoreElement element in GameEngine.Elements.Elements)
             {
                 element.ElementState = CoreElementState.Replaced;
             }
@@ -436,12 +437,12 @@ public class MainGameScreen : GameComponentBase, IGameScreen
     /// </summary>
     private void ShakeScreen()
     {
-        var xShakeOffset = 0;
-        var yShakeOffset = 0;
+        int xShakeOffset = 0;
+        int yShakeOffset = 0;
 
         if (!GameEngine.IntroSequence.SequenceRunning)
         {
-            var shakingScreenTime = GameEngine.RandomNumberGenerator.Next(0, ShakeOdds);
+            int shakingScreenTime = GameEngine.RandomNumberGenerator.Next(0, ShakeOdds);
 
             if (shakingScreenTime == ShakeTrigger && !_shakingScreen)
             {
@@ -568,7 +569,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
     {
         if (GameEngine.Presentation.DrawBackgrounds)
         {
-            var screenXPos = GameEngine.GameScreens.ScreenNumber % WorldMap.ScreensAcross;
+            int screenXPos = GameEngine.GameScreens.ScreenNumber % WorldMap.ScreensAcross;
 
             GameEngine.ContentResourceManager.GetSpriteCollection("Background1")
                 .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);

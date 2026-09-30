@@ -3,15 +3,15 @@
 // ---------------------------------------------------------
 // -
 using System;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
-using Starquake.GameComponents.GameScreens;
 using Starquake.GameComponents;
+using Starquake.GameComponents.GameScreens;
 using Starquake.Sounds;
 using Starquake.Structure;
 
@@ -20,6 +20,10 @@ namespace Starquake.Animations;
 public class IntroSequence : GameComponentBase
 {
     private readonly BlobDeathAnimation _blobKiller;
+
+
+    private readonly FaderAnimation _blobShipHazardLightFlash;
+    private readonly RandomFaderAnimation _blobShipHeadLightFlash;
     private readonly BitmapFont _font;
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsSet _graphicsSet;
@@ -28,10 +32,6 @@ public class IntroSequence : GameComponentBase
     private readonly ResourceManager _resources;
     private readonly ScreenDirectory _screenDirectory;
     private readonly ScreenEffectEngine _screenEffects;
-
-
-    private readonly FaderAnimation _blobShipHazardLightFlash;
-    private readonly RandomFaderAnimation _blobShipHeadLightFlash;
     private float _acceleration;
 
     private int _blobSpaceShipEndXPos;
@@ -53,7 +53,6 @@ public class IntroSequence : GameComponentBase
     private int _sequenceCounter;
 
     private int _sequenceFrameCount;
-    public bool SequenceRunning;
 
     private Guid _shipExplosionSound = Guid.Empty;
 
@@ -64,6 +63,7 @@ public class IntroSequence : GameComponentBase
     private float _xAmountToMoveEachFrame;
 
     private float _yAmountToMoveEachFrame;
+    public bool SequenceRunning;
 
     public IntroSequence(
         ResourceManager resources,
@@ -265,8 +265,8 @@ public class IntroSequence : GameComponentBase
 
         if (_rumbleAmount > 0)
         {
-            var xShakeOffset = _randomNumberGenerator.Next(0, (int)_rumbleAmount);
-            var yShakeOffset = _randomNumberGenerator.Next(0, (int)_rumbleAmount);
+            int xShakeOffset = _randomNumberGenerator.Next(0, (int)_rumbleAmount);
+            int yShakeOffset = _randomNumberGenerator.Next(0, (int)_rumbleAmount);
 
             _rumbleAmount = _rumbleAmount - 0.5;
 

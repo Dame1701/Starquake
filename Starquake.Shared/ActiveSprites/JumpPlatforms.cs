@@ -2,14 +2,13 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System.Collections.Generic;
 using System;
-using Microsoft.Xna.Framework.Content;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
-using Starquake.Engines;
 using Starquake.SharedLibs;
 
 namespace Starquake.ActiveSprites;
@@ -20,10 +19,10 @@ public class JumpPlatforms
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsDeviceManager _graphicsDeviceManager;
     private readonly GraphicsSet _graphicsSet;
+    private readonly List<JumpPlatform> _platforms;
     private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
     private readonly ScreenEffectEngine _screenEffects;
-    private readonly List<JumpPlatform> _platforms;
 
     public JumpPlatforms(
         ResourceManager resources,
@@ -46,7 +45,7 @@ public class JumpPlatforms
 
     public int GetNewJumpPlatform(int xPos, int yPos, int width, int height, bool checkCollision)
     {
-        var position = JumpPlatform.GetJumpPlatformCoords(xPos, yPos, _gameScreens);
+        Point position = JumpPlatform.GetJumpPlatformCoords(xPos, yPos, _gameScreens);
 
         if (checkCollision)
         {
@@ -59,7 +58,7 @@ public class JumpPlatforms
 
         JumpPlatform? newPlatform = null;
 
-        foreach (var platform in _platforms)
+        foreach (JumpPlatform platform in _platforms)
         {
             if (platform.ReadyToAllocate)
             {
@@ -98,7 +97,7 @@ public class JumpPlatforms
 
     public void ResetPlatforms()
     {
-        foreach (var platform in _platforms)
+        foreach (JumpPlatform platform in _platforms)
         {
             _gameScreens.CurrentGameScreenData.CollisionMap.Remove(platform.LeftCollisionTile);
             _gameScreens.CurrentGameScreenData.CollisionMap.Remove(platform.RightCollisionTile);
@@ -111,7 +110,7 @@ public class JumpPlatforms
         // Update jumpplatform lifetime
         if (_platforms.Count > 0)
         {
-            foreach (var platform in _platforms)
+            foreach (JumpPlatform platform in _platforms)
             {
                 if (platform.LeftCollisionTile != null && platform.RightCollisionTile != null)
                 {
@@ -132,7 +131,7 @@ public class JumpPlatforms
 
     public void Draw(GameTime gameTime)
     {
-        foreach (var platform in _platforms)
+        foreach (JumpPlatform platform in _platforms)
         {
             platform.Draw(gameTime);
         }

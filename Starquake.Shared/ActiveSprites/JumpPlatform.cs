@@ -2,15 +2,14 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System.Diagnostics.CodeAnalysis;
 using System;
+using System.Diagnostics.CodeAnalysis;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
-using Starquake.Engines;
 using Starquake.SharedLibs;
 using Starquake.Sprites;
 
@@ -21,16 +20,16 @@ internal class JumpPlatform
 
     private readonly GraphicsDeviceManager _graphicsDeviceManager;
     private readonly GraphicsSet _graphicsSet;
-    private readonly Random _randomNumberGenerator;
-    private readonly ScreenEffectEngine _screenEffects;
 
     private readonly SpriteCollection _jumpPlatform;
     private readonly SpriteCollection _jumpPlatformOriginal;
+    private readonly Random _randomNumberGenerator;
+
+    private readonly RenderTarget2D _renderTarget;
+    private readonly ScreenEffectEngine _screenEffects;
     private readonly SpriteBatch _textureDrawer;
 
     private int _dissolveTime;
-
-    private readonly RenderTarget2D _renderTarget;
 
     private SpritePixelMatrix _matrix;
 
@@ -85,7 +84,7 @@ internal class JumpPlatform
     {
         var returnValue = new Point();
         returnValue.X = blobXPos;
-        var positionOnScreen = blobYPos;
+        int positionOnScreen = blobYPos;
         returnValue.Y = (positionOnScreen / 32 + 1) * 32;
 
         return returnValue;
@@ -107,7 +106,7 @@ internal class JumpPlatform
             // Only disintegrate after a while
             if (_dissolveTime < 50)
             {
-                for (var a = 0; a < 50; a++)
+                for (int a = 0; a < 50; a++)
                 {
                     _matrix.SetRandomPixel(Color.Transparent);
                 }

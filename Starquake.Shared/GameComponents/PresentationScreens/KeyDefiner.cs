@@ -2,13 +2,12 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System.Linq;
 using System;
-using Microsoft.Xna.Framework.Input;
+using System.Linq;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using Starquake.Constants;
 using Starquake.ContentManagement;
-using Starquake.Engines;
 using Starquake.Fonts;
 using Starquake.Helpers;
 using Starquake.Input;
@@ -19,7 +18,6 @@ public class KeyDefiner
 {
 
     private readonly BitmapFont _font;
-    private readonly ResourceManager _resources;
     private readonly string[] _keysToDefine = new[]
     {
         "UP",
@@ -30,6 +28,7 @@ public class KeyDefiner
         "PAUSE",
         "QUIT"
     };
+    private readonly ResourceManager _resources;
     private bool _alldone;
 
     private int _definedKeyIndex;
@@ -55,9 +54,9 @@ public class KeyDefiner
 
     public string GetKeys()
     {
-        var keyString = string.Empty;
+        string keyString = string.Empty;
 
-        for (var a = 0; a < 5; a++)
+        for (int a = 0; a < 5; a++)
         {
             keyString = keyString + ToggleKeys.GetFriendlyName(DefinedKeys[a]) + ", ";
         }
@@ -69,7 +68,7 @@ public class KeyDefiner
     {
         _definedKeyIndex = 0;
         _alldone = false;
-        for (var a = 0; a < DefinedKeys.Length; a++)
+        for (int a = 0; a < DefinedKeys.Length; a++)
         {
             DefinedKeys[a] = Keys.None;
         }
@@ -87,7 +86,7 @@ public class KeyDefiner
 
     public void Update(GameTime gameTime)
     {
-        var pressedKey = ToggleKeys.GetPressedKey();
+        Keys pressedKey = ToggleKeys.GetPressedKey();
 
         if (!_alldone)
         {
@@ -126,15 +125,15 @@ public class KeyDefiner
     {
         _font.WriteText(480, 236, "Press a key for:", 2, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
 
-        var keyDefineYPos = 290;
-        foreach (var keysToDefine in _keysToDefine)
+        int keyDefineYPos = 290;
+        foreach (string keysToDefine in _keysToDefine)
         {
             _font.WriteText(500, keyDefineYPos, keysToDefine + ":", 2, Color.White, (byte)screenFade);
             keyDefineYPos += 40;
         }
 
         keyDefineYPos = 290;
-        foreach (var definedKey in DefinedKeys)
+        foreach (Keys definedKey in DefinedKeys)
         {
             if (definedKey != Keys.None)
             {

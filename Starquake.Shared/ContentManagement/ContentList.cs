@@ -15,7 +15,7 @@ public class ContentList
     public ContentList(ContentManager contentMgr)
     {
         _content = new List<ContentEntry>();
-        this.ContentMgr = contentMgr;
+        ContentMgr = contentMgr;
     }
     public ContentManager ContentMgr { get; }
 
@@ -26,7 +26,7 @@ public class ContentList
 
     public string GetContent(string contentName)
     {
-        foreach (var content in _content)
+        foreach (ContentEntry content in _content)
         {
             if (content.Name == contentName)
             {
@@ -39,7 +39,7 @@ public class ContentList
 
     public void RemoveContent(string contentName)
     {
-        for (var a = 0; a < _content.Count; a++)
+        for (int a = 0; a < _content.Count; a++)
         {
             if (_content[a].Name == contentName)
             {

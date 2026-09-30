@@ -2,13 +2,12 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
-using Starquake.Engines;
 
 namespace Starquake.ActiveSprites;
 
@@ -53,7 +52,7 @@ public class BreakableBridges
     {
         if (_bridges.Count > 0)
         {
-            for (var a = 0; a < _bridges.Count; a++)
+            for (int a = 0; a < _bridges.Count; a++)
             {
                 if (!_bridges[a].Finished)
                 {
@@ -80,7 +79,7 @@ public class BreakableBridges
     {
         if (_bridges.Count > 0)
         {
-            foreach (var bridge in _bridges)
+            foreach (BreakableBridge bridge in _bridges)
             {
                 bridge.Draw(gameTime);
             }

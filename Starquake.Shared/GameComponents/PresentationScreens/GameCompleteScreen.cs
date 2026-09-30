@@ -2,16 +2,15 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework;
 using Starquake.ActiveSprites;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
-using Starquake.GameComponents;
 using Starquake.Helpers;
 using Starquake.Input;
 using Starquake.Sprites;
@@ -21,11 +20,11 @@ namespace Starquake.GameComponents.PresentationScreens;
 
 public class GameCompleteScreen : GameScreenBase, IGameScreen
 {
-    private readonly CoreElements _elements;
 
     private readonly SpriteCollection _backgroundImage;
-    private bool _fadeComplete;
+    private readonly CoreElements _elements;
     private readonly SpriteCollection _foregroundImage;
+    private bool _fadeComplete;
 
     public GameCompleteScreen(
         ResourceManager resources,

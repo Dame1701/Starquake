@@ -8,9 +8,9 @@ namespace Starquake.Structure;
 
 public class SecondLayerTile
 {
-    public Point TileLocation;
 
     public readonly TileType TileType;
+    public Point TileLocation;
     public SecondLayerTile(TileType tileType, Point tileLocation)
     {
         TileType = tileType;

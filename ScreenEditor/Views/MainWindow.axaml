@@ -127,7 +127,8 @@
                             <ToolTip>
                                 <StackPanel MaxWidth="260" Spacing="2">
                                     <TextBlock Classes="tipTitle" Text="{Binding UndoDescription}" />
-                                    <TextBlock Classes="tipBody" Text="Take back the last change. A whole brush stroke comes back in one step." />
+                                    <TextBlock Classes="tipBody"
+                                               Text="Take back the last change. A whole brush stroke comes back in one step." />
                                     <TextBlock Classes="tipKeys">
                                         <Run Classes="tipKeysLabel" Text="Shortcut:" />
                                         <Run Text="Ctrl+Z" />
@@ -163,7 +164,8 @@
                             <ToolTip>
                                 <StackPanel MaxWidth="260" Spacing="2">
                                     <TextBlock Classes="tipTitle" Text="Paint" />
-                                    <TextBlock Classes="tipBody" Text="Lay the selected tile down. Drag to paint a trail of them." />
+                                    <TextBlock Classes="tipBody"
+                                               Text="Lay the selected tile down. Drag to paint a trail of them." />
                                     <TextBlock Classes="tipKeys">
                                         <Run Classes="tipKeysLabel" Text="Shortcut:" />
                                         <Run Text="B" />
@@ -181,7 +183,8 @@
                             <ToolTip>
                                 <StackPanel MaxWidth="260" Spacing="2">
                                     <TextBlock Classes="tipTitle" Text="Erase" />
-                                    <TextBlock Classes="tipBody" Text="Clear tiles back to empty. The right mouse button does this whichever tool is selected." />
+                                    <TextBlock Classes="tipBody"
+                                               Text="Clear tiles back to empty. The right mouse button does this whichever tool is selected." />
                                     <TextBlock Classes="tipKeys">
                                         <Run Classes="tipKeysLabel" Text="Shortcut:" />
                                         <Run Text="E" />
@@ -199,7 +202,8 @@
                             <ToolTip>
                                 <StackPanel MaxWidth="260" Spacing="2">
                                     <TextBlock Classes="tipTitle" Text="Fill" />
-                                    <TextBlock Classes="tipBody" Text="Flood the connected run of matching tiles with the selected one." />
+                                    <TextBlock Classes="tipBody"
+                                               Text="Flood the connected run of matching tiles with the selected one." />
                                     <TextBlock Classes="tipKeys">
                                         <Run Classes="tipKeysLabel" Text="Shortcut:" />
                                         <Run Text="F" />
@@ -217,7 +221,8 @@
                             <ToolTip>
                                 <StackPanel MaxWidth="260" Spacing="2">
                                     <TextBlock Classes="tipTitle" Text="Pick" />
-                                    <TextBlock Classes="tipBody" Text="Select the tile under the pointer so it can be painted elsewhere. Holding Alt does the same without leaving the current tool." />
+                                    <TextBlock Classes="tipBody"
+                                               Text="Select the tile under the pointer so it can be painted elsewhere. Holding Alt does the same without leaving the current tool." />
                                     <TextBlock Classes="tipKeys">
                                         <Run Classes="tipKeysLabel" Text="Shortcut:" />
                                         <Run Text="I" />
@@ -235,7 +240,8 @@
                             <ToolTip>
                                 <StackPanel MaxWidth="260" Spacing="2">
                                     <TextBlock Classes="tipTitle" Text="Tile grid" />
-                                    <TextBlock Classes="tipBody" Text="Rule the screen into its eight by six tile positions." />
+                                    <TextBlock Classes="tipBody"
+                                               Text="Rule the screen into its eight by six tile positions." />
                                     <TextBlock Classes="tipKeys">
                                         <Run Classes="tipKeysLabel" Text="Shortcut:" />
                                         <Run Text="G" />
@@ -251,7 +257,8 @@
                             <ToolTip>
                                 <StackPanel MaxWidth="260" Spacing="2">
                                     <TextBlock Classes="tipTitle" Text="Collision map" />
-                                    <TextBlock Classes="tipBody" Text="Shade the parts of each tile the blob cannot walk through." />
+                                    <TextBlock Classes="tipBody"
+                                               Text="Shade the parts of each tile the blob cannot walk through." />
                                     <TextBlock Classes="tipKeys">
                                         <Run Classes="tipKeysLabel" Text="Shortcut:" />
                                         <Run Text="C" />
@@ -267,7 +274,8 @@
                             <ToolTip>
                                 <StackPanel MaxWidth="260" Spacing="2">
                                     <TextBlock Classes="tipTitle" Text="Tile numbers" />
-                                    <TextBlock Classes="tipBody" Text="Label each position with the tile painted there. Tiles the game treats specially are picked out in amber." />
+                                    <TextBlock Classes="tipBody"
+                                               Text="Label each position with the tile painted there. Tiles the game treats specially are picked out in amber." />
                                     <TextBlock Classes="tipKeys">
                                         <Run Classes="tipKeysLabel" Text="Shortcut:" />
                                         <Run Text="T" />
@@ -283,7 +291,8 @@
                             <ToolTip>
                                 <StackPanel MaxWidth="260" Spacing="2">
                                     <TextBlock Classes="tipTitle" Text="Neighbouring screens" />
-                                    <TextBlock Classes="tipBody" Text="Show a strip of the eight screens around this one, so scenery can be lined up across the join." />
+                                    <TextBlock Classes="tipBody"
+                                               Text="Show a strip of the eight screens around this one, so scenery can be lined up across the join." />
                                     <TextBlock Classes="tipKeys">
                                         <Run Classes="tipKeysLabel" Text="Shortcut:" />
                                         <Run Text="N" />

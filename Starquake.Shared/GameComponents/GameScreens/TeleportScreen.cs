@@ -2,19 +2,18 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework;
 using Starquake.ActiveSprites;
 using Starquake.Animations;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Fonts;
-using Starquake.GameComponents;
 using Starquake.Sprites;
 using Starquake.Structure;
 
@@ -107,7 +106,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         _powerSupplyFader = new FaderAnimation(1, null, 100);
         _teleportingMessageFader = new FaderAnimation(6, null, 50);
 
-        for (var a = 0; a < 16; a++)
+        for (int a = 0; a < 16; a++)
         {
             _keyFades[a] = new FaderAnimation(4, _randomNumberGenerator);
         }
@@ -137,7 +136,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         _teleportMonitorScreenDistortionYPos = _presentation.ScreenYOffset + 28;
 
         _teleportCodeLetters = new TeleportCodeLetter[5];
-        for (var a = 0; a < 5; a++)
+        for (int a = 0; a < 5; a++)
         {
             _teleportCodeLetters[a] = new TeleportCodeLetter(_currentCode[a].ToString(), new Point(350 + a * 70, 400));
         }
@@ -162,7 +161,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
     {
         _resources.GetSoundFxEngine().PlaySound("MachineryBackground", 0.5f, true);
 
-        foreach (var keyFade in _keyFades)
+        foreach (FaderAnimation keyFade in _keyFades)
         {
             keyFade.Update();
         }
@@ -188,7 +187,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
         _teleportCodes.TryGetValue(_gameScreens.ScreenNumber, out _teleportCode);
 
-        for (var a = 0; a < 5; a++)
+        for (int a = 0; a < 5; a++)
         {
             _teleportCodeLetters[a].Letter = _currentCode[a].ToString();
             _teleportCodeLetters[a].Location = new Point(350 + a * 70, 400);
@@ -201,7 +200,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
     /// </summary>
     private void TypeAnyKeyPressed()
     {
-        for (var a = 65; a < 91; a++)
+        for (int a = 65; a < 91; a++)
         {
             if (Keyboard.GetState().IsKeyDown((Keys)a))
             {
@@ -210,7 +209,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
                 _keyPressed = true;
                 _keyIdPressed = a;
 
-                for (var b = 0; b < 5; b++)
+                for (int b = 0; b < 5; b++)
                 {
                     if (_currentCode.Substring(b, 1) == "_")
                     {
@@ -237,7 +236,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
     {
         if (!_currentCode.Contains("_") && !_attemptingTeleport)
         {
-            var destinationScreen = FindKey(_teleportCodes, _currentCode);
+            int destinationScreen = FindKey(_teleportCodes, _currentCode);
             if (destinationScreen > -1)
             {
                 _codeRecognised = true;
@@ -289,7 +288,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
             _presentation.ScreenXOffset = _oldOffsetX;
             _presentation.ScreenYOffset = _oldOffsetY;
 
-            var teleporterLocation = _gameScreens.GetCoordsOfTiles(397);
+            List<Point>? teleporterLocation = _gameScreens.GetCoordsOfTiles(397);
             if (teleporterLocation != null &&
                 teleporterLocation.Count == 1)
             {
@@ -311,10 +310,12 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
     private static int FindKey(IDictionary<int, string> lookup, string value)
     {
-        foreach (var pair in lookup)
+        foreach (KeyValuePair<int, string> pair in lookup)
         {
             if (pair.Value == value.ToLower())
+            {
                 return pair.Key;
+            }
         }
 
         return -1;
@@ -327,22 +328,22 @@ public class TeleportScreen : GameComponentBase, IGameScreen
     /// </summary>
     private static readonly Point[] KeyHighlightPositions =
     [
-        new Point(778, 426),
-        new Point(809, 426),
-        new Point(838, 426),
-        new Point(888, 426),
-        new Point(920, 426),
-        new Point(950, 426),
-        new Point(766, 452),
-        new Point(796, 452),
-        new Point(826, 452),
-        new Point(903, 452),
-        new Point(934, 452),
-        new Point(964, 452),
-        new Point(780, 480),
-        new Point(811, 480),
-        new Point(919, 480),
-        new Point(951, 480)
+        new(778, 426),
+        new(809, 426),
+        new(838, 426),
+        new(888, 426),
+        new(920, 426),
+        new(950, 426),
+        new(766, 452),
+        new(796, 452),
+        new(826, 452),
+        new(903, 452),
+        new(934, 452),
+        new(964, 452),
+        new(780, 480),
+        new(811, 480),
+        new(919, 480),
+        new(951, 480)
     ];
 
     public override void Draw(GameTime gameTime)
@@ -412,45 +413,45 @@ public class TeleportScreen : GameComponentBase, IGameScreen
     /// </summary>
     private void DrawTeleportOutcome()
     {
-    if (_codeRecognised)
-    {
-        // Teleporting text - recognised code
-        _shapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-        _shapeDrawer.FillRectangle(new Rectangle(87, 440, 40, 40), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
-        _shapeDrawer.FillRectangle(new Rectangle(135, 442, 36, 36), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
-        _shapeDrawer.FillRectangle(new Rectangle(179, 446, 28, 28), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
-        _shapeDrawer.End();
+        if (_codeRecognised)
+        {
+            // Teleporting text - recognised code
+            _shapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+            _shapeDrawer.FillRectangle(new Rectangle(87, 440, 40, 40), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
+            _shapeDrawer.FillRectangle(new Rectangle(135, 442, 36, 36), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
+            _shapeDrawer.FillRectangle(new Rectangle(179, 446, 28, 28), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
+            _shapeDrawer.End();
 
-        _font.WriteText(_presentation.ScreenXOffset + 88, _presentation.ScreenYOffset + 431, "NOW TELEPORTING", new Color(0, ColourLevels.Full - _teleportingMessageFader.FadeLevel, 0), ColourLevels.Full);
+            _font.WriteText(_presentation.ScreenXOffset + 88, _presentation.ScreenYOffset + 431, "NOW TELEPORTING", new Color(0, ColourLevels.Full - _teleportingMessageFader.FadeLevel, 0), ColourLevels.Full);
 
-        _shapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
-        _shapeDrawer.FillRectangle(new Rectangle(556, 446, 28, 28), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
-        _shapeDrawer.FillRectangle(new Rectangle(592, 442, 36, 36), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
-        _shapeDrawer.FillRectangle(new Rectangle(636, 440, 40, 40), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
-        _shapeDrawer.End();
-    }
-    else
-    {
-        // Teleporting text - unrecognised code
-        _shapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-        _shapeDrawer.FillRectangle(new Rectangle(100, 442, 36, 36), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
-        _shapeDrawer.FillRectangle(new Rectangle(144, 446, 28, 28), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
-        _shapeDrawer.End();
+            _shapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+            _shapeDrawer.FillRectangle(new Rectangle(556, 446, 28, 28), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
+            _shapeDrawer.FillRectangle(new Rectangle(592, 442, 36, 36), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
+            _shapeDrawer.FillRectangle(new Rectangle(636, 440, 40, 40), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
+            _shapeDrawer.End();
+        }
+        else
+        {
+            // Teleporting text - unrecognised code
+            _shapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+            _shapeDrawer.FillRectangle(new Rectangle(100, 442, 36, 36), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
+            _shapeDrawer.FillRectangle(new Rectangle(144, 446, 28, 28), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
+            _shapeDrawer.End();
 
-        _font.WriteText(_presentation.ScreenXOffset + 49, _presentation.ScreenYOffset + 431, "CODE NOT RECOGNISED", new Color(ColourLevels.Full - _teleportingMessageFader.FadeLevel, 0, 0), ColourLevels.Full);
+            _font.WriteText(_presentation.ScreenXOffset + 49, _presentation.ScreenYOffset + 431, "CODE NOT RECOGNISED", new Color(ColourLevels.Full - _teleportingMessageFader.FadeLevel, 0, 0), ColourLevels.Full);
 
-        _shapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
-        _shapeDrawer.FillRectangle(new Rectangle(590, 446, 28, 28), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
-        _shapeDrawer.FillRectangle(new Rectangle(626, 442, 36, 36), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
-        _shapeDrawer.End();
-    }
+            _shapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+            _shapeDrawer.FillRectangle(new Rectangle(590, 446, 28, 28), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
+            _shapeDrawer.FillRectangle(new Rectangle(626, 442, 36, 36), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
+            _shapeDrawer.End();
+        }
     }
 
     private void DrawEnteredCode()
     {
-        var teleportLetterLocation = 290;
+        int teleportLetterLocation = 290;
 
-        for (var a = 0; a < 5; a++)
+        for (int a = 0; a < 5; a++)
         {
             _font.WriteText(teleportLetterLocation, 412, _teleportCodeLetters[a].Letter, 2, new Color(36, 16, 4), (byte)ScreenFade, new Vector2(1f, 0.5f), SpriteEffects.FlipVertically);
 
@@ -472,11 +473,11 @@ public class TeleportScreen : GameComponentBase, IGameScreen
     /// </summary>
     private void DrawKeyHighlights(GameTime gameTime)
     {
-        var overlays = _resources.GetSpriteCollection("TeleporterKeyOverlays");
+        SpriteCollection overlays = _resources.GetSpriteCollection("TeleporterKeyOverlays");
 
         overlays.Begin(BlendState.Additive, gameTime);
 
-        for (var key = 0; key < KeyHighlightPositions.Length; key++)
+        for (int key = 0; key < KeyHighlightPositions.Length; key++)
         {
             overlays.DrawSprite(
                 key,

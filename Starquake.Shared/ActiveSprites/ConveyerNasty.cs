@@ -3,14 +3,13 @@
 // ---------------------------------------------------------
 // -
 using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework;
 using Starquake.Animations;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
-using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Particles;
 using Starquake.Sprites;
@@ -20,11 +19,6 @@ namespace Starquake.ActiveSprites;
 
 public class ConveyerNasty : GameComponentBase
 {
-    private readonly ContentManager _contentManager;
-    private readonly GameScreenCollection _gameScreens;
-    private readonly GraphicsDeviceManager _graphicsDeviceManager;
-    private readonly Random _randomNumberGenerator;
-    private readonly ResourceManager _resources;
 
     /// <summary>
     ///     A conveyer nasty hangs from the rail it runs along, so it is drawn and tested a collision
@@ -39,6 +33,11 @@ public class ConveyerNasty : GameComponentBase
 
 
     private readonly Animation _anim;
+    private readonly ContentManager _contentManager;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsDeviceManager _graphicsDeviceManager;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
     private readonly int _screenShakeXOffset = 0;
     private readonly int _screenShakeYOffset = 0;
 
@@ -88,7 +87,7 @@ public class ConveyerNasty : GameComponentBase
 
         XLocation = xposition;
         YLocation = yposition;
-        this.MoveSpeed = moveSpeed;
+        MoveSpeed = moveSpeed;
         NastyActive = active;
         _anim = new Animation();
         _anim.FirstFrame = 0;
@@ -117,7 +116,7 @@ public class ConveyerNasty : GameComponentBase
         NastyState = NastyState.Conception;
         NastyActive = true;
 
-        var randomDirection = _randomNumberGenerator.Next(0, 2);
+        int randomDirection = _randomNumberGenerator.Next(0, 2);
 
         if (randomDirection == 0)
         {
@@ -157,7 +156,7 @@ public class ConveyerNasty : GameComponentBase
         {
             if (_nastyDirection == Direction.Left)
             {
-                var amountToMove = _gameScreens.CheckCollision(Direction.Left, XLocation, YLocation + HangsBelowRailBy, SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight, MoveSpeed, false);
+                int amountToMove = _gameScreens.CheckCollision(Direction.Left, XLocation, YLocation + HangsBelowRailBy, SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight, MoveSpeed, false);
                 if (amountToMove > 0)
                 {
                     XLocation = XLocation - amountToMove;
@@ -170,7 +169,7 @@ public class ConveyerNasty : GameComponentBase
             }
             else if (_nastyDirection == Direction.Right)
             {
-                var amountToMove = _gameScreens.CheckCollision(Direction.Right, XLocation, YLocation + HangsBelowRailBy, SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight, MoveSpeed, false);
+                int amountToMove = _gameScreens.CheckCollision(Direction.Right, XLocation, YLocation + HangsBelowRailBy, SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight, MoveSpeed, false);
                 if (amountToMove > 0)
                 {
                     XLocation = XLocation + amountToMove;

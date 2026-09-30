@@ -26,7 +26,7 @@ public class PresentationSettingsTests
     public void TransformFor_ABackBufferTheCompositionSize_ScalesByOneAndLeavesNoBorder()
     {
         // Act
-        var transform = PresentationSettings.TransformFor(TestData.CompositionWidth, TestData.CompositionHeight);
+        Matrix transform = PresentationSettings.TransformFor(TestData.CompositionWidth, TestData.CompositionHeight);
 
         // Assert
         Assert.Equal(1f, transform.M11);
@@ -39,7 +39,7 @@ public class PresentationSettingsTests
     public void TransformFor_ABackBufferTwiceTheCompositionInBothAxes_ScalesByTwoAndLeavesNoBorder()
     {
         // Act
-        var transform = PresentationSettings.TransformFor(
+        Matrix transform = PresentationSettings.TransformFor(
             TestData.CompositionWidth * 2,
             TestData.CompositionHeight * 2);
 
@@ -55,11 +55,11 @@ public class PresentationSettingsTests
     {
         // Arrange
         // Twice the height, but four times the width: the height is what runs out first.
-        var backBufferWidth = TestData.CompositionWidth * 4;
-        var backBufferHeight = TestData.CompositionHeight * 2;
+        int backBufferWidth = TestData.CompositionWidth * 4;
+        int backBufferHeight = TestData.CompositionHeight * 2;
 
         // Act
-        var transform = PresentationSettings.TransformFor(backBufferWidth, backBufferHeight);
+        Matrix transform = PresentationSettings.TransformFor(backBufferWidth, backBufferHeight);
 
         // Assert
         Assert.Equal(2f, transform.M11);
@@ -72,11 +72,11 @@ public class PresentationSettingsTests
     public void TransformFor_ABackBufferTallerThanTheCompositionsShape_IsLimitedByWidthAndBordersTopAndBottom()
     {
         // Arrange
-        var backBufferWidth = TestData.CompositionWidth * 2;
-        var backBufferHeight = TestData.CompositionHeight * 4;
+        int backBufferWidth = TestData.CompositionWidth * 2;
+        int backBufferHeight = TestData.CompositionHeight * 4;
 
         // Act
-        var transform = PresentationSettings.TransformFor(backBufferWidth, backBufferHeight);
+        Matrix transform = PresentationSettings.TransformFor(backBufferWidth, backBufferHeight);
 
         // Assert
         Assert.Equal(2f, transform.M11);
@@ -89,7 +89,7 @@ public class PresentationSettingsTests
     public void TransformFor_ABackBufferSmallerThanTheComposition_ScalesDownRatherThanClipping()
     {
         // Act
-        var transform = PresentationSettings.TransformFor(
+        Matrix transform = PresentationSettings.TransformFor(
             TestData.CompositionWidth / 2,
             TestData.CompositionHeight / 2);
 
@@ -107,7 +107,7 @@ public class PresentationSettingsTests
         const int AwkwardHeight = 1071;
 
         // Act
-        var transform = PresentationSettings.TransformFor(AwkwardWidth, AwkwardHeight);
+        Matrix transform = PresentationSettings.TransformFor(AwkwardWidth, AwkwardHeight);
 
         // Assert
         Assert.Equal(transform.M11, transform.M22);
@@ -121,7 +121,7 @@ public class PresentationSettingsTests
         const int AwkwardHeight = 1071;
 
         // Act
-        var transform = PresentationSettings.TransformFor(AwkwardWidth, AwkwardHeight);
+        Matrix transform = PresentationSettings.TransformFor(AwkwardWidth, AwkwardHeight);
 
         // Assert
         // The picture plus a border on each side is the whole back buffer, so twice either border

@@ -27,6 +27,11 @@ namespace Starquake.ScreenEditor.Controls;
 public sealed class CollisionMaskEditor : Control
 {
 
+    /// <summary>
+    ///     Room under the tile for the line naming it.
+    /// </summary>
+    private const double CaptionHeight = 22;
+
     public static readonly StyledProperty<EditorSession?> SessionProperty =
         AvaloniaProperty.Register<CollisionMaskEditor, EditorSession?>(nameof(Session));
 
@@ -54,23 +59,23 @@ public sealed class CollisionMaskEditor : Control
 
     public override void Render(DrawingContext context)
     {
-        var session = Session;
+        EditorSession? session = Session;
         if (session?.Sheet is null || !session.Sheet.Contains(session.SelectedTile))
         {
             return;
         }
 
-        var area = TileArea();
+        Rect area = TileArea();
 
         context.FillRectangle(EditorColours.VoidBrush, area);
         TileRenderer.Draw(context, session.Sheet, session.SelectedTile, area);
 
-        var cellWidth = area.Width / TileMetrics.CollisionCellsAcrossTile;
-        var cellHeight = area.Height / TileMetrics.CollisionCellsDownTile;
+        double cellWidth = area.Width / TileMetrics.CollisionCellsAcrossTile;
+        double cellHeight = area.Height / TileMetrics.CollisionCellsDownTile;
 
-        for (var cellY = 0; cellY < TileMetrics.CollisionCellsDownTile; cellY++)
+        for (int cellY = 0; cellY < TileMetrics.CollisionCellsDownTile; cellY++)
         {
-            for (var cellX = 0; cellX < TileMetrics.CollisionCellsAcrossTile; cellX++)
+            for (int cellX = 0; cellX < TileMetrics.CollisionCellsAcrossTile; cellX++)
             {
                 var cell = new Rect(
                     area.X + cellX * cellWidth,
@@ -99,7 +104,7 @@ public sealed class CollisionMaskEditor : Control
 
     protected override Size MeasureOverride(Size availableSize)
     {
-        var width = double.IsInfinity(availableSize.Width) ? 220 : availableSize.Width;
+        double width = double.IsInfinity(availableSize.Width) ? 220 : availableSize.Width;
 
         return new Size(width, width * TileMetrics.TileHeight / TileMetrics.TileWidth + CaptionHeight);
     }
@@ -118,8 +123,8 @@ public sealed class CollisionMaskEditor : Control
     {
         base.OnPointerPressed(e);
 
-        var session = Session;
-        if (session is null || !TryHitTest(e.GetPosition(this), out var cellX, out var cellY))
+        EditorSession? session = Session;
+        if (session is null || !TryHitTest(e.GetPosition(this), out int cellX, out int cellY))
         {
             return;
         }
@@ -135,7 +140,7 @@ public sealed class CollisionMaskEditor : Control
     {
         base.OnPointerMoved(e);
 
-        var inside = TryHitTest(e.GetPosition(this), out var cellX, out var cellY);
+        bool inside = TryHitTest(e.GetPosition(this), out int cellX, out int cellY);
 
         if (!inside)
         {
@@ -164,21 +169,16 @@ public sealed class CollisionMaskEditor : Control
         InvalidateVisual();
     }
 
-    /// <summary>
-    ///     Room under the tile for the line naming it.
-    /// </summary>
-    private const double CaptionHeight = 22;
-
     private Rect TileArea()
     {
         var available = new Size(Bounds.Width, Math.Max(0, Bounds.Height - CaptionHeight));
 
-        var scale = Math.Min(
+        double scale = Math.Min(
             available.Width / TileMetrics.TileWidth,
             available.Height / TileMetrics.TileHeight);
 
-        var width = TileMetrics.TileWidth * scale;
-        var height = TileMetrics.TileHeight * scale;
+        double width = TileMetrics.TileWidth * scale;
+        double height = TileMetrics.TileHeight * scale;
 
         return new Rect(Math.Floor((Bounds.Width - width) / 2), 0, Math.Floor(width), Math.Floor(height));
     }
@@ -205,13 +205,13 @@ public sealed class CollisionMaskEditor : Control
         cellX = -1;
         cellY = -1;
 
-        var session = Session;
+        EditorSession? session = Session;
         if (session?.Sheet is null || !session.Sheet.Contains(session.SelectedTile))
         {
             return false;
         }
 
-        var area = TileArea();
+        Rect area = TileArea();
         if (!area.Contains(position))
         {
             return false;

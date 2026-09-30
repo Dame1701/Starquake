@@ -13,9 +13,9 @@ public class PanelNumbers
     public static void Draw(int xPos, int yPos, string score, ResourceManager resources, GameTime gameTime, Color color)
     {
         resources.GetSpriteCollection("PanelNumbers").Begin(BlendState.AlphaBlend, gameTime);
-        for (var a = 0; a < score.Length; a++)
+        for (int a = 0; a < score.Length; a++)
         {
-            var subScore = score.Substring(a, 1);
+            string subScore = score.Substring(a, 1);
             resources.GetSpriteCollection("PanelNumbers").DrawSprite(int.Parse(subScore), xPos + 31 * a, yPos, color);
         }
         resources.GetSpriteCollection("PanelNumbers").End();

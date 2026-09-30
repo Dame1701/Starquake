@@ -2,17 +2,16 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
-using Starquake.GameComponents;
 using Starquake.Helpers;
 using Starquake.Input;
 using Starquake.Sprites;
@@ -117,7 +116,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
     /// </summary>
     private void HandleOptionKeys()
     {
-        var pressed = ToggleKeys.GetPressedKey();
+        Keys pressed = ToggleKeys.GetPressedKey();
 
         if (pressed == Keys.D0)
         {
@@ -134,7 +133,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
         }
 
         // 1 to 4 pick the option of that number, and were four copies of this
-        var option = pressed - Keys.D1;
+        int option = pressed - Keys.D1;
 
         if (option < 0 || option >= SelectableOptionCount || _options[option].Selected)
         {
@@ -152,7 +151,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
     /// </summary>
     private void ConfirmSelectedOption()
     {
-        for (var option = 0; option < SelectableOptionCount; option++)
+        for (int option = 0; option < SelectableOptionCount; option++)
         {
             if (!_options[option].Selected)
             {
@@ -223,7 +222,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
 
     private void ClearSelectedOptions()
     {
-        foreach (var opt in _options)
+        foreach (Option opt in _options)
         {
             opt.Selected = false;
         }
@@ -240,10 +239,10 @@ public class OptionsScreen : GameScreenBase, IGameScreen
         Font.Begin(BlendState.AlphaBlend);
         if (!_definingKeys)
         {
-            var optionXPos = 320;
-            var optionYPos = 260;
+            int optionXPos = 320;
+            int optionYPos = 260;
 
-            foreach (var opt in _options)
+            foreach (Option opt in _options)
             {
                 if (opt.Unavailable)
                 {

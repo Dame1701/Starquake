@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-
 using Starquake.Constants;
 
 namespace Starquake.Animations;
@@ -11,9 +10,9 @@ public class TunnelLiftAnimationSection
 {
     private readonly int _delayStart;
     private int _delayCounter;
-    public int Intensity;
 
     private int _lightDirection;
+    public int Intensity;
     public int X;
     public int Y;
 

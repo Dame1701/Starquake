@@ -24,6 +24,12 @@ public static class TileRenderer
 {
 
     /// <summary>
+    ///     The smallest a marker can be drawn before its label is dropped. Below this the text would
+    ///     be a smudge, and the outline alone still says something is there.
+    /// </summary>
+    private const double MinimumLabelWidth = 44;
+
+    /// <summary>
     ///     The dashed outline a marker is drawn with. Dashes say "this is an annotation, not
     ///     scenery" without needing to be loud about it.
     /// </summary>
@@ -38,15 +44,9 @@ public static class TileRenderer
 
     private static readonly Typeface MarkerTypeface = new(FontFamily.Default, FontStyle.Normal, FontWeight.SemiBold);
 
-    /// <summary>
-    ///     The smallest a marker can be drawn before its label is dropped. Below this the text would
-    ///     be a smudge, and the outline alone still says something is there.
-    /// </summary>
-    private const double MinimumLabelWidth = 44;
-
     public static void Draw(DrawingContext context, TileSheet sheet, int tileImage, Rect destination)
     {
-        var marker = TileCatalogue.MarkerLabel(tileImage);
+        string? marker = TileCatalogue.MarkerLabel(tileImage);
 
         if (marker is null)
         {
@@ -65,8 +65,8 @@ public static class TileRenderer
     {
         // Inset so that neighbouring markers read as separate panels rather than one long band, and
         // so the dashed edge is not clipped in half by the tile boundary.
-        var panel = destination.Deflate(Math.Min(3, destination.Width / 16));
-        var corner = Math.Min(5, panel.Width / 10);
+        Rect panel = destination.Deflate(Math.Min(3, destination.Width / 16));
+        double corner = Math.Min(5, panel.Width / 10);
 
         context.DrawRectangle(MarkerFillBrush, MarkerPen, panel, corner, corner);
 
@@ -75,7 +75,7 @@ public static class TileRenderer
             return;
         }
 
-        var available = panel.Width - 6;
+        double available = panel.Width - 6;
 
         var text = new FormattedText(
             label,

@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-
 namespace Starquake.Scoring;
 
 public class HiScore
@@ -15,7 +14,7 @@ public class HiScore
     {
         get
         {
-            var temp = AdventureScore.ToString();
+            string temp = AdventureScore.ToString();
 
             if (temp.Length == 1)
             {

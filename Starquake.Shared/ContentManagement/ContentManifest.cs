@@ -4,7 +4,6 @@
 // -
 using Starquake.Constants;
 using Starquake.SharedLibs;
-using Starquake.Sounds;
 using Starquake.Structure;
 
 namespace Starquake.ContentManagement;
@@ -65,7 +64,6 @@ public static class ContentManifest
     ///     Both resources read the same file, and the reader takes them in the order they are named here,
     ///     so these two must stay in this order and in this method.
     /// </summary>
-
     private static void PresentationScreenGraphics(ResourceManager resources)
     {
         resources.AddSpriteResource("OptionScreenBackground", "Graphics\\OptionsScreenBackground", CompositionSize.Width, CompositionSize.Height);

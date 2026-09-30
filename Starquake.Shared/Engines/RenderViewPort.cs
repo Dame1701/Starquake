@@ -18,15 +18,15 @@ public class RenderViewPort
         MasterXPos = xPos;
         MasterYPos = yPos;
 
-        this.Width = width;
-        this.Height = height;
+        Width = width;
+        Height = height;
 
         RenderTarget = new RenderTarget2D(_graphicsDeviceManager.GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24, 0, RenderTargetUsage.PreserveContents);
 
 
-        this.XPos = xPos;
-        this.YPos = yPos;
-        this.Name = name;
+        XPos = xPos;
+        YPos = yPos;
+        Name = name;
         Active = false;
     }
     public RenderTarget2D RenderTarget { get; }

@@ -12,11 +12,6 @@ namespace Starquake.Helpers;
 
 public class NastyHelpers
 {
-    /// <summary>
-    ///     The colours a nasty splatters when it dies: one for each of the two side splats and one for
-    ///     the shower of splodges between them.
-    /// </summary>
-    private readonly record struct SplatColours(Color LeftSplat, Color RightSplat, Color Splodges);
 
     private static readonly Color White =
         new(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full);
@@ -32,25 +27,25 @@ public class NastyHelpers
     /// </remarks>
     private static readonly Dictionary<NastyType, SplatColours> SplatColoursByNasty = new()
     {
-        [NastyType.FriedEgg] = new(new Color(125, 62, 62), new Color(0, 182, 0), White),
-        [NastyType.Gonzo] = new(new Color(4, 82, 184), new Color(182, 103, 10), White),
-        [NastyType.Cushion] = new(new Color(59, 194, 42), new Color(227, 66, 19), White),
-        [NastyType.Helmet] = new(new Color(202, 109, 17), new Color(137, 137, 137), White),
-        [NastyType.Shellfish] = new(new Color(239, 238, 0), new Color(198, 99, 0), White),
-        [NastyType.Snail] = new(new Color(0, 124, 0), new Color(141, 141, 141), new Color(166, 198, 0)),
-        [NastyType.CurleyWurley] = new(new Color(168, 163, 252), new Color(109, 109, 253), White),
-        [NastyType.Bird] = new(new Color(0, 0, 211), new Color(148, 148, 217), new Color(188, 62, 0)),
-        [NastyType.Ghost] = new(new Color(0, 151, 43), new Color(88, 0, 88), White),
-        [NastyType.Scorpian] = new(new Color(177, 8, 8), new Color(130, 2, 2), new Color(230, 230, 230)),
-        [NastyType.DragonFly] = new(new Color(8, 150, 219), new Color(50, 111, 85), new Color(76, 191, 142)),
-        [NastyType.Helicopter] = new(new Color(177, 8, 8), new Color(130, 2, 2), new Color(230, 230, 230)),
-        [NastyType.Hippo] = new(new Color(229, 120, 252), new Color(137, 115, 251), new Color(145, 49, 50)),
-        [NastyType.Centipede] = new(new Color(87, 165, 28), new Color(110, 6, 124), new Color(221, 134, 38)),
+        [NastyType.FriedEgg] = new SplatColours(new Color(125, 62, 62), new Color(0, 182, 0), White),
+        [NastyType.Gonzo] = new SplatColours(new Color(4, 82, 184), new Color(182, 103, 10), White),
+        [NastyType.Cushion] = new SplatColours(new Color(59, 194, 42), new Color(227, 66, 19), White),
+        [NastyType.Helmet] = new SplatColours(new Color(202, 109, 17), new Color(137, 137, 137), White),
+        [NastyType.Shellfish] = new SplatColours(new Color(239, 238, 0), new Color(198, 99, 0), White),
+        [NastyType.Snail] = new SplatColours(new Color(0, 124, 0), new Color(141, 141, 141), new Color(166, 198, 0)),
+        [NastyType.CurleyWurley] = new SplatColours(new Color(168, 163, 252), new Color(109, 109, 253), White),
+        [NastyType.Bird] = new SplatColours(new Color(0, 0, 211), new Color(148, 148, 217), new Color(188, 62, 0)),
+        [NastyType.Ghost] = new SplatColours(new Color(0, 151, 43), new Color(88, 0, 88), White),
+        [NastyType.Scorpian] = new SplatColours(new Color(177, 8, 8), new Color(130, 2, 2), new Color(230, 230, 230)),
+        [NastyType.DragonFly] = new SplatColours(new Color(8, 150, 219), new Color(50, 111, 85), new Color(76, 191, 142)),
+        [NastyType.Helicopter] = new SplatColours(new Color(177, 8, 8), new Color(130, 2, 2), new Color(230, 230, 230)),
+        [NastyType.Hippo] = new SplatColours(new Color(229, 120, 252), new Color(137, 115, 251), new Color(145, 49, 50)),
+        [NastyType.Centipede] = new SplatColours(new Color(87, 165, 28), new Color(110, 6, 124), new Color(221, 134, 38))
     };
 
     public static void ApplyNastyColours(NastyType nastyType, ParticleEffect effect)
     {
-        if (!SplatColoursByNasty.TryGetValue(nastyType, out var colours))
+        if (!SplatColoursByNasty.TryGetValue(nastyType, out SplatColours colours))
         {
             return;
         }
@@ -59,4 +54,10 @@ public class NastyHelpers
         effect["Copy of Right Splat"].ReleaseColour.Value = colours.RightSplat.ToVector3();
         effect["Copy of Splodges"].ReleaseColour.Value = colours.Splodges.ToVector3();
     }
+
+    /// <summary>
+    ///     The colours a nasty splatters when it dies: one for each of the two side splats and one for
+    ///     the shower of splodges between them.
+    /// </summary>
+    private readonly record struct SplatColours(Color LeftSplat, Color RightSplat, Color Splodges);
 }

@@ -61,17 +61,17 @@ public static class CollisionDetection
         int obj1X, int obj1Y, int obj1W, int obj1H,
         int obj2X, int obj2Y, int obj2W, int obj2H)
     {
-        var (stepX, stepY) = StepFor(direction);
+        (int stepX, int stepY) = StepFor(direction);
 
         if (stepX == 0 && stepY == 0)
         {
             return 0;
         }
 
-        var amountThatCanBeMoved = 0;
+        int amountThatCanBeMoved = 0;
 
         // Count up in steps to the full velocity requested to see if any collision is taking place
-        for (var a = 1; a <= obj1Velocity; a++)
+        for (int a = 1; a <= obj1Velocity; a++)
         {
             if (Check(obj1X + stepX * a, obj1Y + stepY * a, obj1W, obj1H, obj2X, obj2Y, obj2W, obj2H))
             {

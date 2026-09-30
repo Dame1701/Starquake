@@ -97,7 +97,7 @@ public class TriggeredParticleEffect : IStandardParticleEffect
         }
 
         // Mercury must always be updated
-        var deltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        float deltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
         MercuryParticleEffect.Update(deltaSeconds);
     }
 

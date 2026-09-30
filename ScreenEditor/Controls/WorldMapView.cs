@@ -35,9 +35,6 @@ namespace Starquake.ScreenEditor.Controls;
 public sealed class WorldMapView : Control
 {
 
-    public static readonly StyledProperty<EditorSession?> SessionProperty =
-        AvaloniaProperty.Register<WorldMapView, EditorSession?>(nameof(Session));
-
     /// <summary>
     ///     How many pixels of the map one screen takes up. A tile becomes a handful of pixels rather
     ///     than one, which is just enough for a platform to still look like a platform.
@@ -46,6 +43,9 @@ public sealed class WorldMapView : Control
 
     /// <inheritdoc cref="ScreenPixelWidth" />
     private const int ScreenPixelHeight = TileMetrics.TilesDown * TileSheet.ThumbnailCellsDown;
+
+    public static readonly StyledProperty<EditorSession?> SessionProperty =
+        AvaloniaProperty.Register<WorldMapView, EditorSession?>(nameof(Session));
 
     private static readonly IPen ScreenGridPen = new Pen(new SolidColorBrush(Colors.White, 0.08));
 
@@ -72,15 +72,19 @@ public sealed class WorldMapView : Control
         set => SetValue(SessionProperty, value);
     }
 
+    private static int WorldPixelWidth => WorldMap.ScreensAcross * ScreenPixelWidth;
+
+    private static int WorldPixelHeight => WorldMap.ScreensDown * ScreenPixelHeight;
+
     public override void Render(DrawingContext context)
     {
-        var session = Session;
+        EditorSession? session = Session;
         if (session is null)
         {
             return;
         }
 
-        var area = MapArea();
+        Rect area = MapArea();
 
         context.FillRectangle(EditorColours.VoidBrush, area);
 
@@ -109,7 +113,7 @@ public sealed class WorldMapView : Control
     {
         // The planet is much taller than it is wide, so the map takes whatever width it is given and
         // asks for the height that keeps it in proportion.
-        var width = double.IsInfinity(availableSize.Width) ? 240 : availableSize.Width;
+        double width = double.IsInfinity(availableSize.Width) ? 240 : availableSize.Width;
 
         return new Size(width, width * WorldPixelHeight / WorldPixelWidth);
     }
@@ -137,8 +141,8 @@ public sealed class WorldMapView : Control
     {
         base.OnPointerMoved(e);
 
-        var position = e.GetPosition(this);
-        var screen = ScreenUnder(position);
+        Point position = e.GetPosition(this);
+        int screen = ScreenUnder(position);
 
         if (screen != _hoverScreen)
         {
@@ -169,24 +173,20 @@ public sealed class WorldMapView : Control
         InvalidateVisual();
     }
 
-    private static int WorldPixelWidth => WorldMap.ScreensAcross * ScreenPixelWidth;
-
-    private static int WorldPixelHeight => WorldMap.ScreensDown * ScreenPixelHeight;
-
     private Rect MapArea()
     {
-        var scale = Math.Min(Bounds.Width / WorldPixelWidth, Bounds.Height / WorldPixelHeight);
+        double scale = Math.Min(Bounds.Width / WorldPixelWidth, Bounds.Height / WorldPixelHeight);
 
-        var width = WorldPixelWidth * scale;
-        var height = WorldPixelHeight * scale;
+        double width = WorldPixelWidth * scale;
+        double height = WorldPixelHeight * scale;
 
         return new Rect((Bounds.Width - width) / 2, (Bounds.Height - height) / 2, width, height);
     }
 
     private static Rect ScreenRect(Rect area, int screen)
     {
-        var width = area.Width / WorldMap.ScreensAcross;
-        var height = area.Height / WorldMap.ScreensDown;
+        double width = area.Width / WorldMap.ScreensAcross;
+        double height = area.Height / WorldMap.ScreensDown;
 
         return new Rect(
             area.X + screen % WorldMap.ScreensAcross * width,
@@ -197,14 +197,14 @@ public sealed class WorldMapView : Control
 
     private int ScreenUnder(Point position)
     {
-        var area = MapArea();
+        Rect area = MapArea();
         if (!area.Contains(position))
         {
             return -1;
         }
 
-        var column = (int)((position.X - area.X) / (area.Width / WorldMap.ScreensAcross));
-        var row = (int)((position.Y - area.Y) / (area.Height / WorldMap.ScreensDown));
+        int column = (int)((position.X - area.X) / (area.Width / WorldMap.ScreensAcross));
+        int row = (int)((position.Y - area.Y) / (area.Height / WorldMap.ScreensDown));
 
         column = Math.Clamp(column, 0, WorldMap.ScreensAcross - 1);
         row = Math.Clamp(row, 0, WorldMap.ScreensDown - 1);
@@ -214,7 +214,7 @@ public sealed class WorldMapView : Control
 
     private void GoToScreenUnder(Point position)
     {
-        var screen = ScreenUnder(position);
+        int screen = ScreenUnder(position);
 
         if (screen >= 0 && Session is not null)
         {
@@ -224,7 +224,7 @@ public sealed class WorldMapView : Control
 
     private void ReportHover()
     {
-        var session = Session;
+        EditorSession? session = Session;
         if (session is null)
         {
             return;
@@ -239,12 +239,12 @@ public sealed class WorldMapView : Control
 
     private static void DrawGrid(DrawingContext context, Rect area)
     {
-        var screenWidth = area.Width / WorldMap.ScreensAcross;
-        var screenHeight = area.Height / WorldMap.ScreensDown;
+        double screenWidth = area.Width / WorldMap.ScreensAcross;
+        double screenHeight = area.Height / WorldMap.ScreensDown;
 
-        for (var column = 1; column < WorldMap.ScreensAcross; column++)
+        for (int column = 1; column < WorldMap.ScreensAcross; column++)
         {
-            var x = area.X + column * screenWidth;
+            double x = area.X + column * screenWidth;
 
             // Every fourth line a little stronger, so that a screen can be counted off against the
             // map's edge without following one line all the way across.
@@ -253,9 +253,9 @@ public sealed class WorldMapView : Control
                 new Point(x, area.Bottom));
         }
 
-        for (var row = 1; row < WorldMap.ScreensDown; row++)
+        for (int row = 1; row < WorldMap.ScreensDown; row++)
         {
-            var y = area.Y + row * screenHeight;
+            double y = area.Y + row * screenHeight;
 
             context.DrawLine(row % 4 == 0 ? RegionGridPen : ScreenGridPen,
                 new Point(area.X, y),
@@ -318,48 +318,48 @@ public sealed class WorldMapView : Control
             PixelFormat.Bgra8888,
             AlphaFormat.Premul);
 
-        var sheet = session.Sheet!;
-        var document = session.Document;
-        var thumbnails = sheet.ThumbnailColours;
+        TileSheet sheet = session.Sheet!;
+        EditorDocument document = session.Document;
+        uint[] thumbnails = sheet.ThumbnailColours;
 
-        var voidColour = Premultiplied(EditorColours.Void);
+        uint voidColour = Premultiplied(EditorColours.Void);
 
         // A marker tile is not drawn in the game, so showing its placeholder artwork here would put
         // a block of flat magenta on the map where the player sees nothing. It is still worth
         // knowing one is there, so it goes down as a dim tint instead of either extreme.
-        var markerColour = Premultiplied(Blend(EditorColours.Void, EditorColours.Marker, 0.28));
+        uint markerColour = Premultiplied(Blend(EditorColours.Void, EditorColours.Marker, 0.28));
 
-        using var frame = _bitmap.Lock();
+        using ILockedFramebuffer frame = _bitmap.Lock();
 
         unsafe
         {
-            var pixels = (byte*)frame.Address;
+            byte* pixels = (byte*)frame.Address;
 
-            for (var screen = 0; screen < WorldMap.ScreenCount && screen < document.Screens.Length; screen++)
+            for (int screen = 0; screen < WorldMap.ScreenCount && screen < document.Screens.Length; screen++)
             {
-                var screenLeft = screen % WorldMap.ScreensAcross * ScreenPixelWidth;
-                var screenTop = screen / WorldMap.ScreensAcross * ScreenPixelHeight;
+                int screenLeft = screen % WorldMap.ScreensAcross * ScreenPixelWidth;
+                int screenTop = screen / WorldMap.ScreensAcross * ScreenPixelHeight;
 
-                for (var tileY = 0; tileY < TileMetrics.TilesDown; tileY++)
+                for (int tileY = 0; tileY < TileMetrics.TilesDown; tileY++)
                 {
-                    for (var tileX = 0; tileX < TileMetrics.TilesAcross; tileX++)
+                    for (int tileX = 0; tileX < TileMetrics.TilesAcross; tileX++)
                     {
-                        var tile = document.GetTile(screen, tileX, tileY);
-                        var marker = TileCatalogue.IsMarker(tile);
+                        int tile = document.GetTile(screen, tileX, tileY);
+                        bool marker = TileCatalogue.IsMarker(tile);
 
-                        var source = sheet.Contains(tile) && !marker
+                        int source = sheet.Contains(tile) && !marker
                             ? tile * TileSheet.ThumbnailCellsAcross * TileSheet.ThumbnailCellsDown
                             : -1;
 
-                        var flat = marker ? markerColour : voidColour;
+                        uint flat = marker ? markerColour : voidColour;
 
-                        for (var cellY = 0; cellY < TileSheet.ThumbnailCellsDown; cellY++)
+                        for (int cellY = 0; cellY < TileSheet.ThumbnailCellsDown; cellY++)
                         {
-                            var row = (uint*)(pixels +
-                                              (long)(screenTop + tileY * TileSheet.ThumbnailCellsDown + cellY) *
-                                              frame.RowBytes);
+                            uint* row = (uint*)(pixels +
+                                                (long)(screenTop + tileY * TileSheet.ThumbnailCellsDown + cellY) *
+                                                frame.RowBytes);
 
-                            for (var cellX = 0; cellX < TileSheet.ThumbnailCellsAcross; cellX++)
+                            for (int cellX = 0; cellX < TileSheet.ThumbnailCellsAcross; cellX++)
                             {
                                 row[screenLeft + tileX * TileSheet.ThumbnailCellsAcross + cellX] =
                                     source < 0

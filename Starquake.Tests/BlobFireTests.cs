@@ -31,7 +31,7 @@ public class BlobFireTests
         shot.Launch(TestData.MidScreenX, startY);
 
         // Act
-        var inFlight = shot.Advance(firedIn, TestData.FromShuttle, TestData.NotPointBlank);
+        bool inFlight = shot.Advance(firedIn, TestData.FromShuttle, TestData.NotPointBlank);
 
         // Assert
         Assert.True(inFlight);
@@ -54,7 +54,7 @@ public class BlobFireTests
         shot.Launch(startX, TestData.MidScreenY);
 
         // Act
-        var inFlight = shot.Advance(firedIn, TestData.FromShuttle, TestData.NotPointBlank);
+        bool inFlight = shot.Advance(firedIn, TestData.FromShuttle, TestData.NotPointBlank);
 
         // Assert
         Assert.True(inFlight);
@@ -67,7 +67,10 @@ public class BlobFireTests
     public void Advance_ScenerylessThanAFullStepAway_MovesOnlyAsFarAsItCan()
     {
         // Arrange
-        var surroundings = new Surroundings { Clearance = 5 };
+        var surroundings = new Surroundings
+        {
+            Clearance = 5
+        };
         var shot = new BlobFire(surroundings);
         shot.Launch(TestData.MidScreenX, TestData.MidScreenY);
 
@@ -83,19 +86,22 @@ public class BlobFireTests
     public void Advance_HitsSceneryFromAShuttle_DeflectsAndThrowsSparksWithoutMoving()
     {
         // Arrange
-        var surroundings = new Surroundings { Blocked = [Direction.Up] };
+        var surroundings = new Surroundings
+        {
+            Blocked = [Direction.Up]
+        };
         var shot = new BlobFire(surroundings);
         shot.Launch(TestData.MidScreenX, TestData.MidScreenY);
 
         // Act
-        var inFlight = shot.Advance(Direction.Up, TestData.FromShuttle, TestData.NotPointBlank);
+        bool inFlight = shot.Advance(Direction.Up, TestData.FromShuttle, TestData.NotPointBlank);
 
         // Assert
         Assert.True(inFlight);
         Assert.Equal(FireDeflection.Left, shot.Deflection);
         Assert.Equal(TestData.MidScreenX, shot.X);
         Assert.Equal(TestData.MidScreenY, shot.Y);
-        var sparks = Assert.Single(surroundings.Sparks);
+        (int X, int Y) sparks = Assert.Single(surroundings.Sparks);
         Assert.Equal((TestData.MidScreenX, TestData.MidScreenY + TestData.SparksYOffset), sparks);
     }
 
@@ -103,12 +109,15 @@ public class BlobFireTests
     public void Advance_HitsSceneryOnFoot_DiesWithoutDeflecting()
     {
         // Arrange
-        var surroundings = new Surroundings { Blocked = [Direction.Left] };
+        var surroundings = new Surroundings
+        {
+            Blocked = [Direction.Left]
+        };
         var shot = new BlobFire(surroundings);
         shot.Launch(TestData.MidScreenX, TestData.MidScreenY);
 
         // Act
-        var inFlight = shot.Advance(Direction.Left, TestData.OnFoot, TestData.NotPointBlank);
+        bool inFlight = shot.Advance(Direction.Left, TestData.OnFoot, TestData.NotPointBlank);
 
         // Assert
         Assert.False(inFlight);
@@ -120,13 +129,17 @@ public class BlobFireTests
     public void Advance_AlreadyDeflected_TravelsBackAlongOneAxisAndOutAlongTheOther()
     {
         // Arrange
-        var surroundings = new Surroundings { Blocked = [Direction.Up], Deflection = FireDeflection.Left };
+        var surroundings = new Surroundings
+        {
+            Blocked = [Direction.Up],
+            Deflection = FireDeflection.Left
+        };
         var shot = new BlobFire(surroundings);
         shot.Launch(TestData.MidScreenX, TestData.MidScreenY);
         shot.Advance(Direction.Up, TestData.FromShuttle, TestData.NotPointBlank);
 
         // Act
-        var inFlight = shot.Advance(Direction.Up, TestData.FromShuttle, TestData.NotPointBlank);
+        bool inFlight = shot.Advance(Direction.Up, TestData.FromShuttle, TestData.NotPointBlank);
 
         // Assert
         Assert.True(inFlight);
@@ -148,7 +161,7 @@ public class BlobFireTests
         shot.Launch(x, y);
 
         // Act
-        var inFlight = shot.Advance(firedIn, TestData.FromShuttle, TestData.NotPointBlank);
+        bool inFlight = shot.Advance(firedIn, TestData.FromShuttle, TestData.NotPointBlank);
 
         // Assert
         Assert.False(inFlight);
@@ -161,13 +174,17 @@ public class BlobFireTests
     public void Advance_DeflectedRightAfterBeingFiredDown_StopsAtTheRightHandEdge()
     {
         // Arrange
-        var surroundings = new Surroundings { Blocked = [Direction.Down], Deflection = FireDeflection.Right };
+        var surroundings = new Surroundings
+        {
+            Blocked = [Direction.Down],
+            Deflection = FireDeflection.Right
+        };
         var shot = new BlobFire(surroundings);
         shot.Launch(TestData.AtHighEdgeX, TestData.MidScreenY);
         shot.Advance(Direction.Down, TestData.FromShuttle, TestData.NotPointBlank);
 
         // Act
-        var inFlight = shot.Advance(Direction.Down, TestData.FromShuttle, TestData.NotPointBlank);
+        bool inFlight = shot.Advance(Direction.Down, TestData.FromShuttle, TestData.NotPointBlank);
 
         // Assert
         Assert.False(inFlight);
@@ -180,13 +197,16 @@ public class BlobFireTests
     public void Advance_DeflectedAfterBeingFiredRight_StopsQuietlyAtTheLeftHandEdge()
     {
         // Arrange
-        var surroundings = new Surroundings { Blocked = [Direction.Right] };
+        var surroundings = new Surroundings
+        {
+            Blocked = [Direction.Right]
+        };
         var shot = new BlobFire(surroundings);
         shot.Launch(TestData.PastLowEdge, TestData.MidScreenY);
         shot.Advance(Direction.Right, TestData.FromShuttle, TestData.NotPointBlank);
 
         // Act
-        var inFlight = shot.Advance(Direction.Right, TestData.FromShuttle, TestData.NotPointBlank);
+        bool inFlight = shot.Advance(Direction.Right, TestData.FromShuttle, TestData.NotPointBlank);
 
         // Assert
         Assert.False(inFlight);
@@ -197,12 +217,15 @@ public class BlobFireTests
     public void Advance_FiredHorizontallyFromPointBlank_PushesThroughWhatWouldHaveStoppedIt()
     {
         // Arrange
-        var surroundings = new Surroundings { Blocked = [Direction.Left] };
+        var surroundings = new Surroundings
+        {
+            Blocked = [Direction.Left]
+        };
         var shot = new BlobFire(surroundings);
         shot.Launch(TestData.MidScreenX, TestData.MidScreenY);
 
         // Act
-        var inFlight = shot.Advance(Direction.Left, TestData.OnFoot, TestData.PointBlankReach);
+        bool inFlight = shot.Advance(Direction.Left, TestData.OnFoot, TestData.PointBlankReach);
 
         // Assert
         Assert.True(inFlight);
@@ -214,7 +237,10 @@ public class BlobFireTests
     public void Advance_FiredVerticallyFromPointBlank_IsStoppedAnyway()
     {
         // Arrange
-        var surroundings = new Surroundings { Blocked = [Direction.Up] };
+        var surroundings = new Surroundings
+        {
+            Blocked = [Direction.Up]
+        };
         var shot = new BlobFire(surroundings);
         shot.Launch(TestData.MidScreenX, TestData.MidScreenY);
 
@@ -238,7 +264,7 @@ public class BlobFireTests
         shot.Launch(TestData.MidScreenX, TestData.MidScreenY);
 
         // Act
-        var inFlight = shot.Advance(firedIn, TestData.OnFoot, TestData.NotPointBlank);
+        bool inFlight = shot.Advance(firedIn, TestData.OnFoot, TestData.NotPointBlank);
 
         // Assert
         Assert.False(inFlight);
@@ -256,7 +282,7 @@ public class BlobFireTests
         shot.Launch(TestData.MidScreenX, TestData.MidScreenY);
 
         // Act
-        var inFlight = shot.Advance(firedIn, TestData.FromShuttle, TestData.NotPointBlank);
+        bool inFlight = shot.Advance(firedIn, TestData.FromShuttle, TestData.NotPointBlank);
 
         // Assert
         Assert.True(inFlight);
@@ -269,7 +295,10 @@ public class BlobFireTests
     public void Launch_AfterAShotHasTravelledAndDeflected_StartsTheNextOneClean()
     {
         // Arrange
-        var surroundings = new Surroundings { Blocked = [Direction.Left] };
+        var surroundings = new Surroundings
+        {
+            Blocked = [Direction.Left]
+        };
         var shot = new BlobFire(surroundings);
         shot.Launch(TestData.MidScreenX, TestData.MidScreenY);
         shot.Advance(Direction.Left, TestData.FromShuttle, TestData.NotPointBlank);
@@ -286,10 +315,6 @@ public class BlobFireTests
     {
         public List<(int X, int Y)> Sparks { get; } = [];
 
-        public int ScreenWidth => TestData.ScreenWidth;
-
-        public int ScreenHeight => TestData.ScreenHeight;
-
         /// <summary>
         ///     How far the shot may travel in any direction that is not in <see cref="Blocked" />.
         /// </summary>
@@ -298,6 +323,10 @@ public class BlobFireTests
         public HashSet<Direction> Blocked { get; init; } = [];
 
         public FireDeflection Deflection { get; init; } = FireDeflection.Left;
+
+        public int ScreenWidth => TestData.ScreenWidth;
+
+        public int ScreenHeight => TestData.ScreenHeight;
 
         public int DistanceClear(Direction direction, int x, int y, int width, int height, int distance)
             => Blocked.Contains(direction) ? 0 : Clearance;

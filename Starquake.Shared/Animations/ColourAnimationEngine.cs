@@ -3,12 +3,11 @@
 // ---------------------------------------------------------
 // -
 using System.Collections.Generic;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
-using Starquake.Engines;
 using Starquake.Sprites;
 using Starquake.Structure;
 
@@ -16,11 +15,11 @@ namespace Starquake.Animations;
 
 public class ColourAnimationEngine : GameComponentBase
 {
+
+    private readonly List<ColourFaderAnimation> _colourAnimationsRegistered;
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsSet _graphicsSet;
     private readonly ResourceManager _resources;
-
-    private readonly List<ColourFaderAnimation> _colourAnimationsRegistered;
 
     public ColourAnimationEngine(ResourceManager resources, GameScreenCollection gameScreens, GraphicsSet graphicsSet)
     {
@@ -38,7 +37,7 @@ public class ColourAnimationEngine : GameComponentBase
 
     public void Start(int tileNo, int loopCount)
     {
-        foreach (var colourAnimation in _colourAnimationsRegistered)
+        foreach (ColourFaderAnimation colourAnimation in _colourAnimationsRegistered)
         {
             if (colourAnimation.TileNo == tileNo)
             {
@@ -60,7 +59,7 @@ public class ColourAnimationEngine : GameComponentBase
 
     public void Start(int tileNo, int loopCount, Color transitionColour)
     {
-        foreach (var colourAnimation in _colourAnimationsRegistered)
+        foreach (ColourFaderAnimation colourAnimation in _colourAnimationsRegistered)
         {
             if (colourAnimation.TileNo == tileNo)
             {
@@ -83,7 +82,7 @@ public class ColourAnimationEngine : GameComponentBase
 
     public void Start(int tileNo, int loopCount, Color transitionColour, int intensity)
     {
-        foreach (var colourAnimation in _colourAnimationsRegistered)
+        foreach (ColourFaderAnimation colourAnimation in _colourAnimationsRegistered)
         {
             if (colourAnimation.TileNo == tileNo)
             {
@@ -107,7 +106,7 @@ public class ColourAnimationEngine : GameComponentBase
 
     public void Stop(int tileNo)
     {
-        for (var a = 0; a < _colourAnimationsRegistered.Count; a++)
+        for (int a = 0; a < _colourAnimationsRegistered.Count; a++)
         {
             if (_colourAnimationsRegistered[a].TileNo == tileNo)
             {
@@ -123,7 +122,7 @@ public class ColourAnimationEngine : GameComponentBase
 
     public void ChangeSpeed(int tileNo, int speed)
     {
-        foreach (var colourAnimation in _colourAnimationsRegistered)
+        foreach (ColourFaderAnimation colourAnimation in _colourAnimationsRegistered)
         {
             if (colourAnimation.TileNo == tileNo)
             {
@@ -134,7 +133,7 @@ public class ColourAnimationEngine : GameComponentBase
 
     public override void Update(GameTime gameTime)
     {
-        foreach (var colourAnimation in _colourAnimationsRegistered)
+        foreach (ColourFaderAnimation colourAnimation in _colourAnimationsRegistered)
         {
             if (colourAnimation.Running)
             {
@@ -206,18 +205,18 @@ public class ColourAnimationEngine : GameComponentBase
     {
         _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
 
-        for (var y = 0; y < _gameScreens.TilesDown; y++)
+        for (int y = 0; y < _gameScreens.TilesDown; y++)
         {
-            for (var x = 0; x < _gameScreens.TilesAcross; x++)
+            for (int x = 0; x < _gameScreens.TilesAcross; x++)
             {
-                foreach (var colourAnimation in _colourAnimationsRegistered)
+                foreach (ColourFaderAnimation colourAnimation in _colourAnimationsRegistered)
                 {
                     if (colourAnimation.Running)
                     {
                         if (_gameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage == colourAnimation.TileNo) // Teleport booths
                         {
                             // Layer up the tiles to make the intensity deeper
-                            for (var b = 0; b < colourAnimation.Intensity; b++)
+                            for (int b = 0; b < colourAnimation.Intensity; b++)
                             {
                                 _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).DrawSprite(colourAnimation.TileNo, x * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteWidth,
                                     y * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteHeight, colourAnimation.TransitionColour);
@@ -234,11 +233,11 @@ public class ColourAnimationEngine : GameComponentBase
     {
         sprites.Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
 
-        for (var y = 0; y < _gameScreens.TilesDown; y++)
+        for (int y = 0; y < _gameScreens.TilesDown; y++)
         {
-            for (var x = 0; x < _gameScreens.TilesAcross; x++)
+            for (int x = 0; x < _gameScreens.TilesAcross; x++)
             {
-                foreach (var colourAnimation in _colourAnimationsRegistered)
+                foreach (ColourFaderAnimation colourAnimation in _colourAnimationsRegistered)
                 {
                     if (colourAnimation.Running &&
                         colourAnimation.TileNo >= 0)
@@ -246,7 +245,7 @@ public class ColourAnimationEngine : GameComponentBase
                         if (_gameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage == colourAnimation.TileNo) // Teleport booths
                         {
                             // Layer up the tiles to make the intensity deeper
-                            for (var b = 0; b < colourAnimation.Intensity; b++)
+                            for (int b = 0; b < colourAnimation.Intensity; b++)
                             {
                                 sprites.DrawSprite(colourAnimation.TileNo, x * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteWidth,
                                     y * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteHeight, colourAnimation.TransitionColour);
@@ -263,11 +262,11 @@ public class ColourAnimationEngine : GameComponentBase
     {
         _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
 
-        for (var y = 0; y < _gameScreens.TilesDown; y++)
+        for (int y = 0; y < _gameScreens.TilesDown; y++)
         {
-            for (var x = 0; x < _gameScreens.TilesAcross; x++)
+            for (int x = 0; x < _gameScreens.TilesAcross; x++)
             {
-                foreach (var colourAnimation in _colourAnimationsRegistered)
+                foreach (ColourFaderAnimation colourAnimation in _colourAnimationsRegistered)
                 {
                     if (colourAnimation.Running &&
                         colourAnimation.UpperTileToDraw >= 0)
@@ -275,7 +274,7 @@ public class ColourAnimationEngine : GameComponentBase
                         if (_gameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage == colourAnimation.TileNo) // Teleport booths
                         {
                             // Layer up the tiles to make the intensity deeper
-                            for (var b = 0; b < colourAnimation.Intensity; b++)
+                            for (int b = 0; b < colourAnimation.Intensity; b++)
                             {
                                 _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).DrawSprite(colourAnimation.UpperTileToDraw, x * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteWidth,
                                     y * _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).SpriteHeight, colourAnimation.TransitionColour);

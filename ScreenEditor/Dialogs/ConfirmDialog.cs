@@ -3,6 +3,7 @@
 // ---------------------------------------------------------
 // -
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -48,20 +49,20 @@ public sealed class ConfirmDialog : Window
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Right,
             Spacing = 8,
-            Margin = new Avalonia.Thickness(0, 20, 0, 0)
+            Margin = new Thickness(0, 20, 0, 0)
         };
 
         buttons.Children.Add(CreateButton("Cancel", ConfirmChoice.Cancel));
         buttons.Children.Add(CreateButton("Discard", ConfirmChoice.Discard));
 
-        var save = CreateButton("Save", ConfirmChoice.Save);
+        Button save = CreateButton("Save", ConfirmChoice.Save);
         save.Classes.Add("primary");
         save.IsDefault = true;
         buttons.Children.Add(save);
 
         Content = new StackPanel
         {
-            Margin = new Avalonia.Thickness(24),
+            Margin = new Thickness(24),
             Children =
             {
                 new TextBlock

@@ -3,11 +3,10 @@
 // ---------------------------------------------------------
 // -
 using System;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
 using Starquake.ContentManagement;
-using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Structure;
 
@@ -111,7 +110,7 @@ public class KeyScanner
         _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite(codeNumber, xPos + 2, yPos + 6, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
         _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
 
-        var height = 0;
+        int height = 0;
         if (_scanLineY > 64)
         {
             height = 64;

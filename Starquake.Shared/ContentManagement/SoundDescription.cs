@@ -11,8 +11,8 @@ public class SoundDescription
     public readonly string FilePath;
     public readonly SoundEffectInstanceType InstanceType;
     public readonly bool KillOnScreenChange;
-    public int MaxInstances;
     public readonly string ResourceName;
+    public int MaxInstances;
 
     public SoundDescription(string resourceName, string filePath, SoundEffectInstanceType instanceType, int maxInstances, bool killOnScreenChange)
     {

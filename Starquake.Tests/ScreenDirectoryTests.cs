@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
 using Microsoft.Xna.Framework;
 using Starquake.GameComponents;
 using Starquake.Structure;
@@ -44,7 +43,7 @@ public class ScreenDirectoryTests
         directory.Add(GameScreenType.Teleporter, teleporter);
 
         // Act
-        var found = directory.Get(GameScreenType.Teleporter);
+        IGameScreen found = directory.Get(GameScreenType.Teleporter);
 
         // Assert
         Assert.Same(teleporter, found);
@@ -88,7 +87,7 @@ public class ScreenDirectoryTests
         directory.Current = GameScreenType.MainGame;
 
         // Act
-        var current = directory.CurrentScreen;
+        IGameScreen? current = directory.CurrentScreen;
 
         // Assert
         Assert.Same(mainGame, current);
@@ -103,7 +102,7 @@ public class ScreenDirectoryTests
         directory.Current = GameScreenType.None;
 
         // Act
-        var current = directory.CurrentScreen;
+        IGameScreen? current = directory.CurrentScreen;
 
         // Assert
         // The engine's update and draw dereference this conditionally every frame.
@@ -141,11 +140,16 @@ public class ScreenDirectoryTests
         directory.Add(GameScreenType.Cheops, cheops);
 
         // Act
-        var all = directory.All;
+        IEnumerable<IGameScreen> all = directory.All;
 
         // Assert
         // The engine loads content by walking this, so a screen missing here never loads.
-        Assert.Equal(new IGameScreen[] { options, mainGame, cheops }, all);
+        Assert.Equal(new IGameScreen[]
+        {
+            options,
+            mainGame,
+            cheops
+        }, all);
     }
 
     /// <summary>

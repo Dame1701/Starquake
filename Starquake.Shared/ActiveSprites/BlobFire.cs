@@ -48,12 +48,6 @@ public sealed class BlobFire(IFireSurroundings surroundings)
     /// </summary>
     private const int SparksYOffset = 24;
 
-    private enum Axis
-    {
-        Horizontal,
-        Vertical
-    }
-
     public int X { get; private set; }
 
     public int Y { get; private set; }
@@ -95,7 +89,7 @@ public sealed class BlobFire(IFireSurroundings surroundings)
     /// </param>
     public bool Advance(Direction firedIn, bool firedFromShuttle, int? pointBlankReach)
     {
-        var firedAlong = AxisOf(firedIn);
+        Axis? firedAlong = AxisOf(firedIn);
 
         if (firedAlong is null)
         {
@@ -110,7 +104,7 @@ public sealed class BlobFire(IFireSurroundings surroundings)
             return false;
         }
 
-        var firedSign = SignOf(firedIn);
+        int firedSign = SignOf(firedIn);
 
         return Deflection == FireDeflection.None || !firedFromShuttle
             ? AdvanceStraight(firedIn, firedAlong.Value, firedSign, firedFromShuttle, pointBlankReach)
@@ -124,7 +118,7 @@ public sealed class BlobFire(IFireSurroundings surroundings)
         bool canDeflect,
         int? pointBlankReach)
     {
-        var step = surroundings.DistanceClear(travellingIn, X, Y, Width, Length, Speed);
+        int step = surroundings.DistanceClear(travellingIn, X, Y, Width, Length, Speed);
 
         if (along == Axis.Horizontal && WithinPointBlankReach(pointBlankReach))
         {
@@ -140,7 +134,7 @@ public sealed class BlobFire(IFireSurroundings surroundings)
             return true;
         }
 
-        var atScreenEdge = IsAtScreenEdge(along, sign);
+        bool atScreenEdge = IsAtScreenEdge(along, sign);
 
         if (step > 0 && !atScreenEdge)
         {
@@ -161,12 +155,12 @@ public sealed class BlobFire(IFireSurroundings surroundings)
     private bool AdvanceDeflected(Axis firedAlong, int firedSign, int? pointBlankReach)
     {
         // Deflecting reverses the axis it was fired along and opens up the other one.
-        var deflectedSign = Deflection == FireDeflection.Left ? -1 : 1;
-        var signX = firedAlong == Axis.Horizontal ? -firedSign : deflectedSign;
-        var signY = firedAlong == Axis.Vertical ? -firedSign : deflectedSign;
+        int deflectedSign = Deflection == FireDeflection.Left ? -1 : 1;
+        int signX = firedAlong == Axis.Horizontal ? -firedSign : deflectedSign;
+        int signY = firedAlong == Axis.Vertical ? -firedSign : deflectedSign;
 
-        var stepX = surroundings.DistanceClear(DirectionAlong(Axis.Horizontal, signX), X, Y, Width, Length, Speed);
-        var stepY = surroundings.DistanceClear(DirectionAlong(Axis.Vertical, signY), X, Y, Width, Length, Speed);
+        int stepX = surroundings.DistanceClear(DirectionAlong(Axis.Horizontal, signX), X, Y, Width, Length, Speed);
+        int stepY = surroundings.DistanceClear(DirectionAlong(Axis.Vertical, signY), X, Y, Width, Length, Speed);
 
         if (firedAlong == Axis.Horizontal && WithinPointBlankReach(pointBlankReach))
         {
@@ -174,7 +168,7 @@ public sealed class BlobFire(IFireSurroundings surroundings)
             stepY = Speed;
         }
 
-        var atScreenEdge = IsAtScreenEdge(Axis.Horizontal, signX) || IsAtScreenEdge(Axis.Vertical, signY);
+        bool atScreenEdge = IsAtScreenEdge(Axis.Horizontal, signX) || IsAtScreenEdge(Axis.Vertical, signY);
 
         if (stepX > 0 && stepY > 0 && !atScreenEdge)
         {
@@ -205,7 +199,7 @@ public sealed class BlobFire(IFireSurroundings surroundings)
 
     private bool IsAtScreenEdge(Axis along, int sign)
     {
-        var position = along == Axis.Horizontal ? X : Y;
+        int position = along == Axis.Horizontal ? X : Y;
 
         return sign < 0
             ? position < 0
@@ -238,5 +232,13 @@ public sealed class BlobFire(IFireSurroundings surroundings)
     private static Direction DirectionAlong(Axis along, int sign)
         => along == Axis.Horizontal
             ? sign < 0 ? Direction.Left : Direction.Right
-            : sign < 0 ? Direction.Up : Direction.Down;
+            : sign < 0
+                ? Direction.Up
+                : Direction.Down;
+
+    private enum Axis
+    {
+        Horizontal,
+        Vertical
+    }
 }

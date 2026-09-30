@@ -2,16 +2,15 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework;
 using Starquake.ActiveSprites;
 using Starquake.Animations;
 using Starquake.Constants;
@@ -19,12 +18,11 @@ using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
+using Starquake.GameComponents;
 using Starquake.GameComponents.GameScreens;
 using Starquake.GameComponents.PresentationScreens;
-using Starquake.GameComponents;
 using Starquake.Helpers;
 using Starquake.Input;
-using Starquake.SharedLibs;
 using Starquake.Sprites;
 using Starquake.Structure;
 
@@ -107,11 +105,34 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     private const int CoreInventoryHandoverScreen = 197;
 
+    public readonly ContentManager ContentMgr;
+
+    public readonly ResourceManager ContentResourceManager;
+
+    //public MercuryParticleEngine ParticleEngine;
+    public readonly GraphicsDeviceManager GraphicsDeviceMgr;
+
+    /// <summary>
+    ///     Which of the two sets of artwork the game is drawn with, and the sheet names that go
+    ///     with it. Switched by <see cref="SwitchGraphicsSetIfAsked" />; read live by everything
+    ///     that draws.
+    /// </summary>
+    public readonly GraphicsSet GraphicsSet = new();
+
+    /// <summary>
+    ///     How the composed picture is put on the screen - the transform onto the back buffer, the
+    ///     colours behind it, and where the game's own screens sit on it.
+    /// </summary>
+    public readonly PresentationSettings Presentation = new();
+
+    public readonly Random RandomNumberGenerator;
+    /// <summary>
+    ///     Which of the game's screens is being played, and where to find the others. Not to be
+    ///     confused with <see cref="GameScreens" />, which is the planet.
+    /// </summary>
+    public readonly ScreenDirectory ScreenDirectory = new();
+
     private BlobDeathAnimation? _blobKiller;
-
-    public StatusPanel BlobStatusPanel;
-
-    private GameSession? _session;
     private SpriteCollection _bootProgress;
     private SpriteCollection _bootProgressBackground;
     private int _bootProgressBackgroundFade = ColourLevels.Full;
@@ -119,31 +140,10 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     private SpriteCollection _bootScreen;
 
     private BreakableBridges? _breakableBridgesEngine;
-
-    public readonly ContentManager ContentMgr;
-
-    public readonly ResourceManager ContentResourceManager;
     private ConveyerNasties? _conveyerNastiesInstance;
-    /// <summary>
-    ///     Which of the game's screens is being played, and where to find the others. Not to be
-    ///     confused with <see cref="GameScreens" />, which is the planet.
-    /// </summary>
-    public readonly ScreenDirectory ScreenDirectory = new();
 
     private ElectricityGatesAndNodesEngine? _electricityNodeGateEngine;
-
-    // Central objects
-    public CoreElements Elements;
-
-    // Font 1
-    public BitmapFont Font1;
-
-    // Font 2
-    public BitmapFont Font2;
     private GameScreenCollection? _gameScreens;
-
-    //public MercuryParticleEngine ParticleEngine;
-    public readonly GraphicsDeviceManager GraphicsDeviceMgr;
 
     // Game Sequences
     private IntroSequence? _introSequence;
@@ -163,31 +163,29 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     private int _powerUpType;
 
-    /// <summary>
-    ///     How the composed picture is put on the screen - the transform onto the back buffer, the
-    ///     colours behind it, and where the game's own screens sit on it.
-    /// </summary>
-    public readonly PresentationSettings Presentation = new();
-
-    public readonly Random RandomNumberGenerator;
-
-    /// <summary>
-    ///     Which of the two sets of artwork the game is drawn with, and the sheet names that go
-    ///     with it. Switched by <see cref="SwitchGraphicsSetIfAsked" />; read live by everything
-    ///     that draws.
-    /// </summary>
-    public readonly GraphicsSet GraphicsSet = new();
-
     private SpriteCollection _scanlines;
 
     private ScreenEffectEngine? _screenEffectEngine;
 
-    // Test area
-    public Shapes ShapeDrawer;
+    private GameSession? _session;
 
 
     // Tunnel lift animations
     private TunnelLiftAnimationEngine? _tunnelAnimations;
+
+    public StatusPanel BlobStatusPanel;
+
+    // Central objects
+    public CoreElements Elements;
+
+    // Font 1
+    public BitmapFont Font1;
+
+    // Font 2
+    public BitmapFont Font2;
+
+    // Test area
+    public Shapes ShapeDrawer;
 
     // Scaling
     public GameEngine(
@@ -213,44 +211,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
         DefineContent();
         Initialise();
-    }
-
-    private void Session_OnPlayerKeysChanged(PlayerKeySet playerKeys)
-    {
-        // The blob does not exist until content has loaded, and the options screen can be used
-        // before then; it reads the set back off the session when it is built.
-        if (_player is not { BlobsControl: not null })
-        {
-            return;
-        }
-
-        Player.BlobsControl.PlayerKeySet = playerKeys;
-
-        // Unbinding every movement key is how the options screen says "use the joypad",
-        // and its joystick option unbinds all five - the four directions and fire.
-        Player.BlobsControl.UseJoyPad =
-            playerKeys.Up == Keys.None &&
-            playerKeys.Down == Keys.None &&
-            playerKeys.Left == Keys.None &&
-            playerKeys.Right == Keys.None &&
-            playerKeys.Fire == Keys.None;
-    }
-
-    /// <summary>
-    ///     The background rumble follows the pause. The null check the old setter carried is gone
-    ///     with it: it was there because the constructor assigned Session.Paused before the resource manager
-    ///     existed, and this is only subscribed to once the session is built, by which time it does.
-    /// </summary>
-    private void Session_OnPausedChanged(bool paused)
-    {
-        if (paused)
-        {
-            ContentResourceManager.GetSoundFxEngine().DisablePeriodicBackgroundSounds(true);
-        }
-        else
-        {
-            ContentResourceManager.GetSoundFxEngine().EnablePeriodicBackgroundSounds();
-        }
     }
 
     /// <summary>
@@ -300,6 +260,49 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     /// <inheritdoc cref="GameScreens" />
     private MainGameScreen MainScreen => NotBeforeContentLoads(_mainScreen);
+
+    public void Dispose()
+    {
+        ContentResourceManager.GetSoundFxEngine().Dispose();
+    }
+
+    private void Session_OnPlayerKeysChanged(PlayerKeySet playerKeys)
+    {
+        // The blob does not exist until content has loaded, and the options screen can be used
+        // before then; it reads the set back off the session when it is built.
+        if (_player is not { BlobsControl: not null })
+        {
+            return;
+        }
+
+        Player.BlobsControl.PlayerKeySet = playerKeys;
+
+        // Unbinding every movement key is how the options screen says "use the joypad",
+        // and its joystick option unbinds all five - the four directions and fire.
+        Player.BlobsControl.UseJoyPad =
+            playerKeys.Up == Keys.None &&
+            playerKeys.Down == Keys.None &&
+            playerKeys.Left == Keys.None &&
+            playerKeys.Right == Keys.None &&
+            playerKeys.Fire == Keys.None;
+    }
+
+    /// <summary>
+    ///     The background rumble follows the pause. The null check the old setter carried is gone
+    ///     with it: it was there because the constructor assigned Session.Paused before the resource manager
+    ///     existed, and this is only subscribed to once the session is built, by which time it does.
+    /// </summary>
+    private void Session_OnPausedChanged(bool paused)
+    {
+        if (paused)
+        {
+            ContentResourceManager.GetSoundFxEngine().DisablePeriodicBackgroundSounds(true);
+        }
+        else
+        {
+            ContentResourceManager.GetSoundFxEngine().EnablePeriodicBackgroundSounds();
+        }
+    }
 
     private static T NotBeforeContentLoads<T>(T? component, [CallerMemberName] string name = "")
         where T : class
@@ -411,19 +414,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         Font1 = new BitmapFont(ContentMgr.Load<SpriteFont>("Fonts\\elektoraSmall"), new SpriteBatch(GraphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
         Font2 = new BitmapFont(ContentMgr.Load<SpriteFont>("Fonts\\elektoraMedium"), new SpriteBatch(GraphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     /// <summary>
@@ -629,47 +619,47 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         _mainScreen = new MainGameScreen(this);
 
         ScreenDirectory.Add(GameScreenType.Options, new OptionsScreen(
-                ContentResourceManager,
-                Font2,
-                GraphicsDeviceMgr,
-                Presentation,
-                ScreenEffectEngine,
-                ScreenDirectory,
-                Session));
+            ContentResourceManager,
+            Font2,
+            GraphicsDeviceMgr,
+            Presentation,
+            ScreenEffectEngine,
+            ScreenDirectory,
+            Session));
         ScreenDirectory.Add(GameScreenType.ComputerReport, new ComputerReportScreen(
-                ContentResourceManager,
-                Font2,
-                GraphicsDeviceMgr,
-                Presentation,
-                ScreenEffectEngine,
-                ScreenDirectory,
-                RandomNumberGenerator));
+            ContentResourceManager,
+            Font2,
+            GraphicsDeviceMgr,
+            Presentation,
+            ScreenEffectEngine,
+            ScreenDirectory,
+            RandomNumberGenerator));
         ScreenDirectory.Add(GameScreenType.HiScores, new HiScoreScreen(
-                ContentResourceManager,
-                Font2,
-                GraphicsDeviceMgr,
-                Presentation,
-                ScreenEffectEngine,
-                ScreenDirectory,
-                BlobStatusPanel));
+            ContentResourceManager,
+            Font2,
+            GraphicsDeviceMgr,
+            Presentation,
+            ScreenEffectEngine,
+            ScreenDirectory,
+            BlobStatusPanel));
         ScreenDirectory.Add(GameScreenType.GameOver, new GameOverScreen(
-                ContentResourceManager,
-                Font2,
-                GraphicsDeviceMgr,
-                Presentation,
-                ScreenEffectEngine,
-                ScreenDirectory,
-                BlobStatusPanel,
-                Elements,
-                GameScreens));
+            ContentResourceManager,
+            Font2,
+            GraphicsDeviceMgr,
+            Presentation,
+            ScreenEffectEngine,
+            ScreenDirectory,
+            BlobStatusPanel,
+            Elements,
+            GameScreens));
         ScreenDirectory.Add(GameScreenType.GameComplete, new GameCompleteScreen(
-                ContentResourceManager,
-                Font2,
-                GraphicsDeviceMgr,
-                Presentation,
-                ScreenEffectEngine,
-                ScreenDirectory,
-                Elements));
+            ContentResourceManager,
+            Font2,
+            GraphicsDeviceMgr,
+            Presentation,
+            ScreenEffectEngine,
+            ScreenDirectory,
+            Elements));
 
         ScreenDirectory.Add(GameScreenType.MainGame, _mainScreen);
         ScreenDirectory.Add(GameScreenType.Teleporter, new TeleportScreen(
@@ -716,7 +706,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             ScreenDirectory,
             ShapeDrawer));
 
-        foreach (var screen in ScreenDirectory.All)
+        foreach (IGameScreen screen in ScreenDirectory.All)
         {
             ((GameComponentBase)screen).LoadContent();
         }
@@ -842,25 +832,25 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     private void TogglePauseIfAsked()
     {
-    if (ScreenDirectory.Current == GameScreenType.Cheops ||
-        ScreenDirectory.Current == GameScreenType.MainGame ||
-        ScreenDirectory.Current == GameScreenType.PlanetCore ||
-        ScreenDirectory.Current == GameScreenType.Teleporter ||
-        ScreenDirectory.Current == GameScreenType.AccessBooth)
-    {
-        if (ScreenDirectory.Current != GameScreenType.Teleporter)
+        if (ScreenDirectory.Current == GameScreenType.Cheops ||
+            ScreenDirectory.Current == GameScreenType.MainGame ||
+            ScreenDirectory.Current == GameScreenType.PlanetCore ||
+            ScreenDirectory.Current == GameScreenType.Teleporter ||
+            ScreenDirectory.Current == GameScreenType.AccessBooth)
         {
-            if (ToggleKeys.GetPressedKey() == Session.PlayerKeys.Pause)
+            if (ScreenDirectory.Current != GameScreenType.Teleporter)
             {
-                Session.Paused = !Session.Paused;
-
-                if (Session.Paused)
+                if (ToggleKeys.GetPressedKey() == Session.PlayerKeys.Pause)
                 {
-                    ContentResourceManager.GetSoundFxEngine().KillSounds(true);
+                    Session.Paused = !Session.Paused;
+
+                    if (Session.Paused)
+                    {
+                        ContentResourceManager.GetSoundFxEngine().KillSounds(true);
+                    }
                 }
             }
         }
-    }
     }
 
     /// <remarks>
@@ -870,55 +860,55 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     /// </remarks>
     private void ToggleFullScreenIfAsked()
     {
-    if (ToggleKeys.GetPressedKey() == Keys.F12)
-    {
-        if (ScreenDirectory.Current == GameScreenType.Cheops ||
-            ScreenDirectory.Current == GameScreenType.MainGame ||
-            ScreenDirectory.Current == GameScreenType.PlanetCore ||
-            ScreenDirectory.Current == GameScreenType.AccessBooth)
+        if (ToggleKeys.GetPressedKey() == Keys.F12)
         {
-            // Automatically pause the game after switching to or from fullscreen so the player doesn't die unexpectantly
-            if (!Session.Paused)
+            if (ScreenDirectory.Current == GameScreenType.Cheops ||
+                ScreenDirectory.Current == GameScreenType.MainGame ||
+                ScreenDirectory.Current == GameScreenType.PlanetCore ||
+                ScreenDirectory.Current == GameScreenType.AccessBooth)
             {
-                Session.Paused = true;
+                // Automatically pause the game after switching to or from fullscreen so the player doesn't die unexpectantly
+                if (!Session.Paused)
+                {
+                    Session.Paused = true;
+                }
             }
-        }
 
-        try
-        {
-            ToggleFullScreen();
+            try
+            {
+                ToggleFullScreen();
+            }
+            catch { }
         }
-        catch { }
-    }
     }
 
     private void ToggleBackgroundsIfAsked()
     {
-    if (ToggleKeys.GetPressedKey() == Keys.F10)
-    {
-        if (ScreenDirectory.Current == GameScreenType.MainGame)
+        if (ToggleKeys.GetPressedKey() == Keys.F10)
         {
-            Presentation.DrawBackgrounds = !Presentation.DrawBackgrounds;
+            if (ScreenDirectory.Current == GameScreenType.MainGame)
+            {
+                Presentation.DrawBackgrounds = !Presentation.DrawBackgrounds;
+            }
         }
-    }
     }
 
     private void SwitchGraphicsSetIfAsked()
     {
-    if (ToggleKeys.GetPressedKey() == Keys.F8)
-    {
-        GraphicsSet.Switch();
-
-        // The original graphics have no backdrops drawn for them.
-        Presentation.DrawBackgrounds = GraphicsSet.IsRedrawn;
-
-        if (IntroSequence.SequenceStage == IntroSequenceStage.Finished || IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
+        if (ToggleKeys.GetPressedKey() == Keys.F8)
         {
-            ((MainGameScreen)ScreenDirectory.Get(GameScreenType.MainGame)).SpritesChanged();
-        }
+            GraphicsSet.Switch();
 
-        ContentResourceManager.GetSoundFxEngine().PlaySound("AccessSuccess", 1f, false);
-    }
+            // The original graphics have no backdrops drawn for them.
+            Presentation.DrawBackgrounds = GraphicsSet.IsRedrawn;
+
+            if (IntroSequence.SequenceStage == IntroSequenceStage.Finished || IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
+            {
+                ((MainGameScreen)ScreenDirectory.Get(GameScreenType.MainGame)).SpritesChanged();
+            }
+
+            ContentResourceManager.GetSoundFxEngine().PlaySound("AccessSuccess", 1f, false);
+        }
     }
 
     /// <summary>
@@ -959,73 +949,55 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         if (ScreenDirectory.Current == GameScreenType.MainGame)
         {
             StepBetweenScreens();
-            TestColourAnimations();
         }
     }
 
     private void StepBetweenScreens()
     {
-            if (Keyboard.GetState().IsKeyDown(Keys.NumPad4))
+        if (Keyboard.GetState().IsKeyDown(Keys.NumPad4))
+        {
+            if (GameScreens.ScreenNumber > 0)
             {
-                if (GameScreens.ScreenNumber > 0)
-                {
-                    GameScreens.ScreenNumber--;
-                    ScreenDirectory.Get(ScreenDirectory.Current).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
-                    Thread.Sleep(TestModeScreenStepDelayMs);
-                }
+                GameScreens.ScreenNumber--;
+                ScreenDirectory.Get(ScreenDirectory.Current).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
+                Thread.Sleep(TestModeScreenStepDelayMs);
             }
+        }
 
-            if (Keyboard.GetState().IsKeyDown(Keys.NumPad6))
+        if (Keyboard.GetState().IsKeyDown(Keys.NumPad6))
+        {
+            if (GameScreens.ScreenNumber < WorldMap.LastScreenNumber)
             {
-                if (GameScreens.ScreenNumber < WorldMap.LastScreenNumber)
-                {
-                    GameScreens.ScreenNumber++;
-                    ScreenDirectory.Get(ScreenDirectory.Current).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
-                    Thread.Sleep(TestModeScreenStepDelayMs);
-                }
+                GameScreens.ScreenNumber++;
+                ScreenDirectory.Get(ScreenDirectory.Current).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
+                Thread.Sleep(TestModeScreenStepDelayMs);
             }
+        }
 
-            if (Keyboard.GetState().IsKeyDown(Keys.NumPad8))
+        if (Keyboard.GetState().IsKeyDown(Keys.NumPad8))
+        {
+            if (GameScreens.ScreenNumber - WorldMap.ScreensAcross >= 0)
             {
-                if (GameScreens.ScreenNumber - WorldMap.ScreensAcross >= 0)
-                {
-                    GameScreens.ScreenNumber -= WorldMap.ScreensAcross;
-                    ScreenDirectory.Get(ScreenDirectory.Current).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
-                    Thread.Sleep(TestModeScreenStepDelayMs);
-                }
+                GameScreens.ScreenNumber -= WorldMap.ScreensAcross;
+                ScreenDirectory.Get(ScreenDirectory.Current).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
+                Thread.Sleep(TestModeScreenStepDelayMs);
             }
+        }
 
-            if (Keyboard.GetState().IsKeyDown(Keys.NumPad2))
+        if (Keyboard.GetState().IsKeyDown(Keys.NumPad2))
+        {
+            if (GameScreens.ScreenNumber + WorldMap.ScreensAcross <= WorldMap.ScreenCount)
             {
-                if (GameScreens.ScreenNumber + WorldMap.ScreensAcross <= WorldMap.ScreenCount)
-                {
-                    GameScreens.ScreenNumber += WorldMap.ScreensAcross;
-                    ScreenDirectory.Get(ScreenDirectory.Current).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
-                    Thread.Sleep(TestModeScreenStepDelayMs);
-                }
+                GameScreens.ScreenNumber += WorldMap.ScreensAcross;
+                ScreenDirectory.Get(ScreenDirectory.Current).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
+                Thread.Sleep(TestModeScreenStepDelayMs);
             }
-    }
-
-    private void TestColourAnimations()
-    {
-            if (ToggleKeys.GetPressedKey() == Keys.K)
-            {
-                GameScreens.ColourAnimations.Start((int)ActionTiles.ShuttleTag1, -1);
-                GameScreens.ColourAnimations.Start((int)ActionTiles.ShuttleTag3, -1);
-                GameScreens.ColourAnimations.Start((int)ActionTiles.ShuttleTag2, -1);
-            }
-
-            if (ToggleKeys.GetPressedKey() == Keys.L)
-            {
-                GameScreens.ColourAnimations.Stop((int)ActionTiles.ShuttleTag1);
-                GameScreens.ColourAnimations.Stop((int)ActionTiles.ShuttleTag3);
-                GameScreens.ColourAnimations.Stop((int)ActionTiles.ShuttleTag2);
-            }
+        }
     }
 
     private void UpdateActiveScreen(GameTime gameTime)
     {
-        var screenToUpdate = ScreenDirectory.CurrentScreen;
+        IGameScreen? screenToUpdate = ScreenDirectory.CurrentScreen;
 
         UpdateStatusPanel();
 
@@ -1058,39 +1030,39 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     private void UpdateScreensLeftRunningOffScreen(IGameScreen screenToUpdate, GameTime gameTime)
     {
-            foreach (var igs in ScreenDirectory.All)
+        foreach (IGameScreen igs in ScreenDirectory.All)
+        {
+            if (igs is IRealTimeGameScreen && igs != screenToUpdate)
             {
-                if (igs is IRealTimeGameScreen && igs != screenToUpdate)
+                if (GameScreens.ScreenNumber == ScreenKeptRunningOffScreen)
                 {
-                    if (GameScreens.ScreenNumber == ScreenKeptRunningOffScreen)
+                    ((IRealTimeGameScreen)igs).UpdateOffScreen(gameTime);
+                }
+
+                if (GameScreens.ScreenNumber == CoreInventoryHandoverScreen)
+                {
+                    /*
+                    int counter = 4;
+                    if (Elements.GetActiveElements().Count < 4)
                     {
-                        ((IRealTimeGameScreen)igs).UpdateOffScreen(gameTime);
+                        counter = Elements.GetActiveElements().Count;
                     }
 
-                    if (GameScreens.ScreenNumber == CoreInventoryHandoverScreen)
+                    for (int a = 0; a < counter; a++)
                     {
-                        /*
-                        int counter = 4;
-                        if (Elements.GetActiveElements().Count < 4)
-                        {
-                            counter = Elements.GetActiveElements().Count;
-                        }
-
-                        for (int a = 0; a < counter; a++)
-                        {
-                            Player.BlobInventory[a] = (enCollectables)Elements.GetActiveElements()[a].CurrentElement;
-                        }
-                         */
+                        Player.BlobInventory[a] = (enCollectables)Elements.GetActiveElements()[a].CurrentElement;
                     }
+                     */
                 }
             }
+        }
     }
 
     private void CalculatePresentationTransform()
     {
         // The back buffer, not GraphicsDevice.Viewport: the boot screen parks the viewport at
         // the composition size and the render viewports move it around as they please.
-        var backBuffer = GraphicsDeviceMgr.GraphicsDevice.PresentationParameters;
+        PresentationParameters? backBuffer = GraphicsDeviceMgr.GraphicsDevice.PresentationParameters;
 
         Presentation.Recalculate(backBuffer.BackBufferWidth, backBuffer.BackBufferHeight);
     }
@@ -1117,7 +1089,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         }
         else
         {
-            var desktop = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
+            DisplayMode? desktop = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
 
             GraphicsDeviceMgr.PreferredBackBufferWidth = desktop.Width;
             GraphicsDeviceMgr.PreferredBackBufferHeight = desktop.Height;
@@ -1147,7 +1119,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             ScreenEffectEngine.SelectRenderViewPort("GameArea"); // GameArea;
             GraphicsDeviceMgr.GraphicsDevice.Clear(Presentation.ScreenClearColour);
 
-            var screenToDraw = ScreenDirectory.CurrentScreen;
+            IGameScreen? screenToDraw = ScreenDirectory.CurrentScreen;
             screenToDraw?.Draw(gameTime);
 
             if (Session.Paused)
@@ -1161,7 +1133,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             // The viewport has to be the whole back buffer, not the composition size: the
             // boot screen is scaled up into it by Presentation.Transform like everything else,
             // and a viewport any smaller would just clip the result.
-            var backBuffer = GraphicsDeviceMgr.GraphicsDevice.PresentationParameters;
+            PresentationParameters? backBuffer = GraphicsDeviceMgr.GraphicsDevice.PresentationParameters;
 
             var vp = new Viewport();
             vp.X = 0;
@@ -1187,9 +1159,9 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
                 // Draw the status percentage
                 _bootProgress.Begin(BlendState.AlphaBlend, gameTime, Presentation.Transform);
-                var percentBarWidth = (int)(BootProgressBarSlices / (double)FullyLoadedPercent * PercentComplete);
+                int percentBarWidth = (int)(BootProgressBarSlices / (double)FullyLoadedPercent * PercentComplete);
 
-                for (var a = 0; a < percentBarWidth; a++)
+                for (int a = 0; a < percentBarWidth; a++)
                 {
                     _bootProgress.DrawSpriteUnscaled(0, BootProgressBarXPos + a * BootProgressBarSliceSpacing, BootProgressBarYPos, _bootProgressBackgroundFade);
                 }
@@ -1230,10 +1202,5 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         _scanlines.DrawSprite(0, 0, 0,
             new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ColourLevels.Full));
         _scanlines.End();
-    }
-    
-    public void Dispose()
-    {
-        ContentResourceManager.GetSoundFxEngine().Dispose();
     }
 }

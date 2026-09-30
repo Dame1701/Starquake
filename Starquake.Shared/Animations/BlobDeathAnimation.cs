@@ -2,14 +2,13 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System.Collections.Generic;
 using System;
-using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.ActiveSprites;
 using Starquake.ContentManagement;
 using Starquake.Display;
-using Starquake.Engines;
 using Starquake.Particles;
 using Starquake.Structure;
 
@@ -17,15 +16,15 @@ namespace Starquake.Animations;
 
 public class BlobDeathAnimation : GameComponentBase
 {
-    private readonly GameScreenCollection _gameScreens;
-    private readonly GraphicsSet _graphicsSet;
-    private readonly Random _randomNumberGenerator;
-    private readonly ResourceManager _resources;
 
     // The six fragment sprites Blob comes apart into. Deliberately not a straight run
     private static readonly int[] FragmentSpriteNumbers = [0, 1, 1, 2, 3, 5];
 
     private readonly Animation _blobDeathParticlesOriginal;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
 
     private IPositionalTriggerParticleEffect? _blobFragmentBounceSparks;
     private bool _drawBlobParts;
@@ -61,7 +60,7 @@ public class BlobDeathAnimation : GameComponentBase
     {
         get
         {
-            foreach (var bouncingParticle in BouncingParticles)
+            foreach (BouncingParticle bouncingParticle in BouncingParticles)
             {
                 if (bouncingParticle.Triggered)
                 {
@@ -79,7 +78,7 @@ public class BlobDeathAnimation : GameComponentBase
     {
         get
         {
-            foreach (var bouncingParticle in BouncingParticles)
+            foreach (BouncingParticle bouncingParticle in BouncingParticles)
             {
                 if (bouncingParticle.Triggered || bouncingParticle.HasActiveParticles)
                 {
@@ -99,7 +98,7 @@ public class BlobDeathAnimation : GameComponentBase
 
         // Each fragment needs its own explosion emitter, but they all spark off the one effect
         BouncingParticles.Clear();
-        foreach (var fragmentSpriteNumber in FragmentSpriteNumbers)
+        foreach (int fragmentSpriteNumber in FragmentSpriteNumbers)
         {
             BouncingParticles.Add(new BouncingParticle(_resources, _gameScreens, _randomNumberGenerator, fragmentSpriteNumber)
             {
@@ -116,7 +115,7 @@ public class BlobDeathAnimation : GameComponentBase
     {
         _drawBlobParts = drawBlobParts;
 
-        foreach (var bouncingParticle in BouncingParticles)
+        foreach (BouncingParticle bouncingParticle in BouncingParticles)
         {
             bouncingParticle.Trigger(effectXPosition, effectYPosition, effectMinDuration, effectMaxDuration);
         }
@@ -124,7 +123,7 @@ public class BlobDeathAnimation : GameComponentBase
 
     public void Reset()
     {
-        foreach (var bouncingParticle in BouncingParticles)
+        foreach (BouncingParticle bouncingParticle in BouncingParticles)
         {
             bouncingParticle.Reset();
         }
@@ -132,7 +131,7 @@ public class BlobDeathAnimation : GameComponentBase
 
     public override void Update(GameTime gameTime)
     {
-        foreach (var bouncingParticle in BouncingParticles)
+        foreach (BouncingParticle bouncingParticle in BouncingParticles)
         {
             if (bouncingParticle.Triggered || bouncingParticle.HasActiveParticles)
             {
@@ -158,7 +157,7 @@ public class BlobDeathAnimation : GameComponentBase
             _resources.GetSpriteCollection("BlobFire2Original")
                 .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
 
-            foreach (var bouncingParticle in BouncingParticles)
+            foreach (BouncingParticle bouncingParticle in BouncingParticles)
             {
                 if (bouncingParticle.Triggered)
                 {
@@ -171,7 +170,7 @@ public class BlobDeathAnimation : GameComponentBase
         }
         else
         {
-            foreach (var bouncingParticle in BouncingParticles)
+            foreach (BouncingParticle bouncingParticle in BouncingParticles)
             {
                 if (!bouncingParticle.Triggered && !bouncingParticle.HasActiveParticles)
                 {

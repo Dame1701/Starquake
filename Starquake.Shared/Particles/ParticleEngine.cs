@@ -39,14 +39,14 @@ public class ParticleEngine
 
     public void LoadContent()
     {
-        foreach (var pe in _particleEffects.Values)
+        foreach (ParticleEffect pe in _particleEffects.Values)
         {
             pe.LoadContent(_contentManager);
         }
 
         _particleRenderer.LoadContent(_contentManager);
 
-        foreach (var pe in _particleEffects.Values)
+        foreach (ParticleEffect pe in _particleEffects.Values)
         {
             pe.Initialise();
         }
@@ -78,12 +78,12 @@ public class ParticleEngine
     /// </summary>
     private ParticleEffect CopyEffect(string effectName)
     {
-        if (!_particleEffects.TryGetValue(effectName, out var registered))
+        if (!_particleEffects.TryGetValue(effectName, out ParticleEffect? registered))
         {
             throw new InvalidOperationException($"Particle effect '{effectName}' has not been registered.");
         }
 
-        var copy = registered.DeepCopy();
+        ParticleEffect? copy = registered.DeepCopy();
         copy.LoadContent(_contentManager);
         copy.Initialise();
 

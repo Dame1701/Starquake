@@ -31,7 +31,7 @@ public sealed class EnumMatchConverter : IValueConverter
             return BindingOperations.DoNothing;
         }
 
-        var enumType = Nullable.GetUnderlyingType(targetType) ?? targetType;
+        Type enumType = Nullable.GetUnderlyingType(targetType) ?? targetType;
 
         return Enum.Parse(enumType, parameter.ToString()!);
     }

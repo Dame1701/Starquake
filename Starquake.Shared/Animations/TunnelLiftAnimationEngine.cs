@@ -4,26 +4,25 @@
 // -
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.ContentManagement;
 using Starquake.Display;
-using Starquake.Engines;
 using Starquake.Structure;
 
 namespace Starquake.Animations;
 
 public class TunnelLiftAnimationEngine : GameComponentBase
 {
-    private readonly GameScreenCollection _gameScreens;
-    private readonly GraphicsSet _graphicsSet;
-    private readonly ResourceManager _resources;
 
     /// <summary>
     ///     How far apart the arrow animations of neighbouring lift shafts are started, in logic
     ///     frames, so that two shafts on the same screen ripple rather than pulsing in step.
     /// </summary>
     private const int ColumnStartStagger = 15;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly ResourceManager _resources;
 
     private List<TunnelLiftAnimationColumn>? _columns;
 
@@ -64,15 +63,15 @@ public class TunnelLiftAnimationEngine : GameComponentBase
         }
 
         _columns = null;
-        var initialDelayTime = 0;
+        int initialDelayTime = 0;
 
         if (tunnelLiftArrowLocations != null)
         {
             _columns = new List<TunnelLiftAnimationColumn>();
 
-            for (var a = 0; a < tunnelLiftArrowLocations.Length; a++)
+            for (int a = 0; a < tunnelLiftArrowLocations.Length; a++)
             {
-                var existingColumn = _columns.Where(col => col.XPosition == tunnelLiftArrowLocations[a].X).FirstOrDefault();
+                TunnelLiftAnimationColumn? existingColumn = _columns.Where(col => col.XPosition == tunnelLiftArrowLocations[a].X).FirstOrDefault();
 
                 if (existingColumn == null)
                 {
@@ -90,7 +89,7 @@ public class TunnelLiftAnimationEngine : GameComponentBase
     {
         if (_columns != null && _columns.Count > 0)
         {
-            foreach (var column in _columns)
+            foreach (TunnelLiftAnimationColumn column in _columns)
             {
                 column.Update();
             }
@@ -103,7 +102,7 @@ public class TunnelLiftAnimationEngine : GameComponentBase
         {
             _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
 
-            foreach (var column in _columns)
+            foreach (TunnelLiftAnimationColumn column in _columns)
             {
                 column.Draw(_resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles), screenfade);
             }

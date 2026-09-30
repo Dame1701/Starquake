@@ -15,13 +15,13 @@ public class ContinuousParticleEffect : IStandardParticleEffect
 {
     private readonly GraphicsSet _graphicsSet;
 
-    private DateTime _effectLastTriggered;
-
-    private DateTime _effectStartTime;
-
     internal readonly ParticleEffect MercuryParticleEffect;
 
     internal readonly SpriteBatchRenderer Renderer;
+
+    private DateTime _effectLastTriggered;
+
+    private DateTime _effectStartTime;
 
     public ContinuousParticleEffect(GraphicsSet graphicsSet, ParticleEffect mercuryParticleEffect,
         SpriteBatchRenderer renderer)
@@ -126,7 +126,7 @@ public class ContinuousParticleEffect : IStandardParticleEffect
         }
 
         // Mercury must always be updated
-        var deltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        float deltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
         MercuryParticleEffect.Update(deltaSeconds);
     }
 

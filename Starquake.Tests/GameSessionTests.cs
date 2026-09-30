@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System.Collections.Generic;
 using Microsoft.Xna.Framework.Input;
 using Starquake.Input;
 using Starquake.Structure;
@@ -47,7 +46,11 @@ public class GameSessionTests
 
         // Assert
         // The engine stops the background rumble on the first and restarts it on the second.
-        Assert.Equal(new[] { true, false }, announced);
+        Assert.Equal(new[]
+        {
+            true,
+            false
+        }, announced);
     }
 
     [Fact]
@@ -55,7 +58,7 @@ public class GameSessionTests
     {
         // Arrange
         var session = new GameSession();
-        var announcements = 0;
+        int announcements = 0;
         session.OnPausedChanged += _ => announcements++;
 
         // Act
@@ -144,7 +147,10 @@ public class GameSessionTests
         };
 
         // Act
-        var session = new GameSession { PlayerKeys = joystick };
+        var session = new GameSession
+        {
+            PlayerKeys = joystick
+        };
 
         // Assert
         Assert.Equal(Keys.None, session.PlayerKeys.Up);

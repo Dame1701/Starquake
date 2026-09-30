@@ -85,7 +85,9 @@ public class GameHost : Game
             _graphics.IsFullScreen ||
             Window.ClientBounds.Width == 0 ||
             Window.ClientBounds.Height == 0)
+        {
             return;
+        }
 
         // ApplyChanges resizes the window, which raises this event straight back at us.
         _resizingBackBuffer = true;
@@ -151,7 +153,7 @@ public class GameHost : Game
 
         _logicAccumulator += gameTime.ElapsedGameTime;
 
-        var maxBacklog = LogicFrameLength * MaxCatchUpFrames;
+        TimeSpan maxBacklog = LogicFrameLength * MaxCatchUpFrames;
 
         if (_logicAccumulator > maxBacklog)
         {

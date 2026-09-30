@@ -52,9 +52,9 @@ public static class GameContent
         {
             var paths = new List<string>();
 
-            foreach (var name in TileSheetNames)
+            foreach (string name in TileSheetNames)
             {
-                var path = Combine("Starquake.Shared", "Content", "Graphics", name);
+                string? path = Combine("Starquake.Shared", "Content", "Graphics", name);
                 if (path is not null)
                 {
                     paths.Add(path);
@@ -72,7 +72,7 @@ public static class GameContent
             return null;
         }
 
-        var path = Path.Combine([RepositoryRoot, .. parts]);
+        string path = Path.Combine([RepositoryRoot, .. parts]);
 
         return File.Exists(path) ? path : null;
     }

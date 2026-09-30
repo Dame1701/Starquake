@@ -2,15 +2,14 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System.Collections.Generic;
 using System;
-using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.ActiveSprites;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
-using Starquake.GameComponents;
 using Starquake.Helpers;
 using Starquake.Particles;
 using Starquake.Structure;
@@ -19,14 +18,6 @@ namespace Starquake.GameComponents.GameScreens;
 
 public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
 {
-    private readonly Blob _blob;
-    private readonly GameScreenCollection _gameScreens;
-    private readonly GraphicsSet _graphicsSet;
-    private readonly PresentationSettings _presentation;
-    private readonly Random _randomNumberGenerator;
-    private readonly ResourceManager _resources;
-    private readonly ScreenDirectory _screenDirectory;
-    private readonly GameSession _session;
 
 
     /// <summary>
@@ -86,18 +77,26 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
 
     /// <inheritdoc cref="CoreCentreX" />
     private const int CoreCentreY = TileMetrics.PlayAreaHeight / 2;
-    private int _blankingTilesOpacity;
-    private int _coreAlienCount = MaxCoreAliens;
+    private readonly Blob _blob;
 
     private readonly List<Nasty> _coreAliens;
-    private IStandardParticleEffect _coreComputationEffect;
+    private readonly IStandardParticleEffect _coreComputationEffect;
 
     //private MercuryParticleEngine.MercuryParticleEffect coreVortex;
-    private IStandardParticleEffect _coreSparks;
+    private readonly IStandardParticleEffect _coreSparks;
 
     private readonly CoreElements _elements;
 
     private readonly Queue<int> _elementsToReplace = new();
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly PresentationSettings _presentation;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
+    private readonly ScreenDirectory _screenDirectory;
+    private readonly GameSession _session;
+    private int _blankingTilesOpacity;
+    private int _coreAlienCount = MaxCoreAliens;
     private int _entryTime;
 
     private bool _justEnteredCore = true;
@@ -130,7 +129,7 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
         _elements.LoadContent();
 
         _coreAliens = new List<Nasty>();
-        for (var a = 0; a < _coreAlienCount; a++)
+        for (int a = 0; a < _coreAlienCount; a++)
         {
             var coreAlien = new Nasty(
                 _resources,
@@ -163,7 +162,7 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
     /// <param name="gameTime"></param>
     public void UpdateOffScreen(GameTime gameTime)
     {
-        for (var a = 0; a < _coreAlienCount; a++)
+        for (int a = 0; a < _coreAlienCount; a++)
         {
             _coreAliens[a].Update(gameTime);
         }
@@ -191,11 +190,11 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
             _elementsToReplace.Clear();
 
             // Check to see if blob is carrying any elements to replace
-            var activeElements = _elements.GetActiveElements();
+            List<CoreElement> activeElements = _elements.GetActiveElements();
 
-            for (var a = 0; a < _blob.BlobInventory.Length; a++)
+            for (int a = 0; a < _blob.BlobInventory.Length; a++)
             {
-                foreach (var activeElement in activeElements)
+                foreach (CoreElement activeElement in activeElements)
                 {
                     if ((int)_blob.BlobInventory[a] == activeElement.CurrentElement)
                     {
@@ -273,9 +272,9 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
         if (!_replacingElements)
         {
             _resources.GetSpriteCollection("BlankingTile").Begin(BlendState.AlphaBlend, gameTime);
-            for (var a = 0; a < BlankingTilesDown; a++)
+            for (int a = 0; a < BlankingTilesDown; a++)
             {
-                for (var b = 0; b < BlankingTilesAcross; b++)
+                for (int b = 0; b < BlankingTilesAcross; b++)
                 {
                     _resources.GetSpriteCollection("BlankingTile").DrawSprite(0, b * TileMetrics.TileWidth + BlankingTilesFirstColumn, a * TileMetrics.TileHeight, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_blankingTilesOpacity));
                 }
@@ -288,7 +287,7 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
         // Draw the core aliens
         if (!_replacingElements)
         {
-            for (var a = 0; a < _coreAlienCount; a++)
+            for (int a = 0; a < _coreAlienCount; a++)
             {
                 _coreAliens[a].Draw(gameTime, (byte)(ColourLevels.Full - _blankingTilesOpacity));
             }
@@ -326,13 +325,13 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
         // Add the collision map for the core elements
         _gameScreens.CurrentGameScreenData.CollisionMap.AddRange(_elements.GetCollisionMap());
 
-        var potentialLocations = _gameScreens.GetNastyPotentialLocations();
+        List<Point> potentialLocations = _gameScreens.GetNastyPotentialLocations();
         if (potentialLocations.Count < _coreAlienCount)
         {
             _coreAlienCount = potentialLocations.Count;
         }
 
-        for (var a = 0; a < _coreAlienCount; a++)
+        for (int a = 0; a < _coreAlienCount; a++)
         {
             _coreAliens[a].XPos = potentialLocations[a].X;
             _coreAliens[a].YPos = potentialLocations[a].Y;
@@ -358,7 +357,7 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
     private void CalculateCoreAlienCount()
     {
         // Figure out how many core aliens to display
-        var elementsLeftToReplace = _elements.GetActiveElements().Count;
+        int elementsLeftToReplace = _elements.GetActiveElements().Count;
         if (elementsLeftToReplace > OneAlienFrom)
         {
             _coreAlienCount = 0;

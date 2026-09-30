@@ -20,7 +20,7 @@ public class AnimTile : GameComponentBase
     {
         _graphicsSet = graphicsSet;
 
-        this.ScreenTileRef = screenTileRef;
+        ScreenTileRef = screenTileRef;
         _tileAnimationSpriteSet = tileAnimationSpriteSet;
 
         TileAnimation = new Animation();

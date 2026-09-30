@@ -12,10 +12,10 @@ public class FaderAnimation
 {
     private readonly int _minFade;
     private readonly Random? _randomGenerator;
+    private int _fadeSpeed;
     private FadeDirection FadeDirection;
     public int FadeLevel;
     private bool FadeOperational;
-    private int _fadeSpeed;
 
     public FaderAnimation(int fadeSpeed, Random? randomGenerator = null, int minFade = 0)
     {

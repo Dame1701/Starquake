@@ -78,7 +78,7 @@ public static class TileCatalogue
             return "Empty";
         }
 
-        var name = SpecialName(tileImage);
+        string? name = SpecialName(tileImage);
 
         return name is null ? "Tile " + tileImage : "Tile " + tileImage + "  ·  " + name;
     }
@@ -87,14 +87,14 @@ public static class TileCatalogue
     {
         var names = new Dictionary<int, string>();
 
-        foreach (var tile in Enum.GetValues<ActionTiles>())
+        foreach (ActionTiles tile in Enum.GetValues<ActionTiles>())
         {
             names[(int)tile] = Humanise(tile.ToString());
         }
 
-        for (var pair = 0; pair < TunnelTiles.MouthPairs; pair++)
+        for (int pair = 0; pair < TunnelTiles.MouthPairs; pair++)
         {
-            var left = TunnelTiles.FirstMouth + pair * TunnelTiles.MouthStride;
+            int left = TunnelTiles.FirstMouth + pair * TunnelTiles.MouthStride;
 
             names[left] = "Tunnel mouth " + (pair + 1) + " (west)";
             names[left + 1] = "Tunnel mouth " + (pair + 1) + " (east)";
@@ -111,11 +111,11 @@ public static class TileCatalogue
     {
         var text = new StringBuilder(name.Length + 8);
 
-        for (var index = 0; index < name.Length; index++)
+        for (int index = 0; index < name.Length; index++)
         {
-            var character = name[index];
-            var startsWord = index > 0 &&
-                             (char.IsUpper(character) || char.IsDigit(character) != char.IsDigit(name[index - 1]));
+            char character = name[index];
+            bool startsWord = index > 0 &&
+                              (char.IsUpper(character) || char.IsDigit(character) != char.IsDigit(name[index - 1]));
 
             if (startsWord)
             {

@@ -2,8 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Starquake.Engines;
-
 namespace Starquake.Structure;
 
 public class StartableGameComponentBase

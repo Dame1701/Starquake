@@ -35,7 +35,7 @@ public class MultiTriggerTimeBasedParticleEffect : IPositionalTriggerParticleEff
 
     public void Update(GameTime gameTime)
     {
-        var deltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        float deltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
         MercuryParticleEffect.Update(deltaSeconds);
 
         if (MercuryParticleEffect.ActiveParticlesCount == 0)

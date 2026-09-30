@@ -10,6 +10,7 @@ using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Starquake.Constants;
+using Starquake.ScreenEditor.Content;
 using Starquake.ScreenEditor.Editing;
 using Starquake.ScreenEditor.Styles;
 
@@ -29,14 +30,14 @@ namespace Starquake.ScreenEditor.Controls;
 public sealed class ScreenCanvas : Control
 {
 
-    public static readonly StyledProperty<EditorSession?> SessionProperty =
-        AvaloniaProperty.Register<ScreenCanvas, EditorSession?>(nameof(Session));
-
     /// <summary>
     ///     How much of a neighbouring screen to show, in tiles. One is enough to line scenery up
     ///     against and small enough to leave the screen being edited the obvious subject.
     /// </summary>
     private const int NeighbourTiles = 1;
+
+    public static readonly StyledProperty<EditorSession?> SessionProperty =
+        AvaloniaProperty.Register<ScreenCanvas, EditorSession?>(nameof(Session));
 
     private static readonly Typeface LabelTypeface = new(FontFamily.Default);
 
@@ -46,9 +47,9 @@ public sealed class ScreenCanvas : Control
 
     private int _hoverY = -1;
 
-    private bool _stroking;
-
     private EditorTool _strokeTool;
+
+    private bool _stroking;
 
     public ScreenCanvas()
     {
@@ -70,14 +71,14 @@ public sealed class ScreenCanvas : Control
     {
         context.FillRectangle(EditorColours.VoidBrush, new Rect(Bounds.Size));
 
-        var session = Session;
+        EditorSession? session = Session;
         if (session?.Sheet is null)
         {
             DrawPlaceholder(context);
             return;
         }
 
-        var layout = Layout.For(Bounds.Size, session.ShowNeighbours);
+        Layout layout = Layout.For(Bounds.Size, session.ShowNeighbours);
 
         if (session.ShowNeighbours)
         {
@@ -120,7 +121,7 @@ public sealed class ScreenCanvas : Control
     {
         base.OnPointerPressed(e);
 
-        var session = Session;
+        EditorSession? session = Session;
         if (session?.Sheet is null)
         {
             return;
@@ -128,8 +129,8 @@ public sealed class ScreenCanvas : Control
 
         Focus();
 
-        var point = e.GetCurrentPoint(this);
-        if (!TryHitTest(point.Position, out var x, out var y))
+        PointerPoint point = e.GetCurrentPoint(this);
+        if (!TryHitTest(point.Position, out int x, out int y))
         {
             return;
         }
@@ -148,14 +149,14 @@ public sealed class ScreenCanvas : Control
     {
         base.OnPointerMoved(e);
 
-        var session = Session;
+        EditorSession? session = Session;
         if (session is null)
         {
             return;
         }
 
-        var inside = TryHitTest(e.GetPosition(this), out var x, out var y);
-        var moved = inside ? x != _hoverX || y != _hoverY : _hoverX >= 0;
+        bool inside = TryHitTest(e.GetPosition(this), out int x, out int y);
+        bool moved = inside ? x != _hoverX || y != _hoverY : _hoverX >= 0;
 
         _hoverX = inside ? x : -1;
         _hoverY = inside ? y : -1;
@@ -208,7 +209,7 @@ public sealed class ScreenCanvas : Control
     {
         base.OnKeyDown(e);
 
-        var session = Session;
+        EditorSession? session = Session;
         if (session is null || e.KeyModifiers.HasFlag(KeyModifiers.Control))
         {
             return;
@@ -296,13 +297,13 @@ public sealed class ScreenCanvas : Control
         x = -1;
         y = -1;
 
-        var session = Session;
+        EditorSession? session = Session;
         if (session?.Sheet is null)
         {
             return false;
         }
 
-        var layout = Layout.For(Bounds.Size, session.ShowNeighbours);
+        Layout layout = Layout.For(Bounds.Size, session.ShowNeighbours);
         if (!layout.Screen.Contains(position))
         {
             return false;
@@ -325,7 +326,7 @@ public sealed class ScreenCanvas : Control
             return;
         }
 
-        var tile = session.Document.GetTile(session.CurrentScreen, _hoverX, _hoverY);
+        int tile = session.Document.GetTile(session.CurrentScreen, _hoverX, _hoverY);
 
         session.HoverStatus = _hoverX + ", " + _hoverY + "  ·  " + TileCatalogue.Describe(tile);
     }
@@ -347,14 +348,14 @@ public sealed class ScreenCanvas : Control
 
     private void DrawScreen(DrawingContext context, EditorSession session, Layout layout)
     {
-        var sheet = session.Sheet!;
+        TileSheet sheet = session.Sheet!;
 
-        for (var y = 0; y < TileMetrics.TilesDown; y++)
+        for (int y = 0; y < TileMetrics.TilesDown; y++)
         {
-            for (var x = 0; x < TileMetrics.TilesAcross; x++)
+            for (int x = 0; x < TileMetrics.TilesAcross; x++)
             {
-                var destination = layout.TileRect(x, y);
-                var tile = session.Document.GetTile(session.CurrentScreen, x, y);
+                Rect destination = layout.TileRect(x, y);
+                int tile = session.Document.GetTile(session.CurrentScreen, x, y);
 
                 if (tile == EditorDocument.EmptyTile)
                 {
@@ -373,9 +374,9 @@ public sealed class ScreenCanvas : Control
     /// </summary>
     private static void DrawEmptyTile(DrawingContext context, Layout layout, Rect destination)
     {
-        for (var cellY = 0; cellY < TileMetrics.CollisionCellsDownTile; cellY++)
+        for (int cellY = 0; cellY < TileMetrics.CollisionCellsDownTile; cellY++)
         {
-            for (var cellX = 0; cellX < TileMetrics.CollisionCellsAcrossTile; cellX++)
+            for (int cellX = 0; cellX < TileMetrics.CollisionCellsAcrossTile; cellX++)
             {
                 if ((cellX + cellY) % 2 != 0)
                 {
@@ -395,25 +396,25 @@ public sealed class ScreenCanvas : Control
 
     private void DrawNeighbours(DrawingContext context, EditorSession session, Layout layout)
     {
-        var sheet = session.Sheet!;
-        var document = session.Document;
+        TileSheet sheet = session.Sheet!;
+        EditorDocument document = session.Document;
 
-        var column = session.ScreenColumn;
-        var row = session.ScreenRow;
+        int column = session.ScreenColumn;
+        int row = session.ScreenRow;
 
-        using var dimmed = context.PushOpacity(0.4);
+        using DrawingContext.PushedState dimmed = context.PushOpacity(0.4);
 
-        for (var dy = -1; dy <= 1; dy++)
+        for (int dy = -1; dy <= 1; dy++)
         {
-            for (var dx = -1; dx <= 1; dx++)
+            for (int dx = -1; dx <= 1; dx++)
             {
                 if (dx == 0 && dy == 0)
                 {
                     continue;
                 }
 
-                var neighbourColumn = column + dx;
-                var neighbourRow = row + dy;
+                int neighbourColumn = column + dx;
+                int neighbourRow = row + dy;
 
                 if (neighbourColumn < 0 || neighbourColumn >= WorldMap.ScreensAcross ||
                     neighbourRow < 0 || neighbourRow >= WorldMap.ScreensDown)
@@ -421,18 +422,18 @@ public sealed class ScreenCanvas : Control
                     continue;
                 }
 
-                var neighbour = neighbourRow * WorldMap.ScreensAcross + neighbourColumn;
+                int neighbour = neighbourRow * WorldMap.ScreensAcross + neighbourColumn;
 
                 // Only the tiles that fall inside the border are worth drawing, so each direction
                 // contributes the one row or column of its screen that touches this one.
-                var (firstX, lastX) = StripRange(dx, TileMetrics.TilesAcross);
-                var (firstY, lastY) = StripRange(dy, TileMetrics.TilesDown);
+                (int firstX, int lastX) = StripRange(dx, TileMetrics.TilesAcross);
+                (int firstY, int lastY) = StripRange(dy, TileMetrics.TilesDown);
 
-                for (var y = firstY; y <= lastY; y++)
+                for (int y = firstY; y <= lastY; y++)
                 {
-                    for (var x = firstX; x <= lastX; x++)
+                    for (int x = firstX; x <= lastX; x++)
                     {
-                        var tile = document.GetTile(neighbour, x, y);
+                        int tile = document.GetTile(neighbour, x, y);
                         if (tile == EditorDocument.EmptyTile)
                         {
                             continue;
@@ -462,23 +463,23 @@ public sealed class ScreenCanvas : Control
 
     private void DrawCollision(DrawingContext context, EditorSession session, Layout layout)
     {
-        var document = session.Document;
+        EditorDocument document = session.Document;
 
-        for (var y = 0; y < TileMetrics.TilesDown; y++)
+        for (int y = 0; y < TileMetrics.TilesDown; y++)
         {
-            for (var x = 0; x < TileMetrics.TilesAcross; x++)
+            for (int x = 0; x < TileMetrics.TilesAcross; x++)
             {
-                var tile = document.GetTile(session.CurrentScreen, x, y);
+                int tile = document.GetTile(session.CurrentScreen, x, y);
                 if (tile == EditorDocument.EmptyTile)
                 {
                     continue;
                 }
 
-                var destination = layout.TileRect(x, y);
+                Rect destination = layout.TileRect(x, y);
 
-                for (var cellY = 0; cellY < TileMetrics.CollisionCellsDownTile; cellY++)
+                for (int cellY = 0; cellY < TileMetrics.CollisionCellsDownTile; cellY++)
                 {
-                    for (var cellX = 0; cellX < TileMetrics.CollisionCellsAcrossTile; cellX++)
+                    for (int cellX = 0; cellX < TileMetrics.CollisionCellsAcrossTile; cellX++)
                     {
                         if (!document.IsSolid(tile, cellX, cellY))
                         {
@@ -497,17 +498,17 @@ public sealed class ScreenCanvas : Control
             }
         }
 
-        for (var line = 0; line <= TileMetrics.TilesAcross * TileMetrics.CollisionCellsAcrossTile; line++)
+        for (int line = 0; line <= TileMetrics.TilesAcross * TileMetrics.CollisionCellsAcrossTile; line++)
         {
-            var x = layout.Screen.X + line * layout.Cell;
+            double x = layout.Screen.X + line * layout.Cell;
             context.DrawLine(EditorColours.CollisionGridPen,
                 new Point(x, layout.Screen.Y),
                 new Point(x, layout.Screen.Bottom));
         }
 
-        for (var line = 0; line <= TileMetrics.TilesDown * TileMetrics.CollisionCellsDownTile; line++)
+        for (int line = 0; line <= TileMetrics.TilesDown * TileMetrics.CollisionCellsDownTile; line++)
         {
-            var y = layout.Screen.Y + line * layout.Cell;
+            double y = layout.Screen.Y + line * layout.Cell;
             context.DrawLine(EditorColours.CollisionGridPen,
                 new Point(layout.Screen.X, y),
                 new Point(layout.Screen.Right, y));
@@ -516,17 +517,17 @@ public sealed class ScreenCanvas : Control
 
     private static void DrawGrid(DrawingContext context, Layout layout)
     {
-        for (var column = 0; column <= TileMetrics.TilesAcross; column++)
+        for (int column = 0; column <= TileMetrics.TilesAcross; column++)
         {
-            var x = layout.Screen.X + column * layout.TileWidth;
+            double x = layout.Screen.X + column * layout.TileWidth;
             context.DrawLine(EditorColours.GridPen,
                 new Point(x, layout.Screen.Y),
                 new Point(x, layout.Screen.Bottom));
         }
 
-        for (var row = 0; row <= TileMetrics.TilesDown; row++)
+        for (int row = 0; row <= TileMetrics.TilesDown; row++)
         {
-            var y = layout.Screen.Y + row * layout.TileHeight;
+            double y = layout.Screen.Y + row * layout.TileHeight;
             context.DrawLine(EditorColours.GridPen,
                 new Point(layout.Screen.X, y),
                 new Point(layout.Screen.Right, y));
@@ -535,17 +536,17 @@ public sealed class ScreenCanvas : Control
 
     private void DrawTileNumbers(DrawingContext context, EditorSession session, Layout layout)
     {
-        for (var y = 0; y < TileMetrics.TilesDown; y++)
+        for (int y = 0; y < TileMetrics.TilesDown; y++)
         {
-            for (var x = 0; x < TileMetrics.TilesAcross; x++)
+            for (int x = 0; x < TileMetrics.TilesAcross; x++)
             {
-                var tile = session.Document.GetTile(session.CurrentScreen, x, y);
+                int tile = session.Document.GetTile(session.CurrentScreen, x, y);
                 if (tile == EditorDocument.EmptyTile)
                 {
                     continue;
                 }
 
-                var special = TileCatalogue.IsSpecial(tile);
+                bool special = TileCatalogue.IsSpecial(tile);
 
                 var text = new FormattedText(
                     tile.ToString(),
@@ -555,7 +556,7 @@ public sealed class ScreenCanvas : Control
                     11,
                     special ? EditorColours.AccentBrush : EditorColours.TextBrush);
 
-                var destination = layout.TileRect(x, y);
+                Rect destination = layout.TileRect(x, y);
                 var backing = new Rect(destination.X + 3, destination.Y + 3, text.Width + 8, text.Height + 2);
 
                 context.FillRectangle(new SolidColorBrush(EditorColours.Void, 0.75), backing, 3);
@@ -571,8 +572,8 @@ public sealed class ScreenCanvas : Control
             return;
         }
 
-        var destination = layout.TileRect(_hoverX, _hoverY);
-        var tool = _stroking ? _strokeTool : session.Tool;
+        Rect destination = layout.TileRect(_hoverX, _hoverY);
+        EditorTool tool = _stroking ? _strokeTool : session.Tool;
 
         // A ghost of what is about to be laid down beats guessing from a swatch on the far side of
         // the window whether the tile in hand is the right one.
@@ -609,17 +610,17 @@ public sealed class ScreenCanvas : Control
 
         public static Layout For(Size available, bool showNeighbours)
         {
-            var margin = showNeighbours ? NeighbourTiles : 0;
+            int margin = showNeighbours ? NeighbourTiles : 0;
 
-            var cellsAcross = (TileMetrics.TilesAcross + margin * 2) * TileMetrics.CollisionCellsAcrossTile;
-            var cellsDown = (TileMetrics.TilesDown + margin * 2) * TileMetrics.CollisionCellsDownTile;
+            int cellsAcross = (TileMetrics.TilesAcross + margin * 2) * TileMetrics.CollisionCellsAcrossTile;
+            int cellsDown = (TileMetrics.TilesDown + margin * 2) * TileMetrics.CollisionCellsDownTile;
 
-            var cell = Math.Max(2, Math.Floor(Math.Min(
+            double cell = Math.Max(2, Math.Floor(Math.Min(
                 available.Width / cellsAcross,
                 available.Height / cellsDown)));
 
-            var totalWidth = cellsAcross * cell;
-            var totalHeight = cellsDown * cell;
+            double totalWidth = cellsAcross * cell;
+            double totalHeight = cellsDown * cell;
 
             var screen = new Rect(
                 Math.Floor((available.Width - totalWidth) / 2) +

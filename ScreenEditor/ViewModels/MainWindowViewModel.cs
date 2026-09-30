@@ -132,7 +132,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         get
         {
-            var name = Session.Document.FilePath is null
+            string name = Session.Document.FilePath is null
                 ? "Untitled map"
                 : Path.GetFileName(Session.Document.FilePath);
 
@@ -164,6 +164,11 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private static FilePickerFileType ScreenDataFileType => new("Starquake screen data")
+    {
+        Patterns = ["*.dat"]
+    };
+
     /// <summary>
     ///     Opens whatever the checkout has to offer, so that the editor comes up ready to work rather
     ///     than empty. Anything missing is simply not loaded; the File menu covers that case.
@@ -172,7 +177,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         SelectedTileSheet = AvailableTileSheets.FirstOrDefault();
 
-        var mapPath = GameContent.MapPath;
+        string? mapPath = GameContent.MapPath;
         if (mapPath is not null)
         {
             LoadMap(mapPath);
@@ -192,7 +197,7 @@ public class MainWindowViewModel : ViewModelBase
             return true;
         }
 
-        var choice = await ConfirmDialog.AskAsync(
+        ConfirmChoice choice = await ConfirmDialog.AskAsync(
             _owner,
             "This map has changes that have not been saved. Save them before closing?");
 
@@ -221,7 +226,7 @@ public class MainWindowViewModel : ViewModelBase
 
     private void OnSessionChanged()
     {
-        foreach (var command in _commands)
+        foreach (RelayCommand command in _commands)
         {
             command.RaiseCanExecuteChanged();
         }
@@ -250,14 +255,14 @@ public class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        var files = await _owner.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        IReadOnlyList<IStorageFile> files = await _owner.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Open screen data",
             AllowMultiple = false,
             FileTypeFilter = [ScreenDataFileType]
         });
 
-        var path = files.Count > 0 ? files[0].TryGetLocalPath() : null;
+        string? path = files.Count > 0 ? files[0].TryGetLocalPath() : null;
         if (path is not null)
         {
             LoadMap(path);
@@ -266,7 +271,7 @@ public class MainWindowViewModel : ViewModelBase
 
     private async Task<bool> SaveMapAsync()
     {
-        var path = Session.Document.FilePath;
+        string? path = Session.Document.FilePath;
 
         return path is null ? await SaveMapAsAsync() : Save(path);
     }
@@ -278,7 +283,7 @@ public class MainWindowViewModel : ViewModelBase
             return false;
         }
 
-        var file = await _owner.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        IStorageFile? file = await _owner.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
             Title = "Save screen data",
             SuggestedFileName = Path.GetFileName(Session.Document.FilePath) ?? ScreenDataFile.DefaultFileName,
@@ -286,7 +291,7 @@ public class MainWindowViewModel : ViewModelBase
             FileTypeChoices = [ScreenDataFileType]
         });
 
-        var path = file?.TryGetLocalPath();
+        string? path = file?.TryGetLocalPath();
 
         return path is not null && Save(path);
     }
@@ -330,14 +335,14 @@ public class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        var files = await _owner.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        IReadOnlyList<IStorageFile> files = await _owner.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Open tile sheet",
             AllowMultiple = false,
             FileTypeFilter = [FilePickerFileTypes.ImagePng]
         });
 
-        var path = files.Count > 0 ? files[0].TryGetLocalPath() : null;
+        string? path = files.Count > 0 ? files[0].TryGetLocalPath() : null;
         if (path is not null)
         {
             UseTileSheet(path);
@@ -363,11 +368,6 @@ public class MainWindowViewModel : ViewModelBase
 
         OnSessionChanged();
     }
-
-    private static FilePickerFileType ScreenDataFileType => new("Starquake screen data")
-    {
-        Patterns = ["*.dat"]
-    };
 }
 
 /// <summary>

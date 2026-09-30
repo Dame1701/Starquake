@@ -14,9 +14,9 @@ public class ProportionalNumbers
     {
         resources.GetSpriteCollection("ProportionalNumbers").Begin(BlendState.AlphaBlend, gameTime);
 
-        for (var a = 0; a < numbers.Length; a++)
+        for (int a = 0; a < numbers.Length; a++)
         {
-            var subScore = numbers.Substring(a, 1);
+            string subScore = numbers.Substring(a, 1);
 
             if (subScore == ".")
             {

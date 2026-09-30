@@ -18,7 +18,7 @@ public class AnimTileEngine : GameComponentBase
 
     public bool ContainsTile(int tileNumber)
     {
-        foreach (var animTilesList in AnimTilesList)
+        foreach (AnimTile animTilesList in AnimTilesList)
         {
             if (animTilesList.ScreenTileRef == tileNumber)
             {
@@ -31,7 +31,7 @@ public class AnimTileEngine : GameComponentBase
 
     public override void Update(GameTime gameTime)
     {
-        foreach (var animTilesList in AnimTilesList)
+        foreach (AnimTile animTilesList in AnimTilesList)
         {
             animTilesList.Update(gameTime);
         }
@@ -39,7 +39,7 @@ public class AnimTileEngine : GameComponentBase
 
     public void Draw(int tileNumber, int xPos, int yPos, Color colour, GameTime gameTime)
     {
-        foreach (var animTilesList in AnimTilesList)
+        foreach (AnimTile animTilesList in AnimTilesList)
         {
             if (animTilesList.ScreenTileRef == tileNumber)
             {

@@ -3,8 +3,8 @@
 // ---------------------------------------------------------
 // -
 using System;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.ActiveSprites;
 using Starquake.Animations;
 using Starquake.ContentManagement;
@@ -15,9 +15,6 @@ namespace Starquake.Display;
 
 public class StatusPanel : GameComponentBase
 {
-    private readonly GraphicsSet _graphicsSet;
-    private readonly ResourceManager _resources;
-    private readonly ScreenDirectory _screenDirectory;
 
 
     /// <summary>
@@ -148,9 +145,12 @@ public class StatusPanel : GameComponentBase
 
     /// <inheritdoc cref="ScoreXPos" />
     private const int LivesYPos = 113;
+    private readonly GraphicsSet _graphicsSet;
 
 
     private readonly KeyScanner _inventoryScanner;
+    private readonly ResourceManager _resources;
+    private readonly ScreenDirectory _screenDirectory;
 
     private Collectables[]? _blobsInventory;
 
@@ -342,7 +342,7 @@ public class StatusPanel : GameComponentBase
             return;
         }
 
-        var platformsWorth = Platforms * PlatformCost;
+        double platformsWorth = Platforms * PlatformCost;
 
         if (platformsWorth <= EnergyLevel && platformsWorth <= FirePower)
         {
@@ -492,7 +492,7 @@ public class StatusPanel : GameComponentBase
         {
             // Draw items
             _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-            for (var a = 0; a < _blobsInventory.Length; a++)
+            for (int a = 0; a < _blobsInventory.Length; a++)
             {
                 // Draw numbers above object
                 if (_blobsInventory[a] == Collectables.None)

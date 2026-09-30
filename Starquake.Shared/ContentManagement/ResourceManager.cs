@@ -7,9 +7,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
+using MessagePack;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
-using MessagePack;
 using Starquake.Animations;
 using Starquake.Particles;
 using Starquake.SharedLibs;
@@ -31,11 +31,11 @@ public class ResourceManager : StartableGameComponentBase
     private const int LaunchPauseMs = 500;
 
     private readonly AnimTileEngine _animationTileEngine;
+    private readonly List<AnimSpriteDescription> _animSpriteDescriptions;
     private readonly ContentManager _contentManagerInstance;
+    private readonly List<DataDescription> _dataDescriptions;
     private readonly GraphicsDeviceManager _graphicsDeviceManager;
     private readonly GraphicsSet _graphicsSet;
-    private readonly List<AnimSpriteDescription> _animSpriteDescriptions;
-    private readonly List<DataDescription> _dataDescriptions;
     private readonly ParticleEngine _particleEngine;
 
     private readonly Dictionary<string, object> _resources;
@@ -111,13 +111,13 @@ public class ResourceManager : StartableGameComponentBase
             0,
             GameEngineStatus.Starting);
 
-        var totalComponentsToLoad =
+        int totalComponentsToLoad =
             _spriteDescriptions.Count +
             _dataDescriptions.Count +
             _animSpriteDescriptions.Count +
             _soundDescriptions.Count;
 
-        var componentsLoaded = 0;
+        int componentsLoaded = 0;
 
         LoadSpriteResources(totalComponentsToLoad, ref componentsLoaded);
         LoadAnimatedSpriteResources(totalComponentsToLoad, ref componentsLoaded);
@@ -137,7 +137,7 @@ public class ResourceManager : StartableGameComponentBase
 
     private void LoadSpriteResources(int totalComponentsToLoad, ref int componentsLoaded)
     {
-        foreach (var t in _spriteDescriptions)
+        foreach (SpriteDescription t in _spriteDescriptions)
         {
             ReportProgress("sprite set", t.ResourceName, totalComponentsToLoad, componentsLoaded);
 
@@ -148,7 +148,7 @@ public class ResourceManager : StartableGameComponentBase
 
     private void LoadAnimatedSpriteResources(int totalComponentsToLoad, ref int componentsLoaded)
     {
-        foreach (var t in _animSpriteDescriptions)
+        foreach (AnimSpriteDescription t in _animSpriteDescriptions)
         {
             ReportProgress("anim sprite set", t.ResourceName, totalComponentsToLoad, componentsLoaded);
 
@@ -164,7 +164,7 @@ public class ResourceManager : StartableGameComponentBase
 
     private void LoadSoundResources(int totalComponentsToLoad, ref int componentsLoaded)
     {
-        foreach (var t in _soundDescriptions)
+        foreach (SoundDescription t in _soundDescriptions)
         {
             ReportProgress("sound effect", t.ResourceName, totalComponentsToLoad, componentsLoaded);
 
@@ -186,20 +186,20 @@ public class ResourceManager : StartableGameComponentBase
         using var fs = new FileStream(_dataDescriptions[0].FilePath, FileMode.Open, FileAccess.Read);
 
         // Read the length of the first array
-        var lengthBuffer = new byte[sizeof(int)];
+        byte[] lengthBuffer = new byte[sizeof(int)];
         fs.ReadExactly(lengthBuffer, 0, sizeof(int));
-        var gameScreensArraySize = BitConverter.ToInt32(lengthBuffer, 0);
+        int gameScreensArraySize = BitConverter.ToInt32(lengthBuffer, 0);
 
         // Read the first array
-        var gameScreensData = new byte[gameScreensArraySize];
+        byte[] gameScreensData = new byte[gameScreensArraySize];
         fs.ReadExactly(gameScreensData, 0, gameScreensArraySize);
 
         // Read the length of the second array
         fs.ReadExactly(lengthBuffer, 0, sizeof(int));
-        var collisionTilesArraySize = BitConverter.ToInt32(lengthBuffer, 0);
+        int collisionTilesArraySize = BitConverter.ToInt32(lengthBuffer, 0);
 
         // Read the second array
-        var collisionTilesData = new byte[collisionTilesArraySize];
+        byte[] collisionTilesData = new byte[collisionTilesArraySize];
         fs.ReadExactly(collisionTilesData, 0, collisionTilesArraySize);
 
         _resources.Add(
@@ -255,7 +255,7 @@ public class ResourceManager : StartableGameComponentBase
 
     public SpriteCollection GetSpriteCollection(string name)
     {
-        if (!_resources.TryGetValue(name, out var resource))
+        if (!_resources.TryGetValue(name, out object? resource))
         {
             throw new InvalidOperationException($"Sprite collection '{name}' has not been registered.");
         }
@@ -289,7 +289,7 @@ public class ResourceManager : StartableGameComponentBase
 
     public object GetDataResource(string name)
     {
-        if (!_resources.TryGetValue(name, out var resource))
+        if (!_resources.TryGetValue(name, out object? resource))
         {
             throw new InvalidOperationException($"Data resource '{name}' has not been registered.");
         }

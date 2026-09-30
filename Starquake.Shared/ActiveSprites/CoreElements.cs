@@ -2,13 +2,12 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
-using Starquake.Engines;
 using Starquake.SharedLibs;
 using Starquake.Structure;
 
@@ -16,11 +15,6 @@ namespace Starquake.ActiveSprites;
 
 public class CoreElements : GameComponentBase
 {
-    private readonly GraphicsSet _graphicsSet;
-    private readonly PresentationSettings _presentation;
-    private readonly Random _randomNumberGenerator;
-    private readonly ResourceManager _resources;
-    private readonly StatusPanel _statusPanel;
 
     /// <summary>
     ///     The core is a three by three block of elements sitting in the middle of the core room.
@@ -41,6 +35,11 @@ public class CoreElements : GameComponentBase
     ///     What finishing the core is worth.
     /// </summary>
     private const int ScoreForCompletingCore = 10000;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly PresentationSettings _presentation;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
+    private readonly StatusPanel _statusPanel;
 
     public CoreElements(
         StatusPanel statusPanel,
@@ -64,7 +63,7 @@ public class CoreElements : GameComponentBase
 
     private void CoreElements_OnCoreElementReplaced()
     {
-        for (var a = 0; a < 9; a++)
+        for (int a = 0; a < 9; a++)
         {
             if (Elements[a].ElementState == CoreElementState.Replacing)
             {
@@ -84,7 +83,7 @@ public class CoreElements : GameComponentBase
 
     public void ReplaceElement(int elementNoToReplace)
     {
-        for (var a = 0; a < 9; a++)
+        for (int a = 0; a < 9; a++)
         {
             if (Elements[a].CurrentElement == elementNoToReplace)
             {
@@ -92,7 +91,7 @@ public class CoreElements : GameComponentBase
                 _statusPanel.PlayerScore = _statusPanel.PlayerScore + ScoreForCompletingCore;
 
                 Elements[a].ElementState = CoreElementState.Replacing;
-                var test = Elements[a].CurrentElement;
+                int test = Elements[a].CurrentElement;
                 break;
             }
         }
@@ -102,7 +101,7 @@ public class CoreElements : GameComponentBase
     {
         var toReturn = new List<CoreElement>();
 
-        for (var a = 0; a < 9; a++)
+        for (int a = 0; a < 9; a++)
         {
             if (Elements[a].ElementState == CoreElementState.Missing)
             {
@@ -116,19 +115,19 @@ public class CoreElements : GameComponentBase
     // Resets the elements back to defaults
     public void Reset()
     {
-        var counter = 0;
+        int counter = 0;
         bool fadeUp;
 
         // ensure we don't choose the same element twice....
         var elementsToChoose = new List<int>();
-        for (var a = 0; a < 28; a++)
+        for (int a = 0; a < 28; a++)
         {
             elementsToChoose.Add(a);
         }
 
-        for (var y = 0; y < CoreGridDown; y++)
+        for (int y = 0; y < CoreGridDown; y++)
         {
-            for (var x = 0; x < CoreGridAcross; x++)
+            for (int x = 0; x < CoreGridAcross; x++)
             {
                 if (counter % 2 == 0)
                 {
@@ -138,7 +137,7 @@ public class CoreElements : GameComponentBase
                 {
                     fadeUp = false;
                 }
-                var randomChoice = _randomNumberGenerator.Next(0, elementsToChoose.Count);
+                int randomChoice = _randomNumberGenerator.Next(0, elementsToChoose.Count);
                 Elements[counter] = new CoreElement(_resources, _graphicsSet, _presentation, _randomNumberGenerator, elementsToChoose[randomChoice], counter, 6, fadeUp);
                 Elements[counter].OnCoreElementReplaced += CoreElements_OnCoreElementReplaced;
                 elementsToChoose.RemoveAt(randomChoice);
@@ -150,9 +149,9 @@ public class CoreElements : GameComponentBase
 
     public int GetElementsReplacedCount()
     {
-        var elementsReplaced = 0;
+        int elementsReplaced = 0;
 
-        for (var a = 0; a < 9; a++)
+        for (int a = 0; a < 9; a++)
         {
             if (Elements[a].ElementState == CoreElementState.Replaced)
             {
@@ -166,12 +165,12 @@ public class CoreElements : GameComponentBase
     public List<CollisionTile> GetCollisionMap()
     {
         var toReturn = new List<CollisionTile>();
-        var coreX = CoreXPos;
-        var coreY = CoreYPos;
+        int coreX = CoreXPos;
+        int coreY = CoreYPos;
 
-        for (var y = 0; y < CoreGridDown; y++)
+        for (int y = 0; y < CoreGridDown; y++)
         {
-            for (var x = 0; x < CoreGridAcross; x++)
+            for (int x = 0; x < CoreGridAcross; x++)
             {
                 toReturn.Add(new CollisionTile((int)CollisionObjectType.CoreElement, coreX + x * SpriteMetrics.SpriteWidth, coreY + y * SpriteMetrics.SpriteHeight, CollisionTileType.NotBlob));
                 toReturn.Add(new CollisionTile((int)CollisionObjectType.CoreElement, coreX + x * SpriteMetrics.SpriteWidth + SpriteMetrics.HalfSpriteWidth, coreY + y * SpriteMetrics.SpriteHeight, CollisionTileType.NotBlob));
@@ -185,7 +184,7 @@ public class CoreElements : GameComponentBase
 
     public override void Update(GameTime gameTime)
     {
-        foreach (var element in Elements)
+        foreach (CoreElement element in Elements)
         {
             element.Update(gameTime);
         }
@@ -193,13 +192,13 @@ public class CoreElements : GameComponentBase
 
     public void Draw(GameTime gameTime, bool replacingElement)
     {
-        var coreX = CoreXPos;
-        var coreY = CoreYPos;
-        var counter = 0;
+        int coreX = CoreXPos;
+        int coreY = CoreYPos;
+        int counter = 0;
 
-        for (var y = 0; y < CoreGridDown; y++)
+        for (int y = 0; y < CoreGridDown; y++)
         {
-            for (var x = 0; x < CoreGridAcross; x++)
+            for (int x = 0; x < CoreGridAcross; x++)
             {
                 Elements[counter].Draw(coreX + x * SpriteMetrics.SpriteWidth, coreY + y * SpriteMetrics.SpriteHeight, gameTime, replacingElement);
                 counter++;
@@ -211,10 +210,10 @@ public class CoreElements : GameComponentBase
     public void Draw(GameTime gameTime, int xPos, int yPos, int fade)
     {
 
-        var counter = 0;
-        for (var y = 0; y < CoreGridDown; y++)
+        int counter = 0;
+        for (int y = 0; y < CoreGridDown; y++)
         {
-            for (var x = 0; x < CoreGridAcross; x++)
+            for (int x = 0; x < CoreGridAcross; x++)
             {
                 Elements[counter].Draw(xPos + x * SpriteMetrics.SpriteWidth, yPos + y * SpriteMetrics.SpriteHeight, fade, gameTime);
                 counter++;

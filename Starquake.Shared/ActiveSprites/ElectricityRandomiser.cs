@@ -5,16 +5,15 @@
 using System;
 using Microsoft.Xna.Framework;
 using Starquake.ContentManagement;
-using Starquake.Engines;
 using Starquake.Sounds;
 
 namespace Starquake.ActiveSprites;
 
 public class ElectricityRandomiser
 {
-    private readonly ResourceManager _resources;
 
     private readonly Random _randomGenerator;
+    private readonly ResourceManager _resources;
     private int _counter;
     private int _counterTarget;
     private bool _electricitySoundPlayed;

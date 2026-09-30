@@ -7,7 +7,6 @@ using Microsoft.Xna.Framework;
 using Starquake.Animations;
 using Starquake.ContentManagement;
 using Starquake.Display;
-using Starquake.Engines;
 using Starquake.Particles;
 using Starquake.Sprites;
 using Starquake.Structure;
@@ -17,9 +16,31 @@ namespace Starquake.ActiveSprites;
 public class BouncingParticle
 {
 
+    /// <summary>
+    ///     Reads as an axis at the call site: <c>StepAlongAxis(Vertical, p.Y)</c>.
+    /// </summary>
+    private const bool Vertical = true;
+
+    /// <inheritdoc cref="Vertical" />
+    private const bool Horizontal = false;
+
+    /// <summary>
+    ///     The part is one collision cell across, and a step is never allowed to be longer than that -
+    ///     a longer one could pass straight through a wall without ever being tested inside it.
+    /// </summary>
+    private const int ParticleSize = 32;
+
+    /// <summary>
+    ///     Where the fireball trails from, measured in from the part's top left corner.
+    /// </summary>
+    private const int FireballXOffset = 20;
+
+    /// <inheritdoc cref="FireballXOffset" />
+    private const int FireballYOffset = 5;
+
     private readonly GameScreenCollection _gameScreens;
-    private readonly Random _randomNumberGenerator;
     private readonly BouncingAnimation _particleBounce;
+    private readonly Random _randomNumberGenerator;
 
     private int _oldXPos;
     private int _oldYPos;
@@ -66,9 +87,9 @@ public class BouncingParticle
         // emitter's buffer at the positions they froze at when the bounce stopped
         Fireball.Reset();
 
-        var xSpeed = _randomNumberGenerator.Next(4, 12);
+        int xSpeed = _randomNumberGenerator.Next(4, 12);
 
-        var xDirection = _randomNumberGenerator.Next(0, 2);
+        int xDirection = _randomNumberGenerator.Next(0, 2);
         if (xDirection == 0)
         {
             xSpeed = -xSpeed;
@@ -87,28 +108,6 @@ public class BouncingParticle
         _particleBounce.Reset();
     }
 
-    /// <summary>
-    ///     Reads as an axis at the call site: <c>StepAlongAxis(Vertical, p.Y)</c>.
-    /// </summary>
-    private const bool Vertical = true;
-
-    /// <inheritdoc cref="Vertical" />
-    private const bool Horizontal = false;
-
-    /// <summary>
-    ///     The part is one collision cell across, and a step is never allowed to be longer than that -
-    ///     a longer one could pass straight through a wall without ever being tested inside it.
-    /// </summary>
-    private const int ParticleSize = 32;
-
-    /// <summary>
-    ///     Where the fireball trails from, measured in from the part's top left corner.
-    /// </summary>
-    private const int FireballXOffset = 20;
-
-    /// <inheritdoc cref="FireballXOffset" />
-    private const int FireballYOffset = 5;
-
     public void Update(GameTime gameTime)
     {
         if (!_particleBounce.Triggered)
@@ -122,7 +121,7 @@ public class BouncingParticle
             return;
         }
 
-        var p = _particleBounce.Update();
+        Point p = _particleBounce.Update();
 
         // Vertically first, and the horizontal step is then taken from where that left it
         YPos += StepAlongAxis(Vertical, p.Y);
@@ -145,19 +144,21 @@ public class BouncingParticle
     /// </remarks>
     private int StepAlongAxis(bool vertical, int requestedStep)
     {
-        var movingPositive = requestedStep > 0;
+        bool movingPositive = requestedStep > 0;
 
         // Ensure we don't move more than the size of the collision tilemap
-        var step = movingPositive
+        int step = movingPositive
             ? Math.Min(requestedStep, ParticleSize)
             : Math.Max(requestedStep, -ParticleSize);
 
-        var direction = vertical
+        Direction direction = vertical
             ? movingPositive ? Direction.Down : Direction.Up
-            : movingPositive ? Direction.Right : Direction.Left;
+            : movingPositive
+                ? Direction.Right
+                : Direction.Left;
 
         // Absolute value used here to convert the negative to positive for col routine
-        var speed = _gameScreens.CheckCollision(
+        int speed = _gameScreens.CheckCollision(
             direction,
             XPos,
             YPos,
@@ -177,8 +178,8 @@ public class BouncingParticle
             speed = -speed;
         }
 
-        var position = vertical ? YPos : XPos;
-        var screenSize = vertical
+        int position = vertical ? YPos : XPos;
+        int screenSize = vertical
             ? _gameScreens.ScreenHeight
             : _gameScreens.ScreenWidth;
 

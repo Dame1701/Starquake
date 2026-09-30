@@ -90,7 +90,7 @@ public static class EditorColours
 
     public static readonly IPen AccentPen = new Pen(AccentBrush, 2);
 
-    public static readonly IPen AccentThinPen = new Pen(AccentBrush, 1);
+    public static readonly IPen AccentThinPen = new Pen(AccentBrush);
 
     public static readonly IPen BorderPen = new Pen(new SolidColorBrush(Border));
 

@@ -70,12 +70,12 @@ public sealed class PresentationSettings
     /// </summary>
     public static Matrix TransformFor(int backBufferWidth, int backBufferHeight)
     {
-        var scale = Math.Min(
+        float scale = Math.Min(
             backBufferWidth / (float)CompositionSize.Width,
             backBufferHeight / (float)CompositionSize.Height);
 
-        var borderX = (backBufferWidth - CompositionSize.Width * scale) / 2f;
-        var borderY = (backBufferHeight - CompositionSize.Height * scale) / 2f;
+        float borderX = (backBufferWidth - CompositionSize.Width * scale) / 2f;
+        float borderY = (backBufferHeight - CompositionSize.Height * scale) / 2f;
 
         return
             Matrix.CreateScale(scale, scale, 1f) *

@@ -45,12 +45,6 @@ public enum TilePaletteSource
 public sealed class TilePalette : Control
 {
 
-    public static readonly StyledProperty<EditorSession?> SessionProperty =
-        AvaloniaProperty.Register<TilePalette, EditorSession?>(nameof(Session));
-
-    public static readonly StyledProperty<TilePaletteSource> SourceProperty =
-        AvaloniaProperty.Register<TilePalette, TilePaletteSource>(nameof(Source));
-
     /// <summary>
     ///     The space between tiles, which is also the space around the outside.
     /// </summary>
@@ -61,6 +55,12 @@ public sealed class TilePalette : Control
     ///     same height whatever the sheet is being shown at.
     /// </summary>
     private const double RecentTileWidth = 56;
+
+    public static readonly StyledProperty<EditorSession?> SessionProperty =
+        AvaloniaProperty.Register<TilePalette, EditorSession?>(nameof(Session));
+
+    public static readonly StyledProperty<TilePaletteSource> SourceProperty =
+        AvaloniaProperty.Register<TilePalette, TilePaletteSource>(nameof(Source));
 
     private static readonly Typeface LabelTypeface = new(FontFamily.Default);
 
@@ -101,22 +101,22 @@ public sealed class TilePalette : Control
 
     public override void Render(DrawingContext context)
     {
-        var session = Session;
+        EditorSession? session = Session;
         if (session?.Sheet is null)
         {
             return;
         }
 
-        var tiles = Tiles;
-        var columns = ColumnsFor(Bounds.Width, tiles.Count);
+        IReadOnlyList<int> tiles = Tiles;
+        int columns = ColumnsFor(Bounds.Width, tiles.Count);
 
         // The recent row is one row: anything past the end of it is older than the space allows.
-        var count = Source == TilePaletteSource.Recent ? Math.Min(tiles.Count, columns) : tiles.Count;
+        int count = Source == TilePaletteSource.Recent ? Math.Min(tiles.Count, columns) : tiles.Count;
 
-        for (var index = 0; index < count; index++)
+        for (int index = 0; index < count; index++)
         {
-            var tile = tiles[index];
-            var destination = TileRect(index, columns);
+            int tile = tiles[index];
+            Rect destination = TileRect(index, columns);
 
             if (destination.Top > Bounds.Height || destination.Bottom < 0)
             {
@@ -146,7 +146,7 @@ public sealed class TilePalette : Control
 
     protected override Size MeasureOverride(Size availableSize)
     {
-        var tiles = Tiles;
+        IReadOnlyList<int> tiles = Tiles;
 
         if (Source == TilePaletteSource.Recent)
         {
@@ -155,9 +155,9 @@ public sealed class TilePalette : Control
                 TileHeight + Gap * 2);
         }
 
-        var width = double.IsInfinity(availableSize.Width) ? TileWidth + Gap * 2 : availableSize.Width;
-        var columns = ColumnsFor(width, tiles.Count);
-        var rows = tiles.Count == 0 ? 0 : (tiles.Count + columns - 1) / columns;
+        double width = double.IsInfinity(availableSize.Width) ? TileWidth + Gap * 2 : availableSize.Width;
+        int columns = ColumnsFor(width, tiles.Count);
+        int rows = tiles.Count == 0 ? 0 : (tiles.Count + columns - 1) / columns;
 
         return new Size(width, rows * (TileHeight + Gap) + Gap);
     }
@@ -176,8 +176,8 @@ public sealed class TilePalette : Control
     {
         base.OnPointerPressed(e);
 
-        var session = Session;
-        var tile = TileAt(e.GetPosition(this));
+        EditorSession? session = Session;
+        int tile = TileAt(e.GetPosition(this));
 
         if (session is null || tile < 0)
         {
@@ -200,7 +200,7 @@ public sealed class TilePalette : Control
     {
         base.OnPointerMoved(e);
 
-        var tile = TileAt(e.GetPosition(this));
+        int tile = TileAt(e.GetPosition(this));
         if (tile == _hoverTile)
         {
             return;
@@ -279,8 +279,8 @@ public sealed class TilePalette : Control
 
     private Rect TileRect(int index, int columns)
     {
-        var row = index / columns;
-        var column = index - row * columns;
+        int row = index / columns;
+        int column = index - row * columns;
 
         return new Rect(
             Gap + column * (TileWidth + Gap),
@@ -291,20 +291,20 @@ public sealed class TilePalette : Control
 
     private int TileAt(Point position)
     {
-        var tiles = Tiles;
-        var columns = ColumnsFor(Bounds.Width, tiles.Count);
+        IReadOnlyList<int> tiles = Tiles;
+        int columns = ColumnsFor(Bounds.Width, tiles.Count);
 
-        var column = (int)((position.X - Gap) / (TileWidth + Gap));
-        var row = (int)((position.Y - Gap) / (TileHeight + Gap));
+        int column = (int)((position.X - Gap) / (TileWidth + Gap));
+        int row = (int)((position.Y - Gap) / (TileHeight + Gap));
 
         if (column < 0 || column >= columns || row < 0)
         {
             return -1;
         }
 
-        var count = Source == TilePaletteSource.Recent ? Math.Min(tiles.Count, columns) : tiles.Count;
+        int count = Source == TilePaletteSource.Recent ? Math.Min(tiles.Count, columns) : tiles.Count;
 
-        var index = row * columns + column;
+        int index = row * columns + column;
         if (index < 0 || index >= count)
         {
             return -1;

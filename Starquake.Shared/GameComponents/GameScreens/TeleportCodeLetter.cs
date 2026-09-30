@@ -11,8 +11,8 @@ public class TeleportCodeLetter
 
     public TeleportCodeLetter(string letter, Point location)
     {
-        this.Letter = letter;
-        this.Location = location;
+        Letter = letter;
+        Location = location;
     }
 
     public string Letter { get; set; }

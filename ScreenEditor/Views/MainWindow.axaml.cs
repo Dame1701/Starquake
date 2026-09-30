@@ -2,6 +2,8 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+using System;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -20,7 +22,7 @@ public partial class MainWindow : Window
         InitializeComponent();
     }
 
-    protected override void OnDataContextChanged(System.EventArgs e)
+    protected override void OnDataContextChanged(EventArgs e)
     {
         base.OnDataContextChanged(e);
 
@@ -49,7 +51,7 @@ public partial class MainWindow : Window
     {
         base.OnKeyDown(e);
 
-        var session = (DataContext as MainWindowViewModel)?.Session;
+        EditorSession? session = (DataContext as MainWindowViewModel)?.Session;
 
         if (e.Handled || session is null || e.KeyModifiers != KeyModifiers.None || e.Source is TextBox)
         {
@@ -116,7 +118,7 @@ public partial class MainWindow : Window
         _ = ConfirmThenCloseAsync(viewModel);
     }
 
-    private async System.Threading.Tasks.Task ConfirmThenCloseAsync(MainWindowViewModel viewModel)
+    private async Task ConfirmThenCloseAsync(MainWindowViewModel viewModel)
     {
         if (!await viewModel.ConfirmCloseAsync())
         {

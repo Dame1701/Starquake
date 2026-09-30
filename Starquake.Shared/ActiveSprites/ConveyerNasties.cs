@@ -2,14 +2,13 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System.Collections.Generic;
 using System;
-using Microsoft.Xna.Framework.Content;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Starquake.Collisions;
 using Starquake.ContentManagement;
 using Starquake.Display;
-using Starquake.Engines;
 using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
@@ -64,7 +63,7 @@ public class ConveyerNasties : GameComponentBase
     {
         // Create 3 nasties that we will keep re-using
         Nasties.Clear();
-        for (var a = 0; a < 3; a++)
+        for (int a = 0; a < 3; a++)
         {
             Nasties.Add(
                 new ConveyerNasty(_resources,
@@ -85,18 +84,18 @@ public class ConveyerNasties : GameComponentBase
         // See if we need to create some nasties and get on with it
 
         // Deactivate all nasties first
-        foreach (var nasty in Nasties)
+        foreach (ConveyerNasty nasty in Nasties)
         {
             nasty.PerformPostChangeScreenActions();
         }
 
-        var nastiesToGenerate = _gameScreens.GetCoordsOfTiles(391);
+        List<Point>? nastiesToGenerate = _gameScreens.GetCoordsOfTiles(391);
 
 
         if (nastiesToGenerate != null && nastiesToGenerate.Count > 0)
         {
             // We have some..... So reactivate a few or all...
-            for (var a = 0; a < nastiesToGenerate.Count; a++)
+            for (int a = 0; a < nastiesToGenerate.Count; a++)
             {
                 Nasties[a].NastyActive = true;
                 Nasties[a].XLocation = nastiesToGenerate[a].X;
@@ -123,7 +122,7 @@ public class ConveyerNasties : GameComponentBase
 
     public override void Update(GameTime gameTime)
     {
-        for (var a = 0; a < Nasties.Count; a++)
+        for (int a = 0; a < Nasties.Count; a++)
         {
             Nasties[a].Update(gameTime);
 
@@ -189,7 +188,7 @@ public class ConveyerNasties : GameComponentBase
 
     public override void Draw(GameTime gameTime, int screenFade)
     {
-        foreach (var nasty in Nasties)
+        foreach (ConveyerNasty nasty in Nasties)
         {
             if (nasty.NastyActive || nasty.NastyState == NastyState.Dead)
             {

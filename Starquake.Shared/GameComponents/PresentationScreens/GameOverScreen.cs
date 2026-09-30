@@ -3,9 +3,9 @@
 // ---------------------------------------------------------
 // -
 using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework;
 using Starquake.ActiveSprites;
 using Starquake.Constants;
 using Starquake.ContentManagement;
@@ -13,7 +13,6 @@ using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
 using Starquake.GameComponents.GameScreens;
-using Starquake.GameComponents;
 using Starquake.Helpers;
 using Starquake.Input;
 using Starquake.Scoring;
@@ -24,13 +23,13 @@ namespace Starquake.GameComponents.PresentationScreens;
 
 public class GameOverScreen : GameScreenBase, IGameScreen
 {
-    private readonly StatusPanel _statusPanel;
-    private readonly CoreElements _elements;
-    private readonly GameScreenCollection _gameScreens;
 
     private readonly SpriteCollection _backgroundImage;
-    private bool _fadeComplete;
+    private readonly CoreElements _elements;
     private readonly SpriteCollection _foregroundImage;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly StatusPanel _statusPanel;
+    private bool _fadeComplete;
     private TimeSpan _playTime;
 
     public GameOverScreen(
@@ -72,7 +71,7 @@ public class GameOverScreen : GameScreenBase, IGameScreen
     public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
     {
         Resources.GetSoundFxEngine().DisablePeriodicBackgroundSounds(true);
-        var mainGameScreen = ScreenDirectory.Get(GameScreenType.MainGame);
+        IGameScreen mainGameScreen = ScreenDirectory.Get(GameScreenType.MainGame);
         _playTime = ((MainGameScreen)mainGameScreen).GetPlayTime();
 
         _fadeComplete = false;

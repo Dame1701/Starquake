@@ -50,7 +50,7 @@ public class AdditiveFade : ScreenEffectBase
         renderer.Begin(SpriteSortMode.Deferred, BlendState.Additive, null, null, null, null,
             _presentation.Transform);
 
-        for (var a = 0; a < 10; a++)
+        for (int a = 0; a < 10; a++)
         {
             renderer.Draw(
                 renderViewPortToUse.RenderTarget,

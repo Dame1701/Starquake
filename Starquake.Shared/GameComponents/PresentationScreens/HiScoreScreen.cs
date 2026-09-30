@@ -3,15 +3,14 @@
 // ---------------------------------------------------------
 // -
 using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
-using Starquake.GameComponents;
 using Starquake.Helpers;
 using Starquake.Input;
 using Starquake.Scoring;
@@ -22,12 +21,12 @@ namespace Starquake.GameComponents.PresentationScreens;
 
 public class HiScoreScreen : GameScreenBase, IGameScreen
 {
-    private readonly StatusPanel _statusPanel;
+    private readonly SpriteCollection _backgroundImage;
+    private readonly SpriteCollection _foregroundImage;
 
     private readonly HiScores _hiscoreList;
-    private readonly SpriteCollection _backgroundImage;
+    private readonly StatusPanel _statusPanel;
     private bool _fadeComplete;
-    private readonly SpriteCollection _foregroundImage;
     private bool _gotHighScore;
     private HiScore _playersHighScore = new();
 
@@ -108,10 +107,10 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
         {
             if (ToggleKeys.GetPressedKey() != Keys.None)
             {
-                var temp = ToggleKeys.GetPressedKey();
+                Keys temp = ToggleKeys.GetPressedKey();
 
-                var keyPressedString = ToggleKeys.GetPressedKey().ToString().ToUpper();
-                var keyPressed = TextHelper.GetAsciiCode(keyPressedString);
+                string keyPressedString = ToggleKeys.GetPressedKey().ToString().ToUpper();
+                int keyPressed = TextHelper.GetAsciiCode(keyPressedString);
 
                 if (_playersHighScore.Name.Length < 6)
                 {

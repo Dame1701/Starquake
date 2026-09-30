@@ -12,8 +12,8 @@ public class RandomFaderAnimation
     private readonly int _minimumFade;
     private readonly Random _randomGenerator;
     private readonly int _switchSpeed;
-    public int FadeLevel;
     private int _switchCounter;
+    public int FadeLevel;
 
     public RandomFaderAnimation(int switchSpeed, Random randomGenerator, int minimumFade = 0)
     {

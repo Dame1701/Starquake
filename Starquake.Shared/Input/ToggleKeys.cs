@@ -18,7 +18,7 @@ public static class ToggleKeys
 
     public static Keys GetPressedKey()
     {
-        var temp = _toggledKey;
+        Keys temp = _toggledKey;
         return temp;
     }
 
