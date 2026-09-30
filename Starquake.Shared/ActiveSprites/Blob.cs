@@ -2,11 +2,11 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+using System;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 using Starquake.Animations;
 using Starquake.Collisions;
 using Starquake.Constants;
@@ -31,6 +31,14 @@ public class Blob : GameComponentBase
     ///     How many things the blob can carry. Picking something up pushes the whole inventory along
     ///     one and drops whatever falls off the end.
     /// </summary>
+    /// <summary>
+    ///     How fast the tunnel transition plays, in pixels of play area a frame. It sets the pace of
+    ///     the whole passage rather than a literal step, since
+    ///     <see cref="TunnelEntryEffect" /> eases the motion - the squeeze takes as long as it would
+    ///     have at this many pixels a frame, and the dark and the arrival follow from that.
+    /// </summary>
+    private const int TunnelEntrySpeed = 64;
+
     private const int BlobMaxItemsHeld = 4;
 
     /// <summary>
@@ -1393,7 +1401,7 @@ public class Blob : GameComponentBase
 
                 if (OnScreenChanged != null)
                 {
-                    _screenEffects.ExecuteScreenEffect(ScreenEffectType.LeftTunnelEntry, 80,
+                    _screenEffects.ExecuteScreenEffect(ScreenEffectType.LeftTunnelEntry, TunnelEntrySpeed,
                         -1, true);
                     _resources.GetSoundFxEngine()
                         .PlaySound("TunnelSwish1", 0.8f, false);
@@ -1430,7 +1438,7 @@ public class Blob : GameComponentBase
                 if (OnScreenChanged != null)
                 {
                     _screenEffects.ExecuteScreenEffect(ScreenEffectType.RightTunnelEntry,
-                        80, -1, true);
+                        TunnelEntrySpeed, -1, true);
                     _resources.GetSoundFxEngine()
                         .PlaySound("TunnelSwish2", 0.8f, false);
                     OnScreenChanged(GameScreenType.None);

@@ -31,7 +31,7 @@ public abstract class TunnelEntryEffect : ScreenEffectBase
     ///     this the picture turns around the instant it vanishes, and the two halves read as one
     ///     bounce instead of a passage.
     /// </summary>
-    private const int FramesInTheDark = 5;
+    private const int FramesInTheDark = 7;
 
     /// <summary>
     ///     How much longer emerging takes than being squeezed. Equal times feel mechanical; arriving
