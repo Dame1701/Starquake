@@ -1,0 +1,26 @@
+﻿<!--
+  The properties every project in the solution shares, so that a new project is held to the
+  same standard by existing rather than by being remembered.
+
+  The reason this file exists is the first property. .editorconfig fixes the severity of the
+  inspections the cleanup agreed to keep clean, and says it does so "so Rider, `dotnet build`
+  and `jb inspectcode` all report the same thing". `dotnet build` did not: analysers with the
+  IDE prefix only run during a build when EnforceCodeStyleInBuild is set, and nothing set it,
+  so five rules declared as kept-at-zero had never been checked by a build. TreatWarningsAsErrors
+  is what turns the declaration into a gate rather than a note in the log.
+
+  ProjectMercury sets Nullable back off in its own .csproj for reasons written down there, and
+  the .editorconfig section for it turns the IDE rules off for the same reason: it is upstream
+  code from 2009, kept as a fork, and held to the compiler but not to our style.
+-->
+<Project>
+
+    <PropertyGroup>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+</Project>

@@ -84,7 +84,7 @@ public class KeyDefiner
         return false;
     }
 
-    public void Update(GameTime gameTime)
+    public void Update()
     {
         Keys pressedKey = ToggleKeys.GetPressedKey();
 
@@ -121,7 +121,7 @@ public class KeyDefiner
         }
     }
 
-    public void Draw(GameTime gameTime, int screenFade)
+    public void Draw(int screenFade)
     {
         _font.WriteText(480, 236, "Press a key for:", 2, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
 
@@ -145,7 +145,7 @@ public class KeyDefiner
 
         if (_alldone)
         {
-            _font.WriteText(540, 590, "OK ?  ( Y / N )", ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
+            _font.WriteText(540, 590, "OK ?  (Y / N )", ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
         }
     }
 }

@@ -108,7 +108,7 @@ public sealed class TilePalette : Control
         }
 
         IReadOnlyList<int> tiles = Tiles;
-        int columns = ColumnsFor(Bounds.Width, tiles.Count);
+        int columns = ColumnsFor(Bounds.Width);
 
         // The recent row is one row: anything past the end of it is older than the space allows.
         int count = Source == TilePaletteSource.Recent ? Math.Min(tiles.Count, columns) : tiles.Count;
@@ -156,7 +156,7 @@ public sealed class TilePalette : Control
         }
 
         double width = double.IsInfinity(availableSize.Width) ? TileWidth + Gap * 2 : availableSize.Width;
-        int columns = ColumnsFor(width, tiles.Count);
+        int columns = ColumnsFor(width);
         int rows = tiles.Count == 0 ? 0 : (tiles.Count + columns - 1) / columns;
 
         return new Size(width, rows * (TileHeight + Gap) + Gap);
@@ -274,7 +274,7 @@ public sealed class TilePalette : Control
         context.DrawText(text, new Point(backing.X + 4, backing.Y + 1));
     }
 
-    private int ColumnsFor(double width, int tileCount)
+    private int ColumnsFor(double width)
         => Math.Max(1, (int)((width - Gap) / (TileWidth + Gap)));
 
     private Rect TileRect(int index, int columns)
@@ -292,7 +292,7 @@ public sealed class TilePalette : Control
     private int TileAt(Point position)
     {
         IReadOnlyList<int> tiles = Tiles;
-        int columns = ColumnsFor(Bounds.Width, tiles.Count);
+        int columns = ColumnsFor(Bounds.Width);
 
         int column = (int)((position.X - Gap) / (TileWidth + Gap));
         int row = (int)((position.Y - Gap) / (TileHeight + Gap));

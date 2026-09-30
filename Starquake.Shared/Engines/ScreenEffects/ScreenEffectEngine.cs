@@ -24,8 +24,6 @@ public class ScreenEffectEngine : GameComponentBase
 
 
     public ScreenEffectEngine(
-        int screenWidth,
-        int screenHeight,
         GraphicsDeviceManager graphics,
         PresentationSettings presentation)
     {

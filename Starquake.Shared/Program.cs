@@ -12,7 +12,7 @@ internal static class Program
     ///     The main entry point for the application.
     /// </summary>
     [STAThread]
-    private static void Main(string[] args)
+    private static void Main()
     {
         // Content and the screen data are opened relative to the working directory, which
         // isn't the output folder when the game is launched from anywhere other than that

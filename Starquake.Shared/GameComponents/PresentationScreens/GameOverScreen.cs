@@ -99,7 +99,7 @@ public class GameOverScreen : GameScreenBase, IGameScreen
     public override void Draw(GameTime gameTime)
     {
         ScreenEffects.SelectRenderViewPort("EntireScreen");
-        _backgroundImage.Begin(BlendState.AlphaBlend, gameTime);
+        _backgroundImage.Begin(BlendState.AlphaBlend);
 
         if (_fadeComplete)
         {
@@ -122,21 +122,21 @@ public class GameOverScreen : GameScreenBase, IGameScreen
         Font.End();
 
         // Player Score
-        ProportionalNumbers.Draw(630, 260, _statusPanel.PlayerScore.ToString("000000"), Resources, gameTime, ColourHelper.GetXna4Colour(150, 150, 150, (byte)ScreenFade));
+        ProportionalNumbers.Draw(630, 260, _statusPanel.PlayerScore.ToString("000000"), Resources, ColourHelper.GetXna4Colour(150, 150, 150, (byte)ScreenFade));
 
         // Adventure Score
-        ProportionalNumbers.Draw(814, 320, _gameScreens.GetPercentageOfScreensVisited() + "%", Resources, gameTime, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
+        ProportionalNumbers.Draw(814, 320, _gameScreens.GetPercentageOfScreensVisited() + "%", Resources, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
 
         // Time Taken
-        ProportionalNumbers.Draw(710, 380, _playTime.Minutes + "." + _playTime.Seconds.ToString("00"), Resources, gameTime, ColourHelper.GetXna4Colour(150, 150, 150, (byte)ScreenFade));
+        ProportionalNumbers.Draw(710, 380, _playTime.Minutes + "." + _playTime.Seconds.ToString("00"), Resources, ColourHelper.GetXna4Colour(150, 150, 150, (byte)ScreenFade));
 
         // _elements replaced
-        ProportionalNumbers.Draw(520, 560, _elements.GetElementsReplacedCount().ToString("00"), Resources, gameTime, ColourHelper.GetXna4Colour(134, 0, 134, (byte)ScreenFade));
+        ProportionalNumbers.Draw(520, 560, _elements.GetElementsReplacedCount().ToString("00"), Resources, ColourHelper.GetXna4Colour(134, 0, 134, (byte)ScreenFade));
 
         // Core elements
-        _elements.Draw(gameTime, 820, 446, ScreenFade);
+        _elements.Draw(820, 446, ScreenFade);
 
-        _foregroundImage.Begin(BlendState.AlphaBlend, gameTime);
+        _foregroundImage.Begin(BlendState.AlphaBlend);
 
         if (_fadeComplete)
         {

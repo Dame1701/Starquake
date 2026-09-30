@@ -155,7 +155,7 @@ public class BlobDeathAnimation : GameComponentBase
         if (_graphicsSet.IsOriginal)
         {
             _resources.GetSpriteCollection("BlobFire2Original")
-                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
 
             foreach (BouncingParticle bouncingParticle in BouncingParticles)
             {
@@ -180,7 +180,7 @@ public class BlobDeathAnimation : GameComponentBase
                 if (_drawBlobParts)
                 {
                     _resources.GetSpriteCollection("BlobParts")
-                        .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+                        .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
                     bouncingParticle.Draw(_resources.GetSpriteCollection("BlobParts"),
                         screenFade);
                     _resources.GetSpriteCollection("BlobParts").End();

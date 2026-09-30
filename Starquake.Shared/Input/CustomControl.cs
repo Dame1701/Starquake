@@ -4,7 +4,6 @@
 // -
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using Starquake.ActiveSprites;
 
 namespace Starquake.Input;
 
@@ -28,43 +27,8 @@ public class CustomControl
     /// </summary>
     private const float StickThreshold = 0.5f;
 
-    /// <summary>
-    ///     How far an analogue stick has to be pushed before the blob steps up to the next speed. The
-    ///     bands are deliberately uneven at the bottom so that a resting stick never nudges the blob.
-    /// </summary>
-    private const double SpeedBand1 = 0.2;
-
-    /// <inheritdoc cref="SpeedBand1" />
-    private const double SpeedBand2 = 0.4;
-
-    /// <inheritdoc cref="SpeedBand1" />
-    private const double SpeedBand3 = 0.6;
-
-    /// <inheritdoc cref="SpeedBand1" />
-    private const double SpeedBand4 = 0.8;
-
-    /// <inheritdoc cref="SpeedBand1" />
-    private const double VerticalDeadZone = 0.1;
-
-    /// <summary>
-    ///     The speeds those bands select, from a crawl up to the blob's full walking pace.
-    /// </summary>
-    private const int CrawlSpeed = 1;
-
-    /// <inheritdoc cref="CrawlSpeed" />
-    private const int SlowSpeed = 2;
-
-    /// <inheritdoc cref="CrawlSpeed" />
-    private const int BriskSpeed = 4;
-
-    /// <inheritdoc cref="CrawlSpeed" />
-    private const int FullSpeed = 8;
-
-    private readonly Blob _blob;
-
-    public CustomControl(PlayerKeySet playerKeys, Blob blob)
+    public CustomControl(PlayerKeySet playerKeys)
     {
-        _blob = blob;
         PlayerKeySet = playerKeys;
     }
 
@@ -116,50 +80,4 @@ public class CustomControl
     /// <inheritdoc cref="PushedUp" />
     private static bool PushedRight(GamePadState pad)
         => pad.DPad.Right == ButtonState.Pressed || pad.ThumbSticks.Left.X > StickThreshold;
-
-    private void SetBlobHSpeed(float inputSpeed)
-    {
-        if (inputSpeed < SpeedBand1)
-        {
-            _blob.BlobHSpeed = CrawlSpeed;
-        }
-        else if (inputSpeed < SpeedBand2 && inputSpeed >= SpeedBand1)
-        {
-            _blob.BlobHSpeed = SlowSpeed;
-        }
-        else if (inputSpeed < SpeedBand3 && inputSpeed >= SpeedBand2)
-        {
-        }
-        else if (inputSpeed < SpeedBand4 && inputSpeed >= SpeedBand3)
-        {
-            _blob.BlobHSpeed = BriskSpeed;
-        }
-        else
-        {
-            _blob.BlobHSpeed = FullSpeed;
-        }
-    }
-
-    private void SetBlobVSpeed(float inputSpeed)
-    {
-        if (inputSpeed < VerticalDeadZone)
-        {
-            _blob.BlobVSpeed = CrawlSpeed;
-        }
-        else if (inputSpeed < SpeedBand2 && inputSpeed >= SpeedBand1)
-        {
-            _blob.BlobVSpeed = SlowSpeed;
-        }
-        else if (inputSpeed < SpeedBand3 && inputSpeed >= SpeedBand2)
-        {
-        }
-        else if (inputSpeed < SpeedBand4 && inputSpeed >= SpeedBand3)
-        {
-            _blob.BlobVSpeed = BriskSpeed;
-        }
-        else
-        {
-            _blob.BlobVSpeed = FullSpeed;
-        }
-    }
 }

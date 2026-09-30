@@ -117,3 +117,13 @@ resharper_convert_if_statement_to_conditional_ternary_expression_highlighting = 
 charset = unset
 trim_trailing_whitespace = false
 insert_final_newline = false
+
+# The solution builds with EnforceCodeStyleInBuild and TreatWarningsAsErrors, which would
+# otherwise hold this fork to the five rules above. It has three findings of its own; they
+# are left where upstream put them.
+dotnet_style_readonly_field = false:none
+dotnet_diagnostic.IDE0044.severity = none
+dotnet_diagnostic.IDE0051.severity = none
+dotnet_diagnostic.IDE0052.severity = none
+dotnet_diagnostic.IDE0059.severity = none
+dotnet_diagnostic.IDE0060.severity = none

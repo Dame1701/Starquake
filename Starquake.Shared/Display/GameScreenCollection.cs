@@ -41,16 +41,6 @@ public class GameScreenCollection : GameComponentBase
     private const int FullPercentage = 100;
 
     /// <summary>
-    ///     Where a dropped or placed item sits inside its tile - one collision cell in from the left,
-    ///     and either one cell down or a sprite's height up depending on whether it is being stood on
-    ///     or hung from.
-    /// </summary>
-    private const int ItemTileXOffset = TileMetrics.CollisionCellWidth;
-
-    /// <inheritdoc cref="ItemTileXOffset" />
-    private const int ItemTileYOffset = TileMetrics.CollisionCellHeight;
-
-    /// <summary>
     ///     The two tiles the map uses as plain scenery either side of a doorway. They are recognised
     ///     by number only so that an item is never placed on top of one.
     /// </summary>
@@ -61,12 +51,14 @@ public class GameScreenCollection : GameComponentBase
 
     /// <summary>
     ///     Where an item is drawn relative to the tile it stands on: one collision cell in from the
-    ///     tile's left edge, and two cells above its top.
+    ///     tile's left edge, and two cells above its top. There was a second, unread pair of these
+    ///     saying the same thing in terms of the cell size; this is the pair that is used, so it is
+    ///     the one that says where the numbers come from.
     /// </summary>
-    private const int PlacementXInset = 32;
+    private const int PlacementXInset = TileMetrics.CollisionCellWidth;
 
     /// <inheritdoc cref="PlacementXInset" />
-    private const int PlacementYLift = 64;
+    private const int PlacementYLift = TileMetrics.CollisionCellHeight * 2;
 
     /// <summary>
     ///     Anything numbered above this is scenery drawn on the upper layer rather than a tile the
@@ -234,8 +226,6 @@ public class GameScreenCollection : GameComponentBase
         Random randomNumberGenerator,
         int tilesAcross,
         int tilesDown,
-        int xOffset,
-        int yOffset,
         int collAreaWidth,
         int collAreaHeight)
     {
@@ -1331,12 +1321,12 @@ public class GameScreenCollection : GameComponentBase
         _ollyEyesY = OllyEyesRestY + blobYPos / OllyVerticalGazeDamping;
     }
 
-    public void DrawCoreElements(int xPos, int yPos, GameTime gameTime)
+    public void DrawCoreElements(int xPos, int yPos)
     {
         int objNo = 0;
 
         _resources.GetSpriteCollection(_graphicsSet.Names.Pickups)
-            .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+            .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
         for (int y = 0; y < 3; y++)
         {
             for (int x = 0; x < 3; x++)
@@ -1357,7 +1347,7 @@ public class GameScreenCollection : GameComponentBase
         {
             for (int x = 0; x < TilesAcross; x++)
             {
-                DrawLowerTile(x, y, colour, gameTime);
+                DrawLowerTile(x, y, colour);
             }
         }
 
@@ -1368,15 +1358,15 @@ public class GameScreenCollection : GameComponentBase
 
         if (objectsArePlaced)
         {
-            DrawPowerUp(colour, gameTime);
-            DrawPickUps(colour, gameTime);
-            DrawCheopsPyramid(colour, gameTime);
+            DrawPowerUp(colour);
+            DrawPickUps(colour);
+            DrawCheopsPyramid(colour);
         }
 
-        DrawOllyBackground(colour, gameTime);
+        DrawOllyBackground(colour);
     }
 
-    private void DrawLowerTile(int x, int y, Color colour, GameTime gameTime)
+    private void DrawLowerTile(int x, int y, Color colour)
     {
         int tileImage = _gameScreens[_screenNumber].ScreenTiles[x, y].TileImage;
 
@@ -1394,17 +1384,17 @@ public class GameScreenCollection : GameComponentBase
         {
             SpriteCollection tiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
 
-            tiles.Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
+            tiles.Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate);
             tiles.DrawSprite(tileImage, x * _tileWidth, y * _tileHeight, colour);
             tiles.End();
         }
 
         // Draw animation portions
         _resources.GetAnimationEngine()
-            .Draw(tileImage, x * _tileWidth, y * _tileHeight, colour, gameTime);
+            .Draw(tileImage, x * _tileWidth, y * _tileHeight, colour);
     }
 
-    private void DrawPowerUp(Color colour, GameTime gameTime)
+    private void DrawPowerUp(Color colour)
     {
         if (CurrentGameScreenData.PowerUp == null)
         {
@@ -1412,14 +1402,14 @@ public class GameScreenCollection : GameComponentBase
         }
 
         _resources.GetSpriteCollection(_graphicsSet.Names.PowerUps)
-            .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
+            .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate);
         _resources.GetSpriteCollection(_graphicsSet.Names.PowerUps).DrawSprite(
             CurrentGameScreenData.PowerUp.Type, CurrentGameScreenData.PowerUp.XLocation,
             CurrentGameScreenData.PowerUp.YLocation, colour);
         _resources.GetSpriteCollection(_graphicsSet.Names.PowerUps).End();
     }
 
-    private void DrawPickUps(Color colour, GameTime gameTime)
+    private void DrawPickUps(Color colour)
     {
         if (CurrentGameScreenData.PickUps == null)
         {
@@ -1427,7 +1417,7 @@ public class GameScreenCollection : GameComponentBase
         }
 
         _resources.GetSpriteCollection(_graphicsSet.Names.Pickups)
-            .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
+            .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate);
         foreach (InteractiveItem pickUp in CurrentGameScreenData.PickUps)
         {
             _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite(
@@ -1438,7 +1428,7 @@ public class GameScreenCollection : GameComponentBase
         _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
     }
 
-    private void DrawCheopsPyramid(Color colour, GameTime gameTime)
+    private void DrawCheopsPyramid(Color colour)
     {
         if (CurrentGameScreenData.CheopsPyramid == null)
         {
@@ -1448,7 +1438,7 @@ public class GameScreenCollection : GameComponentBase
         if (_graphicsSet.IsOriginal)
         {
             _resources.GetSpriteCollection("CheopsPyramidOriginal")
-                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
             _resources.GetSpriteCollection("CheopsPyramidOriginal").DrawSprite(0,
                 CurrentGameScreenData.CheopsPyramid.XLocation, CurrentGameScreenData.CheopsPyramid.YLocation,
                 colour);
@@ -1457,7 +1447,7 @@ public class GameScreenCollection : GameComponentBase
         else
         {
             _resources.GetSpriteCollection("CheopsPyramid")
-                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
             _resources.GetSpriteCollection("CheopsPyramid").DrawSprite(0,
                 CurrentGameScreenData.CheopsPyramid.XLocation, CurrentGameScreenData.CheopsPyramid.YLocation,
                 colour);
@@ -1468,7 +1458,7 @@ public class GameScreenCollection : GameComponentBase
     /// <summary>
     ///     Olly has no backdrop in the original graphics, which is why the old set skips this.
     /// </summary>
-    private void DrawOllyBackground(Color colour, GameTime gameTime)
+    private void DrawOllyBackground(Color colour)
     {
         if (ScreenNumber != OllyScreenNumber || _graphicsSet.IsOriginal)
         {
@@ -1476,34 +1466,34 @@ public class GameScreenCollection : GameComponentBase
         }
 
         _resources.GetSpriteCollection("OllyBackground")
-            .Begin(BlendState.AlphaBlend, gameTime);
+            .Begin(BlendState.AlphaBlend);
         _resources.GetSpriteCollection("OllyBackground")
             .DrawSprite(0, 382, 146, colour);
         _resources.GetSpriteCollection("OllyBackground").End();
     }
 
-    public void DrawUpperLayer(Color colour, GameTime gameTime)
+    public void DrawUpperLayer(Color colour)
     {
         for (int y = 0; y < TilesDown; y++)
         {
             for (int x = 0; x < TilesAcross; x++)
             {
-                DrawUpperTilePatch(x, y, colour, gameTime);
-                DrawTunnelEntrance(x, y, colour, gameTime);
+                DrawUpperTilePatch(x, y, colour);
+                DrawTunnelEntrance(x, y, colour);
             }
         }
 
-        DrawOlly(colour, gameTime);
+        DrawOlly(colour);
         DrawKeyDoorForceFields();
 
-        ColourAnimations.DrawUpperLayer(gameTime, colour.A);
+        ColourAnimations.DrawUpperLayer();
     }
 
     /// <summary>
     ///     Lays the upper-layer patch over one tile - the inside of a lift shaft, a booth, a tunnel mouth,
     ///     the shadow another tile casts. A tile with no patch is left as the lower layer drew it.
     /// </summary>
-    private void DrawUpperTilePatch(int x, int y, Color colour, GameTime gameTime)
+    private void DrawUpperTilePatch(int x, int y, Color colour)
     {
         if (UpperLayerPatchFor(CurrentGameScreenData.ScreenTiles[x, y].TileImage) is not var (sprite, rowOffset))
         {
@@ -1513,7 +1503,7 @@ public class GameScreenCollection : GameComponentBase
         SpriteCollection upperTiles = _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles);
         SpriteCollection lowerTiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
 
-        upperTiles.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+        upperTiles.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
         upperTiles.DrawSprite(
             sprite,
             x * lowerTiles.SpriteWidth,
@@ -1592,12 +1582,12 @@ public class GameScreenCollection : GameComponentBase
         };
     }
 
-    private void DrawTunnelEntrance(int x, int y, Color colour, GameTime gameTime)
+    private void DrawTunnelEntrance(int x, int y, Color colour)
     {
         if (CurrentGameScreenData.ScreenTiles[x, y].TileImage > LastCollidableTile)
         {
             _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
-                .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
+                .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate);
             _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
                 .DrawSprite(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage, x * _tileWidth,
                     y * _tileHeight, colour);
@@ -1605,14 +1595,14 @@ public class GameScreenCollection : GameComponentBase
         }
     }
 
-    private void DrawOlly(Color colour, GameTime gameTime)
+    private void DrawOlly(Color colour)
     {
         if (ScreenNumber == OllyScreenNumber)
         {
             if (_graphicsSet.IsOriginal)
             {
                 _resources.GetSpriteCollection("OllyOriginal")
-                    .Begin(BlendState.AlphaBlend, gameTime);
+                    .Begin(BlendState.AlphaBlend);
                 _resources.GetSpriteCollection("OllyOriginal")
                     .DrawSprite(0, 384, 100, colour);
                 _resources.GetSpriteCollection("OllyOriginal").End();
@@ -1620,18 +1610,18 @@ public class GameScreenCollection : GameComponentBase
             else
             {
                 _resources.GetSpriteCollection("OllyLower")
-                    .Begin(BlendState.AlphaBlend, gameTime);
+                    .Begin(BlendState.AlphaBlend);
                 _resources.GetSpriteCollection("OllyLower").DrawSprite(0, 382, 146, colour);
                 _resources.GetSpriteCollection("OllyLower").End();
 
                 _resources.GetSpriteCollection("OllyEyes")
-                    .Begin(BlendState.AlphaBlend, gameTime);
+                    .Begin(BlendState.AlphaBlend);
                 _resources.GetSpriteCollection("OllyEyes")
                     .DrawSprite(0, _ollyEyesX, _ollyEyesY, colour);
                 _resources.GetSpriteCollection("OllyEyes").End();
 
                 _resources.GetSpriteCollection("OllyUpper")
-                    .Begin(BlendState.AlphaBlend, gameTime);
+                    .Begin(BlendState.AlphaBlend);
                 _resources.GetSpriteCollection("OllyUpper").DrawSprite(0, 450, 166, colour);
                 _resources.GetSpriteCollection("OllyUpper").End();
             }
@@ -1649,13 +1639,13 @@ public class GameScreenCollection : GameComponentBase
         }
     }
 
-    public void DrawShadowing(GameTime gameTime)
+    public void DrawShadowing()
     {
         if (_graphicsSet.IsRedrawn)
         {
             // Status panel shadow
             _resources.GetSpriteCollection("StatusPanelShadow")
-                .Begin(BlendState.AlphaBlend, gameTime);
+                .Begin(BlendState.AlphaBlend);
             _resources.GetSpriteCollection("StatusPanelShadow")
                 .DrawSprite(0, 0, 0, Color.White);
             _resources.GetSpriteCollection("StatusPanelShadow").End();

@@ -15,7 +15,6 @@ namespace Starquake.ActiveSprites;
 
 public class JumpPlatforms
 {
-    private readonly ContentManager _contentManager;
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsDeviceManager _graphicsDeviceManager;
     private readonly GraphicsSet _graphicsSet;
@@ -26,7 +25,6 @@ public class JumpPlatforms
 
     public JumpPlatforms(
         ResourceManager resources,
-        ContentManager content,
         GameScreenCollection gameScreens,
         GraphicsDeviceManager graphics,
         GraphicsSet graphicsSet,
@@ -34,7 +32,6 @@ public class JumpPlatforms
         ScreenEffectEngine screenEffects)
     {
         _resources = resources;
-        _contentManager = content;
         _gameScreens = gameScreens;
         _graphicsDeviceManager = graphics;
         _graphicsSet = graphicsSet;
@@ -45,7 +42,7 @@ public class JumpPlatforms
 
     public int GetNewJumpPlatform(int xPos, int yPos, int width, int height, bool checkCollision)
     {
-        Point position = JumpPlatform.GetJumpPlatformCoords(xPos, yPos, _gameScreens);
+        Point position = JumpPlatform.GetJumpPlatformCoords(xPos, yPos);
 
         if (checkCollision)
         {
@@ -74,7 +71,6 @@ public class JumpPlatforms
         {
             newPlatform = new JumpPlatform(
                 _resources,
-                _contentManager,
                 _graphicsDeviceManager,
                 _graphicsSet,
                 _randomNumberGenerator,
@@ -129,11 +125,11 @@ public class JumpPlatforms
         }
     }
 
-    public void Draw(GameTime gameTime)
+    public void Draw()
     {
         foreach (JumpPlatform platform in _platforms)
         {
-            platform.Draw(gameTime);
+            platform.Draw();
         }
     }
 }

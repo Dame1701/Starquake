@@ -106,7 +106,7 @@ public class HiScores
         }
     }
 
-    public void Draw(ResourceManager resources, BitmapFont font, GameTime gameTime, int xPos, int yPos, int fade)
+    public void Draw(ResourceManager resources, BitmapFont font, int xPos, int yPos, int fade)
     {
         int currentYPos = yPos;
         int currentXPos = xPos;
@@ -115,11 +115,11 @@ public class HiScores
         {
             if (a % 2 == 0)
             {
-                ProportionalNumbers.Draw(currentXPos, currentYPos, a + 1 + ".", resources, gameTime, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, fade));
+                ProportionalNumbers.Draw(currentXPos, currentYPos, a + 1 + ".", resources, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, fade));
             }
             else
             {
-                ProportionalNumbers.Draw(currentXPos, currentYPos, a + 1 + ".", resources, gameTime, ColourHelper.GetXna4Colour(150, 150, 150, fade));
+                ProportionalNumbers.Draw(currentXPos, currentYPos, a + 1 + ".", resources, ColourHelper.GetXna4Colour(150, 150, 150, fade));
             }
 
             currentYPos = currentYPos + 50;
@@ -148,11 +148,11 @@ public class HiScores
         {
             if (a % 2 == 0)
             {
-                ProportionalNumbers.Draw(currentXPos + 250, currentYPos, _scores[a].Score.ToString("000000") + " " + _scores[a].AdventureScoreString + "%", resources, gameTime, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, fade));
+                ProportionalNumbers.Draw(currentXPos + 250, currentYPos, _scores[a].Score.ToString("000000") + " " + _scores[a].AdventureScoreString + "%", resources, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, fade));
             }
             else
             {
-                ProportionalNumbers.Draw(currentXPos + 250, currentYPos, _scores[a].Score.ToString("000000") + " " + _scores[a].AdventureScoreString + "%", resources, gameTime, ColourHelper.GetXna4Colour(150, 150, 150, fade));
+                ProportionalNumbers.Draw(currentXPos + 250, currentYPos, _scores[a].Score.ToString("000000") + " " + _scores[a].AdventureScoreString + "%", resources, ColourHelper.GetXna4Colour(150, 150, 150, fade));
             }
             currentYPos = currentYPos + 50;
         }

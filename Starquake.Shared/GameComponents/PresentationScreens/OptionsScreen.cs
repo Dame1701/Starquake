@@ -109,7 +109,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
     {
         if (_definingKeys)
         {
-            _keyDefiner.Update(gameTime);
+            _keyDefiner.Update();
         }
         else
         {
@@ -263,7 +263,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
     {
         ScreenEffects.SelectRenderViewPort("EntireScreen");
 
-        _backgroundImage.Begin(BlendState.AlphaBlend, gameTime);
+        _backgroundImage.Begin(BlendState.AlphaBlend);
         _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
         _backgroundImage.End();
 
@@ -299,14 +299,14 @@ public class OptionsScreen : GameScreenBase, IGameScreen
         }
         else
         {
-            _keyDefiner.Draw(gameTime, ScreenFade);
+            _keyDefiner.Draw(ScreenFade);
         }
 
         Font.WriteText(555, 640, "2017", 2, new Color(112, 155, 155), (byte)ScreenFade);
 
         Font.End();
 
-        _foregroundImage.Begin(BlendState.AlphaBlend, gameTime);
+        _foregroundImage.Begin(BlendState.AlphaBlend);
         _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
         _foregroundImage.End();
     }

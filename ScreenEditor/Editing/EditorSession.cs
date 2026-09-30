@@ -395,7 +395,7 @@ public sealed class EditorSession : ViewModelBase
             return;
         }
 
-        ReplaceScreen(_clipboard, "paste");
+        ReplaceScreen(_clipboard);
     }
 
     public void ClearScreen()
@@ -403,7 +403,7 @@ public sealed class EditorSession : ViewModelBase
         int[] blank = new int[TileMetrics.TilesAcross * TileMetrics.TilesDown];
         Array.Fill(blank, EditorDocument.EmptyTile);
 
-        ReplaceScreen(blank, "clear");
+        ReplaceScreen(blank);
     }
 
     /// <summary>
@@ -415,7 +415,7 @@ public sealed class EditorSession : ViewModelBase
         int[] filled = new int[TileMetrics.TilesAcross * TileMetrics.TilesDown];
         Array.Fill(filled, _selectedTile);
 
-        ReplaceScreen(filled, "fill screen");
+        ReplaceScreen(filled);
     }
 
     /// <summary>
@@ -437,7 +437,7 @@ public sealed class EditorSession : ViewModelBase
         CurrentScreen = row * WorldMap.ScreensAcross + column;
     }
 
-    private void ReplaceScreen(int[] tiles, string name)
+    private void ReplaceScreen(int[] tiles)
     {
         int[] existing = Document.CaptureScreen(_currentScreen);
         if (existing.SequenceEqual(tiles))

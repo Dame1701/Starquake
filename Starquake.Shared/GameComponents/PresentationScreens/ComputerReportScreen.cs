@@ -89,7 +89,7 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
     public override void Draw(GameTime gameTime)
     {
         ScreenEffects.SelectRenderViewPort("EntireScreen");
-        _backgroundImage.Begin(BlendState.AlphaBlend, gameTime);
+        _backgroundImage.Begin(BlendState.AlphaBlend);
 
         if (_fadeComplete)
         {
@@ -112,7 +112,7 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
         Font.WriteTextCentred(1280, 560, "Malfunnythinkin . . .", 2, Color.Red, (byte)ScreenFade);
         Font.End();
 
-        _foregroundImage.Begin(BlendState.AlphaBlend, gameTime);
+        _foregroundImage.Begin(BlendState.AlphaBlend);
 
         if (_fadeComplete)
         {

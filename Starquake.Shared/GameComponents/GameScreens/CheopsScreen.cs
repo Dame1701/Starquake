@@ -313,29 +313,29 @@ public class CheopsScreen : GameComponentBase, IGameScreen
         _font.WriteText(298, 100, "CHEOPS PYRAMID", 2, Color.White, ColourLevels.Full);
         _font.End();
 
-        DrawPyramid(gameTime);
+        DrawPyramid();
 
         if (_elementSelectionMode)
         {
-            DrawElementSelection(gameTime);
+            DrawElementSelection();
         }
         else
         {
-            DrawElementsOnOffer(gameTime);
+            DrawElementsOnOffer();
         }
     }
 
-    private void DrawPyramid(GameTime gameTime)
+    private void DrawPyramid()
     {
         if (_graphicsSet.IsOriginal)
         {
-            _resources.GetSpriteCollection("CheopsPyramidOriginal").Begin(BlendState.AlphaBlend, gameTime);
+            _resources.GetSpriteCollection("CheopsPyramidOriginal").Begin(BlendState.AlphaBlend);
             _resources.GetSpriteCollection("CheopsPyramidOriginal").DrawSprite(0, 750, 69);
             _resources.GetSpriteCollection("CheopsPyramidOriginal").End();
         }
         else
         {
-            _resources.GetSpriteCollection("CheopsPyramid").Begin(BlendState.AlphaBlend, gameTime);
+            _resources.GetSpriteCollection("CheopsPyramid").Begin(BlendState.AlphaBlend);
             _resources.GetSpriteCollection("CheopsPyramid").DrawSprite(0, 750, 69);
             _resources.GetSpriteCollection("CheopsPyramid").End();
         }
@@ -344,7 +344,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
     /// <summary>
     ///     What the pyramid is holding, before the player has picked anything to swap for it.
     /// </summary>
-    private void DrawElementsOnOffer(GameTime gameTime)
+    private void DrawElementsOnOffer()
     {
         {
             _font.Begin(BlendState.AlphaBlend);
@@ -353,7 +353,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
 
             for (int a = 0; a < 2; a++)
             {
-                _accessCodes[a].Draw(_accessCode[a] + 10, 420 + a * 128, 260, gameTime);
+                _accessCodes[a].Draw(_accessCode[a] + 10, 420 + a * 128, 260);
             }
 
             // Draw the result
@@ -422,7 +422,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
     /// <summary>
     ///     The five inventory slots the player chooses from once a swap has been started.
     /// </summary>
-    private void DrawElementSelection(GameTime gameTime)
+    private void DrawElementSelection()
     {
         {
             _font.Begin(BlendState.AlphaBlend);
@@ -434,7 +434,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
 
             _font.End();
 
-            _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).Begin(BlendState.AlphaBlend, gameTime);
+            _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).Begin(BlendState.AlphaBlend);
 
             // Need to select something from the inventory randomly ignoring access card and key unless they are the only items....
             _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite((int)_blob.BlobInventory[_itemToSwap], 590, 168, Color.White);

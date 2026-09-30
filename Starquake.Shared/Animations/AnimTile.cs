@@ -42,11 +42,11 @@ public class AnimTile : GameComponentBase
         TileAnimation.GetNextFrame();
     }
 
-    public void Draw(int xPos, int yPos, Color colour, GameTime gameTime)
+    public void Draw(int xPos, int yPos, Color colour)
     {
         if (_graphicsSet.IsRedrawn)
         {
-            _tileAnimationSpriteSet.Begin(BlendState.AlphaBlend, gameTime);
+            _tileAnimationSpriteSet.Begin(BlendState.AlphaBlend);
             _tileAnimationSpriteSet.DrawSprite(TileAnimation.CurrentFrame, xPos, yPos, colour);
             _tileAnimationSpriteSet.End();
         }

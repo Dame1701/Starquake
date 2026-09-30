@@ -137,7 +137,7 @@ public class CoreElements : GameComponentBase
                     fadeUp = false;
                 }
                 int randomChoice = _randomNumberGenerator.Next(0, elementsToChoose.Count);
-                Elements[counter] = new CoreElement(_resources, _graphicsSet, _presentation, _randomNumberGenerator, elementsToChoose[randomChoice], counter, 6, fadeUp);
+                Elements[counter] = new CoreElement(_resources, _graphicsSet, _presentation, _randomNumberGenerator, elementsToChoose[randomChoice], counter, fadeUp);
                 Elements[counter].OnCoreElementReplaced += CoreElements_OnCoreElementReplaced;
                 elementsToChoose.RemoveAt(randomChoice);
                 Elements[counter].ElementState = CoreElementState.Missing;
@@ -189,7 +189,7 @@ public class CoreElements : GameComponentBase
         }
     }
 
-    public void Draw(GameTime gameTime, bool replacingElement)
+    public void Draw(bool replacingElement)
     {
         int coreX = CoreXPos;
         int coreY = CoreYPos;
@@ -199,14 +199,14 @@ public class CoreElements : GameComponentBase
         {
             for (int x = 0; x < CoreGridAcross; x++)
             {
-                Elements[counter].Draw(coreX + x * SpriteMetrics.SpriteWidth, coreY + y * SpriteMetrics.SpriteHeight, gameTime, replacingElement);
+                Elements[counter].Draw(coreX + x * SpriteMetrics.SpriteWidth, coreY + y * SpriteMetrics.SpriteHeight, replacingElement);
                 counter++;
             }
         }
 
     }
 
-    public void Draw(GameTime gameTime, int xPos, int yPos, int fade)
+    public void Draw(int xPos, int yPos, int fade)
     {
 
         int counter = 0;
@@ -214,7 +214,7 @@ public class CoreElements : GameComponentBase
         {
             for (int x = 0; x < CoreGridAcross; x++)
             {
-                Elements[counter].Draw(xPos + x * SpriteMetrics.SpriteWidth, yPos + y * SpriteMetrics.SpriteHeight, fade, gameTime);
+                Elements[counter].Draw(xPos + x * SpriteMetrics.SpriteWidth, yPos + y * SpriteMetrics.SpriteHeight, fade);
                 counter++;
             }
         }

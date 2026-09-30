@@ -201,9 +201,9 @@ public class ColourAnimationEngine : GameComponentBase
         }
     }
 
-    public void Draw(GameTime gameTime, byte screenFade)
+    public override void Draw(GameTime gameTime)
     {
-        _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+        _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).Begin(BlendState.Additive, SpriteSortMode.BackToFront);
 
         for (int y = 0; y < _gameScreens.TilesDown; y++)
         {
@@ -229,9 +229,9 @@ public class ColourAnimationEngine : GameComponentBase
         _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).End();
     }
 
-    public void Draw(SpriteCollection sprites, GameTime gameTime, byte screenFade)
+    public void Draw(SpriteCollection sprites)
     {
-        sprites.Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+        sprites.Begin(BlendState.Additive, SpriteSortMode.BackToFront);
 
         for (int y = 0; y < _gameScreens.TilesDown; y++)
         {
@@ -258,9 +258,9 @@ public class ColourAnimationEngine : GameComponentBase
         sprites.End();
     }
 
-    public void DrawUpperLayer(GameTime gameTime, byte screenFade)
+    public void DrawUpperLayer()
     {
-        _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+        _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).Begin(BlendState.Additive, SpriteSortMode.BackToFront);
 
         for (int y = 0; y < _gameScreens.TilesDown; y++)
         {

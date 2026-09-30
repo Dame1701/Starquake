@@ -147,7 +147,7 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
     public override void Draw(GameTime gameTime)
     {
         ScreenEffects.SelectRenderViewPort("EntireScreen");
-        _backgroundImage.Begin(BlendState.AlphaBlend, gameTime);
+        _backgroundImage.Begin(BlendState.AlphaBlend);
 
         if (_fadeComplete)
         {
@@ -179,10 +179,10 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
             Font.WriteTextCentred(1280, 180, "CORE OF HEROES", 2, ColourHelper.GetXna4Colour(9, 132, ColourLevels.Full), (byte)ScreenFade);
             Font.End();
 
-            _hiscoreList.Draw(Resources, Font, gameTime, 380, 250, ScreenFade);
+            _hiscoreList.Draw(Resources, Font, 380, 250, ScreenFade);
         }
 
-        _foregroundImage.Begin(BlendState.AlphaBlend, gameTime);
+        _foregroundImage.Begin(BlendState.AlphaBlend);
 
         if (_fadeComplete)
         {

@@ -192,10 +192,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
     public override void LoadContent()
     {
         GameEngine.Nasties.Initialise(null);
-
-        var nastyGraphics = new ContentList(GameEngine.ContentMgr);
-        nastyGraphics.AddContent("nastySprite", "Graphics\\nastiesNew");
-        GameEngine.Nasties.LoadContent(nastyGraphics);
+        GameEngine.Nasties.LoadContent();
     }
 
     // Resets the game back to defaults
@@ -516,7 +513,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
     {
         if (WorldIsVisible)
         {
-            DrawBackground(gameTime);
+            DrawBackground();
 
             GameEngine.ElectricityNodeGateEngine.Draw(gameTime, ScreenFade);
 
@@ -525,7 +522,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
                 gameTime, GameEngine.IntroSequence.SequenceRunning, GameEngine.IntroSequence.SequenceStage);
 
 
-            GameEngine.BreakableBridgesEngine.Draw(gameTime);
+            GameEngine.BreakableBridgesEngine.Draw();
 
             if (GameIsInPlay)
             {
@@ -538,7 +535,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
                 DrawNasties(gameTime);
             }
 
-            DrawUpperGraphics(gameTime);
+            DrawUpperGraphics();
 
             GameEngine.TunnelAnimations.Draw(gameTime, (byte)ScreenFade);
 
@@ -547,7 +544,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
             if (GameIsInPlay)
             {
                 // Screen Exit shadows
-                GameEngine.GameScreens.DrawShadowing(gameTime);
+                GameEngine.GameScreens.DrawShadowing();
             }
 
             // Draw any sprites/effects that must go in front of shadows etc.
@@ -565,14 +562,14 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         }
     }
 
-    private void DrawBackground(GameTime gameTime)
+    private void DrawBackground()
     {
         if (GameEngine.Presentation.DrawBackgrounds)
         {
             int screenXPos = GameEngine.GameScreens.ScreenNumber % WorldMap.ScreensAcross;
 
             GameEngine.ContentResourceManager.GetSpriteCollection("Background1")
-                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
             GameEngine.ContentResourceManager.GetSpriteCollection("Background1").DrawSprite(0, screenXPos * BackgroundParallaxStep,
                 0, new Color((byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)(BackgroundOpacity / ColourLevels.Full * ScreenFade)));
             GameEngine.ContentResourceManager.GetSpriteCollection("Background1").End();
@@ -605,14 +602,12 @@ public class MainGameScreen : GameComponentBase, IGameScreen
             ScreenFade);
     }
 
-    private void DrawUpperGraphics(GameTime gameTime)
+    private void DrawUpperGraphics()
     {
-        GameEngine.ElectricityNodeGateEngine.DrawUpperLayer(gameTime,
-            ScreenFade);
+        GameEngine.ElectricityNodeGateEngine.DrawUpperLayer();
 
         GameEngine.GameScreens.DrawUpperLayer(
-            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade),
-            gameTime);
+            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
     }
 
     private void DrawShipSmoke1()

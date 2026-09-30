@@ -1501,7 +1501,7 @@ public class Nasty : GameComponentBase
 
         if (_nastyType == NastyType.CoreGuardian)
         {
-            DrawCoreGuardian(nastyImage, gameTime, screenFade);
+            DrawCoreGuardian(nastyImage, screenFade);
 
             return;
         }
@@ -1510,28 +1510,28 @@ public class Nasty : GameComponentBase
         {
             case NastyState.Birth:
             {
-                DrawBirth(nastyImage, gameTime, screenFade);
+                DrawBirth(nastyImage, screenFade);
 
                 break;
             }
             case NastyState.Normal:
             {
-                DrawLiveNasty(nastyImage, gameTime, screenFade);
+                DrawLiveNasty(nastyImage, screenFade);
 
                 break;
             }
             case NastyState.Dead:
             {
-                DrawDeath(nastyImage, gameTime, screenFade);
+                DrawDeath(nastyImage, screenFade);
 
                 break;
             }
         }
     }
 
-    private void DrawCoreGuardian(int nastyImage, GameTime gameTime, int screenFade)
+    private void DrawCoreGuardian(int nastyImage, int screenFade)
     {
-        _nastySprite.Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+        _nastySprite.Begin(BlendState.Additive, SpriteSortMode.BackToFront);
 
         // Choose the image
         _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
@@ -1543,9 +1543,9 @@ public class Nasty : GameComponentBase
     ///     A nasty materialises spinning and part-coloured, so it is drawn at its own scale and rotation
     ///     rather than the walk cycle's.
     /// </summary>
-    private void DrawBirth(int nastyImage, GameTime gameTime, int screenFade)
+    private void DrawBirth(int nastyImage, int screenFade)
     {
-        _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+        _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
 
         // Choose the image
         _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
@@ -1555,12 +1555,12 @@ public class Nasty : GameComponentBase
         _nastySprite.End();
     }
 
-    private void DrawLiveNasty(int nastyImage, GameTime gameTime, int screenFade)
+    private void DrawLiveNasty(int nastyImage, int screenFade)
     {
         // Choose the image
         if (Smoking)
         {
-            _nastySprite.Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+            _nastySprite.Begin(BlendState.Additive, SpriteSortMode.BackToFront);
             _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
                 ColourHelper.GetXna4Colour(ShotNastyGrey, ShotNastyGrey, ShotNastyGrey, (byte)screenFade));
             _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
@@ -1570,7 +1570,7 @@ public class Nasty : GameComponentBase
         }
         else
         {
-            _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+            _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
             _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
                 ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
         }
@@ -1581,7 +1581,7 @@ public class Nasty : GameComponentBase
     /// <summary>
     ///     The corpse shrinks and spins away while the explosion plays over it.
     /// </summary>
-    private void DrawDeath(int nastyImage, GameTime gameTime, int screenFade)
+    private void DrawDeath(int nastyImage, int screenFade)
     {
         // Draw the explosion
         if (_nastyDies != null)
@@ -1618,7 +1618,7 @@ public class Nasty : GameComponentBase
 
         if (_deathFadeLevel > 0)
         {
-            _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+            _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
             _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
                 ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
                     (byte)(_deathFadeLevel * ((double)screenFade / ColourLevels.Full))), _deathScale, DeathRotateSpeed,
@@ -1629,7 +1629,7 @@ public class Nasty : GameComponentBase
         if (_graphicsSet.IsOriginal)
         {
             _resources.GetSpriteCollection("BlobFire2Original")
-                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
             _resources.GetSpriteCollection("BlobFire2Original").DrawSprite(
                 _nastyDiesAnimation.CurrentFrame, XPos, YPos,
                 ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, screenFade), 1f, 0f);

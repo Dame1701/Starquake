@@ -60,7 +60,7 @@ public class BreakableBridge
         }
     }
 
-    public void Draw(GameTime gameTime)
+    public void Draw()
     {
         if (!Finished)
         {
@@ -70,14 +70,14 @@ public class BreakableBridge
 
             if (_graphicsSet.IsOriginal)
             {
-                _breakableBridgeOriginal.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                _breakableBridgeOriginal.DrawSprite(0, 0, 0, Color.White, _matrix.Matrix);
+                _breakableBridgeOriginal.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
+                _breakableBridgeOriginal.DrawSprite(0, 0, 0, _matrix.Matrix);
                 _breakableBridgeOriginal.End();
             }
             else
             {
-                _breakableBridge.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                _breakableBridge.DrawSprite(0, 0, 0, Color.White, _matrix.Matrix);
+                _breakableBridge.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
+                _breakableBridge.DrawSprite(0, 0, 0, _matrix.Matrix);
                 _breakableBridge.End();
             }
 

@@ -37,13 +37,13 @@ public class AnimTileEngine : GameComponentBase
         }
     }
 
-    public void Draw(int tileNumber, int xPos, int yPos, Color colour, GameTime gameTime)
+    public void Draw(int tileNumber, int xPos, int yPos, Color colour)
     {
         foreach (AnimTile animTilesList in AnimTilesList)
         {
             if (animTilesList.ScreenTileRef == tileNumber)
             {
-                animTilesList.Draw(xPos, yPos, colour, gameTime);
+                animTilesList.Draw(xPos, yPos, colour);
             }
         }
     }

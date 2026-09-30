@@ -80,7 +80,7 @@ public class GameCompleteScreen : GameScreenBase, IGameScreen
     public override void Draw(GameTime gameTime)
     {
         ScreenEffects.SelectRenderViewPort("EntireScreen");
-        _backgroundImage.Begin(BlendState.AlphaBlend, gameTime);
+        _backgroundImage.Begin(BlendState.AlphaBlend);
 
         if (_fadeComplete)
         {
@@ -102,9 +102,9 @@ public class GameCompleteScreen : GameScreenBase, IGameScreen
         Font.End();
 
         // Core elements
-        _elements.Draw(gameTime, 540, 450, ScreenFade);
+        _elements.Draw(540, 450, ScreenFade);
 
-        _foregroundImage.Begin(BlendState.AlphaBlend, gameTime);
+        _foregroundImage.Begin(BlendState.AlphaBlend);
 
         if (_fadeComplete)
         {

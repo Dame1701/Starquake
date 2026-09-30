@@ -134,16 +134,16 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
         _font.WriteText(370, 300, "ACCESS CODE", 2, Color.White, ColourLevels.Full);
         _font.End();
 
-        DrawBoothDoors(gameTime);
+        DrawBoothDoors();
 
-        _blobAnim1.Draw(gameTime);
-        _blobAnim2.Draw(gameTime);
+        _blobAnim1.Draw();
+        _blobAnim2.Draw();
 
-        DrawDoorHighlights(gameTime);
+        DrawDoorHighlights();
 
         for (int a = 0; a < 3; a++)
         {
-            _accessCodes[a].Draw(_accessCode[a] + 10, 348 + a * 128, 364, gameTime);
+            _accessCodes[a].Draw(_accessCode[a] + 10, 348 + a * 128, 364);
         }
 
         if (_accessCodes[2].Scanned)
@@ -152,18 +152,18 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
         }
     }
 
-    private void DrawBoothDoors(GameTime gameTime)
+    private void DrawBoothDoors()
     {
-        _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).Begin(BlendState.AlphaBlend, gameTime);
+        _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).Begin(BlendState.AlphaBlend);
         _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).DrawSprite(399, 380, 160);
         _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).DrawSprite(400, 508, 160);
 
         _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).End();
     }
 
-    private void DrawDoorHighlights(GameTime gameTime)
+    private void DrawDoorHighlights()
     {
-        _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).Begin(BlendState.AlphaBlend, gameTime);
+        _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).Begin(BlendState.AlphaBlend);
         _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).DrawSprite(9, 380, 160);
         _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).DrawSprite(10, 508, 160);
         _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).End();

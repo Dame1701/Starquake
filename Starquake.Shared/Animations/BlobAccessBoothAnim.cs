@@ -145,10 +145,10 @@ public class BlobAccessBoothAnim
         }
     }
 
-    public void Draw(GameTime gameTime)
+    public void Draw()
     {
         // Draw blob animation
-        _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites).Begin(BlendState.AlphaBlend, gameTime);
+        _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites).Begin(BlendState.AlphaBlend);
         _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites).DrawSprite(_blobFrame, _blobX, 192);
         _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites).End();
     }

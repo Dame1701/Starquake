@@ -35,7 +35,6 @@ internal class JumpPlatform
 
     public JumpPlatform(
         ResourceManager resources,
-        ContentManager content,
         GraphicsDeviceManager graphics,
         GraphicsSet graphicsSet,
         Random randomNumberGenerator,
@@ -80,7 +79,7 @@ internal class JumpPlatform
 
     public bool ReadyToAllocate { get; set; }
 
-    public static Point GetJumpPlatformCoords(int blobXPos, int blobYPos, GameScreenCollection gsc)
+    public static Point GetJumpPlatformCoords(int blobXPos, int blobYPos)
     {
         var returnValue = new Point();
         returnValue.X = blobXPos;
@@ -119,7 +118,7 @@ internal class JumpPlatform
         }
     }
 
-    public void Draw(GameTime gameTime)
+    public void Draw()
     {
         if (PlatformActive)
         {
@@ -129,14 +128,14 @@ internal class JumpPlatform
 
             if (_graphicsSet.IsOriginal)
             {
-                _jumpPlatformOriginal.Begin(BlendState.AlphaBlend, gameTime);
-                _jumpPlatformOriginal.DrawSprite(0, 0, 0, Color.White, _matrix.Matrix);
+                _jumpPlatformOriginal.Begin(BlendState.AlphaBlend);
+                _jumpPlatformOriginal.DrawSprite(0, 0, 0, _matrix.Matrix);
                 _jumpPlatformOriginal.End();
             }
             else
             {
-                _jumpPlatform.Begin(BlendState.AlphaBlend, gameTime);
-                _jumpPlatform.DrawSprite(0, 0, 0, Color.White, _matrix.Matrix);
+                _jumpPlatform.Begin(BlendState.AlphaBlend);
+                _jumpPlatform.DrawSprite(0, 0, 0, _matrix.Matrix);
                 _jumpPlatform.End();
             }
 

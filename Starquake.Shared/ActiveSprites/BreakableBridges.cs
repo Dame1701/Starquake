@@ -75,13 +75,13 @@ public class BreakableBridges
         _bridges.Clear();
     }
 
-    public void Draw(GameTime gameTime)
+    public void Draw()
     {
         if (_bridges.Count > 0)
         {
             foreach (BreakableBridge bridge in _bridges)
             {
-                bridge.Draw(gameTime);
+                bridge.Draw();
             }
         }
     }

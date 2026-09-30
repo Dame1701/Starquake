@@ -88,7 +88,7 @@ public class Nasties : GameComponentBase
 
     #region IGameComponent Members
 
-    public void LoadContent(ContentList content)
+    public override void LoadContent()
     {
         // Create double the number needed for screen swap operations
         _nasties.Clear();

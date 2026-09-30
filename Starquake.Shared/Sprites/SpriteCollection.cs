@@ -19,14 +19,14 @@ public class SpriteCollection
     private bool _clockWise = true;
 
     [NonSerialized]
-    private ContentManager _contentManager;
+    private readonly ContentManager _contentManager;
 
     private byte _fade;
 
     [NonSerialized]
-    private GraphicsDeviceManager _graphicsDeviceManager;
+    private readonly GraphicsDeviceManager _graphicsDeviceManager;
 
-    private string _imageFilePath;
+    private readonly string _imageFilePath;
 
     private float _rotationSpeed = 1f;
 
@@ -97,11 +97,6 @@ public class SpriteCollection
         private set;
     }
 
-    private void SetSpriteEffect()
-    {
-        _fade = ColourLevels.Full;
-    }
-
     public void ResetEffect()
     {
         _fade = 0;
@@ -112,12 +107,12 @@ public class SpriteCollection
     ///     composition - see PresentationSettings.Transform. Drawing into a render target the
     ///     game composes at its own fixed size, so there it is left null.
     /// </param>
-    public void Begin(BlendState blendState, GameTime gameTime, Matrix? transform = null)
+    public void Begin(BlendState blendState, Matrix? transform = null)
     {
         Sprites.Begin(SpriteSortMode.Deferred, blendState, null, null, null, null, transform);
     }
 
-    public void Begin(BlendState blendState, SpriteSortMode sortMode, GameTime gameTime, Matrix? transform = null)
+    public void Begin(BlendState blendState, SpriteSortMode sortMode, Matrix? transform = null)
     {
         Sprites.Begin(sortMode, blendState, null, null, null, null, transform);
     }
@@ -183,7 +178,7 @@ public class SpriteCollection
             ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, _fade));
     }
 
-    public void DrawSprite(int spriteNumber, int xPosition, int yPosition, Color spriteColour, SpritePixel[] matrix,
+    public void DrawSprite(int spriteNumber, int xPosition, int yPosition, SpritePixel[] matrix,
         int blockSize = 4, SpriteEffects spriteEffect = SpriteEffects.None)
     {
         if (matrix.Length == SpriteWidth * SpriteHeight)

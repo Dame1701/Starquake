@@ -100,7 +100,7 @@ public class TunnelLiftAnimationEngine : GameComponentBase
     {
         if (_columns != null && _columns.Count > 0)
         {
-            _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+            _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
 
             foreach (TunnelLiftAnimationColumn column in _columns)
             {

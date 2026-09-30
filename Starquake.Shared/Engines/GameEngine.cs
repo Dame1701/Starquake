@@ -188,7 +188,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     // Scaling
     public GameEngine(
-        GameWindow parentWindow,
         GraphicsDeviceManager graphics,
         ContentManager content)
     {
@@ -358,7 +357,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
         // Built here rather than with its view ports, so that anything constructed from here on -
         // the blob's jump platforms, for one - can be handed it instead of reaching for it later.
-        _screenEffectEngine = new ScreenEffectEngine(CompositionSize.Width, CompositionSize.Height, _graphicsDeviceMgr, Presentation);
+        _screenEffectEngine = new ScreenEffectEngine(_graphicsDeviceMgr, Presentation);
     }
 
     /// <summary>
@@ -439,8 +438,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                 RandomNumberGenerator,
                 TileMetrics.TilesAcross,
                 TileMetrics.TilesDown,
-                0,
-                0,
                 TileMetrics.CollisionCellWidth,
                 TileMetrics.CollisionCellHeight);
 
@@ -471,7 +468,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         // particle effects he carries are resources that do not exist until content loads.
         _player = new Blob(
             ContentResourceManager,
-            ContentMgr,
             GameScreens,
             _graphicsDeviceMgr,
             _graphicsSet,
@@ -1157,16 +1153,16 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                 Status == GameEngineStatus.StartingGraphicsLoaded ||
                 Status == GameEngineStatus.ContentLoaded)
             {
-                _bootScreen.Begin(BlendState.Opaque, gameTime, Presentation.Transform);
+                _bootScreen.Begin(BlendState.Opaque, Presentation.Transform);
                 _bootScreen.DrawSpriteUnscaled(0, 0, 0, _loadingScreenFade);
                 _bootScreen.End();
 
-                _bootProgressBackground.Begin(BlendState.AlphaBlend, gameTime, Presentation.Transform);
+                _bootProgressBackground.Begin(BlendState.AlphaBlend, Presentation.Transform);
                 _bootProgressBackground.DrawSpriteUnscaled(0, BootProgressBackgroundXPos, BootProgressBackgroundYPos, _bootProgressBackgroundFade);
                 _bootProgressBackground.End();
 
                 // Draw the status percentage
-                _bootProgress.Begin(BlendState.AlphaBlend, gameTime, Presentation.Transform);
+                _bootProgress.Begin(BlendState.AlphaBlend, Presentation.Transform);
                 int percentBarWidth = (int)(BootProgressBarSlices / (double)FullyLoadedPercent * PercentComplete);
 
                 for (int a = 0; a < percentBarWidth; a++)
@@ -1186,7 +1182,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         // Screen effects compose over whatever was just drawn, and only exist once the game does
         _screenEffectEngine?.Draw();
 
-        DrawScanlines(gameTime);
+        DrawScanlines();
     }
 
     /// <summary>
@@ -1199,14 +1195,14 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     ///         pacing frames, not deciding what the picture looks like.
     ///     </para>
     /// </summary>
-    private void DrawScanlines(GameTime gameTime)
+    private void DrawScanlines()
     {
         if (!Presentation.ScanlinesEnabled)
         {
             return;
         }
 
-        _scanlines.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime, Presentation.Transform);
+        _scanlines.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, Presentation.Transform);
         _scanlines.DrawSprite(0, 0, 0,
             new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ColourLevels.Full));
         _scanlines.End();

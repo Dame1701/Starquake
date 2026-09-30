@@ -283,13 +283,13 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
                             {
                                 if (_graphicsSet.IsRedrawn)
                                 {
-                                    _resources.GetSpriteCollection("ElectricityNodeElectricity1").Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+                                    _resources.GetSpriteCollection("ElectricityNodeElectricity1").Begin(BlendState.Additive, SpriteSortMode.BackToFront);
                                     _resources.GetSpriteCollection("ElectricityNodeElectricity1").DrawSprite(_electricityAnimation.CurrentFrame, secondLayerTile.TileLocation.X + 28, secondLayerTile.TileLocation.Y - 18, Color.White);
                                     _resources.GetSpriteCollection("ElectricityNodeElectricity1").End();
                                 }
                                 else
                                 {
-                                    _resources.GetSpriteCollection("ElectricityOriginal").Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+                                    _resources.GetSpriteCollection("ElectricityOriginal").Begin(BlendState.Additive, SpriteSortMode.BackToFront);
                                     _resources.GetSpriteCollection("ElectricityOriginal").DrawSprite(_electricityAnimationOriginal.CurrentFrame, secondLayerTile.TileLocation.X + OriginalArcXOffset, secondLayerTile.TileLocation.Y - OriginalNodeArcYRise, Color.White);
                                     _resources.GetSpriteCollection("ElectricityOriginal").End();
                                 }
@@ -310,13 +310,13 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
                             {
                                 if (_graphicsSet.IsRedrawn)
                                 {
-                                    _resources.GetSpriteCollection("ElectricityNodeElectricity1").Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+                                    _resources.GetSpriteCollection("ElectricityNodeElectricity1").Begin(BlendState.Additive, SpriteSortMode.BackToFront);
                                     _resources.GetSpriteCollection("ElectricityNodeElectricity1").DrawSprite(_electricityAnimation.CurrentFrame, secondLayerTile.TileLocation.X + 28, secondLayerTile.TileLocation.Y + 14, Color.White);
                                     _resources.GetSpriteCollection("ElectricityNodeElectricity1").End();
                                 }
                                 else
                                 {
-                                    _resources.GetSpriteCollection("ElectricityOriginal").Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+                                    _resources.GetSpriteCollection("ElectricityOriginal").Begin(BlendState.Additive, SpriteSortMode.BackToFront);
                                     _resources.GetSpriteCollection("ElectricityOriginal").DrawSprite(_electricityAnimationOriginal.CurrentFrame, secondLayerTile.TileLocation.X + OriginalArcXOffset, secondLayerTile.TileLocation.Y + OriginalGateArcYOffset, Color.White);
                                     _resources.GetSpriteCollection("ElectricityOriginal").End();
                                 }
@@ -330,7 +330,7 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
         }
     }
 
-    public void DrawUpperLayer(GameTime gameTime, int screenFade)
+    public void DrawUpperLayer()
     {
         // Draw electricity nodes etc bottom layer
         List<SecondLayerTile>? secondLayerTiles = _gameScreens.GetListOfSecondLayerTiles();
@@ -350,11 +350,11 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
                 {
                     if (secondLayerTile.TileType == TileType.ElectricityNode)
                     {
-                        DrawLitNode(secondLayerTile.TileLocation, gameTime);
+                        DrawLitNode(secondLayerTile.TileLocation);
                     }
                     else
                     {
-                        DrawLitGate(secondLayerTile.TileLocation, gameTime);
+                        DrawLitGate(secondLayerTile.TileLocation);
                     }
                 }
 
@@ -366,7 +366,7 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
 
         if (_conveyerNasties != null)
         {
-            DrawConveyerNastyArcs(gameTime);
+            DrawConveyerNastyArcs();
         }
     }
 
@@ -380,41 +380,37 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
            ElectricityNodeControllers[electricityNodeCounter].ElectricityOn &&
            _graphicsSet.IsRedrawn;
 
-    private void DrawLitNode(Point tileLocation, GameTime gameTime)
+    private void DrawLitNode(Point tileLocation)
     {
         DrawLightPair(
             "NodeLights",
             new Point(tileLocation.X - NodeLightNearXOffset, tileLocation.Y - NodeLightYRise),
-            new Point(tileLocation.X + NodeLightXOffset, tileLocation.Y - NodeLightYRise),
-            gameTime);
+            new Point(tileLocation.X + NodeLightXOffset, tileLocation.Y - NodeLightYRise));
 
         DrawArc(
             "ElectricityNodeElectricity2",
             _electricityAnimation2.CurrentFrame,
-            new Point(tileLocation.X + ArcXOffset, tileLocation.Y - NodeLightYRise),
-            gameTime);
+            new Point(tileLocation.X + ArcXOffset, tileLocation.Y - NodeLightYRise));
     }
 
     /// <summary>
     ///     A gate draws its arc before its lights and a node draws it after, which is the only thing
     ///     that stops the two sharing one method.
     /// </summary>
-    private void DrawLitGate(Point tileLocation, GameTime gameTime)
+    private void DrawLitGate(Point tileLocation)
     {
         DrawArc(
             "ElectricityNodeElectricity2",
             _electricityAnimation2.CurrentFrame,
-            new Point(tileLocation.X + ArcXOffset, tileLocation.Y + NodeLightYRise),
-            gameTime);
+            new Point(tileLocation.X + ArcXOffset, tileLocation.Y + NodeLightYRise));
 
         DrawLightPair(
             "GateLights",
             new Point(tileLocation.X + GateLightNearXOffset, tileLocation.Y + GateLightYOffset),
-            new Point(tileLocation.X + GateLightXOffset, tileLocation.Y + GateLightYOffset),
-            gameTime);
+            new Point(tileLocation.X + GateLightXOffset, tileLocation.Y + GateLightYOffset));
     }
 
-    private void DrawConveyerNastyArcs(GameTime gameTime)
+    private void DrawConveyerNastyArcs()
     {
         foreach (ConveyerNasty nasty in _conveyerNasties!.Nasties)
         {
@@ -426,11 +422,10 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
             DrawLightPair(
                 "GateLights",
                 new Point(nasty.XLocation - ConveyerGateLightNearXOffset, nasty.YLocation + GateLightYOffset),
-                new Point(nasty.XLocation + ConveyerGateLightXOffset, nasty.YLocation + GateLightYOffset),
-                gameTime);
+                new Point(nasty.XLocation + ConveyerGateLightXOffset, nasty.YLocation + GateLightYOffset));
 
             _resources.GetSpriteCollection("ElectricityNodeElectricity1")
-                .Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+                .Begin(BlendState.Additive, SpriteSortMode.BackToFront);
             _resources.GetSpriteCollection("ElectricityNodeElectricity1")
                 .DrawSprite(
                     _electricityAnimation.CurrentFrame,
@@ -447,11 +442,11 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
     ///     The two lights at either end of a node or a gate. Each is drawn blue and then cyan over the
     ///     top, which is what gives it a hot centre, and all three callers wanted the same four draws.
     /// </summary>
-    private void DrawLightPair(string spriteName, Point left, Point right, GameTime gameTime)
+    private void DrawLightPair(string spriteName, Point left, Point right)
     {
         SpriteCollection lights = _resources.GetSpriteCollection(spriteName);
 
-        lights.Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+        lights.Begin(BlendState.Additive, SpriteSortMode.BackToFront);
 
         foreach (Point at in new[]
                  {
@@ -466,11 +461,11 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
         lights.End();
     }
 
-    private void DrawArc(string spriteName, int frame, Point at, GameTime gameTime)
+    private void DrawArc(string spriteName, int frame, Point at)
     {
         SpriteCollection arc = _resources.GetSpriteCollection(spriteName);
 
-        arc.Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+        arc.Begin(BlendState.Additive, SpriteSortMode.BackToFront);
         arc.DrawSprite(frame, at.X, at.Y, Color.White);
         arc.End();
     }

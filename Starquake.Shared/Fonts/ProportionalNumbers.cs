@@ -10,9 +10,9 @@ namespace Starquake.Fonts;
 
 public class ProportionalNumbers
 {
-    public static void Draw(int xPos, int yPos, string numbers, ResourceManager resources, GameTime gameTime, Color color)
+    public static void Draw(int xPos, int yPos, string numbers, ResourceManager resources, Color color)
     {
-        resources.GetSpriteCollection("ProportionalNumbers").Begin(BlendState.AlphaBlend, gameTime);
+        resources.GetSpriteCollection("ProportionalNumbers").Begin(BlendState.AlphaBlend);
 
         for (int a = 0; a < numbers.Length; a++)
         {

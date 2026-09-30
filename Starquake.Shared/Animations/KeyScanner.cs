@@ -103,10 +103,10 @@ public class KeyScanner
         }
     }
 
-    public void Draw(int codeNumber, int xPos, int yPos, GameTime gameTime)
+    public void Draw(int codeNumber, int xPos, int yPos)
     {
         // Draw the code keys
-        _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).Begin(BlendState.AlphaBlend, gameTime);
+        _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).Begin(BlendState.AlphaBlend);
         _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite(codeNumber, xPos + 2, yPos + 6, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
         _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
 
@@ -117,20 +117,20 @@ public class KeyScanner
         {
             if (_matched)
             {
-                _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesPassed).Begin(BlendState.AlphaBlend, gameTime);
+                _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesPassed).Begin(BlendState.AlphaBlend);
                 _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesPassed).DrawSpriteSubSection(codeNumber, xPos + 2, yPos + 6, new Rectangle(0, 0, 64, height), ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
                 _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesPassed).End();
 
             }
             else
             {
-                _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesFailed).Begin(BlendState.AlphaBlend, gameTime);
+                _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesFailed).Begin(BlendState.AlphaBlend);
                 _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesFailed).DrawSpriteSubSection(codeNumber, xPos + 2, yPos + 6, new Rectangle(0, 0, 64, height), ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
                 _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesFailed).End();
             }
 
             // Draw the scanlines
-            _resources.GetSpriteCollection("ScanLine").Begin(BlendState.Additive, gameTime);
+            _resources.GetSpriteCollection("ScanLine").Begin(BlendState.Additive);
             _resources.GetSpriteCollection("ScanLine").DrawSprite(0, xPos - 4, _scanLineY + yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_scanLineFade));
             _resources.GetSpriteCollection("ScanLine").End();
         }

@@ -10,9 +10,9 @@ namespace Starquake.Display;
 
 public class PanelNumbers
 {
-    public static void Draw(int xPos, int yPos, string score, ResourceManager resources, GameTime gameTime, Color color)
+    public static void Draw(int xPos, int yPos, string score, ResourceManager resources, Color color)
     {
-        resources.GetSpriteCollection("PanelNumbers").Begin(BlendState.AlphaBlend, gameTime);
+        resources.GetSpriteCollection("PanelNumbers").Begin(BlendState.AlphaBlend);
         for (int a = 0; a < score.Length; a++)
         {
             string subScore = score.Substring(a, 1);

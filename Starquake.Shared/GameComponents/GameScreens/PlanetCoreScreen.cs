@@ -271,7 +271,7 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
 
         if (!_replacingElements)
         {
-            _resources.GetSpriteCollection("BlankingTile").Begin(BlendState.AlphaBlend, gameTime);
+            _resources.GetSpriteCollection("BlankingTile").Begin(BlendState.AlphaBlend);
             for (int a = 0; a < BlankingTilesDown; a++)
             {
                 for (int b = 0; b < BlankingTilesAcross; b++)
@@ -293,7 +293,7 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
             }
         }
 
-        _elements.Draw(gameTime, _replacingElements);
+        _elements.Draw(_replacingElements);
     }
 
     #region IGameScreen Members
