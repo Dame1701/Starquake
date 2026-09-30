@@ -17,6 +17,13 @@ public abstract class ScreenEffectBase
     public ScreenEffectType ScreenEffectType { get; protected init; }
     public bool EffectFinished { get; protected set; } = true;
 
+    /// <summary>
+    ///     Whether the blob and the nasties should still be held still. An effect that says nothing
+    ///     holds them for as long as it runs, which is what they all used to do; one that can afford
+    ///     to give control back before it has finished drawing says so by overriding this.
+    /// </summary>
+    public virtual bool HoldsGameplay => !EffectFinished;
+
     public virtual void TriggerEffect(RenderViewPort effectSurface, int effectSpeed, int effectDuration)
     {
         EffectSpeed = effectSpeed;

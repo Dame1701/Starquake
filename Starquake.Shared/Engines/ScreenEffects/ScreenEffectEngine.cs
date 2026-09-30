@@ -42,9 +42,17 @@ public class ScreenEffectEngine : GameComponentBase
         _screenEffects.Add(new AdditiveFade(presentation));
 
         _renderer = new SpriteBatch(_graphicsDeviceManager.GraphicsDevice);
-        HaltBlobAndNasties = false;
+        _haltBlobAndNastiesRequested = false;
     }
-    public bool HaltBlobAndNasties { get; private set; }
+    private bool _haltBlobAndNastiesRequested;
+
+    /// <summary>
+    ///     Whether the blob and the nasties are being held still. Both that the caller asked for a
+    ///     halt and that the running effect still wants one - the tunnel transition lets go before
+    ///     it has finished, so the last of it settles while the blob is already walking.
+    /// </summary>
+    public bool HaltBlobAndNasties
+        => _haltBlobAndNastiesRequested && ActiveScreenEffect is { HoldsGameplay: true };
 
     public ScreenEffectBase? ActiveScreenEffect { get; private set; }
 
@@ -134,7 +142,7 @@ public class ScreenEffectEngine : GameComponentBase
             {
                 ActiveScreenEffect = screenEffect;
                 ActiveScreenEffect.TriggerEffect(GetRenderViewPort("GameArea"), effectSpeed, effectDuration);
-                HaltBlobAndNasties = haltBlobAndNasties;
+                _haltBlobAndNastiesRequested = haltBlobAndNasties;
                 break;
             }
         }
@@ -148,7 +156,6 @@ public class ScreenEffectEngine : GameComponentBase
 
             if (ActiveScreenEffect.EffectFinished)
             {
-                HaltBlobAndNasties = false;
                 ActiveScreenEffect = null;
             }
         }

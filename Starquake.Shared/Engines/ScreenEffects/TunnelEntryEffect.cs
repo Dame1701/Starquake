@@ -53,9 +53,23 @@ public abstract class TunnelEntryEffect : ScreenEffectBase
     /// </summary>
     private const double Stretch = 1.70158;
 
+    /// <summary>
+    ///     How far into the arrival the blob gets control back, as a fraction of it. He is let go
+    ///     before the transition has finished, so the last of the overshoot settles while he is
+    ///     already walking - but not while the picture is still narrow, because the play area is
+    ///     drawn into a rectangle of the current width and his movement would be squashed along with
+    ///     it. At two fifths the picture is back to within a per cent of full width, which is the
+    ///     earliest it reads honestly.
+    /// </summary>
+    private const double HeldThroughArrival = 0.4;
+
     private int _emergeFrames;
     private int _frame;
+    private int _releaseFrame;
     private int _squeezeFrames;
+
+    /// <inheritdoc />
+    public override bool HoldsGameplay => !EffectFinished && _frame < _releaseFrame;
 
     /// <summary>
     ///     Whether the picture collapses towards the left edge as the blob leaves, and so expands
@@ -71,6 +85,7 @@ public abstract class TunnelEntryEffect : ScreenEffectBase
         // squeeze takes as long as it would have at that many pixels a frame, and the rest follows.
         _squeezeFrames = Math.Max(1, effectSurface.MasterWidth / Math.Max(1, effectSpeed));
         _emergeFrames = Math.Max(1, (int)(_squeezeFrames * EmergeSlowdown));
+        _releaseFrame = _squeezeFrames + FramesInTheDark + (int)(_emergeFrames * HeldThroughArrival);
         _frame = 0;
     }
 
