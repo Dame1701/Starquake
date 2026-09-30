@@ -3,7 +3,6 @@
 // ---------------------------------------------------------
 // -
 using System;
-using MessagePack;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -12,33 +11,27 @@ using Starquake.Helpers;
 
 namespace Starquake.Sprites;
 
-[Serializable]
 public class SpriteCollection
 {
-
-    private bool _clockWise = true;
-
-    [NonSerialized]
     private readonly ContentManager _contentManager;
 
-    private byte _fade;
-
-    [NonSerialized]
     private readonly GraphicsDeviceManager _graphicsDeviceManager;
 
     private readonly string _imageFilePath;
 
+    private readonly Texture2D _spriteImages;
+
+    private readonly int[] _spriteTexturePosX;
+
+    private readonly int[] _spriteTexturePosY;
+
+    private bool _clockWise = true;
+
+    private byte _fade;
+
     private float _rotationSpeed = 1f;
 
-    [NonSerialized]
-    private Texture2D _spriteImages;
-
-    [NonSerialized]
     private SpriteBatch? _sprites;
-
-    private int[] _spriteTexturePosX;
-
-    private int[] _spriteTexturePosY;
 
     public SpriteCollection(GraphicsDeviceManager graphics, ContentManager content, string imageFilePath,
         int spriteWidth, int spriteHeight)
@@ -467,6 +460,16 @@ public class SpriteCollection
     private SpriteBatch Sprites
         => _sprites ??= new SpriteBatch(_graphicsDeviceManager.GraphicsDevice);
 
+    /// <summary>
+    ///     A second collection over the same sheet, carrying this one's fade, rotation and spin.
+    /// </summary>
+    /// <remarks>
+    ///     The two sprite position arrays used to be copied here by round-tripping them through
+    ///     MessagePack - a deep-clone-via-BinaryFormatter idiom carried forward - and the texture was
+    ///     loaded a second time. None of the three was needed: the constructor on the line above
+    ///     computes both arrays from the same sheet's dimensions and loads the same texture, so all
+    ///     three assigned a value over an identical one.
+    /// </remarks>
     public SpriteCollection Clone()
     {
         var clonedSpriteCollection = new SpriteCollection(
@@ -479,10 +482,7 @@ public class SpriteCollection
             _fade = _fade,
             _clockWise = _clockWise,
             _rotationSpeed = _rotationSpeed,
-            _spriteTexturePosX = MessagePackSerializer.Deserialize<int[]>(MessagePackSerializer.Serialize(_spriteTexturePosX)),
-            _spriteTexturePosY = MessagePackSerializer.Deserialize<int[]>(MessagePackSerializer.Serialize(_spriteTexturePosY)),
-            SpriteRotation = SpriteRotation,
-            _spriteImages = _contentManager.Load<Texture2D>(_imageFilePath)
+            SpriteRotation = SpriteRotation
         };
 
         return clonedSpriteCollection;
