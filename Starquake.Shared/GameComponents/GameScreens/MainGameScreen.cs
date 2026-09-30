@@ -538,7 +538,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
 
     private void DrawBackground(GameTime gameTime)
     {
-        if (GameEngine.DrawBackgrounds)
+        if (GameEngine.Presentation.DrawBackgrounds)
         {
             var screenXPos = GameEngine.GameScreens.ScreenNumber % WorldMap.ScreensAcross;
 

@@ -170,7 +170,7 @@ public class CoreElement
         }
         if (_screenFlashFader.Triggered)
         {
-            _gameEngine.BackgroundColour = ColourHelper.GetXna4Colour(_screenFlashFader.ByteModifier, _screenFlashFader.ByteModifier, _screenFlashFader.ByteModifier);
+            _gameEngine.Presentation.BackgroundColour = ColourHelper.GetXna4Colour(_screenFlashFader.ByteModifier, _screenFlashFader.ByteModifier, _screenFlashFader.ByteModifier);
             _screenFlashFader.Update();
         }
 

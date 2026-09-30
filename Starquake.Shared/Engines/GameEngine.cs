@@ -105,8 +105,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     private const int CoreInventoryHandoverScreen = 197;
 
-    public Color BackgroundColour;
-
     public BlobDeathAnimation BlobKiller;
 
     public StatusPanel BlobStatusPanel;
@@ -125,7 +123,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public ConveyerNasties ConveyerNastiesInstance;
     public GameScreenType CurrentGameScreen;
 
-    public bool DrawBackgrounds = true;
     public ElectricityGatesAndNodesEngine ElectricityNodeGateEngine;
 
     // Central objects
@@ -164,15 +161,10 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     private int _powerUpType;
 
     /// <summary>
-    ///     The game is composed at a fixed <see cref="GameHost.ScreenWidth" /> by
-    ///     <see cref="GameHost.ScreenHeight" /> and only scaled onto the back buffer as the very
-    ///     last step, so nothing in the game has to know or care whether it is in a small window,
-    ///     a dragged-out one, or fullscreen on a 6K display. The scale is uniform so the picture
-    ///     is never stretched, and whatever is left over becomes an even border - top and bottom,
-    ///     or left and right. Recalculated every frame rather than hung off a resize event, so a
-    ///     fullscreen toggle, a window drag and a change of display all just work.
+    ///     How the composed picture is put on the screen - the transform onto the back buffer, the
+    ///     colours behind it, and where the game's own screens sit on it.
     /// </summary>
-    public Matrix PresentationTransform = Matrix.Identity;
+    public readonly PresentationSettings Presentation = new();
 
     public readonly Random RandomNumberGenerator;
 
@@ -184,14 +176,9 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public readonly GraphicsSet GraphicsSet = new();
 
     public SpriteCollection Scanlines;
-    public bool ScanlinesEnabled = true;
-
-    public Color ScreenClearColour = Color.Black;
 
     private ScreenEffectEngine? _screenEffectEngine;
     private readonly Dictionary<GameScreenType, IGameScreen> _screens;
-    public int ScreenXOffset;
-    public int ScreenYOffset;
 
     // Test area
     public Shapes ShapeDrawer;
@@ -213,7 +200,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         // Setup graphics device and content management
         GraphicsDeviceMgr = graphics;
         ContentMgr = content;
-        BackgroundColour = Color.Black;
+        Presentation.BackgroundColour = Color.Black;
 
         // Before the resource manager, which hands it to the sound engine.
         RandomNumberGenerator = new Random((int)DateTime.Now.Ticks);
@@ -724,8 +711,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
         _colourAnimationEngine = new ColourAnimationEngine(this);
 
-        ScreenXOffset = (GraphicsDeviceMgr.PreferredBackBufferWidth - GameScreens.ScreenWidth) / 2;
-        ScreenYOffset = 10;
+        Presentation.ScreenXOffset = (GraphicsDeviceMgr.PreferredBackBufferWidth - GameScreens.ScreenWidth) / 2;
+        Presentation.ScreenYOffset = 10;
 
         ConveyerNastiesInstance.Initialise(null);
         var converyerNastyGraphics = new ContentList(ContentMgr);
@@ -825,15 +812,15 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
         ScreenEffectEngine.RegisterViewPort(
             "GameArea",
-            ScreenXOffset,
-            ScreenYOffset + BlobStatusPanel.Height + 10,
+            Presentation.ScreenXOffset,
+            Presentation.ScreenYOffset + BlobStatusPanel.Height + 10,
             GameScreens.ScreenWidth,
             GameScreens.ScreenHeight);
 
         ScreenEffectEngine.RegisterViewPort(
             "StatusArea",
-            ScreenXOffset + 2,
-            ScreenYOffset,
+            Presentation.ScreenXOffset + 2,
+            Presentation.ScreenYOffset,
             BlobStatusPanel.Width,
             BlobStatusPanel.Height);
 
@@ -871,7 +858,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     {
         if (ToggleKeys.GetPressedKey() == Keys.F9)
         {
-            ScanlinesEnabled = !ScanlinesEnabled;
+            Presentation.ScanlinesEnabled = !Presentation.ScanlinesEnabled;
         }
 
         if (Status == GameEngineStatus.StartingGraphicsLoaded)
@@ -1004,7 +991,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     {
         if (CurrentGameScreen == GameScreenType.MainGame)
         {
-            DrawBackgrounds = !DrawBackgrounds;
+            Presentation.DrawBackgrounds = !Presentation.DrawBackgrounds;
         }
     }
     }
@@ -1016,7 +1003,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         GraphicsSet.Switch();
 
         // The original graphics have no backdrops drawn for them.
-        DrawBackgrounds = GraphicsSet.IsRedrawn;
+        Presentation.DrawBackgrounds = GraphicsSet.IsRedrawn;
 
         if (IntroSequence.SequenceStage == IntroSequenceStage.Finished || IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
         {
@@ -1203,16 +1190,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         // the composition size and the render viewports move it around as they please.
         var backBuffer = GraphicsDeviceMgr.GraphicsDevice.PresentationParameters;
 
-        var scale = Math.Min(
-            backBuffer.BackBufferWidth / (float)GameHost.ScreenWidth,
-            backBuffer.BackBufferHeight / (float)GameHost.ScreenHeight);
-
-        var borderX = (backBuffer.BackBufferWidth - GameHost.ScreenWidth * scale) / 2f;
-        var borderY = (backBuffer.BackBufferHeight - GameHost.ScreenHeight * scale) / 2f;
-
-        PresentationTransform =
-            Matrix.CreateScale(scale, scale, 1f) *
-            Matrix.CreateTranslation(borderX, borderY, 0f);
+        Presentation.Recalculate(backBuffer.BackBufferWidth, backBuffer.BackBufferHeight);
     }
 
     /// <summary>
@@ -1220,7 +1198,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     ///     composed for the display it lands on instead of being stretched up from the windowed
     ///     size. The game itself never changes size: it always composes at
     ///     <see cref="GameHost.ScreenWidth" /> x <see cref="GameHost.ScreenHeight" /> and
-    ///     PresentationTransform scales that onto whatever back buffer we end up with.
+    ///     Presentation.Transform scales that onto whatever back buffer we end up with.
     ///     HardwareModeSwitch has to be on. Borderless (the false case) looks like the friendlier
     ///     option, but on macOS it produces a window clamped to the desktop area *below* the menu
     ///     bar - a back buffer 39 points short, sat 39 points down the screen, with the picture
@@ -1265,7 +1243,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             }
 
             ScreenEffectEngine.SelectRenderViewPort("GameArea"); // GameArea;
-            GraphicsDeviceMgr.GraphicsDevice.Clear(ScreenClearColour);
+            GraphicsDeviceMgr.GraphicsDevice.Clear(Presentation.ScreenClearColour);
 
             _screens.TryGetValue(CurrentGameScreen, out var screenToDraw);
             screenToDraw?.Draw(gameTime);
@@ -1279,7 +1257,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         {
             // We're starting up so draw some nice progress bars and graphics etc.
             // The viewport has to be the whole back buffer, not the composition size: the
-            // boot screen is scaled up into it by PresentationTransform like everything else,
+            // boot screen is scaled up into it by Presentation.Transform like everything else,
             // and a viewport any smaller would just clip the result.
             var backBuffer = GraphicsDeviceMgr.GraphicsDevice.PresentationParameters;
 
@@ -1290,23 +1268,23 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             vp.Height = backBuffer.BackBufferHeight;
 
             GraphicsDeviceMgr.GraphicsDevice.Viewport = vp;
-            GraphicsDeviceMgr.GraphicsDevice.Clear(ScreenClearColour);
+            GraphicsDeviceMgr.GraphicsDevice.Clear(Presentation.ScreenClearColour);
 
 
             if (Status == GameEngineStatus.Starting ||
                 Status == GameEngineStatus.StartingGraphicsLoaded ||
                 Status == GameEngineStatus.ContentLoaded)
             {
-                _bootScreen.Begin(BlendState.Opaque, gameTime, PresentationTransform);
+                _bootScreen.Begin(BlendState.Opaque, gameTime, Presentation.Transform);
                 _bootScreen.DrawSpriteUnscaled(0, 0, 0, _loadingScreenFade);
                 _bootScreen.End();
 
-                _bootProgressBackground.Begin(BlendState.AlphaBlend, gameTime, PresentationTransform);
+                _bootProgressBackground.Begin(BlendState.AlphaBlend, gameTime, Presentation.Transform);
                 _bootProgressBackground.DrawSpriteUnscaled(0, BootProgressBackgroundXPos, BootProgressBackgroundYPos, _bootProgressBackgroundFade);
                 _bootProgressBackground.End();
 
                 // Draw the status percentage
-                _bootProgress.Begin(BlendState.AlphaBlend, gameTime, PresentationTransform);
+                _bootProgress.Begin(BlendState.AlphaBlend, gameTime, Presentation.Transform);
                 var percentBarWidth = (int)(BootProgressBarSlices / (double)FullyLoadedPercent * PercentComplete);
 
                 for (var a = 0; a < percentBarWidth; a++)

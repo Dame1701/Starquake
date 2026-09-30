@@ -35,7 +35,7 @@ public class GameHost : Game
     /// <summary>
     ///     The size the game composes its picture at, and the size the window first opens at.
     ///     Nothing in the game draws to the back buffer directly: everything is laid out against
-    ///     these two numbers and GameEngine.PresentationTransform scales the result onto whatever
+    ///     these two numbers and GameEngine.Presentation.Transform scales the result onto whatever
     ///     the back buffer happens to be, so the game looks the same in a small window as it does
     ///     fullscreen on a 6K display.
     /// </summary>
@@ -87,7 +87,7 @@ public class GameHost : Game
     ///     Keep the back buffer the same size as the window the user just dragged, so the picture is
     ///     composed at the resolution it is actually displayed at rather than being stretched up from
     ///     whatever size the window happened to start at. The game itself needs no telling: it always
-    ///     composes at its fixed size and GameEngine.PresentationTransform scales that onto whatever
+    ///     composes at its fixed size and GameEngine.Presentation.Transform scales that onto whatever
     ///     the back buffer now is.
     /// </summary>
     private void Window_ClientSizeChanged(object? sender, EventArgs e)
@@ -226,12 +226,12 @@ public class GameHost : Game
         {
             _gameEngine.Draw(gameTime);
 
-            if (_gameEngine.ScanlinesEnabled)
+            if (_gameEngine.Presentation.ScanlinesEnabled)
             {
                 // Scanlines overlay the finished picture, so they are scaled and centred
                 // with it rather than being laid over the letterbox borders as well.
                 _gameEngine.Scanlines.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime,
-                    _gameEngine.PresentationTransform);
+                    _gameEngine.Presentation.Transform);
                 _gameEngine.Scanlines.DrawSprite(0, 0, 0,
                     new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ColourLevels.Full));
                 _gameEngine.Scanlines.End();

@@ -197,12 +197,12 @@ public class IntroSequence : GameComponentBase
     {
         SequenceStage = IntroSequenceStage.PreFadePause;
         _shipExplosionSound = GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobShipExplodes");
-        GameEngine.ScreenClearColour = Color.White;
+        GameEngine.Presentation.ScreenClearColour = Color.White;
     }
 
     private void UpdatePreFadePause(GameTime gameTime)
     {
-        GameEngine.ScreenClearColour = Color.Black;
+        GameEngine.Presentation.ScreenClearColour = Color.Black;
         if (_shipRotationSpeed > 0)
         {
             _shipRotationSpeed = _shipRotationSpeed - 2;

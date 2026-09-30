@@ -110,7 +110,7 @@ public class SpriteCollection
 
     /// <param name="transform">
     ///     Only wanted when drawing straight to the back buffer, where it scales and centres the
-    ///     composition - see GameEngine.PresentationTransform. Drawing into a render target the
+    ///     composition - see GameEngine.Presentation.Transform. Drawing into a render target the
     ///     game composes at its own fixed size, so there it is left null.
     /// </param>
     public void Begin(BlendState blendState, GameTime gameTime, Matrix? transform = null)

@@ -78,7 +78,7 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
         {
             if (ToggleKeys.GetPressedKey() != Keys.None)
             {
-                GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.ScreenClearColour);
+                GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.Presentation.ScreenClearColour);
                 GameEngine.CurrentGameScreen = GameScreenType.Options;
                 GameEngine.GetGameScreen(GameScreenType.Options).PerformPostScreenChangeActions(GameScreenType.HiScores, null);
             }

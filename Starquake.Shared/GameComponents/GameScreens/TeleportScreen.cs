@@ -97,7 +97,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         _teleportMonitorScreen = new SpriteCollection(GameEngine.GraphicsDeviceMgr, GameEngine.ContentMgr, "Graphics\\TeleportInfoMonitor", 268, 210);
         _teleportMonitorScreenDistortion = new SpriteCollection(GameEngine.GraphicsDeviceMgr, GameEngine.ContentMgr, "Graphics\\TeleportInfoMonitorDistortion", 230, 30);
 
-        _teleportMonitorScreenDistortionYPos = GameEngine.ScreenYOffset + 28;
+        _teleportMonitorScreenDistortionYPos = GameEngine.Presentation.ScreenYOffset + 28;
 
         _teleportCodeLetters = new TeleportCodeLetter[5];
         for (var a = 0; a < 5; a++)
@@ -117,8 +117,8 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         _teleportCounter = 0;
         ScreenFade = ColourLevels.Full;
 
-        _oldOffsetX = GameEngine.ScreenXOffset;
-        _oldOffsetY = GameEngine.ScreenYOffset;
+        _oldOffsetX = GameEngine.Presentation.ScreenXOffset;
+        _oldOffsetY = GameEngine.Presentation.ScreenYOffset;
     }
 
     public override void Update(GameTime gameTime)
@@ -249,8 +249,8 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
         if (_teleportCounter > 58)
         {
-            GameEngine.ScreenXOffset = _oldOffsetX;
-            GameEngine.ScreenYOffset = _oldOffsetY;
+            GameEngine.Presentation.ScreenXOffset = _oldOffsetX;
+            GameEngine.Presentation.ScreenYOffset = _oldOffsetY;
 
             var teleporterLocation = GameEngine.GameScreens.GetCoordsOfTiles(397);
             if (teleporterLocation != null &&
@@ -384,7 +384,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         GameEngine.ShapeDrawer.FillRectangle(new Rectangle(179, 446, 28, 28), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
         GameEngine.ShapeDrawer.End();
 
-        GameEngine.Font2.WriteText(GameEngine.ScreenXOffset + 88, GameEngine.ScreenYOffset + 431, "NOW TELEPORTING", new Color(0, ColourLevels.Full - _teleportingMessageFader.FadeLevel, 0), ColourLevels.Full);
+        GameEngine.Font2.WriteText(GameEngine.Presentation.ScreenXOffset + 88, GameEngine.Presentation.ScreenYOffset + 431, "NOW TELEPORTING", new Color(0, ColourLevels.Full - _teleportingMessageFader.FadeLevel, 0), ColourLevels.Full);
 
         GameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
         GameEngine.ShapeDrawer.FillRectangle(new Rectangle(556, 446, 28, 28), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
@@ -400,7 +400,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         GameEngine.ShapeDrawer.FillRectangle(new Rectangle(144, 446, 28, 28), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
         GameEngine.ShapeDrawer.End();
 
-        GameEngine.Font2.WriteText(GameEngine.ScreenXOffset + 49, GameEngine.ScreenYOffset + 431, "CODE NOT RECOGNISED", new Color(ColourLevels.Full - _teleportingMessageFader.FadeLevel, 0, 0), ColourLevels.Full);
+        GameEngine.Font2.WriteText(GameEngine.Presentation.ScreenXOffset + 49, GameEngine.Presentation.ScreenYOffset + 431, "CODE NOT RECOGNISED", new Color(ColourLevels.Full - _teleportingMessageFader.FadeLevel, 0, 0), ColourLevels.Full);
 
         GameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
         GameEngine.ShapeDrawer.FillRectangle(new Rectangle(590, 446, 28, 28), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));

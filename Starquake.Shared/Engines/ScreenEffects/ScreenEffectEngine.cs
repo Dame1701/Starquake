@@ -39,7 +39,7 @@ public class ScreenEffectEngine : GameComponentBase
         // Add all of the screen effects we can find - do this eventually through reflection but for now - manually!
         _screenEffects.Add(new LeftTunnelEntryEffect());
         _screenEffects.Add(new RightTunnelEntryEffect());
-        _screenEffects.Add(new AdditiveFade(GameEngine));
+        _screenEffects.Add(new AdditiveFade(GameEngine.Presentation));
 
         _renderer = new SpriteBatch(GameEngine.GraphicsDeviceMgr.GraphicsDevice);
         HaltBlobAndNasties = false;
@@ -160,7 +160,7 @@ public class ScreenEffectEngine : GameComponentBase
         GameEngine.GraphicsDeviceMgr.GraphicsDevice.SetRenderTarget(null);
 
         // Clear the screen
-        GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.ScreenClearColour);
+        GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.Presentation.ScreenClearColour);
 
         foreach (var renderViewPort in _renderViewPorts)
         {
@@ -181,7 +181,7 @@ public class ScreenEffectEngine : GameComponentBase
                     if (useDefaultRenderer)
                     {
                         _renderer.Begin(SpriteSortMode.Deferred, BlendState.Opaque, null, null, null, null,
-                            GameEngine.PresentationTransform);
+                            GameEngine.Presentation.Transform);
 
                         _renderer.Draw(renderViewPort.RenderTarget, new Rectangle(
                             renderViewPort.XPos,
@@ -195,7 +195,7 @@ public class ScreenEffectEngine : GameComponentBase
                 else
                 {
                     _renderer.Begin(SpriteSortMode.Deferred, BlendState.Opaque, null, null, null, null,
-                        GameEngine.PresentationTransform);
+                        GameEngine.Presentation.Transform);
 
                     _renderer.Draw(renderViewPort.RenderTarget, new Rectangle(
                         renderViewPort.XPos,

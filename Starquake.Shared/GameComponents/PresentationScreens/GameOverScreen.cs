@@ -63,7 +63,7 @@ public class GameOverScreen : GameScreenBase, IGameScreen
                 AdventureScore = GameEngine.GameScreens.GetPercentageOfScreensVisited()
             };
 
-            GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.ScreenClearColour);
+            GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.Presentation.ScreenClearColour);
             GameEngine.CurrentGameScreen = GameScreenType.HiScores;
             GameEngine.GetGameScreen(GameScreenType.HiScores).PerformPostScreenChangeActions(GameScreenType.GameOver, playersScore);
         }

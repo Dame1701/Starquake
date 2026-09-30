@@ -213,7 +213,7 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
             GameEngine.GetGameScreen(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.PlanetCore, null);
 
             _justEnteredCore = true;
-            GameEngine.BackgroundColour = Color.Black;
+            GameEngine.Presentation.BackgroundColour = Color.Black;
         }
         else if (!_replacingElements && GameEngine.Elements.GetElementsReplacedCount() == CoreElementsToReplace)
         {
