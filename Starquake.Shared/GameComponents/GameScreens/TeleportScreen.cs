@@ -90,10 +90,10 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         _teleportCodes.Add(461, "aisle");
         _teleportCodes.Add(506, "exeon");
 
-        _teleportSprites = new SpriteCollection(GameEngine, GameEngine.ContentMgr, "Graphics\\TeleportEntry", 62, 62);
-        _teleportDistort = new SpriteCollection(GameEngine, GameEngine.ContentMgr, "Graphics\\TeleportDistort", 44, 29);
-        _teleportMonitorScreen = new SpriteCollection(GameEngine, GameEngine.ContentMgr, "Graphics\\TeleportInfoMonitor", 268, 210);
-        _teleportMonitorScreenDistortion = new SpriteCollection(GameEngine, GameEngine.ContentMgr, "Graphics\\TeleportInfoMonitorDistortion", 230, 30);
+        _teleportSprites = new SpriteCollection(GameEngine.GraphicsDeviceMgr, GameEngine.ContentMgr, "Graphics\\TeleportEntry", 62, 62);
+        _teleportDistort = new SpriteCollection(GameEngine.GraphicsDeviceMgr, GameEngine.ContentMgr, "Graphics\\TeleportDistort", 44, 29);
+        _teleportMonitorScreen = new SpriteCollection(GameEngine.GraphicsDeviceMgr, GameEngine.ContentMgr, "Graphics\\TeleportInfoMonitor", 268, 210);
+        _teleportMonitorScreenDistortion = new SpriteCollection(GameEngine.GraphicsDeviceMgr, GameEngine.ContentMgr, "Graphics\\TeleportInfoMonitorDistortion", 230, 30);
 
         _teleportMonitorScreenDistortionYPos = GameEngine.ScreenYOffset + 28;
 

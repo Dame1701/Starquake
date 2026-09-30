@@ -283,8 +283,8 @@ public class Nasty : GameComponentBase
         _nastyDiesAnimation.AnimateForwards = true;
 
         _nastySpriteOriginal = GameEngine.ContentResourceManager.GetSpriteCollection("NastiesOriginal")
-            .Clone(GameEngine);
-        _nastySpriteNew = GameEngine.ContentResourceManager.GetSpriteCollection("Nasties").Clone(GameEngine);
+            .Clone();
+        _nastySpriteNew = GameEngine.ContentResourceManager.GetSpriteCollection("Nasties").Clone();
 
         CheckSpritesInUse();
 

@@ -210,7 +210,7 @@ public class ResourceManager : StartableGameComponentBase
     /// </summary>
     private SpriteCollection LoadSpriteCollection(string filePath, int width, int height)
         => new(
-            _gameEngineInstance,
+            _gameEngineInstance.GraphicsDeviceMgr,
             _contentManagerInstance,
             filePath,
             width,

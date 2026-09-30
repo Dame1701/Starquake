@@ -440,10 +440,10 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         nameof(Scanlines))]
     private void DefineBootGraphics()
     {
-        _bootScreen = new SpriteCollection(this, ContentMgr, @"Graphics\\BootScreen2", GameHost.ScreenWidth, GameHost.ScreenHeight);
-        _bootProgressBackground = new SpriteCollection(this, ContentMgr, @"Graphics\\ProgressBarBackground", 1046, 32);
-        _bootProgress = new SpriteCollection(this, ContentMgr, @"Graphics\\BootProgress", 1, 24);
-        Scanlines = new SpriteCollection(this, ContentMgr, @"Graphics\\Scanlines2", GameHost.ScreenWidth, GameHost.ScreenHeight);
+        _bootScreen = new SpriteCollection(GraphicsDeviceMgr, ContentMgr, @"Graphics\\BootScreen2", GameHost.ScreenWidth, GameHost.ScreenHeight);
+        _bootProgressBackground = new SpriteCollection(GraphicsDeviceMgr, ContentMgr, @"Graphics\\ProgressBarBackground", 1046, 32);
+        _bootProgress = new SpriteCollection(GraphicsDeviceMgr, ContentMgr, @"Graphics\\BootProgress", 1, 24);
+        Scanlines = new SpriteCollection(GraphicsDeviceMgr, ContentMgr, @"Graphics\\Scanlines2", GameHost.ScreenWidth, GameHost.ScreenHeight);
     }
 
     [MemberNotNull(nameof(Font1), nameof(Font2))]

@@ -83,7 +83,7 @@ public class ConveyerNasty : GameComponentBase
         _deathFadeLevel = ColourLevels.Full;
         _deathScale = 1f;
 
-        _nastySprite = new SpriteCollection(GameEngine, GameEngine.ContentMgr, content.GetContent("conveyerNasty"), SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        _nastySprite = new SpriteCollection(GameEngine.GraphicsDeviceMgr, GameEngine.ContentMgr, content.GetContent("conveyerNasty"), SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
         _conveyerNastyDies = (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("NastyDies", ParticleEffectType.Triggered, null);
         _conveyerNastyDies.ParticleEffectComplete += conveyerNastyDies_ParticleEffectComplete;
     }

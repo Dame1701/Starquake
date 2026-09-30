@@ -8,7 +8,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
-using Starquake.Engines;
 using Starquake.Helpers;
 
 namespace Starquake.Sprites;
@@ -22,7 +21,11 @@ public class SpriteCollection
     private byte _fade;
 
     [NonSerialized]
-    private GameEngine _gameEngineReference;
+    private ContentManager _contentManager;
+
+    [NonSerialized]
+    private GraphicsDeviceManager _graphicsDeviceManager;
+
     private string _imageFilePath;
 
     private float _rotationSpeed = 1f;
@@ -37,16 +40,17 @@ public class SpriteCollection
 
     private int[] _spriteTexturePosY;
 
-    public SpriteCollection(GameEngine gameEngineReference, ContentManager content, string imageFilePath,
+    public SpriteCollection(GraphicsDeviceManager graphics, ContentManager content, string imageFilePath,
         int spriteWidth, int spriteHeight)
     {
         _imageFilePath = imageFilePath;
-        _gameEngineReference = gameEngineReference;
+        _graphicsDeviceManager = graphics;
+        _contentManager = content;
 
         this.SpriteWidth = spriteWidth;
         this.SpriteHeight = spriteHeight;
 
-        _sprites = new SpriteBatch(_gameEngineReference.GraphicsDeviceMgr.GraphicsDevice);
+        _sprites = new SpriteBatch(_graphicsDeviceManager.GraphicsDevice);
         _spriteImages = content.Load<Texture2D>(imageFilePath);
 
         var noHorizontalImages = _spriteImages.Width / spriteWidth;
@@ -455,11 +459,11 @@ public class SpriteCollection
         }
     }
 
-    public SpriteCollection Clone(GameEngine gameEngineReference)
+    public SpriteCollection Clone()
     {
         var clonedSpriteCollection = new SpriteCollection(
-            gameEngineReference,
-            gameEngineReference.ContentMgr,
+            _graphicsDeviceManager,
+            _contentManager,
             _imageFilePath,
             SpriteWidth,
             SpriteHeight)
@@ -470,7 +474,7 @@ public class SpriteCollection
             _spriteTexturePosX = MessagePackSerializer.Deserialize<int[]>(MessagePackSerializer.Serialize(_spriteTexturePosX)),
             _spriteTexturePosY = MessagePackSerializer.Deserialize<int[]>(MessagePackSerializer.Serialize(_spriteTexturePosY)),
             SpriteRotation = SpriteRotation,
-            _spriteImages = _gameEngineReference.ContentMgr.Load<Texture2D>(_imageFilePath)
+            _spriteImages = _contentManager.Load<Texture2D>(_imageFilePath)
         };
 
         return clonedSpriteCollection;

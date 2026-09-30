@@ -33,8 +33,8 @@ internal class JumpPlatform
         _textureDrawer = new SpriteBatch(gameEngineRef.GraphicsDeviceMgr.GraphicsDevice);
         _gameEngine = gameEngineRef;
 
-        _jumpPlatform = gameEngineRef.ContentResourceManager.GetSpriteCollection("JumpPlatforms").Clone(_gameEngine);
-        _jumpPlatformOriginal = gameEngineRef.ContentResourceManager.GetSpriteCollection("JumpPlatformsOriginal").Clone(_gameEngine);
+        _jumpPlatform = gameEngineRef.ContentResourceManager.GetSpriteCollection("JumpPlatforms").Clone();
+        _jumpPlatformOriginal = gameEngineRef.ContentResourceManager.GetSpriteCollection("JumpPlatformsOriginal").Clone();
 
         XPos = position.X;
         YPos = position.Y;
