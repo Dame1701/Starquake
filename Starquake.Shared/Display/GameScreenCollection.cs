@@ -128,11 +128,6 @@ public class GameScreenCollection : GameComponentBase
     ///     Olly, the eye that watches the blob from the wall of one particular screen, and the screen
     ///     it lives on. Its pupil tracks the blob across the room at a fraction of the blob's speed.
     /// </summary>
-    /// <summary>
-    ///     Where a new game starts. Not screen 0: the blob begins part way into the map.
-    /// </summary>
-    private const int StartingScreenNumber = 8;
-
     private const int OllyScreenNumber = 477;
 
     /// <inheritdoc cref="OllyScreenNumber" />
@@ -1584,7 +1579,7 @@ public class GameScreenCollection : GameComponentBase
     /// </summary>
     public void Reset()
     {
-        ScreenNumber = StartingScreenNumber;
+        ScreenNumber = WorldMap.ShipWreckScreenNumber;
 
         var r = new Random((int)DateTime.Now.Ticks);
 

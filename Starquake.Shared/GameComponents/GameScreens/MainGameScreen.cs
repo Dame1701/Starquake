@@ -350,7 +350,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
     /// </summary>
     private void UpdateShipSmoke(GameTime gameTime)
     {
-        if (GameEngine.GameScreens.ScreenNumber == 8)
+        if (GameEngine.GameScreens.ScreenNumber == WorldMap.ShipWreckScreenNumber)
         {
             if (GameEngine.GameScreens.BlobsShipSmoke1 != null)
             {
@@ -473,84 +473,47 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         ScreenFadeSpeed = fadeSpeed;
     }
 
+    /// <summary>
+    ///     Whether the world is on screen at all. It is hidden while the intro sequence's caption
+    ///     fades in and out over it.
+    /// </summary>
+    private bool WorldIsVisible =>
+        GameEngine.IntroSequence.SequenceStage != IntroSequenceStage.CaptionFadeUp &&
+        GameEngine.IntroSequence.SequenceStage != IntroSequenceStage.CaptionFadeDown;
+
     public override void Draw(GameTime gameTime)
     {
-        if (GameEngine.IntroSequence.SequenceStage != IntroSequenceStage.CaptionFadeUp &&
-            GameEngine.IntroSequence.SequenceStage != IntroSequenceStage.CaptionFadeDown)
+        if (WorldIsVisible)
         {
-            // Draw background
-            if (GameEngine.DrawBackgrounds)
-            {
-                var screenXPos = GameEngine.GameScreens.ScreenNumber % WorldMap.ScreensAcross;
+            DrawBackground(gameTime);
 
-                GameEngine.ContentResourceManager.GetSpriteCollection("Background1")
-                    .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                GameEngine.ContentResourceManager.GetSpriteCollection("Background1").DrawSprite(0, screenXPos * BackgroundParallaxStep,
-                    0, new Color((byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)(BackgroundOpacity / ColourLevels.Full * ScreenFade)));
-                GameEngine.ContentResourceManager.GetSpriteCollection("Background1").End();
-            }
-
-            // Draw electricity nodes etc lower layer
             GameEngine.ElectricityNodeGateEngine.Draw(gameTime, ScreenFade);
 
-            // Draw screen
             GameEngine.GameScreens.Draw(
                 ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade),
                 gameTime, GameEngine.IntroSequence.SequenceRunning, GameEngine.IntroSequence.SequenceStage);
 
-            // Draw breakable bridges
+
             GameEngine.BreakableBridgesEngine.Draw(gameTime);
 
-            if (!GameEngine.IntroSequence.SequenceRunning ||
-                GameEngine.IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
+            if (GameIsInPlay)
             {
-                // Draw blob
-                GameEngine.Player.Draw(
-                    gameTime,
-                    ScreenFade);
+                GameEngine.Player.Draw(gameTime, ScreenFade);
             }
 
             if (!GameEngine.IntroSequence.SequenceRunning)
             {
-                // Draw blob's death routine
-                if (GameEngine.Player.BlobsState is BlobState.Dead or BlobState.Dying or BlobState.Overloading ||
-                    GameEngine.BlobKiller.Active)
-                {
-                    GameEngine.BlobKiller.Draw(gameTime, ScreenFade);
-                }
-
-                // Draw nasties
-                GameEngine.Nasties.Draw(
-                    gameTime,
-                    ScreenFade);
-
-                GameEngine.ConveyerNastiesInstance.Draw(
-                    gameTime,
-                    ScreenFade);
+                DrawBlobDeath(gameTime);
+                DrawNasties(gameTime);
             }
 
-            // Draw upper graphics
-            GameEngine.ElectricityNodeGateEngine.DrawUpperLayer(gameTime,
-                ScreenFade);
+            DrawUpperGraphics(gameTime);
 
-            GameEngine.GameScreens.DrawUpperLayer(
-                ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade),
-                gameTime);
-
-            // Draw tunnel animations
             GameEngine.TunnelAnimations.Draw(gameTime, (byte)ScreenFade);
 
-            // Draw blob's ship smoke
-            if (GameEngine.GameScreens.ScreenNumber == 8)
-            {
-                if (GameEngine.GameScreens.BlobsShipSmoke1 != null)
-                {
-                    GameEngine.GameScreens.BlobsShipSmoke1.Draw(ScreenFade);
-                }
-            }
+            DrawShipSmoke1();
 
-            if (!GameEngine.IntroSequence.SequenceRunning ||
-                GameEngine.IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
+            if (GameIsInPlay)
             {
                 // Screen Exit shadows
                 GameEngine.GameScreens.DrawShadowing(gameTime);
@@ -560,21 +523,85 @@ public class MainGameScreen : GameComponentBase, IGameScreen
             GameEngine.Player.DrawUpper(ScreenFade);
         }
 
-        if (GameEngine.GameScreens.ScreenNumber == 8)
+        if (GameEngine.GameScreens.ScreenNumber == WorldMap.ShipWreckScreenNumber)
         {
             GameEngine.IntroSequence.Draw(gameTime);
         }
 
-        // Draw blob's ship smoke
-        if (GameEngine.IntroSequence.SequenceStage != IntroSequenceStage.CaptionFadeUp &&
-            GameEngine.IntroSequence.SequenceStage != IntroSequenceStage.CaptionFadeDown)
+        if (WorldIsVisible)
         {
-            if (GameEngine.GameScreens.ScreenNumber == 8)
+            DrawShipSmoke2();
+        }
+    }
+
+    private void DrawBackground(GameTime gameTime)
+    {
+        if (GameEngine.DrawBackgrounds)
+        {
+            var screenXPos = GameEngine.GameScreens.ScreenNumber % WorldMap.ScreensAcross;
+
+            GameEngine.ContentResourceManager.GetSpriteCollection("Background1")
+                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+            GameEngine.ContentResourceManager.GetSpriteCollection("Background1").DrawSprite(0, screenXPos * BackgroundParallaxStep,
+                0, new Color((byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)(BackgroundOpacity / ColourLevels.Full * ScreenFade)));
+            GameEngine.ContentResourceManager.GetSpriteCollection("Background1").End();
+        }
+    }
+
+    /// <summary>
+    ///     Blob is revived the frame after he reaches Dead, so the animation's own state has to keep it
+    ///     drawing while the explosion fades out.
+    /// </summary>
+    private void DrawBlobDeath(GameTime gameTime)
+    {
+        // Draw blob's death routine
+        if (GameEngine.Player.BlobsState is BlobState.Dead or BlobState.Dying or BlobState.Overloading ||
+            GameEngine.BlobKiller.Active)
+        {
+            GameEngine.BlobKiller.Draw(gameTime, ScreenFade);
+        }
+
+    }
+
+    private void DrawNasties(GameTime gameTime)
+    {
+        GameEngine.Nasties.Draw(
+            gameTime,
+            ScreenFade);
+
+        GameEngine.ConveyerNastiesInstance.Draw(
+            gameTime,
+            ScreenFade);
+    }
+
+    private void DrawUpperGraphics(GameTime gameTime)
+    {
+        GameEngine.ElectricityNodeGateEngine.DrawUpperLayer(gameTime,
+            ScreenFade);
+
+        GameEngine.GameScreens.DrawUpperLayer(
+            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade),
+            gameTime);
+    }
+
+    private void DrawShipSmoke1()
+    {
+        if (GameEngine.GameScreens.ScreenNumber == WorldMap.ShipWreckScreenNumber)
+        {
+            if (GameEngine.GameScreens.BlobsShipSmoke1 != null)
             {
-                if (GameEngine.GameScreens.BlobsShipSmoke2 != null)
-                {
-                    GameEngine.GameScreens.BlobsShipSmoke2.Draw(ScreenFade);
-                }
+                GameEngine.GameScreens.BlobsShipSmoke1.Draw(ScreenFade);
+            }
+        }
+    }
+
+    private void DrawShipSmoke2()
+    {
+        if (GameEngine.GameScreens.ScreenNumber == WorldMap.ShipWreckScreenNumber)
+        {
+            if (GameEngine.GameScreens.BlobsShipSmoke2 != null)
+            {
+                GameEngine.GameScreens.BlobsShipSmoke2.Draw(ScreenFade);
             }
         }
     }

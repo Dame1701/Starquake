@@ -123,7 +123,6 @@ public class TeleportScreen : GameComponentBase, IGameScreen
     {
         GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("MachineryBackground", 0.5f, true);
 
-        // Run Keyfader animation
         foreach (var keyFade in _keyFades)
         {
             keyFade.Update();
@@ -131,39 +130,72 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
         _powerSupplyFader.Update();
 
-        // Grab key presses
         if (!_keyPressed)
         {
-            for (var a = 65; a < 91; a++)
+            TypeAnyKeyPressed();
+        }
+
+        StartTeleportIfCodeComplete();
+
+        if (_attemptingTeleport)
+        {
+            RunTeleportAttempt();
+        }
+
+        if (!Keyboard.GetState().IsKeyDown((Keys)_keyIdPressed))
+        {
+            _keyPressed = false;
+        }
+
+        _teleportCodes.TryGetValue(GameEngine.GameScreens.ScreenNumber, out _teleportCode);
+
+        for (var a = 0; a < 5; a++)
+        {
+            _teleportCodeLetters[a].Letter = _currentCode[a].ToString();
+            _teleportCodeLetters[a].Location = new Point(350 + a * 70, 400);
+        }
+    }
+
+    /// <summary>
+    ///     A letter key goes into the first free slot of the code. The loop over 65 to 90 is A to Z as key
+    ///     codes, and only one key registers per press because the caller latches _keyPressed.
+    /// </summary>
+    private void TypeAnyKeyPressed()
+    {
+        for (var a = 65; a < 91; a++)
+        {
+            if (Keyboard.GetState().IsKeyDown((Keys)a))
             {
-                if (Keyboard.GetState().IsKeyDown((Keys)a))
+                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("TeleportKeyClick", 0.5f, false);
+
+                _keyPressed = true;
+                _keyIdPressed = a;
+
+                for (var b = 0; b < 5; b++)
                 {
-                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("TeleportKeyClick", 0.5f, false);
-
-                    _keyPressed = true;
-                    _keyIdPressed = a;
-
-                    for (var b = 0; b < 5; b++)
+                    if (_currentCode.Substring(b, 1) == "_")
                     {
-                        if (_currentCode.Substring(b, 1) == "_")
+                        if (b > 0)
                         {
-                            if (b > 0)
-                            {
-                                _currentCode = _currentCode.Substring(0, b) + (char)a + _currentCode.Substring(b + 1, 5 - (b + 1));
-                            }
-                            else
-                            {
-                                _currentCode = (char)a + _currentCode.Substring(b + 1, 5 - (b + 1));
-                            }
-
-                            break;
+                            _currentCode = _currentCode.Substring(0, b) + (char)a + _currentCode.Substring(b + 1, 5 - (b + 1));
                         }
+                        else
+                        {
+                            _currentCode = (char)a + _currentCode.Substring(b + 1, 5 - (b + 1));
+                        }
+
+                        break;
                     }
                 }
             }
         }
+    }
 
-        // Code has been entered so try to teleport.....
+    /// <summary>
+    ///     An underscore is an empty slot, so a code with none left in it is ready to try.
+    /// </summary>
+    private void StartTeleportIfCodeComplete()
+    {
         if (!_currentCode.Contains("_") && !_attemptingTeleport)
         {
             var destinationScreen = FindKey(_teleportCodes, _currentCode);
@@ -181,69 +213,60 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
             _attemptingTeleport = true;
         }
+    }
 
-        if (_attemptingTeleport)
+    /// <summary>
+    ///     Counts out the message, fades the screen if the code was good, and hands back to the main game
+    ///     once the animation has run. An unrecognised code plays out the same way but does not move blob.
+    /// </summary>
+    private void RunTeleportAttempt()
+    {
+        if (_codeRecognised)
         {
-            if (_codeRecognised)
+            _teleportingMessageFader.Update(8);
+        }
+        else
+        {
+            _teleportingMessageFader.Update(20);
+        }
+
+        _teleportCounter++;
+
+        // Only fade the screen out if the code is recognised
+        if (_codeRecognised)
+        {
+            if (ScreenFade > 0)
             {
-                _teleportingMessageFader.Update(8);
+                ScreenFade = ScreenFade - 3;
             }
-            else
+            if (ScreenFade < 0)
             {
-                _teleportingMessageFader.Update(20);
-            }
-
-            _teleportCounter++;
-
-            // Only fade the screen out if the code is recognised
-            if (_codeRecognised)
-            {
-                if (ScreenFade > 0)
-                {
-                    ScreenFade = ScreenFade - 3;
-                }
-                if (ScreenFade < 0)
-                {
-                    ScreenFade = 0;
-                }
-            }
-
-            if (_teleportCounter > 58)
-            {
-                GameEngine.ScreenXOffset = _oldOffsetX;
-                GameEngine.ScreenYOffset = _oldOffsetY;
-
-                var teleporterLocation = GameEngine.GameScreens.GetCoordsOfTiles(397);
-                if (teleporterLocation != null &&
-                    teleporterLocation.Count == 1)
-                {
-                    GameEngine.Player.BlobXPos = teleporterLocation[0].X + 20;
-                    GameEngine.Player.BlobYPos = teleporterLocation[0].Y + 32;
-                }
-
-                GameEngine.GetGameScreen(GameScreenType.MainGame).ScreenFade = 0;
-
-                // only do this if the teleport was successful
-                if (_codeRecognised && _currentCode != _previousCode.ToUpper())
-                {
-                    GameEngine.GetGameScreen(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.Teleporter, null);
-                    GameEngine.GameScreens.UpdateCollisionMap(true);
-                }
-                GameEngine.CurrentGameScreen = GameScreenType.MainGame;
+                ScreenFade = 0;
             }
         }
 
-        if (!Keyboard.GetState().IsKeyDown((Keys)_keyIdPressed))
+        if (_teleportCounter > 58)
         {
-            _keyPressed = false;
-        }
+            GameEngine.ScreenXOffset = _oldOffsetX;
+            GameEngine.ScreenYOffset = _oldOffsetY;
 
-        _teleportCodes.TryGetValue(GameEngine.GameScreens.ScreenNumber, out _teleportCode);
+            var teleporterLocation = GameEngine.GameScreens.GetCoordsOfTiles(397);
+            if (teleporterLocation != null &&
+                teleporterLocation.Count == 1)
+            {
+                GameEngine.Player.BlobXPos = teleporterLocation[0].X + 20;
+                GameEngine.Player.BlobYPos = teleporterLocation[0].Y + 32;
+            }
 
-        for (var a = 0; a < 5; a++)
-        {
-            _teleportCodeLetters[a].Letter = _currentCode[a].ToString();
-            _teleportCodeLetters[a].Location = new Point(350 + a * 70, 400);
+            GameEngine.GetGameScreen(GameScreenType.MainGame).ScreenFade = 0;
+
+            // only do this if the teleport was successful
+            if (_codeRecognised && _currentCode != _previousCode.ToUpper())
+            {
+                GameEngine.GetGameScreen(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.Teleporter, null);
+                GameEngine.GameScreens.UpdateCollisionMap(true);
+            }
+            GameEngine.CurrentGameScreen = GameScreenType.MainGame;
         }
     }
 
@@ -259,19 +282,49 @@ public class TeleportScreen : GameComponentBase, IGameScreen
     }
 
 
+    /// <summary>
+    ///     Where each key of the teleporter's keypad sits on the screen, indexed by the same number as
+    ///     its overlay sprite. Three rows with gaps in them, so a list rather than a grid.
+    /// </summary>
+    private static readonly Point[] KeyHighlightPositions =
+    [
+        new Point(778, 426),
+        new Point(809, 426),
+        new Point(838, 426),
+        new Point(888, 426),
+        new Point(920, 426),
+        new Point(950, 426),
+        new Point(766, 452),
+        new Point(796, 452),
+        new Point(826, 452),
+        new Point(903, 452),
+        new Point(934, 452),
+        new Point(964, 452),
+        new Point(780, 480),
+        new Point(811, 480),
+        new Point(919, 480),
+        new Point(951, 480)
+    ];
+
     public override void Draw(GameTime gameTime)
     {
-        var drawColour = Color.White;
+        DrawInteriorLowerLayer(gameTime);
+        DrawTeleportPad(gameTime);
+        DrawConsoleText();
+        DrawInteriorUpperLayer(gameTime);
+        DrawKeyHighlights(gameTime);
+        DrawPowerSupply(gameTime);
+    }
 
-        var codeEntryLocation = new Point(GameEngine.ScreenXOffset + 100, GameEngine.ScreenYOffset + 230);
-
-        // Draw Interior Lower layer
+    private void DrawInteriorLowerLayer(GameTime gameTime)
+    {
         GameEngine.ContentResourceManager.GetSpriteCollection("TeleportInteriorLower").Begin(BlendState.AlphaBlend, gameTime);
         GameEngine.ContentResourceManager.GetSpriteCollection("TeleportInteriorLower").DrawSprite(0, 0, 0, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
         GameEngine.ContentResourceManager.GetSpriteCollection("TeleportInteriorLower").End();
+    }
 
-
-        // Draw teleport graphics
+    private void DrawTeleportPad(GameTime gameTime)
+    {
         GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).Begin(BlendState.AlphaBlend, gameTime);
         GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).DrawSprite(397, 550, 96, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
 
@@ -280,8 +333,10 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).Begin(BlendState.AlphaBlend, gameTime);
         GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).DrawSprite(7, 550, 96, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
         GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).End();
+    }
 
-        // Draw text
+    private void DrawConsoleText()
+    {
         if (!_attemptingTeleport)
         {
             _previousCode = _teleportCode ?? string.Empty;
@@ -302,44 +357,58 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         GameEngine.Font2.WriteText(228, 256, "ENTER TELEPORTAL", 2, Color.White, (byte)ScreenFade);
         GameEngine.Font2.WriteText(228, 320, "DESTINATION CODE", 2, Color.White, (byte)ScreenFade);
 
-
         if (_attemptingTeleport)
         {
-            if (_codeRecognised)
-            {
-                // Teleporting text - recognised code
-                GameEngine.ShapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(87, 440, 40, 40), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(135, 442, 36, 36), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(179, 446, 28, 28), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
-                GameEngine.ShapeDrawer.End();
-
-                GameEngine.Font2.WriteText(GameEngine.ScreenXOffset + 88, GameEngine.ScreenYOffset + 431, "NOW TELEPORTING", new Color(0, ColourLevels.Full - _teleportingMessageFader.FadeLevel, 0), ColourLevels.Full);
-
-                GameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(556, 446, 28, 28), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(592, 442, 36, 36), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(636, 440, 40, 40), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
-                GameEngine.ShapeDrawer.End();
-            }
-            else
-            {
-                // Teleporting text - unrecognised code
-                GameEngine.ShapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(100, 442, 36, 36), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(144, 446, 28, 28), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
-                GameEngine.ShapeDrawer.End();
-
-                GameEngine.Font2.WriteText(GameEngine.ScreenXOffset + 49, GameEngine.ScreenYOffset + 431, "CODE NOT RECOGNISED", new Color(ColourLevels.Full - _teleportingMessageFader.FadeLevel, 0, 0), ColourLevels.Full);
-
-                GameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(590, 446, 28, 28), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
-                GameEngine.ShapeDrawer.FillRectangle(new Rectangle(626, 442, 36, 36), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
-                GameEngine.ShapeDrawer.End();
-            }
+            DrawTeleportOutcome();
         }
 
-        // Draw codes
+        DrawEnteredCode();
+
+        GameEngine.Font2.End();
+    }
+
+    /// <summary>
+    ///     The green or red message, with its blocks closing in from both sides. Drawn between the console
+    ///     font's Begin and End, which is why it is not a Draw* of its own.
+    /// </summary>
+    private void DrawTeleportOutcome()
+    {
+    if (_codeRecognised)
+    {
+        // Teleporting text - recognised code
+        GameEngine.ShapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+        GameEngine.ShapeDrawer.FillRectangle(new Rectangle(87, 440, 40, 40), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
+        GameEngine.ShapeDrawer.FillRectangle(new Rectangle(135, 442, 36, 36), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
+        GameEngine.ShapeDrawer.FillRectangle(new Rectangle(179, 446, 28, 28), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
+        GameEngine.ShapeDrawer.End();
+
+        GameEngine.Font2.WriteText(GameEngine.ScreenXOffset + 88, GameEngine.ScreenYOffset + 431, "NOW TELEPORTING", new Color(0, ColourLevels.Full - _teleportingMessageFader.FadeLevel, 0), ColourLevels.Full);
+
+        GameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+        GameEngine.ShapeDrawer.FillRectangle(new Rectangle(556, 446, 28, 28), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
+        GameEngine.ShapeDrawer.FillRectangle(new Rectangle(592, 442, 36, 36), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
+        GameEngine.ShapeDrawer.FillRectangle(new Rectangle(636, 440, 40, 40), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
+        GameEngine.ShapeDrawer.End();
+    }
+    else
+    {
+        // Teleporting text - unrecognised code
+        GameEngine.ShapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+        GameEngine.ShapeDrawer.FillRectangle(new Rectangle(100, 442, 36, 36), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
+        GameEngine.ShapeDrawer.FillRectangle(new Rectangle(144, 446, 28, 28), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
+        GameEngine.ShapeDrawer.End();
+
+        GameEngine.Font2.WriteText(GameEngine.ScreenXOffset + 49, GameEngine.ScreenYOffset + 431, "CODE NOT RECOGNISED", new Color(ColourLevels.Full - _teleportingMessageFader.FadeLevel, 0, 0), ColourLevels.Full);
+
+        GameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+        GameEngine.ShapeDrawer.FillRectangle(new Rectangle(590, 446, 28, 28), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
+        GameEngine.ShapeDrawer.FillRectangle(new Rectangle(626, 442, 36, 36), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
+        GameEngine.ShapeDrawer.End();
+    }
+    }
+
+    private void DrawEnteredCode()
+    {
         var teleportLetterLocation = 290;
 
         for (var a = 0; a < 5; a++)
@@ -349,47 +418,46 @@ public class TeleportScreen : GameComponentBase, IGameScreen
             GameEngine.Font2.WriteText(teleportLetterLocation, 380, _teleportCodeLetters[a].Letter, 2, new Color(ColourLevels.Full, 180, 0), (byte)ScreenFade);
             teleportLetterLocation += 50;
         }
+    }
 
-        GameEngine.Font2.End();
-
-
-        // Draw upper interior layer
+    private void DrawInteriorUpperLayer(GameTime gameTime)
+    {
         GameEngine.ContentResourceManager.GetSpriteCollection("TeleportInteriorUpper").Begin(BlendState.AlphaBlend, gameTime);
         GameEngine.ContentResourceManager.GetSpriteCollection("TeleportInteriorUpper").DrawSprite(0, 51, 42, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
         GameEngine.ContentResourceManager.GetSpriteCollection("TeleportInteriorUpper").End();
+    }
 
-        // Draw key Highlights
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterKeyOverlays").Begin(BlendState.Additive, gameTime);
+    /// <summary>
+    ///     Lights up whichever keys the player is pressing. This was sixteen lines of the same call with a
+    ///     different sprite number and position; the positions are now the table they always were.
+    /// </summary>
+    private void DrawKeyHighlights(GameTime gameTime)
+    {
+        var overlays = GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterKeyOverlays");
 
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterKeyOverlays").DrawSprite(0, 778, 426, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_keyFades[0].FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterKeyOverlays").DrawSprite(1, 809, 426, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_keyFades[1].FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterKeyOverlays").DrawSprite(2, 838, 426, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_keyFades[2].FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
+        overlays.Begin(BlendState.Additive, gameTime);
 
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterKeyOverlays").DrawSprite(3, 888, 426, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_keyFades[3].FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterKeyOverlays").DrawSprite(4, 920, 426, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_keyFades[4].FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterKeyOverlays").DrawSprite(5, 950, 426, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_keyFades[5].FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
+        for (var key = 0; key < KeyHighlightPositions.Length; key++)
+        {
+            overlays.DrawSprite(
+                key,
+                KeyHighlightPositions[key].X,
+                KeyHighlightPositions[key].Y,
+                new Color(
+                    ColourLevels.Full,
+                    ColourLevels.Full,
+                    ColourLevels.Full,
+                    (int)(_keyFades[key].FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
+        }
 
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterKeyOverlays").DrawSprite(6, 766, 452, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_keyFades[6].FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterKeyOverlays").DrawSprite(7, 796, 452, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_keyFades[7].FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterKeyOverlays").DrawSprite(8, 826, 452, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_keyFades[8].FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
+        overlays.End();
+    }
 
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterKeyOverlays").DrawSprite(9, 903, 452, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_keyFades[9].FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterKeyOverlays").DrawSprite(10, 934, 452, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_keyFades[10].FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterKeyOverlays").DrawSprite(11, 964, 452, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_keyFades[11].FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
-
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterKeyOverlays").DrawSprite(12, 780, 480, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_keyFades[12].FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterKeyOverlays").DrawSprite(13, 811, 480, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_keyFades[13].FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
-
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterKeyOverlays").DrawSprite(14, 919, 480, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_keyFades[14].FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterKeyOverlays").DrawSprite(15, 951, 480, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_keyFades[15].FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
-
-        GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterKeyOverlays").End();
-
-        // Draw power supply
+    private void DrawPowerSupply(GameTime gameTime)
+    {
         GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterPowerSupply").Begin(BlendState.AlphaBlend, gameTime);
         GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterPowerSupply").DrawSprite(0, 754, 6, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_powerSupplyFader.FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
         GameEngine.ContentResourceManager.GetSpriteCollection("TeleporterPowerSupply").End();
-
     }
 
     #endregion

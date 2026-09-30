@@ -68,129 +68,136 @@ public class OptionsScreen : GameScreenBase, IGameScreen
         GameEngine.Font2.Flash = true;
     }
 
+    /// <summary>
+    ///     The four presets the player chooses between, which are the first four entries of
+    ///     <see cref="_options" />. The entries after them - define keys, start, quit - are not
+    ///     presets and are handled separately.
+    /// </summary>
+    private const int SelectableOptionCount = 4;
+
     public override void Update(GameTime gameTime)
     {
-        if (!_definingKeys)
-        {
-            if (ToggleKeys.GetPressedKey() == Keys.D0)
-            {
-                if (_options[0].Selected)
-                {
-                    // Player keys
-                    var playerKeys = new PlayerKeySet();
-                    playerKeys.Up = Keys.None;
-                    playerKeys.Down = Keys.None;
-                    playerKeys.Left = Keys.None;
-                    playerKeys.Right = Keys.None;
-                    playerKeys.Fire = Keys.None;
-
-                    // Set quit and pause only
-                    playerKeys.Pause = Keys.P;
-                    playerKeys.Quit = Keys.Q;
-
-                    GameEngine.PlayerKeys = playerKeys;
-                }
-                else if (_options[1].Selected)
-                {
-                    // Player keys
-                    var playerKeys = new PlayerKeySet();
-                    playerKeys.Up = Keys.Up;
-                    playerKeys.Down = Keys.Down;
-                    playerKeys.Left = Keys.Left;
-                    playerKeys.Right = Keys.Right;
-                    playerKeys.Fire = Keys.LeftControl;
-
-                    playerKeys.Pause = Keys.P;
-                    playerKeys.Quit = Keys.Q;
-
-                    GameEngine.PlayerKeys = playerKeys;
-                }
-                else if (_options[2].Selected)
-                {
-                    // Player keys
-                    var playerKeys = new PlayerKeySet();
-                    playerKeys.Up = Keys.Q;
-                    playerKeys.Down = Keys.A;
-                    playerKeys.Left = Keys.O;
-                    playerKeys.Right = Keys.P;
-                    playerKeys.Fire = Keys.Space;
-
-                    playerKeys.Pause = Keys.S;
-                    playerKeys.Quit = Keys.D;
-
-                    GameEngine.PlayerKeys = playerKeys;
-                }
-                else if (_options[3].Selected)
-                {
-                    // Player keys
-                    var playerKeys = new PlayerKeySet();
-                    playerKeys.Up = _keyDefiner.DefinedKeys[0];
-                    playerKeys.Down = _keyDefiner.DefinedKeys[1];
-                    playerKeys.Left = _keyDefiner.DefinedKeys[2];
-                    playerKeys.Right = _keyDefiner.DefinedKeys[3];
-                    playerKeys.Fire = _keyDefiner.DefinedKeys[4];
-
-                    playerKeys.Pause = _keyDefiner.DefinedKeys[5];
-                    playerKeys.Quit = _keyDefiner.DefinedKeys[6];
-
-                    GameEngine.PlayerKeys = playerKeys;
-                }
-
-                GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.ScreenClearColour);
-                GameEngine.CurrentGameScreen = GameScreenType.ComputerReport;
-                GameEngine.GetGameScreen(GameScreenType.ComputerReport).PerformPostScreenChangeActions(GameScreenType.Options, null);
-            }
-            else if (ToggleKeys.GetPressedKey() == Keys.D1)
-            {
-                if (!_options[0].Selected)
-                {
-                    ClearSelectedOptions();
-                    _options[0].Selected = true;
-                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
-                }
-            }
-            else if (ToggleKeys.GetPressedKey() == Keys.D2)
-            {
-                if (!_options[1].Selected)
-                {
-                    ClearSelectedOptions();
-                    _options[1].Selected = true;
-                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
-                }
-            }
-            else if (ToggleKeys.GetPressedKey() == Keys.D3)
-            {
-                if (!_options[2].Selected)
-                {
-                    ClearSelectedOptions();
-                    _options[2].Selected = true;
-                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
-                }
-            }
-            else if (ToggleKeys.GetPressedKey() == Keys.D4)
-            {
-                if (!_options[3].Selected)
-                {
-                    ClearSelectedOptions();
-                    _options[3].Selected = true;
-                    GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
-                }
-            }
-            else if (ToggleKeys.GetPressedKey() == Keys.D5)
-            {
-                _definingKeys = true;
-                _keyDefiner.Reset();
-                GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
-            }
-
-            GameEngine.Font2.Update();
-        }
-        else
+        if (_definingKeys)
         {
             _keyDefiner.Update(gameTime);
         }
+        else
+        {
+            HandleOptionKeys();
+            GameEngine.Font2.Update();
+        }
 
         base.Update(gameTime);
+    }
+
+    /// <summary>
+    ///     0 confirms whatever is selected, 5 goes off to define keys by hand, and 1 to 4 pick one of the
+    ///     four presets.
+    /// </summary>
+    private void HandleOptionKeys()
+    {
+        var pressed = ToggleKeys.GetPressedKey();
+
+        if (pressed == Keys.D0)
+        {
+            ConfirmSelectedOption();
+            return;
+        }
+
+        if (pressed == Keys.D5)
+        {
+            _definingKeys = true;
+            _keyDefiner.Reset();
+            GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+            return;
+        }
+
+        // 1 to 4 pick the option of that number, and were four copies of this
+        var option = pressed - Keys.D1;
+
+        if (option < 0 || option >= SelectableOptionCount || _options[option].Selected)
+        {
+            return;
+        }
+
+        ClearSelectedOptions();
+        _options[option].Selected = true;
+        GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+    }
+
+    /// <summary>
+    ///     Applies the selected preset and leaves for the report screen. If nothing is selected the keys are
+    ///     left as they were, which is what the original chain of four tests also did.
+    /// </summary>
+    private void ConfirmSelectedOption()
+    {
+        for (var option = 0; option < SelectableOptionCount; option++)
+        {
+            if (!_options[option].Selected)
+            {
+                continue;
+            }
+
+            GameEngine.PlayerKeys = KeysForOption(option);
+            break;
+        }
+
+        GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.ScreenClearColour);
+        GameEngine.CurrentGameScreen = GameScreenType.ComputerReport;
+        GameEngine.GetGameScreen(GameScreenType.ComputerReport).PerformPostScreenChangeActions(GameScreenType.Options, null);
+    }
+
+    /// <summary>
+    ///     The four key presets. Each was written out as seven assignments to a fresh PlayerKeySet, so the
+    ///     four are now four object initialisers and the differences between them can be read down a column.
+    /// </summary>
+    private PlayerKeySet KeysForOption(int option)
+    {
+        return option switch
+        {
+            // Joystick: every movement key is unbound, so only pause and quit still answer
+            0 => new PlayerKeySet
+            {
+                Up = Keys.None,
+                Down = Keys.None,
+                Left = Keys.None,
+                Right = Keys.None,
+                Fire = Keys.None,
+                Pause = Keys.P,
+                Quit = Keys.Q
+            },
+            1 => new PlayerKeySet
+            {
+                Up = Keys.Up,
+                Down = Keys.Down,
+                Left = Keys.Left,
+                Right = Keys.Right,
+                Fire = Keys.LeftControl,
+                Pause = Keys.P,
+                Quit = Keys.Q
+            },
+            // The original Spectrum layout
+            2 => new PlayerKeySet
+            {
+                Up = Keys.Q,
+                Down = Keys.A,
+                Left = Keys.O,
+                Right = Keys.P,
+                Fire = Keys.Space,
+                Pause = Keys.S,
+                Quit = Keys.D
+            },
+            _ => new PlayerKeySet
+            {
+                Up = _keyDefiner.DefinedKeys[0],
+                Down = _keyDefiner.DefinedKeys[1],
+                Left = _keyDefiner.DefinedKeys[2],
+                Right = _keyDefiner.DefinedKeys[3],
+                Fire = _keyDefiner.DefinedKeys[4],
+                Pause = _keyDefiner.DefinedKeys[5],
+                Quit = _keyDefiner.DefinedKeys[6]
+            }
+        };
     }
 
     private void ClearSelectedOptions()

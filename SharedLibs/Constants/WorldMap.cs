@@ -44,4 +44,10 @@ public static class WorldMap
     ///     The room next to the core, which is where the blob is put down on leaving it.
     /// </summary>
     public const int CoreApproachScreenNumber = 198;
+
+    /// <summary>
+    ///     Where the blob's ship came down, which is both where a new game starts and the only screen
+    ///     that draws the wreck and its smoke.
+    /// </summary>
+    public const int ShipWreckScreenNumber = 8;
 }

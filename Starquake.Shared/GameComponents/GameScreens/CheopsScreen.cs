@@ -68,6 +68,21 @@ public class CheopsScreen : GameComponentBase, IGameScreen
         _resultMessageFade = ColourLevels.Full;
         _elementSelectionMode = false;
 
+        ReadAccessCode();
+        CheckInventoryAgainstCode();
+        ChooseItemToSwap();
+
+        if (_codeSucceeded)
+        {
+            ChooseElementsOnOffer();
+        }
+    }
+
+    /// <summary>
+    ///     The code is stored on the screen as a string of digits, one per element the pyramid wants.
+    /// </summary>
+    private void ReadAccessCode()
+    {
         if (GameEngine.GameScreens.CurrentGameScreenData.CheopsAccessCode != null)
         {
             for (var a = 0; a < _accessCode.Length; a++)
@@ -75,8 +90,13 @@ public class CheopsScreen : GameComponentBase, IGameScreen
                 _accessCode[a] = int.Parse(GameEngine.GameScreens.CurrentGameScreenData.CheopsAccessCode.Substring(a, 1));
             }
         }
+    }
 
-        // Scan blob's inventory to see if we have the right stuff
+    /// <summary>
+    ///     Scan blob's inventory to see if he is carrying the right stuff.
+    /// </summary>
+    private void CheckInventoryAgainstCode()
+    {
         _codeSucceeded = true;
 
         for (var b = 0; b < _accessCode.Length; b++)
@@ -111,8 +131,14 @@ public class CheopsScreen : GameComponentBase, IGameScreen
 
             _accessCodes[b].Reset(match);
         }
+    }
 
-        // Pick an item from the inventory to swap
+    /// <summary>
+    ///     Picks at random from whatever blob is carrying that is not his access card or key. If that is
+    ///     nothing at all he has to give up the key, or the card if he has no key.
+    /// </summary>
+    private void ChooseItemToSwap()
+    {
         var slotsToSelectFrom = new List<int>();
         _itemToSwap = NoItemSelected;
 
@@ -154,42 +180,46 @@ public class CheopsScreen : GameComponentBase, IGameScreen
         {
             _itemToSwap = slotsToSelectFrom[GameEngine.RandomNumberGenerator.Next(0, slotsToSelectFrom.Count)];
         }
+    }
 
-        // Assign 5 elements to choose from, one being a required element, the other beingthe item to swap
-        if (_codeSucceeded)
+    /// <summary>
+    ///     Five to choose from: one the pyramid actually wants, and the item blob would be giving up.
+    /// </summary>
+    private void ChooseElementsOnOffer()
+    {
+    {
+        _itemsToSelect = new InteractiveItem[5];
+
+        // Get an element from the core if there is one, if there isn't we've completed the game and this should never happen....
+        var activeElements = GameEngine.Elements.GetActiveElements();
+        var coreElementSlot = -1;
+        var coreElement = 0;
+
+        if (activeElements.Count > 0)
         {
-            _itemsToSelect = new InteractiveItem[5];
+            coreElementSlot = GameEngine.RandomNumberGenerator.Next(0, 5);
+            coreElement = activeElements[GameEngine.RandomNumberGenerator.Next(0, activeElements.Count)].CurrentElement;
+        }
 
-            // Get an element from the core if there is one, if there isn't we've completed the game and this should never happen....
-            var activeElements = GameEngine.Elements.GetActiveElements();
-            var coreElementSlot = -1;
-            var coreElement = 0;
+        // The item to swap takes the first slot the core element did not
+        var swapItemSlot = coreElementSlot == 0 ? 1 : 0;
 
-            if (activeElements.Count > 0)
+        for (var a = 0; a < 5; a++)
+        {
+            if (a == coreElementSlot)
             {
-                coreElementSlot = GameEngine.RandomNumberGenerator.Next(0, 5);
-                coreElement = activeElements[GameEngine.RandomNumberGenerator.Next(0, activeElements.Count)].CurrentElement;
+                _itemsToSelect[a] = new InteractiveItem(0, 0, coreElement);
             }
-
-            // The item to swap takes the first slot the core element did not
-            var swapItemSlot = coreElementSlot == 0 ? 1 : 0;
-
-            for (var a = 0; a < 5; a++)
+            else if (a == swapItemSlot)
             {
-                if (a == coreElementSlot)
-                {
-                    _itemsToSelect[a] = new InteractiveItem(0, 0, coreElement);
-                }
-                else if (a == swapItemSlot)
-                {
-                    _itemsToSelect[a] = new InteractiveItem(0, 0, (int)GameEngine.Player.BlobInventory[_itemToSwap]);
-                }
-                else
-                {
-                    _itemsToSelect[a] = new InteractiveItem(0, 0, GameEngine.RandomNumberGenerator.Next(0, 28));
-                }
+                _itemsToSelect[a] = new InteractiveItem(0, 0, (int)GameEngine.Player.BlobInventory[_itemToSwap]);
+            }
+            else
+            {
+                _itemsToSelect[a] = new InteractiveItem(0, 0, GameEngine.RandomNumberGenerator.Next(0, 28));
             }
         }
+    }
     }
 
 
