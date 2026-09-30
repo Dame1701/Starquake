@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
+using Starquake.Scoring;
 using Starquake.SharedLibs;
 using Starquake.Structure;
 
@@ -39,16 +40,16 @@ public class CoreElements : GameComponentBase
     private readonly PresentationSettings _presentation;
     private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
-    private readonly StatusPanel _statusPanel;
+    private readonly PlayerStats _stats;
 
     public CoreElements(
-        StatusPanel statusPanel,
+        PlayerStats stats,
         ResourceManager resources,
         GraphicsSet graphicsSet,
         PresentationSettings presentation,
         Random randomNumberGenerator)
     {
-        _statusPanel = statusPanel;
+        _stats = stats;
         _resources = resources;
         _graphicsSet = graphicsSet;
         _presentation = presentation;
@@ -88,7 +89,7 @@ public class CoreElements : GameComponentBase
             if (Elements[a].CurrentElement == elementNoToReplace)
             {
                 // You get a healthy 10,000 points for each element replaced!
-                _statusPanel.PlayerScore = _statusPanel.PlayerScore + ScoreForCompletingCore;
+                _stats.PlayerScore = _stats.PlayerScore + ScoreForCompletingCore;
 
                 Elements[a].ElementState = CoreElementState.Replacing;
                 break;

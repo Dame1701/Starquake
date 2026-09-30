@@ -25,7 +25,7 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
     private readonly SpriteCollection _foregroundImage;
 
     private readonly HiScores _hiscoreList;
-    private readonly StatusPanel _statusPanel;
+    private readonly PlayerStats _stats;
     private bool _fadeComplete;
     private bool _gotHighScore;
     private HiScore _playersHighScore = new();
@@ -37,7 +37,7 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
         PresentationSettings presentation,
         ScreenEffectEngine screenEffects,
         ScreenDirectory screenDirectory,
-        StatusPanel statusPanel,
+        PlayerStats stats,
         ToggleKeys input)
         : base(
             resources,
@@ -48,7 +48,7 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
             screenDirectory,
             input)
     {
-        _statusPanel = statusPanel;
+        _stats = stats;
 
         ScreenFade = 0;
         ScreenFadeSpeed = 5;
@@ -72,7 +72,7 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
         _playersHighScore = new HiScore();
 
         // Lets see if we have a place in the high score table
-        _gotHighScore = _hiscoreList.GotHighScore(_statusPanel.PlayerScore);
+        _gotHighScore = _hiscoreList.GotHighScore(_stats.PlayerScore);
 
         if (_gotHighScore)
         {

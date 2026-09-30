@@ -10,80 +10,22 @@ using Starquake.Animations;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.GameComponents;
+using Starquake.Scoring;
 using Starquake.Structure;
 
 namespace Starquake.Display;
 
+/// <summary>
+///     The strip of HUD along the top: the score, the lives, the three supply bars and the four
+///     inventory slots with their scanner.
+/// </summary>
+/// <remarks>
+///     It used to own all of that as well as draw it - every scoring and power-up rule in the game
+///     lived on a class named for a widget, which is why <c>Blob</c> read his own supplies off the
+///     HUD. Those are <see cref="PlayerStats" /> now and this reads them to draw them.
+/// </remarks>
 public class StatusPanel : GameComponentBase
 {
-    /// <summary>
-    ///     How long the blob goes between losing a bar of energy, in logic frames - four seconds.
-    /// </summary>
-    private const int EnergyDrainFrames = 4 * LogicClock.FramesPerSecond;
-
-    /// <summary>
-    ///     How much of each supply the blob can hold, and how much it starts a life with. The bars on
-    ///     the panel are drawn full at these, so a pick-up that would take a supply over its ceiling
-    ///     is simply capped.
-    /// </summary>
-    private const int MaxFirePower = 128;
-
-    /// <inheritdoc cref="MaxFirePower" />
-    private const int MaxEnergyLevel = 128;
-
-    /// <inheritdoc cref="MaxFirePower" />
-    private const int MaxPlatforms = 64;
-
-    /// <inheritdoc cref="MaxFirePower" />
-    private const int StartingPlatforms = 32;
-
-    /// <summary>
-    ///     What each power-up is worth. There are three sizes of each, plus a top-up that gives
-    ///     whichever supply is running lowest and an extra life.
-    /// </summary>
-    private const int SmallTopUp = 32;
-
-    /// <inheritdoc cref="SmallTopUp" />
-    private const int MediumTopUp = 64;
-
-    /// <inheritdoc cref="SmallTopUp" />
-    private const int LargeTopUp = 96;
-
-    /// <inheritdoc cref="SmallTopUp" />
-    private const int FullTopUp = 128;
-
-    /// <summary>
-    ///     The power-ups, in the order the tile sheet holds them.
-    /// </summary>
-    private const int PowerUpEnergyMedium = 0;
-
-    /// <inheritdoc cref="PowerUpEnergyMedium" />
-    private const int PowerUpEnergySmall = 1;
-
-    /// <inheritdoc cref="PowerUpEnergyMedium" />
-    private const int PowerUpEnergyFull = 2;
-
-    /// <inheritdoc cref="PowerUpEnergyMedium" />
-    private const int PowerUpFirePowerMedium = 3;
-
-    /// <inheritdoc cref="PowerUpEnergyMedium" />
-    private const int PowerUpFirePowerSmall = 4;
-
-    /// <inheritdoc cref="PowerUpEnergyMedium" />
-    private const int PowerUpPlatforms = 5;
-
-    /// <inheritdoc cref="PowerUpEnergyMedium" />
-    private const int PowerUpWhateverIsLowest = 6;
-
-    /// <inheritdoc cref="PowerUpEnergyMedium" />
-    private const int PowerUpExtraLife = 7;
-
-    /// <summary>
-    ///     A platform costs twice what a shot does, so the top-up power-up weighs the platform count
-    ///     double when deciding which supply is running lowest.
-    /// </summary>
-    private const int PlatformCost = 2;
-
     /// <summary>
     ///     The inventory strip: how far apart the slots are, and where the first one starts. The slot
     ///     number, the item in it, and the scanner that sweeps it are each drawn at their own offset
@@ -156,76 +98,10 @@ public class StatusPanel : GameComponentBase
     private readonly ResourceManager _resources;
     private readonly ScreenDirectory _screenDirectory;
 
+    private readonly PlayerStats _stats;
+
     private Collectables[]? _blobsInventory;
-
-    private double _energyLevel;
-    private int _energyDrainCounter;
-    private double _firePower;
-
-    private double _platforms;
-
-    private bool _removeEnergyTimerStarted;
     private int _slotToScan = -1;
-
-    public double FirePower
-    {
-        get => _firePower;
-        set
-        {
-            _firePower = value;
-            if (_firePower > MaxFirePower)
-            {
-                _firePower = MaxFirePower;
-            }
-
-            if (_firePower < 0)
-            {
-                _firePower = 0;
-            }
-        }
-    }
-
-    public double EnergyLevel
-    {
-        get => _energyLevel;
-        set
-        {
-            _energyLevel = value;
-
-            if (_energyLevel > MaxEnergyLevel)
-            {
-                _energyLevel = MaxEnergyLevel;
-            }
-
-            if (_energyLevel < 0)
-            {
-                _energyLevel = 0;
-            }
-        }
-    }
-
-    public double Platforms
-    {
-        get => _platforms;
-        set
-        {
-            _platforms = value;
-
-            if (_platforms > MaxPlatforms)
-            {
-                _platforms = MaxPlatforms;
-            }
-
-            if (_platforms < 0)
-            {
-                _platforms = 0;
-            }
-        }
-    }
-
-    public int BlobLives { get; set; }
-
-    public int PlayerScore { get; set; }
 
     public int Width => _resources.GetSpriteCollection("StatusPanelGraphic").SpriteWidth;
 
@@ -237,11 +113,13 @@ public class StatusPanel : GameComponentBase
         ResourceManager resources,
         GraphicsSet graphicsSet,
         ScreenDirectory screenDirectory,
-        Random randomNumberGenerator)
+        Random randomNumberGenerator,
+        PlayerStats stats)
     {
         _resources = resources;
         _graphicsSet = graphicsSet;
         _screenDirectory = screenDirectory;
+        _stats = stats;
 
         _inventoryScanner = new KeyScanner(resources, graphicsSet, randomNumberGenerator, false);
     }
@@ -249,137 +127,6 @@ public class StatusPanel : GameComponentBase
     public void Initialise()
     {
 
-    }
-
-    public void Reset()
-    {
-        BlobLives = 4;
-        _firePower = MaxFirePower;
-        _energyLevel = MaxEnergyLevel;
-        _platforms = StartingPlatforms;
-        PlayerScore = 0;
-    }
-
-    public void BlobHasPerformedAnAction(BlobAction action, object? data)
-    {
-        switch (action)
-        {
-            case BlobAction.FiredLazer:
-            {
-                FirePower--;
-
-                break;
-            }
-            case BlobAction.LaidPlatform:
-            {
-                Platforms--;
-
-                break;
-            }
-            case BlobAction.GotPowerUp:
-            {
-                // The only action that carries anything, and what it carries is the power up's type
-                if (data is not int powerUpType)
-                {
-                    throw new ArgumentException(
-                        "A power up action needs the type of power up collected.", nameof(data));
-                }
-
-                CollectPowerUp(powerUpType);
-
-                break;
-            }
-        }
-    }
-
-    private void CollectPowerUp(int powerUpType)
-    {
-        if (powerUpType == PowerUpEnergyMedium)
-        {
-            TopUpEnergy(MediumTopUp);
-        }
-        else if (powerUpType == PowerUpEnergySmall)
-        {
-            TopUpEnergy(SmallTopUp);
-        }
-        else if (powerUpType == PowerUpEnergyFull)
-        {
-            TopUpEnergy(FullTopUp);
-        }
-        else if (powerUpType == PowerUpFirePowerMedium)
-        {
-            TopUpFirePower(MediumTopUp);
-        }
-        else if (powerUpType == PowerUpFirePowerSmall)
-        {
-            TopUpFirePower(SmallTopUp);
-        }
-        else if (powerUpType == PowerUpPlatforms)
-        {
-            TopUpPlatforms(SmallTopUp);
-        }
-        else if (powerUpType == PowerUpWhateverIsLowest)
-        {
-            TopUpWhateverIsLowest();
-        }
-        else if (powerUpType == PowerUpExtraLife)
-        {
-            GiveExtraLife();
-        }
-    }
-
-    /// <summary>
-    ///     The wildcard power up. A life if the blob has none left, otherwise whichever of his three
-    ///     supplies he is shortest of - and platforms are compared at their energy cost rather than
-    ///     their count, since one platform is worth several units of anything else.
-    /// </summary>
-    private void TopUpWhateverIsLowest()
-    {
-        if (BlobLives == 0)
-        {
-            GiveExtraLife();
-
-            return;
-        }
-
-        double platformsWorth = Platforms * PlatformCost;
-
-        if (platformsWorth <= EnergyLevel && platformsWorth <= FirePower)
-        {
-            TopUpPlatforms(SmallTopUp);
-        }
-        else if (FirePower <= platformsWorth && FirePower <= EnergyLevel)
-        {
-            TopUpFirePower(MediumTopUp);
-        }
-        else if (EnergyLevel <= platformsWorth && EnergyLevel <= FirePower)
-        {
-            TopUpEnergy(LargeTopUp);
-        }
-    }
-
-    private void TopUpEnergy(int amount)
-    {
-        EnergyLevel += amount;
-        _resources.GetSoundFxEngine().PlaySound("PowerUp2", false);
-    }
-
-    private void TopUpFirePower(int amount)
-    {
-        FirePower += amount;
-        _resources.GetSoundFxEngine().PlaySound("PowerUp3", 0.5f, false);
-    }
-
-    private void TopUpPlatforms(int amount)
-    {
-        Platforms += amount;
-        _resources.GetSoundFxEngine().PlaySound("PowerUp1", false);
-    }
-
-    private void GiveExtraLife()
-    {
-        BlobLives++;
-        _resources.GetSoundFxEngine().PlaySound("LifePowerUp", false);
     }
 
     public void PerformPostChangeScreenActions()
@@ -400,36 +147,13 @@ public class StatusPanel : GameComponentBase
         {
             _blobsInventory = blobsInventory;
 
-            if (energyMayDrain)
+            // The blob is only drained while he is walking the planet - a teleporter, a booth or a
+            // pyramid is a safe place to stand. PlayerStats decides whether that has killed him;
+            // applying the answer to the blob is this class's job because it is the one holding one.
+            if (_stats.DrainEnergy(energyMayDrain && _screenDirectory.Current == GameScreenType.MainGame))
             {
-                // Delete Blob's energy one bar every four seconds, but only if we're not in a
-                // teleporter. Counted in logic frames rather than off the clock, so the drain keeps
-                // step with everything else the game moves by a fixed amount per frame.
-                if (_screenDirectory.Current == GameScreenType.MainGame)
-                {
-                    if (!_removeEnergyTimerStarted)
-                    {
-                        _energyDrainCounter = 0;
-                        _removeEnergyTimerStarted = true;
-                    }
-                    else
-                    {
-                        _energyDrainCounter++;
-
-                        if (_energyDrainCounter > EnergyDrainFrames)
-                        {
-                            _removeEnergyTimerStarted = false;
-                            _energyLevel = _energyLevel - 1;
-                        }
-                    }
-                }
-
-                if (EnergyLevel <= 0)
-                {
-                    // Lose a life and put us into the overloading state
-                    blob.KillBlob(false, true);
-                    EnergyLevel = 0;
-                }
+                blob.KillBlob(false, true);
+                _stats.EnergyLevel = 0;
             }
 
             if (_inventoryScanner.Scanned)
@@ -443,27 +167,7 @@ public class StatusPanel : GameComponentBase
         }
         else if (blob.BlobsState == BlobState.Dead)
         {
-            BlobLives -= 1;
-
-            if (BlobLives < 0)
-            {
-                // That's all folks
-                blob.BlobsState = BlobState.Gameover;
-                BlobLives = 0;
-            }
-            else
-            {
-                // Bring him back to life
-                EnergyLevel = MaxEnergyLevel;
-
-                // If he's out of platforms, give him some back
-                if (Platforms <= 8)
-                {
-                    Platforms = 8;
-                }
-
-                blob.BlobsState = BlobState.Normal;
-            }
+            blob.BlobsState = _stats.TakeALife() ? BlobState.Gameover : BlobState.Normal;
         }
     }
 
@@ -523,22 +227,22 @@ public class StatusPanel : GameComponentBase
 
         // Draw energybars
         _resources.GetSpriteCollection("EnerygyBar").Begin(BlendState.AlphaBlend);
-        _resources.GetSpriteCollection("EnerygyBar").DrawSprite(0, BarXPos, EnergyBarYPos, (int)(_energyLevel * EnergyBarScale), BarHeight, Color.White);
+        _resources.GetSpriteCollection("EnerygyBar").DrawSprite(0, BarXPos, EnergyBarYPos, (int)(_stats.EnergyLevel * EnergyBarScale), BarHeight, Color.White);
         _resources.GetSpriteCollection("EnerygyBar").End();
 
         _resources.GetSpriteCollection("JumpBar").Begin(BlendState.AlphaBlend);
-        _resources.GetSpriteCollection("JumpBar").DrawSprite(0, BarXPos, JumpBarYPos, (int)(_platforms * JumpBarScale), BarHeight, Color.White);
+        _resources.GetSpriteCollection("JumpBar").DrawSprite(0, BarXPos, JumpBarYPos, (int)(_stats.Platforms * JumpBarScale), BarHeight, Color.White);
         _resources.GetSpriteCollection("JumpBar").End();
 
         _resources.GetSpriteCollection("AmmoBar").Begin(BlendState.AlphaBlend);
-        _resources.GetSpriteCollection("AmmoBar").DrawSprite(0, BarXPos, AmmoBarYPos, (int)(_firePower * AmmoBarScale), BarHeight, Color.White);
+        _resources.GetSpriteCollection("AmmoBar").DrawSprite(0, BarXPos, AmmoBarYPos, (int)(_stats.FirePower * AmmoBarScale), BarHeight, Color.White);
         _resources.GetSpriteCollection("AmmoBar").End();
 
         // Draw score
-        PanelNumbers.Draw(ScoreXPos, ScoreYPos, PlayerScore.ToString("000000"), _resources, Color.White);
+        PanelNumbers.Draw(ScoreXPos, ScoreYPos, _stats.PlayerScore.ToString("000000"), _resources, Color.White);
 
         // Draw remaining lives
-        PanelNumbers.Draw(LivesXPos, LivesYPos, BlobLives.ToString("00"), _resources, Color.White);
+        PanelNumbers.Draw(LivesXPos, LivesYPos, _stats.BlobLives.ToString("00"), _resources, Color.White);
 
         // draw overlay
         _resources.GetSpriteCollection("StatusPanelOverlay").Begin(BlendState.AlphaBlend);

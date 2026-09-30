@@ -17,6 +17,7 @@ using Starquake.GameComponents;
 using Starquake.Helpers;
 using Starquake.Input;
 using Starquake.Particles;
+using Starquake.Scoring;
 using Starquake.SharedLibs;
 using Starquake.Sounds;
 using Starquake.Structure;
@@ -291,7 +292,7 @@ public class Blob : GameComponentBase
     private readonly ScreenDirectory _screenDirectory;
     private readonly ScreenEffectEngine _screenEffects;
     private readonly GameSession _session;
-    private readonly StatusPanel _statusPanel;
+    private readonly PlayerStats _stats;
     private readonly List<ResetTile> _tilesToReset = [];
     private int _blobAlarmSoundCounter;
 
@@ -349,7 +350,7 @@ public class Blob : GameComponentBase
         GraphicsSet graphicsSet,
         ScreenDirectory screenDirectory,
         ScreenEffectEngine screenEffects,
-        StatusPanel statusPanel,
+        PlayerStats stats,
         GameSession session,
         BlobDeathAnimation blobKiller,
         BreakableBridges breakableBridges,
@@ -361,7 +362,7 @@ public class Blob : GameComponentBase
         _graphicsSet = graphicsSet;
         _screenDirectory = screenDirectory;
         _screenEffects = screenEffects;
-        _statusPanel = statusPanel;
+        _stats = stats;
         _session = session;
         _blobKiller = blobKiller;
         _breakableBridges = breakableBridges;
@@ -742,7 +743,7 @@ public class Blob : GameComponentBase
             {
                 _jumpPressed = true;
 
-                if (_statusPanel.Platforms > 0)
+                if (_stats.Platforms > 0)
                 {
                     if (!_blobOnShuttlePad)
                     {
@@ -1080,7 +1081,7 @@ public class Blob : GameComponentBase
     {
         if (BlobsControl.HasFired())
         {
-            if (_statusPanel.FirePower > 0)
+            if (_stats.FirePower > 0)
             {
                 if (_blobCanFire)
                 {

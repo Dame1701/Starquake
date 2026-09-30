@@ -23,6 +23,7 @@ using Starquake.GameComponents.GameScreens;
 using Starquake.GameComponents.PresentationScreens;
 using Starquake.Helpers;
 using Starquake.Input;
+using Starquake.Scoring;
 using Starquake.Sprites;
 using Starquake.Structure;
 
@@ -174,6 +175,13 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     public StatusPanel BlobStatusPanel;
 
+    /// <summary>
+    ///     The player's score, lives and supplies. Held here beside the panel that draws them rather
+    ///     than inside it, because most of the game reads and writes these and only one class draws
+    ///     them.
+    /// </summary>
+    public PlayerStats Stats;
+
     // Central objects
     public CoreElements Elements;
 
@@ -312,7 +320,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     {
         if (interactionType == NastyInteractionType.BlobShot)
         {
-            BlobStatusPanel.PlayerScore += ScoreForShootingNasty;
+            Stats.PlayerScore += ScoreForShootingNasty;
         }
         else if (interactionType == NastyInteractionType.HitBlob)
         {
@@ -326,7 +334,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             }
             else
             {
-                BlobStatusPanel.EnergyLevel = BlobStatusPanel.EnergyLevel - 1;
+                Stats.EnergyLevel = Stats.EnergyLevel - 1;
             }
         }
     }
@@ -344,15 +352,16 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     private void Player_OnBlobActionRaised(BlobAction action, object? data)
     {
         // inform status panel that something has happened
-        BlobStatusPanel.BlobHasPerformedAnAction(action, data);
+        Stats.BlobHasPerformedAnAction(action, data);
 
     }
 
-    [MemberNotNull(nameof(BlobStatusPanel), nameof(Elements),
+    [MemberNotNull(nameof(BlobStatusPanel), nameof(Stats), nameof(Elements),
         nameof(ShapeDrawer))]
     private void Initialise()
     {
-        BlobStatusPanel = new StatusPanel(ContentResourceManager, _graphicsSet, ScreenDirectory, RandomNumberGenerator);
+        Stats = new PlayerStats(ContentResourceManager.GetSoundFxEngine());
+        BlobStatusPanel = new StatusPanel(ContentResourceManager, _graphicsSet, ScreenDirectory, RandomNumberGenerator, Stats);
         BlobStatusPanel.Initialise(null);
 
         _session = new GameSession();
@@ -360,7 +369,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         _session.OnPlayerKeysChanged += Session_OnPlayerKeysChanged;
 
         // Core Elements
-        Elements = new CoreElements(BlobStatusPanel, ContentResourceManager, _graphicsSet, Presentation, RandomNumberGenerator);
+        Elements = new CoreElements(Stats, ContentResourceManager, _graphicsSet, Presentation, RandomNumberGenerator);
 
         // Test area
         ShapeDrawer = new Shapes(_graphicsDeviceMgr.GraphicsDevice);
@@ -483,7 +492,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             _graphicsSet,
             ScreenDirectory,
             ScreenEffectEngine,
-            BlobStatusPanel,
+            Stats,
             Session,
             BlobKiller,
             BreakableBridgesEngine,
@@ -640,7 +649,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             Presentation,
             ScreenEffectEngine,
             ScreenDirectory,
-            BlobStatusPanel,
+            Stats,
             Input));
         ScreenDirectory.Add(GameScreenType.GameOver, new GameOverScreen(
             ContentResourceManager,
@@ -649,7 +658,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             Presentation,
             ScreenEffectEngine,
             ScreenDirectory,
-            BlobStatusPanel,
+            Stats,
             Elements,
             GameScreens,
             Input));
@@ -963,7 +972,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         // Give us some lives back (Testing)
         if (Input.KeyboardState.IsKeyDown(Keys.F2))
         {
-            BlobStatusPanel.BlobLives = TestModeLivesRestored;
+            Stats.BlobLives = TestModeLivesRestored;
             Player.BlobsState = BlobState.Dead;
         }
 

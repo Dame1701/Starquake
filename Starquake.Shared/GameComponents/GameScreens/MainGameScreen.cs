@@ -131,7 +131,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         if (!GameEngine.GameScreens.CurrentGameScreenData.ScreenVisited)
         {
             GameEngine.GameScreens.CurrentGameScreenData.ScreenVisited = true;
-            GameEngine.BlobStatusPanel.PlayerScore += ScoreForReachingCore;
+            GameEngine.Stats.PlayerScore += ScoreForReachingCore;
         }
 
         if (GameEngine.GameScreens.ScreenNumber == WorldMap.CoreScreenNumber)
@@ -204,7 +204,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
     {
         _framesPlayed = 0;
         GameEngine.Session.Paused = false;
-        GameEngine.BlobStatusPanel.Reset();
+        GameEngine.Stats.Reset();
         GameEngine.Elements.Reset();
         GameEngine.GameScreens.Reset();
         GameEngine.Player.Reset();
@@ -301,8 +301,8 @@ public class MainGameScreen : GameComponentBase, IGameScreen
     {
         if (GameEngine.Input.KeyboardState.IsKeyDown(Keys.J))
         {
-            GameEngine.BlobStatusPanel.Platforms = TestModeSuppliesRestored;
-            GameEngine.BlobStatusPanel.FirePower = TestModeSuppliesRestored;
+            GameEngine.Stats.Platforms = TestModeSuppliesRestored;
+            GameEngine.Stats.FirePower = TestModeSuppliesRestored;
         }
 
         if (GameEngine.Input.KeyboardState.IsKeyDown(Keys.T))

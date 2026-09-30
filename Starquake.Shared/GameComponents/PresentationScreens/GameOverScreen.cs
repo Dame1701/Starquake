@@ -28,7 +28,7 @@ public class GameOverScreen : GameScreenBase, IGameScreen
     private readonly CoreElements _elements;
     private readonly SpriteCollection _foregroundImage;
     private readonly GameScreenCollection _gameScreens;
-    private readonly StatusPanel _statusPanel;
+    private readonly PlayerStats _stats;
     private bool _fadeComplete;
     private TimeSpan _playTime;
 
@@ -39,7 +39,7 @@ public class GameOverScreen : GameScreenBase, IGameScreen
         PresentationSettings presentation,
         ScreenEffectEngine screenEffects,
         ScreenDirectory screenDirectory,
-        StatusPanel statusPanel,
+        PlayerStats stats,
         CoreElements elements,
         GameScreenCollection gameScreens,
         ToggleKeys input)
@@ -52,7 +52,7 @@ public class GameOverScreen : GameScreenBase, IGameScreen
             screenDirectory,
             input)
     {
-        _statusPanel = statusPanel;
+        _stats = stats;
         _elements = elements;
         _gameScreens = gameScreens;
 
@@ -86,7 +86,7 @@ public class GameOverScreen : GameScreenBase, IGameScreen
         {
             var playersScore = new HiScore
             {
-                Score = _statusPanel.PlayerScore,
+                Score = _stats.PlayerScore,
                 AdventureScore = _gameScreens.GetPercentageOfScreensVisited()
             };
 
@@ -123,7 +123,7 @@ public class GameOverScreen : GameScreenBase, IGameScreen
         Font.End();
 
         // Player Score
-        ProportionalNumbers.Draw(630, 260, _statusPanel.PlayerScore.ToString("000000"), Resources, ColourHelper.GetXna4Colour(150, 150, 150, (byte)ScreenFade));
+        ProportionalNumbers.Draw(630, 260, _stats.PlayerScore.ToString("000000"), Resources, ColourHelper.GetXna4Colour(150, 150, 150, (byte)ScreenFade));
 
         // Adventure Score
         ProportionalNumbers.Draw(814, 320, _gameScreens.GetPercentageOfScreensVisited() + "%", Resources, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
