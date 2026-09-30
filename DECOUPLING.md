@@ -44,22 +44,35 @@ since the dependency arrives per call. Eight more take theirs at construction: `
 `RenderViewPort`, `ElectricityRandomiser`, `BouncingAnimation`, `KeyScanner`,
 `BlobAccessBoothAnim`, `CoreElement`, `CoreElements`.
 
-**Construction order is the constraint on the remainder, and it has to be checked per class.** The
-engine's lazily-built members — the planet, the blob, the screen effect engine — throw if read
-before content has loaded, so a class handed one at construction throws where holding the engine
-and reading it later did not. That is the bug that went in with the random number generator, and
-three classes are stopped by it:
+**Construction order looked like the constraint on the remainder, and it was not one.** The engine's
+lazily-built members — the planet, the blob, the screen effect engine — throw if read before content
+has loaded, so a class handed one at construction throws where holding the engine and reading it
+later did not. That is the bug that went in with the random number generator. Three classes appeared
+to be stopped by it: `TunnelLiftAnimationEngine` and `BlobDeathAnimation` wanted the planet and were
+built before it existed, and `BreakableBridges` was a conduit for `BreakableBridge`, which wants the
+screen effect engine, built later still.
 
-| Class | Wants | Built |
+**But none of them had to be built when they were.** The order was an accident of which method each
+thing had been dropped into — `Initialise()` was building components before content that had no
+reason to be there. Checking first that none of the three is touched during any *constructor* (every
+use is in `Update` or `Draw`), all three moved:
+
+| Class | Moved to | Now takes |
 | --- | --- | --- |
-| `TunnelLiftAnimationEngine` | the planet | before the planet exists |
-| `BlobDeathAnimation` | conduit for `BouncingParticle`, which wants the planet | before the planet exists |
-| `BreakableBridges` | conduit for `BreakableBridge`, which wants the screen effect engine | before that exists |
+| `TunnelLiftAnimationEngine` | after the screen collection | `ResourceManager`, `GameScreenCollection`, `GraphicsSet` |
+| `BlobDeathAnimation` | after the screen collection | those, plus a `Random`, handed on to each `BouncingParticle` |
+| `BreakableBridges` | after `RegisterScreenEffectViewPorts` | those, plus a `GraphicsDeviceManager` and the `ScreenEffectEngine` |
 
-None of these is a leaf. They are the actor graph, and they belong with stage 6, where the order of
-construction is the actual subject rather than an obstacle.
+`TunnelAnimations` and `BlobKiller` come off their `MemberNotNull` contracts and go behind
+`NotBeforeContentLoads`, the pattern the engine already uses for the planet and the blob. That is
+honest rather than a workaround — they genuinely do not exist until content loads, and now they say
+so instead of being non-null fields that happened to be assigned early.
 
-**33 coupled files**, from 60 at the baseline.
+**No lazy accessors, no factories, no registry.** Reordering was enough for all three, which is
+worth knowing before stage 6 reaches for one: check whether an order is load-bearing before
+building machinery to work around it.
+
+**28 coupled files**, from 60 at the baseline.
 
 ### What is left of stage 5
 
