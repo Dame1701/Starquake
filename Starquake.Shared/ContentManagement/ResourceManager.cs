@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -33,7 +34,6 @@ public class ResourceManager : StartableGameComponentBase
     private readonly SoundEffectEngine _soundEngine;
 
     private readonly List<SpriteDescription> _spriteDescriptions;
-    private BackgroundWorker _backgroundWorker;
 
     public ResourceManager(GameEngine gameEngineInstance)
         : base(gameEngineInstance)
@@ -54,16 +54,16 @@ public class ResourceManager : StartableGameComponentBase
     {
         _resources.Clear();
 
-        _backgroundWorker = new BackgroundWorker();
-        _backgroundWorker.DoWork += backgroundWorker_DoWork;
-        _backgroundWorker.RunWorkerCompleted += backgroundWorker_RunWorkerCompleted;
+        var backgroundWorker = new BackgroundWorker();
+        backgroundWorker.DoWork += backgroundWorker_DoWork;
+        backgroundWorker.RunWorkerCompleted += backgroundWorker_RunWorkerCompleted;
 
         UpdateStatus(
             "Loading content....",
             0,
             GameEngineStatus.Starting);
 
-        _backgroundWorker.RunWorkerAsync();
+        backgroundWorker.RunWorkerAsync();
     }
 
     public void Initialise()
@@ -71,13 +71,14 @@ public class ResourceManager : StartableGameComponentBase
         _particleEngine.LoadContent();
     }
 
-    private void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+    private void backgroundWorker_RunWorkerCompleted(object? sender, RunWorkerCompletedEventArgs e)
     {
-        _backgroundWorker.DoWork -= backgroundWorker_DoWork;
-        _backgroundWorker.RunWorkerCompleted -= backgroundWorker_RunWorkerCompleted;
-
-        _backgroundWorker.Dispose();
-        _backgroundWorker = null;
+        if (sender is BackgroundWorker backgroundWorker)
+        {
+            backgroundWorker.DoWork -= backgroundWorker_DoWork;
+            backgroundWorker.RunWorkerCompleted -= backgroundWorker_RunWorkerCompleted;
+            backgroundWorker.Dispose();
+        }
 
         UpdateStatus(
             "Launching Game.....",
@@ -85,7 +86,7 @@ public class ResourceManager : StartableGameComponentBase
             GameEngineStatus.ContentLoaded);
     }
 
-    private void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+    private void backgroundWorker_DoWork(object? sender, DoWorkEventArgs e)
     {
         UpdateStatus(
             "Loading content....",
@@ -215,11 +216,12 @@ public class ResourceManager : StartableGameComponentBase
 
     public SpriteCollection GetSpriteCollection(string name)
     {
-        if (_resources.ContainsKey(name))
+        if (!_resources.TryGetValue(name, out var resource))
         {
-            return _resources[name] as SpriteCollection;
+            throw new InvalidOperationException($"Sprite collection '{name}' has not been registered.");
         }
-        return null;
+
+        return (SpriteCollection)resource;
     }
 
     public IParticleEffect GetParticleEffectInstance(string effectName, ParticleEffectType effectType, TimeSpan? duration)
@@ -237,7 +239,7 @@ public class ResourceManager : StartableGameComponentBase
             return _particleEngine.CreateMultiTriggeredTimeBasedEffectInstance(effectName);
         }
 
-        return null;
+        throw new InvalidOperationException($"There is no particle effect of type '{effectType}'.");
     }
 
     public AnimTileEngine GetAnimationEngine()
@@ -248,15 +250,17 @@ public class ResourceManager : StartableGameComponentBase
 
     public object GetDataResource(string name)
     {
-        if (_resources.ContainsKey(name))
+        if (!_resources.TryGetValue(name, out var resource))
         {
-            // Ensure we don't return a sprite array by mistake!
-            if (!(_resources[name] is SpriteCollection))
-            {
-                return _resources[name];
-            }
+            throw new InvalidOperationException($"Data resource '{name}' has not been registered.");
         }
 
-        return null;
+        // Ensure we don't return a sprite array by mistake!
+        if (resource is SpriteCollection)
+        {
+            throw new InvalidOperationException($"Resource '{name}' is a sprite collection, not a data resource.");
+        }
+
+        return resource;
     }
 }

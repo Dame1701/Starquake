@@ -105,7 +105,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     private static GameEngine _sInstance;
     public string AccessCodesFailedName = "AccessCodesFailed";
-    public string AccessCodesGreyName = "AccessCodesGrey";
+    public string AccessCodesGreyName = "AccessCodesGray";
     public string AccessCodesPassedName = "AccessCodesPassed";
     private GameComponentBase _accessScreen;
 
@@ -179,7 +179,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     private bool _particleTestTrigger;
 
     private bool _paused;
-    public string PickupsIlluminatedName = "PickupsIlluminate";
+    public string PickupsIlluminatedName = "PickupsIlluminated";
     public string PickupsName = "Pickups";
     public Blob Player;
 
@@ -902,7 +902,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                     BlobsShipName = "BlobsShipOriginal";
                     AccessCodesFailedName = "AccessCodesFailedOriginal";
                     AccessCodesPassedName = "AccessCodesPassedOriginal";
-                    AccessCodesGreyName = "AccessCodesGreyOriginal";
+                    AccessCodesGreyName = "AccessCodesGrayOriginal";
                     PickupsIlluminatedName = "PickupsIlluminatedOriginal";
                     PickupsName = "PickupsOriginal";
 
@@ -917,7 +917,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                     BlobsShipName = "BlobsShip";
                     AccessCodesFailedName = "AccessCodesFailed";
                     AccessCodesPassedName = "AccessCodesPassed";
-                    AccessCodesGreyName = "AccessCodesGrey";
+                    AccessCodesGreyName = "AccessCodesGray";
                     PickupsIlluminatedName = "PickupsIlluminated";
                     PickupsName = "Pickups";
 
