@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using Microsoft.Xna.Framework.Input;
 using Starquake.Engines;
 
@@ -56,6 +57,7 @@ public class CustomControl
     public CustomControl(PlayerKeySet playerKeys, GameEngine gameEngine, bool useJoyPad = false)
     {
         _gameEngine = gameEngine;
+        PlayerKeySet = playerKeys;
         /*
         if (UseJoyPad)
         {
