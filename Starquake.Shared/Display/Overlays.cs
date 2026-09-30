@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
-using Starquake.Engines;
+using Starquake.Fonts;
 using Starquake.Helpers;
 
 namespace Starquake.Display;
@@ -63,18 +63,18 @@ public class Overlays
     /// <inheritdoc cref="BorderRed" />
     private const int BannerAlpha = 200;
 
-    public static void Paused(int xPos, int yPos, GameEngine gameEngine)
+    public static void Paused(int xPos, int yPos, Shapes shapeDrawer, BitmapFont font)
     {
-        gameEngine.ShapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
-        gameEngine.ShapeDrawer.FillRectangle(new Rectangle(0 + xPos, 0 + yPos, BannerWidth, BorderThickness), ColourHelper.GetXna4Colour(BorderRed, 0, 0, BannerAlpha));
-        gameEngine.ShapeDrawer.FillRectangle(new Rectangle(0 + xPos, BorderThickness + yPos, BorderThickness, PostHeight), ColourHelper.GetXna4Colour(BorderRed, 0, 0, BannerAlpha));
-        gameEngine.ShapeDrawer.FillRectangle(new Rectangle(PanelInset + xPos, PanelInset + yPos, PanelWidth, PanelHeight), ColourHelper.GetXna4Colour(PanelGrey, PanelGrey, PanelGrey, BannerAlpha));
-        gameEngine.ShapeDrawer.FillRectangle(new Rectangle(0 + xPos, BottomBarYPos + yPos, BannerWidth, BorderThickness), ColourHelper.GetXna4Colour(BorderRed, 0, 0, BannerAlpha));
-        gameEngine.ShapeDrawer.FillRectangle(new Rectangle(RightPostXPos + xPos, BorderThickness + yPos, BorderThickness, PostHeight), ColourHelper.GetXna4Colour(BorderRed, 0, 0, BannerAlpha));
-        gameEngine.ShapeDrawer.End();
+        shapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+        shapeDrawer.FillRectangle(new Rectangle(0 + xPos, 0 + yPos, BannerWidth, BorderThickness), ColourHelper.GetXna4Colour(BorderRed, 0, 0, BannerAlpha));
+        shapeDrawer.FillRectangle(new Rectangle(0 + xPos, BorderThickness + yPos, BorderThickness, PostHeight), ColourHelper.GetXna4Colour(BorderRed, 0, 0, BannerAlpha));
+        shapeDrawer.FillRectangle(new Rectangle(PanelInset + xPos, PanelInset + yPos, PanelWidth, PanelHeight), ColourHelper.GetXna4Colour(PanelGrey, PanelGrey, PanelGrey, BannerAlpha));
+        shapeDrawer.FillRectangle(new Rectangle(0 + xPos, BottomBarYPos + yPos, BannerWidth, BorderThickness), ColourHelper.GetXna4Colour(BorderRed, 0, 0, BannerAlpha));
+        shapeDrawer.FillRectangle(new Rectangle(RightPostXPos + xPos, BorderThickness + yPos, BorderThickness, PostHeight), ColourHelper.GetXna4Colour(BorderRed, 0, 0, BannerAlpha));
+        shapeDrawer.End();
 
-        gameEngine.Font2.Begin(BlendState.AlphaBlend);
-        gameEngine.Font2.WriteText(TextXPos + xPos, TextYPos + yPos, "PAUSED...", TextScale, Color.White, ColourLevels.Full);
-        gameEngine.Font2.End();
+        font.Begin(BlendState.AlphaBlend);
+        font.WriteText(TextXPos + xPos, TextYPos + yPos, "PAUSED...", TextScale, Color.White, ColourLevels.Full);
+        font.End();
     }
 }

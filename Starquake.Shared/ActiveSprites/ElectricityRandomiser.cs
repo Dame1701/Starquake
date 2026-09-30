@@ -4,6 +4,7 @@
 // -
 using System;
 using Microsoft.Xna.Framework;
+using Starquake.ContentManagement;
 using Starquake.Engines;
 using Starquake.Sounds;
 
@@ -11,7 +12,7 @@ namespace Starquake.ActiveSprites;
 
 public class ElectricityRandomiser
 {
-    private readonly GameEngine _gameEngine;
+    private readonly ResourceManager _resources;
 
     private readonly Random _randomGenerator;
     private int _counter;
@@ -20,11 +21,11 @@ public class ElectricityRandomiser
 
     private Guid _soundId;
 
-    public ElectricityRandomiser(GameEngine gameEngineReference)
+    public ElectricityRandomiser(ResourceManager resources, Random randomNumberGenerator)
     {
-        _gameEngine = gameEngineReference;
+        _resources = resources;
         _electricitySoundPlayed = false;
-        _randomGenerator = gameEngineReference.RandomNumberGenerator;
+        _randomGenerator = randomNumberGenerator;
 
         if (_randomGenerator.Next(0, 2) == 0)
         {
@@ -83,7 +84,7 @@ public class ElectricityRandomiser
             if (!_electricitySoundPlayed)
             {
                 // Play sound
-                _soundId = _gameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("ElectricityNodes", 0.3F);
+                _soundId = _resources.GetSoundFxEngine().PlaySound("ElectricityNodes", 0.3F);
 
                 _electricitySoundPlayed = true;
             }
@@ -93,7 +94,7 @@ public class ElectricityRandomiser
             // Stop sound
             if (_soundId != Guid.Empty)
             {
-                _gameEngine.ContentResourceManager.GetSoundFxEngine().StopSound(_soundId, SoundFade.None);
+                _resources.GetSoundFxEngine().StopSound(_soundId, SoundFade.None);
             }
 
             _electricitySoundPlayed = false;

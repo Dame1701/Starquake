@@ -88,15 +88,15 @@ public class CoreElement
 
         if (startFadeUp)
         {
-            _fader1 = new ElementFader(_gameEngine, Direction.Up);
-            _fader2 = new ElementFader(_gameEngine, Direction.Down);
-            _fader3 = new ElementFader(_gameEngine, Direction.Up);
+            _fader1 = new ElementFader(_gameEngine.RandomNumberGenerator, Direction.Up);
+            _fader2 = new ElementFader(_gameEngine.RandomNumberGenerator, Direction.Down);
+            _fader3 = new ElementFader(_gameEngine.RandomNumberGenerator, Direction.Up);
         }
         else
         {
-            _fader1 = new ElementFader(_gameEngine, Direction.Down);
-            _fader2 = new ElementFader(_gameEngine, Direction.Up);
-            _fader3 = new ElementFader(_gameEngine, Direction.Down);
+            _fader1 = new ElementFader(_gameEngine.RandomNumberGenerator, Direction.Down);
+            _fader2 = new ElementFader(_gameEngine.RandomNumberGenerator, Direction.Up);
+            _fader3 = new ElementFader(_gameEngine.RandomNumberGenerator, Direction.Down);
         }
 
         _coreReplacementEffect = (IStandardParticleEffect)_gameEngine.ContentResourceManager.GetParticleEffectInstance("CoreReplacementParticleEffect", ParticleEffectType.Continual, new TimeSpan(0, 0, 0, 0, ReplacementEffectMilliseconds));

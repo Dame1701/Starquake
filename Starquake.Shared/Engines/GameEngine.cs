@@ -1240,7 +1240,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
             if (Paused)
             {
-                Overlays.Paused(PausedOverlayXPos, PausedOverlayYPos, this);
+                Overlays.Paused(PausedOverlayXPos, PausedOverlayYPos, ShapeDrawer, Font2);
             }
         }
         else

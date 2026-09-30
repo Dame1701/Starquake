@@ -161,7 +161,7 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
             GameEngine.Font2.WriteTextCentred(1280, 180, "CORE OF HEROES", 2, ColourHelper.GetXna4Colour(9, 132, ColourLevels.Full), (byte)ScreenFade);
             GameEngine.Font2.End();
 
-            _hiscoreList.Draw(GameEngine, gameTime, 380, 250, ScreenFade);
+            _hiscoreList.Draw(GameEngine.ContentResourceManager, GameEngine.Font2, gameTime, 380, 250, ScreenFade);
         }
 
         _foregroundImage.Begin(BlendState.AlphaBlend, gameTime);

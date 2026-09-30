@@ -2,8 +2,8 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+using System;
 using Starquake.Constants;
-using Starquake.Engines;
 using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
@@ -14,11 +14,11 @@ internal class ElementFader
     private readonly int _fadeSpeed;
     private Direction _fadeDirection;
 
-    public ElementFader(GameEngine gameEngineInstance, Direction fadeDirection)
+    public ElementFader(Random randomNumberGenerator, Direction fadeDirection)
     {
         _fadeDirection = fadeDirection;
-        _fadeSpeed = gameEngineInstance.RandomNumberGenerator.Next(8, 16);
-        FadeLevel = gameEngineInstance.RandomNumberGenerator.Next(50, 200);
+        _fadeSpeed = randomNumberGenerator.Next(8, 16);
+        FadeLevel = randomNumberGenerator.Next(50, 200);
     }
     public int FadeLevel { get; private set; }
 

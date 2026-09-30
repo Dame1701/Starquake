@@ -96,16 +96,16 @@ public class GameOverScreen : GameScreenBase, IGameScreen
         GameEngine.Font2.End();
 
         // Player Score
-        ProportionalNumbers.Draw(630, 260, GameEngine.BlobStatusPanel.PlayerScore.ToString("000000"), GameEngine, gameTime, ColourHelper.GetXna4Colour(150, 150, 150, (byte)ScreenFade));
+        ProportionalNumbers.Draw(630, 260, GameEngine.BlobStatusPanel.PlayerScore.ToString("000000"), GameEngine.ContentResourceManager, gameTime, ColourHelper.GetXna4Colour(150, 150, 150, (byte)ScreenFade));
 
         // Adventure Score
-        ProportionalNumbers.Draw(814, 320, GameEngine.GameScreens.GetPercentageOfScreensVisited() + "%", GameEngine, gameTime, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
+        ProportionalNumbers.Draw(814, 320, GameEngine.GameScreens.GetPercentageOfScreensVisited() + "%", GameEngine.ContentResourceManager, gameTime, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
 
         // Time Taken
-        ProportionalNumbers.Draw(710, 380, _playTime.Minutes + "." + _playTime.Seconds.ToString("00"), GameEngine, gameTime, ColourHelper.GetXna4Colour(150, 150, 150, (byte)ScreenFade));
+        ProportionalNumbers.Draw(710, 380, _playTime.Minutes + "." + _playTime.Seconds.ToString("00"), GameEngine.ContentResourceManager, gameTime, ColourHelper.GetXna4Colour(150, 150, 150, (byte)ScreenFade));
 
         // Elements replaced
-        ProportionalNumbers.Draw(520, 560, GameEngine.Elements.GetElementsReplacedCount().ToString("00"), GameEngine, gameTime, ColourHelper.GetXna4Colour(134, 0, 134, (byte)ScreenFade));
+        ProportionalNumbers.Draw(520, 560, GameEngine.Elements.GetElementsReplacedCount().ToString("00"), GameEngine.ContentResourceManager, gameTime, ColourHelper.GetXna4Colour(134, 0, 134, (byte)ScreenFade));
 
         // Core elements
         GameEngine.Elements.Draw(gameTime, 820, 446, ScreenFade);

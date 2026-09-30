@@ -24,7 +24,7 @@ public class BouncingParticle
     public BouncingParticle(GameEngine gameEngineReference, int spriteNo)
     {
         _gameEngine = gameEngineReference;
-        _particleBounce = new BouncingAnimation(gameEngineReference, spriteNo);
+        _particleBounce = new BouncingAnimation(gameEngineReference.ContentResourceManager, gameEngineReference.RandomNumberGenerator, spriteNo);
     }
 
     public required IStandardParticleEffect Fireball { get; init; }

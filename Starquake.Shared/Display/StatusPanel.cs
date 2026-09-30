@@ -481,11 +481,11 @@ public class StatusPanel : GameComponentBase
                 // Draw numbers above object
                 if (_blobsInventory[a] == Collectables.None)
                 {
-                    PanelNumbers.Draw(InventorySlotSpacing * a + InventoryNumberXPos, InventoryNumberYPos, (a + 1).ToString(), GameEngine, gameTime, Color.White);
+                    PanelNumbers.Draw(InventorySlotSpacing * a + InventoryNumberXPos, InventoryNumberYPos, (a + 1).ToString(), GameEngine.ContentResourceManager, gameTime, Color.White);
                 }
                 else
                 {
-                    PanelNumbers.Draw(InventorySlotSpacing * a + InventoryNumberXPos, InventoryNumberYPos, (a + 1).ToString(), GameEngine, gameTime, Color.OrangeRed);
+                    PanelNumbers.Draw(InventorySlotSpacing * a + InventoryNumberXPos, InventoryNumberYPos, (a + 1).ToString(), GameEngine.ContentResourceManager, gameTime, Color.OrangeRed);
 
                     if (_slotToScan != a) // Don't draw the slot being scanned
                     {
@@ -515,10 +515,10 @@ public class StatusPanel : GameComponentBase
         GameEngine.ContentResourceManager.GetSpriteCollection("AmmoBar").End();
 
         // Draw score
-        PanelNumbers.Draw(ScoreXPos, ScoreYPos, PlayerScore.ToString("000000"), GameEngine, gameTime, Color.White);
+        PanelNumbers.Draw(ScoreXPos, ScoreYPos, PlayerScore.ToString("000000"), GameEngine.ContentResourceManager, gameTime, Color.White);
 
         // Draw remaining lives
-        PanelNumbers.Draw(LivesXPos, LivesYPos, BlobLives.ToString("00"), GameEngine, gameTime, Color.White);
+        PanelNumbers.Draw(LivesXPos, LivesYPos, BlobLives.ToString("00"), GameEngine.ContentResourceManager, gameTime, Color.White);
 
         // draw overlay
         GameEngine.ContentResourceManager.GetSpriteCollection("StatusPanelOverlay").Begin(BlendState.AlphaBlend, gameTime);

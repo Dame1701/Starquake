@@ -462,7 +462,7 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
 
         for (var a = 0; a < count; a++)
         {
-            controllers[a] = new ElectricityRandomiser(GameEngine)
+            controllers[a] = new ElectricityRandomiser(GameEngine.ContentResourceManager, GameEngine.RandomNumberGenerator)
             {
                 Location = new Point(secondLayerTiles[a].TileLocation.X, secondLayerTiles[a].TileLocation.Y)
             };

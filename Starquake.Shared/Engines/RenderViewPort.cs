@@ -9,11 +9,11 @@ namespace Starquake.Engines;
 
 public class RenderViewPort
 {
-    private readonly GameEngine _gameEngine;
+    private readonly GraphicsDeviceManager _graphicsDeviceManager;
 
-    public RenderViewPort(GameEngine gameEngineReference, string name, int xPos, int yPos, int width, int height)
+    public RenderViewPort(GraphicsDeviceManager graphics, string name, int xPos, int yPos, int width, int height)
     {
-        _gameEngine = gameEngineReference;
+        _graphicsDeviceManager = graphics;
 
         MasterXPos = xPos;
         MasterYPos = yPos;
@@ -21,7 +21,7 @@ public class RenderViewPort
         this.Width = width;
         this.Height = height;
 
-        RenderTarget = new RenderTarget2D(_gameEngine.GraphicsDeviceMgr.GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24, 0, RenderTargetUsage.PreserveContents);
+        RenderTarget = new RenderTarget2D(_graphicsDeviceManager.GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24, 0, RenderTargetUsage.PreserveContents);
 
 
         this.XPos = xPos;

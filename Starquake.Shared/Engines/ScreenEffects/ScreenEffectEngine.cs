@@ -74,7 +74,7 @@ public class ScreenEffectEngine : GameComponentBase
     {
         if (FindRenderViewPort(name) == null)
         {
-            _renderViewPorts.Add(new RenderViewPort(GameEngine, name, xPosition, yPosition, width, height));
+            _renderViewPorts.Add(new RenderViewPort(GameEngine.GraphicsDeviceMgr, name, xPosition, yPosition, width, height));
         }
         else
         {

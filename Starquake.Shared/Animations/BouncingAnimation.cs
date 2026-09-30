@@ -2,8 +2,10 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+using System;
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
+using Starquake.ContentManagement;
 using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Sprites;
@@ -14,7 +16,8 @@ public class BouncingAnimation
 {
     private readonly double _friction = 1.00;
 
-    private readonly GameEngine _gameEngine;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
 
     private readonly int _spriteNo;
 
@@ -31,10 +34,11 @@ public class BouncingAnimation
     private int _xDelta;
     private double _yDelta;
 
-    public BouncingAnimation(GameEngine gameEngineReference, int spriteNo)
+    public BouncingAnimation(ResourceManager resources, Random randomNumberGenerator, int spriteNo)
     {
         _spriteNo = spriteNo;
-        _gameEngine = gameEngineReference;
+        _resources = resources;
+        _randomNumberGenerator = randomNumberGenerator;
     }
     public int Fade => (int)_fade;
     public bool Triggered { get; private set; }
@@ -53,16 +57,16 @@ public class BouncingAnimation
         Triggered = true;
         _fade = ColourLevels.Full;
         _scale = 1.0f;
-        _effectDuration = _gameEngine.RandomNumberGenerator.Next(effectMinDuration, effectMaxDuration);
-        _fadeSpeed = _gameEngine.RandomNumberGenerator.Next(10, 30);
-        _rotationSpeed = (float)(_gameEngine.RandomNumberGenerator.NextDouble() - 0.5);
+        _effectDuration = _randomNumberGenerator.Next(effectMinDuration, effectMaxDuration);
+        _fadeSpeed = _randomNumberGenerator.Next(10, 30);
+        _rotationSpeed = (float)(_randomNumberGenerator.NextDouble() - 0.5);
     }
 
     public void YBounce()
     {
         if (Triggered)
         {
-            _gameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPartClang", false);
+            _resources.GetSoundFxEngine().PlaySound("BlobPartClang", false);
             _yDelta = -_yDelta;
         }
     }
@@ -71,7 +75,7 @@ public class BouncingAnimation
     {
         if (Triggered)
         {
-            _gameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobPartClang", false);
+            _resources.GetSoundFxEngine().PlaySound("BlobPartClang", false);
             _xDelta = -_xDelta;
         }
     }

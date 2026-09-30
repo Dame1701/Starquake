@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
-using Starquake.Engines;
+using Starquake.ContentManagement;
 using Starquake.Fonts;
 using Starquake.Helpers;
 
@@ -106,7 +106,7 @@ public class HiScores
         }
     }
 
-    public void Draw(GameEngine gameEngine, GameTime gameTime, int xPos, int yPos, int fade)
+    public void Draw(ResourceManager resources, BitmapFont font, GameTime gameTime, int xPos, int yPos, int fade)
     {
         var currentYPos = yPos;
         var currentXPos = xPos;
@@ -115,28 +115,28 @@ public class HiScores
         {
             if (a % 2 == 0)
             {
-                ProportionalNumbers.Draw(currentXPos, currentYPos, (a + 1) + ".", gameEngine, gameTime, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, fade));
+                ProportionalNumbers.Draw(currentXPos, currentYPos, (a + 1) + ".", resources, gameTime, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, fade));
             }
             else
             {
-                ProportionalNumbers.Draw(currentXPos, currentYPos, (a + 1) + ".", gameEngine, gameTime, ColourHelper.GetXna4Colour(150, 150, 150, fade));
+                ProportionalNumbers.Draw(currentXPos, currentYPos, (a + 1) + ".", resources, gameTime, ColourHelper.GetXna4Colour(150, 150, 150, fade));
             }
 
             currentYPos = currentYPos + 50;
         }
 
-        gameEngine.Font2.Begin(BlendState.AlphaBlend);
+        font.Begin(BlendState.AlphaBlend);
         currentYPos = yPos;
 
         for (var a = 0; a < _scores.Count; a++)
         {
             if (a % 2 == 0)
             {
-                gameEngine.Font2.WriteText(currentXPos + 55, currentYPos, _scores[a].Name, 2, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full), (byte)fade);
+                font.WriteText(currentXPos + 55, currentYPos, _scores[a].Name, 2, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full), (byte)fade);
             }
             else
             {
-                gameEngine.Font2.WriteText(currentXPos + 55, currentYPos, _scores[a].Name, 2, new Color(150, 150, 150), (byte)fade);
+                font.WriteText(currentXPos + 55, currentYPos, _scores[a].Name, 2, new Color(150, 150, 150), (byte)fade);
             }
 
             currentYPos = currentYPos + 50;
@@ -148,16 +148,16 @@ public class HiScores
         {
             if (a % 2 == 0)
             {
-                ProportionalNumbers.Draw(currentXPos + 250, currentYPos, _scores[a].Score.ToString("000000") + " " + _scores[a].AdventureScoreString + "%", gameEngine, gameTime, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, fade));
+                ProportionalNumbers.Draw(currentXPos + 250, currentYPos, _scores[a].Score.ToString("000000") + " " + _scores[a].AdventureScoreString + "%", resources, gameTime, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, fade));
             }
             else
             {
-                ProportionalNumbers.Draw(currentXPos + 250, currentYPos, _scores[a].Score.ToString("000000") + " " + _scores[a].AdventureScoreString + "%", gameEngine, gameTime, ColourHelper.GetXna4Colour(150, 150, 150, fade));
+                ProportionalNumbers.Draw(currentXPos + 250, currentYPos, _scores[a].Score.ToString("000000") + " " + _scores[a].AdventureScoreString + "%", resources, gameTime, ColourHelper.GetXna4Colour(150, 150, 150, fade));
             }
             currentYPos = currentYPos + 50;
         }
 
-        gameEngine.Font2.End();
+        font.End();
     }
 
     public void Reset()
