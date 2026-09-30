@@ -330,7 +330,51 @@ The six broad consumers are the whole of the work here. They are the game's cent
 them will legitimately keep a wide dependency — but on three or four named things rather than one
 50-member class, and each extraction is a class that can be tested.
 
-## Stage 6 — the actors, and the last cycle
+## Stage 6 — the decision, now that 1-5 have landed
+
+The plan said to decide the registry question here rather than in advance. With the cycle isolated,
+**no registry is needed, and the graph is nothing like as tangled as it looked.**
+
+Three findings, in order of how much they changed the picture.
+
+**The cycle the plan named was one expression.** "`Blob` reaching back through the engine to find
+itself" was `GameEngine.Player.BlobXPos` *inside* `Blob`. There is one blob, constructed once, and
+it is what `Player` returns — so that was `BlobXPos`. Gone in a line. `Player` being read by ten
+files was never a cycle; the other nine are other objects asking where the blob is.
+
+**Most of the rest was construction order again, not dependency.** `ConveyerNasties` and
+`ElectricityGatesAndNodesEngine` were built in `Initialise()`, before the blob and the planet
+existed, which is the only reason they held the engine. Neither needs anything from the pre-content
+phase. Moved after the blob, both take what they use. `ConveyerNasty` needs no blob at all.
+`CustomControl` writes the blob's speed and wanted nothing else — and the blob constructs it, so
+the blob hands over itself.
+
+**What was left was four true two-cycles, all through `Blob` or `GameScreens`** — and the important
+one broke by passing values instead of the object. The planet held the whole blob to answer three
+questions: does the blob carry a key (a door's force field turns green), and where is it (Olly's
+eyes follow it). Three values, two private methods, one caller. `Update` now takes them. That
+matters because the planet and the blob were mutually blocked — the blob built first so it could
+not be handed the planet, the planet needing the blob so it could not be built first either. With
+the planet no longer needing the blob, that ordering is free.
+
+### What remains
+
+`Blob` needs six things built after it. Three are **ordering only** — nothing needs the blob back,
+so they are reorders or nothing: `BlobKiller`, `BreakableBridgesEngine`, `ScreenEffectEngine`. Two
+are **true cycles still**: `ElectricityNodeGateEngine` and `BlobStatusPanel` both need the blob.
+And `GameScreens` still needs `ColourAnimationEngine`, which needs `GameScreens` — the fourth
+cycle, and the one that has not been touched.
+
+So the remaining work is: build the planet before the blob and hand it over; decide the two-cycle
+with `StatusPanel` (which is also the Session cluster, so the two questions are one); and break or
+accept `GameScreens` ↔ `ColourAnimationEngine`, which is seven call sites in one direction and
+would go the same way the blob's did.
+
+**Nothing here wants a registry.** The pattern that has worked five times running is: ask whether
+the order is load-bearing, and if the answer is a cycle, ask what the dependent side actually needs
+— it has been three values or fewer every time.
+
+## Appendix — stage 6 as originally written
 
 Left until last because it is the real one. `GameEngine.Player` is read by 10 files, one of which
 is `Blob` reaching back through the engine to find itself (`Blob.cs:1592`). The actors
