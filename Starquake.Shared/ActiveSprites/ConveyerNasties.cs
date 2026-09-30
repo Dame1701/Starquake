@@ -3,9 +3,12 @@
 // ---------------------------------------------------------
 // -
 using System.Collections.Generic;
+using System;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework;
 using Starquake.Collisions;
 using Starquake.ContentManagement;
+using Starquake.Display;
 using Starquake.Engines;
 using Starquake.Structure;
 
@@ -13,7 +16,12 @@ namespace Starquake.ActiveSprites;
 
 public class ConveyerNasties : GameComponentBase
 {
-    private readonly GameEngine GameEngine;
+    private readonly Blob _blob;
+    private readonly ContentManager _contentManager;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsDeviceManager _graphicsDeviceManager;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
 
     #region IGameComponent Members
 
@@ -25,18 +33,29 @@ public class ConveyerNasties : GameComponentBase
     {
         get
         {
-            if (GameEngine.GameScreens.GetCoordsOfTiles(391) != null)
+            if (_gameScreens.GetCoordsOfTiles(391) != null)
             {
-                return GameEngine.GameScreens.GetCoordsOfTiles(391).Count;
+                return _gameScreens.GetCoordsOfTiles(391).Count;
             }
 
             return 0;
         }
     }
 
-    public ConveyerNasties(GameEngine gameEngineReference)
+    public ConveyerNasties(
+        ResourceManager resources,
+        ContentManager content,
+        GameScreenCollection gameScreens,
+        GraphicsDeviceManager graphics,
+        Blob blob,
+        Random randomNumberGenerator)
     {
-        GameEngine = gameEngineReference;
+        _resources = resources;
+        _contentManager = content;
+        _gameScreens = gameScreens;
+        _graphicsDeviceManager = graphics;
+        _blob = blob;
+        _randomNumberGenerator = randomNumberGenerator;
 
         Nasties = new List<ConveyerNasty>();
     }
@@ -48,7 +67,11 @@ public class ConveyerNasties : GameComponentBase
         for (var a = 0; a < 3; a++)
         {
             Nasties.Add(
-                new ConveyerNasty(GameEngine,
+                new ConveyerNasty(_resources,
+                    _contentManager,
+                    _gameScreens,
+                    _graphicsDeviceManager,
+                    _randomNumberGenerator,
                     0,
                     0,
                     0,
@@ -67,7 +90,7 @@ public class ConveyerNasties : GameComponentBase
             nasty.PerformPostChangeScreenActions();
         }
 
-        var nastiesToGenerate = GameEngine.GameScreens.GetCoordsOfTiles(391);
+        var nastiesToGenerate = _gameScreens.GetCoordsOfTiles(391);
 
 
         if (nastiesToGenerate != null && nastiesToGenerate.Count > 0)
@@ -78,7 +101,7 @@ public class ConveyerNasties : GameComponentBase
                 Nasties[a].NastyActive = true;
                 Nasties[a].XLocation = nastiesToGenerate[a].X;
                 Nasties[a].YLocation = nastiesToGenerate[a].Y;
-                Nasties[a].MoveSpeed = GameEngine.RandomNumberGenerator.Next(1, 3);
+                Nasties[a].MoveSpeed = _randomNumberGenerator.Next(1, 3);
 
                 if (Nasties[a].MoveSpeed == 1)
                 {
@@ -111,9 +134,9 @@ public class ConveyerNasties : GameComponentBase
             if (Nasties[a].NastyState == NastyState.Normal)
             {
                 if (CollisionDetection.Check(
-                        GameEngine.Player.BlobXPos + 8,
-                        GameEngine.Player.BlobYPos - 32,
-                        GameEngine.Player.BlobWidth - 16,
+                        _blob.BlobXPos + 8,
+                        _blob.BlobYPos - 32,
+                        _blob.BlobWidth - 16,
                         64,
                         Nasties[a].XLocation,
                         Nasties[a].YLocation,
@@ -129,16 +152,16 @@ public class ConveyerNasties : GameComponentBase
                         }
 
                         // Trigger the blob animation
-                        GameEngine.Player.BlobTouchedByNasty = true;
+                        _blob.BlobTouchedByNasty = true;
                     }
                 }
 
                 // Has blob shot a nasty
-                if (GameEngine.Player.BlobHasFired)
+                if (_blob.BlobHasFired)
                 {
                     if (CollisionDetection.Check(
-                            GameEngine.Player.BlobFireX,
-                            GameEngine.Player.BlobFireY,
+                            _blob.BlobFireX,
+                            _blob.BlobFireY,
                             32,
                             32,
                             Nasties[a].XLocation,
@@ -148,10 +171,10 @@ public class ConveyerNasties : GameComponentBase
                     {
                         if (Nasties[a].NastyActive)
                         {
-                            GameEngine.Player.RegisterFireHit();
+                            _blob.RegisterFireHit();
                             Nasties[a].NastyState = NastyState.Shot;
 
-                            GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobExplodes");
+                            _resources.GetSoundFxEngine().PlaySound("BlobExplodes");
 
                             if (OnNastyInteractionWithBlob != null)
                             {

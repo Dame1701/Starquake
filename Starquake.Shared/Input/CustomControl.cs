@@ -3,7 +3,7 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework.Input;
-using Starquake.Engines;
+using Starquake.ActiveSprites;
 
 namespace Starquake.Input;
 
@@ -60,11 +60,11 @@ public class CustomControl
     //DirectInput directInputInstance;
     //Joystick joystick;
 
-    private readonly GameEngine _gameEngine;
+    private readonly Blob _blob;
 
-    public CustomControl(PlayerKeySet playerKeys, GameEngine gameEngine, bool useJoyPad = false)
+    public CustomControl(PlayerKeySet playerKeys, Blob blob, bool useJoyPad = false)
     {
-        _gameEngine = gameEngine;
+        _blob = blob;
         PlayerKeySet = playerKeys;
         /*
         if (UseJoyPad)
@@ -138,22 +138,22 @@ public class CustomControl
     {
         if (inputSpeed < SpeedBand1)
         {
-            _gameEngine.Player.BlobHSpeed = CrawlSpeed;
+            _blob.BlobHSpeed = CrawlSpeed;
         }
         else if (inputSpeed < SpeedBand2 && inputSpeed >= SpeedBand1)
         {
-            _gameEngine.Player.BlobHSpeed = SlowSpeed;
+            _blob.BlobHSpeed = SlowSpeed;
         }
         else if (inputSpeed < SpeedBand3 && inputSpeed >= SpeedBand2)
         {
         }
         else if (inputSpeed < SpeedBand4 && inputSpeed >= SpeedBand3)
         {
-            _gameEngine.Player.BlobHSpeed = BriskSpeed;
+            _blob.BlobHSpeed = BriskSpeed;
         }
         else
         {
-            _gameEngine.Player.BlobHSpeed = FullSpeed;
+            _blob.BlobHSpeed = FullSpeed;
         }
     }
 
@@ -161,22 +161,22 @@ public class CustomControl
     {
         if (inputSpeed < VerticalDeadZone)
         {
-            _gameEngine.Player.BlobVSpeed = CrawlSpeed;
+            _blob.BlobVSpeed = CrawlSpeed;
         }
         else if (inputSpeed < SpeedBand2 && inputSpeed >= SpeedBand1)
         {
-            _gameEngine.Player.BlobVSpeed = SlowSpeed;
+            _blob.BlobVSpeed = SlowSpeed;
         }
         else if (inputSpeed < SpeedBand3 && inputSpeed >= SpeedBand2)
         {
         }
         else if (inputSpeed < SpeedBand4 && inputSpeed >= SpeedBand3)
         {
-            _gameEngine.Player.BlobVSpeed = BriskSpeed;
+            _blob.BlobVSpeed = BriskSpeed;
         }
         else
         {
-            _gameEngine.Player.BlobVSpeed = FullSpeed;
+            _blob.BlobVSpeed = FullSpeed;
         }
     }
 }

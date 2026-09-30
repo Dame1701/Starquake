@@ -121,14 +121,14 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public readonly ContentManager ContentMgr;
 
     public readonly ResourceManager ContentResourceManager;
-    public ConveyerNasties ConveyerNastiesInstance;
+    private ConveyerNasties? _conveyerNastiesInstance;
     /// <summary>
     ///     Which of the game's screens is being played, and where to find the others. Not to be
     ///     confused with <see cref="GameScreens" />, which is the planet.
     /// </summary>
     public readonly ScreenDirectory ScreenDirectory = new();
 
-    public ElectricityGatesAndNodesEngine ElectricityNodeGateEngine;
+    private ElectricityGatesAndNodesEngine? _electricityNodeGateEngine;
 
     // Central objects
     public CoreElements Elements;
@@ -302,6 +302,12 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public BlobDeathAnimation BlobKiller => NotBeforeContentLoads(_blobKiller);
 
     /// <inheritdoc cref="GameScreens" />
+    public ConveyerNasties ConveyerNastiesInstance => NotBeforeContentLoads(_conveyerNastiesInstance);
+
+    /// <inheritdoc cref="GameScreens" />
+    public ElectricityGatesAndNodesEngine ElectricityNodeGateEngine => NotBeforeContentLoads(_electricityNodeGateEngine);
+
+    /// <inheritdoc cref="GameScreens" />
     public ScreenEffectEngine ScreenEffectEngine => NotBeforeContentLoads(_screenEffectEngine);
 
     /// <inheritdoc cref="GameScreens" />
@@ -358,8 +364,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     }
 
     [MemberNotNull(nameof(IntroSequence), nameof(BlobStatusPanel), nameof(Elements),
-        nameof(Nasties), nameof(ConveyerNastiesInstance), nameof(ElectricityNodeGateEngine),
-        nameof(ShapeDrawer))]
+        nameof(Nasties), nameof(ShapeDrawer))]
     private void Initialise()
     {
         // Sequences
@@ -374,14 +379,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         // Nasties
         Nasties = new Nasties(this, NastiesPerScreen);
         Nasties.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
-
-        // Conveyer nasties
-        ConveyerNastiesInstance = new ConveyerNasties(this);
-        ConveyerNastiesInstance.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
-
-        // Nodes and gates engine
-        ElectricityNodeGateEngine = new ElectricityGatesAndNodesEngine(this, ConveyerNastiesInstance);
-        ElectricityNodeGateEngine.OnBlobStruckByElectricity += ElectricityNodeGateEngine_OnBlobStruckByElectricity;
 
         // Test area
         ShapeDrawer = new Shapes(GraphicsDeviceMgr.GraphicsDevice);
@@ -734,9 +731,29 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         Presentation.ScreenYOffset = 10;
 
         ConveyerNastiesInstance.Initialise(null);
+        // The conveyer nasties and the electricity engine. Both chase the blob and read the
+        // planet, so both are built here rather than in Initialise, where neither existed yet.
+        _conveyerNastiesInstance = new ConveyerNasties(
+            ContentResourceManager,
+            ContentMgr,
+            GameScreens,
+            GraphicsDeviceMgr,
+            Player,
+            RandomNumberGenerator);
+        ConveyerNastiesInstance.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
+
         var converyerNastyGraphics = new ContentList(ContentMgr);
         converyerNastyGraphics.AddContent("conveyerNasty", "Graphics\\ConveryerNasty");
         ConveyerNastiesInstance.LoadContent(converyerNastyGraphics);
+
+        _electricityNodeGateEngine = new ElectricityGatesAndNodesEngine(
+            ContentResourceManager,
+            GameScreens,
+            GraphicsSet,
+            Player,
+            RandomNumberGenerator,
+            ConveyerNastiesInstance);
+        ElectricityNodeGateEngine.OnBlobStruckByElectricity += ElectricityNodeGateEngine_OnBlobStruckByElectricity;
     }
 
     /// <summary>

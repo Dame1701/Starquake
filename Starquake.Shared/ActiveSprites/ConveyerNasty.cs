@@ -2,11 +2,14 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
+using System;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 using Starquake.Animations;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Display;
 using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Particles;
@@ -17,7 +20,11 @@ namespace Starquake.ActiveSprites;
 
 public class ConveyerNasty : GameComponentBase
 {
-    private readonly GameEngine GameEngine;
+    private readonly ContentManager _contentManager;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsDeviceManager _graphicsDeviceManager;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
 
     /// <summary>
     ///     A conveyer nasty hangs from the rail it runs along, so it is drawn and tested a collision
@@ -62,14 +69,22 @@ public class ConveyerNasty : GameComponentBase
     private Direction _nastyDirection;
 
     public ConveyerNasty(
-        GameEngine gameEngineReference,
+        ResourceManager resources,
+        ContentManager contentManager,
+        GameScreenCollection gameScreens,
+        GraphicsDeviceManager graphics,
+        Random randomNumberGenerator,
         int xposition,
         int yposition,
         int moveSpeed,
         bool active,
         ContentList content)
     {
-        GameEngine = gameEngineReference;
+        _resources = resources;
+        _contentManager = contentManager;
+        _gameScreens = gameScreens;
+        _graphicsDeviceManager = graphics;
+        _randomNumberGenerator = randomNumberGenerator;
 
         XLocation = xposition;
         YLocation = yposition;
@@ -87,8 +102,8 @@ public class ConveyerNasty : GameComponentBase
         _deathFadeLevel = ColourLevels.Full;
         _deathScale = 1f;
 
-        _nastySprite = new SpriteCollection(GameEngine.GraphicsDeviceMgr, GameEngine.ContentMgr, content.GetContent("conveyerNasty"), SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        _conveyerNastyDies = (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("NastyDies", ParticleEffectType.Triggered, null);
+        _nastySprite = new SpriteCollection(_graphicsDeviceManager, _contentManager, content.GetContent("conveyerNasty"), SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        _conveyerNastyDies = (IStandardParticleEffect)_resources.GetParticleEffectInstance("NastyDies", ParticleEffectType.Triggered, null);
         _conveyerNastyDies.ParticleEffectComplete += conveyerNastyDies_ParticleEffectComplete;
     }
 
@@ -102,7 +117,7 @@ public class ConveyerNasty : GameComponentBase
         NastyState = NastyState.Conception;
         NastyActive = true;
 
-        var randomDirection = GameEngine.RandomNumberGenerator.Next(0, 2);
+        var randomDirection = _randomNumberGenerator.Next(0, 2);
 
         if (randomDirection == 0)
         {
@@ -142,7 +157,7 @@ public class ConveyerNasty : GameComponentBase
         {
             if (_nastyDirection == Direction.Left)
             {
-                var amountToMove = GameEngine.GameScreens.CheckCollision(Direction.Left, XLocation, YLocation + HangsBelowRailBy, SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight, MoveSpeed, false);
+                var amountToMove = _gameScreens.CheckCollision(Direction.Left, XLocation, YLocation + HangsBelowRailBy, SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight, MoveSpeed, false);
                 if (amountToMove > 0)
                 {
                     XLocation = XLocation - amountToMove;
@@ -155,7 +170,7 @@ public class ConveyerNasty : GameComponentBase
             }
             else if (_nastyDirection == Direction.Right)
             {
-                var amountToMove = GameEngine.GameScreens.CheckCollision(Direction.Right, XLocation, YLocation + HangsBelowRailBy, SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight, MoveSpeed, false);
+                var amountToMove = _gameScreens.CheckCollision(Direction.Right, XLocation, YLocation + HangsBelowRailBy, SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight, MoveSpeed, false);
                 if (amountToMove > 0)
                 {
                     XLocation = XLocation + amountToMove;
