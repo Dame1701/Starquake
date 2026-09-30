@@ -3,19 +3,24 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
-using Starquake.Engines;
 
 namespace Starquake.Structure;
 
+/// <summary>
+///     The frame a game component is driven through: content load, initialise, update, draw. Every
+///     method is a no-op here, so a component overrides only the parts of the cycle it takes part
+///     in.
+///     <para>
+///         This used to hold a <c>GameEngine</c> it never called a member on, purely so its
+///         subclasses could reach one. That made the god object reachable from 22 classes without
+///         any of them naming the dependency, and meant none of them could be narrowed alone -
+///         dropping one subclass's reference meant changing the base constructor, which touched
+///         every sibling at once. The components now hold their own, so what each one needs is
+///         visible in its own constructor and can be narrowed on its own.
+///     </para>
+/// </summary>
 public abstract class GameComponentBase
 {
-    protected GameEngine GameEngine;
-
-    public GameComponentBase(GameEngine gameEngineReference)
-    {
-        GameEngine = gameEngineReference;
-    }
-
     public virtual void LoadContent()
     {
     }

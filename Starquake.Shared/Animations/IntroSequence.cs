@@ -15,6 +15,7 @@ namespace Starquake.Animations;
 
 public class IntroSequence : GameComponentBase
 {
+    private readonly GameEngine GameEngine;
 
     private readonly FaderAnimation _blobShipHazardLightFlash;
     private readonly RandomFaderAnimation _blobShipHeadLightFlash;
@@ -51,8 +52,10 @@ public class IntroSequence : GameComponentBase
 
     private float _yAmountToMoveEachFrame;
 
-    public IntroSequence(GameEngine gameEngine) : base(gameEngine)
+    public IntroSequence(GameEngine gameEngine)
     {
+        GameEngine = gameEngine;
+
         _blobShipHazardLightFlash = new FaderAnimation(10);
         _blobShipHeadLightFlash = new RandomFaderAnimation(4, GameEngine.RandomNumberGenerator, 100);
     }

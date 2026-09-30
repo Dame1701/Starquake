@@ -13,6 +13,7 @@ namespace Starquake.ActiveSprites;
 
 public class ConveyerNasties : GameComponentBase
 {
+    private readonly GameEngine GameEngine;
 
     #region IGameComponent Members
 
@@ -33,8 +34,10 @@ public class ConveyerNasties : GameComponentBase
         }
     }
 
-    public ConveyerNasties(GameEngine gameEngineReference) : base(gameEngineReference)
+    public ConveyerNasties(GameEngine gameEngineReference)
     {
+        GameEngine = gameEngineReference;
+
         Nasties = new List<ConveyerNasty>();
     }
 

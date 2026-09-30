@@ -14,11 +14,14 @@ namespace Starquake.Animations;
 
 public class ColourAnimationEngine : GameComponentBase
 {
+    private readonly GameEngine GameEngine;
+
     private readonly List<ColourFaderAnimation> _colourAnimationsRegistered;
 
     public ColourAnimationEngine(GameEngine gameEngineReference)
-        : base(gameEngineReference)
     {
+        GameEngine = gameEngineReference;
+
         _colourAnimationsRegistered = new List<ColourFaderAnimation>();
     }
 

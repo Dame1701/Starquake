@@ -22,6 +22,7 @@ namespace Starquake.Display;
 
 public class GameScreenCollection : GameComponentBase
 {
+    private readonly GameEngine GameEngine;
 
     /// <summary>
     ///     How many Cheops pyramids and core elements are scattered across the map at the start of a
@@ -223,8 +224,10 @@ public class GameScreenCollection : GameComponentBase
     private int _tileWidth;
 
     public GameScreenCollection(GameEngine gameEngineRef, int tilesAcross, int tilesDown, int xOffset, int yOffset,
-        int collAreaWidth, int collAreaHeight) : base(gameEngineRef)
+        int collAreaWidth, int collAreaHeight)
     {
+        GameEngine = gameEngineRef;
+
         _oldXoffset = xOffset;
         _oldYoffset = yOffset;
 

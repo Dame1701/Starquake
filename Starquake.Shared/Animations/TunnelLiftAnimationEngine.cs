@@ -13,6 +13,8 @@ namespace Starquake.Animations;
 
 public class TunnelLiftAnimationEngine : GameComponentBase
 {
+    private readonly GameEngine GameEngine;
+
     /// <summary>
     ///     How far apart the arrow animations of neighbouring lift shafts are started, in logic
     ///     frames, so that two shafts on the same screen ripple rather than pulsing in step.
@@ -22,7 +24,6 @@ public class TunnelLiftAnimationEngine : GameComponentBase
     private List<TunnelLiftAnimationColumn>? _columns;
 
     public TunnelLiftAnimationEngine(GameEngine engine)
-        : base(engine)
     {
         GameEngine = engine;
     }

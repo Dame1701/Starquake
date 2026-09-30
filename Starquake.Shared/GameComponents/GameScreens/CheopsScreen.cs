@@ -17,6 +17,8 @@ namespace Starquake.GameComponents.GameScreens;
 
 public class CheopsScreen : GameComponentBase, IGameScreen
 {
+    private readonly GameEngine GameEngine;
+
     /// <summary>
     ///     The value <see cref="_itemToSwap" /> holds while no inventory slot has been picked yet. It
     ///     is a slot index everywhere else, and no inventory is anywhere near this long.
@@ -43,8 +45,9 @@ public class CheopsScreen : GameComponentBase, IGameScreen
     public bool Success => true;
 
     public CheopsScreen(GameEngine gameEngineReference)
-        : base(gameEngineReference)
     {
+        GameEngine = gameEngineReference;
+
         _accessCode = new int[2]
         {
             -1,

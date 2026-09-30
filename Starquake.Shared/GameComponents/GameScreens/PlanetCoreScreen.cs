@@ -19,6 +19,8 @@ namespace Starquake.GameComponents.GameScreens;
 
 public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
 {
+    private readonly GameEngine GameEngine;
+
     /// <summary>
     ///     The most aliens the core room ever holds, which is also how many it holds once the blob
     ///     has nearly finished repairing it - the fuller the core, the busier its guards.
@@ -97,8 +99,9 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
 
 
     public PlanetCoreScreen(GameEngine gameEngineReference, CoreElements elements)
-        : base(gameEngineReference)
     {
+        GameEngine = gameEngineReference;
+
         _elements = elements;
         _elements.OnCoreElementReplaced += elements_OnCoreElementReplaced;
         _elements.LoadContent();

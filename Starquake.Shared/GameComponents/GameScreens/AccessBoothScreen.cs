@@ -14,6 +14,7 @@ namespace Starquake.GameComponents.GameScreens;
 
 public class AccessBoothScreen : GameComponentBase, IGameScreen
 {
+    private readonly GameEngine GameEngine;
 
     private readonly int[] _accessCode;
 
@@ -28,8 +29,9 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
     private bool _soundPlayed;
 
     public AccessBoothScreen(GameEngine gameEngineReference)
-        : base(gameEngineReference)
     {
+        GameEngine = gameEngineReference;
+
         _accessCode = new int[3]
         {
             -1,

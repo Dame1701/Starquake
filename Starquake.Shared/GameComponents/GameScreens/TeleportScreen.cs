@@ -17,6 +17,7 @@ namespace Starquake.GameComponents.GameScreens;
 
 public class TeleportScreen : GameComponentBase, IGameScreen
 {
+    private readonly GameEngine GameEngine;
 
     #region IGameScreen Members
 
@@ -62,8 +63,9 @@ public class TeleportScreen : GameComponentBase, IGameScreen
     public bool Success => true;
 
     public TeleportScreen(GameEngine gameEngineReference)
-        : base(gameEngineReference)
     {
+        GameEngine = gameEngineReference;
+
         _keyFades = new FaderAnimation[16];
         _powerSupplyFader = new FaderAnimation(1, null, 100);
         _teleportingMessageFader = new FaderAnimation(6, null, 50);

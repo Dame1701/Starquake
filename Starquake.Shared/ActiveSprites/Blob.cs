@@ -22,6 +22,7 @@ namespace Starquake.ActiveSprites;
 
 public class Blob : GameComponentBase
 {
+    private readonly GameEngine GameEngine;
 
     /// <summary>
     ///     How many things the blob can carry. Picking something up pushes the whole inventory along
@@ -323,8 +324,10 @@ public class Blob : GameComponentBase
     private TileDetected? _tileRightBlob;
     private readonly List<ResetTile> _tilesToReset = [];
 
-    public Blob(GameEngine gameEngineReference) : base(gameEngineReference)
+    public Blob(GameEngine gameEngineReference)
     {
+        GameEngine = gameEngineReference;
+
         _blobJumpPlatformEngine = new JumpPlatforms(GameEngine);
         BlobsControl = new CustomControl(gameEngineReference.PlayerKeys, GameEngine, true);
         _blobTouched = false;

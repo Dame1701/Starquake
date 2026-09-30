@@ -11,11 +11,14 @@ namespace Starquake.GameComponents;
 
 public class GameScreenBase : GameComponentBase
 {
+    protected readonly GameEngine GameEngine;
+
     protected int ScreenFadeSpeed;
 
     protected GameScreenBase(GameEngine gameEngineReference)
-        : base(gameEngineReference)
     {
+        GameEngine = gameEngineReference;
+
         //ScreenFade = 0;
         // screenFadeSpeed = 5;
     }

@@ -15,6 +15,8 @@ namespace Starquake.ActiveSprites;
 
 public class ElectricityGatesAndNodesEngine : GameComponentBase
 {
+    private readonly GameEngine GameEngine;
+
     /// <summary>
     ///     The live part of an electricity node, as an inset from the tile it is drawn on. The arc
     ///     hangs below the node itself and does not reach the tile's edges, so the blob can pass under
@@ -113,8 +115,10 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
     public event EventHandler? OnBlobStruckByElectricity;
 
     public ElectricityGatesAndNodesEngine(GameEngine gameEngineReference,
-        ConveyerNasties convyrNasties) : base(gameEngineReference)
+        ConveyerNasties convyrNasties)
     {
+        GameEngine = gameEngineReference;
+
         _conveyerNasties = convyrNasties;
 
         _electricityAnimationOriginal = new Animation();

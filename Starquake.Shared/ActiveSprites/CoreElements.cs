@@ -13,6 +13,8 @@ namespace Starquake.ActiveSprites;
 
 public class CoreElements : GameComponentBase
 {
+    private readonly GameEngine GameEngine;
+
     /// <summary>
     ///     The core is a three by three block of elements sitting in the middle of the core room.
     ///     Each element is drawn a sprite apart, and the whole block starts here.
@@ -33,8 +35,10 @@ public class CoreElements : GameComponentBase
     /// </summary>
     private const int ScoreForCompletingCore = 10000;
 
-    public CoreElements(GameEngine gameEngineReference) : base(gameEngineReference)
+    public CoreElements(GameEngine gameEngineReference)
     {
+        GameEngine = gameEngineReference;
+
         Elements = new CoreElement[9];
         Reset();
     }

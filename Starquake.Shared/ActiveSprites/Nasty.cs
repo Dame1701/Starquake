@@ -19,6 +19,7 @@ namespace Starquake.ActiveSprites;
 
 public class Nasty : GameComponentBase
 {
+    private readonly GameEngine GameEngine;
 
     // The number of frames for the birth to appear (60 frames = 1 second)
     private const int BirthPeriod = 60;
@@ -256,8 +257,9 @@ public class Nasty : GameComponentBase
         int xposition,
         int yposition,
         int moveSpeed)
-        : base(gameEngineReference)
     {
+        GameEngine = gameEngineReference;
+
         XPos = xposition;
         YPos = yposition;
         MoveSpeed = moveSpeed;

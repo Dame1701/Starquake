@@ -12,6 +12,7 @@ namespace Starquake.Engines.ScreenEffects;
 
 public class ScreenEffectEngine : GameComponentBase
 {
+    private readonly GameEngine GameEngine;
 
     private readonly SpriteBatch _renderer;
     private readonly List<RenderViewPort> _renderViewPorts;
@@ -26,8 +27,9 @@ public class ScreenEffectEngine : GameComponentBase
         int screenWidth,
         int screenHeight,
         GameEngine gameEngineReference)
-        : base(gameEngineReference)
     {
+        GameEngine = gameEngineReference;
+
         _screenWidth = screenWidth;
         _screenHeight = screenHeight;
 

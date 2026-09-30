@@ -11,10 +11,12 @@ namespace Starquake.Animations;
 
 public class AnimTileEngine : GameComponentBase
 {
+    private readonly GameEngine GameEngine;
 
     public AnimTileEngine(GameEngine gameEngineReference)
-        : base(gameEngineReference)
     {
+        GameEngine = gameEngineReference;
+
         AnimTilesList = new List<AnimTile>();
     }
     public List<AnimTile> AnimTilesList { get; }

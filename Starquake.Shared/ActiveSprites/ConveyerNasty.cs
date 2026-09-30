@@ -17,6 +17,8 @@ namespace Starquake.ActiveSprites;
 
 public class ConveyerNasty : GameComponentBase
 {
+    private readonly GameEngine GameEngine;
+
     /// <summary>
     ///     A conveyer nasty hangs from the rail it runs along, so it is drawn and tested a collision
     ///     cell below the position it is tracked at.
@@ -65,8 +67,10 @@ public class ConveyerNasty : GameComponentBase
         int yposition,
         int moveSpeed,
         bool active,
-        ContentList content) : base(gameEngineReference)
+        ContentList content)
     {
+        GameEngine = gameEngineReference;
+
         XLocation = xposition;
         YLocation = yposition;
         this.MoveSpeed = moveSpeed;

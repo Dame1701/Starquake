@@ -18,6 +18,8 @@ namespace Starquake.ActiveSprites;
 // This wraps multiple nasties
 public class Nasties : GameComponentBase
 {
+    private readonly GameEngine GameEngine;
+
     /// <summary>
     ///     A nasty parked this far off screen is one that has not been given a home yet, so it is
     ///     skipped rather than drawn or tested.
@@ -47,8 +49,9 @@ public class Nasties : GameComponentBase
     private int _previousScreenVisited;
 
     public Nasties(GameEngine gameEngineReference, int nastyCount)
-        : base(gameEngineReference)
     {
+        GameEngine = gameEngineReference;
+
         _nastyCount = nastyCount;
         _nasties = new List<Nasty>();
         _nastySmokes =

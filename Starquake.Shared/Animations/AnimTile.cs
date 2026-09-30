@@ -12,11 +12,14 @@ namespace Starquake.Animations;
 
 public class AnimTile : GameComponentBase
 {
+    private readonly GameEngine GameEngine;
 
     private readonly SpriteCollection _tileAnimationSpriteSet;
 
-    public AnimTile(GameEngine gameEngineReference, int screenTileRef, SpriteCollection tileAnimationSpriteSet, int delay) : base(gameEngineReference)
+    public AnimTile(GameEngine gameEngineReference, int screenTileRef, SpriteCollection tileAnimationSpriteSet, int delay)
     {
+        GameEngine = gameEngineReference;
+
         this.ScreenTileRef = screenTileRef;
         _tileAnimationSpriteSet = tileAnimationSpriteSet;
 

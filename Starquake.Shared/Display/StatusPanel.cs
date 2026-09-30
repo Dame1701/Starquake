@@ -14,6 +14,8 @@ namespace Starquake.Display;
 
 public class StatusPanel : GameComponentBase
 {
+    private readonly GameEngine GameEngine;
+
     /// <summary>
     ///     How much of each supply the blob can hold, and how much it starts a life with. The bars on
     ///     the panel are drawn full at these, so a pick-up that would take a supply over its ceiling
@@ -223,8 +225,10 @@ public class StatusPanel : GameComponentBase
 
     #region IGameComponent Members
 
-    public StatusPanel(GameEngine gameEngineRef) : base(gameEngineRef)
+    public StatusPanel(GameEngine gameEngineRef)
     {
+        GameEngine = gameEngineRef;
+
         _inventoryScanner = new KeyScanner(gameEngineRef, false);
     }
 

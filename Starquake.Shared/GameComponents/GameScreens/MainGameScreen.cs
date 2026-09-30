@@ -18,6 +18,7 @@ namespace Starquake.GameComponents.GameScreens;
 
 public class MainGameScreen : GameComponentBase, IGameScreen
 {
+    private readonly GameEngine GameEngine;
 
     /// <summary>
     ///     How fast a screen fades up when the blob walks onto it, in colour channel levels a frame.
@@ -179,8 +180,9 @@ public class MainGameScreen : GameComponentBase, IGameScreen
     #region IGameComponent Members
 
     public MainGameScreen(GameEngine gameEngineReference)
-        : base(gameEngineReference)
     {
+        GameEngine = gameEngineReference;
+
         ScreenFade = ColourLevels.Full;
     }
 

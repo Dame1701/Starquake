@@ -14,6 +14,8 @@ namespace Starquake.Animations;
 
 public class BlobDeathAnimation : GameComponentBase
 {
+    private readonly GameEngine GameEngine;
+
     // The six fragment sprites Blob comes apart into. Deliberately not a straight run
     private static readonly int[] FragmentSpriteNumbers = [0, 1, 1, 2, 3, 5];
 
@@ -23,8 +25,9 @@ public class BlobDeathAnimation : GameComponentBase
     private bool _drawBlobParts;
 
     public BlobDeathAnimation(GameEngine gameEngineReference)
-        : base(gameEngineReference)
     {
+        GameEngine = gameEngineReference;
+
         BouncingParticles = new List<BouncingParticle>(FragmentSpriteNumbers.Length);
 
         _blobDeathParticlesOriginal = new Animation
