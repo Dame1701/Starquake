@@ -56,8 +56,8 @@ public static class ContentManifest
 
     private static void ScreenData(ResourceManager resources)
     {
-        resources.AddDataResource("GameScreens", "Data/SQScreenData.dat", typeof(GameScreenData[]));
-        resources.AddDataResource("ScreenCollisionData", "Data/SQScreenData.dat", typeof(int[,,]));
+        resources.AddDataResource("GameScreens", "Data/SQScreenData.dat");
+        resources.AddDataResource("ScreenCollisionData", "Data/SQScreenData.dat");
     }
 
     /// <summary>

@@ -50,7 +50,6 @@ public class IntroSequence : GameComponentBase
 
     private double _rumbleAmount = 100;
     private Guid _rumbleSound = Guid.Empty;
-    private int _sequenceCounter;
 
     private int _sequenceFrameCount;
 
@@ -135,7 +134,6 @@ public class IntroSequence : GameComponentBase
         _blobSpaceShipYPos = _blobSpaceShipStartYPos;
         _acceleration = 0;
 
-        _sequenceCounter = 0;
 
         _resources.GetSoundFxEngine().StopSound(_shipExplosionSound, SoundFade.None);
 
@@ -204,8 +202,6 @@ public class IntroSequence : GameComponentBase
         {
             _blobSpaceShipXPos = _blobSpaceShipXPos + _xAmountToMoveEachFrame;
             _blobSpaceShipYPos = _blobSpaceShipYPos + _yAmountToMoveEachFrame * _acceleration;
-
-            _sequenceCounter++;
 
             if (_blobSpaceShipYPos + 100 > _blobSpaceShipEndYPos)
             {

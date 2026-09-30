@@ -10,12 +10,10 @@ internal class DataDescription
 {
     public readonly string FilePath;
     public readonly string ResourceName;
-    public Type ResourceType;
 
-    public DataDescription(string resourceName, string filePath, Type resourceType)
+    public DataDescription(string resourceName, string filePath)
     {
         ResourceName = resourceName;
         FilePath = filePath;
-        ResourceType = resourceType;
     }
 }

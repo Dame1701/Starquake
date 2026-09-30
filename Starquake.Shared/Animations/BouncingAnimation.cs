@@ -24,7 +24,6 @@ public class BouncingAnimation
     private int _effectDurationCounter;
 
     private double _fade = ColourLevels.Full;
-    private int _fadeSpeed;
     private double _gravity;
     private float _rotation;
     private float _rotationSpeed;
@@ -57,7 +56,6 @@ public class BouncingAnimation
         _fade = ColourLevels.Full;
         _scale = 1.0f;
         _effectDuration = _randomNumberGenerator.Next(effectMinDuration, effectMaxDuration);
-        _fadeSpeed = _randomNumberGenerator.Next(10, 30);
         _rotationSpeed = (float)(_randomNumberGenerator.NextDouble() - 0.5);
     }
 

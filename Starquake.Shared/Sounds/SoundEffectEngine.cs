@@ -42,7 +42,7 @@ public class SoundEffectEngine(ContentManager content, Random randomNumberGenera
             {
                 var sfx = content.Load<SoundEffect>(soundDesc.FilePath);
                 var soundEffectInstanceRecord = new SoundEffectInstanceRecord(soundDesc.ResourceName,
-                    soundDesc.InstanceType, sfx.CreateInstance(), 0, 0, soundDesc.KillOnScreenChange)
+                    sfx.CreateInstance(), 0, 0, soundDesc.KillOnScreenChange)
                 {
                     Id = Guid.NewGuid()
                 };
@@ -349,7 +349,6 @@ public class SoundEffectEngine(ContentManager content, Random randomNumberGenera
     {
         var soundToPlay = new SoundEffectInstanceRecord(
             soundName,
-            SoundEffectInstanceType.Multi,
             misxf.Sound.CreateInstance(),
             DateTime.Now.Ticks,
             0,

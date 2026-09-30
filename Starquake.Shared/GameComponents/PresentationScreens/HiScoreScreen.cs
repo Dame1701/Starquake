@@ -107,8 +107,6 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
         {
             if (ToggleKeys.GetPressedKey() != Keys.None)
             {
-                Keys temp = ToggleKeys.GetPressedKey();
-
                 string keyPressedString = ToggleKeys.GetPressedKey().ToString().ToUpper();
                 int keyPressed = TextHelper.GetAsciiCode(keyPressedString);
 

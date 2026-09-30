@@ -21,9 +21,7 @@ public class ScreenEffectEngine : GameComponentBase
     private readonly List<ScreenEffectBase> _screenEffects;
 
 
-    private int _screenHeight;
 
-    private int _screenWidth;
 
     public ScreenEffectEngine(
         int screenWidth,
@@ -34,8 +32,6 @@ public class ScreenEffectEngine : GameComponentBase
         _graphicsDeviceManager = graphics;
         _presentation = presentation;
 
-        _screenWidth = screenWidth;
-        _screenHeight = screenHeight;
 
         _renderViewPorts = new List<RenderViewPort>();
         _screenEffects = new List<ScreenEffectBase>();

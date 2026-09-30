@@ -279,11 +279,8 @@ public class Blob : GameComponentBase
 
     private readonly IStandardParticleEffect _blobTeleporterBeam;
     private readonly BreakableBridges _breakableBridges;
-    private readonly ContentManager _contentManager;
     private readonly GameScreenCollection _gameScreens;
-    private readonly GraphicsDeviceManager _graphicsDeviceManager;
     private readonly GraphicsSet _graphicsSet;
-    private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
     private readonly ScreenDirectory _screenDirectory;
     private readonly ScreenEffectEngine _screenEffects;
@@ -354,9 +351,7 @@ public class Blob : GameComponentBase
         Random randomNumberGenerator)
     {
         _resources = resources;
-        _contentManager = content;
         _gameScreens = gameScreens;
-        _graphicsDeviceManager = graphics;
         _graphicsSet = graphicsSet;
         _screenDirectory = screenDirectory;
         _screenEffects = screenEffects;
@@ -364,7 +359,6 @@ public class Blob : GameComponentBase
         _session = session;
         _blobKiller = blobKiller;
         _breakableBridges = breakableBridges;
-        _randomNumberGenerator = randomNumberGenerator;
 
         _blobJumpPlatformEngine = new JumpPlatforms(
             resources,

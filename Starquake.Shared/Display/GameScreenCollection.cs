@@ -219,8 +219,6 @@ public class GameScreenCollection : GameComponentBase
 
     private List<KeyLockDoor>? _keyLockDoors;
 
-    private int _oldXoffset;
-    private int _oldYoffset;
 
 
     // olly
@@ -252,8 +250,6 @@ public class GameScreenCollection : GameComponentBase
         // from, and the planet was reaching back through the engine to find the animation engine.
         ColourAnimations = new ColourAnimationEngine(resources, this, graphicsSet);
 
-        _oldXoffset = xOffset;
-        _oldYoffset = yOffset;
 
         TilesAcross = tilesAcross;
         TilesDown = tilesDown;
@@ -870,28 +866,20 @@ public class GameScreenCollection : GameComponentBase
         int playerHeight,
         bool isBlob)
     {
-        bool collide = false;
-
         // Cycle through the collision map
         foreach (CollisionTile collisionTile in _gameScreens[_screenNumber].CollisionMap)
         {
-            collide =
+            var collide =
                 CollisionDetection.Check(
                     new Rectangle(playerXPos, playerYPos, playerWidth, playerHeight),
                     new Rectangle(collisionTile.XPos,
                         collisionTile.YPos, CollAreaWidth, CollAreaHeight));
 
-            if (collide)
+            // A NotBlob tile is there for the nasties to walk on, so the blob passes through it
+            // and we carry on looking for something it does hit.
+            if (collide && !(isBlob && collisionTile.CollisionTileType == CollisionTileType.NotBlob))
             {
-                if (isBlob && collisionTile.CollisionTileType ==
-                    CollisionTileType.NotBlob)
-                {
-                    collide = false;
-                }
-                else
-                {
-                    return collisionTile.TileImage;
-                }
+                return collisionTile.TileImage;
             }
         }
 

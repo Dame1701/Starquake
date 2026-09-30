@@ -5,7 +5,6 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Starquake.ActiveSprites;
@@ -22,10 +21,8 @@ namespace Starquake.GameComponents.GameScreens;
 public class TeleportScreen : GameComponentBase, IGameScreen
 {
     private readonly Blob _blob;
-    private readonly ContentManager _contentManager;
     private readonly BitmapFont _font;
     private readonly GameScreenCollection _gameScreens;
-    private readonly GraphicsDeviceManager _graphicsDeviceManager;
     private readonly GraphicsSet _graphicsSet;
     private readonly PresentationSettings _presentation;
     private readonly Random _randomNumberGenerator;
@@ -45,10 +42,6 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
     #region IGameComponent Members
 
-    private readonly SpriteCollection _teleportSprites;
-    private readonly SpriteCollection _teleportDistort;
-    private readonly SpriteCollection _teleportMonitorScreen;
-    private readonly SpriteCollection _teleportMonitorScreenDistortion;
     private readonly TeleportCodeLetter[] _teleportCodeLetters;
     private readonly Dictionary<int, string> _teleportCodes;
     /// <summary>
@@ -56,7 +49,6 @@ public class TeleportScreen : GameComponentBase, IGameScreen
     /// </summary>
     private const string EmptyCode = "_____";
 
-    private int _teleportMonitorScreenDistortionYPos;
     private string? _teleportCode;
     private string _currentCode = EmptyCode;
     private string _previousCode = string.Empty;
@@ -78,11 +70,9 @@ public class TeleportScreen : GameComponentBase, IGameScreen
     public bool Success => true;
 
     public TeleportScreen(
-        ContentManager content,
         ResourceManager resources,
         BitmapFont font,
         GameScreenCollection gameScreens,
-        GraphicsDeviceManager graphics,
         GraphicsSet graphicsSet,
         Blob blob,
         PresentationSettings presentation,
@@ -90,11 +80,9 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         ScreenDirectory screenDirectory,
         Shapes shapeDrawer)
     {
-        _contentManager = content;
         _resources = resources;
         _font = font;
         _gameScreens = gameScreens;
-        _graphicsDeviceManager = graphics;
         _graphicsSet = graphicsSet;
         _blob = blob;
         _presentation = presentation;
@@ -128,12 +116,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         _teleportCodes.Add(461, "aisle");
         _teleportCodes.Add(506, "exeon");
 
-        _teleportSprites = new SpriteCollection(_graphicsDeviceManager, _contentManager, "Graphics\\TeleportEntry", 62, 62);
-        _teleportDistort = new SpriteCollection(_graphicsDeviceManager, _contentManager, "Graphics\\TeleportDistort", 44, 29);
-        _teleportMonitorScreen = new SpriteCollection(_graphicsDeviceManager, _contentManager, "Graphics\\TeleportInfoMonitor", 268, 210);
-        _teleportMonitorScreenDistortion = new SpriteCollection(_graphicsDeviceManager, _contentManager, "Graphics\\TeleportInfoMonitorDistortion", 230, 30);
 
-        _teleportMonitorScreenDistortionYPos = _presentation.ScreenYOffset + 28;
 
         _teleportCodeLetters = new TeleportCodeLetter[5];
         for (int a = 0; a < 5; a++)

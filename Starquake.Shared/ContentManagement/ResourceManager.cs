@@ -238,9 +238,9 @@ public class ResourceManager : StartableGameComponentBase
         _animSpriteDescriptions.Add(new AnimSpriteDescription(resourceName, filePath, spriteWidth, spriteHeight, tileToAnimate, delay));
     }
 
-    public void AddDataResource(string resourceName, string filePath, Type resourceType)
+    public void AddDataResource(string resourceName, string filePath)
     {
-        _dataDescriptions.Add(new DataDescription(resourceName, filePath, resourceType));
+        _dataDescriptions.Add(new DataDescription(resourceName, filePath));
     }
 
     public void AddParticleResource(string effectName, string effectPath)

@@ -155,13 +155,11 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     private Nasties? _nasties;
 
 
-    private GameWindow _parentWindow;
     private bool _particleTestTrigger;
 
     private Blob? _player;
 
 
-    private int _powerUpType;
 
     private SpriteCollection _scanlines;
 
@@ -193,8 +191,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         GraphicsDeviceManager graphics,
         ContentManager content)
     {
-        _parentWindow = parentWindow;
-
         // Setup graphics device and content management
         GraphicsDeviceMgr = graphics;
         ContentMgr = content;
@@ -346,11 +342,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     {
         // inform status panel that something has happened
         BlobStatusPanel.BlobHasPerformedAnAction(action, data);
-
-        if (action == BlobAction.GotPowerUp && data is int powerUpType)
-        {
-            _powerUpType = powerUpType;
-        }
 
     }
 
@@ -663,11 +654,9 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
         ScreenDirectory.Add(GameScreenType.MainGame, _mainScreen);
         ScreenDirectory.Add(GameScreenType.Teleporter, new TeleportScreen(
-            ContentMgr,
             ContentResourceManager,
             Font2,
             GameScreens,
-            GraphicsDeviceMgr,
             GraphicsSet,
             Player,
             Presentation,

@@ -110,15 +110,7 @@ public class KeyScanner
         _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite(codeNumber, xPos + 2, yPos + 6, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
         _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
 
-        int height = 0;
-        if (_scanLineY > 64)
-        {
-            height = 64;
-        }
-        else
-        {
-            height = _scanLineY;
-        }
+        var height = _scanLineY > 64 ? 64 : _scanLineY;
 
         // If scan started......
         if (ScanStarted)

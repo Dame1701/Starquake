@@ -91,7 +91,6 @@ public class CoreElements : GameComponentBase
                 _statusPanel.PlayerScore = _statusPanel.PlayerScore + ScoreForCompletingCore;
 
                 Elements[a].ElementState = CoreElementState.Replacing;
-                int test = Elements[a].CurrentElement;
                 break;
             }
         }
