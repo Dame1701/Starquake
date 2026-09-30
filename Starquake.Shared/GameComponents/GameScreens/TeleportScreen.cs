@@ -67,7 +67,6 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
     public int ScreenFade { get; set; }
 
-    public bool Success => true;
 
     public TeleportScreen(
         ResourceManager resources,

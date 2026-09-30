@@ -29,7 +29,6 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
     private readonly SpriteCollection _foregroundImage;
     private bool _fadeComplete;
 
-    public bool Success => true;
 
     public ComputerReportScreen(
         ResourceManager resources,

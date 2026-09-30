@@ -83,7 +83,13 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
 
     public int ScreenFade { get; set; }
 
-    public bool Success { get; private set; }
+    /// <summary>
+    ///     Whether the code the player typed matched. It used to be on IGameScreen, where eight of the
+    ///     nine screens answered a constant true and nothing read it through the interface; this is the
+    ///     one screen with a real answer, and it passes it on explicitly as the post-change parameter
+    ///     rather than leaving anyone to read it off the property.
+    /// </summary>
+    private bool Success { get; set; }
 
     public override void Update(GameTime gameTime)
     {

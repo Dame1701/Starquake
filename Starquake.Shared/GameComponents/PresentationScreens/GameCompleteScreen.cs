@@ -51,7 +51,6 @@ public class GameCompleteScreen : GameScreenBase, IGameScreen
         _foregroundImage = Resources.GetSpriteCollection("GameCompleteScreenForeground");
     }
 
-    public bool Success => true;
 
     public void Reset(object? data)
     {

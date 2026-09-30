@@ -61,7 +61,6 @@ public class GameOverScreen : GameScreenBase, IGameScreen
         _foregroundImage = Resources.GetSpriteCollection("GameOverScreenForeground");
     }
 
-    public bool Success => true;
 
     public void Reset(object? data)
     {

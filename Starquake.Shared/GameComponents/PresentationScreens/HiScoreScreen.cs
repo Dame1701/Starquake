@@ -56,7 +56,6 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
         _hiscoreList = new HiScores();
     }
 
-    public bool Success => true;
 
     public void Reset(object? data)
     {

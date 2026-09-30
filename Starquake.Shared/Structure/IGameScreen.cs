@@ -10,8 +10,6 @@ public interface IGameScreen
 {
     int ScreenFade { get; set; }
 
-    bool Success { get; }
-
     void Update(GameTime gameTime);
     void Reset(object? data);
     void Draw(GameTime gameTime);

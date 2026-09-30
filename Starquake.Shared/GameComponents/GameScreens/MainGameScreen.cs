@@ -94,7 +94,6 @@ public class MainGameScreen : GameComponentBase, IGameScreen
 
     private int ScreenFadeSpeed { get; set; }
 
-    public bool Success => true;
 
     public int ScreenFade { get; set; }
 

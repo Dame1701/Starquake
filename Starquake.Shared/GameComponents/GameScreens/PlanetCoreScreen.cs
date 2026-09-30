@@ -150,7 +150,6 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
         _coreSparks = (IStandardParticleEffect)_resources.GetParticleEffectInstance("CoreSparks", ParticleEffectType.Continual, null);
     }
 
-    public bool Success => true;
 
     public void Reset(object? data)
     {

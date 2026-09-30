@@ -32,7 +32,6 @@ public class OptionsScreen : GameScreenBase, IGameScreen
     private readonly List<Option> _options;
     private readonly KeyDefiner _keyDefiner;
 
-    public bool Success => true;
 
     public OptionsScreen(
         ResourceManager resources,

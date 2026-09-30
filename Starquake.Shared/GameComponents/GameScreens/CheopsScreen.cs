@@ -55,7 +55,6 @@ public class CheopsScreen : GameComponentBase, IGameScreen
 
     public int ScreenFade { get; set; }
 
-    public bool Success => true;
 
     public CheopsScreen(
         StatusPanel statusPanel,
