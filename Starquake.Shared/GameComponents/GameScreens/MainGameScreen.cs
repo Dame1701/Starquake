@@ -298,10 +298,12 @@ public class MainGameScreen : GameComponentBase, IGameScreen
                 GameEngine.Player.Update(gameTime);
             }
 
-            // Update blob's death routine
+            // Update blob's death routine. Blob is revived the frame after he reaches Dead, so
+            // the animation's own state has to keep it alive while the explosion fades out
             if (GameEngine.Player.BlobsState == BlobState.Dead ||
                 GameEngine.Player.BlobsState == BlobState.Dying ||
-                GameEngine.Player.BlobsState == BlobState.Overloading)
+                GameEngine.Player.BlobsState == BlobState.Overloading ||
+                GameEngine.BlobKiller.Active)
             {
                 GameEngine.BlobKiller.Update(gameTime);
             }
@@ -472,7 +474,8 @@ public class MainGameScreen : GameComponentBase, IGameScreen
             if (!GameEngine.IntroSequence.SequenceRunning)
             {
                 // Draw blob's death routine
-                if (GameEngine.Player.BlobsState is BlobState.Dead or BlobState.Dying or BlobState.Overloading)
+                if (GameEngine.Player.BlobsState is BlobState.Dead or BlobState.Dying or BlobState.Overloading ||
+                    GameEngine.BlobKiller.Active)
                 {
                     GameEngine.BlobKiller.Draw(gameTime, ScreenFade);
                 }

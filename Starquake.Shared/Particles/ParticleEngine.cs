@@ -60,9 +60,13 @@ public class ParticleEngine
     {
         if (_particleEffects.ContainsKey(effectName))
         {
+            // Each instance needs its own copy of the effect, otherwise callers sharing
+            // an effect name emit into, and draw from, the same particle pool
             var cpe = new ContinuousParticleEffect(_gameEngineInstance);
             cpe.EffectDuration = duration;
-            cpe.MercuryParticleEffect = _particleEffects[effectName];
+            cpe.MercuryParticleEffect = _particleEffects[effectName].DeepCopy();
+            cpe.MercuryParticleEffect.LoadContent(_gameEngineInstance.ContentMgr);
+            cpe.MercuryParticleEffect.Initialise();
             cpe.Renderer = _particleRenderer;
 
             return cpe;

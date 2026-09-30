@@ -35,6 +35,9 @@ public class BouncingParticle
 
     public bool Triggered => _particleBounce.Triggered;
 
+    // True while the emitter still holds particles, which outlives the bounce itself
+    public bool HasActiveParticles => Fireball is { Effect.ActiveParticlesCount: > 0 };
+
     public IPositionalTriggerParticleEffect SparkEffect { get; set; }
 
     public void XBounce()
@@ -54,6 +57,10 @@ public class BouncingParticle
 
         _oldYPos = YPos;
         _oldXPos = XPos;
+
+        // Clear any particles left over from the last death, they are still sitting in the
+        // emitter's buffer at the positions they froze at when the bounce stopped
+        Fireball.Reset();
 
         var xSpeed = _gameEngine.RandomNumberGenerator.Next(4, 12);
 
@@ -173,7 +180,7 @@ public class BouncingParticle
                 // Ensure we don't move more than the size of the collision tilemap
                 if (p.X < -32)
                 {
-                    p.X = 32;
+                    p.X = -32;
                 }
 
                 // Absolute value used here to convert the negative to positive for col routine
@@ -205,21 +212,26 @@ public class BouncingParticle
         }
         else
         {
-            Fireball.Reset();
+            // The bounce has finished, so stop releasing particles, but keep updating the
+            // effect so the ones still in flight age, move and retire rather than freezing
+            // in the emitter's buffer
+            Fireball.Stop();
+            Fireball.Update(XPos + 20, YPos + 5, gameTime);
         }
     }
 
-    public void Draw(SpriteCollection spriteToDraw, int spriteNumber = -1)
+    public void Draw(SpriteCollection spriteToDraw, int screenFade, int spriteNumber = -1)
     {
-        if (Triggered)
+        if (Triggered && spriteNumber >= 0 && spriteToDraw != null)
         {
-            if (spriteNumber >= 0 && spriteToDraw != null)
-            {
-                _particleBounce.Draw(spriteToDraw, XPos + 4, YPos + 4, spriteNumber);
-            }
+            _particleBounce.Draw(spriteToDraw, XPos + 4, YPos + 4, spriteNumber);
+        }
 
-            // In additive mode so draw a few to improve brightness
-            Fireball.Draw(_particleBounce.Fade);
+        // Carry on drawing after the bounce has finished so the last particles released can
+        // fade out under their own modifiers instead of vanishing with the fragment
+        if (Triggered || HasActiveParticles)
+        {
+            Fireball.Draw(screenFade);
         }
     }
 }
