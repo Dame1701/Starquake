@@ -59,6 +59,18 @@ main reason this is on MonoGame 3.8.4: 3.8.2's content builder shipped x86_64-on
 natives (FreeImage, freetype) and could only be built by routing MGCB through an x64 .NET
 host under Rosetta.
 
+## Assets/
+
+`Assets/` is the master art and sound, 197 files and 20 MB of it. It is not built by anything:
+`Content.mgcb` compiles `Starquake.Shared/Content/`, which holds its own copy of nearly all
+the same files. 175 of the two folders' files are byte-identical, 17 differ, and five exist
+only here - the three `Shaders/*.fx`, which nothing in the pipeline compiles today, and the two
+font PNGs the `.spritefont` descriptions replaced.
+
+It was called `Temp/` until a folder of that name proved to be one confident `rm -rf` away from
+gone. If you edit art, edit it here and copy the result into `Content/`; nothing automates that,
+which is why the two have drifted apart in 17 places.
+
 ## CI
 
 `.github/workflows/build.yml` restores, builds and tests the solution on Ubuntu, macOS and
