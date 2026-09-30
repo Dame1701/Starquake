@@ -153,7 +153,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     private int _loadingScreenFade;
 
     private MainGameScreen? _mainScreen;
-    public Nasties Nasties;
+    private Nasties? _nasties;
 
 
     private GameWindow _parentWindow;
@@ -285,6 +285,9 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public GameSession Session => NotBeforeContentLoads(_session);
 
     /// <inheritdoc cref="GameScreens" />
+    public Nasties Nasties => NotBeforeContentLoads(_nasties);
+
+    /// <inheritdoc cref="GameScreens" />
     public BlobDeathAnimation BlobKiller => NotBeforeContentLoads(_blobKiller);
 
     /// <inheritdoc cref="GameScreens" />
@@ -350,7 +353,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     }
 
     [MemberNotNull(nameof(IntroSequence), nameof(BlobStatusPanel), nameof(Elements),
-        nameof(Nasties), nameof(ShapeDrawer))]
+        nameof(ShapeDrawer))]
     private void Initialise()
     {
         // Sequences
@@ -365,10 +368,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
         // Core Elements
         Elements = new CoreElements(BlobStatusPanel, ContentResourceManager, GraphicsSet, Presentation, RandomNumberGenerator);
-
-        // Nasties
-        Nasties = new Nasties(this, NastiesPerScreen);
-        Nasties.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
 
         // Test area
         ShapeDrawer = new Shapes(GraphicsDeviceMgr.GraphicsDevice);
@@ -744,6 +743,20 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             RandomNumberGenerator,
             ConveyerNastiesInstance);
         ElectricityNodeGateEngine.OnBlobStruckByElectricity += ElectricityNodeGateEngine_OnBlobStruckByElectricity;
+
+        // The nasties last of the three: they chase the blob, read the planet, and ask the other two
+        // where the conveyers and the electricity are.
+        _nasties = new Nasties(
+            ContentResourceManager,
+            GameScreens,
+            GraphicsSet,
+            Session,
+            Player,
+            RandomNumberGenerator,
+            ConveyerNastiesInstance,
+            ElectricityNodeGateEngine,
+            NastiesPerScreen);
+        Nasties.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
     }
 
     /// <summary>

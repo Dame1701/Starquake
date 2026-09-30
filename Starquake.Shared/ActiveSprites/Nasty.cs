@@ -2,13 +2,14 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.Xna.Framework;
+using System;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 using Starquake.Animations;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Display;
 using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Particles;
@@ -19,7 +20,12 @@ namespace Starquake.ActiveSprites;
 
 public class Nasty : GameComponentBase
 {
-    private readonly GameEngine GameEngine;
+    private readonly Blob _blob;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
+    private readonly GameSession _session;
 
     // The number of frames for the birth to appear (60 frames = 1 second)
     private const int BirthPeriod = 60;
@@ -253,12 +259,22 @@ public class Nasty : GameComponentBase
     // Position
 
     public Nasty(
-        GameEngine gameEngineReference,
+        ResourceManager resources,
+        GameScreenCollection gameScreens,
+        GraphicsSet graphicsSet,
+        GameSession session,
+        Blob blob,
+        Random randomNumberGenerator,
         int xposition,
         int yposition,
         int moveSpeed)
     {
-        GameEngine = gameEngineReference;
+        _resources = resources;
+        _gameScreens = gameScreens;
+        _graphicsSet = graphicsSet;
+        _session = session;
+        _blob = blob;
+        _randomNumberGenerator = randomNumberGenerator;
 
         XPos = xposition;
         YPos = yposition;
@@ -284,18 +300,18 @@ public class Nasty : GameComponentBase
         _nastyDiesAnimation.Repeat = true;
         _nastyDiesAnimation.AnimateForwards = true;
 
-        _nastySpriteOriginal = GameEngine.ContentResourceManager.GetSpriteCollection("NastiesOriginal")
+        _nastySpriteOriginal = _resources.GetSpriteCollection("NastiesOriginal")
             .Clone();
-        _nastySpriteNew = GameEngine.ContentResourceManager.GetSpriteCollection("Nasties").Clone();
+        _nastySpriteNew = _resources.GetSpriteCollection("Nasties").Clone();
 
         CheckSpritesInUse();
 
-        _nastyDies = (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("NastyDies",
+        _nastyDies = (IStandardParticleEffect)_resources.GetParticleEffectInstance("NastyDies",
             ParticleEffectType.Triggered, null);
         _nastyDies.ParticleEffectComplete += nastyDies_ParticleEffectComplete;
 
         _nastyDiesType2 =
-            (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("NastySplat",
+            (IStandardParticleEffect)_resources.GetParticleEffectInstance("NastySplat",
                 ParticleEffectType.Triggered, null);
         _nastyDiesType2.ParticleEffectComplete += nastyDies_ParticleEffectComplete;
     }
@@ -349,7 +365,7 @@ public class Nasty : GameComponentBase
             else
             {
                 MovementType =
-                    (MoveType)GameEngine.RandomNumberGenerator.Next(0,
+                    (MoveType)_randomNumberGenerator.Next(0,
                         Enum.GetValues(typeof(MoveType)).Length - 1);
             }
         }
@@ -407,11 +423,11 @@ public class Nasty : GameComponentBase
     private Point GetNastySpawnLocation()
     {
         // Get all locations where we can have nasties from the current game screen
-        var potentialLocations = GameEngine.GameScreens.GetNastyPotentialLocations();
+        var potentialLocations = _gameScreens.GetNastyPotentialLocations();
 
         if (potentialLocations.Count > 0)
         {
-            var nastyLocationIndex = GameEngine.RandomNumberGenerator.Next(0, potentialLocations.Count);
+            var nastyLocationIndex = _randomNumberGenerator.Next(0, potentialLocations.Count);
 
             // Return a location
             return new Point(potentialLocations[nastyLocationIndex].X + SpriteMetrics.HalfSpriteWidth,
@@ -425,7 +441,7 @@ public class Nasty : GameComponentBase
     [MemberNotNull(nameof(_nastySprite))]
     private void CheckSpritesInUse()
     {
-        if (GameEngine.GraphicsSet.IsOriginal)
+        if (_graphicsSet.IsOriginal)
         {
             _nastySprite = _nastySpriteOriginal;
         }
@@ -442,7 +458,7 @@ public class Nasty : GameComponentBase
             // Extend this to pause for random time before bringing a nasty back to life
             _nastyDeadPauseCounter = 0;
             NastyState = NastyState.PreConception;
-            _conceptionwaitCounter = GameEngine.RandomNumberGenerator.Next(0, LongestConceptionWait);
+            _conceptionwaitCounter = _randomNumberGenerator.Next(0, LongestConceptionWait);
         }
     }
 
@@ -453,31 +469,23 @@ public class Nasty : GameComponentBase
 
         if (MovementType == MoveType.DiagonalBouncing)
         {
-            Direction = (Direction)GameEngine.RandomNumberGenerator.Next(4, 8); // select from 2nd four
+            Direction = (Direction)_randomNumberGenerator.Next(4, 8); // select from 2nd four
         }
         else if (MovementType == MoveType.RandomMovement ||
                  MovementType == MoveType.RandomUpDownLeftRight)
         {
-            Direction = (Direction)GameEngine.RandomNumberGenerator.Next(0, 4); // select from 1st four
+            Direction = (Direction)_randomNumberGenerator.Next(0, 4); // select from 1st four
         }
     }
 
-    public static NastyType GetRandomNastyType(GameEngine gameEngineReference, bool keepNastiesTheSame)
+    /// <summary>
+    ///     Picks a nasty at random. The range runs one past the fifteen types so that Spiky, the
+    ///     last, comes up twice as often as the rest - Bird is also drawn twice, at 0 and at 14.
+    /// </summary>
+    public static NastyType GetRandomNastyType(Random randomNumberGenerator)
     {
-        //NastyType = (enNastyType)gameEngine.RandomNumberGenerator.Next(0, 15); // Pick from first 15 types
-
-        var temp = 0;
-
         // Go to more than max nasty types to increase chance of four spiky nasties
-        if (keepNastiesTheSame)
-        {
-            // Add an extra 5 onto final nasty number when all anims done
-            temp = gameEngineReference.RandomNumberGenerator.Next(0, 16);
-        }
-        else
-        {
-            temp = gameEngineReference.RandomNumberGenerator.Next(0, 16);
-        }
+        var temp = randomNumberGenerator.Next(0, 16);
 
         if (temp == 0)
         {
@@ -544,12 +552,12 @@ public class Nasty : GameComponentBase
 
     public override void Update(GameTime gameTime)
     {
-        if (GameEngine.GameScreens.ScreenNumber == WorldMap.CoreApproachScreenNumber)
+        if (_gameScreens.ScreenNumber == WorldMap.CoreApproachScreenNumber)
         {
             NastyState = NastyState.Disabled;
         }
 
-        if (GameEngine.GameScreens.ScreenNumber == WorldMap.CoreScreenNumber)
+        if (_gameScreens.ScreenNumber == WorldMap.CoreScreenNumber)
         {
             _nastyType = NastyType.CoreGuardian;
             _attractedToBlob = false;
@@ -596,12 +604,12 @@ public class Nasty : GameComponentBase
     /// </summary>
     private void BeginConception()
     {
-        _conceptionwaitCounter = GameEngine.RandomNumberGenerator.Next(0, ShortestConceptionWaitOnCoreScreen);
+        _conceptionwaitCounter = _randomNumberGenerator.Next(0, ShortestConceptionWaitOnCoreScreen);
         NastyState = NastyState.Conception;
 
         if (!KeepNastyTheSame)
         {
-            _nastyType = GetRandomNastyType(GameEngine, false);
+            _nastyType = GetRandomNastyType(_randomNumberGenerator);
         }
 
         if (_nastyType != NastyType.Spiky)
@@ -623,7 +631,7 @@ public class Nasty : GameComponentBase
         }
         else
         {
-            GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("NastyAppear", 0.1F, false);
+            _resources.GetSoundFxEngine().PlaySound("NastyAppear", 0.1F, false);
             _movementChangeCounter = 0;
             _movementChangeCount = 0;
             _firstMovement = true;
@@ -733,7 +741,7 @@ public class Nasty : GameComponentBase
 
         NastyState = NastyState.Dead;
 
-        if (GameEngine.RandomNumberGenerator.Next(0, 2) == 0)
+        if (_randomNumberGenerator.Next(0, 2) == 0)
         {
             _deathAnticlockwise = true;
         }
@@ -745,7 +753,7 @@ public class Nasty : GameComponentBase
 
     private void UpdateDeath()
     {
-        if (GameEngine.GraphicsSet.IsOriginal)
+        if (_graphicsSet.IsOriginal)
         {
             _nastyDiesAnimation.GetNextFrame();
 
@@ -756,7 +764,7 @@ public class Nasty : GameComponentBase
             else
             {
                 NastyState = NastyState.PreConception;
-                _conceptionwaitCounter = GameEngine.RandomNumberGenerator.Next(0, LongestConceptionWait);
+                _conceptionwaitCounter = _randomNumberGenerator.Next(0, LongestConceptionWait);
                 _nastyDeadPauseCounter = 0;
             }
         }
@@ -868,12 +876,12 @@ public class Nasty : GameComponentBase
                 if (MovementType == MoveType.RandomMovement)
                 {
                     _constantMovement = false;
-                    RandomMovement(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos);
+                    RandomMovement(_blob.BlobXPos, _blob.BlobYPos);
                 }
                 else if (MovementType == MoveType.RandomUpDownLeftRight)
                 {
                     _constantMovement = false;
-                    RandomUpDownLeftRight(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos);
+                    RandomUpDownLeftRight(_blob.BlobXPos, _blob.BlobYPos);
                 }
                 else if (MovementType == MoveType.DiagonalBouncing)
                 {
@@ -888,13 +896,13 @@ public class Nasty : GameComponentBase
                 else if (MovementType == MoveType.RandomMovementsAllDirections)
                 {
                     _constantMovement = false;
-                    RandomMovementsAllDirections(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos);
+                    RandomMovementsAllDirections(_blob.BlobXPos, _blob.BlobYPos);
                 }
                 else if (MovementType == MoveType.SpikeyMovement)
                 {
                     _spikeyPause = !_spikeyPause;
                     _constantMovement = false;
-                    SpikeyMovement(GameEngine.Player.BlobXPos, GameEngine.Player.BlobYPos);
+                    SpikeyMovement(_blob.BlobXPos, _blob.BlobYPos);
                 }
             }
         }
@@ -937,8 +945,8 @@ public class Nasty : GameComponentBase
 
         _attractedToBlob = !wandering;
         _movementChangeCount = wandering
-            ? GameEngine.RandomNumberGenerator.Next(WanderingShortest, WanderingLongest)
-            : GameEngine.RandomNumberGenerator.Next(ChasingShortest, ChasingLongest);
+            ? _randomNumberGenerator.Next(WanderingShortest, WanderingLongest)
+            : _randomNumberGenerator.Next(ChasingShortest, ChasingLongest);
         _movementChangeCounter = 0;
 
         if (_nastyType == NastyType.Spiky)
@@ -951,8 +959,8 @@ public class Nasty : GameComponentBase
 
         MovementType = _attractedToBlob
             // just choose from the attraction modes....
-            ? (MoveType)GameEngine.RandomNumberGenerator.Next(0, 2)
-            : (MoveType)GameEngine.RandomNumberGenerator.Next(0, Enum.GetValues(typeof(MoveType)).Length - 1);
+            ? (MoveType)_randomNumberGenerator.Next(0, 2)
+            : (MoveType)_randomNumberGenerator.Next(0, Enum.GetValues(typeof(MoveType)).Length - 1);
 
         SetStartingDirection();
 
@@ -991,7 +999,7 @@ public class Nasty : GameComponentBase
             case MoveType.DiagonalBouncingInSteps:
             {
                 Direction = RandomDiagonal();
-                _stepsToMove = GameEngine.RandomNumberGenerator.Next(ShortestSteppedRun, LongestSteppedRun);
+                _stepsToMove = _randomNumberGenerator.Next(ShortestSteppedRun, LongestSteppedRun);
 
                 break;
             }
@@ -1014,13 +1022,13 @@ public class Nasty : GameComponentBase
         if (!_attractedToBlob)
         {
             return randomWalk
-                ? GameEngine.RandomNumberGenerator.Next(WanderingAmbleSpeed, WanderingAmbleSpeedLimit)
-                : GameEngine.RandomNumberGenerator.Next(WanderingStrideSpeed, WanderingStrideSpeedLimit);
+                ? _randomNumberGenerator.Next(WanderingAmbleSpeed, WanderingAmbleSpeedLimit)
+                : _randomNumberGenerator.Next(WanderingStrideSpeed, WanderingStrideSpeedLimit);
         }
 
         return randomWalk || MovementType == MoveType.SpikeyMovement
-            ? GameEngine.RandomNumberGenerator.Next(ChasingPickingSpeed, ChasingPickingSpeedLimit)
-            : GameEngine.RandomNumberGenerator.Next(ChasingChargeSpeed, ChasingChargeSpeedLimit);
+            ? _randomNumberGenerator.Next(ChasingPickingSpeed, ChasingPickingSpeedLimit)
+            : _randomNumberGenerator.Next(ChasingChargeSpeed, ChasingChargeSpeedLimit);
     }
 
     private void DiagonalBouncingInSteps()
@@ -1047,7 +1055,7 @@ public class Nasty : GameComponentBase
             Direction = reflected;
         }
 
-        _stepsToMove = GameEngine.RandomNumberGenerator.Next(ShortestRun, LongestRun);
+        _stepsToMove = _randomNumberGenerator.Next(ShortestRun, LongestRun);
     }
 
     /// <summary>
@@ -1101,7 +1109,7 @@ public class Nasty : GameComponentBase
             HeadTowardsBlob(blobsXPosition, blobsYPosition);
         }
 
-        _stepsToMove = GameEngine.RandomNumberGenerator.Next(ShortestRun, LongestRun);
+        _stepsToMove = _randomNumberGenerator.Next(ShortestRun, LongestRun);
     }
 
     /// <summary>
@@ -1125,7 +1133,7 @@ public class Nasty : GameComponentBase
             HeadTowardsBlob(blobsXPosition, blobsYPosition);
         }
 
-        _stepsToMove = GameEngine.RandomNumberGenerator.Next(ShortestScuttle, LongestScuttle);
+        _stepsToMove = _randomNumberGenerator.Next(ShortestScuttle, LongestScuttle);
     }
 
     /// <summary>
@@ -1202,10 +1210,10 @@ public class Nasty : GameComponentBase
 
         if (choices is not null)
         {
-            Direction = choices[GameEngine.RandomNumberGenerator.Next(0, choices.Length)];
+            Direction = choices[_randomNumberGenerator.Next(0, choices.Length)];
         }
 
-        _stepsToMove = GameEngine.RandomNumberGenerator.Next(ShortestChasingRun, LongestRun);
+        _stepsToMove = _randomNumberGenerator.Next(ShortestChasingRun, LongestRun);
     }
 
     /// <summary>
@@ -1255,13 +1263,13 @@ public class Nasty : GameComponentBase
     }
 
     /// <summary>One of the four diagonals - the second half of <see cref="Direction" />.</summary>
-    private Direction RandomDiagonal() => (Direction)GameEngine.RandomNumberGenerator.Next(4, 8);
+    private Direction RandomDiagonal() => (Direction)_randomNumberGenerator.Next(4, 8);
 
     /// <summary>One of the four straight directions - the first half of <see cref="Direction" />.</summary>
-    private Direction RandomStraightDirection() => (Direction)GameEngine.RandomNumberGenerator.Next(0, 4);
+    private Direction RandomStraightDirection() => (Direction)_randomNumberGenerator.Next(0, 4);
 
     /// <summary>Any of the eight, but never <see cref="Direction.None" />.</summary>
-    private Direction RandomAnyDirection() => (Direction)GameEngine.RandomNumberGenerator.Next(0, 8);
+    private Direction RandomAnyDirection() => (Direction)_randomNumberGenerator.Next(0, 8);
 
     /// <summary>
     ///     A spiky nasty goes at the blob along whichever axis he is further away on, sometimes cuts
@@ -1279,7 +1287,7 @@ public class Nasty : GameComponentBase
         if (_spikeyPause)
         {
             Direction = Direction.None;
-            _stepsToMove = GameEngine.RandomNumberGenerator.Next(ShortestBouncingRun, LongestBouncingRun);
+            _stepsToMove = _randomNumberGenerator.Next(ShortestBouncingRun, LongestBouncingRun);
             return;
         }
 
@@ -1342,7 +1350,7 @@ public class Nasty : GameComponentBase
             }
         }
 
-        _stepsToMove = GameEngine.RandomNumberGenerator.Next(
+        _stepsToMove = _randomNumberGenerator.Next(
                            (int)(stepsFromBlob / (double)MoveSpeed / 2),
                            (int)(stepsFromBlob / (double)MoveSpeed)) +
                        SpikeyOvershoot;
@@ -1379,7 +1387,7 @@ public class Nasty : GameComponentBase
         };
 
     /// <summary>A one-in-two chance, which is how most of a nasty's mind gets made up.</summary>
-    private bool CoinFlip() => GameEngine.RandomNumberGenerator.Next(0, 2) == 0;
+    private bool CoinFlip() => _randomNumberGenerator.Next(0, 2) == 0;
 
     /// <summary>
     ///     Moves a nasty one step the way it is facing, and records what it walked into so that the
@@ -1439,7 +1447,7 @@ public class Nasty : GameComponentBase
     }
 
     private int DistanceClear(Direction direction, int x, int y)
-        => GameEngine.GameScreens.CheckCollision(direction, x, y, NastyWidth, NastyHeight, MoveSpeed, false);
+        => _gameScreens.CheckCollision(direction, x, y, NastyWidth, NastyHeight, MoveSpeed, false);
 
     /// <summary>Which of up and down a direction contains, if either.</summary>
     private static Direction VerticalComponent(Direction direction)
@@ -1531,7 +1539,7 @@ public class Nasty : GameComponentBase
 
         // Choose the image
         _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade), 1.0f, NastyRockSpeed, true, GameEngine.Session.Paused);
+            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade), 1.0f, NastyRockSpeed, true, _session.Paused);
         _nastySprite.End();
     }
 
@@ -1547,7 +1555,7 @@ public class Nasty : GameComponentBase
         _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
             ColourHelper.GetXna4Colour((byte)_birthColourLevel, (byte)_birthColourLevel, ColourLevels.Full,
                 (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), _birthScale, _birthRotateSpeed,
-            true, GameEngine.Session.Paused);
+            true, _session.Paused);
         _nastySprite.End();
     }
 
@@ -1618,18 +1626,18 @@ public class Nasty : GameComponentBase
             _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
                 ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
                     (byte)(_deathFadeLevel * ((double)screenFade / ColourLevels.Full))), _deathScale, DeathRotateSpeed,
-                _deathAnticlockwise, GameEngine.Session.Paused);
+                _deathAnticlockwise, _session.Paused);
             _nastySprite.End();
         }
 
-        if (GameEngine.GraphicsSet.IsOriginal)
+        if (_graphicsSet.IsOriginal)
         {
-            GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original")
+            _resources.GetSpriteCollection("BlobFire2Original")
                 .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-            GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").DrawSprite(
+            _resources.GetSpriteCollection("BlobFire2Original").DrawSprite(
                 _nastyDiesAnimation.CurrentFrame, XPos, YPos,
                 ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, screenFade), 1f, 0f);
-            GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").End();
+            _resources.GetSpriteCollection("BlobFire2Original").End();
         }
     }
 

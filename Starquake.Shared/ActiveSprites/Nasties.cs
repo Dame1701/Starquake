@@ -3,11 +3,13 @@
 // ---------------------------------------------------------
 // -
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+using System;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
 using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Display;
 using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Particles;
@@ -18,7 +20,14 @@ namespace Starquake.ActiveSprites;
 // This wraps multiple nasties
 public class Nasties : GameComponentBase
 {
-    private readonly GameEngine GameEngine;
+    private readonly Blob _blob;
+    private readonly ConveyerNasties _conveyerNasties;
+    private readonly ElectricityGatesAndNodesEngine _electricityNodeGates;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
+    private readonly GameSession _session;
 
     /// <summary>
     ///     A nasty parked this far off screen is one that has not been given a home yet, so it is
@@ -48,14 +57,30 @@ public class Nasties : GameComponentBase
     private readonly IPositionalTriggerParticleEffect _nastySmokes;
     private int _previousScreenVisited;
 
-    public Nasties(GameEngine gameEngineReference, int nastyCount)
+    public Nasties(
+        ResourceManager resources,
+        GameScreenCollection gameScreens,
+        GraphicsSet graphicsSet,
+        GameSession session,
+        Blob blob,
+        Random randomNumberGenerator,
+        ConveyerNasties conveyerNasties,
+        ElectricityGatesAndNodesEngine electricityNodeGates,
+        int nastyCount)
     {
-        GameEngine = gameEngineReference;
+        _resources = resources;
+        _gameScreens = gameScreens;
+        _graphicsSet = graphicsSet;
+        _session = session;
+        _blob = blob;
+        _randomNumberGenerator = randomNumberGenerator;
+        _conveyerNasties = conveyerNasties;
+        _electricityNodeGates = electricityNodeGates;
 
         _nastyCount = nastyCount;
         _nasties = new List<Nasty>();
         _nastySmokes =
-            (IPositionalTriggerParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume",
+            (IPositionalTriggerParticleEffect)_resources.GetParticleEffectInstance("BasicSmokePlume",
                 ParticleEffectType.TriggeredMultiLocationTimed, null);
 
     }
@@ -71,7 +96,12 @@ public class Nasties : GameComponentBase
         {
             _nasties.Add(
                 new Nasty(
-                    GameEngine,
+                    _resources,
+                    _gameScreens,
+                    _graphicsSet,
+                    _session,
+                    _blob,
+                    _randomNumberGenerator,
                     0,
                     0,
                     3));
@@ -101,14 +131,14 @@ public class Nasties : GameComponentBase
 
     public override void Update(GameTime gameTime)
     {
-        if (GameEngine.Player.BlobsState != BlobState.Normal)
+        if (_blob.BlobsState != BlobState.Normal)
         {
             Reset();
             return;
         }
 
         // Cancel any nasty collision effect
-        GameEngine.Player.BlobTouchedByNasty = false;
+        _blob.BlobTouchedByNasty = false;
 
         if (Keyboard.GetState().IsKeyDown(Keys.R))
         {
@@ -146,7 +176,7 @@ public class Nasties : GameComponentBase
 
         if (nastySpawnedCounter == _nastyCount)
         {
-                GameEngine.ContentResourceManager.GetSoundFxEngine().EnablePeriodicBackgroundSounds();
+                _resources.GetSoundFxEngine().EnablePeriodicBackgroundSounds();
         }
 
         if (_nastySmokes != null)
@@ -162,10 +192,10 @@ public class Nasties : GameComponentBase
     private void TouchBlob(int a, ref bool nastyInteractingWithBlob)
     {
         if (CollisionDetection.Check(
-                GameEngine.Player.BlobXPos + 8,
-                GameEngine.Player.BlobYPos + 8,
-                GameEngine.Player.BlobWidth - 16,
-                GameEngine.Player.BlobHeight - 16,
+                _blob.BlobXPos + 8,
+                _blob.BlobYPos + 8,
+                _blob.BlobWidth - 16,
+                _blob.BlobHeight - 16,
                 _nasties[a].XPos,
                 _nasties[a].YPos,
                 _nasties[a].NastyWidth,
@@ -184,18 +214,18 @@ public class Nasties : GameComponentBase
                 }
 
                 // Trigger the blob animation
-                GameEngine.Player.BlobTouchedByNasty = true;
+                _blob.BlobTouchedByNasty = true;
             }
         }
     }
 
     private void TakeAnyFireHit(int a)
     {
-        if (GameEngine.Player.BlobHasFired)
+        if (_blob.BlobHasFired)
         {
             if (CollisionDetection.Check(
-                    GameEngine.Player.BlobFireX,
-                    GameEngine.Player.BlobFireY,
+                    _blob.BlobFireX,
+                    _blob.BlobFireY,
                     FireWidth,
                     FireHeight,
                     _nasties[a].XPos,
@@ -206,16 +236,16 @@ public class Nasties : GameComponentBase
                 if (_nasties[a].NastyState == NastyState.Normal ||
                     _nasties[a].NastyState == NastyState.Birth)
                 {
-                    GameEngine.Player.RegisterFireHit();
+                    _blob.RegisterFireHit();
                     _nasties[a].NastyState = NastyState.Shot;
 
                     if (_nasties[a].NastyType == NastyType.Spiky)
                     {
-                        GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("BlobExplodes");
+                        _resources.GetSoundFxEngine().PlaySound("BlobExplodes");
                     }
                     else
                     {
-                        GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("NastyDeath");
+                        _resources.GetSoundFxEngine().PlaySound("NastyDeath");
                     }
 
                     if (OnNastyInteractionWithBlob != null)
@@ -232,18 +262,18 @@ public class Nasties : GameComponentBase
     {
         _nasties[a].Smoking = false;
 
-        if (GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers != null)
+        if (_electricityNodeGates.ElectricityNodeControllers != null)
         {
             for (var b = 0;
-                 b < GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers.Length;
+                 b < _electricityNodeGates.ElectricityNodeControllers.Length;
                  b++)
             {
-                if (GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].ElectricityOn)
+                if (_electricityNodeGates.ElectricityNodeControllers[b].ElectricityOn)
                 {
                     if (CollisionDetection.Check(
-                            GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
+                            _electricityNodeGates.ElectricityNodeControllers[b].Location
                                 .X,
-                            GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
+                            _electricityNodeGates.ElectricityNodeControllers[b].Location
                                 .Y,
                             ElectricityArcWidth,
                             ElectricityArcHeight,
@@ -258,9 +288,9 @@ public class Nasties : GameComponentBase
                             _nasties[a].YPos,
                             _nasties[a].NastyWidth,
                             _nasties[a].NastyHeight,
-                            GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
+                            _electricityNodeGates.ElectricityNodeControllers[b].Location
                                 .X,
-                            GameEngine.ElectricityNodeGateEngine.ElectricityNodeControllers[b].Location
+                            _electricityNodeGates.ElectricityNodeControllers[b].Location
                                 .Y,
                             ElectricityArcWidth,
                             ElectricityArcHeight);
@@ -303,7 +333,7 @@ public class Nasties : GameComponentBase
     /// </summary>
     public void PerformPostChangeScreenActions()
     {
-        var goingBackTheWayWeCame = GameEngine.GameScreens.ScreenNumber == _previousScreenVisited;
+        var goingBackTheWayWeCame = _gameScreens.ScreenNumber == _previousScreenVisited;
 
         if (goingBackTheWayWeCame)
         {
@@ -327,7 +357,7 @@ public class Nasties : GameComponentBase
 
         _nastySmokes?.Reset();
 
-        _previousScreenVisited = GameEngine.GameScreens.PreviousScreenNumber;
+        _previousScreenVisited = _gameScreens.PreviousScreenNumber;
     }
 
     /// <summary>
@@ -354,13 +384,13 @@ public class Nasties : GameComponentBase
     /// </summary>
     private void CreateFreshNasties()
     {
-        var screenData = GameEngine.GameScreens.CurrentGameScreenData;
+        var screenData = _gameScreens.CurrentGameScreenData;
 
         screenData.KeepNastiesTheSame =
-            GameEngine.RandomNumberGenerator.Next(0, SameNastyScreenOdds) == 0;
+            _randomNumberGenerator.Next(0, SameNastyScreenOdds) == 0;
 
         var nastyType = screenData.KeepNastiesTheSame
-            ? Nasty.GetRandomNastyType(GameEngine, true)
+            ? Nasty.GetRandomNastyType(_randomNumberGenerator)
             : NastyType.Ghost;
 
         for (var a = 0; a < _nastyCount; a++)
@@ -381,7 +411,7 @@ public class Nasties : GameComponentBase
     /// </summary>
     private void DisableNastiesDisplacedByConveyerNasties()
     {
-        for (var a = 0; a < GameEngine.ConveyerNastiesInstance.NastiesActive; a++)
+        for (var a = 0; a < _conveyerNasties.NastiesActive; a++)
         {
             _nasties[a].NastyState = NastyState.Disabled;
         }
@@ -389,7 +419,7 @@ public class Nasties : GameComponentBase
 
     public override void Draw(GameTime gameTime, int screenFade)
     {
-        if (GameEngine.Player.BlobsState == BlobState.Normal)
+        if (_blob.BlobsState == BlobState.Normal)
         {
             for (var a = 0; a < _nastyCount; a++)
             {

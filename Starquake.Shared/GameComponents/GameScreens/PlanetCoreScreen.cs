@@ -112,7 +112,12 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
         for (var a = 0; a < _coreAlienCount; a++)
         {
             var coreAlien = new Nasty(
-                GameEngine,
+                GameEngine.ContentResourceManager,
+                GameEngine.GameScreens,
+                GameEngine.GraphicsSet,
+                GameEngine.Session,
+                GameEngine.Player,
+                GameEngine.RandomNumberGenerator,
                 0,
                 0,
                 CoreElementsToReplace);
