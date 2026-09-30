@@ -51,7 +51,13 @@ public class LeftTunnelEntryEffect : ScreenEffectBase
                     if (EffectSurface.Width >= EffectSurface.MasterWidth)
                     {
                         _effectState = 2;
+
+                        // The opening step overshoots whenever the speed does not divide the width,
+                        // and the frame that overshoots has already pushed XPos past MasterXPos by
+                        // the overshoot. Clamping the width without putting the position back leaves
+                        // the play area sitting that far to the left for good.
                         EffectSurface.Width = EffectSurface.MasterWidth;
+                        EffectSurface.XPos = EffectSurface.MasterXPos;
 
                         EffectFinished = true;
                     }
