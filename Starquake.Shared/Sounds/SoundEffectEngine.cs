@@ -15,23 +15,65 @@ namespace Starquake.Sounds;
 
 public class SoundEffectEngine(ContentManager content, Random randomNumberGenerator) : IDisposable
 {
+    /// <summary>
+    ///     How long the background rumble waits before its first outing once it is switched on, and
+    ///     between outings after that. A range, picked from at random each time, so the rumble does
+    ///     not fall into a rhythm.
+    /// </summary>
+    private const int FirstSoundMinDelayMs = 1000;
+
+    /// <inheritdoc cref="FirstSoundMinDelayMs" />
+    private const int FirstSoundMaxDelayMs = 10000;
+
+    /// <inheritdoc cref="FirstSoundMinDelayMs" />
+    private const int NextSoundMinDelayMs = 10000;
+
+    /// <inheritdoc cref="FirstSoundMinDelayMs" />
+    private const int NextSoundMaxDelayMs = 20000;
+
+    /// <summary>
+    ///     How loud the background rumble is against everything else.
+    /// </summary>
+    private const float PeriodicSoundVolume = 0.5f;
 
     private readonly List<SoundEffectInstanceRecord> _multiInstanceSoundEffectInstances = [];
     private readonly Dictionary<string, MultiInstanceSoundEffect> _multiInstanceSoundEffects = new();
+
+    /// <summary>
+    ///     Guards everything to do with the periodic sound timer. Its callback runs on a thread pool
+    ///     thread and re-arms the timer from there, so enabling, disabling and disposing all have to
+    ///     agree with the callback about whether the timer is still wanted.
+    /// </summary>
+    private readonly Lock _periodicSoundLock = new();
+
     private readonly List<SoundEffectInstanceRecord> _singleInstanceSoundEffectInstances = [];
     private bool _periodicBackgroundSoundsEnabled;
     private Guid _periodicBackgroundSoundsId = Guid.Empty;
+
+    /// <summary>
+    ///     One timer for the life of the engine, re-armed rather than replaced. Enabling and
+    ///     disabling the background rumble used to create and throw away a timer each time, which
+    ///     left the callback able to arm a fresh one just after the old one was disposed - a rumble
+    ///     that would not stop, and one still able to fire at content that had already been
+    ///     unloaded on the way out of the game.
+    /// </summary>
     private Timer? _periodicSoundTimer;
 
+    /// <summary>
+    ///     Stops the background rumble for good. The sound effect instances themselves belong to the
+    ///     content manager, which disposes them with the rest of the content; the timer is the one
+    ///     thing here that outlives the game if it is not put down, and it would be calling into
+    ///     those instances after they had gone.
+    /// </summary>
     public void Dispose()
     {
-        if (_periodicSoundTimer == null)
+        lock (_periodicSoundLock)
         {
-            return;
-        }
+            _periodicBackgroundSoundsEnabled = false;
 
-        _periodicSoundTimer.Dispose();
-        _periodicSoundTimer = null;
+            _periodicSoundTimer?.Dispose();
+            _periodicSoundTimer = null;
+        }
     }
 
     public void LoadSoundEffect(SoundDescription soundDesc)
@@ -61,47 +103,60 @@ public class SoundEffectEngine(ContentManager content, Random randomNumberGenera
 
     public void EnablePeriodicBackgroundSounds()
     {
-        if (_periodicBackgroundSoundsEnabled)
+        lock (_periodicSoundLock)
         {
-            return;
-        }
+            if (_periodicBackgroundSoundsEnabled)
+            {
+                return;
+            }
 
-        _periodicBackgroundSoundsEnabled = true;
-        _periodicSoundTimer = new Timer(PlayPeriodicSound, null,
-            randomNumberGenerator.Next(1000, 10000), Timeout.Infinite);
+            _periodicBackgroundSoundsEnabled = true;
+            _periodicSoundTimer ??= new Timer(PlayPeriodicSound, null, Timeout.Infinite, Timeout.Infinite);
+            _periodicSoundTimer.Change(randomNumberGenerator.Next(FirstSoundMinDelayMs, FirstSoundMaxDelayMs), Timeout.Infinite);
+        }
     }
 
     public void DisablePeriodicBackgroundSounds(bool killPlayingSounds = false)
     {
-        if (!_periodicBackgroundSoundsEnabled)
+        lock (_periodicSoundLock)
         {
-            return;
-        }
+            if (!_periodicBackgroundSoundsEnabled)
+            {
+                return;
+            }
 
-        if (_periodicSoundTimer != null)
-        {
-            _periodicSoundTimer.Dispose();
-            _periodicSoundTimer = null;
+            _periodicBackgroundSoundsEnabled = false;
+            _periodicSoundTimer?.Change(Timeout.Infinite, Timeout.Infinite);
         }
 
         if (killPlayingSounds)
         {
             StopSound(_periodicBackgroundSoundsId, SoundFade.None);
         }
-
-        _periodicBackgroundSoundsEnabled = false;
     }
 
+    /// <summary>
+    ///     Plays the background rumble, unless the last one is still going, and asks for the next
+    ///     one. The asking happens either way: skipping it when the sound was still playing is what
+    ///     used to silence the rumble for the rest of the game the first time the timer caught it.
+    /// </summary>
     private void PlayPeriodicSound(object? state)
     {
-        if (GetSoundState(_periodicBackgroundSoundsId) == SoundState.Playing)
+        if (GetSoundState(_periodicBackgroundSoundsId) != SoundState.Playing)
         {
-            return;
+            _periodicBackgroundSoundsId = PlaySound("BackgroundSound1", PeriodicSoundVolume, false);
         }
 
-        _periodicBackgroundSoundsId = PlaySound("BackgroundSound1", 0.5f, false);
-        _periodicSoundTimer = new Timer(PlayPeriodicSound, null,
-            randomNumberGenerator.Next(10000, 20000), Timeout.Infinite);
+        lock (_periodicSoundLock)
+        {
+            // Disabled or disposed while this callback was running - it is not wanted again.
+            if (!_periodicBackgroundSoundsEnabled)
+            {
+                return;
+            }
+
+            _periodicSoundTimer?.Change(randomNumberGenerator.Next(NextSoundMinDelayMs, NextSoundMaxDelayMs), Timeout.Infinite);
+        }
     }
 
     /// <summary>

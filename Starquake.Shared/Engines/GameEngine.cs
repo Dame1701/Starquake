@@ -258,6 +258,12 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     /// <inheritdoc cref="GameScreens" />
     private MainGameScreen MainScreen => NotBeforeContentLoads(_mainScreen);
 
+    /// <summary>
+    ///     Called by the host on the way out. The sound engine's timer is the only thing the engine
+    ///     owns that has to be put down by hand: every texture, font and sound belongs to the content
+    ///     manager, and every sprite batch and render target to the graphics device, both of which
+    ///     the game disposes itself.
+    /// </summary>
     public void Dispose()
     {
         ContentResourceManager.GetSoundFxEngine().Dispose();

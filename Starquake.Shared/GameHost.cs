@@ -189,8 +189,6 @@ public class GameHost : Game
             // Allows the game to exit
             if (ToggleKeys.GetPressedKey() == Keys.Escape)
             {
-                _gameEngine?.Dispose();
-
                 Exit();
             }
 
@@ -213,5 +211,21 @@ public class GameHost : Game
         base.Draw(gameTime);
 
         _gameEngine?.Draw(gameTime);
+    }
+
+    /// <summary>
+    ///     Shutting down. This is the only place the engine is torn down, because it is the only one
+    ///     every way out of the game passes through - the escape key, the gamepad's back button, the
+    ///     window's close box - and because Exit only asks the loop to stop, so a teardown done next
+    ///     to it would be pulling the engine apart underneath the frames still to be drawn.
+    /// </summary>
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _gameEngine?.Dispose();
+        }
+
+        base.Dispose(disposing);
     }
 }

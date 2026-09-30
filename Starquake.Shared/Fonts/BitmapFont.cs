@@ -2,14 +2,13 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Helpers;
 
 namespace Starquake.Fonts;
 
-public class BitmapFont : IDisposable
+public class BitmapFont
 {
     private readonly SpriteFont _font;
 
@@ -44,15 +43,6 @@ public class BitmapFont : IDisposable
     public bool Flash { get; set; }
 
     private int FlashInterval { get; }
-
-    #region IDisposable Members
-
-    public void Dispose()
-    {
-        _fontSpriteBatch.Dispose();
-    }
-
-    #endregion
 
     public void Update()
     {
