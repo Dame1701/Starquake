@@ -123,6 +123,11 @@ looks exactly like a broken constructor and is not. Rebuild the head project wit
 dotnet build Starquake.Mac/Starquake.Mac.csproj -v q --nologo
 ```
 
+A solution build will **not** put it back, even though it succeeds and includes that project:
+`ls Starquake.Mac/bin/Debug/net9.0/Content/Graphics | wc -l` still gives 0. It has to be the
+head project on its own. Worth checking that count whenever a smoke run dies on a missing
+`.xnb`, before reading anything into the stack trace.
+
 **File encodings differ by project.** Our own sources are UTF-8 **with BOM** and LF endings; read
 and write them as `utf-8-sig`. `ProjectMercury` sources are **Latin-1** and will raise
 `UnicodeDecodeError` if opened as UTF-8. This is why `grep` treats some Mercury files as binary.
