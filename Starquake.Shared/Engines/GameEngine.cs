@@ -178,7 +178,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     public readonly GraphicsSet GraphicsSet = new();
 
-    public SpriteCollection Scanlines;
+    private SpriteCollection _scanlines;
 
     private ScreenEffectEngine? _screenEffectEngine;
 
@@ -370,7 +370,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
         // Built here rather than with its view ports, so that anything constructed from here on -
         // the blob's jump platforms, for one - can be handed it instead of reaching for it later.
-        _screenEffectEngine = new ScreenEffectEngine(GameHost.ScreenWidth, GameHost.ScreenHeight, GraphicsDeviceMgr, Presentation);
+        _screenEffectEngine = new ScreenEffectEngine(CompositionSize.Width, CompositionSize.Height, GraphicsDeviceMgr, Presentation);
     }
 
     /// <summary>
@@ -383,7 +383,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     ///     one place it is known to matter, and the rest was not worth risking to tidy.
     /// </remarks>
     [MemberNotNull(nameof(_bootScreen), nameof(_bootProgressBackground), nameof(_bootProgress),
-        nameof(Scanlines), nameof(Font1), nameof(Font2))]
+        nameof(_scanlines), nameof(Font1), nameof(Font2))]
     private void DefineContent()
     {
         DefineBootGraphics();
@@ -410,13 +410,13 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     }
 
     [MemberNotNull(nameof(_bootScreen), nameof(_bootProgressBackground), nameof(_bootProgress),
-        nameof(Scanlines))]
+        nameof(_scanlines))]
     private void DefineBootGraphics()
     {
-        _bootScreen = new SpriteCollection(GraphicsDeviceMgr, ContentMgr, @"Graphics\\BootScreen2", GameHost.ScreenWidth, GameHost.ScreenHeight);
+        _bootScreen = new SpriteCollection(GraphicsDeviceMgr, ContentMgr, @"Graphics\\BootScreen2", CompositionSize.Width, CompositionSize.Height);
         _bootProgressBackground = new SpriteCollection(GraphicsDeviceMgr, ContentMgr, @"Graphics\\ProgressBarBackground", 1046, 32);
         _bootProgress = new SpriteCollection(GraphicsDeviceMgr, ContentMgr, @"Graphics\\BootProgress", 1, 24);
-        Scanlines = new SpriteCollection(GraphicsDeviceMgr, ContentMgr, @"Graphics\\Scanlines2", GameHost.ScreenWidth, GameHost.ScreenHeight);
+        _scanlines = new SpriteCollection(GraphicsDeviceMgr, ContentMgr, @"Graphics\\Scanlines2", CompositionSize.Width, CompositionSize.Height);
     }
 
     [MemberNotNull(nameof(Font1), nameof(Font2))]
@@ -445,19 +445,19 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     private void DefinePresentationScreenGraphics()
     {
-        ContentResourceManager.AddSpriteResource("OptionScreenBackground", "Graphics\\OptionsScreenBackground", GameHost.ScreenWidth, GameHost.ScreenHeight);
+        ContentResourceManager.AddSpriteResource("OptionScreenBackground", "Graphics\\OptionsScreenBackground", CompositionSize.Width, CompositionSize.Height);
         ContentResourceManager.AddSpriteResource("OptionScreenForeground", "Graphics\\OptionsScreenForeground", 821, 554);
 
-        ContentResourceManager.AddSpriteResource("ComputerReportScreenBackground", "Graphics\\ComputerReportScreenBackground", GameHost.ScreenWidth, GameHost.ScreenHeight);
+        ContentResourceManager.AddSpriteResource("ComputerReportScreenBackground", "Graphics\\ComputerReportScreenBackground", CompositionSize.Width, CompositionSize.Height);
         ContentResourceManager.AddSpriteResource("ComputerReportScreenForeground", "Graphics\\ComputerReportScreenForeground", 821, 554);
 
-        ContentResourceManager.AddSpriteResource("GameOverScreenBackground", "Graphics\\GameOverScreenBackground", GameHost.ScreenWidth, GameHost.ScreenHeight);
+        ContentResourceManager.AddSpriteResource("GameOverScreenBackground", "Graphics\\GameOverScreenBackground", CompositionSize.Width, CompositionSize.Height);
         ContentResourceManager.AddSpriteResource("GameOverScreenForeground", "Graphics\\GameOverScreenForeground", 821, 554);
 
-        ContentResourceManager.AddSpriteResource("HiScoreScreenBackground", "Graphics\\HiScoreScreenBackground", GameHost.ScreenWidth, GameHost.ScreenHeight);
+        ContentResourceManager.AddSpriteResource("HiScoreScreenBackground", "Graphics\\HiScoreScreenBackground", CompositionSize.Width, CompositionSize.Height);
         ContentResourceManager.AddSpriteResource("HiScoreScreenForeground", "Graphics\\HiScoreScreenForeground", 821, 554);
 
-        ContentResourceManager.AddSpriteResource("GameCompleteScreenBackground", "Graphics\\GameCompleteScreenBackground", GameHost.ScreenWidth, GameHost.ScreenHeight);
+        ContentResourceManager.AddSpriteResource("GameCompleteScreenBackground", "Graphics\\GameCompleteScreenBackground", CompositionSize.Width, CompositionSize.Height);
         ContentResourceManager.AddSpriteResource("GameCompleteScreenForeground", "Graphics\\GameCompleteScreenForeground", 821, 554);
     }
 
@@ -972,8 +972,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             "EntireScreen",
             0,
             0,
-            GameHost.ScreenWidth,
-            GameHost.ScreenHeight);
+            CompositionSize.Width,
+            CompositionSize.Height);
     }
 
     private void LoadContent()
@@ -1323,7 +1323,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     ///     Go fullscreen at the resolution the desktop is already running at, so the picture is
     ///     composed for the display it lands on instead of being stretched up from the windowed
     ///     size. The game itself never changes size: it always composes at
-    ///     <see cref="GameHost.ScreenWidth" /> x <see cref="GameHost.ScreenHeight" /> and
+    ///     <see cref="CompositionSize.Width" /> x <see cref="CompositionSize.Height" /> and
     ///     Presentation.Transform scales that onto whatever back buffer we end up with.
     ///     HardwareModeSwitch has to be on. Borderless (the false case) looks like the friendlier
     ///     option, but on macOS it produces a window clamped to the desktop area *below* the menu
@@ -1336,8 +1336,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
         if (GraphicsDeviceMgr.IsFullScreen)
         {
-            GraphicsDeviceMgr.PreferredBackBufferWidth = GameHost.ScreenWidth;
-            GraphicsDeviceMgr.PreferredBackBufferHeight = GameHost.ScreenHeight;
+            GraphicsDeviceMgr.PreferredBackBufferWidth = CompositionSize.Width;
+            GraphicsDeviceMgr.PreferredBackBufferHeight = CompositionSize.Height;
         }
         else
         {
@@ -1429,6 +1429,31 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
         // Screen effects compose over whatever was just drawn, and only exist once the game does
         _screenEffectEngine?.Draw();
+
+        DrawScanlines(gameTime);
+    }
+
+    /// <summary>
+    ///     The CRT scanline overlay, laid over the finished picture as the very last thing drawn.
+    ///     Scaled and centred with the composition rather than laid over the letterbox borders as
+    ///     well, which is why it draws through the presentation transform.
+    ///     <para>
+    ///         <c>GameHost</c> used to do this, reaching in for the sprites, the flag and the
+    ///         transform. It is the game's own overlay and the game draws it; the host's business is
+    ///         pacing frames, not deciding what the picture looks like.
+    ///     </para>
+    /// </summary>
+    private void DrawScanlines(GameTime gameTime)
+    {
+        if (!Presentation.ScanlinesEnabled)
+        {
+            return;
+        }
+
+        _scanlines.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime, Presentation.Transform);
+        _scanlines.DrawSprite(0, 0, 0,
+            new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ColourLevels.Full));
+        _scanlines.End();
     }
     
     public void Dispose()

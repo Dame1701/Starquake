@@ -32,18 +32,6 @@ public class GameHost : Game
     /// </summary>
     private const int MaxCatchUpFrames = 5;
 
-    /// <summary>
-    ///     The size the game composes its picture at, and the size the window first opens at.
-    ///     Nothing in the game draws to the back buffer directly: everything is laid out against
-    ///     these two numbers and PresentationSettings.Transform scales the result onto whatever
-    ///     the back buffer happens to be, so the game looks the same in a small window as it does
-    ///     fullscreen on a 6K display.
-    /// </summary>
-    public const int ScreenWidth = 1280;
-
-    /// <inheritdoc cref="ScreenWidth" />
-    public const int ScreenHeight = 800;
-
     private static readonly TimeSpan LogicFrameLength = TimeSpan.FromTicks((long)(TimeSpan.TicksPerSecond / LogicFramesPerSecond));
 
     private readonly GraphicsDeviceManager _graphics;
@@ -67,8 +55,8 @@ public class GameHost : Game
     {
         _graphics = new GraphicsDeviceManager(this);
         _graphics.SynchronizeWithVerticalRetrace = true;
-        _graphics.PreferredBackBufferWidth = ScreenWidth;
-        _graphics.PreferredBackBufferHeight = ScreenHeight;
+        _graphics.PreferredBackBufferWidth = CompositionSize.Width;
+        _graphics.PreferredBackBufferHeight = CompositionSize.Height;
         _graphics.IsFullScreen = false;
         _graphics.PreferMultiSampling = false;
 
@@ -222,20 +210,6 @@ public class GameHost : Game
     {
         base.Draw(gameTime);
 
-        if (_gameEngine != null)
-        {
-            _gameEngine.Draw(gameTime);
-
-            if (_gameEngine.Presentation.ScanlinesEnabled)
-            {
-                // Scanlines overlay the finished picture, so they are scaled and centred
-                // with it rather than being laid over the letterbox borders as well.
-                _gameEngine.Scanlines.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime,
-                    _gameEngine.Presentation.Transform);
-                _gameEngine.Scanlines.DrawSprite(0, 0, 0,
-                    new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ColourLevels.Full));
-                _gameEngine.Scanlines.End();
-            }
-        }
+        _gameEngine?.Draw(gameTime);
     }
 }

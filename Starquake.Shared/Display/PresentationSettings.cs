@@ -4,6 +4,7 @@
 // -
 using System;
 using Microsoft.Xna.Framework;
+using Starquake.Constants;
 
 namespace Starquake.Display;
 
@@ -19,8 +20,8 @@ namespace Starquake.Display;
 public sealed class PresentationSettings
 {
     /// <summary>
-    ///     The game is composed at a fixed <see cref="GameHost.ScreenWidth" /> by
-    ///     <see cref="GameHost.ScreenHeight" /> and only scaled onto the back buffer as the very
+    ///     The game is composed at a fixed <see cref="CompositionSize.Width" /> by
+    ///     <see cref="CompositionSize.Height" /> and only scaled onto the back buffer as the very
     ///     last step, so nothing in the game has to know or care whether it is in a small window,
     ///     a dragged-out one, or fullscreen on a 6K display. The scale is uniform so the picture
     ///     is never stretched, and whatever is left over becomes an even border - top and bottom,
@@ -70,11 +71,11 @@ public sealed class PresentationSettings
     public static Matrix TransformFor(int backBufferWidth, int backBufferHeight)
     {
         var scale = Math.Min(
-            backBufferWidth / (float)GameHost.ScreenWidth,
-            backBufferHeight / (float)GameHost.ScreenHeight);
+            backBufferWidth / (float)CompositionSize.Width,
+            backBufferHeight / (float)CompositionSize.Height);
 
-        var borderX = (backBufferWidth - GameHost.ScreenWidth * scale) / 2f;
-        var borderY = (backBufferHeight - GameHost.ScreenHeight * scale) / 2f;
+        var borderX = (backBufferWidth - CompositionSize.Width * scale) / 2f;
+        var borderY = (backBufferHeight - CompositionSize.Height * scale) / 2f;
 
         return
             Matrix.CreateScale(scale, scale, 1f) *

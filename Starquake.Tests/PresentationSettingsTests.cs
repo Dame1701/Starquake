@@ -3,6 +3,7 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
+using Starquake.Constants;
 using Starquake.Display;
 using Xunit;
 
@@ -159,9 +160,9 @@ public class PresentationSettingsTests
         /// <summary>
         ///     The fixed size the game composes at, which every scale here is measured against.
         /// </summary>
-        public const int CompositionWidth = GameHost.ScreenWidth;
+        public const int CompositionWidth = CompositionSize.Width;
 
         /// <inheritdoc cref="CompositionWidth" />
-        public const int CompositionHeight = GameHost.ScreenHeight;
+        public const int CompositionHeight = CompositionSize.Height;
     }
 }
