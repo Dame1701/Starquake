@@ -3,10 +3,13 @@
 // ---------------------------------------------------------
 // -
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.Xna.Framework;
+using System;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
+using Starquake.ContentManagement;
 using Starquake.Display;
+using Starquake.Engines.ScreenEffects;
 using Starquake.Engines;
 using Starquake.SharedLibs;
 using Starquake.Sprites;
@@ -16,7 +19,10 @@ namespace Starquake.ActiveSprites;
 internal class JumpPlatform
 {
 
-    private readonly GameEngine _gameEngine;
+    private readonly GraphicsDeviceManager _graphicsDeviceManager;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly Random _randomNumberGenerator;
+    private readonly ScreenEffectEngine _screenEffects;
 
     private readonly SpriteCollection _jumpPlatform;
     private readonly SpriteCollection _jumpPlatformOriginal;
@@ -28,20 +34,30 @@ internal class JumpPlatform
 
     private SpritePixelMatrix _matrix;
 
-    public JumpPlatform(GameEngine gameEngineRef, ContentManager content, Point position)
+    public JumpPlatform(
+        ResourceManager resources,
+        ContentManager content,
+        GraphicsDeviceManager graphics,
+        GraphicsSet graphicsSet,
+        Random randomNumberGenerator,
+        ScreenEffectEngine screenEffects,
+        Point position)
     {
-        _textureDrawer = new SpriteBatch(gameEngineRef.GraphicsDeviceMgr.GraphicsDevice);
-        _gameEngine = gameEngineRef;
+        _textureDrawer = new SpriteBatch(graphics.GraphicsDevice);
+        _graphicsDeviceManager = graphics;
+        _graphicsSet = graphicsSet;
+        _randomNumberGenerator = randomNumberGenerator;
+        _screenEffects = screenEffects;
 
-        _jumpPlatform = gameEngineRef.ContentResourceManager.GetSpriteCollection("JumpPlatforms").Clone();
-        _jumpPlatformOriginal = gameEngineRef.ContentResourceManager.GetSpriteCollection("JumpPlatformsOriginal").Clone();
+        _jumpPlatform = resources.GetSpriteCollection("JumpPlatforms").Clone();
+        _jumpPlatformOriginal = resources.GetSpriteCollection("JumpPlatformsOriginal").Clone();
 
         XPos = position.X;
         YPos = position.Y;
 
         // The platform is always drawn at one sprite's size, so the target it is composed
         // onto never has to change; only the pixel matrix eaten away by the dissolve does
-        _renderTarget = new RenderTarget2D(gameEngineRef.GraphicsDeviceMgr.GraphicsDevice, _jumpPlatform.SpriteWidth, _jumpPlatform.SpriteHeight);
+        _renderTarget = new RenderTarget2D(graphics.GraphicsDevice, _jumpPlatform.SpriteWidth, _jumpPlatform.SpriteHeight);
 
         // A platform that has not been allocated to a screen still sits at a position, and
         // JumpPlatforms replaces both tiles every time it hands this platform out again
@@ -78,7 +94,7 @@ internal class JumpPlatform
     [MemberNotNull(nameof(_matrix))]
     public void Reset()
     {
-        _matrix = new SpritePixelMatrix(_jumpPlatform.SpriteWidth * _jumpPlatform.SpriteHeight, _gameEngine.RandomNumberGenerator);
+        _matrix = new SpritePixelMatrix(_jumpPlatform.SpriteWidth * _jumpPlatform.SpriteHeight, _randomNumberGenerator);
         PlatformActive = false;
         ReadyToAllocate = true;
         _dissolveTime = 100;
@@ -109,10 +125,10 @@ internal class JumpPlatform
         if (PlatformActive)
         {
             // The render target is a texture that we draw directly to
-            _gameEngine.GraphicsDeviceMgr.GraphicsDevice.SetRenderTarget(_renderTarget);
-            _gameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(Color.Transparent);
+            _graphicsDeviceManager.GraphicsDevice.SetRenderTarget(_renderTarget);
+            _graphicsDeviceManager.GraphicsDevice.Clear(Color.Transparent);
 
-            if (_gameEngine.GraphicsSet.IsOriginal)
+            if (_graphicsSet.IsOriginal)
             {
                 _jumpPlatformOriginal.Begin(BlendState.AlphaBlend, gameTime);
                 _jumpPlatformOriginal.DrawSprite(0, 0, 0, Color.White, _matrix.Matrix);
@@ -127,7 +143,7 @@ internal class JumpPlatform
 
 
             // Set the render targer back to the screen
-            _gameEngine.ScreenEffectEngine.SelectRenderViewPort("GameArea", false);
+            _screenEffects.SelectRenderViewPort("GameArea", false);
 
             if (_dissolveTime > 0)
             {

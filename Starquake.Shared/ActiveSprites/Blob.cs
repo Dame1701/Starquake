@@ -328,7 +328,14 @@ public class Blob : GameComponentBase
     {
         GameEngine = gameEngineReference;
 
-        _blobJumpPlatformEngine = new JumpPlatforms(GameEngine);
+        _blobJumpPlatformEngine = new JumpPlatforms(
+            GameEngine.ContentResourceManager,
+            GameEngine.ContentMgr,
+            GameEngine.GameScreens,
+            GameEngine.GraphicsDeviceMgr,
+            GameEngine.GraphicsSet,
+            GameEngine.RandomNumberGenerator,
+            GameEngine.ScreenEffectEngine);
         BlobsControl = new CustomControl(gameEngineReference.Session.PlayerKeys, this, true);
         _blobTouched = false;
         _teleportFadeLevel = ColourLevels.Full;

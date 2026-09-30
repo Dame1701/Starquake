@@ -371,6 +371,10 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
         // Test area
         ShapeDrawer = new Shapes(GraphicsDeviceMgr.GraphicsDevice);
+
+        // Built here rather than with its view ports, so that anything constructed from here on -
+        // the blob's jump platforms, for one - can be handed it instead of reaching for it later.
+        _screenEffectEngine = new ScreenEffectEngine(GameHost.ScreenWidth, GameHost.ScreenHeight, GraphicsDeviceMgr, Presentation);
     }
 
     /// <summary>
@@ -842,10 +846,14 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         }
     }
 
+    /// <summary>
+    ///     The view ports the screen effects draw through. Separate from building the effect engine,
+    ///     which happens in <see cref="Initialise" />: the engine itself needs only a graphics
+    ///     device, while a view port needs the status panel's height and the planet's dimensions,
+    ///     and those are not known until content has loaded.
+    /// </summary>
     private void RegisterScreenEffectViewPorts()
     {
-        _screenEffectEngine = new ScreenEffectEngine(GameHost.ScreenWidth, GameHost.ScreenHeight, GraphicsDeviceMgr, Presentation);
-
         ScreenEffectEngine.RegisterViewPort(
             "GameArea",
             Presentation.ScreenXOffset,

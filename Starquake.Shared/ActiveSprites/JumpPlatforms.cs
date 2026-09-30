@@ -3,8 +3,12 @@
 // ---------------------------------------------------------
 // -
 using System.Collections.Generic;
+using System;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework;
+using Starquake.ContentManagement;
 using Starquake.Display;
+using Starquake.Engines.ScreenEffects;
 using Starquake.Engines;
 using Starquake.SharedLibs;
 
@@ -12,22 +16,41 @@ namespace Starquake.ActiveSprites;
 
 public class JumpPlatforms
 {
-    private readonly GameEngine _gameEngine;
+    private readonly ContentManager _contentManager;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsDeviceManager _graphicsDeviceManager;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
+    private readonly ScreenEffectEngine _screenEffects;
     private readonly List<JumpPlatform> _platforms;
 
-    public JumpPlatforms(GameEngine gameEngineRef)
+    public JumpPlatforms(
+        ResourceManager resources,
+        ContentManager content,
+        GameScreenCollection gameScreens,
+        GraphicsDeviceManager graphics,
+        GraphicsSet graphicsSet,
+        Random randomNumberGenerator,
+        ScreenEffectEngine screenEffects)
     {
-        _gameEngine = gameEngineRef;
+        _resources = resources;
+        _contentManager = content;
+        _gameScreens = gameScreens;
+        _graphicsDeviceManager = graphics;
+        _graphicsSet = graphicsSet;
+        _randomNumberGenerator = randomNumberGenerator;
+        _screenEffects = screenEffects;
         _platforms = new List<JumpPlatform>();
     }
 
     public int GetNewJumpPlatform(int xPos, int yPos, int width, int height, bool checkCollision)
     {
-        var position = JumpPlatform.GetJumpPlatformCoords(xPos, yPos, _gameEngine.GameScreens);
+        var position = JumpPlatform.GetJumpPlatformCoords(xPos, yPos, _gameScreens);
 
         if (checkCollision)
         {
-            if (_gameEngine.GameScreens.CheckRectangles(xPos, position.Y - 64, width, height, true) >= 0)
+            if (_gameScreens.CheckRectangles(xPos, position.Y - 64, width, height, true) >= 0)
             {
                 // If there is a collision, return a failure int i.e. -1000, needs to be a big number because we can have minus amounts when changing screen
                 return -1000;
@@ -50,7 +73,14 @@ public class JumpPlatforms
 
         if (newPlatform == null)
         {
-            newPlatform = new JumpPlatform(_gameEngine, _gameEngine.ContentMgr, position);
+            newPlatform = new JumpPlatform(
+                _resources,
+                _contentManager,
+                _graphicsDeviceManager,
+                _graphicsSet,
+                _randomNumberGenerator,
+                _screenEffects,
+                position);
             _platforms.Add(newPlatform);
         }
 
@@ -59,8 +89,8 @@ public class JumpPlatforms
         newPlatform.PlatformActive = true;
         newPlatform.ReadyToAllocate = false;
 
-        _gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.Add(newPlatform.LeftCollisionTile);
-        _gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.Add(newPlatform.RightCollisionTile);
+        _gameScreens.CurrentGameScreenData.CollisionMap.Add(newPlatform.LeftCollisionTile);
+        _gameScreens.CurrentGameScreenData.CollisionMap.Add(newPlatform.RightCollisionTile);
 
         // Returns blob's new YPosition
         return newPlatform.YPos - 64;
@@ -70,8 +100,8 @@ public class JumpPlatforms
     {
         foreach (var platform in _platforms)
         {
-            _gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.Remove(platform.LeftCollisionTile);
-            _gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.Remove(platform.RightCollisionTile);
+            _gameScreens.CurrentGameScreenData.CollisionMap.Remove(platform.LeftCollisionTile);
+            _gameScreens.CurrentGameScreenData.CollisionMap.Remove(platform.RightCollisionTile);
             platform.Reset();
         }
     }
