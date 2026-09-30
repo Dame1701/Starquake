@@ -56,16 +56,6 @@ public class Nasties : GameComponentBase
             (IPositionalTriggerParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("BasicSmokePlume",
                 ParticleEffectType.TriggeredMultiLocationTimed, null);
 
-        // Create double the number needed for screen swap operations
-        for (var a = 0; a < _nastyCount * 2; a++)
-        {
-            _nasties.Add(
-                new Nasty(
-                    gameEngineReference,
-                    0,
-                    0,
-                    3));
-        }
     }
     public event RaiseInteractionWithBlob? OnNastyInteractionWithBlob;
 
@@ -73,9 +63,16 @@ public class Nasties : GameComponentBase
 
     public void LoadContent(ContentList content)
     {
+        // Create double the number needed for screen swap operations
+        _nasties.Clear();
         for (var a = 0; a < _nastyCount * 2; a++)
         {
-            _nasties[a].LoadContent(content);
+            _nasties.Add(
+                new Nasty(
+                    GameEngine,
+                    0,
+                    0,
+                    3));
         }
     }
 

@@ -2,6 +2,8 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -23,9 +25,9 @@ internal class JumpPlatform
 
     private int _dissolveTime;
 
-    private SpritePixelMatrix _matrix;
+    private readonly RenderTarget2D _renderTarget;
 
-    private RenderTarget2D _renderTarget;
+    private SpritePixelMatrix _matrix;
 
     public JumpPlatform(GameEngine gameEngineRef, ContentManager content, Point position)
     {
@@ -37,6 +39,15 @@ internal class JumpPlatform
 
         XPos = position.X;
         YPos = position.Y;
+
+        // The platform is always drawn at one sprite's size, so the target it is composed
+        // onto never has to change; only the pixel matrix eaten away by the dissolve does
+        _renderTarget = new RenderTarget2D(GameEngine.GetInstance().GraphicsDeviceMgr.GraphicsDevice, _jumpPlatform.SpriteWidth, _jumpPlatform.SpriteHeight);
+
+        // A platform that has not been allocated to a screen still sits at a position, and
+        // JumpPlatforms replaces both tiles every time it hands this platform out again
+        LeftCollisionTile = new CollisionTile((int)CollisionObjectType.JumpPlatform, XPos, YPos, CollisionTileType.EveryoneHits);
+        RightCollisionTile = new CollisionTile((int)CollisionObjectType.JumpPlatform, XPos + 32, YPos, CollisionTileType.EveryoneHits);
 
         Reset();
     }
@@ -65,10 +76,10 @@ internal class JumpPlatform
         return returnValue;
     }
 
+    [MemberNotNull(nameof(_matrix))]
     public void Reset()
     {
         _matrix = new SpritePixelMatrix(_jumpPlatform.SpriteWidth * _jumpPlatform.SpriteHeight);
-        _renderTarget = new RenderTarget2D(GameEngine.GetInstance().GraphicsDeviceMgr.GraphicsDevice, _jumpPlatform.SpriteWidth, _jumpPlatform.SpriteHeight);
         PlatformActive = false;
         ReadyToAllocate = true;
         _dissolveTime = 100;

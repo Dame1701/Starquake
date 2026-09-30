@@ -279,8 +279,6 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
     {
         _elements.LoadContent();
         _coreAliens = new List<Nasty>();
-        var nastyGraphics = new ContentList(GameEngine.ContentMgr);
-        nastyGraphics.AddContent("nastySprite", "Graphics\\nastiesNew");
         _randomNumberGenerator = new Random((int)DateTime.Now.Ticks);
 
         for (var a = 0; a < _coreAlienCount; a++)
@@ -291,7 +289,6 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
                 0,
                 CoreElementsToReplace);
 
-            coreAlien.LoadContent(nastyGraphics);
             coreAlien.NastyType = NastyType.CoreGuardian;
             coreAlien.Initialise(null);
             _coreAliens.Add(coreAlien);

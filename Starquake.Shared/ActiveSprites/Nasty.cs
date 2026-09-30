@@ -2,7 +2,9 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+#nullable enable
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Animations;
@@ -153,10 +155,10 @@ public class Nasty : GameComponentBase
     // Behaviour
 
     private int _nastyDeadPauseCounter;
-    private IStandardParticleEffect _nastyDies;
+    private readonly IStandardParticleEffect _nastyDies;
 
-    private Animation _nastyDiesAnimation;
-    private IStandardParticleEffect _nastyDiesType2;
+    private readonly Animation _nastyDiesAnimation;
+    private readonly IStandardParticleEffect _nastyDiesType2;
     //bool attractedToBlobFlag;
 
 
@@ -164,8 +166,8 @@ public class Nasty : GameComponentBase
     // Tech stuff
     private SpriteCollection _nastySprite;
 
-    private SpriteCollection _nastySpriteNew;
-    private SpriteCollection _nastySpriteOriginal;
+    private readonly SpriteCollection _nastySpriteNew;
+    private readonly SpriteCollection _nastySpriteOriginal;
 
     /// <summary>
     ///     If the nasty is attracted to blob but something is in the way it won't be able to move
@@ -205,6 +207,30 @@ public class Nasty : GameComponentBase
         _nastyAnim.AnimateForwards = true;
         _nastyAnim.Yoyo = true;
         _nastyAnim.Delay = NastyAnimationDelay;
+
+        _nastyDiesAnimation = new Animation();
+        _nastyDiesAnimation.FirstFrame = 0;
+        _nastyDiesAnimation.CurrentFrame = 0;
+        _nastyDiesAnimation.LastFrame = 3;
+        _nastyDiesAnimation.Yoyo = false;
+        _nastyDiesAnimation.Delay = 2;
+        _nastyDiesAnimation.Repeat = true;
+        _nastyDiesAnimation.AnimateForwards = true;
+
+        _nastySpriteOriginal = GameEngine.ContentResourceManager.GetSpriteCollection("NastiesOriginal")
+            .Clone(GameEngine);
+        _nastySpriteNew = GameEngine.ContentResourceManager.GetSpriteCollection("Nasties").Clone(GameEngine);
+
+        CheckSpritesInUse();
+
+        _nastyDies = (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("NastyDies",
+            ParticleEffectType.Triggered, null);
+        _nastyDies.ParticleEffectComplete += nastyDies_ParticleEffectComplete;
+
+        _nastyDiesType2 =
+            (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("NastySplat",
+                ParticleEffectType.Triggered, null);
+        _nastyDiesType2.ParticleEffectComplete += nastyDies_ParticleEffectComplete;
     }
 
     private MoveType MovementType
@@ -329,33 +355,7 @@ public class Nasty : GameComponentBase
         return new Point(0, 0);
     }
 
-    public void LoadContent(ContentList content)
-    {
-        _nastyDiesAnimation = new Animation();
-        _nastyDiesAnimation.FirstFrame = 0;
-        _nastyDiesAnimation.CurrentFrame = 0;
-        _nastyDiesAnimation.LastFrame = 3;
-        _nastyDiesAnimation.Yoyo = false;
-        _nastyDiesAnimation.Delay = 2;
-        _nastyDiesAnimation.Repeat = true;
-        _nastyDiesAnimation.AnimateForwards = true;
-
-        _nastySpriteOriginal = GameEngine.ContentResourceManager.GetSpriteCollection("NastiesOriginal")
-            .Clone(GameEngine);
-        _nastySpriteNew = GameEngine.ContentResourceManager.GetSpriteCollection("Nasties").Clone(GameEngine);
-
-        CheckSpritesInUse();
-
-        _nastyDies = (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("NastyDies",
-            ParticleEffectType.Triggered, null);
-        _nastyDies.ParticleEffectComplete += nastyDies_ParticleEffectComplete;
-
-        _nastyDiesType2 =
-            (IStandardParticleEffect)GameEngine.ContentResourceManager.GetParticleEffectInstance("NastySplat",
-                ParticleEffectType.Triggered, null);
-        _nastyDiesType2.ParticleEffectComplete += nastyDies_ParticleEffectComplete;
-    }
-
+    [MemberNotNull(nameof(_nastySprite))]
     private void CheckSpritesInUse()
     {
         if (GameEngine.UsingOldGraphics)
@@ -615,18 +615,12 @@ public class Nasty : GameComponentBase
             if (_nastyType == NastyType.Spiky ||
                 _nastyType == NastyType.Conveyer)
             {
-                if (_nastyDies != null)
-                {
-                    _nastyDies.Start();
-                }
+                _nastyDies.Start();
             }
             else
             {
-                if (_nastyDiesType2 != null)
-                {
-                    NastyHelpers.ApplyNastyColours(_nastyType, _nastyDiesType2.Effect);
-                    _nastyDiesType2.Start();
-                }
+                NastyHelpers.ApplyNastyColours(_nastyType, _nastyDiesType2.Effect);
+                _nastyDiesType2.Start();
             }
 
             NastyState = NastyState.Dead;
