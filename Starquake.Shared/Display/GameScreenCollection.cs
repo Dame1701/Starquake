@@ -879,9 +879,8 @@ public class GameScreenCollection : GameComponentBase
         _detectedCollisionMap.Clear();
 
         // Cycle through the collision map
-        for (var a = 0; a < _gameScreens[_screenNumber].CollisionMap.Count; a++)
+        foreach (var colTile in _gameScreens[_screenNumber].CollisionMap)
         {
-            var colTile = _gameScreens[_screenNumber].CollisionMap[a];
             _detectedCollisionMap.Add(colTile);
 
             var checkMovementAmountTemp = StepAllowedBy(
