@@ -61,90 +61,43 @@ public static class CollisionDetection
         int obj1X, int obj1Y, int obj1W, int obj1H,
         int obj2X, int obj2Y, int obj2W, int obj2H)
     {
-        if (direction == Direction.Up)
+        var (stepX, stepY) = StepFor(direction);
+
+        if (stepX == 0 && stepY == 0)
         {
-            var amountThatCanBeMoved = 0;
-
-            // Count up in steps to the full velocity requested to see if any collision is taking place
-            for (var a = 0; a < obj1Velocity; a++)
-            {
-                if (!Check(obj1X, obj1Y - (a + 1), obj1W, obj1H, obj2X, obj2Y, obj2W, obj2H))
-                {
-                    amountThatCanBeMoved++;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            return amountThatCanBeMoved;
-        }
-        if (direction == Direction.Down)
-        {
-            var amountThatCanBeMoved = 0;
-
-            // Count up in steps to the full velocity requested to see if any collision is taking place
-            for (var a = 0; a < obj1Velocity; a++)
-            {
-                if (!Check(obj1X, obj1Y + a + 1, obj1W, obj1H, obj2X, obj2Y, obj2W, obj2H))
-                {
-                    amountThatCanBeMoved++;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            if (amountThatCanBeMoved == 0)
-            {
-
-            }
-
-            return amountThatCanBeMoved;
-        }
-        if (direction == Direction.Left)
-        {
-            var amountThatCanBeMoved = 0;
-
-            // Count up in steps to the full velocity requested to see if any collision is taking place
-            for (var a = 0; a < obj1Velocity; a++)
-            {
-                if (!Check(obj1X - (a + 1), obj1Y, obj1W, obj1H, obj2X, obj2Y, obj2W, obj2H))
-                {
-                    amountThatCanBeMoved++;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            return amountThatCanBeMoved;
-        }
-        if (direction == Direction.Right)
-        {
-            var amountThatCanBeMoved = 0;
-
-            // Count up in steps to the full velocity requested to see if any collision is taking place
-            for (var a = 0; a < obj1Velocity; a++)
-            {
-                if (!Check(obj1X + a + 1, obj1Y, obj1W, obj1H, obj2X, obj2Y, obj2W, obj2H))
-                {
-                    amountThatCanBeMoved++;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            return amountThatCanBeMoved;
+            return 0;
         }
 
-        return 0;
+        var amountThatCanBeMoved = 0;
+
+        // Count up in steps to the full velocity requested to see if any collision is taking place
+        for (var a = 1; a <= obj1Velocity; a++)
+        {
+            if (Check(obj1X + stepX * a, obj1Y + stepY * a, obj1W, obj1H, obj2X, obj2Y, obj2W, obj2H))
+            {
+                break;
+            }
+
+            amountThatCanBeMoved++;
+        }
+
+        return amountThatCanBeMoved;
     }
+
+    /// <summary>
+    ///     Which way one step in a direction moves, or nought on both axes for a direction this does
+    ///     not step in. Only the four straight directions do: a diagonal is checked one axis at a time
+    ///     by the caller.
+    /// </summary>
+    private static (int X, int Y) StepFor(Direction direction)
+        => direction switch
+        {
+            Direction.Up => (0, -1),
+            Direction.Down => (0, 1),
+            Direction.Left => (-1, 0),
+            Direction.Right => (1, 0),
+            _ => (0, 0)
+        };
 
     /// <summary>
     ///     Checks for a collision and if it has taken place return the direction it occurred in
