@@ -13,7 +13,7 @@ using Starquake.Structure;
 
 namespace Starquake.Sounds;
 
-public class SoundEffectEngine(ContentManager content, Random randomNumberGenerator) : IDisposable
+public class SoundEffectEngine(ContentManager content) : IDisposable
 {
     /// <summary>
     ///     How long the background rumble waits before its first outing once it is switched on, and
@@ -49,6 +49,12 @@ public class SoundEffectEngine(ContentManager content, Random randomNumberGenera
     private readonly List<SoundEffectInstanceRecord> _singleInstanceSoundEffectInstances = [];
     private bool _periodicBackgroundSoundsEnabled;
     private Guid _periodicBackgroundSoundsId = Guid.Empty;
+
+    /// <summary>
+    ///     Set by the timer callback and cleared by <see cref="Update" />, which is the whole of what
+    ///     the callback is allowed to do to this engine. See the note on <see cref="PlayPeriodicSound" />.
+    /// </summary>
+    private int _periodicSoundDue;
 
     /// <summary>
     ///     One timer for the life of the engine, re-armed rather than replaced. Enabling and
@@ -112,7 +118,7 @@ public class SoundEffectEngine(ContentManager content, Random randomNumberGenera
 
             _periodicBackgroundSoundsEnabled = true;
             _periodicSoundTimer ??= new Timer(PlayPeriodicSound, null, Timeout.Infinite, Timeout.Infinite);
-            _periodicSoundTimer.Change(randomNumberGenerator.Next(FirstSoundMinDelayMs, FirstSoundMaxDelayMs), Timeout.Infinite);
+            _periodicSoundTimer.Change(Random.Shared.Next(FirstSoundMinDelayMs, FirstSoundMaxDelayMs), Timeout.Infinite);
         }
     }
 
@@ -136,16 +142,21 @@ public class SoundEffectEngine(ContentManager content, Random randomNumberGenera
     }
 
     /// <summary>
-    ///     Plays the background rumble, unless the last one is still going, and asks for the next
-    ///     one. The asking happens either way: skipping it when the sound was still playing is what
-    ///     used to silence the rumble for the rest of the game the first time the timer caught it.
+    ///     Notes that the background rumble is due and asks for the next one. The asking happens
+    ///     either way: skipping it when the sound was still playing is what used to silence the
+    ///     rumble for the rest of the game the first time the timer caught it.
     /// </summary>
+    /// <remarks>
+    ///     This runs on a thread pool thread, so it plays nothing itself. It used to call PlaySound
+    ///     and GetSoundState from here, both of which walk the instance lists that the game thread
+    ///     rewrites in KillSounds on every screen change. That survived only because
+    ///     "BackgroundSound1" is registered as a single-instance sound: change that one line of
+    ///     ContentManifest to Multi and the callback starts calling List.Add on a list the game
+    ///     thread is enumerating. <see cref="Update" /> does the playing, on the game thread.
+    /// </remarks>
     private void PlayPeriodicSound(object? state)
     {
-        if (GetSoundState(_periodicBackgroundSoundsId) != SoundState.Playing)
-        {
-            _periodicBackgroundSoundsId = PlaySound("BackgroundSound1", PeriodicSoundVolume, false);
-        }
+        Interlocked.Exchange(ref _periodicSoundDue, 1);
 
         lock (_periodicSoundLock)
         {
@@ -155,7 +166,25 @@ public class SoundEffectEngine(ContentManager content, Random randomNumberGenera
                 return;
             }
 
-            _periodicSoundTimer?.Change(randomNumberGenerator.Next(NextSoundMinDelayMs, NextSoundMaxDelayMs), Timeout.Infinite);
+            _periodicSoundTimer?.Change(Random.Shared.Next(NextSoundMinDelayMs, NextSoundMaxDelayMs), Timeout.Infinite);
+        }
+    }
+
+    /// <summary>
+    ///     Plays the background rumble if the timer has asked for it since the last frame, unless the
+    ///     last one is still going. Called once a frame from the game thread, which is the only thread
+    ///     allowed to touch the sound effect instances.
+    /// </summary>
+    public void Update()
+    {
+        if (Interlocked.Exchange(ref _periodicSoundDue, 0) == 0)
+        {
+            return;
+        }
+
+        if (GetSoundState(_periodicBackgroundSoundsId) != SoundState.Playing)
+        {
+            _periodicBackgroundSoundsId = PlaySound("BackgroundSound1", PeriodicSoundVolume, false);
         }
     }
 

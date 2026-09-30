@@ -196,10 +196,12 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ContentMgr = content;
         Presentation.BackgroundColour = Color.Black;
 
-        // Before the resource manager, which hands it to the sound engine.
+        // The one generator the game logic draws from, so a game can be reproduced from its seed.
+        // The sound engine is deliberately not given it: its only draw happens on a thread pool
+        // timer callback, and System.Random is not thread-safe.
         RandomNumberGenerator = new Random((int)DateTime.Now.Ticks);
 
-        ContentResourceManager = new ResourceManager(content, graphics, RandomNumberGenerator, _graphicsSet);
+        ContentResourceManager = new ResourceManager(content, graphics, _graphicsSet);
         ContentResourceManager.OnGameComponentStatusChanged += ContentResourceManager_OnGameComponentStatusChanged;
 
 
@@ -745,6 +747,10 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         // Anything the background content load threw comes out here, on this thread, rather than
         // being lost on the one that threw it.
         ContentResourceManager.ThrowIfLoadFailed();
+
+        // The background rumble's timer runs on the thread pool and only raises a flag. This is
+        // where it is acted on, because the sound effect instances belong to this thread.
+        ContentResourceManager.GetSoundFxEngine().Update();
 
         if (ToggleKeys.GetPressedKey() == Keys.F9)
         {

@@ -47,7 +47,6 @@ public class ResourceManager : StartableGameComponentBase
     public ResourceManager(
         ContentManager content,
         GraphicsDeviceManager graphics,
-        Random randomNumberGenerator,
         GraphicsSet graphicsSet)
     {
         _contentManagerInstance = content;
@@ -56,7 +55,11 @@ public class ResourceManager : StartableGameComponentBase
 
         _particleEngine = new ParticleEngine(content, graphics, graphicsSet);
         _animationTileEngine = new AnimTileEngine();
-        _soundEngine = new SoundEffectEngine(content, randomNumberGenerator);
+        // Random.Shared rather than the game's own generator: the delay between background
+        // rumbles is drawn on a thread pool timer callback, and System.Random is not thread-safe -
+        // concurrent use can corrupt its state so that it returns zero indefinitely, and about a
+        // dozen collaborators draw from the game's instance every frame.
+        _soundEngine = new SoundEffectEngine(content);
 
         _spriteDescriptions = new List<SpriteDescription>();
         _animSpriteDescriptions = new List<AnimSpriteDescription>();
