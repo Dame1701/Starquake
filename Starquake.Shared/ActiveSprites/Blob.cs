@@ -2418,193 +2418,231 @@ public class Blob : GameComponentBase
         {
             case BlobState.Normal:
             {
-                // Draw the fire trail particles
-                _blobFireTrail?.Draw();
-
-                // Draw blob
-                if (BlobTouchedByNasty)
-                {
-                    // Reset the counter
-                    if (!_blobTouched)
-                    {
-                        _blobEnergyDrainCounter = ColourLevels.Full;
-                        _blobTouched = true;
-                    }
-
-                    if (_blobEnergyDrainCounter > 0)
-                        _blobEnergyDrainCounter -= EnergyDrainFadeStep;
-
-                    if (_blobEnergyDrainCounter < 0)
-                        _blobEnergyDrainCounter = 0;
-                }
-                else
-                {
-                    if (_blobEnergyDrainCounter < ColourLevels.Full)
-                        _blobEnergyDrainCounter += EnergyDrainFadeStep;
-
-                    if (_blobEnergyDrainCounter > ColourLevels.Full)
-                    {
-                        _blobEnergyDrainCounter = ColourLevels.Full;
-                    }
-
-                    _blobTouched = false;
-                }
-
-                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName)
-                    .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName).DrawSprite(BlobFrame,
-                    _blobXPos, _blobYPos,
-                    ColourHelper.GetXna4Colour(ColourLevels.Full, (byte)_blobEnergyDrainCounter, (byte)_blobEnergyDrainCounter,
-                        (byte)(_teleportFadeLevel * ((double)screenFade / ColourLevels.Full))), 1f, 0f);
-                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName).End();
-
-                // Draw other bits
-                if (_blobOnShuttle)
-                {
-                    if (GameEngine.UsingOldGraphics)
-                    {
-                        GameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttleOriginal")
-                            .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                        GameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttleOriginal").DrawSprite(
-                            _blobShuttleAnim.CurrentFrame, _blobXPos, _blobYPos + SpriteMetrics.SpriteHeight,
-                            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
-                        GameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttleOriginal").End();
-                    }
-                    else
-                    {
-                        GameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttle")
-                            .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                        GameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttle").DrawSprite(0, _blobXPos,
-                            _blobYPos + SpriteMetrics.SpriteHeight, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
-                        GameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttle").End();
-                    }
-                }
-
-                _blobJumpPlatformEngine.Draw(gameTime);
-
-                if (BlobHasFired)
-                {
-                    if (_blobFireFade < ColourLevels.Full)
-                    {
-                        _blobFireFade = _blobFireFade + 16;
-                    }
-
-                    if (_blobFireFade > ColourLevels.Full)
-                    {
-                        _blobFireFade = ColourLevels.Full;
-                    }
-
-                    if (GameEngine.UsingOldGraphics)
-                    {
-                        if (_blobOnShuttle)
-                        {
-                            GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original")
-                                .Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
-                            GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").DrawSprite(
-                                _blobAnimFire1.CurrentFrame, BlobFireX, BlobFireY,
-                                ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
-                                    (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), 1.0f, 0f, true,
-                                GameEngine.Paused);
-                            GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").End();
-                        }
-                        else
-                        {
-                            GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire1")
-                                .Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
-                            GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire1").DrawSprite(
-                                _blobAnimFire1.CurrentFrame, BlobFireX, BlobFireY - FireOffset,
-                                ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
-                                    (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), 1.0f, 0f, true,
-                                GameEngine.Paused);
-                            GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire1").End();
-                        }
-                    }
-                    else
-                    {
-                        if (_blobOnShuttle)
-                        {
-                            GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2")
-                                .Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
-                            GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2").DrawSprite(
-                                _blobAnimFire2.CurrentFrame, BlobFireX, BlobFireY,
-                                ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
-                                    (byte)(_blobFireFade * ((double)screenFade / ColourLevels.Full))), 1.0f, 10f,
-                                true,
-                                GameEngine.Paused);
-                            GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2").End();
-                        }
-                    }
-                }
-
-                // Draw teleport beam effect
-                if (_startBlobTeleporting)
-                {
-                    if (_blobTeleporterBeam != null)
-                    {
-                        _blobTeleporterBeam.Draw();
-                    }
-                }
-
-                if (_teleportFadeLevel < ColourLevels.Full)
-                {
-                    _teleportFadeLevel += TeleportFadeStep;
-                }
-
-                if (_teleportFadeLevel > ColourLevels.Full)
-                {
-                    _teleportFadeLevel = ColourLevels.Full;
-                }
-
+                DrawNormalState(gameTime, screenFade);
                 break;
             }
             case BlobState.Overloading when _blobAlarmSoundCounter < OverloadAlarmFrames:
             {
-                // Make blob flicker
-                if (_blobAlarmSoundCounter % 2 == 0)
-                {
-                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName)
-                        .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName).DrawSprite(
-                        BlobFrame, _blobXPos, _blobYPos,
-                        ColourHelper.GetXna4Colour(ColourLevels.Full, (byte)_blobEnergyDrainCounter, (byte)_blobEnergyDrainCounter,
-                            (byte)(_teleportFadeLevel * ((double)screenFade / ColourLevels.Full))), 1f, 0f);
-                    GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName).End();
-                }
-
-                // Draw other bits
-                if (_blobOnShuttle)
-                {
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttle")
-                        .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttle").DrawSprite(0, _blobXPos,
-                        _blobYPos + SpriteMetrics.SpriteHeight, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
-                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttle").End();
-                }
-
+                DrawOverloadAlarmState(gameTime, screenFade);
                 break;
             }
             case BlobState.Overloading:
             {
-                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName)
-                    .Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
-
-                var temp = _blobScale - OverloadFlareFirstScale;
-                for (var a = 0; a < OverloadFlareCopies; a++)
-                {
-                    if (temp >= 0f)
-                    {
-                        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName)
-                            .DrawSprite(BlobFrame, _blobXPos, _blobYPos,
-                                ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, OverloadFlareAlpha), temp, 0f);
-                    }
-
-                    temp += OverloadFlareScaleStep;
-                }
-
-                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName).End();
+                DrawOverloadFlare(gameTime);
                 break;
             }
         }
+    }
+
+    private void DrawNormalState(GameTime gameTime, int screenFade)
+    {
+        _blobFireTrail?.Draw();
+
+        FadeEnergyDrainTint();
+        DrawBlobSprite(gameTime, screenFade);
+        DrawShuttle(gameTime, screenFade);
+
+        _blobJumpPlatformEngine.Draw(gameTime);
+
+        DrawFire(gameTime, screenFade);
+        DrawTeleportBeam();
+        FadeInAfterTeleport();
+    }
+
+    /// <summary>
+    ///     The red wash that shows energy being drained. It runs down while a nasty is touching him and
+    ///     back up once it stops, so a glancing touch shows as a flash rather than a step change.
+    /// </summary>
+    private void FadeEnergyDrainTint()
+    {
+        if (BlobTouchedByNasty)
+        {
+            // Reset the counter
+            if (!_blobTouched)
+            {
+                _blobEnergyDrainCounter = ColourLevels.Full;
+                _blobTouched = true;
+            }
+
+            if (_blobEnergyDrainCounter > 0)
+                _blobEnergyDrainCounter -= EnergyDrainFadeStep;
+
+            if (_blobEnergyDrainCounter < 0)
+                _blobEnergyDrainCounter = 0;
+        }
+        else
+        {
+            if (_blobEnergyDrainCounter < ColourLevels.Full)
+                _blobEnergyDrainCounter += EnergyDrainFadeStep;
+
+            if (_blobEnergyDrainCounter > ColourLevels.Full)
+            {
+                _blobEnergyDrainCounter = ColourLevels.Full;
+            }
+
+            _blobTouched = false;
+        }
+    }
+
+    private void DrawBlobSprite(GameTime gameTime, int screenFade)
+    {
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName)
+            .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName).DrawSprite(BlobFrame,
+            _blobXPos, _blobYPos,
+            ColourHelper.GetXna4Colour(ColourLevels.Full, (byte)_blobEnergyDrainCounter, (byte)_blobEnergyDrainCounter,
+                (byte)(_teleportFadeLevel * ((double)screenFade / ColourLevels.Full))), 1f, 0f);
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName).End();
+    }
+
+    private void DrawShuttle(GameTime gameTime, int screenFade)
+    {
+        if (_blobOnShuttle)
+        {
+            if (GameEngine.UsingOldGraphics)
+            {
+                GameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttleOriginal")
+                    .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+                GameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttleOriginal").DrawSprite(
+                    _blobShuttleAnim.CurrentFrame, _blobXPos, _blobYPos + SpriteMetrics.SpriteHeight,
+                    ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
+                GameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttleOriginal").End();
+            }
+            else
+            {
+                GameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttle")
+                    .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+                GameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttle").DrawSprite(0, _blobXPos,
+                    _blobYPos + SpriteMetrics.SpriteHeight, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
+                GameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttle").End();
+            }
+        }
+    }
+
+    private void DrawFire(GameTime gameTime, int screenFade)
+    {
+        if (BlobHasFired)
+        {
+            if (_blobFireFade < ColourLevels.Full)
+            {
+                _blobFireFade = _blobFireFade + 16;
+            }
+
+            if (_blobFireFade > ColourLevels.Full)
+            {
+                _blobFireFade = ColourLevels.Full;
+            }
+
+            if (GameEngine.UsingOldGraphics)
+            {
+                if (_blobOnShuttle)
+                {
+                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original")
+                        .Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").DrawSprite(
+                        _blobAnimFire1.CurrentFrame, BlobFireX, BlobFireY,
+                        ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
+                            (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), 1.0f, 0f, true,
+                        GameEngine.Paused);
+                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2Original").End();
+                }
+                else
+                {
+                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire1")
+                        .Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire1").DrawSprite(
+                        _blobAnimFire1.CurrentFrame, BlobFireX, BlobFireY - FireOffset,
+                        ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
+                            (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), 1.0f, 0f, true,
+                        GameEngine.Paused);
+                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire1").End();
+                }
+            }
+            else
+            {
+                if (_blobOnShuttle)
+                {
+                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2")
+                        .Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2").DrawSprite(
+                        _blobAnimFire2.CurrentFrame, BlobFireX, BlobFireY,
+                        ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
+                            (byte)(_blobFireFade * ((double)screenFade / ColourLevels.Full))), 1.0f, 10f,
+                        true,
+                        GameEngine.Paused);
+                    GameEngine.ContentResourceManager.GetSpriteCollection("BlobFire2").End();
+                }
+            }
+        }
+    }
+
+    private void DrawTeleportBeam()
+    {
+        if (_startBlobTeleporting)
+        {
+            if (_blobTeleporterBeam != null)
+            {
+                _blobTeleporterBeam.Draw();
+            }
+        }
+    }
+
+    private void FadeInAfterTeleport()
+    {
+        if (_teleportFadeLevel < ColourLevels.Full)
+        {
+            _teleportFadeLevel += TeleportFadeStep;
+        }
+
+        if (_teleportFadeLevel > ColourLevels.Full)
+        {
+            _teleportFadeLevel = ColourLevels.Full;
+        }
+    }
+
+    private void DrawOverloadAlarmState(GameTime gameTime, int screenFade)
+    {
+        // Make blob flicker
+        if (_blobAlarmSoundCounter % 2 == 0)
+        {
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName)
+                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName).DrawSprite(
+                BlobFrame, _blobXPos, _blobYPos,
+                ColourHelper.GetXna4Colour(ColourLevels.Full, (byte)_blobEnergyDrainCounter, (byte)_blobEnergyDrainCounter,
+                    (byte)(_teleportFadeLevel * ((double)screenFade / ColourLevels.Full))), 1f, 0f);
+            GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName).End();
+        }
+
+        if (_blobOnShuttle)
+        {
+            GameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttle")
+                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
+            GameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttle").DrawSprite(0, _blobXPos,
+                _blobYPos + SpriteMetrics.SpriteHeight, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
+            GameEngine.ContentResourceManager.GetSpriteCollection("BlobShuttle").End();
+        }
+    }
+
+    private void DrawOverloadFlare(GameTime gameTime)
+    {
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName)
+            .Begin(BlendState.Additive, SpriteSortMode.BackToFront, gameTime);
+
+        var temp = _blobScale - OverloadFlareFirstScale;
+        for (var a = 0; a < OverloadFlareCopies; a++)
+        {
+            if (temp >= 0f)
+            {
+                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName)
+                    .DrawSprite(BlobFrame, _blobXPos, _blobYPos,
+                        ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, OverloadFlareAlpha), temp, 0f);
+            }
+
+            temp += OverloadFlareScaleStep;
+        }
+
+        GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.BlobSpritesName).End();
     }
 
     public void DrawUpper(int screenFade)
