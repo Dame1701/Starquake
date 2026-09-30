@@ -1299,7 +1299,7 @@ public class Nasty : GameComponentBase
         {
             if (_lastCollisionDirection == Direction.Up)
             {
-                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 2);
+                var newDirection = GameEngine.RandomNumberGenerator.Next(0, 3);
 
                 if (newDirection == 0)
                 {
