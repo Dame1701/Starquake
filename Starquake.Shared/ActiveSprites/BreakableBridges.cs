@@ -60,9 +60,9 @@ public class BreakableBridges
     {
         if (_bridges.Count > 0)
         {
-            for (var a = 0; a < _bridges.Count; a++)
+            foreach (var bridge in _bridges)
             {
-                _bridges[a].Draw(gameTime);
+                bridge.Draw(gameTime);
             }
         }
     }

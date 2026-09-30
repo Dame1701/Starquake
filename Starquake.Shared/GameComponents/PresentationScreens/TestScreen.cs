@@ -51,26 +51,26 @@ public class TestScreen : GameScreenBase, IGameScreen
 
         if (_bda.Triggered)
         {
-            for (var a = 0; a < _bda.BouncingParticles.Count; a++)
+            foreach (var bouncingParticle in _bda.BouncingParticles)
             {
-                if (_bda.BouncingParticles[a].YPos > 700)
+                if (bouncingParticle.YPos > 700)
                 {
-                    _bda.BouncingParticles[a].YBounce();
+                    bouncingParticle.YBounce();
                 }
 
-                if (_bda.BouncingParticles[a].YPos < 500)
+                if (bouncingParticle.YPos < 500)
                 {
-                    _bda.BouncingParticles[a].YBounce();
+                    bouncingParticle.YBounce();
                 }
 
-                if (_bda.BouncingParticles[a].XPos < 400)
+                if (bouncingParticle.XPos < 400)
                 {
-                    _bda.BouncingParticles[a].XBounce();
+                    bouncingParticle.XBounce();
                 }
 
-                if (_bda.BouncingParticles[a].XPos > 800)
+                if (bouncingParticle.XPos > 800)
                 {
-                    _bda.BouncingParticles[a].XBounce();
+                    bouncingParticle.XBounce();
                 }
             }
         }

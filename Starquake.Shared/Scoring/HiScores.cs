@@ -77,9 +77,9 @@ public class HiScores
     /// <returns></returns>
     public bool GotHighScore(int score)
     {
-        for (var a = 0; a < _scores.Count; a++)
+        foreach (var scoreItem in _scores)
         {
-            if (score > _scores[a].Score)
+            if (score > scoreItem.Score)
             {
                 return true;
             }

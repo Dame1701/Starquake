@@ -123,18 +123,18 @@ public class KeyDefiner
         _gameEngine.Font2.WriteText(480, 236, "Press a key for:", 2, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
 
         var keyDefineYPos = 290;
-        for (var a = 0; a < _keysToDefine.Length; a++)
+        foreach (var keysToDefine in _keysToDefine)
         {
-            _gameEngine.Font2.WriteText(500, keyDefineYPos, _keysToDefine[a] + ":", 2, Color.White, (byte)screenFade);
+            _gameEngine.Font2.WriteText(500, keyDefineYPos, keysToDefine + ":", 2, Color.White, (byte)screenFade);
             keyDefineYPos += 40;
         }
 
         keyDefineYPos = 290;
-        for (var a = 0; a < DefinedKeys.Length; a++)
+        foreach (var definedKey in DefinedKeys)
         {
-            if (DefinedKeys[a] != Keys.None)
+            if (definedKey != Keys.None)
             {
-                _gameEngine.Font2.WriteText(660, keyDefineYPos, ToggleKeys.GetFriendlyName(DefinedKeys[a]), 2, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
+                _gameEngine.Font2.WriteText(660, keyDefineYPos, ToggleKeys.GetFriendlyName(definedKey), 2, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
             }
 
             keyDefineYPos += 40;

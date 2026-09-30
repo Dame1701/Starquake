@@ -83,9 +83,9 @@ public class TunnelLiftAnimationEngine : GameComponentBase
     {
         if (_columns != null && _columns.Count > 0)
         {
-            for (var a = 0; a < _columns.Count; a++)
+            foreach (var column in _columns)
             {
-                _columns[a].Update();
+                column.Update();
             }
         }
     }
@@ -96,9 +96,9 @@ public class TunnelLiftAnimationEngine : GameComponentBase
         {
             GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, gameTime);
 
-            for (var a = 0; a < _columns.Count; a++)
+            foreach (var column in _columns)
             {
-                _columns[a].Draw(GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName), screenfade);
+                column.Draw(GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName), screenfade);
             }
 
             GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).End();

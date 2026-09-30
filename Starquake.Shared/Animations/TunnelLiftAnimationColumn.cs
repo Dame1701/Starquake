@@ -47,23 +47,23 @@ public class TunnelLiftAnimationColumn
 
     public void Update()
     {
-        for (var a = 0; a < _sections.Count; a++)
+        foreach (var section in _sections)
         {
-            _sections[a].Update();
+            section.Update();
         }
     }
 
     public void Draw(SpriteCollection tunnelSprites, int screenfade)
     {
-        for (var a = 0; a < _sections.Count; a++)
+        foreach (var section in _sections)
         {
-            if (_sections[a].Intensity > ColourLevels.Full)
+            if (section.Intensity > ColourLevels.Full)
             {
-                tunnelSprites.DrawSprite(13, _sections[a].X, _sections[a].Y, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenfade));
+                tunnelSprites.DrawSprite(13, section.X, section.Y, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenfade));
             }
             else
             {
-                tunnelSprites.DrawSprite(13, _sections[a].X, _sections[a].Y, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, _sections[a].Intensity * (byte)screenfade / ColourLevels.Full));
+                tunnelSprites.DrawSprite(13, section.X, section.Y, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, section.Intensity * (byte)screenfade / ColourLevels.Full));
             }
         }
     }

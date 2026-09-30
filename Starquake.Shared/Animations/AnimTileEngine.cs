@@ -21,9 +21,9 @@ public class AnimTileEngine : GameComponentBase
 
     public bool ContainsTile(int tileNumber)
     {
-        for (var a = 0; a < AnimTilesList.Count; a++)
+        foreach (var animTilesList in AnimTilesList)
         {
-            if (AnimTilesList[a].ScreenTileRef == tileNumber)
+            if (animTilesList.ScreenTileRef == tileNumber)
             {
                 return true;
             }
@@ -34,19 +34,19 @@ public class AnimTileEngine : GameComponentBase
 
     public override void Update(GameTime gameTime)
     {
-        for (var a = 0; a < AnimTilesList.Count; a++)
+        foreach (var animTilesList in AnimTilesList)
         {
-            AnimTilesList[a].Update(gameTime);
+            animTilesList.Update(gameTime);
         }
     }
 
     public void Draw(int tileNumber, int xPos, int yPos, Color colour, GameTime gameTime)
     {
-        for (var a = 0; a < AnimTilesList.Count; a++)
+        foreach (var animTilesList in AnimTilesList)
         {
-            if (AnimTilesList[a].ScreenTileRef == tileNumber)
+            if (animTilesList.ScreenTileRef == tileNumber)
             {
-                AnimTilesList[a].Draw(xPos, yPos, colour, gameTime);
+                animTilesList.Draw(xPos, yPos, colour, gameTime);
             }
         }
     }

@@ -112,11 +112,11 @@ public class ScreenEffectEngine : GameComponentBase
 
     private RenderViewPort GetRenderViewPort(string name)
     {
-        for (var a = 0; a < _renderViewPorts.Count; a++)
+        foreach (var renderViewPort in _renderViewPorts)
         {
-            if (_renderViewPorts[a].Name.ToLower() == name.ToLower())
+            if (renderViewPort.Name.ToLower() == name.ToLower())
             {
-                return _renderViewPorts[a];
+                return renderViewPort;
             }
         }
 
@@ -126,17 +126,17 @@ public class ScreenEffectEngine : GameComponentBase
     public void ExecuteScreenEffect(ScreenEffectType screenEffectToExecute, int effectSpeed, int effectDuration, bool haltBlobAndNasties)
     {
         // Only allow one effect to execute at a time - may need to implement an overrride system....
-        for (var a = 0; a < _screenEffects.Count; a++)
+        foreach (var screenEffect in _screenEffects)
         {
-            _screenEffects[a].Reset();
+            screenEffect.Reset();
             ActiveScreenEffect = null;
         }
 
-        for (var a = 0; a < _screenEffects.Count; a++)
+        foreach (var screenEffect in _screenEffects)
         {
-            if (_screenEffects[a].ScreenEffectType == screenEffectToExecute)
+            if (screenEffect.ScreenEffectType == screenEffectToExecute)
             {
-                ActiveScreenEffect = _screenEffects[a];
+                ActiveScreenEffect = screenEffect;
                 ActiveScreenEffect.TriggerEffect(GetRenderViewPort("GameArea"), effectSpeed, effectDuration);
                 this.HaltBlobAndNasties = haltBlobAndNasties;
                 break;
@@ -172,19 +172,19 @@ public class ScreenEffectEngine : GameComponentBase
         // Clear the screen
         GameEngine.GraphicsDeviceMgr.GraphicsDevice.Clear(GameEngine.ScreenClearColour);
 
-        for (var a = 0; a < _renderViewPorts.Count; a++)
+        foreach (var renderViewPort in _renderViewPorts)
         {
-            if (_renderViewPorts[a].Active)
+            if (renderViewPort.Active)
             {
                 // Only apply effects to the game area - might change this so we can apply different ones to different ports...
-                if (_renderViewPorts[a].Name.ToLower() == "gamearea")
+                if (renderViewPort.Name.ToLower() == "gamearea")
                 {
                     // Run the alternative renderer if we need to
                     var useDefaultRenderer = true;
 
                     if (ActiveScreenEffect != null)
                     {
-                        useDefaultRenderer = ActiveScreenEffect.Draw(_renderer, _renderViewPorts[a]);
+                        useDefaultRenderer = ActiveScreenEffect.Draw(_renderer, renderViewPort);
                     }
 
                     // We're using the default renderer so lets render
@@ -193,11 +193,11 @@ public class ScreenEffectEngine : GameComponentBase
                         _renderer.Begin(SpriteSortMode.Deferred, BlendState.Opaque, null, null, null, null,
                             GameEngine.PresentationTransform);
 
-                        _renderer.Draw(_renderViewPorts[a].RenderTarget, new Rectangle(
-                            _renderViewPorts[a].XPos,
-                            _renderViewPorts[a].YPos,
-                            _renderViewPorts[a].Width,
-                            _renderViewPorts[a].Height), Color.White);
+                        _renderer.Draw(renderViewPort.RenderTarget, new Rectangle(
+                            renderViewPort.XPos,
+                            renderViewPort.YPos,
+                            renderViewPort.Width,
+                            renderViewPort.Height), Color.White);
 
                         _renderer.End();
                     }
@@ -207,16 +207,16 @@ public class ScreenEffectEngine : GameComponentBase
                     _renderer.Begin(SpriteSortMode.Deferred, BlendState.Opaque, null, null, null, null,
                         GameEngine.PresentationTransform);
 
-                    _renderer.Draw(_renderViewPorts[a].RenderTarget, new Rectangle(
-                        _renderViewPorts[a].XPos,
-                        _renderViewPorts[a].YPos,
-                        _renderViewPorts[a].Width,
-                        _renderViewPorts[a].Height), Color.White);
+                    _renderer.Draw(renderViewPort.RenderTarget, new Rectangle(
+                        renderViewPort.XPos,
+                        renderViewPort.YPos,
+                        renderViewPort.Width,
+                        renderViewPort.Height), Color.White);
 
                     _renderer.End();
                 }
 
-                _renderViewPorts[a].Active = false;
+                renderViewPort.Active = false;
             }
         }
 

@@ -154,12 +154,12 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
 
             for (var a = 0; a < GameEngine.Player.BlobInventory.Length; a++)
             {
-                for (var b = 0; b < activeElements.Count; b++)
+                foreach (var activeElement in activeElements)
                 {
-                    if ((int)GameEngine.Player.BlobInventory[a] == activeElements[b].CurrentElement)
+                    if ((int)GameEngine.Player.BlobInventory[a] == activeElement.CurrentElement)
                     {
                         GameEngine.Player.BlobInventory[a] = Collectables.None;
-                        _elementsToReplace.Enqueue(activeElements[b].CurrentElement);
+                        _elementsToReplace.Enqueue(activeElement.CurrentElement);
                         _replacingElements = true;
 
                     }

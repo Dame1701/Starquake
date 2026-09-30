@@ -32,9 +32,9 @@ public class SpritePixelMatrix
     {
         get
         {
-            for (var a = 0; a < Matrix.Length; a++)
+            foreach (var matrix in Matrix)
             {
-                if (Matrix[a].IsOn)
+                if (matrix.IsOn)
                 {
                     return false;
                 }

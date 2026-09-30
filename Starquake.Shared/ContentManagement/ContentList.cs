@@ -25,11 +25,11 @@ public class ContentList
 
     public string GetContent(string contentName)
     {
-        for (var a = 0; a < _content.Count; a++)
+        foreach (var content in _content)
         {
-            if (_content[a].Name == contentName)
+            if (content.Name == contentName)
             {
-                return _content[a].FilePath;
+                return content.FilePath;
             }
         }
 

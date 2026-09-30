@@ -36,11 +36,11 @@ public class JumpPlatforms
 
         JumpPlatform newPlatform = null;
 
-        for (var a = 0; a < _platforms.Count; a++)
+        foreach (var platform in _platforms)
         {
-            if (_platforms[a].ReadyToAllocate)
+            if (platform.ReadyToAllocate)
             {
-                newPlatform = _platforms[a];
+                newPlatform = platform;
                 newPlatform.Reset();
                 newPlatform.XPos = position.X;
                 newPlatform.YPos = position.Y;
@@ -68,11 +68,11 @@ public class JumpPlatforms
 
     public void ResetPlatforms()
     {
-        for (var a = 0; a < _platforms.Count; a++)
+        foreach (var platform in _platforms)
         {
-            _gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.Remove(_platforms[a].LeftCollisionTile);
-            _gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.Remove(_platforms[a].RightCollisionTile);
-            _platforms[a].Reset();
+            _gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.Remove(platform.LeftCollisionTile);
+            _gameEngine.GameScreens.CurrentGameScreenData.CollisionMap.Remove(platform.RightCollisionTile);
+            platform.Reset();
         }
     }
 
@@ -81,19 +81,19 @@ public class JumpPlatforms
         // Update jumpplatform lifetime
         if (_platforms.Count > 0)
         {
-            for (var a = 0; a < _platforms.Count; a++)
+            foreach (var platform in _platforms)
             {
-                if (_platforms[a].LeftCollisionTile != null && _platforms[a].RightCollisionTile != null)
+                if (platform.LeftCollisionTile != null && platform.RightCollisionTile != null)
                 {
-                    if (_platforms[a].Finished)
+                    if (platform.Finished)
                     {
-                        gameScreensReference.CurrentGameScreenData.CollisionMap.Remove(_platforms[a].LeftCollisionTile);
-                        gameScreensReference.CurrentGameScreenData.CollisionMap.Remove(_platforms[a].RightCollisionTile);
-                        _platforms[a].Reset();
+                        gameScreensReference.CurrentGameScreenData.CollisionMap.Remove(platform.LeftCollisionTile);
+                        gameScreensReference.CurrentGameScreenData.CollisionMap.Remove(platform.RightCollisionTile);
+                        platform.Reset();
                     }
                     else
                     {
-                        _platforms[a].Update();
+                        platform.Update();
                     }
                 }
             }
@@ -102,9 +102,9 @@ public class JumpPlatforms
 
     public void Draw(GameTime gameTime)
     {
-        for (var a = 0; a < _platforms.Count; a++)
+        foreach (var platform in _platforms)
         {
-            _platforms[a].Draw(gameTime);
+            platform.Draw(gameTime);
         }
     }
 }

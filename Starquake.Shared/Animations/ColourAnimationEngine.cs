@@ -29,21 +29,21 @@ public class ColourAnimationEngine : GameComponentBase
 
     public void Start(int tileNo, int loopCount)
     {
-        for (var a = 0; a < _colourAnimationsRegistered.Count; a++)
+        foreach (var colourAnimation in _colourAnimationsRegistered)
         {
-            if (_colourAnimationsRegistered[a].TileNo == tileNo)
+            if (colourAnimation.TileNo == tileNo)
             {
-                if (!_colourAnimationsRegistered[a].Running)
+                if (!colourAnimation.Running)
                 {
                     // Make colour initially invisible
-                    _colourAnimationsRegistered[a].TransitionColour.A = 0;
-                    _colourAnimationsRegistered[a].Running = true;
-                    _colourAnimationsRegistered[a].Direction = ColourAnimationDirection.FadeUp;
-                    _colourAnimationsRegistered[a].Stopping = false;
-                    _colourAnimationsRegistered[a].LoopCount = loopCount;
+                    colourAnimation.TransitionColour.A = 0;
+                    colourAnimation.Running = true;
+                    colourAnimation.Direction = ColourAnimationDirection.FadeUp;
+                    colourAnimation.Stopping = false;
+                    colourAnimation.LoopCount = loopCount;
 
                     // Reset the loop counter
-                    _colourAnimationsRegistered[a].LoopCounter = 0;
+                    colourAnimation.LoopCounter = 0;
                 }
             }
         }
@@ -51,22 +51,22 @@ public class ColourAnimationEngine : GameComponentBase
 
     public void Start(int tileNo, int loopCount, Color transitionColour)
     {
-        for (var a = 0; a < _colourAnimationsRegistered.Count; a++)
+        foreach (var colourAnimation in _colourAnimationsRegistered)
         {
-            if (_colourAnimationsRegistered[a].TileNo == tileNo)
+            if (colourAnimation.TileNo == tileNo)
             {
-                if (!_colourAnimationsRegistered[a].Running)
+                if (!colourAnimation.Running)
                 {
                     // Make colour initially invisible
-                    _colourAnimationsRegistered[a].TransitionColour = transitionColour;
-                    _colourAnimationsRegistered[a].TransitionColour.A = 0;
-                    _colourAnimationsRegistered[a].Running = true;
-                    _colourAnimationsRegistered[a].Direction = ColourAnimationDirection.FadeUp;
-                    _colourAnimationsRegistered[a].Stopping = false;
-                    _colourAnimationsRegistered[a].LoopCount = loopCount;
+                    colourAnimation.TransitionColour = transitionColour;
+                    colourAnimation.TransitionColour.A = 0;
+                    colourAnimation.Running = true;
+                    colourAnimation.Direction = ColourAnimationDirection.FadeUp;
+                    colourAnimation.Stopping = false;
+                    colourAnimation.LoopCount = loopCount;
 
                     // Reset the loop counter
-                    _colourAnimationsRegistered[a].LoopCounter = 0;
+                    colourAnimation.LoopCounter = 0;
                 }
             }
         }
@@ -74,23 +74,23 @@ public class ColourAnimationEngine : GameComponentBase
 
     public void Start(int tileNo, int loopCount, Color transitionColour, int intensity)
     {
-        for (var a = 0; a < _colourAnimationsRegistered.Count; a++)
+        foreach (var colourAnimation in _colourAnimationsRegistered)
         {
-            if (_colourAnimationsRegistered[a].TileNo == tileNo)
+            if (colourAnimation.TileNo == tileNo)
             {
-                if (!_colourAnimationsRegistered[a].Running)
+                if (!colourAnimation.Running)
                 {
                     // Make colour initially invisible
-                    _colourAnimationsRegistered[a].TransitionColour = transitionColour;
-                    _colourAnimationsRegistered[a].TransitionColour.A = 0;
-                    _colourAnimationsRegistered[a].Intensity = intensity;
-                    _colourAnimationsRegistered[a].Running = true;
-                    _colourAnimationsRegistered[a].Direction = ColourAnimationDirection.FadeUp;
-                    _colourAnimationsRegistered[a].Stopping = false;
-                    _colourAnimationsRegistered[a].LoopCount = loopCount;
+                    colourAnimation.TransitionColour = transitionColour;
+                    colourAnimation.TransitionColour.A = 0;
+                    colourAnimation.Intensity = intensity;
+                    colourAnimation.Running = true;
+                    colourAnimation.Direction = ColourAnimationDirection.FadeUp;
+                    colourAnimation.Stopping = false;
+                    colourAnimation.LoopCount = loopCount;
 
                     // Reset the loop counter
-                    _colourAnimationsRegistered[a].LoopCounter = 0;
+                    colourAnimation.LoopCounter = 0;
                 }
             }
         }
@@ -98,21 +98,21 @@ public class ColourAnimationEngine : GameComponentBase
 
     public void Start(string name, int loopCount)
     {
-        for (var a = 0; a < _colourAnimationsRegistered.Count; a++)
+        foreach (var colourAnimation in _colourAnimationsRegistered)
         {
-            if (_colourAnimationsRegistered[a].Name == name)
+            if (colourAnimation.Name == name)
             {
-                if (!_colourAnimationsRegistered[a].Running)
+                if (!colourAnimation.Running)
                 {
                     // Make colour initially invisible
-                    _colourAnimationsRegistered[a].TransitionColour.A = 0;
-                    _colourAnimationsRegistered[a].Running = true;
-                    _colourAnimationsRegistered[a].Direction = ColourAnimationDirection.FadeUp;
-                    _colourAnimationsRegistered[a].Stopping = false;
-                    _colourAnimationsRegistered[a].LoopCount = loopCount;
+                    colourAnimation.TransitionColour.A = 0;
+                    colourAnimation.Running = true;
+                    colourAnimation.Direction = ColourAnimationDirection.FadeUp;
+                    colourAnimation.Stopping = false;
+                    colourAnimation.LoopCount = loopCount;
 
                     // Reset the loop counter
-                    _colourAnimationsRegistered[a].LoopCounter = 0;
+                    colourAnimation.LoopCounter = 0;
                 }
             }
         }
@@ -120,22 +120,22 @@ public class ColourAnimationEngine : GameComponentBase
 
     public void Start(string name, int loopCount, Color transitionColour)
     {
-        for (var a = 0; a < _colourAnimationsRegistered.Count; a++)
+        foreach (var colourAnimation in _colourAnimationsRegistered)
         {
-            if (_colourAnimationsRegistered[a].Name == name)
+            if (colourAnimation.Name == name)
             {
-                if (!_colourAnimationsRegistered[a].Running)
+                if (!colourAnimation.Running)
                 {
                     // Make colour initially invisible
-                    _colourAnimationsRegistered[a].TransitionColour = transitionColour;
-                    _colourAnimationsRegistered[a].TransitionColour.A = 0;
-                    _colourAnimationsRegistered[a].Running = true;
-                    _colourAnimationsRegistered[a].Direction = ColourAnimationDirection.FadeUp;
-                    _colourAnimationsRegistered[a].Stopping = false;
-                    _colourAnimationsRegistered[a].LoopCount = loopCount;
+                    colourAnimation.TransitionColour = transitionColour;
+                    colourAnimation.TransitionColour.A = 0;
+                    colourAnimation.Running = true;
+                    colourAnimation.Direction = ColourAnimationDirection.FadeUp;
+                    colourAnimation.Stopping = false;
+                    colourAnimation.LoopCount = loopCount;
 
                     // Reset the loop counter
-                    _colourAnimationsRegistered[a].LoopCounter = 0;
+                    colourAnimation.LoopCounter = 0;
                 }
             }
         }
@@ -143,23 +143,23 @@ public class ColourAnimationEngine : GameComponentBase
 
     public void Start(string name, int loopCount, Color transitionColour, int intensity)
     {
-        for (var a = 0; a < _colourAnimationsRegistered.Count; a++)
+        foreach (var colourAnimation in _colourAnimationsRegistered)
         {
-            if (_colourAnimationsRegistered[a].Name == name)
+            if (colourAnimation.Name == name)
             {
-                if (!_colourAnimationsRegistered[a].Running)
+                if (!colourAnimation.Running)
                 {
                     // Make colour initially invisible
-                    _colourAnimationsRegistered[a].TransitionColour = transitionColour;
-                    _colourAnimationsRegistered[a].TransitionColour.A = 0;
-                    _colourAnimationsRegistered[a].Intensity = intensity;
-                    _colourAnimationsRegistered[a].Running = true;
-                    _colourAnimationsRegistered[a].Direction = ColourAnimationDirection.FadeUp;
-                    _colourAnimationsRegistered[a].Stopping = false;
-                    _colourAnimationsRegistered[a].LoopCount = loopCount;
+                    colourAnimation.TransitionColour = transitionColour;
+                    colourAnimation.TransitionColour.A = 0;
+                    colourAnimation.Intensity = intensity;
+                    colourAnimation.Running = true;
+                    colourAnimation.Direction = ColourAnimationDirection.FadeUp;
+                    colourAnimation.Stopping = false;
+                    colourAnimation.LoopCount = loopCount;
 
                     // Reset the loop counter
-                    _colourAnimationsRegistered[a].LoopCounter = 0;
+                    colourAnimation.LoopCounter = 0;
                 }
             }
         }
@@ -199,88 +199,88 @@ public class ColourAnimationEngine : GameComponentBase
 
     public void ChangeSpeed(int tileNo, int speed)
     {
-        for (var a = 0; a < _colourAnimationsRegistered.Count; a++)
+        foreach (var colourAnimation in _colourAnimationsRegistered)
         {
-            if (_colourAnimationsRegistered[a].TileNo == tileNo)
+            if (colourAnimation.TileNo == tileNo)
             {
-                _colourAnimationsRegistered[a].Speed = speed;
+                colourAnimation.Speed = speed;
             }
         }
     }
 
     public void ChangeSpeed(string name, int speed)
     {
-        for (var a = 0; a < _colourAnimationsRegistered.Count; a++)
+        foreach (var colourAnimation in _colourAnimationsRegistered)
         {
-            if (_colourAnimationsRegistered[a].Name == name)
+            if (colourAnimation.Name == name)
             {
-                _colourAnimationsRegistered[a].Speed = speed;
+                colourAnimation.Speed = speed;
             }
         }
     }
 
     public override void Update(GameTime gameTime)
     {
-        for (var a = 0; a < _colourAnimationsRegistered.Count; a++)
+        foreach (var colourAnimation in _colourAnimationsRegistered)
         {
-            if (_colourAnimationsRegistered[a].Running)
+            if (colourAnimation.Running)
             {
-                if (_colourAnimationsRegistered[a].Direction == ColourAnimationDirection.FadeUp)
+                if (colourAnimation.Direction == ColourAnimationDirection.FadeUp)
                 {
-                    if (_colourAnimationsRegistered[a].TransitionColour.A < ColourLevels.Full)
+                    if (colourAnimation.TransitionColour.A < ColourLevels.Full)
                     {
-                        int value = _colourAnimationsRegistered[a].TransitionColour.A;
-                        value = value + _colourAnimationsRegistered[a].Speed;
+                        int value = colourAnimation.TransitionColour.A;
+                        value = value + colourAnimation.Speed;
 
                         if (value > ColourLevels.Full)
                         {
                             value = ColourLevels.Full;
                         }
 
-                        _colourAnimationsRegistered[a].TransitionColour.A = (byte)value;
+                        colourAnimation.TransitionColour.A = (byte)value;
                     }
                     else
                     {
-                        _colourAnimationsRegistered[a].Direction = ColourAnimationDirection.FadeDown;
+                        colourAnimation.Direction = ColourAnimationDirection.FadeDown;
                     }
                 }
-                else if (_colourAnimationsRegistered[a].Direction == ColourAnimationDirection.FadeDown)
+                else if (colourAnimation.Direction == ColourAnimationDirection.FadeDown)
                 {
-                    if (_colourAnimationsRegistered[a].TransitionColour.A > 0)
+                    if (colourAnimation.TransitionColour.A > 0)
                     {
-                        int value = _colourAnimationsRegistered[a].TransitionColour.A;
-                        value = value - _colourAnimationsRegistered[a].Speed;
+                        int value = colourAnimation.TransitionColour.A;
+                        value = value - colourAnimation.Speed;
 
                         if (value < 0)
                         {
                             value = 0;
                         }
 
-                        _colourAnimationsRegistered[a].TransitionColour.A = (byte)value;
+                        colourAnimation.TransitionColour.A = (byte)value;
                     }
                     else
                     {
-                        if (!_colourAnimationsRegistered[a].Stopping &&
-                            _colourAnimationsRegistered[a].LoopCounter < _colourAnimationsRegistered[a].LoopCount - 1)
+                        if (!colourAnimation.Stopping &&
+                            colourAnimation.LoopCounter < colourAnimation.LoopCount - 1)
                         {
-                            if (_colourAnimationsRegistered[a].LoopCount >= 0)
+                            if (colourAnimation.LoopCount >= 0)
                             {
-                                _colourAnimationsRegistered[a].LoopCounter++;
+                                colourAnimation.LoopCounter++;
                             }
 
-                            _colourAnimationsRegistered[a].Direction = ColourAnimationDirection.FadeUp;
+                            colourAnimation.Direction = ColourAnimationDirection.FadeUp;
                         }
                         else
                         {
-                            if (_colourAnimationsRegistered[a].Stopping ||
-                                _colourAnimationsRegistered[a].LoopCount >= 0)
+                            if (colourAnimation.Stopping ||
+                                colourAnimation.LoopCount >= 0)
                             {
-                                _colourAnimationsRegistered[a].Running = false;
-                                _colourAnimationsRegistered[a].LoopCounter = 0;
+                                colourAnimation.Running = false;
+                                colourAnimation.LoopCounter = 0;
                             }
                             else
                             {
-                                _colourAnimationsRegistered[a].Direction = ColourAnimationDirection.FadeUp;
+                                colourAnimation.Direction = ColourAnimationDirection.FadeUp;
                             }
                         }
                     }
@@ -297,17 +297,17 @@ public class ColourAnimationEngine : GameComponentBase
         {
             for (var x = 0; x < GameEngine.GameScreens.TilesAcross; x++)
             {
-                for (var a = 0; a < _colourAnimationsRegistered.Count; a++)
+                foreach (var colourAnimation in _colourAnimationsRegistered)
                 {
-                    if (_colourAnimationsRegistered[a].Running)
+                    if (colourAnimation.Running)
                     {
-                        if (GameEngine.GameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage == _colourAnimationsRegistered[a].TileNo) // Teleport booths
+                        if (GameEngine.GameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage == colourAnimation.TileNo) // Teleport booths
                         {
                             // Layer up the tiles to make the intensity deeper
-                            for (var b = 0; b < _colourAnimationsRegistered[a].Intensity; b++)
+                            for (var b = 0; b < colourAnimation.Intensity; b++)
                             {
-                                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).DrawSprite(_colourAnimationsRegistered[a].TileNo, x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth,
-                                    y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight, _colourAnimationsRegistered[a].TransitionColour);
+                                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).DrawSprite(colourAnimation.TileNo, x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth,
+                                    y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight, colourAnimation.TransitionColour);
                             }
                         }
                     }
@@ -325,18 +325,18 @@ public class ColourAnimationEngine : GameComponentBase
         {
             for (var x = 0; x < GameEngine.GameScreens.TilesAcross; x++)
             {
-                for (var a = 0; a < _colourAnimationsRegistered.Count; a++)
+                foreach (var colourAnimation in _colourAnimationsRegistered)
                 {
-                    if (_colourAnimationsRegistered[a].Running &&
-                        _colourAnimationsRegistered[a].TileNo >= 0)
+                    if (colourAnimation.Running &&
+                        colourAnimation.TileNo >= 0)
                     {
-                        if (GameEngine.GameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage == _colourAnimationsRegistered[a].TileNo) // Teleport booths
+                        if (GameEngine.GameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage == colourAnimation.TileNo) // Teleport booths
                         {
                             // Layer up the tiles to make the intensity deeper
-                            for (var b = 0; b < _colourAnimationsRegistered[a].Intensity; b++)
+                            for (var b = 0; b < colourAnimation.Intensity; b++)
                             {
-                                sprites.DrawSprite(_colourAnimationsRegistered[a].TileNo, x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth,
-                                    y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight, _colourAnimationsRegistered[a].TransitionColour);
+                                sprites.DrawSprite(colourAnimation.TileNo, x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth,
+                                    y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteHeight, colourAnimation.TransitionColour);
                             }
                         }
                     }
@@ -354,18 +354,18 @@ public class ColourAnimationEngine : GameComponentBase
         {
             for (var x = 0; x < GameEngine.GameScreens.TilesAcross; x++)
             {
-                for (var a = 0; a < _colourAnimationsRegistered.Count; a++)
+                foreach (var colourAnimation in _colourAnimationsRegistered)
                 {
-                    if (_colourAnimationsRegistered[a].Running &&
-                        _colourAnimationsRegistered[a].UpperTileToDraw >= 0)
+                    if (colourAnimation.Running &&
+                        colourAnimation.UpperTileToDraw >= 0)
                     {
-                        if (GameEngine.GameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage == _colourAnimationsRegistered[a].TileNo) // Teleport booths
+                        if (GameEngine.GameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage == colourAnimation.TileNo) // Teleport booths
                         {
                             // Layer up the tiles to make the intensity deeper
-                            for (var b = 0; b < _colourAnimationsRegistered[a].Intensity; b++)
+                            for (var b = 0; b < colourAnimation.Intensity; b++)
                             {
-                                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).DrawSprite(_colourAnimationsRegistered[a].UpperTileToDraw, x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth,
-                                    y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).SpriteHeight, _colourAnimationsRegistered[a].TransitionColour);
+                                GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).DrawSprite(colourAnimation.UpperTileToDraw, x * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.LowerScreenTilesName).SpriteWidth,
+                                    y * GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.UpperScreenTilesName).SpriteHeight, colourAnimation.TransitionColour);
                             }
                         }
                     }

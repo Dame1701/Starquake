@@ -62,9 +62,9 @@ public class ConveyerNasties : GameComponentBase
         // See if we need to create some nasties and get on with it
 
         // Deactivate all nasties first
-        for (var a = 0; a < Nasties.Count; a++)
+        foreach (var nasty in Nasties)
         {
-            Nasties[a].PerformPostChangeScreenActions();
+            nasty.PerformPostChangeScreenActions();
         }
 
         var nastiesToGenerate = GameEngine.GameScreens.GetCoordsOfTiles(391);
@@ -166,11 +166,11 @@ public class ConveyerNasties : GameComponentBase
 
     public override void Draw(GameTime gameTime, int screenFade)
     {
-        for (var a = 0; a < Nasties.Count; a++)
+        foreach (var nasty in Nasties)
         {
-            if (Nasties[a].NastyActive || Nasties[a].NastyState == NastyState.Dead)
+            if (nasty.NastyActive || nasty.NastyState == NastyState.Dead)
             {
-                Nasties[a].Draw(gameTime, screenFade);
+                nasty.Draw(gameTime, screenFade);
             }
         }
     }

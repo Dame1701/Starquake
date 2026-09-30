@@ -79,9 +79,9 @@ public sealed class CompoundEdit(string name, IReadOnlyList<IEdit> edits) : IEdi
 
     public void Redo(EditorDocument document)
     {
-        for (var index = 0; index < edits.Count; index++)
+        foreach (var edit in edits)
         {
-            edits[index].Redo(document);
+            edit.Redo(document);
         }
     }
 }

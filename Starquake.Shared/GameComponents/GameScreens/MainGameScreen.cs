@@ -252,9 +252,9 @@ public class MainGameScreen : GameComponentBase, IGameScreen
             // Test completing core
             if (ToggleKeys.GetPressedKey() == Keys.C)
             {
-                for (var a = 0; a < GameEngine.Elements.Elements.Length; a++)
+                foreach (var element in GameEngine.Elements.Elements)
                 {
-                    GameEngine.Elements.Elements[a].ElementState = CoreElementState.Replaced;
+                    element.ElementState = CoreElementState.Replaced;
                 }
             }
 

@@ -116,9 +116,9 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("MachineryBackground", 0.5f, true);
 
         // Run Keyfader animation
-        for (var a = 0; a < _keyFades.Length; a++)
+        foreach (var keyFade in _keyFades)
         {
-            _keyFades[a].Update();
+            keyFade.Update();
         }
 
         _powerSupplyFader.Update();

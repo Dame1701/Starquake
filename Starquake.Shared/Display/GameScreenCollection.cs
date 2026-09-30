@@ -213,9 +213,9 @@ public class GameScreenCollection : GameComponentBase
     {
         var screensVisited = 0;
 
-        for (var a = 0; a < _gameScreens.Length; a++)
+        foreach (var gameScreen in _gameScreens)
         {
-            if (_gameScreens[a].ScreenVisited)
+            if (gameScreen.ScreenVisited)
             {
                 screensVisited++;
             }
@@ -267,14 +267,14 @@ public class GameScreenCollection : GameComponentBase
                     {
                         for (var x1 = 0; x1 < TileMetrics.CollisionCellsAcrossTile; x1++)
                         {
-                            for (var a = 0; a < _gameScreens[ScreenNumber].CollisionMap.Count; a++)
+                            foreach (var collisionTile in _gameScreens[ScreenNumber].CollisionMap)
                             {
-                                if (_gameScreens[ScreenNumber].CollisionMap[a].XPos ==
+                                if (collisionTile.XPos ==
                                     x * _tileWidth + x1 * CollAreaWidth &&
-                                    _gameScreens[ScreenNumber].CollisionMap[a].YPos ==
+                                    collisionTile.YPos ==
                                     y * _tileHeight + y1 * CollAreaHeight)
                                 {
-                                    if (_gameScreens[ScreenNumber].CollisionMap[a].CollisionTileType ==
+                                    if (collisionTile.CollisionTileType ==
                                         CollisionTileType.NotBlob)
                                     {
                                         addLocation = false;
@@ -668,7 +668,7 @@ public class GameScreenCollection : GameComponentBase
 
         if (_gameScreens[ScreenNumber].PickUps != null)
         {
-            for (var a = 0; a < _gameScreens[ScreenNumber].PickUps.Count; a++)
+            foreach (var pickUp in _gameScreens[ScreenNumber].PickUps)
             {
                 for (var y = 0; y < 2; y++)
                 {
@@ -679,8 +679,8 @@ public class GameScreenCollection : GameComponentBase
                             _gameScreens[ScreenNumber].CollisionMap.Add(
                                 new CollisionTile(
                                     (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                    _gameScreens[ScreenNumber].PickUps[a].XLocation + x * 32,
-                                    _gameScreens[ScreenNumber].PickUps[a].YLocation + y * 32,
+                                    pickUp.XLocation + x * 32,
+                                    pickUp.YLocation + y * 32,
                                     CollisionTileType.NotBlob));
                         }
                         else
@@ -688,8 +688,8 @@ public class GameScreenCollection : GameComponentBase
                             collisionsToAppend.Add(
                                 new CollisionTile(
                                     (int)CollisionObjectType.GameObject, // Random image that's meaningless
-                                    _gameScreens[ScreenNumber].PickUps[a].XLocation + x * 32,
-                                    _gameScreens[ScreenNumber].PickUps[a].YLocation + y * 32,
+                                    pickUp.XLocation + x * 32,
+                                    pickUp.YLocation + y * 32,
                                     CollisionTileType.NotBlob));
                         }
                     }
@@ -735,7 +735,7 @@ public class GameScreenCollection : GameComponentBase
 
     public void ChangeShuttlePlatformState(bool padRemoved)
     {
-        for (var a = 0; a < _gameScreens.Length; a++)
+        foreach (var gameScreen in _gameScreens)
         {
             for (var y = 0; y < TilesDown; y++)
             {
@@ -743,9 +743,9 @@ public class GameScreenCollection : GameComponentBase
                 {
                     if (padRemoved)
                     {
-                        if (_gameScreens[a].ScreenTiles[x, y].TileImage == (int)ActionTiles.ShuttlePlatform)
+                        if (gameScreen.ScreenTiles[x, y].TileImage == (int)ActionTiles.ShuttlePlatform)
                         {
-                            _gameScreens[a].ScreenTiles[x, y].TileImage = (int)ActionTiles.RemovedShuttlePlatform;
+                            gameScreen.ScreenTiles[x, y].TileImage = (int)ActionTiles.RemovedShuttlePlatform;
 
                             // Trigger Colour animation
                             GameEngine.ColourAnimationEngine.Start((int)ActionTiles.ShuttleTag1, -1);
@@ -755,9 +755,9 @@ public class GameScreenCollection : GameComponentBase
                     }
                     else
                     {
-                        if (_gameScreens[a].ScreenTiles[x, y].TileImage == (int)ActionTiles.RemovedShuttlePlatform)
+                        if (gameScreen.ScreenTiles[x, y].TileImage == (int)ActionTiles.RemovedShuttlePlatform)
                         {
-                            _gameScreens[a].ScreenTiles[x, y].TileImage = (int)ActionTiles.ShuttlePlatform;
+                            gameScreen.ScreenTiles[x, y].TileImage = (int)ActionTiles.ShuttlePlatform;
 
                             // Cancel Colour animation
                             GameEngine.ColourAnimationEngine.Stop((int)ActionTiles.ShuttleTag1);
@@ -780,24 +780,24 @@ public class GameScreenCollection : GameComponentBase
         var collide = false;
 
         // Cycle through the collision map
-        for (var a = 0; a < _gameScreens[_screenNumber].CollisionMap.Count; a++)
+        foreach (var collisionTile in _gameScreens[_screenNumber].CollisionMap)
         {
             collide =
                 CollisionDetection.Check(
                     new Rectangle(playerXPos, playerYPos, playerWidth, playerHeight),
-                    new Rectangle(_gameScreens[_screenNumber].CollisionMap[a].XPos,
-                        _gameScreens[_screenNumber].CollisionMap[a].YPos, CollAreaWidth, CollAreaHeight));
+                    new Rectangle(collisionTile.XPos,
+                        collisionTile.YPos, CollAreaWidth, CollAreaHeight));
 
             if (collide)
             {
-                if (isBlob && _gameScreens[_screenNumber].CollisionMap[a].CollisionTileType ==
+                if (isBlob && collisionTile.CollisionTileType ==
                     CollisionTileType.NotBlob)
                 {
                     collide = false;
                 }
                 else
                 {
-                    return _gameScreens[_screenNumber].CollisionMap[a].TileImage;
+                    return collisionTile.TileImage;
                 }
             }
         }
@@ -1159,10 +1159,10 @@ public class GameScreenCollection : GameComponentBase
             {
                 _keyDoorForceFieldNoAccess.Start();
 
-                for (var b = 0; b < _keyLockDoors.Count; b++)
+                foreach (var keyLockDoor in _keyLockDoors)
                 {
                     // Create the collision map
-                    if (_keyLockDoors[b].CollisionTiles.Count == 0) // If the collision map doesn't exist, create it
+                    if (keyLockDoor.CollisionTiles.Count == 0) // If the collision map doesn't exist, create it
                     {
                         CollisionTile keyLockCollisionTile = null;
 
@@ -1171,12 +1171,12 @@ public class GameScreenCollection : GameComponentBase
                             keyLockCollisionTile =
                                 new CollisionTile(
                                     (int)CollisionObjectType.KeyAccessDoor, // Random image that's meaningless
-                                    _keyLockDoors[b].Location.X + 48,
-                                    _keyLockDoors[b].Location.Y + c * 32,
+                                    keyLockDoor.Location.X + 48,
+                                    keyLockDoor.Location.Y + c * 32,
                                     CollisionTileType.None);
 
                             // Add the tile to the keylock door so we can remove it later
-                            _keyLockDoors[b].CollisionTiles.Add(keyLockCollisionTile);
+                            keyLockDoor.CollisionTiles.Add(keyLockCollisionTile);
 
                             // Add the tile to the collision map
                             _gameScreens[ScreenNumber].CollisionMap.Add(keyLockCollisionTile);
@@ -1195,14 +1195,14 @@ public class GameScreenCollection : GameComponentBase
 
                     for (var c = 0; c < 4; c++)
                     {
-                        _keyDoorForceFieldNoAccess.Update(_keyLockDoors[b].Location.X + 52 + c,
-                            _keyLockDoors[b].Location.Y + 48, gameTime);
+                        _keyDoorForceFieldNoAccess.Update(keyLockDoor.Location.X + 52 + c,
+                            keyLockDoor.Location.Y + 48, gameTime);
                     }
 
                     for (var c = 0; c < 4; c++)
                     {
-                        _keyDoorForceFieldNoAccess.Update(_keyLockDoors[b].Location.X + 76 + c,
-                            _keyLockDoors[b].Location.Y + 48, gameTime);
+                        _keyDoorForceFieldNoAccess.Update(keyLockDoor.Location.X + 76 + c,
+                            keyLockDoor.Location.Y + 48, gameTime);
                     }
 
                     // Change colour of the gate depending on whether blob has the access key or not
@@ -1214,10 +1214,10 @@ public class GameScreenCollection : GameComponentBase
                             new Color(0, ColourLevels.Full, 0).ToVector3();
 
                         // Change collision tiles to anyone but Blob
-                        for (var c = 0; c < _keyLockDoors[b].CollisionTiles.Count; c++)
+                        foreach (var collisionTile in keyLockDoor.CollisionTiles)
                         {
                             // Remove the tile from screen and from the key door lock collection
-                            _keyLockDoors[b].CollisionTiles[c].CollisionTileType = CollisionTileType.NotBlob;
+                            collisionTile.CollisionTileType = CollisionTileType.NotBlob;
                         }
                     }
                     else
@@ -1228,10 +1228,10 @@ public class GameScreenCollection : GameComponentBase
                             new Color(ColourLevels.Full, 0, 0).ToVector3();
 
                         // Change collision tiles to everyone
-                        for (var c = 0; c < _keyLockDoors[b].CollisionTiles.Count; c++)
+                        foreach (var collisionTile in keyLockDoor.CollisionTiles)
                         {
                             // Remove the tile from screen and from the key door lock collection
-                            _keyLockDoors[b].CollisionTiles[c].CollisionTileType = CollisionTileType.EveryoneHits;
+                            collisionTile.CollisionTileType = CollisionTileType.EveryoneHits;
                         }
                     }
 
@@ -1242,8 +1242,8 @@ public class GameScreenCollection : GameComponentBase
 
                     for (var c = 0; c < 12; c++)
                     {
-                        _keyDoorForceFieldNoAccess.Update(_keyLockDoors[b].Location.X + 60 + c,
-                            _keyLockDoors[b].Location.Y + 48, gameTime);
+                        _keyDoorForceFieldNoAccess.Update(keyLockDoor.Location.X + 60 + c,
+                            keyLockDoor.Location.Y + 48, gameTime);
                     }
                 }
             }
@@ -1339,11 +1339,11 @@ public class GameScreenCollection : GameComponentBase
         {
             GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName)
                 .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate, gameTime);
-            for (var a = 0; a < CurrentGameScreenData.PickUps.Count; a++)
+            foreach (var pickUp in CurrentGameScreenData.PickUps)
             {
                 GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).DrawSprite(
-                    CurrentGameScreenData.PickUps[a].Type, CurrentGameScreenData.PickUps[a].XLocation,
-                    CurrentGameScreenData.PickUps[a].YLocation, colour);
+                    pickUp.Type, pickUp.XLocation,
+                    pickUp.YLocation, colour);
             }
 
             GameEngine.ContentResourceManager.GetSpriteCollection(GameEngine.PickupsName).End();
@@ -1701,10 +1701,10 @@ public class GameScreenCollection : GameComponentBase
 
                 var potentialLocations = GetPotentialLocations(a);
                 var placePickup = false;
-                for (var b = 0; b < powerUpScreens.Count; b++)
+                foreach (var powerUpScreen in powerUpScreens)
                 {
                     // Does the screen we're currently on match a power up screen designated in our list?
-                    if (a == powerUpScreens[b])
+                    if (a == powerUpScreen)
                     {
                         // Yep so we can place a powerup here...
                         placePickup = true;
@@ -1803,10 +1803,10 @@ public class GameScreenCollection : GameComponentBase
             if (_gameScreens[a].PickUps != null &&
                 _gameScreens[a].PickUps.Count > 0)
             {
-                for (var b = 0; b < _gameScreens[a].PickUps.Count; b++)
+                foreach (var pickUp in _gameScreens[a].PickUps)
                 {
-                    if ((Collectables)_gameScreens[a].PickUps[b].Type != Collectables.AccessCard ||
-                        (Collectables)_gameScreens[a].PickUps[b].Type != Collectables.Key)
+                    if ((Collectables)pickUp.Type != Collectables.AccessCard ||
+                        (Collectables)pickUp.Type != Collectables.Key)
                     {
                         screensContainingCoreElements.Add(_gameScreens[a]);
                         break;

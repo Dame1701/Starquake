@@ -166,9 +166,9 @@ public class CoreElements : GameComponentBase
 
     public override void Update(GameTime gameTime)
     {
-        for (var a = 0; a < Elements.Length; a++)
+        foreach (var element in Elements)
         {
-            Elements[a].Update(gameTime);
+            element.Update(gameTime);
         }
     }
 
