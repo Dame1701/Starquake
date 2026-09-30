@@ -2410,7 +2410,7 @@ public class Blob : GameComponentBase
 
                 break;
             }
-            case BlobState.Overloading when _blobAlarmSoundCounter < 60:
+            case BlobState.Overloading when _blobAlarmSoundCounter < OverloadAlarmFrames:
             {
                 // Make blob flicker
                 if (_blobAlarmSoundCounter % 2 == 0)
