@@ -133,9 +133,9 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     // Colour Animation Engine
     public ColourAnimationEngine ColourAnimationEngine;
     private GameComponentBase _computerReportScreen;
-    public ContentManager ContentMgr;
+    public readonly ContentManager ContentMgr;
 
-    public ResourceManager ContentResourceManager;
+    public readonly ResourceManager ContentResourceManager;
     public ConveyerNasties ConveyerNastiesInstance;
     private GameComponentBase _coreScreen;
     public GameScreenType CurrentGameScreen;
@@ -153,10 +153,10 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public BitmapFont Font2;
     private GameComponentBase _gameCompleteScreen;
     private GameComponentBase _gameOverScreen;
-    public GameScreenCollection GameScreens;
+    public readonly GameScreenCollection GameScreens;
 
     //public MercuryParticleEngine ParticleEngine;
-    public GraphicsDeviceManager GraphicsDeviceMgr;
+    public readonly GraphicsDeviceManager GraphicsDeviceMgr;
     private GameComponentBase _hiScoreScreen;
 
     public bool InTestMode = true;
@@ -199,7 +199,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     public Matrix PresentationTransform = Matrix.Identity;
 
-    public Random RandomNumberGenerator;
+    public readonly Random RandomNumberGenerator;
     public SpriteCollection Scanlines;
     public bool ScanlinesEnabled = true;
 
@@ -207,7 +207,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     // Screen Effect engine
     public ScreenEffectEngine ScreenEffectEngine;
-    public Dictionary<GameScreenType, IGameScreen> Screens;
+    private readonly Dictionary<GameScreenType, IGameScreen> _screens;
     public int ScreenXOffset;
     public int ScreenYOffset;
 
@@ -250,7 +250,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ContentResourceManager.OnGameComponentStatusChanged += ContentResourceManager_OnGameComponentStatusChanged;
 
         RandomNumberGenerator = new Random((int)DateTime.Now.Ticks);
-        Screens = new Dictionary<GameScreenType, IGameScreen>();
+        _screens = new Dictionary<GameScreenType, IGameScreen>();
 
         // Starting screen will be the title screen later.....
         CurrentGameScreen = GameScreenType.Options;
@@ -726,21 +726,21 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
             _coreScreen.Initialise(Elements);
 
-            Screens.Add(GameScreenType.Options, (IGameScreen)_optionsScreen);
-            Screens.Add(GameScreenType.ComputerReport, (IGameScreen)_computerReportScreen);
-            Screens.Add(GameScreenType.HiScores, (IGameScreen)_hiScoreScreen);
-            Screens.Add(GameScreenType.GameOver, (IGameScreen)_gameOverScreen);
-            Screens.Add(GameScreenType.GameComplete, (IGameScreen)_gameCompleteScreen);
-            Screens.Add(GameScreenType.TestScreen, (IGameScreen)_testScreen);
+            _screens.Add(GameScreenType.Options, (IGameScreen)_optionsScreen);
+            _screens.Add(GameScreenType.ComputerReport, (IGameScreen)_computerReportScreen);
+            _screens.Add(GameScreenType.HiScores, (IGameScreen)_hiScoreScreen);
+            _screens.Add(GameScreenType.GameOver, (IGameScreen)_gameOverScreen);
+            _screens.Add(GameScreenType.GameComplete, (IGameScreen)_gameCompleteScreen);
+            _screens.Add(GameScreenType.TestScreen, (IGameScreen)_testScreen);
 
-            Screens.Add(GameScreenType.MainGame, (IGameScreen)_mainScreen);
-            Screens.Add(GameScreenType.Teleporter, (IGameScreen)_teleportScreen);
-            Screens.Add(GameScreenType.PlanetCore, (IGameScreen)_coreScreen);
-            Screens.Add(GameScreenType.AccessBooth, (IGameScreen)_accessScreen);
-            Screens.Add(GameScreenType.Cheops, (IGameScreen)_cheopsScreen);
+            _screens.Add(GameScreenType.MainGame, (IGameScreen)_mainScreen);
+            _screens.Add(GameScreenType.Teleporter, (IGameScreen)_teleportScreen);
+            _screens.Add(GameScreenType.PlanetCore, (IGameScreen)_coreScreen);
+            _screens.Add(GameScreenType.AccessBooth, (IGameScreen)_accessScreen);
+            _screens.Add(GameScreenType.Cheops, (IGameScreen)_cheopsScreen);
 
             // Load the content for the screens
-            foreach (var screen in Screens)
+            foreach (var screen in _screens)
             {
                 ((GameComponentBase)screen.Value).LoadContent();
             }
@@ -793,8 +793,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     public IGameScreen GetGameScreen(GameScreenType gameScreen)
     {
-        IGameScreen screenToGet = null;
-        Screens.TryGetValue(gameScreen, out screenToGet);
+        _screens.TryGetValue(gameScreen, out var screenToGet);
         return screenToGet;
     }
 
@@ -860,8 +859,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                     }
                 }
             }
-
-            IGameScreen screenToUpdate = null;
 
             // A toggle rather than IsKeyDown: held down, that flipped fullscreen once per
             // logic frame for as long as the key was held.
@@ -1053,7 +1050,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
             if (!Paused)
             {
-                Screens.TryGetValue(CurrentGameScreen, out screenToUpdate);
+                _screens.TryGetValue(CurrentGameScreen, out var screenToUpdate);
 
                 // Status panel
                 if (CurrentGameScreen == GameScreenType.Cheops ||
@@ -1070,7 +1067,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                     screenToUpdate.Update(gameTime);
 
                     // Update realtime gamescreens
-                    foreach (var igs in Screens.Values)
+                    foreach (var igs in _screens.Values)
                     {
                         if (igs is IRealTimeGameScreen && igs != screenToUpdate)
                         {
@@ -1176,7 +1173,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             ScreenEffectEngine.SelectRenderViewPort("GameArea"); // GameArea;
             GraphicsDeviceMgr.GraphicsDevice.Clear(ScreenClearColour);
 
-            Screens.TryGetValue(CurrentGameScreen, out var screenToDraw);
+            _screens.TryGetValue(CurrentGameScreen, out var screenToDraw);
             screenToDraw?.Draw(gameTime);
 
             if (Paused)
@@ -1232,33 +1229,9 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             }
         }
     }
-
-    #region IDisposable Members
-
-    private void FreeMem(IDisposable objToFree)
-    {
-        if (objToFree != null)
-        {
-            objToFree.Dispose();
-            objToFree = null;
-        }
-    }
-
+    
     public void Dispose()
     {
         ContentResourceManager.GetSoundFxEngine().Dispose();
-        //FreeMem(BlobSprites);
-        //FreeMem(BlobShuttle);
-        //FreeMem(JumpPlatforms);
-        //FreeMem(BlobFire1);
-        //FreeMem(BlobFire2);
-        //FreeMem(BlobFire2Overlay);
-        //FreeMem(UpperScreenTiles);
-        //FreeMem(LowerScreenTiles);
-        //FreeMem(PickUps);
-        //FreeMem(SQText);
     }
-
-    #endregion
-
 }

@@ -1,0 +1,231 @@
+﻿<!--
+    The editor's chrome. Colours come from EditorColours so that the window and the surfaces
+    drawn inside it cannot drift apart; this file is only about shape, spacing and states.
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style Selector="Window">
+        <Setter Property="Background" Value="{DynamicResource EditorBackgroundBrush}" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <Style Selector="Menu">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Padding" Value="4,2" />
+    </Style>
+
+    <!-- The strips that frame the work: the toolbar above it and the status line below. -->
+    <Style Selector="Border.chrome">
+        <Setter Property="Background" Value="{DynamicResource EditorPanelBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EditorBorderBrush}" />
+    </Style>
+
+    <Style Selector="Border.panel">
+        <Setter Property="Background" Value="{DynamicResource EditorPanelBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EditorBorderBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.header">
+        <Setter Property="Foreground" Value="{DynamicResource EditorMutedBrush}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Margin" Value="0,0,0,6" />
+    </Style>
+
+    <Style Selector="TextBlock.status">
+        <Setter Property="Foreground" Value="{DynamicResource EditorMutedBrush}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+
+    <Style Selector="TextBlock.statusStrong">
+        <Setter Property="Foreground" Value="{DynamicResource EditorTextBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.accent">
+        <Setter Property="Foreground" Value="{DynamicResource EditorAccentBrush}" />
+    </Style>
+
+    <!--
+        The tool picker and the view toggles share one look. Both are retemplated rather than
+        restyled because the stock templates put their own colours on an inner part, which a
+        setter on the control itself never reaches.
+    -->
+    <Style Selector="RadioButton.tool">
+        <Setter Property="Foreground" Value="{DynamicResource EditorMutedBrush}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="Shell"
+                        Background="Transparent"
+                        BorderBrush="Transparent"
+                        BorderThickness="1"
+                        CornerRadius="5"
+                        Padding="7">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="RadioButton.tool:pointerover /template/ Border#Shell">
+        <Setter Property="Background" Value="{DynamicResource EditorPanelRaisedBrush}" />
+    </Style>
+
+    <Style Selector="RadioButton.tool:checked /template/ Border#Shell">
+        <Setter Property="Background" Value="{DynamicResource EditorAccentWashBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EditorAccentBrush}" />
+    </Style>
+
+    <Style Selector="RadioButton.tool:checked">
+        <Setter Property="Foreground" Value="{DynamicResource EditorAccentBrush}" />
+    </Style>
+
+    <Style Selector="ToggleButton.chip">
+        <Setter Property="Foreground" Value="{DynamicResource EditorMutedBrush}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="Shell"
+                        Background="Transparent"
+                        BorderBrush="{DynamicResource EditorBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="5"
+                        Padding="7">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="ToggleButton.chip:pointerover /template/ Border#Shell">
+        <Setter Property="Background" Value="{DynamicResource EditorPanelRaisedBrush}" />
+    </Style>
+
+    <Style Selector="ToggleButton.chip:checked /template/ Border#Shell">
+        <Setter Property="Background" Value="{DynamicResource EditorAccentWashBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EditorAccentBrush}" />
+    </Style>
+
+    <Style Selector="ToggleButton.chip:checked">
+        <Setter Property="Foreground" Value="{DynamicResource EditorAccentBrush}" />
+    </Style>
+
+    <!--
+        Icon buttons. The icon inherits the button's Foreground, so the checked and hover states
+        defined above colour the glyph without the icon needing to know anything about them.
+    -->
+    <Style Selector="Button.icon">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource EditorMutedBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="5" />
+        <Setter Property="Padding" Value="7" />
+    </Style>
+
+    <Style Selector="Button.icon:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource EditorPanelRaisedBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource EditorTextBrush}" />
+    </Style>
+
+    <Style Selector="Button.icon:disabled /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Opacity" Value="0.35" />
+    </Style>
+
+    <!-- Tooltips carry a title, a sentence and the shortcut, so they need room to breathe. -->
+    <Style Selector="ToolTip">
+        <Setter Property="Background" Value="{DynamicResource EditorPanelRaisedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EditorBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Padding" Value="10,8" />
+        <Setter Property="Foreground" Value="{DynamicResource EditorTextBrush}" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style Selector="ToolTip TextBlock.tipTitle">
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource EditorTextBrush}" />
+    </Style>
+
+    <Style Selector="ToolTip TextBlock.tipBody">
+        <Setter Property="Foreground" Value="{DynamicResource EditorMutedBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <!--
+        A shortcut line is two runs: the word "Shortcut:" and the key itself. The key keeps the
+        accent colour it always had and the label is plain white, so the eye lands on the key
+        rather than on the eleven identical labels down a column of tooltips.
+    -->
+    <Style Selector="ToolTip TextBlock.tipKeys">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Foreground" Value="{DynamicResource EditorAccentBrush}" />
+    </Style>
+
+    <Style Selector="ToolTip TextBlock.tipKeys > Run.tipKeysLabel">
+        <Setter Property="Foreground" Value="{DynamicResource EditorTextBrush}" />
+    </Style>
+
+    <Style Selector="Button.quiet">
+        <Setter Property="Background" Value="{DynamicResource EditorPanelRaisedBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource EditorTextBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EditorBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="5" />
+        <Setter Property="Padding" Value="10,4" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <!--
+        The confirming button of a dialog. Named "primary" rather than "accent" because Fluent
+        already defines an "accent" button class of its own - its blue - and marking a button
+        IsDefault opts into that same look, either of which would otherwise win here. The colour
+        goes on the template's content presenter because that is the part Fluent paints.
+    -->
+    <Style Selector="Button.primary">
+        <Setter Property="Foreground" Value="#1A1205" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="Button.primary /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource EditorAccentBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EditorAccentBrush}" />
+        <Setter Property="TextElement.Foreground" Value="#1A1205" />
+    </Style>
+
+    <Style Selector="Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource EditorAccentBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EditorTextBrush}" />
+        <Setter Property="TextElement.Foreground" Value="#1A1205" />
+    </Style>
+
+    <Style Selector="TextBox.search">
+        <Setter Property="Background" Value="{DynamicResource EditorBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EditorBorderBrush}" />
+        <Setter Property="CornerRadius" Value="5" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Padding" Value="8,5" />
+    </Style>
+
+    <Style Selector="GridSplitter">
+        <Setter Property="Background" Value="{DynamicResource EditorBorderBrush}" />
+    </Style>
+
+    <Style Selector="Separator.toolbar">
+        <Setter Property="Background" Value="{DynamicResource EditorBorderBrush}" />
+        <Setter Property="Width" Value="1" />
+        <Setter Property="Height" Value="20" />
+        <Setter Property="Margin" Value="6,0" />
+    </Style>
+
+</Styles>

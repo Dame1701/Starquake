@@ -14,7 +14,7 @@ target framework and MonoGame flavour, and adds whatever packaging that platform
 | `Starquake.Windows` | Windows | `net9.0-windows` | WindowsDX |
 | `ProjectMercury` | all (particle engine) | `net8.0`, `net8.0-windows` | both, by target framework |
 | `ProjectMercury.ContentPipeline` | build-time only (MGCB extension) | `net8.0` | DesktopGL |
-| `SharedLibs` | all (screen data structures) | `net9.0` | — |
+| `SharedLibs` | all (screen data structures and world constants) | `net9.0` | — |
 | `ScreenEditor` | all (Avalonia tool, not part of the game) | `net9.0` | — |
 
 `Starquake.Shared` and `ProjectMercury` both multi-target a plain and a `-windows` framework.
@@ -27,7 +27,16 @@ Each head builds to an assembly named `Starquake`, so `Starquake.Shared.dll` plu
 `Starquake.dll` entry point is the normal shape of the output.
 
 `SharedLibs` has no MonoGame dependency, so there is nothing to multi-target for and a single
-`net9.0` build serves the game and the editor alike.
+`net9.0` build serves the game and the editor alike. As well as the screen data structures it
+holds the constants that describe the shape of the world — `TileMetrics`, `WorldMap`,
+`TunnelTiles` and `ActionTiles`. The editor has to agree with the game about every one of
+those, so they live in one place rather than being written down twice; they kept their
+`Starquake.Constants` and `Starquake.Structure` namespaces when they moved, so the game's own
+sources did not change.
+
+`ScreenEditor` is an Avalonia app and nothing in the game references it. It is on Avalonia
+11.3 rather than the 11.2 it was generated against, because `Material.Icons.Avalonia` — the
+toolbar's icons — needs 11.3.
 
 ## Building
 
