@@ -110,14 +110,14 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public readonly ResourceManager ContentResourceManager;
 
     //public MercuryParticleEngine ParticleEngine;
-    public readonly GraphicsDeviceManager GraphicsDeviceMgr;
+    private readonly GraphicsDeviceManager _graphicsDeviceMgr;
 
     /// <summary>
     ///     Which of the two sets of artwork the game is drawn with, and the sheet names that go
     ///     with it. Switched by <see cref="SwitchGraphicsSetIfAsked" />; read live by everything
     ///     that draws.
     /// </summary>
-    public readonly GraphicsSet GraphicsSet = new();
+    private readonly GraphicsSet _graphicsSet = new();
 
     /// <summary>
     ///     How the composed picture is put on the screen - the transform onto the back buffer, the
@@ -192,14 +192,14 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ContentManager content)
     {
         // Setup graphics device and content management
-        GraphicsDeviceMgr = graphics;
+        _graphicsDeviceMgr = graphics;
         ContentMgr = content;
         Presentation.BackgroundColour = Color.Black;
 
         // Before the resource manager, which hands it to the sound engine.
         RandomNumberGenerator = new Random((int)DateTime.Now.Ticks);
 
-        ContentResourceManager = new ResourceManager(content, graphics, RandomNumberGenerator, GraphicsSet);
+        ContentResourceManager = new ResourceManager(content, graphics, RandomNumberGenerator, _graphicsSet);
         ContentResourceManager.OnGameComponentStatusChanged += ContentResourceManager_OnGameComponentStatusChanged;
 
 
@@ -309,7 +309,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     {
         if (interactionType == NastyInteractionType.BlobShot)
         {
-            BlobStatusPanel.PlayerScore = BlobStatusPanel.PlayerScore + ScoreForShootingNasty;
+            BlobStatusPanel.PlayerScore += ScoreForShootingNasty;
         }
         else if (interactionType == NastyInteractionType.HitBlob)
         {
@@ -349,7 +349,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         nameof(ShapeDrawer))]
     private void Initialise()
     {
-        BlobStatusPanel = new StatusPanel(ContentResourceManager, GraphicsSet, ScreenDirectory, RandomNumberGenerator);
+        BlobStatusPanel = new StatusPanel(ContentResourceManager, _graphicsSet, ScreenDirectory, RandomNumberGenerator);
         BlobStatusPanel.Initialise(null);
 
         _session = new GameSession();
@@ -357,14 +357,14 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         _session.OnPlayerKeysChanged += Session_OnPlayerKeysChanged;
 
         // Core Elements
-        Elements = new CoreElements(BlobStatusPanel, ContentResourceManager, GraphicsSet, Presentation, RandomNumberGenerator);
+        Elements = new CoreElements(BlobStatusPanel, ContentResourceManager, _graphicsSet, Presentation, RandomNumberGenerator);
 
         // Test area
-        ShapeDrawer = new Shapes(GraphicsDeviceMgr.GraphicsDevice);
+        ShapeDrawer = new Shapes(_graphicsDeviceMgr.GraphicsDevice);
 
         // Built here rather than with its view ports, so that anything constructed from here on -
         // the blob's jump platforms, for one - can be handed it instead of reaching for it later.
-        _screenEffectEngine = new ScreenEffectEngine(CompositionSize.Width, CompositionSize.Height, GraphicsDeviceMgr, Presentation);
+        _screenEffectEngine = new ScreenEffectEngine(CompositionSize.Width, CompositionSize.Height, _graphicsDeviceMgr, Presentation);
     }
 
     /// <summary>
@@ -393,17 +393,17 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         nameof(_scanlines))]
     private void DefineBootGraphics()
     {
-        _bootScreen = new SpriteCollection(GraphicsDeviceMgr, ContentMgr, @"Graphics\\BootScreen2", CompositionSize.Width, CompositionSize.Height);
-        _bootProgressBackground = new SpriteCollection(GraphicsDeviceMgr, ContentMgr, @"Graphics\\ProgressBarBackground", 1046, 32);
-        _bootProgress = new SpriteCollection(GraphicsDeviceMgr, ContentMgr, @"Graphics\\BootProgress", 1, 24);
-        _scanlines = new SpriteCollection(GraphicsDeviceMgr, ContentMgr, @"Graphics\\Scanlines2", CompositionSize.Width, CompositionSize.Height);
+        _bootScreen = new SpriteCollection(_graphicsDeviceMgr, ContentMgr, @"Graphics\\BootScreen2", CompositionSize.Width, CompositionSize.Height);
+        _bootProgressBackground = new SpriteCollection(_graphicsDeviceMgr, ContentMgr, @"Graphics\\ProgressBarBackground", 1046, 32);
+        _bootProgress = new SpriteCollection(_graphicsDeviceMgr, ContentMgr, @"Graphics\\BootProgress", 1, 24);
+        _scanlines = new SpriteCollection(_graphicsDeviceMgr, ContentMgr, @"Graphics\\Scanlines2", CompositionSize.Width, CompositionSize.Height);
     }
 
     [MemberNotNull(nameof(Font1), nameof(Font2))]
     private void DefineFonts()
     {
-        Font1 = new BitmapFont(ContentMgr.Load<SpriteFont>("Fonts\\elektoraSmall"), new SpriteBatch(GraphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
-        Font2 = new BitmapFont(ContentMgr.Load<SpriteFont>("Fonts\\elektoraMedium"), new SpriteBatch(GraphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
+        Font1 = new BitmapFont(ContentMgr.Load<SpriteFont>("Fonts\\elektoraSmall"), new SpriteBatch(_graphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
+        Font2 = new BitmapFont(ContentMgr.Load<SpriteFont>("Fonts\\elektoraMedium"), new SpriteBatch(_graphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
     }
 
 
@@ -440,7 +440,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         _gameScreens =
             new GameScreenCollection(
                 ContentResourceManager,
-                GraphicsSet,
+                _graphicsSet,
                 Elements,
                 RandomNumberGenerator,
                 TileMetrics.TilesAcross,
@@ -451,11 +451,11 @@ public class GameEngine : StartableGameComponentBase, IDisposable
                 TileMetrics.CollisionCellHeight);
 
         // Tunnel lift animations. After the screen collection, which it reads the lift shafts from.
-        _tunnelAnimations = new TunnelLiftAnimationEngine(ContentResourceManager, GameScreens, GraphicsSet);
+        _tunnelAnimations = new TunnelLiftAnimationEngine(ContentResourceManager, GameScreens, _graphicsSet);
 
         // The blob's death throes. After the screen collection, which each thrown-off fragment
         // bounces around.
-        _blobKiller = new BlobDeathAnimation(ContentResourceManager, GameScreens, GraphicsSet, RandomNumberGenerator);
+        _blobKiller = new BlobDeathAnimation(ContentResourceManager, GameScreens, _graphicsSet, RandomNumberGenerator);
 
         // Its fragments each take a particle effect instance, so this cannot run until the
         // resources are loaded - which is now, not when the load was started.
@@ -467,8 +467,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         _breakableBridgesEngine = new BreakableBridges(
             ContentResourceManager,
             GameScreens,
-            GraphicsDeviceMgr,
-            GraphicsSet,
+            _graphicsDeviceMgr,
+            _graphicsSet,
             RandomNumberGenerator,
             ScreenEffectEngine);
 
@@ -479,8 +479,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             ContentResourceManager,
             ContentMgr,
             GameScreens,
-            GraphicsDeviceMgr,
-            GraphicsSet,
+            _graphicsDeviceMgr,
+            _graphicsSet,
             ScreenDirectory,
             ScreenEffectEngine,
             BlobStatusPanel,
@@ -497,14 +497,14 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             ContentResourceManager,
             Font2,
             GameScreens,
-            GraphicsSet,
+            _graphicsSet,
             Presentation,
             ScreenDirectory,
             ScreenEffectEngine,
             BlobKiller,
             RandomNumberGenerator);
 
-        Presentation.ScreenXOffset = (GraphicsDeviceMgr.PreferredBackBufferWidth - GameScreens.ScreenWidth) / 2;
+        Presentation.ScreenXOffset = (_graphicsDeviceMgr.PreferredBackBufferWidth - GameScreens.ScreenWidth) / 2;
         Presentation.ScreenYOffset = 10;
 
         // The conveyer nasties and the electricity engine. Both chase the blob and read the
@@ -513,7 +513,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             ContentResourceManager,
             ContentMgr,
             GameScreens,
-            GraphicsDeviceMgr,
+            _graphicsDeviceMgr,
             Player,
             RandomNumberGenerator);
         ConveyerNastiesInstance.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
@@ -526,7 +526,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         _electricityNodeGateEngine = new ElectricityGatesAndNodesEngine(
             ContentResourceManager,
             GameScreens,
-            GraphicsSet,
+            _graphicsSet,
             Player,
             RandomNumberGenerator,
             ConveyerNastiesInstance);
@@ -538,7 +538,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         _nasties = new Nasties(
             ContentResourceManager,
             GameScreens,
-            GraphicsSet,
+            _graphicsSet,
             Session,
             Player,
             RandomNumberGenerator,
@@ -616,7 +616,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ScreenDirectory.Add(GameScreenType.Options, new OptionsScreen(
             ContentResourceManager,
             Font2,
-            GraphicsDeviceMgr,
+            _graphicsDeviceMgr,
             Presentation,
             ScreenEffectEngine,
             ScreenDirectory,
@@ -624,7 +624,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ScreenDirectory.Add(GameScreenType.ComputerReport, new ComputerReportScreen(
             ContentResourceManager,
             Font2,
-            GraphicsDeviceMgr,
+            _graphicsDeviceMgr,
             Presentation,
             ScreenEffectEngine,
             ScreenDirectory,
@@ -632,7 +632,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ScreenDirectory.Add(GameScreenType.HiScores, new HiScoreScreen(
             ContentResourceManager,
             Font2,
-            GraphicsDeviceMgr,
+            _graphicsDeviceMgr,
             Presentation,
             ScreenEffectEngine,
             ScreenDirectory,
@@ -640,7 +640,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ScreenDirectory.Add(GameScreenType.GameOver, new GameOverScreen(
             ContentResourceManager,
             Font2,
-            GraphicsDeviceMgr,
+            _graphicsDeviceMgr,
             Presentation,
             ScreenEffectEngine,
             ScreenDirectory,
@@ -650,7 +650,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ScreenDirectory.Add(GameScreenType.GameComplete, new GameCompleteScreen(
             ContentResourceManager,
             Font2,
-            GraphicsDeviceMgr,
+            _graphicsDeviceMgr,
             Presentation,
             ScreenEffectEngine,
             ScreenDirectory,
@@ -661,7 +661,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             ContentResourceManager,
             Font2,
             GameScreens,
-            GraphicsSet,
+            _graphicsSet,
             Player,
             Presentation,
             RandomNumberGenerator,
@@ -670,7 +670,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
         ScreenDirectory.Add(GameScreenType.PlanetCore, new PlanetCoreScreen(
             ContentResourceManager,
             GameScreens,
-            GraphicsSet,
+            _graphicsSet,
             Presentation,
             ScreenDirectory,
             Session,
@@ -682,7 +682,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             ContentResourceManager,
             Font2,
             GameScreens,
-            GraphicsSet,
+            _graphicsSet,
             Player,
             RandomNumberGenerator,
             ScreenDirectory,
@@ -693,7 +693,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             Elements,
             Font2,
             GameScreens,
-            GraphicsSet,
+            _graphicsSet,
             Player,
             RandomNumberGenerator,
             ScreenDirectory,
@@ -742,8 +742,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     ///     <see cref="ContentResourceManager_OnGameComponentStatusChanged" /> when the worker says it
     ///     has finished.
     /// </summary>
-    private void LoadContent()
-        => ContentResourceManager.LoadContent();
+    private void LoadContent() => ContentResourceManager.LoadContent();
 
     // Resets the game back to defaults - need to sort all of this out!
     public void Reset()
@@ -859,10 +858,11 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     {
         if (ToggleKeys.GetPressedKey() == Keys.F12)
         {
-            if (ScreenDirectory.Current == GameScreenType.Cheops ||
-                ScreenDirectory.Current == GameScreenType.MainGame ||
-                ScreenDirectory.Current == GameScreenType.PlanetCore ||
-                ScreenDirectory.Current == GameScreenType.AccessBooth)
+            if (ScreenDirectory.Current is
+                GameScreenType.Cheops or
+                GameScreenType.MainGame or
+                GameScreenType.PlanetCore or
+                GameScreenType.AccessBooth)
             {
                 // Automatically pause the game after switching to or from fullscreen so the player doesn't die unexpectantly
                 if (!Session.Paused)
@@ -894,10 +894,10 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     {
         if (ToggleKeys.GetPressedKey() == Keys.F8)
         {
-            GraphicsSet.Switch();
+            _graphicsSet.Switch();
 
             // The original graphics have no backdrops drawn for them.
-            Presentation.DrawBackgrounds = GraphicsSet.IsRedrawn;
+            Presentation.DrawBackgrounds = _graphicsSet.IsRedrawn;
 
             if (IntroSequence.SequenceStage == IntroSequenceStage.Finished || IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
             {
@@ -1012,11 +1012,12 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     private void UpdateStatusPanel()
     {
-        if (ScreenDirectory.Current == GameScreenType.Cheops ||
-            ScreenDirectory.Current == GameScreenType.MainGame ||
-            ScreenDirectory.Current == GameScreenType.PlanetCore ||
-            ScreenDirectory.Current == GameScreenType.Teleporter ||
-            ScreenDirectory.Current == GameScreenType.AccessBooth)
+        if (ScreenDirectory.Current is
+            GameScreenType.Cheops or
+            GameScreenType.MainGame or
+            GameScreenType.PlanetCore or
+            GameScreenType.Teleporter or
+            GameScreenType.AccessBooth)
         {
             BlobStatusPanel.Update(
                 Player.BlobInventory,
@@ -1059,7 +1060,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     {
         // The back buffer, not GraphicsDevice.Viewport: the boot screen parks the viewport at
         // the composition size and the render viewports move it around as they please.
-        PresentationParameters? backBuffer = GraphicsDeviceMgr.GraphicsDevice.PresentationParameters;
+        PresentationParameters? backBuffer = _graphicsDeviceMgr.GraphicsDevice.PresentationParameters;
 
         Presentation.Recalculate(backBuffer.BackBufferWidth, backBuffer.BackBufferHeight);
     }
@@ -1077,23 +1078,23 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     private void ToggleFullScreen()
     {
-        GraphicsDeviceMgr.HardwareModeSwitch = true;
+        _graphicsDeviceMgr.HardwareModeSwitch = true;
 
-        if (GraphicsDeviceMgr.IsFullScreen)
+        if (_graphicsDeviceMgr.IsFullScreen)
         {
-            GraphicsDeviceMgr.PreferredBackBufferWidth = CompositionSize.Width;
-            GraphicsDeviceMgr.PreferredBackBufferHeight = CompositionSize.Height;
+            _graphicsDeviceMgr.PreferredBackBufferWidth = CompositionSize.Width;
+            _graphicsDeviceMgr.PreferredBackBufferHeight = CompositionSize.Height;
         }
         else
         {
             DisplayMode? desktop = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
 
-            GraphicsDeviceMgr.PreferredBackBufferWidth = desktop.Width;
-            GraphicsDeviceMgr.PreferredBackBufferHeight = desktop.Height;
+            _graphicsDeviceMgr.PreferredBackBufferWidth = desktop.Width;
+            _graphicsDeviceMgr.PreferredBackBufferHeight = desktop.Height;
         }
 
-        GraphicsDeviceMgr.IsFullScreen = !GraphicsDeviceMgr.IsFullScreen;
-        GraphicsDeviceMgr.ApplyChanges();
+        _graphicsDeviceMgr.IsFullScreen = !_graphicsDeviceMgr.IsFullScreen;
+        _graphicsDeviceMgr.ApplyChanges();
     }
 
     public void Draw(GameTime gameTime)
@@ -1114,7 +1115,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             }
 
             ScreenEffectEngine.SelectRenderViewPort("GameArea"); // GameArea;
-            GraphicsDeviceMgr.GraphicsDevice.Clear(Presentation.ScreenClearColour);
+            _graphicsDeviceMgr.GraphicsDevice.Clear(Presentation.ScreenClearColour);
 
             IGameScreen? screenToDraw = ScreenDirectory.CurrentScreen;
             screenToDraw?.Draw(gameTime);
@@ -1130,7 +1131,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             // The viewport has to be the whole back buffer, not the composition size: the
             // boot screen is scaled up into it by Presentation.Transform like everything else,
             // and a viewport any smaller would just clip the result.
-            PresentationParameters? backBuffer = GraphicsDeviceMgr.GraphicsDevice.PresentationParameters;
+            PresentationParameters? backBuffer = _graphicsDeviceMgr.GraphicsDevice.PresentationParameters;
 
             var vp = new Viewport();
             vp.X = 0;
@@ -1138,8 +1139,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             vp.Width = backBuffer.BackBufferWidth;
             vp.Height = backBuffer.BackBufferHeight;
 
-            GraphicsDeviceMgr.GraphicsDevice.Viewport = vp;
-            GraphicsDeviceMgr.GraphicsDevice.Clear(Presentation.ScreenClearColour);
+            _graphicsDeviceMgr.GraphicsDevice.Viewport = vp;
+            _graphicsDeviceMgr.GraphicsDevice.Clear(Presentation.ScreenClearColour);
 
 
             if (Status == GameEngineStatus.Starting ||
