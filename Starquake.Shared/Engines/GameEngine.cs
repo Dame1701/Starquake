@@ -220,9 +220,6 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     public CoreElement TestElement1;
     private GameComponentBase _testScreen;
 
-    // Text output
-    public XnaFont TextWriter;
-
     // Tunnel lift animations
     public TunnelLiftAnimationEngine TunnelAnimations;
     public string UpperScreenTilesName = "UpperScreenTiles";
