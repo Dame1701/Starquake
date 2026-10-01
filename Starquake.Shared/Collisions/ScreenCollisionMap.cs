@@ -78,12 +78,6 @@ internal class ScreenCollisionMap
     }
 
     /// <summary>
-    ///     The authored data itself, for <c>GameScreenCollection.SaveData</c> to write back out beside
-    ///     the screens it belongs to.
-    /// </summary>
-    public int[,,] TileCollisionData => _tileCollisionData;
-
-    /// <summary>
     ///     The screen this map currently describes. Set by <see cref="Rebuild" />, which is the only
     ///     way the map changes which screen it is the map of.
     /// </summary>

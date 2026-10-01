@@ -24,7 +24,6 @@ internal class TeleportScreen : IGameScreen
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsSet _graphicsSet;
     private readonly PresentationSettings _presentation;
-    private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
     private readonly ScreenDirectory _screenDirectory;
     private readonly Shapes _shapeDrawer;
@@ -74,7 +73,6 @@ internal class TeleportScreen : IGameScreen
         _graphicsSet = graphicsSet;
         _blob = blob;
         _presentation = presentation;
-        _randomNumberGenerator = randomNumberGenerator;
         _screenDirectory = screenDirectory;
         _shapeDrawer = shapeDrawer;
         _input = input;
@@ -85,7 +83,7 @@ internal class TeleportScreen : IGameScreen
 
         for (int a = 0; a < 16; a++)
         {
-            _keyFades[a] = new FaderAnimation(4, _randomNumberGenerator);
+            _keyFades[a] = new FaderAnimation(4, randomNumberGenerator);
         }
 
         _teleportCodes = new Dictionary<int, string>();
@@ -304,7 +302,7 @@ internal class TeleportScreen : IGameScreen
         new(951, 480)
     ];
 
-    public void Draw(GameTime gameTime)
+    public void Draw()
     {
         DrawInteriorLowerLayer();
         DrawTeleportPad();

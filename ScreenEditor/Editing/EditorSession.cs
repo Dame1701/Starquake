@@ -252,11 +252,6 @@ internal sealed class EditorSession : ViewModelBase
     /// </summary>
     public event EventHandler? Invalidated;
 
-    /// <summary>
-    ///     Raised when the map itself has been swapped out, rather than merely edited.
-    /// </summary>
-    public event EventHandler? DocumentReplaced;
-
     public void SetDocument(EditorDocument document)
     {
         DetachDocument(Document);
@@ -274,7 +269,6 @@ internal sealed class EditorSession : ViewModelBase
         RaisePropertyChanged(nameof(CurrentScreen));
         RaisePropertyChanged(nameof(ScreenDescription));
 
-        DocumentReplaced?.Invoke(this, EventArgs.Empty);
         Invalidate();
     }
 
@@ -295,7 +289,6 @@ internal sealed class EditorSession : ViewModelBase
 
         RebuildVisibleTiles();
 
-        DocumentReplaced?.Invoke(this, EventArgs.Empty);
         Invalidate();
     }
 

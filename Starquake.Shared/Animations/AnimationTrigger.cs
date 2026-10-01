@@ -13,9 +13,4 @@ internal class AnimationTrigger
         UseTrigger = useTrigger;
     }
     public bool Triggered { get; protected set; }
-
-    public void Trigger()
-    {
-        Triggered = true;
-    }
 }

@@ -8,7 +8,7 @@ using Starquake.ContentManagement;
 
 namespace Starquake.Fonts;
 
-internal class ProportionalNumbers
+internal static class ProportionalNumbers
 {
     public static void Draw(int xPos, int yPos, string numbers, ResourceManager resources, Color color)
     {

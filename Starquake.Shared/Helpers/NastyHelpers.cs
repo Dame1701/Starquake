@@ -9,7 +9,7 @@ using Starquake.Structure;
 
 namespace Starquake.Helpers;
 
-internal class NastyHelpers
+internal static class NastyHelpers
 {
 
     private static readonly Color White =

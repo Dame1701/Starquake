@@ -3,7 +3,6 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
-using Starquake.Structure;
 
 namespace Starquake.Animations;
 
@@ -14,19 +13,6 @@ internal class AnimTileEngine
         AnimTilesList = [];
     }
     public List<AnimTile> AnimTilesList { get; }
-
-    public bool ContainsTile(int tileNumber)
-    {
-        foreach (AnimTile animTilesList in AnimTilesList)
-        {
-            if (animTilesList.ScreenTileRef == tileNumber)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
 
     public void Update()
     {

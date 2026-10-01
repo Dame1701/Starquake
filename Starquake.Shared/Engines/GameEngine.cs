@@ -171,7 +171,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         // Setup graphics device and content management
         _graphicsDeviceMgr = graphics;
         ContentMgr = content;
-        Presentation.BackgroundColour = Color.Black;
 
         // The one generator the game logic draws from, so a game can be reproduced from its seed.
         // The sound engine is deliberately not given it: its only draw happens on a thread pool
@@ -367,7 +366,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             ArtworkSwapped);
 
         // Core Elements
-        Elements = new CoreElements(Stats, ContentResourceManager, _graphicsSet, Presentation, RandomNumberGenerator);
+        Elements = new CoreElements(Stats, ContentResourceManager, _graphicsSet, RandomNumberGenerator);
 
         // Test area
         ShapeDrawer = new Shapes(_graphicsDeviceMgr.GraphicsDevice);
@@ -532,7 +531,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             RandomNumberGenerator);
         ConveyerNastiesInstance.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
 
-        var converyerNastyGraphics = new ContentList(ContentMgr);
+        var converyerNastyGraphics = new ContentList();
         converyerNastyGraphics.AddContent("conveyerNasty", "Graphics\\ConveryerNasty");
         ConveyerNastiesInstance.LoadContent(converyerNastyGraphics);
 
@@ -693,7 +692,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             ContentResourceManager,
             GameScreens,
             _graphicsSet,
-            Presentation,
             ScreenDirectory,
             Session,
             Player,
@@ -767,12 +765,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     ///     has finished.
     /// </summary>
     private void LoadContent() => ContentResourceManager.LoadContent();
-
-    // Resets the game back to defaults - need to sort all of this out!
-    public void Reset()
-    {
-        MainScreen.Reset();
-    }
 
     public void Update(GameTime gameTime)
     {
@@ -924,7 +916,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         Presentation.Recalculate(backBuffer.BackBufferWidth, backBuffer.BackBufferHeight);
     }
 
-    public void Draw(GameTime gameTime)
+    public void Draw()
     {
         CalculatePresentationTransform();
 
@@ -945,7 +937,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             _graphicsDeviceMgr.GraphicsDevice.Clear(Presentation.ScreenClearColour);
 
             IGameScreen? screenToDraw = ScreenDirectory.CurrentScreen;
-            screenToDraw?.Draw(gameTime);
+            screenToDraw?.Draw();
 
             if (Session.Paused)
             {

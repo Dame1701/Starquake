@@ -88,11 +88,6 @@ internal class SpriteCollection
         get;
     }
 
-    public void ResetEffect()
-    {
-        _fade = 0;
-    }
-
     /// <param name="transform">
     ///     Only wanted when drawing straight to the back buffer, where it scales and centres the
     ///     composition - see PresentationSettings.Transform. Drawing into a render target the
@@ -113,21 +108,6 @@ internal class SpriteCollection
     public void Begin(BlendState blendState, Matrix? transform = null)
     {
         Sprites.Begin(SpriteSortMode.Deferred, blendState, null, null, null, null, transform);
-    }
-
-    public void DrawSpriteUnscaled(int spriteNumber, int xPosition, int yPosition)
-    {
-        Sprites.Draw(
-            _spriteImages,
-            new Vector2(xPosition, yPosition),
-            new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
-                SpriteHeight),
-            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, _fade),
-            0f,
-            new Vector2(0, 0),
-            new Vector2(1, 1),
-            SpriteEffects.None,
-            0);
     }
 
     public void DrawSpriteUnscaled(int spriteNumber, int xPosition, int yPosition, int fade)
@@ -161,19 +141,6 @@ internal class SpriteCollection
             new Vector2(hScaling, vScaling),
             SpriteEffects.None,
             0);
-    }
-
-    public void DrawSprite(int spriteNumber, float xPosition, float yPosition)
-    {
-        const float hScaling = 1f;
-        const float vScaling = 1f;
-
-        Sprites.Draw(
-            _spriteImages,
-            new Vector2(xPosition * hScaling, yPosition * vScaling),
-            new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
-                SpriteHeight),
-            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, _fade));
     }
 
     public void DrawSprite(int spriteNumber, int xPosition, int yPosition, SpritePixel[] matrix,
@@ -305,58 +272,6 @@ internal class SpriteCollection
             0);
     }
 
-    public void DrawSprite(int spriteNumber, float xPosition, float yPosition, Color spriteColour, float scale, float rotation)
-    {
-        const float hScaling = 1f;
-        const float vScaling = 1f;
-
-        Sprites.Draw(_spriteImages,
-            new Vector2((float)((xPosition + SpriteWidth / 2.0) * hScaling),
-                (float)(yPosition + SpriteHeight / 2.0) * vScaling),
-            new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
-                SpriteHeight),
-            ColourHelper.GetXna4Colour(spriteColour.R, spriteColour.G, spriteColour.B, spriteColour.A),
-            rotation,
-            new Vector2((float)SpriteWidth / 2, (float)SpriteHeight / 2),
-            new Vector2(hScaling * scale, vScaling * scale),
-            SpriteEffects.None,
-            0);
-    }
-
-    public void DrawSprite(int spriteNumber, int xPosition, int yPosition, Color spriteColour, float scale,
-        float rotation, int originX, int originY)
-    {
-        const float hScaling = 1f;
-        const float vScaling = 1f;
-
-        Sprites.Draw(_spriteImages,
-            new Vector2((xPosition + originX) * hScaling, (yPosition + originY) * vScaling),
-            new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
-                SpriteHeight),
-            ColourHelper.GetXna4Colour(spriteColour.R, spriteColour.G, spriteColour.B, spriteColour.A),
-            rotation,
-            new Vector2(originX, originY),
-            new Vector2(hScaling * scale, vScaling * scale),
-            SpriteEffects.None, 0);
-    }
-
-
-    public void DrawSprite(int spriteNumber, float xPosition, float yPosition, Color spriteColour, float scale,
-        float rotation, int originX, int originY)
-    {
-        const float hScaling = 1f;
-        const float vScaling = 1f;
-
-        Sprites.Draw(_spriteImages,
-            new Vector2((xPosition + originX) * hScaling, (yPosition + originY) * vScaling),
-            new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
-                SpriteHeight),
-            ColourHelper.GetXna4Colour(spriteColour.R, spriteColour.G, spriteColour.B, spriteColour.A),
-            rotation,
-            new Vector2(originX, originY),
-            new Vector2(hScaling * scale, vScaling * scale),
-            SpriteEffects.None, 0);
-    }
 
     public void DrawSprite(int spriteNumber, int xPosition, int yPosition, Color spriteColour, float scale,
         float rotationSpeed, bool clockwise, bool paused)

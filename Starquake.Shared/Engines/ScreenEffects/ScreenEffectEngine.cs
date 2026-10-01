@@ -52,19 +52,6 @@ internal class ScreenEffectEngine
 
     public ScreenEffectBase? ActiveScreenEffect { get; private set; }
 
-    public ScreenEffectType CurrentScreenEffect
-    {
-        get
-        {
-            if (ActiveScreenEffect != null)
-            {
-                return ActiveScreenEffect.ScreenEffectType;
-            }
-
-            return ScreenEffectType.None;
-        }
-    }
-
     /// <summary>
     ///     Rather than adding a viewport this sets up a new Render2D target at the size of the viewport we want, we also store
     ///     the location so we can draw correctly

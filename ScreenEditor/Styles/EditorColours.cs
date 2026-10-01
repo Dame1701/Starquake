@@ -66,8 +66,6 @@ internal static class EditorColours
 
     public static readonly IBrush VoidChequerBrush = new SolidColorBrush(VoidChequer);
 
-    public static readonly IBrush PanelBrush = new SolidColorBrush(Panel);
-
     public static readonly IBrush TextBrush = new SolidColorBrush(Text);
 
     public static readonly IBrush MutedBrush = new SolidColorBrush(Muted);
@@ -89,8 +87,6 @@ internal static class EditorColours
     public static readonly IPen CollisionGridPen = new Pen(new SolidColorBrush(Collision, 0.25));
 
     public static readonly IPen AccentPen = new Pen(AccentBrush, 2);
-
-    public static readonly IPen AccentThinPen = new Pen(AccentBrush);
 
     public static readonly IPen BorderPen = new Pen(new SolidColorBrush(Border));
 

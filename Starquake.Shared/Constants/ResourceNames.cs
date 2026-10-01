@@ -32,7 +32,6 @@ internal sealed class ResourceNames
         BlobsShip = "BlobsShip",
         AccessCodesFailed = "AccessCodesFailed",
         AccessCodesPassed = "AccessCodesPassed",
-        AccessCodesGrey = "AccessCodesGray",
         PickupsIlluminated = "PickupsIlluminated",
         Pickups = "Pickups"
     };
@@ -49,7 +48,6 @@ internal sealed class ResourceNames
         BlobsShip = "BlobsShipOriginal",
         AccessCodesFailed = "AccessCodesFailedOriginal",
         AccessCodesPassed = "AccessCodesPassedOriginal",
-        AccessCodesGrey = "AccessCodesGrayOriginal",
         PickupsIlluminated = "PickupsIlluminatedOriginal",
         Pickups = "PickupsOriginal"
     };
@@ -93,11 +91,6 @@ internal sealed class ResourceNames
     ///     The access code digits as they read once a code has been accepted.
     /// </summary>
     public string AccessCodesPassed { get; private init; } = string.Empty;
-
-    /// <summary>
-    ///     The access code digits as they read before a code has been judged either way.
-    /// </summary>
-    public string AccessCodesGrey { get; private init; } = string.Empty;
 
     /// <summary>
     ///     The pickups lit from within, drawn additively over <see cref="Pickups" /> to make a core

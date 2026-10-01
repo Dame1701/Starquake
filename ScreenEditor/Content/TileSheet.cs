@@ -45,8 +45,6 @@ internal sealed class TileSheet : IDisposable
 
     private string Path { get; }
 
-    public string Name => System.IO.Path.GetFileNameWithoutExtension(Path);
-
     /// <summary>
     ///     The sheet itself, for drawing tiles from.
     /// </summary>

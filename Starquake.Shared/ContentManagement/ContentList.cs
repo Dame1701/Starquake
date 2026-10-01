@@ -2,20 +2,16 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework.Content;
-
 namespace Starquake.ContentManagement;
 
 internal class ContentList
 {
     private readonly List<ContentEntry> _content;
 
-    public ContentList(ContentManager contentMgr)
+    public ContentList()
     {
         _content = new List<ContentEntry>();
-        ContentMgr = contentMgr;
     }
-    public ContentManager ContentMgr { get; }
 
     public void AddContent(string contentName, string contentFilePath)
     {
@@ -35,15 +31,4 @@ internal class ContentList
         throw new InvalidOperationException($"Content '{contentName}' has not been added to the list.");
     }
 
-    public void RemoveContent(string contentName)
-    {
-        for (int a = 0; a < _content.Count; a++)
-        {
-            if (_content[a].Name == contentName)
-            {
-                _content.Remove(_content[a]);
-                break;
-            }
-        }
-    }
 }

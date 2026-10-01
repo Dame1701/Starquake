@@ -36,11 +36,6 @@ internal class BreakableBridges
         _bridges = new List<BreakableBridge>();
     }
 
-    public void AddBridge(int tileLocationX, int tileLocationY)
-    {
-        _bridges.Add(new BreakableBridge(tileLocationX, tileLocationY, _resources, _graphicsDeviceManager, _graphicsSet, _randomNumberGenerator, _screenEffects));
-    }
-
     public void AddBridge(Point tileLocation)
     {
         _bridges.Add(new BreakableBridge(tileLocation.X, tileLocation.Y, _resources, _graphicsDeviceManager, _graphicsSet, _randomNumberGenerator, _screenEffects));
@@ -66,11 +61,6 @@ internal class BreakableBridges
                 }
             }
         }
-    }
-
-    public void Reset()
-    {
-        _bridges.Clear();
     }
 
     public void Draw()

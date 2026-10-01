@@ -8,7 +8,7 @@ using Starquake.ContentManagement;
 
 namespace Starquake.Display;
 
-internal class PanelNumbers
+internal static class PanelNumbers
 {
     public static void Draw(int xPos, int yPos, string score, ResourceManager resources, Color color)
     {

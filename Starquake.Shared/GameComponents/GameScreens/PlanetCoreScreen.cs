@@ -87,12 +87,8 @@ internal class PlanetCoreScreen : IGameScreen
 
     private readonly Queue<int> _elementsToReplace = new();
     private readonly GameScreenCollection _gameScreens;
-    private readonly GraphicsSet _graphicsSet;
-    private readonly PresentationSettings _presentation;
-    private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
     private readonly ScreenDirectory _screenDirectory;
-    private readonly GameSession _session;
     private int _blankingTilesOpacity;
     private int _coreAlienCount = MaxCoreAliens;
     private int _entryTime;
@@ -106,7 +102,6 @@ internal class PlanetCoreScreen : IGameScreen
         ResourceManager resources,
         GameScreenCollection gameScreens,
         GraphicsSet graphicsSet,
-        PresentationSettings presentation,
         ScreenDirectory screenDirectory,
         GameSession session,
         Blob blob,
@@ -115,12 +110,8 @@ internal class PlanetCoreScreen : IGameScreen
     {
         _resources = resources;
         _gameScreens = gameScreens;
-        _graphicsSet = graphicsSet;
-        _presentation = presentation;
         _screenDirectory = screenDirectory;
-        _session = session;
         _blob = blob;
-        _randomNumberGenerator = randomNumberGenerator;
 
         _elements = elements;
         _elements.OnCoreElementReplaced += Elements_OnCoreElementReplaced;
@@ -131,10 +122,10 @@ internal class PlanetCoreScreen : IGameScreen
             var coreAlien = new Nasty(
                 _resources,
                 _gameScreens,
-                _graphicsSet,
-                _session,
+                graphicsSet,
+                session,
                 _blob,
-                _randomNumberGenerator,
+                randomNumberGenerator,
                 0,
                 0,
                 CoreElementsToReplace);
@@ -232,7 +223,6 @@ internal class PlanetCoreScreen : IGameScreen
             _screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.PlanetCore, new ScreenChange.FadeIn());
 
             _justEnteredCore = true;
-            _presentation.BackgroundColour = Color.Black;
         }
         else if (!_replacingElements && _elements.GetElementsReplacedCount() == CoreElementsToReplace)
         {
@@ -248,7 +238,7 @@ internal class PlanetCoreScreen : IGameScreen
         _entryTime++;
     }
 
-    public void Draw(GameTime gameTime)
+    public void Draw()
     {
         if (!_replacingElements)
         {

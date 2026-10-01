@@ -32,7 +32,6 @@ internal class MainWindowViewModel : ViewModelBase
         SaveMapCommand = Register(new RelayCommand(SaveMapAsync));
         SaveMapAsCommand = Register(new RelayCommand(SaveMapAsAsync));
         OpenTileSheetCommand = Register(new RelayCommand(OpenTileSheetAsync));
-        UseTileSheetCommand = Register(new RelayCommand(parameter => UseTileSheet(parameter as string)));
         ExitCommand = Register(new RelayCommand(() => _owner?.Close()));
         ShowShortcutsCommand = Register(new RelayCommand(ShowShortcutsAsync));
 
@@ -68,8 +67,6 @@ internal class MainWindowViewModel : ViewModelBase
     public RelayCommand SaveMapAsCommand { get; }
 
     public RelayCommand OpenTileSheetCommand { get; }
-
-    public RelayCommand UseTileSheetCommand { get; }
 
     public RelayCommand ExitCommand { get; }
 

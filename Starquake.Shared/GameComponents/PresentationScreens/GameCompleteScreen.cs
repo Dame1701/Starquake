@@ -71,7 +71,7 @@ internal class GameCompleteScreen : GameScreenBase, IGameScreen
         base.Update(gameTime);
     }
 
-    public void Draw(GameTime gameTime)
+    public void Draw()
     {
         ScreenEffects.SelectRenderViewPort("EntireScreen");
         _backgroundImage.Begin(BlendState.AlphaBlend);

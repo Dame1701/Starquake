@@ -8,7 +8,6 @@ using Starquake.ActiveSprites;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Particles;
-using Starquake.Structure;
 
 namespace Starquake.Animations;
 

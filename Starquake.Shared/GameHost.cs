@@ -209,7 +209,7 @@ public class GameHost : Game
     {
         base.Draw(gameTime);
 
-        _gameEngine?.Draw(gameTime);
+        _gameEngine?.Draw();
     }
 
     /// <summary>

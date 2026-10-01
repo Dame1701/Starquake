@@ -5,7 +5,6 @@
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
-using Starquake.Display;
 using Starquake.Scoring;
 using Starquake.SharedLibs;
 using Starquake.Structure;
@@ -35,7 +34,6 @@ internal class CoreElements
     /// </summary>
     private const int ScoreForCompletingCore = 10000;
     private readonly GraphicsSet _graphicsSet;
-    private readonly PresentationSettings _presentation;
     private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
     private readonly PlayerStats _stats;
@@ -44,13 +42,11 @@ internal class CoreElements
         PlayerStats stats,
         ResourceManager resources,
         GraphicsSet graphicsSet,
-        PresentationSettings presentation,
         Random randomNumberGenerator)
     {
         _stats = stats;
         _resources = resources;
         _graphicsSet = graphicsSet;
-        _presentation = presentation;
         _randomNumberGenerator = randomNumberGenerator;
 
         Elements = new CoreElement[9];
@@ -136,7 +132,7 @@ internal class CoreElements
                     fadeUp = false;
                 }
                 int randomChoice = _randomNumberGenerator.Next(0, elementsToChoose.Count);
-                Elements[counter] = new CoreElement(_resources, _graphicsSet, _presentation, _randomNumberGenerator, elementsToChoose[randomChoice], counter, fadeUp);
+                Elements[counter] = new CoreElement(_resources, _graphicsSet, _randomNumberGenerator, elementsToChoose[randomChoice], counter, fadeUp);
                 Elements[counter].OnCoreElementReplaced += CoreElements_OnCoreElementReplaced;
                 elementsToChoose.RemoveAt(randomChoice);
                 Elements[counter].ElementState = CoreElementState.Missing;

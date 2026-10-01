@@ -495,7 +495,7 @@ internal class MainGameScreen : IGameScreen
         GameEngine.IntroSequence.SequenceStage != IntroSequenceStage.CaptionFadeUp &&
         GameEngine.IntroSequence.SequenceStage != IntroSequenceStage.CaptionFadeDown;
 
-    public void Draw(GameTime gameTime)
+    public void Draw()
     {
         if (WorldIsVisible)
         {

@@ -18,12 +18,6 @@ internal class BitmapFont
 
     private int _flashCounter;
 
-    public BitmapFont(SpriteFont font, SpriteBatch fontSpriteBatch)
-    {
-        _font = font;
-        _fontSpriteBatch = fontSpriteBatch;
-    }
-
     public BitmapFont(SpriteFont font, SpriteBatch fontSpriteBatch, Color colour1, Color colour2, int flashInterval)
     {
         _font = font;
@@ -117,38 +111,6 @@ internal class BitmapFont
         int indent = (horizontalWidth - (int)stringSize.X) / 2;
 
         WriteText(indent, yPos, text, leading, colour, screenFade);
-    }
-
-    public void WriteTextAltColours(int xPos, int yPos, string text, Color colour1, Color colour2, byte screenFade)
-    {
-        for (int a = 0; a < text.Length; a++)
-        {
-            string letterToDraw = text.Substring(a, 1);
-            Vector2 letterLength = MeasureString(letterToDraw);
-
-            if (a % 2 == 0)
-            {
-                _fontSpriteBatch.DrawString(_font, letterToDraw, new Vector2(xPos, yPos), ColourHelper.GetXna4Colour(colour1.R, colour1.G, colour1.B, screenFade));
-            }
-            else
-            {
-                _fontSpriteBatch.DrawString(_font, letterToDraw, new Vector2(xPos, yPos), ColourHelper.GetXna4Colour(colour2.R, colour2.G, colour2.B, screenFade));
-            }
-
-            xPos = xPos + (int)letterLength.X;
-        }
-    }
-
-    public void WriteText(int xPos, int yPos, string text, byte screenFade)
-    {
-        if (!Flash)
-        {
-            _fontSpriteBatch.DrawString(_font, text, new Vector2(xPos, yPos), ColourHelper.GetXna4Colour(Colour1.R, Colour1.G, Colour1.B, screenFade));
-        }
-        else
-        {
-            _fontSpriteBatch.DrawString(_font, text, new Vector2(xPos, yPos), ColourHelper.GetXna4Colour(_flashColour.R, _flashColour.G, _flashColour.B, screenFade));
-        }
     }
 
     public void WriteText(int xPos, int yPos, string text, int leading, byte screenFade)

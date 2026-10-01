@@ -51,6 +51,14 @@ internal class Nasty
     private const float BirthEndRotateSpeed = 16f;
 
     /// <summary>
+    ///     The longest the birth will keep spinning past <see cref="BirthPeriod" /> waiting to come
+    ///     to rest upright. One revolution at the speed the spin settles to is about twenty-four
+    ///     frames, so this is a little over a full turn - long enough that the nasty normally does
+    ///     land square, short enough that it is not left spinning if it never gets the chance to.
+    /// </summary>
+    private const int BirthSpinOutLimit = 30;
+
+    /// <summary>
     ///     The colours only fade in over the back half of the birth, so both fades count up at twice
     ///     the rate the birth itself runs at.
     /// </summary>
@@ -282,22 +290,28 @@ internal class Nasty
         }
     }
 
-    private Point GetNastySpawnLocation()
+    /// <summary>
+    ///     Picks somewhere on the current screen for this nasty to appear, or <c>null</c> if the
+    ///     screen offers nowhere.
+    /// </summary>
+    /// <remarks>
+    ///     Nowhere used to be reported as <c>Point(0, 0)</c>, which a real location can never be -
+    ///     every one of them is offset by half a sprite - but which reads like one at the call site.
+    /// </remarks>
+    private Point? GetNastySpawnLocation()
     {
         // Get all locations where we can have nasties from the current game screen
         List<Point> potentialLocations = _gameScreens.GetNastyPotentialLocations();
 
-        if (potentialLocations.Count > 0)
+        if (potentialLocations.Count == 0)
         {
-            int nastyLocationIndex = _randomNumberGenerator.Next(0, potentialLocations.Count);
-
-            // Return a location
-            return new Point(potentialLocations[nastyLocationIndex].X + SpriteMetrics.HalfSpriteWidth,
-                potentialLocations[nastyLocationIndex].Y + 16);
+            return null;
         }
 
-        // this should never happen
-        return new Point(0, 0);
+        int nastyLocationIndex = _randomNumberGenerator.Next(0, potentialLocations.Count);
+
+        return new Point(potentialLocations[nastyLocationIndex].X + SpriteMetrics.HalfSpriteWidth,
+            potentialLocations[nastyLocationIndex].Y + 16);
     }
 
     [MemberNotNull(nameof(_nastySprite))]
@@ -467,6 +481,20 @@ internal class Nasty
         }
         else
         {
+            // Where it is going has to be settled before anything announces that it is going: a
+            // screen with nowhere to put it disables it instead, and the appear sound, the first
+            // movement and the birth counters all belong to a nasty that is actually being born.
+            // This used to set Disabled and then overwrite it with Birth on the next line, so a
+            // nasty with nowhere to go was born at whatever position it last held.
+            Point? newPosition = GetNastySpawnLocation();
+
+            if (newPosition == null)
+            {
+                NastyState = NastyState.Disabled;
+
+                return;
+            }
+
             _resources.GetSoundFxEngine().PlaySound("NastyAppear", 0.1F, false);
             Movement.StartFirstMovement();
             _deathFadeLevel = ColourLevels.Full;
@@ -477,17 +505,8 @@ internal class Nasty
             _birthRotateSpeed = BirthRespawnRotateSpeed;
             _birthTimer = 0;
 
-            // Select a new location to spawn
-            Point newPosition = GetNastySpawnLocation();
-            if (newPosition == new Point(0, 0))
-            {
-                NastyState = NastyState.Disabled;
-            }
-            else
-            {
-                XPos = newPosition.X;
-                YPos = newPosition.Y;
-            }
+            XPos = newPosition.Value.X;
+            YPos = newPosition.Value.Y;
 
             NastyState = NastyState.Birth;
         }
@@ -547,7 +566,19 @@ internal class Nasty
 
         if (_birthTimer > BirthPeriod)
         {
-            if (_nastySprite.SpriteRotation == 0)
+            // The nasty prefers to stop spinning square, but it must stop either way.
+            //
+            // This used to end the birth only on a frame where the rotation read exactly zero.
+            // The angle is advanced in SpriteCollection.End, on the draw path, while this runs on
+            // the update path, and the two do not run under the same conditions: a screen effect
+            // holding gameplay skips the nasty's update and still draws it, so the spin carries on
+            // past zero with nobody watching. Zero is also only ever read for a single frame in
+            // every revolution - the wrap assigns the literal, and the settled speed does not
+            // divide 360 - so one missed frame cost a further whole revolution, and an update that
+            // kept missing it cost every one of them. That is the nasty that span and never
+            // stabilised.
+            if (_nastySprite.SpriteRotation < _birthRotateSpeed ||
+                _birthTimer > BirthPeriod + BirthSpinOutLimit)
             {
                 NastyState = NastyState.Normal;
                 _birthTimer = 0;

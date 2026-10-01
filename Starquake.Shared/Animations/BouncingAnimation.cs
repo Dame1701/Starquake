@@ -37,7 +37,6 @@ internal class BouncingAnimation
         _resources = resources;
         _randomNumberGenerator = randomNumberGenerator;
     }
-    public int Fade => (int)_fade;
     public bool Triggered { get; private set; }
 
     public void Reset()

@@ -36,15 +36,6 @@ internal sealed class RelayCommand : ICommand
     {
     }
 
-    public RelayCommand(Action<object?> execute, Func<bool>? canExecute = null)
-        : this(parameter =>
-        {
-            execute(parameter);
-            return Task.CompletedTask;
-        }, canExecute)
-    {
-    }
-
     private RelayCommand(Func<object?, Task> execute, Func<bool>? canExecute)
     {
         _execute = execute;

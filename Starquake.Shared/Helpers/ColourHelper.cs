@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 
 namespace Starquake.Helpers;
 
-internal class ColourHelper
+internal static class ColourHelper
 {
     public static Color GetXna4Colour(int r, int g, int b, int a)
         => new Color(r, g, b) * (1f / 255f * a);

@@ -169,7 +169,4 @@ internal class HiScores
         font.End();
     }
 
-    public void Reset()
-    {
-    }
 }

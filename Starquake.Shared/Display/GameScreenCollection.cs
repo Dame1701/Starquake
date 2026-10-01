@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using MessagePack;
 using Microsoft.Xna.Framework;
 using Starquake.ActiveSprites;
 using Starquake.Animations;
@@ -219,30 +218,6 @@ internal class GameScreenCollection
         }
 
         return potentialLocations;
-    }
-
-    public void SaveData()
-    {
-        byte[] gameScreensData = MessagePackSerializer.Serialize(_gameScreens);
-        byte[] collisionData = MessagePackSerializer.Serialize(Collisions.TileCollisionData);
-
-        using (var fs = new FileStream("SQScreenData.dat", FileMode.Create, FileAccess.Write))
-        {
-            // Write the length of the first array
-            fs.Write(BitConverter.GetBytes(gameScreensData.Length), 0, sizeof(int));
-
-            // Write the first array
-            fs.Write(gameScreensData, 0, gameScreensData.Length);
-
-            // Write the length of the second array
-            fs.Write(BitConverter.GetBytes(collisionData.Length), 0, sizeof(int));
-
-            // Write the second array
-            fs.Write(collisionData, 0, collisionData.Length);
-        }
-
-        //var newGameScreensData = MessagePackSerializer.Deserialize<GameScreen[]>(gameScreensData);
-        //var newCollisionData = MessagePackSerializer.Deserialize<int[,,]>(collisionData);
     }
 
     /// <summary>
@@ -495,10 +470,6 @@ internal class GameScreenCollection
     /// <inheritdoc cref="ScreenRenderer.DrawShadowing" />
     public void DrawShadowing()
         => Renderer.DrawShadowing();
-
-    /// <inheritdoc cref="ScreenRenderer.DrawCoreElements" />
-    public void DrawCoreElements(int xPos, int yPos)
-        => Renderer.DrawCoreElements(xPos, yPos);
 
     public List<SecondLayerTile> GetListOfSecondLayerTiles()
     {

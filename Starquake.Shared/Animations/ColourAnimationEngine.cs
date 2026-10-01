@@ -8,7 +8,6 @@ using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Sprites;
-using Starquake.Structure;
 
 namespace Starquake.Animations;
 
@@ -43,29 +42,6 @@ internal class ColourAnimationEngine
                 if (!colourAnimation.Running)
                 {
                     // Make colour initially invisible
-                    colourAnimation.TransitionColour.A = 0;
-                    colourAnimation.Running = true;
-                    colourAnimation.Direction = ColourAnimationDirection.FadeUp;
-                    colourAnimation.Stopping = false;
-                    colourAnimation.LoopCount = loopCount;
-
-                    // Reset the loop counter
-                    colourAnimation.LoopCounter = 0;
-                }
-            }
-        }
-    }
-
-    public void Start(int tileNo, int loopCount, Color transitionColour)
-    {
-        foreach (ColourFaderAnimation colourAnimation in _colourAnimationsRegistered)
-        {
-            if (colourAnimation.TileNo == tileNo)
-            {
-                if (!colourAnimation.Running)
-                {
-                    // Make colour initially invisible
-                    colourAnimation.TransitionColour = transitionColour;
                     colourAnimation.TransitionColour.A = 0;
                     colourAnimation.Running = true;
                     colourAnimation.Direction = ColourAnimationDirection.FadeUp;
@@ -115,17 +91,6 @@ internal class ColourAnimationEngine
                     // Schedule a stop
                     _colourAnimationsRegistered[a].Stopping = true;
                 }
-            }
-        }
-    }
-
-    public void ChangeSpeed(int tileNo, int speed)
-    {
-        foreach (ColourFaderAnimation colourAnimation in _colourAnimationsRegistered)
-        {
-            if (colourAnimation.TileNo == tileNo)
-            {
-                colourAnimation.Speed = speed;
             }
         }
     }

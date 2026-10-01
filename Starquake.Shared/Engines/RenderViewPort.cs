@@ -44,8 +44,6 @@ internal class RenderViewPort
 
     public int MasterWidth => RenderTarget.Width;
 
-    public int MasterHeight => RenderTarget.Height;
     public string Name { get; }
 
-    public Rectangle GetBounds() => new(XPos, YPos, Width, Height);
 }

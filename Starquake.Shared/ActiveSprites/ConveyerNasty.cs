@@ -32,13 +32,8 @@ internal class ConveyerNasty
 
 
     private readonly Animation _anim;
-    private readonly ContentManager _contentManager;
     private readonly GameScreenCollection _gameScreens;
-    private readonly GraphicsDeviceManager _graphicsDeviceManager;
     private readonly Random _randomNumberGenerator;
-    private readonly ResourceManager _resources;
-    private readonly int _screenShakeXOffset = 0;
-    private readonly int _screenShakeYOffset = 0;
 
     private int _deathFadeLevel = ColourLevels.Full;
     private float _deathScale = 1f;
@@ -55,7 +50,6 @@ internal class ConveyerNasty
 
     public int AnimationDelay
     {
-        get => _anim.Delay;
         set => _anim.Delay = value;
     }
 
@@ -76,10 +70,7 @@ internal class ConveyerNasty
         bool active,
         ContentList content)
     {
-        _resources = resources;
-        _contentManager = contentManager;
         _gameScreens = gameScreens;
-        _graphicsDeviceManager = graphics;
         _randomNumberGenerator = randomNumberGenerator;
 
         XLocation = xposition;
@@ -98,8 +89,8 @@ internal class ConveyerNasty
         _deathFadeLevel = ColourLevels.Full;
         _deathScale = 1f;
 
-        _nastySprite = new SpriteCollection(_graphicsDeviceManager, _contentManager, content.GetContent("conveyerNasty"), SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        _conveyerNastyDies = (IStandardParticleEffect)_resources.GetParticleEffectInstance("NastyDies", ParticleEffectType.Triggered, null);
+        _nastySprite = new SpriteCollection(graphics, contentManager, content.GetContent("conveyerNasty"), SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        _conveyerNastyDies = (IStandardParticleEffect)resources.GetParticleEffectInstance("NastyDies", ParticleEffectType.Triggered, null);
         _conveyerNastyDies.ParticleEffectComplete += ConveyerNastyDies_ParticleEffectComplete;
     }
 
@@ -140,7 +131,7 @@ internal class ConveyerNasty
         if (_conveyerNastyDies != null)
         {
             // Update the explosion
-            _conveyerNastyDies.Update(XLocation + _screenShakeXOffset + SpriteMetrics.HalfSpriteWidth, YLocation + _screenShakeYOffset + SpriteMetrics.SpriteHeight, gameTime);
+            _conveyerNastyDies.Update(XLocation + SpriteMetrics.HalfSpriteWidth, YLocation + SpriteMetrics.SpriteHeight, gameTime);
         }
 
         if (NastyState == NastyState.Conception)

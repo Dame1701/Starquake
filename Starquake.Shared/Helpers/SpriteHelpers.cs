@@ -7,7 +7,7 @@ using Starquake.Structure;
 
 namespace Starquake.Helpers;
 
-internal class SpriteHelpers
+internal static class SpriteHelpers
 {
     /// <summary>
     ///     Gets a collision offset point for particles based on the direction a sprite is moving, assumes sprite is drawn from

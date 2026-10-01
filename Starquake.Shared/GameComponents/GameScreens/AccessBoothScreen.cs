@@ -93,8 +93,6 @@ internal class AccessBoothScreen : IGameScreen
         Reset();
     }
 
-    public int ScreenFade { get; set; }
-
     /// <summary>
     ///     Whether the code the player typed matched. It used to be on IGameScreen, where eight of the
     ///     nine screens answered a constant true and nothing read it through the interface; this is the
@@ -147,7 +145,7 @@ internal class AccessBoothScreen : IGameScreen
         }
     }
 
-    public void Draw(GameTime gameTime)
+    public void Draw()
     {
         _font.Begin(BlendState.AlphaBlend);
         _font.WriteText(350, 100, "SECURITY  DOOR", 2, Color.White, ColourLevels.Full);

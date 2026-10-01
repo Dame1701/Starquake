@@ -7,7 +7,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Starquake.Animations;
 using Starquake.Constants;
 using Starquake.ContentManagement;
-using Starquake.Display;
 using Starquake.Helpers;
 using Starquake.Particles;
 using Starquake.Sprites;
@@ -47,9 +46,6 @@ internal class CoreElement
     /// </summary>
     private const int ElementFadeStep = 8;
 
-    /// <inheritdoc cref="ElementFadeStep" />
-    private const int ScreenFlashFadeStep = 5;
-
     /// <summary>
     ///     How faintly a core element still to be replaced is drawn, so the gaps in the core read as
     ///     gaps without disappearing altogether.
@@ -68,10 +64,7 @@ internal class CoreElement
     private readonly FloatAdder _finalElementUpScaler;
 
     private readonly GraphicsSet _graphicsSet;
-    private readonly PresentationSettings _presentation;
-    private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
-    private readonly IntegerSubtractor _screenFlashFader;
 
     private bool _elementReplacementStarted;
 
@@ -81,7 +74,6 @@ internal class CoreElement
     public CoreElement(
         ResourceManager resources,
         GraphicsSet graphicsSet,
-        PresentationSettings presentation,
         Random randomNumberGenerator,
         int currentElement,
         int finalElement,
@@ -90,27 +82,24 @@ internal class CoreElement
         _currentElementDownScaler = new FloatSubtractor(ElementShrinkFrom, ElementScaleTo, ElementShrinkStep, false);
         _finalElementUpScaler = new FloatAdder(0, ElementScaleTo, ElementGrowStep, false);
         _elementFader = new IntegerSubtractor(ColourLevels.Full, ColourLevels.None, ElementFadeStep, false);
-        _screenFlashFader = new IntegerSubtractor(ColourLevels.Full, ColourLevels.None, ScreenFlashFadeStep, true);
 
         ElementState = CoreElementState.Missing;
         CurrentElement = currentElement;
         FinalElement = finalElement;
         _resources = resources;
         _graphicsSet = graphicsSet;
-        _presentation = presentation;
-        _randomNumberGenerator = randomNumberGenerator;
 
         if (startFadeUp)
         {
-            _fader1 = new ElementFader(_randomNumberGenerator, Direction.Up);
-            _fader2 = new ElementFader(_randomNumberGenerator, Direction.Down);
-            _fader3 = new ElementFader(_randomNumberGenerator, Direction.Up);
+            _fader1 = new ElementFader(randomNumberGenerator, Direction.Up);
+            _fader2 = new ElementFader(randomNumberGenerator, Direction.Down);
+            _fader3 = new ElementFader(randomNumberGenerator, Direction.Up);
         }
         else
         {
-            _fader1 = new ElementFader(_randomNumberGenerator, Direction.Down);
-            _fader2 = new ElementFader(_randomNumberGenerator, Direction.Up);
-            _fader3 = new ElementFader(_randomNumberGenerator, Direction.Down);
+            _fader1 = new ElementFader(randomNumberGenerator, Direction.Down);
+            _fader2 = new ElementFader(randomNumberGenerator, Direction.Up);
+            _fader3 = new ElementFader(randomNumberGenerator, Direction.Down);
         }
 
         _coreReplacementEffect = (IStandardParticleEffect)_resources.GetParticleEffectInstance("CoreReplacementParticleEffect", ParticleEffectType.Continual, new TimeSpan(0, 0, 0, 0, ReplacementEffectMilliseconds));
@@ -165,17 +154,9 @@ internal class CoreElement
                             _coreReplacementEffect.Start();
                         }
                     }
-
-                    // Flash the screen white then fade out
-                    _screenFlashFader.Trigger();
                 }
                 _elementFader.Update();
             }
-        }
-        if (_screenFlashFader.Triggered)
-        {
-            _presentation.BackgroundColour = ColourHelper.GetXna4Colour(_screenFlashFader.ByteModifier, _screenFlashFader.ByteModifier, _screenFlashFader.ByteModifier);
-            _screenFlashFader.Update();
         }
 
         if (_elementReplacementStarted && ElementState == CoreElementState.Replacing)

@@ -36,12 +36,6 @@ internal sealed class PresentationSettings
     public Color ScreenClearColour { get; set; } = Color.Black;
 
     /// <summary>
-    ///     What shows through behind a game screen's tiles. A core element about to be collected
-    ///     flashes this up and fades it back down.
-    /// </summary>
-    public Color BackgroundColour { get; set; } = Color.Black;
-
-    /// <summary>
     ///     Whether the backdrops behind the tile layers are drawn at all. The original graphics
     ///     have none, and F10 turns them off by hand.
     /// </summary>

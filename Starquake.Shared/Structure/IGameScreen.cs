@@ -21,5 +21,5 @@ namespace Starquake.Structure;
 internal interface IGameScreen
 {
     void Update(GameTime gameTime);
-    void Draw(GameTime gameTime);
+    void Draw();
 }

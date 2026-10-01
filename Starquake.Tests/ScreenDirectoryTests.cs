@@ -149,7 +149,7 @@ public class ScreenDirectoryTests
         {
         }
 
-        public void Draw(GameTime gameTime)
+        public void Draw()
         {
         }
     }

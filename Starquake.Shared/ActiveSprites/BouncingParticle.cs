@@ -64,16 +64,6 @@ internal class BouncingParticle
 
     public required IPositionalTriggerParticleEffect SparkEffect { get; init; }
 
-    public void XBounce()
-    {
-        _particleBounce.XBounce();
-    }
-
-    public void YBounce()
-    {
-        _particleBounce.YBounce();
-    }
-
     public void Trigger(int xPos, int yPos, int effectMinDuration = 50, int effectMaxDuration = 100)
     {
         XPos = xPos + 16;

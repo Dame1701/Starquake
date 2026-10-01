@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Starquake.Helpers;
 
-internal class TextHelper
+internal static class TextHelper
 {
     public static int GetAsciiCode(string character)
     {

@@ -66,8 +66,6 @@ internal class CheopsScreen : IGameScreen
     private InteractiveItem[] _itemsToSelect = [];
     private int _itemToSwap;
 
-    public int ScreenFade { get; set; }
-
 
     public CheopsScreen(
         StatusPanel statusPanel,
@@ -323,7 +321,7 @@ internal class CheopsScreen : IGameScreen
     }
 
 
-    public void Draw(GameTime gameTime)
+    public void Draw()
     {
         _font.Begin(BlendState.AlphaBlend);
         _font.WriteText(298, 100, "CHEOPS PYRAMID", 2, Color.White, ColourLevels.Full);

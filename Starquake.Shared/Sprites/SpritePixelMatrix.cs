@@ -13,7 +13,15 @@ internal class SpritePixelMatrix
     public SpritePixelMatrix(int size, Random randomNumberGenerator)
     {
         _randomNumberGenerator = randomNumberGenerator;
+
+        // The array has to be filled, not just allocated: every pixel starts on and white, which
+        // is both what Finished counts down from and what SetRandomPixel's loop looks for in an
+        // as-yet-untouched pixel.
         Matrix = new SpritePixel[size];
+        for (int a = 0; a < Matrix.Length; a++)
+        {
+            Matrix[a] = new SpritePixel();
+        }
     }
 
     public SpritePixel[] Matrix { get; }
@@ -32,12 +40,6 @@ internal class SpritePixelMatrix
 
             return true;
         }
-    }
-
-    public void SetPixel(int index, Color colour)
-    {
-        Matrix[index].IsOn = false;
-        Matrix[index].Colour = colour;
     }
 
     public void SetRandomPixel(Color colour)

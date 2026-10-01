@@ -71,7 +71,7 @@ public class GameSessionTests
     }
 
     [Fact]
-    public void PlayerKeys_OnANewSession_IsTheCursorKeysWithLeftControlToFire()
+    public void PlayerKeys_OnANewSession_IsTheCursorKeysWithLeftAltToFire()
     {
         // Act
         var session = new GameSession();
@@ -81,7 +81,7 @@ public class GameSessionTests
         Assert.Equal(Keys.Down, session.PlayerKeys.Down);
         Assert.Equal(Keys.Left, session.PlayerKeys.Left);
         Assert.Equal(Keys.Right, session.PlayerKeys.Right);
-        Assert.Equal(Keys.LeftControl, session.PlayerKeys.Fire);
+        Assert.Equal(Keys.LeftAlt, session.PlayerKeys.Fire);
     }
 
     [Fact]

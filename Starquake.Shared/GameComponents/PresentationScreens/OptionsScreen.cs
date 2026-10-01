@@ -60,7 +60,7 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
         _options =
         [
             new Option("1", "Joypad", false, Color.White, !Input.GamePadState.IsConnected),
-            new Option("2", "Cursor Keys, Left Ctrl", true, Color.White),
+            new Option("2", "Cursor Keys, Left Alt", true, Color.White),
             new Option("3", "Keyboard . . O, P, A, Q, SP", false, Color.White),
             new Option("4", "UDK Keyboard . . " + _keyDefiner.GetKeys(), false, Color.White),
             new Option("5", "Define your own keys", false, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full)),
@@ -219,7 +219,9 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
                 Down = Keys.Down,
                 Left = Keys.Left,
                 Right = Keys.Right,
-                Fire = Keys.LeftControl,
+
+                // See GameSession for why this is Alt and not Ctrl.
+                Fire = Keys.LeftAlt,
                 Pause = Keys.P,
                 Quit = Keys.Q
             },
@@ -255,7 +257,7 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
         }
     }
 
-    public void Draw(GameTime gameTime)
+    public void Draw()
     {
         ScreenEffects.SelectRenderViewPort("EntireScreen");
 

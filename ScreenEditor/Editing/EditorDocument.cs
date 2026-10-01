@@ -204,23 +204,4 @@ internal sealed class EditorDocument
         }
     }
 
-    /// <summary>
-    ///     Whether a screen has nothing painted on it at all. The world map draws these differently so
-    ///     that the parts of the planet still to be built stand out from the parts that are done.
-    /// </summary>
-    public bool IsScreenEmpty(int screen)
-    {
-        for (int y = 0; y < TileMetrics.TilesDown; y++)
-        {
-            for (int x = 0; x < TileMetrics.TilesAcross; x++)
-            {
-                if (GetTile(screen, x, y) != EmptyTile)
-                {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
 }

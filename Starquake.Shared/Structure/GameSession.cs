@@ -34,7 +34,12 @@ internal sealed class GameSession
         Down = Keys.Down,
         Left = Keys.Left,
         Right = Keys.Right,
-        Fire = Keys.LeftControl
+
+        // Alt rather than Ctrl, which macOS reserves: Ctrl with any arrow key is a Mission Control
+        // shortcut - the two space switches, Mission Control itself and App Expose - and the window
+        // server takes those before the game is given the key. Firing while moving is the ordinary
+        // thing to be doing, so the authentic Ctrl-to-fire made the default scheme unplayable there.
+        Fire = Keys.LeftAlt
     };
 
     /// <summary>

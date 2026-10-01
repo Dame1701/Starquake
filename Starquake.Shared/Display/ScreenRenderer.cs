@@ -227,25 +227,6 @@ internal class ScreenRenderer
         _ollyEyesY = OllyEyesRestY + blobYPos / OllyVerticalGazeDamping;
     }
 
-    public void DrawCoreElements(int xPos, int yPos)
-    {
-        int objNo = 0;
-
-        _resources.GetSpriteCollection(_graphicsSet.Names.Pickups)
-            .Begin(BlendState.AlphaBlend);
-        for (int y = 0; y < 3; y++)
-        {
-            for (int x = 0; x < 3; x++)
-            {
-                _resources.GetSpriteCollection(_graphicsSet.Names.Pickups)
-                    .DrawSprite(objNo, x * 64 + xPos, y * 64 + yPos, Color.White);
-                objNo++;
-            }
-        }
-
-        _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
-    }
-
     public void Draw(Color colour, bool introSequenceRunning = false,
         IntroSequenceStage introSequenceStage = IntroSequenceStage.None)
     {
