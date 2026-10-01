@@ -250,13 +250,8 @@ public class ScreenRenderer
     public void Draw(Color colour, GameTime gameTime, bool introSequenceRunning = false,
         IntroSequenceStage introSequenceStage = IntroSequenceStage.None)
     {
-        for (int y = 0; y < TileMetrics.TilesDown; y++)
-        {
-            for (int x = 0; x < TileMetrics.TilesAcross; x++)
-            {
-                DrawLowerTile(x, y, colour);
-            }
-        }
+        DrawLowerTiles(colour);
+        DrawTileAnimations(colour);
 
         _colourAnimations.Draw(gameTime, colour.A);
 
@@ -273,33 +268,75 @@ public class ScreenRenderer
         DrawOllyBackground(colour);
     }
 
-    private void DrawLowerTile(int x, int y, Color colour)
+    /// <summary>
+    ///     The whole lower layer, as one batch. Every tile on the screen comes off the same sheet, so
+    ///     there is one <c>Begin</c>/<c>End</c> pair for the forty-eight of them rather than one each.
+    /// </summary>
+    /// <remarks>
+    ///     A <c>Begin</c>/<c>End</c> pair flushes a draw call, so this used to issue up to 2,880 of
+    ///     them a second to draw at most 48 sprites - batching is the entire purpose of
+    ///     <c>SpriteBatch</c>. The sort mode is <c>Deferred</c>, which draws in the order the calls
+    ///     were made: <c>Immediate</c> would flush per sprite and undo the batching, and
+    ///     <c>BackToFront</c> sorts by a layer depth none of these set, which leaves the order among
+    ///     them unspecified.
+    /// </remarks>
+    private void DrawLowerTiles(Color colour)
     {
-        int tileImage = _screens[ScreenNumber].ScreenTiles[x, y].TileImage;
+        SpriteCollection tiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
 
-        if (tileImage <= -1 || tileImage is
-                (int)ActionTiles.BlankFiller or // The blank spacer tile
-                (int)ActionTiles.ConveyerNasty or // Tile representing conveyer nasties
-                (int)ActionTiles.TunnelLiftTile or
-                (int)ActionTiles.PreferredCoreLocation) // Tile representing preferred pickup location
+        tiles.Begin(BlendState.AlphaBlend);
+
+        for (int y = 0; y < TileMetrics.TilesDown; y++)
         {
-            return;
+            for (int x = 0; x < TileMetrics.TilesAcross; x++)
+            {
+                int tileImage = _screens[ScreenNumber].ScreenTiles[x, y].TileImage;
+
+                // Avoid the tunnel tiles
+                if (IsDrawnOnTheLowerLayer(tileImage) && tileImage < (int)ActionTiles.AccessForceField)
+                {
+                    tiles.DrawSprite(tileImage, x * TileMetrics.TileWidth, y * TileMetrics.TileHeight, colour);
+                }
+            }
         }
 
-        // Avoid the tunnel tiles
-        if (tileImage < (int)ActionTiles.AccessForceField)
-        {
-            SpriteCollection tiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
-
-            tiles.Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate);
-            tiles.DrawSprite(tileImage, x * TileMetrics.TileWidth, y * TileMetrics.TileHeight, colour);
-            tiles.End();
-        }
-
-        // Draw animation portions
-        _resources.GetAnimationEngine()
-            .Draw(tileImage, x * TileMetrics.TileWidth, y * TileMetrics.TileHeight, colour);
+        tiles.End();
     }
+
+    /// <summary>
+    ///     The animated patches that sit over a tile - a breakable bridge, a shuttle pad. Drawn after
+    ///     the whole lower layer rather than tile by tile with it, which is the same picture: every
+    ///     animated patch is at most one tile big, so none of them can be covered by a tile drawn later.
+    /// </summary>
+    private void DrawTileAnimations(Color colour)
+    {
+        AnimTileEngine animations = _resources.GetAnimationEngine();
+
+        for (int y = 0; y < TileMetrics.TilesDown; y++)
+        {
+            for (int x = 0; x < TileMetrics.TilesAcross; x++)
+            {
+                int tileImage = _screens[ScreenNumber].ScreenTiles[x, y].TileImage;
+
+                if (IsDrawnOnTheLowerLayer(tileImage))
+                {
+                    animations.Draw(tileImage, x * TileMetrics.TileWidth, y * TileMetrics.TileHeight, colour);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Whether a tile is drawn at all. Four of them are markers the level author places rather than
+    ///     scenery - a blank spacer, a conveyer nasty's post, a lift tile, the preferred core location -
+    ///     and neither the tile nor any animation of it is drawn.
+    /// </summary>
+    private static bool IsDrawnOnTheLowerLayer(int tileImage)
+        => tileImage > -1 && tileImage is not (
+            (int)ActionTiles.BlankFiller or
+            (int)ActionTiles.ConveyerNasty or
+            (int)ActionTiles.TunnelLiftTile or
+            (int)ActionTiles.PreferredCoreLocation);
 
     private void DrawPowerUp(Color colour)
     {
@@ -367,14 +404,8 @@ public class ScreenRenderer
 
     public void DrawUpperLayer(Color colour)
     {
-        for (int y = 0; y < TileMetrics.TilesDown; y++)
-        {
-            for (int x = 0; x < TileMetrics.TilesAcross; x++)
-            {
-                DrawUpperTilePatch(x, y, colour);
-                DrawTunnelEntrance(x, y, colour);
-            }
-        }
+        DrawUpperTilePatches(colour);
+        DrawTunnelEntrances(colour);
 
         DrawOlly(colour);
         DrawKeyDoorForceFields();
@@ -386,22 +417,36 @@ public class ScreenRenderer
     ///     Lays the upper-layer patch over one tile - the inside of a lift shaft, a booth, a tunnel mouth,
     ///     the shadow another tile casts. A tile with no patch is left as the lower layer drew it.
     /// </summary>
-    private void DrawUpperTilePatch(int x, int y, Color colour)
+    /// <remarks>
+    ///     One batch for the whole layer, as with the lower one. The patches and the tunnel entrances
+    ///     come off different sheets and so are two passes rather than one interleaved loop; that is
+    ///     the same picture because every patch is drawn on its own row or the one below it, never
+    ///     above, so a tunnel entrance that shares a cell with one was always drawn after it anyway.
+    /// </remarks>
+    private void DrawUpperTilePatches(Color colour)
     {
-        if (UpperLayerPatchFor(_screens[ScreenNumber].ScreenTiles[x, y].TileImage) is not var (sprite, rowOffset))
+        SpriteCollection upperTiles = _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles);
+
+        upperTiles.Begin(BlendState.AlphaBlend);
+
+        for (int y = 0; y < TileMetrics.TilesDown; y++)
         {
-            return;
+            for (int x = 0; x < TileMetrics.TilesAcross; x++)
+            {
+                if (UpperLayerPatchFor(_screens[ScreenNumber].ScreenTiles[x, y].TileImage)
+                    is not var (sprite, rowOffset))
+                {
+                    continue;
+                }
+
+                upperTiles.DrawSprite(
+                    sprite,
+                    x * TileMetrics.TileWidth,
+                    (y + rowOffset) * TileMetrics.TileHeight,
+                    colour);
+            }
         }
 
-        SpriteCollection upperTiles = _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles);
-        SpriteCollection lowerTiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
-
-        upperTiles.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
-        upperTiles.DrawSprite(
-            sprite,
-            x * lowerTiles.SpriteWidth,
-            (y + rowOffset) * lowerTiles.SpriteHeight,
-            colour);
         upperTiles.End();
     }
 
@@ -475,17 +520,30 @@ public class ScreenRenderer
         };
     }
 
-    private void DrawTunnelEntrance(int x, int y, Color colour)
+    /// <summary>
+    ///     The tunnel mouths, which are lower-layer tiles numbered above everything the blob can stand
+    ///     on and so are drawn over the upper layer rather than under it.
+    /// </summary>
+    private void DrawTunnelEntrances(Color colour)
     {
-        if (_screens[ScreenNumber].ScreenTiles[x, y].TileImage > LastCollidableTile)
+        SpriteCollection tiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
+
+        tiles.Begin(BlendState.AlphaBlend);
+
+        for (int y = 0; y < TileMetrics.TilesDown; y++)
         {
-            _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
-                .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate);
-            _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
-                .DrawSprite(_screens[ScreenNumber].ScreenTiles[x, y].TileImage, x * TileMetrics.TileWidth,
-                    y * TileMetrics.TileHeight, colour);
-            _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).End();
+            for (int x = 0; x < TileMetrics.TilesAcross; x++)
+            {
+                int tileImage = _screens[ScreenNumber].ScreenTiles[x, y].TileImage;
+
+                if (tileImage > LastCollidableTile)
+                {
+                    tiles.DrawSprite(tileImage, x * TileMetrics.TileWidth, y * TileMetrics.TileHeight, colour);
+                }
+            }
         }
+
+        tiles.End();
     }
 
     private void DrawOlly(Color colour)
