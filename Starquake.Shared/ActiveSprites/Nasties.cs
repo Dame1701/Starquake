@@ -168,10 +168,7 @@ internal class Nasties
             _resources.GetSoundFxEngine().EnablePeriodicBackgroundSounds();
         }
 
-        if (_nastySmokes != null)
-        {
-            _nastySmokes.Update(gameTime);
-        }
+        _nastySmokes.Update(gameTime);
     }
 
     /// <summary>
@@ -287,17 +284,14 @@ internal class Nasties
                         if (nastyTravelDirection != Direction.None &&
                             _nasties[a].NastyState == NastyState.Normal)
                         {
-                            if (_nastySmokes != null)
-                            {
-                                _nasties[a].Smoking = true;
-                                _nastySmokes.Start(
-                                    SpriteHelpers.GetSpriteLocationOffset(_nasties[a].Direction,
-                                        _nasties[a].NastyWidth, _nasties[a].NastyHeight).X +
-                                    _nasties[a].XPos,
-                                    SpriteHelpers.GetSpriteLocationOffset(_nasties[a].Direction,
-                                        _nasties[a].NastyWidth, _nasties[a].NastyHeight).Y +
-                                    _nasties[a].YPos);
-                            }
+                            _nasties[a].Smoking = true;
+                            _nastySmokes.Start(
+                                SpriteHelpers.GetSpriteLocationOffset(_nasties[a].Direction,
+                                    _nasties[a].NastyWidth, _nasties[a].NastyHeight).X +
+                                _nasties[a].XPos,
+                                SpriteHelpers.GetSpriteLocationOffset(_nasties[a].Direction,
+                                    _nasties[a].NastyWidth, _nasties[a].NastyHeight).Y +
+                                _nasties[a].YPos);
                         }
                     }
                 }
@@ -344,7 +338,7 @@ internal class Nasties
 
         DisableNastiesDisplacedByConveyerNasties();
 
-        _nastySmokes?.Reset();
+        _nastySmokes.Reset();
 
         _previousScreenVisited = _gameScreens.PreviousScreenNumber;
     }
@@ -419,10 +413,7 @@ internal class Nasties
                 }
             }
 
-            if (_nastySmokes != null)
-            {
-                _nastySmokes.Draw(screenFade);
-            }
+            _nastySmokes.Draw(screenFade);
         }
     }
 

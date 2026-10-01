@@ -248,28 +248,21 @@ internal class PlanetCoreScreen : IGameScreen
     {
         if (!_replacingElements)
         {
-            if (_coreComputationEffect != null)
-            {
-                _coreComputationEffect.Draw();
-            }
-
-            if (_coreSparks != null)
-            {
-                _coreSparks.Draw();
-            }
+            _coreComputationEffect.Draw();
+            _coreSparks.Draw();
         }
 
         if (!_replacingElements)
         {
-            _resources.GetSpriteCollection("BlankingTile").Begin(BlendState.AlphaBlend);
+            _resources.GetSpriteCollection(Assets.Graphics.BlankingTile).Begin(BlendState.AlphaBlend);
             for (int a = 0; a < BlankingTilesDown; a++)
             {
                 for (int b = 0; b < BlankingTilesAcross; b++)
                 {
-                    _resources.GetSpriteCollection("BlankingTile").DrawSprite(0, b * TileMetrics.TileWidth + BlankingTilesFirstColumn, a * TileMetrics.TileHeight, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_blankingTilesOpacity));
+                    _resources.GetSpriteCollection(Assets.Graphics.BlankingTile).DrawSprite(0, b * TileMetrics.TileWidth + BlankingTilesFirstColumn, a * TileMetrics.TileHeight, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_blankingTilesOpacity));
                 }
             }
-            _resources.GetSpriteCollection("BlankingTile").End();
+            _resources.GetSpriteCollection(Assets.Graphics.BlankingTile).End();
         }
 
         _gameScreens.Draw(Color.White);

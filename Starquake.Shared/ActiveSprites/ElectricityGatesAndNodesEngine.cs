@@ -245,7 +245,7 @@ internal class ElectricityGatesAndNodesEngine
                 _electricityAnimationOriginal.GetNextFrame();
             }
         }
-        else if (_conveyerNasties != null)
+        else
         {
             if (_graphicsSet.IsRedrawn)
             {
@@ -364,10 +364,7 @@ internal class ElectricityGatesAndNodesEngine
             ElectricityNodeControllers ??= CreateNodeControllers(electricityNodeCounter, secondLayerTiles);
         }
 
-        if (_conveyerNasties != null)
-        {
-            DrawConveyerNastyArcs();
-        }
+        DrawConveyerNastyArcs();
     }
 
     /// <summary>

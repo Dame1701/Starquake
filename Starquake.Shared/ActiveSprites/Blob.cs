@@ -514,9 +514,9 @@ internal class Blob
         }
 
         // Update the teleport beam effect - probably should have a boolean to stop drawing when not needed.....
-        _blobFireSparks?.Update(gameTime);
-        _blobTeleporterBeam?.Update(_blobXPos + TeleportBeamXOffset, _blobYPos + TeleportBeamYOffset, gameTime);
-        _blobFireTrail?.Update(BlobFireX + FireTrailOffset, BlobFireY + FireTrailOffset, gameTime);
+        _blobFireSparks.Update(gameTime);
+        _blobTeleporterBeam.Update(_blobXPos + TeleportBeamXOffset, _blobYPos + TeleportBeamYOffset, gameTime);
+        _blobFireTrail.Update(BlobFireX + FireTrailOffset, BlobFireY + FireTrailOffset, gameTime);
 
         if (!changedScreens)
         {
@@ -1027,7 +1027,7 @@ internal class Blob
             return;
         }
 
-        _blobFireTrail?.Start();
+        _blobFireTrail.Start();
 
         if (!_blobFire.Advance(_directionBlobFired, _blobOnShuttleCached, PointBlankReach()))
         {
@@ -1053,10 +1053,7 @@ internal class Blob
     {
         if (!BlobHasFired)
         {
-            if (_blobFireTrail != null)
-            {
-                _blobFireTrail.Stop();
-            }
+            _blobFireTrail.Stop();
 
             _blobOnShuttleCached = _blobOnShuttle;
         }
@@ -1685,8 +1682,8 @@ internal class Blob
         }
 
         _tilesToReset.Clear();
-        _blobFireSparks?.Reset();
-        _blobFireTrail?.Reset();
+        _blobFireSparks.Reset();
+        _blobFireTrail.Reset();
     }
 
     public void Draw(int screenFade)
@@ -1713,7 +1710,7 @@ internal class Blob
 
     private void DrawNormalState(int screenFade)
     {
-        _blobFireTrail?.Draw();
+        _blobFireTrail.Draw();
 
         FadeEnergyDrainTint();
         DrawBlobSprite(screenFade);
@@ -1863,10 +1860,7 @@ internal class Blob
     {
         if (_startBlobTeleporting)
         {
-            if (_blobTeleporterBeam != null)
-            {
-                _blobTeleporterBeam.Draw();
-            }
+            _blobTeleporterBeam.Draw();
         }
     }
 
@@ -1930,7 +1924,7 @@ internal class Blob
 
     public void DrawUpper(int screenFade)
     {
-        _blobFireSparks?.Draw(screenFade);
+        _blobFireSparks.Draw(screenFade);
     }
 
     public void Reset()
@@ -2032,6 +2026,6 @@ internal class Blob
                 (int)FireDeflection.Right + 1);
 
         /// <inheritdoc />
-        public void ThrowSparks(int x, int y) => blob._blobFireSparks?.Start(x, y);
+        public void ThrowSparks(int x, int y) => blob._blobFireSparks.Start(x, y);
     }
 }

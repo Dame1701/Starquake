@@ -637,17 +637,11 @@ internal class Nasty
 
     private void UpdateDeathEffects(GameTime gameTime)
     {
-        if (_nastyDies != null)
-        {
-            // Update the explosion
-            _nastyDies.Update(XPos + SpriteMetrics.HalfSpriteWidth, YPos + SpriteMetrics.HalfSpriteHeight, gameTime);
-        }
+        // Update the explosion
+        _nastyDies.Update(XPos + SpriteMetrics.HalfSpriteWidth, YPos + SpriteMetrics.HalfSpriteHeight, gameTime);
 
-        if (_nastyDiesType2 != null)
-        {
-            // Update the splat
-            _nastyDiesType2.Update(XPos + SpriteMetrics.HalfSpriteWidth, YPos + SpriteMetrics.HalfSpriteHeight, gameTime);
-        }
+        // Update the splat
+        _nastyDiesType2.Update(XPos + SpriteMetrics.HalfSpriteWidth, YPos + SpriteMetrics.HalfSpriteHeight, gameTime);
     }
 
     /// <summary>
@@ -678,15 +672,8 @@ internal class Nasty
     public void PerformPostChangeScreenActions()
     {
         // Stop the explosion effect leaking onto the next screen
-        if (_nastyDies != null)
-        {
-            _nastyDies.Stop();
-        }
-
-        if (_nastyDiesType2 != null)
-        {
-            _nastyDiesType2.Stop();
-        }
+        _nastyDies.Stop();
+        _nastyDiesType2.Stop();
 
         if (NastyState == NastyState.Disabled)
         {
@@ -784,16 +771,9 @@ internal class Nasty
     /// </summary>
     private void DrawDeath(int nastyImage, int screenFade)
     {
-        // Draw the explosion
-        if (_nastyDies != null)
-        {
-            _nastyDies.Draw();
-        }
-
-        if (_nastyDiesType2 != null)
-        {
-            _nastyDiesType2.Draw();
-        }
+        // Draw the explosion and the splat
+        _nastyDies.Draw();
+        _nastyDiesType2.Draw();
 
         // Fade the nasty out as it explodes
         if (_deathFadeLevel > 0)

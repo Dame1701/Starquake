@@ -29,7 +29,7 @@ internal class ConveyerNasties
     {
         get
         {
-            return _gameScreens.GetCoordsOfTiles((int)MarkerTile.ConveyerNasty)?.Count ?? 0;
+            return _gameScreens.GetCoordsOfTiles((int)MarkerTile.ConveyerNasty).Count;
         }
     }
 

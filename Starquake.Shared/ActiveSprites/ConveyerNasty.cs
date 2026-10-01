@@ -118,21 +118,15 @@ internal class ConveyerNasty
 
     public void PerformPostChangeScreenActions()
     {
-        if (_conveyerNastyDies != null)
-        {
-            _conveyerNastyDies.Stop();
-        }
+        _conveyerNastyDies.Stop();
 
         NastyActive = false;
     }
 
     public void Update(GameTime gameTime)
     {
-        if (_conveyerNastyDies != null)
-        {
-            // Update the explosion
-            _conveyerNastyDies.Update(XLocation + SpriteMetrics.HalfSpriteWidth, YLocation + SpriteMetrics.SpriteHeight, gameTime);
-        }
+        // Update the explosion
+        _conveyerNastyDies.Update(XLocation + SpriteMetrics.HalfSpriteWidth, YLocation + SpriteMetrics.SpriteHeight, gameTime);
 
         if (NastyState == NastyState.Conception)
         {
@@ -175,10 +169,7 @@ internal class ConveyerNasty
             _deathFadeLevel = ColourLevels.Full;
             _deathScale = 1.0f;
 
-            if (_conveyerNastyDies != null)
-            {
-                _conveyerNastyDies.Start();
-            }
+            _conveyerNastyDies.Start();
 
             NastyState = NastyState.Dead;
             NastyActive = false;
@@ -196,10 +187,7 @@ internal class ConveyerNasty
         else if (NastyState == NastyState.Dead)
         {
             // Draw the explosion
-            if (_conveyerNastyDies != null)
-            {
-                _conveyerNastyDies.Draw();
-            }
+            _conveyerNastyDies.Draw();
 
             // Fade the nasty out as it explodes
             if (_deathFadeLevel > 0)

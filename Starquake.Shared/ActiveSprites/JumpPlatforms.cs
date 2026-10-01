@@ -106,23 +106,20 @@ internal class JumpPlatforms
 
     public void Update(GameScreenCollection gameScreensReference)
     {
-        // Update jumpplatform lifetime
+        // Update jump platform lifetime
         if (_platforms.Count > 0)
         {
             foreach (JumpPlatform platform in _platforms)
             {
-                if (platform.LeftCollisionTile != null && platform.RightCollisionTile != null)
+                if (platform.Finished)
                 {
-                    if (platform.Finished)
-                    {
-                        gameScreensReference.CurrentGameScreenData.CollisionMap.Remove(platform.LeftCollisionTile);
-                        gameScreensReference.CurrentGameScreenData.CollisionMap.Remove(platform.RightCollisionTile);
-                        platform.Reset();
-                    }
-                    else
-                    {
-                        platform.Update();
-                    }
+                    gameScreensReference.CurrentGameScreenData.CollisionMap.Remove(platform.LeftCollisionTile);
+                    gameScreensReference.CurrentGameScreenData.CollisionMap.Remove(platform.RightCollisionTile);
+                    platform.Reset();
+                }
+                else
+                {
+                    platform.Update();
                 }
             }
         }
