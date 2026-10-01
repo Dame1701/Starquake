@@ -98,7 +98,7 @@ internal class IntroSequence : GameComponentBase
     ///     The screen the sequence fades up over. Looked up rather than held, so the sequence cannot
     ///     be built before the screen it needs exists.
     /// </summary>
-    private MainGameScreen MainScreen => (MainGameScreen)_screenDirectory.Get(GameScreenType.MainGame);
+    private MainGameScreen MainScreen => _screenDirectory.MainGame;
 
     public void Reset()
     {

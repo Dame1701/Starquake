@@ -90,7 +90,7 @@ internal class AccessBoothScreen : GameComponentBase, IGameScreen
         _blobAnim1 = new BlobAccessBoothAnim(_resources, _graphicsSet, 164, 800);
         _blobAnim2 = new BlobAccessBoothAnim(_resources, _graphicsSet, 164, 800);
 
-        Reset(null);
+        Reset();
     }
 
     public int ScreenFade { get; set; }
@@ -139,8 +139,8 @@ internal class AccessBoothScreen : GameComponentBase, IGameScreen
 
             if (_screenReadWaitFrames > ScreenReadWaitFrames)
             {
-                _screenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
-                _screenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.AccessBooth, new ScreenChange.AccessCode(Success));
+                _screenDirectory.MainGame.ScreenFade = 40;
+                _screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.AccessBooth, new ScreenChange.AccessCode(Success));
 
                 _screenDirectory.Current = GameScreenType.MainGame;
             }
@@ -257,9 +257,12 @@ internal class AccessBoothScreen : GameComponentBase, IGameScreen
         _soundPlayed = true;
     }
 
-    #region IGameScreen Members
-
-    public void Reset(object? data)
+    /// <summary>
+    ///     Reads the booth's code and checks the blob's inventory against it, leaving the blob
+    ///     where it is. This is the form the constructor uses, before there is a door to arrive
+    ///     through.
+    /// </summary>
+    public void Reset()
     {
         _soundPlayed = false;
         _blobAnim1.Reset(Direction.Left);
@@ -271,11 +274,16 @@ internal class AccessBoothScreen : GameComponentBase, IGameScreen
         _resultMessageFade = ColourLevels.Full;
 
         CheckInventoryAgainstCode();
+    }
 
-        if (data != null)
-        {
-            MoveBlobToTheBoothDoor(data);
-        }
+    /// <inheritdoc cref="Reset()" />
+    /// <param name="approachedFrom">Which side of the booth door the blob walked in from.</param>
+    /// <param name="doorMapXPosition">The map column the booth door stands in.</param>
+    public void Reset(Direction approachedFrom, int doorMapXPosition)
+    {
+        Reset();
+
+        MoveBlobToTheBoothDoor(approachedFrom, doorMapXPosition);
     }
 
     /// <summary>
@@ -336,51 +344,28 @@ internal class AccessBoothScreen : GameComponentBase, IGameScreen
     /// <summary>
     ///     Puts blob on the far side of the door he walked into, which is why the caller passes which side
     ///     he came from.
+    ///     <para>
+    ///         The two arguments used to arrive as an <c>object[]</c> unboxed by index - a
+    ///         <see cref="Direction" /> at 0 and an <c>int</c> at 1 - because
+    ///         <c>IGameScreen.Reset</c> took a single <c>object?</c>. Nothing checked either cast,
+    ///         and a null meant "don't move him" rather than "no data".
+    ///     </para>
     /// </summary>
-    private void MoveBlobToTheBoothDoor(object data)
+    private void MoveBlobToTheBoothDoor(Direction approachedFrom, int doorMapXPosition)
     {
+        if (approachedFrom == Direction.Left)
         {
-            object[]? temp = data as object[];
-
-            if (temp != null)
-            {
-
-                if ((Direction)temp[0] == Direction.Left)
-                {
-                    if (Success)
-                    {
-                        _blob.BlobXPos = ((int)temp[1] - 1) * 128 + 16;
-                        _blob.BlobFrame = 0;
-                    }
-                    else
-                    {
-                        _blob.BlobXPos = (int)temp[1] * 128 + 48;
-                        _blob.BlobFrame = 0;
-                    }
-                }
-                else if ((Direction)temp[0] == Direction.Right)
-                {
-                    if (Success)
-                    {
-                        _blob.BlobXPos = ((int)temp[1] + 1) * 128 + 48;
-                        _blob.BlobFrame = 10;
-                    }
-                    else
-                    {
-                        _blob.BlobXPos = (int)temp[1] * 128 + 16;
-                        _blob.BlobFrame = 10;
-                    }
-                }
-            }
-
+            _blob.BlobXPos = Success
+                ? (doorMapXPosition - 1) * 128 + 16
+                : doorMapXPosition * 128 + 48;
+            _blob.BlobFrame = 0;
+        }
+        else if (approachedFrom == Direction.Right)
+        {
+            _blob.BlobXPos = Success
+                ? (doorMapXPosition + 1) * 128 + 48
+                : doorMapXPosition * 128 + 16;
+            _blob.BlobFrame = 10;
         }
     }
-
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, ScreenChange change)
-    {
-        //throw new NotImplementedException();
-    }
-
-    #endregion
-
 }

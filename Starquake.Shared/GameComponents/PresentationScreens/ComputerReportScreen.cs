@@ -59,8 +59,8 @@ internal class ComputerReportScreen : GameScreenBase, IGameScreen
             GraphicsDeviceManager.GraphicsDevice.Clear(Presentation.ScreenClearColour);
             ScreenDirectory.Current = GameScreenType.MainGame;
 
-            ScreenDirectory.Get(GameScreenType.MainGame).Reset(null);
-            ScreenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.ComputerReport, new ScreenChange.KeepPicture());
+            ScreenDirectory.MainGame.Reset();
+            ScreenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.ComputerReport, new ScreenChange.KeepPicture());
         }
 
         if (ScreenFade >= ColourLevels.Full)
@@ -122,11 +122,7 @@ internal class ComputerReportScreen : GameScreenBase, IGameScreen
         _foregroundImage.End();
     }
 
-    public void Reset(object? data)
-    {
-    }
-
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, ScreenChange change)
+    public void PerformPostScreenChangeActions()
     {
         _fadeComplete = false;
         ScreenFade = 0;

@@ -814,7 +814,7 @@ internal class Blob : GameComponentBase
                 if (accessingCheops)
                 {
                     // Do something with the pyramid.....
-                    _screenDirectory.Get(GameScreenType.Cheops).Reset(null);
+                    _screenDirectory.Cheops.Reset();
                     _screenDirectory.Current = GameScreenType.Cheops;
                 }
                 else
@@ -1237,7 +1237,7 @@ internal class Blob : GameComponentBase
                 {
                     _screenDirectory.Current = GameScreenType.Teleporter;
 
-                    _screenDirectory.Get(GameScreenType.Teleporter).Reset(null);
+                    _screenDirectory.Teleporter.Reset();
                     _blobXPos = _tileRightBlob.MapXPosition * TileMetrics.TileWidth + TeleportBoothXOffset;
                     BlobFrame = BlobWalkRightFirstFrame;
                 }
@@ -1257,11 +1257,7 @@ internal class Blob : GameComponentBase
             if (_tileLeftBlob.XPosition <= 46 &&
                 _tileLeftBlob.YPosition == 32)
             {
-                _screenDirectory.Get(GameScreenType.AccessBooth).Reset(new object[]
-                {
-                    Direction.Left,
-                    _tileRightBlob.MapXPosition
-                });
+                _screenDirectory.AccessBooth.Reset(Direction.Left, _tileRightBlob.MapXPosition);
                 _screenDirectory.Current = GameScreenType.AccessBooth;
             }
         }
@@ -1272,11 +1268,7 @@ internal class Blob : GameComponentBase
             if (_tileRightBlob.XPosition >= 24 &&
                 _tileRightBlob.YPosition == 32)
             {
-                _screenDirectory.Get(GameScreenType.AccessBooth).Reset(new object[]
-                {
-                    Direction.Right,
-                    _tileLeftBlob.MapXPosition
-                });
+                _screenDirectory.AccessBooth.Reset(Direction.Right, _tileLeftBlob.MapXPosition);
                 _screenDirectory.Current = GameScreenType.AccessBooth;
             }
         }

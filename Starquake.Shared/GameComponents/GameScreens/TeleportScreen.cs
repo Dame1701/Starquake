@@ -31,15 +31,6 @@ internal class TeleportScreen : GameComponentBase, IGameScreen
     private readonly ToggleKeys _input;
 
 
-    #region IGameScreen Members
-
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, ScreenChange change)
-    {
-        throw new NotImplementedException();
-    }
-
-    #endregion
-
     private readonly Dictionary<int, string> _teleportCodes;
     /// <summary>
     ///     The destination code as typed so far, one underscore per letter still to be entered.
@@ -115,7 +106,7 @@ internal class TeleportScreen : GameComponentBase, IGameScreen
         _teleportCodes.Add(506, "exeon");
     }
 
-    public void Reset(object? data)
+    public void Reset()
     {
         _currentCode = EmptyCode;
 
@@ -263,12 +254,12 @@ internal class TeleportScreen : GameComponentBase, IGameScreen
                 _blob.BlobYPos = teleporterLocation[0].Y + 32;
             }
 
-            _screenDirectory.Get(GameScreenType.MainGame).ScreenFade = 0;
+            _screenDirectory.MainGame.ScreenFade = 0;
 
             // only do this if the teleport was successful
             if (_codeRecognised && _currentCode != _previousCode.ToUpper())
             {
-                _screenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.Teleporter, new ScreenChange.FadeIn());
+                _screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.Teleporter, new ScreenChange.FadeIn());
                 _gameScreens.UpdateCollisionMap(true);
             }
             _screenDirectory.Current = GameScreenType.MainGame;

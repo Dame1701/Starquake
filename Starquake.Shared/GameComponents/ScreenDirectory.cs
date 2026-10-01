@@ -1,7 +1,9 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+using Starquake.GameComponents.GameScreens;
+using Starquake.GameComponents.PresentationScreens;
 using Starquake.Structure;
 
 namespace Starquake.GameComponents;
@@ -19,23 +21,39 @@ namespace Starquake.GameComponents;
 ///     <para>
 ///         Switching screen is an assignment to <see cref="Current" /> from whichever screen has
 ///         decided it is finished - twenty-four places do it. Nothing here acts on the change; the
-///         engine reads <see cref="Current" /> each frame and updates and draws whatever it names.
+///         engine reads <see cref="CurrentScreen" /> each frame and updates and draws whatever it
+///         names.
+///     </para>
+///     <para>
+///         The ten properties below are the other half of the job, and they are typed. A screen
+///         handing over always names the one screen it is handing to, and what it then says to it is
+///         particular to that screen - the main game screen's fade level, the high score screen's
+///         score to type a name against, the access booth's door to put the blob through. A single
+///         <c>Get</c> returning <see cref="IGameScreen" /> made all of that have to fit one
+///         interface, which is how eleven empty and throwing members ended up on screens that have
+///         no such thing. There is no cast anywhere now; the screens arrive typed and leave typed.
 ///     </para>
 /// </summary>
 internal sealed class ScreenDirectory
 {
     private readonly Dictionary<GameScreenType, IGameScreen> _screens = new();
 
+    private AccessBoothScreen? _accessBooth;
+    private CheopsScreen? _cheops;
+    private ComputerReportScreen? _computerReport;
+    private GameCompleteScreen? _gameComplete;
+    private GameOverScreen? _gameOver;
+    private HiScoreScreen? _hiScores;
+    private MainGameScreen? _mainGame;
+    private OptionsScreen? _options;
+    private PlanetCoreScreen? _planetCore;
+    private TeleportScreen? _teleporter;
+
     /// <summary>
     ///     The screen being played. Starts on the options screen, which is what the game boots
     ///     into.
     /// </summary>
     public GameScreenType Current { get; set; } = GameScreenType.Options;
-
-    /// <summary>
-    ///     Every screen registered, in the order they were added.
-    /// </summary>
-    public IEnumerable<IGameScreen> All => _screens.Values;
 
     /// <summary>
     ///     The component that draws the screen being played, or null if <see cref="Current" /> has
@@ -45,22 +63,87 @@ internal sealed class ScreenDirectory
     /// </summary>
     public IGameScreen? CurrentScreen => _screens.GetValueOrDefault(Current);
 
+    public AccessBoothScreen AccessBooth => Registered(_accessBooth, GameScreenType.AccessBooth);
+
+    public CheopsScreen Cheops => Registered(_cheops, GameScreenType.Cheops);
+
+    public ComputerReportScreen ComputerReport => Registered(_computerReport, GameScreenType.ComputerReport);
+
+    public GameCompleteScreen GameComplete => Registered(_gameComplete, GameScreenType.GameComplete);
+
+    public GameOverScreen GameOver => Registered(_gameOver, GameScreenType.GameOver);
+
+    public HiScoreScreen HiScores => Registered(_hiScores, GameScreenType.HiScores);
+
+    public MainGameScreen MainGame => Registered(_mainGame, GameScreenType.MainGame);
+
+    public OptionsScreen Options => Registered(_options, GameScreenType.Options);
+
+    public PlanetCoreScreen PlanetCore => Registered(_planetCore, GameScreenType.PlanetCore);
+
+    public TeleportScreen Teleporter => Registered(_teleporter, GameScreenType.Teleporter);
+
     /// <summary>
-    ///     Registers the component that draws one screen. Registering the same screen twice throws,
-    ///     as the dictionary underneath always did - two components claiming one screen means one of
-    ///     them would never be drawn and nothing would say so.
+    ///     Registers the component that draws one screen. This is the primitive the ten typed
+    ///     overloads below go through; they add the screen exactly as this does and additionally
+    ///     record it under its own type, so that the screens handing over to it get it back typed.
+    ///     <para>
+    ///         Registering the same screen twice throws, as the dictionary underneath always did -
+    ///         two components claiming one screen means one of them would never be drawn and
+    ///         nothing would say so.
+    ///     </para>
     /// </summary>
     public void Add(GameScreenType gameScreen, IGameScreen screen) => _screens.Add(gameScreen, screen);
 
+    /// <inheritdoc cref="Add(GameScreenType,IGameScreen)" />
+    public void Add(AccessBoothScreen screen) => _accessBooth = Added(GameScreenType.AccessBooth, screen);
+
+    /// <inheritdoc cref="Add(GameScreenType,IGameScreen)" />
+    public void Add(CheopsScreen screen) => _cheops = Added(GameScreenType.Cheops, screen);
+
+    /// <inheritdoc cref="Add(GameScreenType,IGameScreen)" />
+    public void Add(ComputerReportScreen screen) => _computerReport = Added(GameScreenType.ComputerReport, screen);
+
+    /// <inheritdoc cref="Add(GameScreenType,IGameScreen)" />
+    public void Add(GameCompleteScreen screen) => _gameComplete = Added(GameScreenType.GameComplete, screen);
+
+    /// <inheritdoc cref="Add(GameScreenType,IGameScreen)" />
+    public void Add(GameOverScreen screen) => _gameOver = Added(GameScreenType.GameOver, screen);
+
+    /// <inheritdoc cref="Add(GameScreenType,IGameScreen)" />
+    public void Add(HiScoreScreen screen) => _hiScores = Added(GameScreenType.HiScores, screen);
+
+    /// <inheritdoc cref="Add(GameScreenType,IGameScreen)" />
+    public void Add(MainGameScreen screen) => _mainGame = Added(GameScreenType.MainGame, screen);
+
+    /// <inheritdoc cref="Add(GameScreenType,IGameScreen)" />
+    public void Add(OptionsScreen screen) => _options = Added(GameScreenType.Options, screen);
+
+    /// <inheritdoc cref="Add(GameScreenType,IGameScreen)" />
+    public void Add(PlanetCoreScreen screen) => _planetCore = Added(GameScreenType.PlanetCore, screen);
+
+    /// <inheritdoc cref="Add(GameScreenType,IGameScreen)" />
+    public void Add(TeleportScreen screen) => _teleporter = Added(GameScreenType.Teleporter, screen);
+
     /// <summary>
-    ///     The component that draws one screen. Throws rather than returning null: a screen asking
-    ///     for another by name has no way to carry on without it, and the alternative is a null
-    ///     dereference somewhere further away from the mistake.
+    ///     Throws rather than returning null: a screen asking for another by name has no way to
+    ///     carry on without it, and the alternative is a null dereference somewhere further away
+    ///     from the mistake. This is the same contract the old <c>Get</c> had, kept because the
+    ///     engine relies on it.
     /// </summary>
-    public IGameScreen Get(GameScreenType gameScreen)
+    private static TScreen Registered<TScreen>(TScreen? screen, GameScreenType gameScreen)
+        where TScreen : class, IGameScreen
+        => screen ?? throw new InvalidOperationException($"There is no '{gameScreen}' screen.");
+
+    /// <summary>
+    ///     Registers a screen and hands it straight back, so that a typed overload can record it in
+    ///     its own field only once the duplicate check has passed.
+    /// </summary>
+    private TScreen Added<TScreen>(GameScreenType gameScreen, TScreen screen)
+        where TScreen : class, IGameScreen
     {
-        return !_screens.TryGetValue(gameScreen, out IGameScreen? screenToGet)
-            ? throw new InvalidOperationException($"There is no '{gameScreen}' screen.")
-            : screenToGet;
+        Add(gameScreen, screen);
+
+        return screen;
     }
 }

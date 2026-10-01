@@ -45,10 +45,4 @@ internal abstract record ScreenChange
     ///     main game screen flashes the booth either green or red to match.
     /// </summary>
     public sealed record AccessCode(bool Accepted) : ScreenChange;
-
-    /// <summary>
-    ///     The score the player has just finished with, for a name to be typed against it on the
-    ///     high score screen.
-    /// </summary>
-    public sealed record FinalScore(HiScore Score) : ScreenChange;
 }

@@ -61,16 +61,10 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
         _foregroundImage = Resources.GetSpriteCollection("GameOverScreenForeground");
     }
 
-
-    public void Reset(object? data)
-    {
-    }
-
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, ScreenChange change)
+    public void PerformPostScreenChangeActions()
     {
         Resources.GetSoundFxEngine().DisablePeriodicBackgroundSounds(true);
-        IGameScreen mainGameScreen = ScreenDirectory.Get(GameScreenType.MainGame);
-        _playTime = ((MainGameScreen)mainGameScreen).GetPlayTime();
+        _playTime = ScreenDirectory.MainGame.GetPlayTime();
 
         _fadeComplete = false;
         ScreenFade = 0;
@@ -89,7 +83,7 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
 
             GraphicsDeviceManager.GraphicsDevice.Clear(Presentation.ScreenClearColour);
             ScreenDirectory.Current = GameScreenType.HiScores;
-            ScreenDirectory.Get(GameScreenType.HiScores).PerformPostScreenChangeActions(GameScreenType.GameOver, new ScreenChange.FinalScore(playersScore));
+            ScreenDirectory.HiScores.PerformPostScreenChangeActions(playersScore);
         }
         base.Update(gameTime);
     }

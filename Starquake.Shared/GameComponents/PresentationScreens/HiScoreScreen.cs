@@ -57,12 +57,19 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
         _hiscoreList = new HiScores();
     }
 
-
-    public void Reset(object? data)
-    {
-    }
-
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, ScreenChange change)
+    /// <summary>
+    ///     Called once this screen has been handed control, with the score it needs.
+    ///     <para>
+    ///         This took a <c>ScreenChange</c> and threw an <see cref="ArgumentException" /> for any
+    ///         case but <c>FinalScore</c>, because the signature had to suit all nine other screens
+    ///         too. The game over screen is the only way onto this one and always had a score to
+    ///         pass, so the throw stood for a mistake nobody could make; it now cannot be written.
+    ///     </para>
+    /// </summary>
+    /// <param name="playersScore">
+    ///     The score the player has just finished with, for a name to be typed against it.
+    /// </param>
+    public void PerformPostScreenChangeActions(HiScore playersScore)
     {
         _fadeComplete = false;
         ScreenFade = 0;
@@ -74,13 +81,6 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
 
         if (_gotHighScore)
         {
-            // The game over screen hands the score across so a name can be typed into it
-            if (change is not ScreenChange.FinalScore(var playersScore))
-            {
-                throw new ArgumentException(
-                    "The high score screen needs the player's score to enter a name against.", nameof(change));
-            }
-
             _playersHighScore = playersScore;
             _playersHighScore.Name = "";
 
@@ -99,7 +99,7 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
             {
                 GraphicsDeviceManager.GraphicsDevice.Clear(Presentation.ScreenClearColour);
                 ScreenDirectory.Current = GameScreenType.Options;
-                ScreenDirectory.Get(GameScreenType.Options).PerformPostScreenChangeActions(GameScreenType.HiScores, new ScreenChange.FadeIn());
+                ScreenDirectory.Options.PerformPostScreenChangeActions();
             }
         }
         else

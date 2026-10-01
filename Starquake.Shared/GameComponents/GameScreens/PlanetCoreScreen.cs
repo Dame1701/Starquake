@@ -14,7 +14,7 @@ using Starquake.Structure;
 
 namespace Starquake.GameComponents.GameScreens;
 
-internal class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
+internal class PlanetCoreScreen : GameComponentBase, IGameScreen
 {
 
 
@@ -149,14 +149,12 @@ internal class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
     }
 
 
-    public void Reset(object? data)
-    {
-    }
-
     /// <summary>
-    ///     Some screens need to keep events moving even when they are not showing
+    ///     Keeps the core room's events moving while the blob is away from it. The engine calls
+    ///     this directly rather than through <see cref="IGameScreen" />, which the frame loop's two
+    ///     members are all of - the core is the only screen that carries on off screen, so an
+    ///     interface for it described one class.
     /// </summary>
-    /// <param name="gameTime"></param>
     public void UpdateOffScreen(GameTime gameTime)
     {
         for (int a = 0; a < _coreAlienCount; a++)
@@ -232,7 +230,7 @@ internal class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
             _gameScreens.ScreenNumber = WorldMap.CoreApproachScreenNumber;
             _screenDirectory.Current = GameScreenType.MainGame;
             _blob.BlobXPos = _gameScreens.ScreenWidth - _blob.BlobWidth;
-            _screenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.PlanetCore, new ScreenChange.FadeIn());
+            _screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.PlanetCore, new ScreenChange.FadeIn());
 
             _justEnteredCore = true;
             _presentation.BackgroundColour = Color.Black;
@@ -241,7 +239,7 @@ internal class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
         {
             // Finished the game!
             _screenDirectory.Current = GameScreenType.GameComplete;
-            _screenDirectory.Get(GameScreenType.GameComplete).PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.FadeIn());
+            _screenDirectory.GameComplete.PerformPostScreenChangeActions();
         }
         else
         {
@@ -292,25 +290,6 @@ internal class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
 
         _elements.Draw(_replacingElements);
     }
-
-    #region IGameScreen Members
-
-    public int ScreenFade
-    {
-        get => throw new NotImplementedException();
-        set => throw new NotImplementedException();
-    }
-
-    #endregion
-
-    #region IGameScreen Members
-
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, ScreenChange change)
-    {
-        throw new NotImplementedException();
-    }
-
-    #endregion
 
     /// <summary>
     ///     Puts the core screen and its guardians in place for a blob that has just arrived.

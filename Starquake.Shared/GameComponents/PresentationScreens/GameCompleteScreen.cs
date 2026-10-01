@@ -52,12 +52,7 @@ internal class GameCompleteScreen : GameScreenBase, IGameScreen
         _foregroundImage = Resources.GetSpriteCollection("GameCompleteScreenForeground");
     }
 
-
-    public void Reset(object? data)
-    {
-    }
-
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, ScreenChange change)
+    public void PerformPostScreenChangeActions()
     {
         _fadeComplete = false;
         ScreenFade = 0;
@@ -70,7 +65,7 @@ internal class GameCompleteScreen : GameScreenBase, IGameScreen
         {
             GraphicsDeviceManager.GraphicsDevice.Clear(Presentation.ScreenClearColour);
             ScreenDirectory.Current = GameScreenType.GameOver;
-            ScreenDirectory.Get(GameScreenType.GameOver).PerformPostScreenChangeActions(GameScreenType.GameComplete, new ScreenChange.FadeIn());
+            ScreenDirectory.GameOver.PerformPostScreenChangeActions();
         }
 
         base.Update(gameTime);

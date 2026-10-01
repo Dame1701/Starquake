@@ -107,10 +107,10 @@ internal class CheopsScreen : GameComponentBase, IGameScreen
             _accessCodes[a] = new KeyScanner(_resources, _graphicsSet, _randomNumberGenerator, true);
         }
 
-        Reset(null);
+        Reset();
     }
 
-    public void Reset(object? data)
+    public void Reset()
     {
         _soundPlayed = false;
         _screenReadWaitFrames = ScreenReadNotWaiting;
@@ -314,7 +314,7 @@ internal class CheopsScreen : GameComponentBase, IGameScreen
                 }
                 else // Kick you out
                 {
-                    _screenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
+                    _screenDirectory.MainGame.ScreenFade = 40;
                     _screenDirectory.Current = GameScreenType.MainGame;
                 }
             }
@@ -467,7 +467,7 @@ internal class CheopsScreen : GameComponentBase, IGameScreen
             if (_input.KeyboardState.IsKeyDown(Keys.D1))
             {
                 _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[0].Type;
-                _screenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
+                _screenDirectory.MainGame.ScreenFade = 40;
                 _screenDirectory.Current = GameScreenType.MainGame;
                 _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
                 _gameScreens.UpdateCollisionMap(false);
@@ -476,7 +476,7 @@ internal class CheopsScreen : GameComponentBase, IGameScreen
             else if (_input.KeyboardState.IsKeyDown(Keys.D2))
             {
                 _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[1].Type;
-                _screenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
+                _screenDirectory.MainGame.ScreenFade = 40;
                 _screenDirectory.Current = GameScreenType.MainGame;
                 _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
                 _gameScreens.UpdateCollisionMap(false);
@@ -485,7 +485,7 @@ internal class CheopsScreen : GameComponentBase, IGameScreen
             else if (_input.KeyboardState.IsKeyDown(Keys.D3))
             {
                 _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[2].Type;
-                _screenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
+                _screenDirectory.MainGame.ScreenFade = 40;
                 _screenDirectory.Current = GameScreenType.MainGame;
                 _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
                 _gameScreens.UpdateCollisionMap(false);
@@ -494,7 +494,7 @@ internal class CheopsScreen : GameComponentBase, IGameScreen
             else if (_input.KeyboardState.IsKeyDown(Keys.D4))
             {
                 _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[3].Type;
-                _screenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
+                _screenDirectory.MainGame.ScreenFade = 40;
                 _screenDirectory.Current = GameScreenType.MainGame;
                 _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
                 _gameScreens.UpdateCollisionMap(false);
@@ -503,18 +503,13 @@ internal class CheopsScreen : GameComponentBase, IGameScreen
             else if (_input.KeyboardState.IsKeyDown(Keys.D5))
             {
                 _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[4].Type;
-                _screenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
+                _screenDirectory.MainGame.ScreenFade = 40;
                 _screenDirectory.Current = GameScreenType.MainGame;
                 _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
                 _gameScreens.UpdateCollisionMap(false);
                 _resources.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
             }
         }
-    }
-
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, ScreenChange change)
-    {
-
     }
 
     #endregion

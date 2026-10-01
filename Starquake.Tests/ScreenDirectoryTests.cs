@@ -14,12 +14,19 @@ namespace Starquake.Tests;
 ///     lookup method on <c>GameEngine</c>, so none of it could be exercised without a graphics
 ///     device and a loaded content pipeline behind it.
 ///     <para>
-///         What is worth pinning is the difference between the two lookups, because the engine
-///         relies on it: asking for a screen <em>by name</em> throws when it is not there, since a
-///         screen asking for another has no way to carry on without it, while asking for the
-///         <em>current</em> screen returns null, because update and draw run every frame whatever
-///         <see cref="ScreenDirectory.Current" /> has been set to and have always skipped a screen
-///         they could not find.
+///         What is worth pinning is the difference between its two jobs, because the engine relies
+///         on it. Asking for the <em>current</em> screen returns null, because update and draw run
+///         every frame whatever <see cref="ScreenDirectory.Current" /> has been set to and have
+///         always skipped a screen they could not find. Asking for a screen <em>by name</em> -
+///         now a typed property per screen - throws, since a screen handing over to another has no
+///         way to carry on without it.
+///     </para>
+///     <para>
+///         Only the throwing half of the named lookups can be pinned here: the ten typed properties
+///         return real screen components, and one of those cannot be constructed without a graphics
+///         device. What they would otherwise have needed - an <see cref="IGameScreen" /> wide
+///         enough for a stub to stand in for any screen - is the thing that put eleven empty and
+///         throwing members on the screens in the first place.
 ///     </para>
 /// </summary>
 public class ScreenDirectoryTests
@@ -35,32 +42,36 @@ public class ScreenDirectoryTests
     }
 
     [Fact]
-    public void Get_AScreenThatWasRegistered_ReturnsIt()
+    public void ANamedScreen_ThatWasNeverRegistered_ThrowsNamingIt()
     {
         // Arrange
+        // Every screen the directory hands back by name, and the property that does it. A screen
+        // missing from here is one no other screen can hand over to. These stay in one test rather
+        // than a theory because both the enum and the directory are internal, and a theory's
+        // parameters would have to be public.
         var directory = new ScreenDirectory();
-        var teleporter = new StubScreen();
-        directory.Add(GameScreenType.Teleporter, teleporter);
+        (GameScreenType Screen, Func<object> Lookup)[] namedLookups =
+        [
+            (GameScreenType.AccessBooth, () => directory.AccessBooth),
+            (GameScreenType.Cheops, () => directory.Cheops),
+            (GameScreenType.ComputerReport, () => directory.ComputerReport),
+            (GameScreenType.GameComplete, () => directory.GameComplete),
+            (GameScreenType.GameOver, () => directory.GameOver),
+            (GameScreenType.HiScores, () => directory.HiScores),
+            (GameScreenType.MainGame, () => directory.MainGame),
+            (GameScreenType.Options, () => directory.Options),
+            (GameScreenType.PlanetCore, () => directory.PlanetCore),
+            (GameScreenType.Teleporter, () => directory.Teleporter)
+        ];
 
-        // Act
-        IGameScreen found = directory.Get(GameScreenType.Teleporter);
+        foreach ((GameScreenType screen, Func<object> lookup) in namedLookups)
+        {
+            // Act
+            var thrown = Assert.Throws<InvalidOperationException>(() => lookup());
 
-        // Assert
-        Assert.Same(teleporter, found);
-    }
-
-    [Fact]
-    public void Get_AScreenThatWasNeverRegistered_ThrowsNamingIt()
-    {
-        // Arrange
-        var directory = new ScreenDirectory();
-
-        // Act
-        var thrown = Assert.Throws<InvalidOperationException>(
-            () => directory.Get(GameScreenType.Cheops));
-
-        // Assert
-        Assert.Contains("Cheops", thrown.Message);
+            // Assert
+            Assert.Contains(screen.ToString(), thrown.Message);
+        }
     }
 
     [Fact]
@@ -127,54 +138,18 @@ public class ScreenDirectoryTests
         Assert.Same(hiScores, directory.CurrentScreen);
     }
 
-    [Fact]
-    public void All_AfterRegistering_HoldsEveryScreenInTheOrderTheyWereAdded()
-    {
-        // Arrange
-        var directory = new ScreenDirectory();
-        var options = new StubScreen();
-        var mainGame = new StubScreen();
-        var cheops = new StubScreen();
-        directory.Add(GameScreenType.Options, options);
-        directory.Add(GameScreenType.MainGame, mainGame);
-        directory.Add(GameScreenType.Cheops, cheops);
-
-        // Act
-        IEnumerable<IGameScreen> all = directory.All;
-
-        // Assert
-        // The engine loads content by walking this, so a screen missing here never loads.
-        Assert.Equal(new IGameScreen[]
-        {
-            options,
-            mainGame,
-            cheops
-        }, all);
-    }
-
     /// <summary>
-    ///     Stands in for a screen's component. The directory only ever stores and hands these back,
-    ///     so nothing here needs to do anything.
+    ///     Stands in for a screen's component in the frame loop. Stepping it and drawing it is the
+    ///     whole of <see cref="IGameScreen" />, and the directory only ever stores these and hands
+    ///     them back, so neither needs to do anything.
     /// </summary>
     private sealed class StubScreen : IGameScreen
     {
-        public int ScreenFade { get; set; }
-
-        public bool Success => false;
-
         public void Update(GameTime gameTime)
         {
         }
 
-        public void Reset(object? data)
-        {
-        }
-
         public void Draw(GameTime gameTime)
-        {
-        }
-
-        public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, ScreenChange change)
         {
         }
     }

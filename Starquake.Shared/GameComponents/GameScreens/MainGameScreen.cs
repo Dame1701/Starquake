@@ -187,7 +187,7 @@ internal class MainGameScreen : GameComponentBase, IGameScreen
     }
 
     // Resets the game back to defaults
-    public void Reset(object? data)
+    public void Reset()
     {
         _framesPlayed = 0;
         GameEngine.Session.Paused = false;
@@ -267,8 +267,7 @@ internal class MainGameScreen : GameComponentBase, IGameScreen
         }
 
         GameEngine.ScreenDirectory.Current = GameScreenType.GameOver;
-        GameEngine.ScreenDirectory.Get(GameScreenType.GameOver)
-            .PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.FadeIn());
+        GameEngine.ScreenDirectory.GameOver.PerformPostScreenChangeActions();
     }
 
     /// <summary>
@@ -309,8 +308,7 @@ internal class MainGameScreen : GameComponentBase, IGameScreen
         if (GameEngine.Input.GetPressedKey() == Keys.W)
         {
             GameEngine.ScreenDirectory.Current = GameScreenType.GameComplete;
-            GameEngine.ScreenDirectory.Get(GameScreenType.GameComplete)
-                .PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.FadeIn());
+            GameEngine.ScreenDirectory.GameComplete.PerformPostScreenChangeActions();
         }
 
         // Test completing core
@@ -415,8 +413,7 @@ internal class MainGameScreen : GameComponentBase, IGameScreen
             GameEngine.ContentResourceManager.GetSoundFxEngine().DisablePeriodicBackgroundSounds(true);
 
             // Change to gameover screen
-            GameEngine.ScreenDirectory.Get(GameScreenType.GameOver)
-                .PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.FadeIn());
+            GameEngine.ScreenDirectory.GameOver.PerformPostScreenChangeActions();
             GameEngine.ScreenDirectory.Current = GameScreenType.GameOver;
         }
     }

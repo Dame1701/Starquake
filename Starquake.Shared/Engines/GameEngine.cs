@@ -408,7 +408,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     {
         if (IntroSequence.SequenceStage is IntroSequenceStage.Finished or IntroSequenceStage.EndPause)
         {
-            ((MainGameScreen)ScreenDirectory.Get(GameScreenType.MainGame)).SpritesChanged();
+            ScreenDirectory.MainGame.SpritesChanged();
         }
     }
 
@@ -631,7 +631,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
 
         _mainScreen = new MainGameScreen(this);
 
-        ScreenDirectory.Add(GameScreenType.Options, new OptionsScreen(
+        ScreenDirectory.Add(new OptionsScreen(
             ContentResourceManager,
             Font2,
             _graphicsDeviceMgr,
@@ -640,7 +640,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             ScreenDirectory,
             Session,
             Input));
-        ScreenDirectory.Add(GameScreenType.ComputerReport, new ComputerReportScreen(
+        ScreenDirectory.Add(new ComputerReportScreen(
             ContentResourceManager,
             Font2,
             _graphicsDeviceMgr,
@@ -649,7 +649,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             ScreenDirectory,
             RandomNumberGenerator,
             Input));
-        ScreenDirectory.Add(GameScreenType.HiScores, new HiScoreScreen(
+        ScreenDirectory.Add(new HiScoreScreen(
             ContentResourceManager,
             Font2,
             _graphicsDeviceMgr,
@@ -658,7 +658,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             ScreenDirectory,
             Stats,
             Input));
-        ScreenDirectory.Add(GameScreenType.GameOver, new GameOverScreen(
+        ScreenDirectory.Add(new GameOverScreen(
             ContentResourceManager,
             Font2,
             _graphicsDeviceMgr,
@@ -669,7 +669,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             Elements,
             GameScreens,
             Input));
-        ScreenDirectory.Add(GameScreenType.GameComplete, new GameCompleteScreen(
+        ScreenDirectory.Add(new GameCompleteScreen(
             ContentResourceManager,
             Font2,
             _graphicsDeviceMgr,
@@ -679,8 +679,8 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             Elements,
             Input));
 
-        ScreenDirectory.Add(GameScreenType.MainGame, _mainScreen);
-        ScreenDirectory.Add(GameScreenType.Teleporter, new TeleportScreen(
+        ScreenDirectory.Add(_mainScreen);
+        ScreenDirectory.Add(new TeleportScreen(
             ContentResourceManager,
             Font2,
             GameScreens,
@@ -691,7 +691,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             ScreenDirectory,
             ShapeDrawer,
             Input));
-        ScreenDirectory.Add(GameScreenType.PlanetCore, new PlanetCoreScreen(
+        ScreenDirectory.Add(new PlanetCoreScreen(
             ContentResourceManager,
             GameScreens,
             _graphicsSet,
@@ -701,7 +701,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             Player,
             RandomNumberGenerator,
             Elements));
-        ScreenDirectory.Add(GameScreenType.AccessBooth, new AccessBoothScreen(
+        ScreenDirectory.Add(new AccessBoothScreen(
             BlobStatusPanel,
             ContentResourceManager,
             Font2,
@@ -711,7 +711,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             RandomNumberGenerator,
             ScreenDirectory,
             ShapeDrawer));
-        ScreenDirectory.Add(GameScreenType.Cheops, new CheopsScreen(
+        ScreenDirectory.Add(new CheopsScreen(
             BlobStatusPanel,
             ContentResourceManager,
             Elements,
@@ -724,10 +724,11 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             ShapeDrawer,
             Input));
 
-        foreach (IGameScreen screen in ScreenDirectory.All)
-        {
-            ((GameComponentBase)screen).LoadContent();
-        }
+        // Two of the ten screens have content of their own to load, in the order the loop that
+        // used to do this walked them. It reached LoadContent by downcasting every screen back to
+        // GameComponentBase, where the other eight inherit it as a no-op.
+        ScreenDirectory.Options.LoadContent();
+        _mainScreen.LoadContent();
     }
 
     /// <summary>
@@ -772,7 +773,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     // Resets the game back to defaults - need to sort all of this out!
     public void Reset()
     {
-        MainScreen.Reset(null);
+        MainScreen.Reset();
     }
 
     public void Update(GameTime gameTime)
@@ -878,33 +879,41 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         }
     }
 
+    /// <summary>
+    ///     The planet core keeps its guardians and particle effects moving while the blob is away
+    ///     from it, as long as he is on the screen that approaches it.
+    ///     <para>
+    ///         This walked all ten screens testing each for an <c>IRealTimeGameScreen</c> the core
+    ///         was the only implementor of, then cast it back to call the one member. Naming the
+    ///         core is what the loop was doing, at more length.
+    ///     </para>
+    /// </summary>
     private void UpdateScreensLeftRunningOffScreen(IGameScreen screenToUpdate, GameTime gameTime)
     {
-        foreach (IGameScreen igs in ScreenDirectory.All)
+        if (screenToUpdate == ScreenDirectory.PlanetCore)
         {
-            if (igs is IRealTimeGameScreen && igs != screenToUpdate)
+            return;
+        }
+
+        if (GameScreens.ScreenNumber == ScreenKeptRunningOffScreen)
+        {
+            ScreenDirectory.PlanetCore.UpdateOffScreen(gameTime);
+        }
+
+        if (GameScreens.ScreenNumber == CoreInventoryHandoverScreen)
+        {
+            /*
+            int counter = 4;
+            if (Elements.GetActiveElements().Count < 4)
             {
-                if (GameScreens.ScreenNumber == ScreenKeptRunningOffScreen)
-                {
-                    ((IRealTimeGameScreen)igs).UpdateOffScreen(gameTime);
-                }
-
-                if (GameScreens.ScreenNumber == CoreInventoryHandoverScreen)
-                {
-                    /*
-                    int counter = 4;
-                    if (Elements.GetActiveElements().Count < 4)
-                    {
-                        counter = Elements.GetActiveElements().Count;
-                    }
-
-                    for (int a = 0; a < counter; a++)
-                    {
-                        Player.BlobInventory[a] = (enCollectables)Elements.GetActiveElements()[a].CurrentElement;
-                    }
-                     */
-                }
+                counter = Elements.GetActiveElements().Count;
             }
+
+            for (int a = 0; a < counter; a++)
+            {
+                Player.BlobInventory[a] = (enCollectables)Elements.GetActiveElements()[a].CurrentElement;
+            }
+             */
         }
     }
 
