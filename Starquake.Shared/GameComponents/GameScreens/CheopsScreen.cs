@@ -18,7 +18,7 @@ using Starquake.Structure;
 
 namespace Starquake.GameComponents.GameScreens;
 
-internal class CheopsScreen : GameComponentBase, IGameScreen
+internal class CheopsScreen : IGameScreen
 {
 
 
@@ -272,7 +272,7 @@ internal class CheopsScreen : GameComponentBase, IGameScreen
     }
 
 
-    public override void Update(GameTime gameTime)
+    public void Update(GameTime gameTime)
     {
         _resources.GetSoundFxEngine().PlaySound("MachineryBackground", 0.5f, true);
 
@@ -323,7 +323,7 @@ internal class CheopsScreen : GameComponentBase, IGameScreen
     }
 
 
-    public override void Draw(GameTime gameTime)
+    public void Draw(GameTime gameTime)
     {
         _font.Begin(BlendState.AlphaBlend);
         _font.WriteText(298, 100, "CHEOPS PYRAMID", 2, Color.White, ColourLevels.Full);

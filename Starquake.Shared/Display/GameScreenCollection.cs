@@ -16,7 +16,7 @@ using Starquake.WorldGeneration;
 
 namespace Starquake.Display;
 
-internal class GameScreenCollection : GameComponentBase
+internal class GameScreenCollection
 {
 
 
@@ -154,7 +154,7 @@ internal class GameScreenCollection : GameComponentBase
     public GameScreenData GetGameScreen(int number)
         => _gameScreens[number];
 
-    public override void Initialise(object? data)
+    public void Initialise()
     {
         // Setup Collision map, we're using 8 x 8 blocks for each collision area for improved accuracy
         UpdateCollisionMap(true);
@@ -414,11 +414,10 @@ internal class GameScreenCollection : GameComponentBase
     ///     key-locked door, which turns green when the blob can open it, and Olly's eyes, which
     ///     drift after it - and neither needs the blob itself, only three values it can be told.
     ///     <para>
-    ///         Not an override of <see cref="GameComponentBase.Update" /> any more, which it can
-    ///         afford not to be: the planet is only ever stepped by name from
-    ///         <c>MainGameScreen</c>, never polymorphically with the components in the screen
-    ///         directory. Being told instead of asking is what lets the planet be built before the
-    ///         blob rather than after it, which is the whole of the cycle between them.
+    ///         The planet is only ever stepped by name from <c>MainGameScreen</c>, never
+    ///         polymorphically, which is what lets this take arguments at all. Being told instead
+    ///         of asking is in turn what lets the planet be built before the blob rather than
+    ///         after it, which is the whole of the cycle between them.
     ///     </para>
     /// </summary>
     public void Update(GameTime gameTime, int blobXPos, int blobYPos, bool blobHasKey)
@@ -438,8 +437,8 @@ internal class GameScreenCollection : GameComponentBase
 
         Renderer.TrackBlobWithOllysEyes(blobXPos, blobYPos);
 
-        _resources.GetAnimationEngine().Update(gameTime);
-        ColourAnimations.Update(gameTime);
+        _resources.GetAnimationEngine().Update();
+        ColourAnimations.Update();
     }
 
     /// <summary>
@@ -485,9 +484,9 @@ internal class GameScreenCollection : GameComponentBase
     }
 
     /// <inheritdoc cref="ScreenRenderer.Draw" />
-    public void Draw(Color colour, GameTime gameTime, bool introSequenceRunning = false,
+    public void Draw(Color colour, bool introSequenceRunning = false,
         IntroSequenceStage introSequenceStage = IntroSequenceStage.None)
-        => Renderer.Draw(colour, gameTime, introSequenceRunning, introSequenceStage);
+        => Renderer.Draw(colour, introSequenceRunning, introSequenceStage);
 
     /// <inheritdoc cref="ScreenRenderer.DrawUpperLayer" />
     public void DrawUpperLayer(Color colour)

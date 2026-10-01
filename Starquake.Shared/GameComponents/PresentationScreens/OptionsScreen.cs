@@ -79,7 +79,7 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
         _definingKeys = false;
     }
 
-    public override void LoadContent()
+    public void LoadContent()
     {
         Font.Flash = true;
     }
@@ -255,7 +255,7 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
         }
     }
 
-    public override void Draw(GameTime gameTime)
+    public void Draw(GameTime gameTime)
     {
         ScreenEffects.SelectRenderViewPort("EntireScreen");
 

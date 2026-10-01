@@ -7,7 +7,7 @@ using Starquake.Structure;
 
 namespace Starquake.Animations;
 
-internal class AnimTileEngine : GameComponentBase
+internal class AnimTileEngine
 {
     public AnimTileEngine()
     {
@@ -28,11 +28,11 @@ internal class AnimTileEngine : GameComponentBase
         return false;
     }
 
-    public override void Update(GameTime gameTime)
+    public void Update()
     {
         foreach (AnimTile animTilesList in AnimTilesList)
         {
-            animTilesList.Update(gameTime);
+            animTilesList.Update();
         }
     }
 

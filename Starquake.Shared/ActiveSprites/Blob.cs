@@ -23,7 +23,7 @@ using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
 
-internal class Blob : GameComponentBase
+internal class Blob
 {
     /// <summary>
     ///     How fast the tunnel transition plays, in pixels of play area a frame. It sets the pace of
@@ -501,7 +501,7 @@ internal class Blob : GameComponentBase
         _teleportFadeLevel = 0;
     }
 
-    public override void Update(GameTime gameTime)
+    public void Update(GameTime gameTime)
     {
         bool changedScreens = false;
 
@@ -1697,9 +1697,7 @@ internal class Blob : GameComponentBase
         _blobFireTrail?.Reset();
     }
 
-    public override void Draw(
-        GameTime gameTime,
-        int screenFade)
+    public void Draw(int screenFade)
     {
         switch (BlobsState)
         {

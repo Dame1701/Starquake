@@ -15,7 +15,7 @@ using Starquake.Structure;
 
 namespace Starquake.GameComponents.GameScreens;
 
-internal class AccessBoothScreen : GameComponentBase, IGameScreen
+internal class AccessBoothScreen : IGameScreen
 {
 
 
@@ -103,7 +103,7 @@ internal class AccessBoothScreen : GameComponentBase, IGameScreen
     /// </summary>
     private bool Success { get; set; }
 
-    public override void Update(GameTime gameTime)
+    public void Update(GameTime gameTime)
     {
         _resources.GetSoundFxEngine().PlaySound("MachineryBackground", 0.5f, true);
 
@@ -147,7 +147,7 @@ internal class AccessBoothScreen : GameComponentBase, IGameScreen
         }
     }
 
-    public override void Draw(GameTime gameTime)
+    public void Draw(GameTime gameTime)
     {
         _font.Begin(BlendState.AlphaBlend);
         _font.WriteText(350, 100, "SECURITY  DOOR", 2, Color.White, ColourLevels.Full);

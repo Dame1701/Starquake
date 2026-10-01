@@ -17,7 +17,7 @@ using Starquake.Structure;
 namespace Starquake.ActiveSprites;
 
 // This wraps multiple nasties
-internal class Nasties : GameComponentBase
+internal class Nasties
 {
 
     /// <summary>
@@ -88,7 +88,7 @@ internal class Nasties : GameComponentBase
     }
     public event RaiseInteractionWithBlob? OnNastyInteractionWithBlob;
 
-    public override void LoadContent()
+    public void LoadContent()
     {
         // Create double the number needed for screen swap operations
         _nasties.Clear();
@@ -129,7 +129,7 @@ internal class Nasties : GameComponentBase
         PerformPostChangeScreenActions();
     }
 
-    public override void Update(GameTime gameTime)
+    public void Update(GameTime gameTime)
     {
         if (_blob.BlobsState != BlobState.Normal)
         {
@@ -417,7 +417,7 @@ internal class Nasties : GameComponentBase
         }
     }
 
-    public override void Draw(GameTime gameTime, int screenFade)
+    public void Draw(int screenFade)
     {
         if (_blob.BlobsState == BlobState.Normal)
         {
@@ -426,7 +426,7 @@ internal class Nasties : GameComponentBase
                 if (_nasties[a].XPos > UnplacedNastyPosition &&
                     _nasties[a].YPos > UnplacedNastyPosition)
                 {
-                    _nasties[a].Draw(gameTime, screenFade);
+                    _nasties[a].Draw(screenFade);
                 }
             }
 

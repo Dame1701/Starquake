@@ -23,7 +23,7 @@ namespace Starquake.Display;
 ///     lived on a class named for a widget, which is why <c>Blob</c> read his own supplies off the
 ///     HUD. Those are <see cref="PlayerStats" /> now and this reads them to draw them.
 /// </remarks>
-internal class StatusPanel : GameComponentBase
+internal class StatusPanel
 {
     /// <summary>
     ///     The inventory strip: how far apart the slots are, and where the first one starts. The slot
@@ -175,7 +175,7 @@ internal class StatusPanel : GameComponentBase
         }
     }
 
-    public override void Draw(GameTime gameTime)
+    public void Draw()
     {
         SpriteCollection statusPanelGraphic = _resources.GetSpriteCollection("StatusPanelGraphic");
         statusPanelGraphic.Begin(BlendState.AlphaBlend);

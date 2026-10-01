@@ -12,7 +12,7 @@ using Starquake.Structure;
 
 namespace Starquake.Animations;
 
-internal class BlobDeathAnimation : GameComponentBase
+internal class BlobDeathAnimation
 {
     // The six fragment sprites Blob comes apart into. Deliberately not a straight run
     private static readonly int[] FragmentSpriteNumbers = [0, 1, 1, 2, 3, 5];
@@ -86,7 +86,7 @@ internal class BlobDeathAnimation : GameComponentBase
         }
     }
 
-    public override void LoadContent()
+    public void LoadContent()
     {
         _blobFragmentBounceSparks = (IPositionalTriggerParticleEffect)_resources
             .GetParticleEffectInstance("FireSparks", ParticleEffectType.TriggeredMultiLocationTimed, null);
@@ -123,7 +123,7 @@ internal class BlobDeathAnimation : GameComponentBase
         }
     }
 
-    public override void Update(GameTime gameTime)
+    public void Update(GameTime gameTime)
     {
         foreach (BouncingParticle bouncingParticle in _bouncingParticles)
         {
@@ -144,7 +144,7 @@ internal class BlobDeathAnimation : GameComponentBase
         }
     }
 
-    public override void Draw(GameTime gameTime, int screenFade)
+    public void Draw(int screenFade)
     {
         if (_graphicsSet.IsOriginal)
         {

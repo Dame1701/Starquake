@@ -15,7 +15,7 @@ using Starquake.Structure;
 
 namespace Starquake.GameComponents.GameScreens;
 
-internal class MainGameScreen : GameComponentBase, IGameScreen
+internal class MainGameScreen : IGameScreen
 {
 
     /// <summary>
@@ -180,11 +180,7 @@ internal class MainGameScreen : GameComponentBase, IGameScreen
         ScreenFade = ColourLevels.Full;
     }
 
-    public override void LoadContent()
-    {
-        GameEngine.Nasties.Initialise(null);
-        GameEngine.Nasties.LoadContent();
-    }
+    public void LoadContent() => GameEngine.Nasties.LoadContent();
 
     // Resets the game back to defaults
     public void Reset()
@@ -203,7 +199,7 @@ internal class MainGameScreen : GameComponentBase, IGameScreen
 
     private Guid _testRumbleSoundId;
 
-    public override void Update(GameTime gameTime)
+    public void Update(GameTime gameTime)
     {
         _framesPlayed++;
 
@@ -397,7 +393,7 @@ internal class MainGameScreen : GameComponentBase, IGameScreen
             }
         }
 
-        GameEngine.TunnelAnimations.Update(gameTime);
+        GameEngine.TunnelAnimations.Update();
         GameEngine.ConveyerNastiesInstance.Update(gameTime);
         GameEngine.ElectricityNodeGateEngine.Update();
 
@@ -499,35 +495,35 @@ internal class MainGameScreen : GameComponentBase, IGameScreen
         GameEngine.IntroSequence.SequenceStage != IntroSequenceStage.CaptionFadeUp &&
         GameEngine.IntroSequence.SequenceStage != IntroSequenceStage.CaptionFadeDown;
 
-    public override void Draw(GameTime gameTime)
+    public void Draw(GameTime gameTime)
     {
         if (WorldIsVisible)
         {
             DrawBackground();
 
-            GameEngine.ElectricityNodeGateEngine.Draw(gameTime, ScreenFade);
+            GameEngine.ElectricityNodeGateEngine.Draw();
 
             GameEngine.GameScreens.Draw(
                 ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade),
-                gameTime, GameEngine.IntroSequence.SequenceRunning, GameEngine.IntroSequence.SequenceStage);
+                GameEngine.IntroSequence.SequenceRunning, GameEngine.IntroSequence.SequenceStage);
 
 
             GameEngine.BreakableBridgesEngine.Draw();
 
             if (GameIsInPlay)
             {
-                GameEngine.Player.Draw(gameTime, ScreenFade);
+                GameEngine.Player.Draw(ScreenFade);
             }
 
             if (!GameEngine.IntroSequence.SequenceRunning)
             {
-                DrawBlobDeath(gameTime);
-                DrawNasties(gameTime);
+                DrawBlobDeath();
+                DrawNasties();
             }
 
             DrawUpperGraphics();
 
-            GameEngine.TunnelAnimations.Draw(gameTime, (byte)ScreenFade);
+            GameEngine.TunnelAnimations.Draw((byte)ScreenFade);
 
             DrawShipSmoke1();
 
@@ -543,7 +539,7 @@ internal class MainGameScreen : GameComponentBase, IGameScreen
 
         if (GameEngine.GameScreens.ScreenNumber == WorldMap.ShipWreckScreenNumber)
         {
-            GameEngine.IntroSequence.Draw(gameTime);
+            GameEngine.IntroSequence.Draw();
         }
 
         if (WorldIsVisible)
@@ -570,26 +566,22 @@ internal class MainGameScreen : GameComponentBase, IGameScreen
     ///     Blob is revived the frame after he reaches Dead, so the animation's own state has to keep it
     ///     drawing while the explosion fades out.
     /// </summary>
-    private void DrawBlobDeath(GameTime gameTime)
+    private void DrawBlobDeath()
     {
         // Draw blob's death routine
         if (GameEngine.Player.BlobsState is BlobState.Dead or BlobState.Dying or BlobState.Overloading ||
             GameEngine.BlobKiller.Active)
         {
-            GameEngine.BlobKiller.Draw(gameTime, ScreenFade);
+            GameEngine.BlobKiller.Draw(ScreenFade);
         }
 
     }
 
-    private void DrawNasties(GameTime gameTime)
+    private void DrawNasties()
     {
-        GameEngine.Nasties.Draw(
-            gameTime,
-            ScreenFade);
+        GameEngine.Nasties.Draw(ScreenFade);
 
-        GameEngine.ConveyerNastiesInstance.Draw(
-            gameTime,
-            ScreenFade);
+        GameEngine.ConveyerNastiesInstance.Draw(ScreenFade);
     }
 
     private void DrawUpperGraphics()

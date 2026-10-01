@@ -17,7 +17,7 @@ using Starquake.Structure;
 
 namespace Starquake.GameComponents.GameScreens;
 
-internal class TeleportScreen : GameComponentBase, IGameScreen
+internal class TeleportScreen : IGameScreen
 {
     private readonly Blob _blob;
     private readonly BitmapFont _font;
@@ -121,7 +121,7 @@ internal class TeleportScreen : GameComponentBase, IGameScreen
         _oldOffsetY = _presentation.ScreenYOffset;
     }
 
-    public override void Update(GameTime gameTime)
+    public void Update(GameTime gameTime)
     {
         _resources.GetSoundFxEngine().PlaySound("MachineryBackground", 0.5f, true);
 
@@ -304,7 +304,7 @@ internal class TeleportScreen : GameComponentBase, IGameScreen
         new(951, 480)
     ];
 
-    public override void Draw(GameTime gameTime)
+    public void Draw(GameTime gameTime)
     {
         DrawInteriorLowerLayer();
         DrawTeleportPad();

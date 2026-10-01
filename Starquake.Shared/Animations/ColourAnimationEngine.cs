@@ -12,7 +12,7 @@ using Starquake.Structure;
 
 namespace Starquake.Animations;
 
-internal class ColourAnimationEngine : GameComponentBase
+internal class ColourAnimationEngine
 {
 
     private readonly List<ColourFaderAnimation> _colourAnimationsRegistered;
@@ -130,7 +130,7 @@ internal class ColourAnimationEngine : GameComponentBase
         }
     }
 
-    public override void Update(GameTime gameTime)
+    public void Update()
     {
         foreach (ColourFaderAnimation colourAnimation in _colourAnimationsRegistered)
         {
@@ -200,7 +200,7 @@ internal class ColourAnimationEngine : GameComponentBase
         }
     }
 
-    public override void Draw(GameTime gameTime)
+    public void Draw()
     {
         SpriteCollection lowerTiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
 

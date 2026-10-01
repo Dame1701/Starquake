@@ -17,7 +17,7 @@ using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
 
-internal class Nasty : GameComponentBase
+internal class Nasty
 {
 
     // The number of frames for the birth to appear (60 frames = 1 second)
@@ -399,7 +399,7 @@ internal class Nasty : GameComponentBase
         return NastyType.Spiky;
     }
 
-    public override void Update(GameTime gameTime)
+    public void Update(GameTime gameTime)
     {
         if (_gameScreens.ScreenNumber == WorldMap.CoreApproachScreenNumber)
         {
@@ -666,7 +666,7 @@ internal class Nasty : GameComponentBase
         }
     }
 
-    public override void Draw(GameTime gameTime, int screenFade)
+    public void Draw(int screenFade)
     {
         CheckSpritesInUse();
 

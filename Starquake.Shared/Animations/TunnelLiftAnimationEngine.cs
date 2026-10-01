@@ -10,7 +10,7 @@ using Starquake.Structure;
 
 namespace Starquake.Animations;
 
-internal class TunnelLiftAnimationEngine : GameComponentBase
+internal class TunnelLiftAnimationEngine
 {
 
     /// <summary>
@@ -83,7 +83,7 @@ internal class TunnelLiftAnimationEngine : GameComponentBase
         }
     }
 
-    public override void Update(GameTime gameTime)
+    public void Update()
     {
         if (_columns != null && _columns.Count > 0)
         {
@@ -94,7 +94,7 @@ internal class TunnelLiftAnimationEngine : GameComponentBase
         }
     }
 
-    public override void Draw(GameTime gameTime, int screenfade)
+    public void Draw(int screenfade)
     {
         if (_columns != null && _columns.Count > 0)
         {

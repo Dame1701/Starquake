@@ -11,7 +11,7 @@ using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
 
-internal class ConveyerNasties : GameComponentBase
+internal class ConveyerNasties
 {
     private readonly Blob _blob;
     private readonly ContentManager _contentManager;
@@ -110,13 +110,11 @@ internal class ConveyerNasties : GameComponentBase
                 {
                     Nasties[a].AnimationDelay = 2;
                 }
-
-                Nasties[a].Initialise(null);
             }
         }
     }
 
-    public override void Update(GameTime gameTime)
+    public void Update(GameTime gameTime)
     {
         for (int a = 0; a < Nasties.Count; a++)
         {
@@ -182,13 +180,13 @@ internal class ConveyerNasties : GameComponentBase
         }
     }
 
-    public override void Draw(GameTime gameTime, int screenFade)
+    public void Draw(int screenFade)
     {
         foreach (ConveyerNasty nasty in Nasties)
         {
             if (nasty.NastyActive || nasty.NastyState == NastyState.Dead)
             {
-                nasty.Draw(gameTime, screenFade);
+                nasty.Draw(screenFade);
             }
         }
     }

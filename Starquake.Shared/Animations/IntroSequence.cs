@@ -17,7 +17,7 @@ using Starquake.Structure;
 
 namespace Starquake.Animations;
 
-internal class IntroSequence : GameComponentBase
+internal class IntroSequence
 {
     private readonly BlobDeathAnimation _blobKiller;
 
@@ -145,7 +145,7 @@ internal class IntroSequence : GameComponentBase
     ///     The stages run in the order they are tested here. InitialPause is its own test rather than part
     ///     of the chain because it hands straight on to ShipFalling in the same frame.
     /// </summary>
-    public override void Update(GameTime gameTime)
+    public void Update(GameTime gameTime)
     {
         if (SequenceStage == IntroSequenceStage.InitialPause)
         {
@@ -333,7 +333,7 @@ internal class IntroSequence : GameComponentBase
         _blobShipHeadLightFlash.Update();
     }
 
-    public override void Draw(GameTime gameTime)
+    public void Draw()
     {
         // Draw spaceship
         if (SequenceStage != IntroSequenceStage.CaptionFadeUp && SequenceStage != IntroSequenceStage.CaptionFadeDown)
@@ -389,7 +389,7 @@ internal class IntroSequence : GameComponentBase
 
             if (SequenceStage == IntroSequenceStage.PreFadePause)
             {
-                _blobKiller.Draw(gameTime, MainScreen.ScreenFade);
+                _blobKiller.Draw(MainScreen.ScreenFade);
             }
         }
         else

@@ -13,7 +13,7 @@ using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
 
-internal class ElectricityGatesAndNodesEngine : GameComponentBase
+internal class ElectricityGatesAndNodesEngine
 {
 
     /// <summary>
@@ -261,7 +261,7 @@ internal class ElectricityGatesAndNodesEngine : GameComponentBase
         ElectricityNodeControllers = null;
     }
 
-    public override void Draw(GameTime gameTime, int screenFade)
+    public void Draw()
     {
         if (_secondLayerTiles != null && _secondLayerTiles.Count > 0)
         {

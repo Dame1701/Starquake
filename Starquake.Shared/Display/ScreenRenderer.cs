@@ -246,13 +246,11 @@ internal class ScreenRenderer
         _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
     }
 
-    public void Draw(Color colour, GameTime gameTime, bool introSequenceRunning = false,
+    public void Draw(Color colour, bool introSequenceRunning = false,
         IntroSequenceStage introSequenceStage = IntroSequenceStage.None)
     {
         DrawLowerTiles(colour);
         DrawTileAnimations(colour);
-
-        _colourAnimations.Draw(gameTime, colour.A);
 
         // The intro sequence flies over a screen whose objects have not been placed yet
         bool objectsArePlaced = !introSequenceRunning || introSequenceStage == IntroSequenceStage.EndPause;

@@ -14,7 +14,7 @@ using Starquake.Structure;
 
 namespace Starquake.GameComponents.GameScreens;
 
-internal class PlanetCoreScreen : GameComponentBase, IGameScreen
+internal class PlanetCoreScreen : IGameScreen
 {
 
 
@@ -124,7 +124,6 @@ internal class PlanetCoreScreen : GameComponentBase, IGameScreen
 
         _elements = elements;
         _elements.OnCoreElementReplaced += Elements_OnCoreElementReplaced;
-        _elements.LoadContent();
 
         _coreAliens = new List<Nasty>();
         for (int a = 0; a < _coreAlienCount; a++)
@@ -171,7 +170,7 @@ internal class PlanetCoreScreen : GameComponentBase, IGameScreen
         _coreComputationEffect.Update(CoreCentreX, CoreCentreY, gameTime);
     }
 
-    public override void Update(GameTime gameTime)
+    public void Update(GameTime gameTime)
     {
         if (_justEnteredCore)
         {
@@ -249,7 +248,7 @@ internal class PlanetCoreScreen : GameComponentBase, IGameScreen
         _entryTime++;
     }
 
-    public override void Draw(GameTime gameTime)
+    public void Draw(GameTime gameTime)
     {
         if (!_replacingElements)
         {
@@ -277,14 +276,14 @@ internal class PlanetCoreScreen : GameComponentBase, IGameScreen
             _resources.GetSpriteCollection("BlankingTile").End();
         }
 
-        _gameScreens.Draw(Color.White, gameTime);
+        _gameScreens.Draw(Color.White);
 
         // Draw the core aliens
         if (!_replacingElements)
         {
             for (int a = 0; a < _coreAlienCount; a++)
             {
-                _coreAliens[a].Draw(gameTime, (byte)(ColourLevels.Full - _blankingTilesOpacity));
+                _coreAliens[a].Draw((byte)(ColourLevels.Full - _blankingTilesOpacity));
             }
         }
 

@@ -25,7 +25,7 @@ namespace Starquake.GameComponents;
 ///         <c>GameEngine</c>, which let each page reach any of its thirty members instead.
 ///     </para>
 /// </summary>
-internal class GameScreenBase : GameComponentBase
+internal class GameScreenBase
 {
     protected readonly BitmapFont Font;
     protected readonly GraphicsDeviceManager GraphicsDeviceManager;
@@ -62,7 +62,7 @@ internal class GameScreenBase : GameComponentBase
 
     public int ScreenFade { get; set; }
 
-    public override void Update(GameTime gameTime)
+    public virtual void Update(GameTime gameTime)
     {
         // Fade screen back up
         if (ScreenFade < ColourLevels.Full)

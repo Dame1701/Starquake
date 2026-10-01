@@ -12,7 +12,7 @@ using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
 
-internal class CoreElements : GameComponentBase
+internal class CoreElements
 {
 
     /// <summary>
@@ -180,7 +180,7 @@ internal class CoreElements : GameComponentBase
         return toReturn;
     }
 
-    public override void Update(GameTime gameTime)
+    public void Update(GameTime gameTime)
     {
         foreach (CoreElement element in Elements)
         {

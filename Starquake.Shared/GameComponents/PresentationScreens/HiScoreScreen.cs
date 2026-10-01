@@ -143,7 +143,7 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
         base.Update(gameTime);
     }
 
-    public override void Draw(GameTime gameTime)
+    public void Draw(GameTime gameTime)
     {
         ScreenEffects.SelectRenderViewPort("EntireScreen");
         _backgroundImage.Begin(BlendState.AlphaBlend);

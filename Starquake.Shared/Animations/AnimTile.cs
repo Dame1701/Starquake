@@ -10,7 +10,7 @@ using Starquake.Structure;
 
 namespace Starquake.Animations;
 
-internal class AnimTile : GameComponentBase
+internal class AnimTile
 {
     private readonly GraphicsSet _graphicsSet;
 
@@ -37,7 +37,7 @@ internal class AnimTile : GameComponentBase
 
     private Animation TileAnimation { get; }
 
-    public override void Update(GameTime gameTime)
+    public void Update()
     {
         TileAnimation.GetNextFrame();
     }

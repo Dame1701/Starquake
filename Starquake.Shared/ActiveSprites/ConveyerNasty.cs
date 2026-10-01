@@ -16,7 +16,7 @@ using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
 
-internal class ConveyerNasty : GameComponentBase
+internal class ConveyerNasty
 {
 
     /// <summary>
@@ -135,7 +135,7 @@ internal class ConveyerNasty : GameComponentBase
         NastyActive = false;
     }
 
-    public override void Update(GameTime gameTime)
+    public void Update(GameTime gameTime)
     {
         if (_conveyerNastyDies != null)
         {
@@ -194,7 +194,7 @@ internal class ConveyerNasty : GameComponentBase
         }
     }
 
-    public override void Draw(GameTime gameTime, int screenFade)
+    public void Draw(int screenFade)
     {
         if (NastyState == NastyState.Normal)
         {

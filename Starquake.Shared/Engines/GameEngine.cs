@@ -351,7 +351,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     {
         Stats = new PlayerStats(ContentResourceManager.GetSoundFxEngine());
         BlobStatusPanel = new StatusPanel(ContentResourceManager, _graphicsSet, ScreenDirectory, RandomNumberGenerator, Stats);
-        BlobStatusPanel.Initialise(null);
 
         _session = new GameSession();
         _session.OnPausedChanged += Session_OnPausedChanged;
@@ -532,7 +531,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             Player,
             RandomNumberGenerator);
         ConveyerNastiesInstance.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
-        ConveyerNastiesInstance.Initialise(null);
 
         var converyerNastyGraphics = new ContentList(ContentMgr);
         converyerNastyGraphics.AddContent("conveyerNasty", "Graphics\\ConveryerNasty");
@@ -627,7 +625,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     private void BuildGameScreens()
     {
-        GameScreens.Initialise(null);
+        GameScreens.Initialise();
 
         _mainScreen = new MainGameScreen(this);
 
@@ -726,7 +724,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
 
         // Two of the ten screens have content of their own to load, in the order the loop that
         // used to do this walked them. It reached LoadContent by downcasting every screen back to
-        // GameComponentBase, where the other eight inherit it as a no-op.
+        // a shared base class, where the other eight inherited it as a no-op.
         ScreenDirectory.Options.LoadContent();
         _mainScreen.LoadContent();
     }
@@ -940,7 +938,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
                 ScreenDirectory.Current == GameScreenType.AccessBooth)
             {
                 ScreenEffectEngine.SelectRenderViewPort("StatusArea"); // StatusPanelArea;
-                BlobStatusPanel.Draw(gameTime);
+                BlobStatusPanel.Draw();
             }
 
             ScreenEffectEngine.SelectRenderViewPort("GameArea"); // GameArea;
