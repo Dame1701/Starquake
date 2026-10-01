@@ -14,7 +14,7 @@ work are written into the code and `BUILD.md`. What is below is what remains.
 | 1 | The build never checked the standard `.editorconfig` declared. 35 violations | `b10a13c` `b9f071c` `d73c6fe`, and CI on three platforms |
 | 2 | Subtraction: `IGameScreen.Success`, `SpriteCollection.Clone`, dead initialisers, `packages/`, `Temp/` → `Assets/`, four carried-over follow-ups | `036b437` … `d31561b` |
 | 3 | Time, randomness and threads: `CollisionDetection`'s statics, the sound timer, 19 `DateTime.Now` calls, the last global state | `eaaa1f0` `69b6d4a` `8b8ad66` `41173d8` |
-| 4 | The god classes. `GameScreenCollection` 1,938 → 550, `Nasty` 1,646 → 819, `GameEngine` 1,227 → 961, `StatusPanel` 547 → 255 | `057bdc1` … `90e7910` |
+| 4 | The god classes. `GameScreenCollection` 1,938 → 550, `Nasty` 1,646 → 819, `GameEngine` 1,227 → 961 (985 now, phase 6 added back), `StatusPanel` 547 → 255 | `057bdc1` … `90e7910` |
 | 5 | Performance: tile batching, 46 batches sorting by a constant, repeated sheet lookups | `4260cb1` `393b360` `fe10a3a` |
 | 6 | The `object? param` channel, the lookup table, three records, six handler names, `Dispose`, the build fix | `314a9d4` `ea37940` `07433fc` |
 
