@@ -42,7 +42,6 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
     #region IGameComponent Members
 
-    private readonly TeleportCodeLetter[] _teleportCodeLetters;
     private readonly Dictionary<int, string> _teleportCodes;
     /// <summary>
     ///     The destination code as typed so far, one underscore per letter still to be entered.
@@ -116,14 +115,6 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         _teleportCodes.Add(499, "palma");
         _teleportCodes.Add(461, "aisle");
         _teleportCodes.Add(506, "exeon");
-
-
-
-        _teleportCodeLetters = new TeleportCodeLetter[5];
-        for (int a = 0; a < 5; a++)
-        {
-            _teleportCodeLetters[a] = new TeleportCodeLetter(_currentCode[a].ToString(), new Point(350 + a * 70, 400));
-        }
     }
 
     public void Reset(object? data)
@@ -170,12 +161,6 @@ public class TeleportScreen : GameComponentBase, IGameScreen
         }
 
         _teleportCodes.TryGetValue(_gameScreens.ScreenNumber, out _teleportCode);
-
-        for (int a = 0; a < 5; a++)
-        {
-            _teleportCodeLetters[a].Letter = _currentCode[a].ToString();
-            _teleportCodeLetters[a].Location = new Point(350 + a * 70, 400);
-        }
     }
 
     /// <summary>
@@ -440,9 +425,11 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
         for (int a = 0; a < 5; a++)
         {
-            _font.WriteText(teleportLetterLocation, 412, _teleportCodeLetters[a].Letter, 2, new Color(36, 16, 4), (byte)ScreenFade, new Vector2(1f, 0.5f), SpriteEffects.FlipVertically);
+            string letter = _currentCode[a].ToString();
 
-            _font.WriteText(teleportLetterLocation, 380, _teleportCodeLetters[a].Letter, 2, new Color(ColourLevels.Full, 180, 0), (byte)ScreenFade);
+            _font.WriteText(teleportLetterLocation, 412, letter, 2, new Color(36, 16, 4), (byte)ScreenFade, new Vector2(1f, 0.5f), SpriteEffects.FlipVertically);
+
+            _font.WriteText(teleportLetterLocation, 380, letter, 2, new Color(ColourLevels.Full, 180, 0), (byte)ScreenFade);
             teleportLetterLocation += 50;
         }
     }

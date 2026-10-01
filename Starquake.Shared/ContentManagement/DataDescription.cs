@@ -4,14 +4,4 @@
 // -
 namespace Starquake.ContentManagement;
 
-internal class DataDescription
-{
-    public readonly string FilePath;
-    public readonly string ResourceName;
-
-    public DataDescription(string resourceName, string filePath)
-    {
-        ResourceName = resourceName;
-        FilePath = filePath;
-    }
-}
+internal sealed record DataDescription(string ResourceName, string FilePath);
