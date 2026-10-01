@@ -66,6 +66,20 @@ internal class MainGameScreen : IGameScreen
     private const int BackgroundOpacity = 150;
 
     /// <summary>
+    ///     The starfield behind the planet. Half the planet's parallax, because it is meant to read as
+    ///     further away.
+    /// </summary>
+    private const int StarfieldParallaxStep = BackgroundParallaxStep / 2;
+
+    /// <summary>
+    ///     How much of the starfield's own painted alpha comes through. It has little to spare - the
+    ///     artwork peaks at about an eighth of full and covers well under one percent of the sheet - so
+    ///     this is a gentle knock back rather than the planet's, and there is not much room below it
+    ///     before the stars stop being there at all.
+    /// </summary>
+    private const int StarfieldOpacity = 180;
+
+    /// <summary>
     ///     The colour animations the access booth tiles are given, and how long each runs for. Green
     ///     for a booth the blob has the code for, red for one it has not.
     /// </summary>
@@ -550,15 +564,25 @@ internal class MainGameScreen : IGameScreen
     }
 
     /// <summary>
-    ///     The planet behind the scenery, shifted sideways a little per screen so that walking along a
-    ///     row reads as travelling across the planet. It moves with the column only, which is deliberate:
-    ///     going up or down a row leaves it where it was.
+    ///     The planet behind the scenery, in two layers shifted sideways by different amounts per
+    ///     screen so that walking along a row reads as travelling across it. Both move with the column
+    ///     only, which is deliberate: going up or down a row leaves them where they were.
     /// </summary>
     /// <remarks>
-    ///     The fade is worked out in floating point. Written as <c>BackgroundOpacity / ColourLevels.Full
-    ///     * ScreenFade</c> it was an integer division of 150 by 255, which is 0 - so the background was
-    ///     drawn on every frame at an alpha of nothing, and had been since the first commit in the
-    ///     repository. <see cref="ColourHelper.GetXna4Colour" /> had the right of it all along.
+    ///     <para>
+    ///         The stars are drawn first and move at half the planet's rate, which is what makes the
+    ///         two read as being at different distances. Both sheets are exactly a playfield in size
+    ///         but their artwork is inset - the planet's occupies roughly the middle 680 pixels - so
+    ///         sliding them sideways by up to <see cref="BackgroundParallaxStep" /> times fifteen never
+    ///         exposes an edge. That inset is what sets the ceiling on the step.
+    ///     </para>
+    ///     <para>
+    ///         The fades are worked out in floating point. Written as <c>BackgroundOpacity /
+    ///         ColourLevels.Full * ScreenFade</c> it was an integer division of 150 by 255, which is 0 -
+    ///         so the planet was drawn on every frame at an alpha of nothing, and had been since the
+    ///         first commit in the repository. <see cref="ColourHelper.GetXna4Colour" /> had the right
+    ///         of it all along.
+    ///     </para>
     /// </remarks>
     private void DrawBackground()
     {
@@ -568,17 +592,31 @@ internal class MainGameScreen : IGameScreen
         }
 
         int screenColumn = GameEngine.GameScreens.ScreenNumber % WorldMap.ScreensAcross;
-        int fade = (int)((float)BackgroundOpacity / ColourLevels.Full * ScreenFade);
 
-        SpriteCollection background = GameEngine.ContentResourceManager.GetSpriteCollection("Background1");
+        DrawBackgroundLayer("Background2", screenColumn * StarfieldParallaxStep, StarfieldOpacity);
+        DrawBackgroundLayer("Background1", screenColumn * BackgroundParallaxStep, BackgroundOpacity);
+    }
 
-        background.Begin(BlendState.AlphaBlend);
-        background.DrawSprite(
+    /// <summary>
+    ///     One layer of the background, at a given offset and strength. The strength is how much of the
+    ///     layer's own painted alpha comes through, so a layer drawn at <see cref="ColourLevels.Full" />
+    ///     is as the artwork has it.
+    /// </summary>
+    private void DrawBackgroundLayer(string spriteName, int xOffset, int opacity)
+    {
+        SpriteCollection layer = GameEngine.ContentResourceManager.GetSpriteCollection(spriteName);
+
+        layer.Begin(BlendState.AlphaBlend);
+        layer.DrawSprite(
             0,
-            screenColumn * BackgroundParallaxStep,
+            xOffset,
             0,
-            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, fade));
-        background.End();
+            ColourHelper.GetXna4Colour(
+                ColourLevels.Full,
+                ColourLevels.Full,
+                ColourLevels.Full,
+                (int)((float)opacity / ColourLevels.Full * ScreenFade)));
+        layer.End();
     }
 
     /// <summary>

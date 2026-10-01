@@ -49,7 +49,7 @@ internal static class ContentManifest
     private static void SharedGraphics(ResourceManager resources)
     {
         resources.AddSpriteResource("Background1", "Graphics\\Background1", 1024, 576);
-        //resources.AddSpriteResource("Background2", "Graphics\\Background2", 1024, 576);
+        resources.AddSpriteResource("Background2", "Graphics\\Background2", 1024, 576);
         resources.AddSpriteResource("ProportionalNumbers", "Graphics\\ProportionalNumbers", 27, 26);
     }
 
