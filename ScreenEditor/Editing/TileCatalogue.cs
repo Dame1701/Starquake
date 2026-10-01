@@ -14,37 +14,13 @@ namespace Starquake.ScreenEditor.Editing;
 /// <remarks>
 ///     A screen is stored as bare tile numbers, so nothing in the data says that 397 is a teleport
 ///     booth or that 420 is a tunnel mouth that leads to the previous screen. The game knows because
-///     <see cref="ActionTiles" /> and <see cref="TunnelTiles" /> say so, and the editor reads the
-///     same two sources rather than keeping its own list that could drift out of step with them.
+///     <see cref="ActionTiles" />, <see cref="TunnelTiles" /> and <see cref="MarkerTile" /> say so,
+///     and the editor reads the same sources rather than keeping its own list that could drift out of
+///     step with them. How a marker is drawn, as opposed to what it is called here, belongs to
+///     <see cref="MarkerCatalogue" />.
 /// </remarks>
 internal static class TileCatalogue
 {
-
-    /// <summary>
-    ///     The tiles the game never actually draws.
-    /// </summary>
-    /// <remarks>
-    ///     <para>
-    ///         These four mark a position for the game to do something at rather than describing
-    ///         scenery: somewhere to put a floor nasty, somewhere a tunnel lift runs, somewhere a core
-    ///         element would ideally be seeded, and a gap that should stay a gap. The game's drawing
-    ///         code names all four and skips them, so nothing of them is ever on screen.
-    ///     </para>
-    ///     <para>
-    ///         They still need artwork, because the editor has to show something where they are, and
-    ///         what the sheet has for them is a flat block of colour with the name written across it.
-    ///         That artwork was only ever meant for the editor, and painted across a screen it drowns
-    ///         out the tiles that do get drawn. So the editor recognises these four and draws its own
-    ///         marker instead - see <see cref="MarkerLabel" />.
-    ///     </para>
-    /// </remarks>
-    private static readonly Dictionary<int, string> MarkerLabels = new()
-    {
-        [(int)ActionTiles.BlankFiller] = "SPACER",
-        [(int)ActionTiles.ConveyerNasty] = "CONVEYER NASTY",
-        [(int)ActionTiles.PreferredCoreLocation] = "CORE",
-        [(int)ActionTiles.TunnelLiftTile] = "LIFT"
-    };
 
     private static readonly Dictionary<int, string> Names = BuildNames();
 
@@ -57,13 +33,10 @@ internal static class TileCatalogue
     public static bool IsSpecial(int tileImage) => Names.ContainsKey(tileImage);
 
     /// <summary>
-    ///     A short word for a tile the game does not draw, or null for anything it does. The editor
-    ///     draws its own marker for these rather than the placeholder artwork on the sheet.
+    ///     Whether the editor draws this tile itself rather than from the sheet - see
+    ///     <see cref="MarkerCatalogue" />, which holds what it draws.
     /// </summary>
-    public static string? MarkerLabel(int tileImage)
-        => MarkerLabels.GetValueOrDefault(tileImage);
-
-    public static bool IsMarker(int tileImage) => MarkerLabels.ContainsKey(tileImage);
+    public static bool IsMarker(int tileImage) => MarkerCatalogue.IsDrawnAsAMarker(tileImage);
 
     /// <summary>
     ///     A tile described for a status bar or a tooltip: its number, and what it is for if that is
@@ -88,6 +61,11 @@ internal static class TileCatalogue
         foreach (ActionTiles tile in Enum.GetValues<ActionTiles>())
         {
             names[(int)tile] = Humanise(tile.ToString());
+        }
+
+        foreach (MarkerTile marker in MarkerTiles.All)
+        {
+            names[(int)marker] = Humanise(marker.ToString());
         }
 
         for (int pair = 0; pair < TunnelTiles.MouthPairs; pair++)

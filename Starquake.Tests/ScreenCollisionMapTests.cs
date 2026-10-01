@@ -422,6 +422,28 @@ public class ScreenCollisionMapTests
         Assert.Single(screen.CollisionMap);
     }
 
+    /// <summary>
+    ///     A marker is a position the author noted rather than a tile, so there is no mask to read for
+    ///     one - and its number is past the end of the mask data, which is why reading one anyway would
+    ///     not merely add a stray cell but throw.
+    /// </summary>
+    [Fact]
+    public void Rebuild_AMarker_IsNeitherSolidNorReadFromTheMaskData()
+    {
+        // Arrange
+        GameScreenData screen = TestData.EmptyScreen();
+        screen.ScreenTiles[0, 0] = new ScreenTile((int)MarkerTile.BlobStartPosition);
+
+        // The shipped file covers the tile sheet and no more, so the marker is past its end here too.
+        var map = new ScreenCollisionMap([screen], TestData.SheetSizedCollisionData());
+
+        // Act
+        map.Rebuild(0);
+
+        // Assert
+        Assert.Empty(screen.CollisionMap);
+    }
+
     private static ScreenCollisionMap MapOf(GameScreenData screen)
         => new([screen], TestData.TileCollisionData());
 
@@ -470,6 +492,17 @@ public class ScreenCollisionMapTests
 
             return data;
         }
+
+        /// <summary>
+        ///     Collision data the size the shipped file is: one mask per tile on the sheet, and nothing
+        ///     beyond it. <see cref="TileCollisionData" /> is deliberately roomier than that, so only a
+        ///     test that cares about the end of the array asks for this.
+        /// </summary>
+        public static int[,,] SheetSizedCollisionData()
+            => new int[
+                TunnelTiles.LastMouth + 1,
+                TileMetrics.CollisionCellsAcrossTile,
+                TileMetrics.CollisionCellsDownTile];
 
         /// <summary>
         ///     Big enough to index every action tile the tests place, since the map reads the collision

@@ -11,6 +11,7 @@ using Starquake.Constants;
 using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Sounds;
+using Starquake.Sprites;
 using Starquake.Structure;
 
 namespace Starquake.GameComponents.GameScreens;
@@ -365,7 +366,7 @@ internal class MainGameScreen : IGameScreen
     /// </summary>
     private void UpdateShipSmoke(GameTime gameTime)
     {
-        if (GameEngine.GameScreens.ScreenNumber == WorldMap.ShipWreckScreenNumber)
+        if (GameEngine.GameScreens.ScreenNumber == GameEngine.GameScreens.LandingSite.ScreenNumber)
         {
             if (GameEngine.GameScreens.BlobsShipSmoke1 != null)
             {
@@ -537,7 +538,7 @@ internal class MainGameScreen : IGameScreen
             GameEngine.Player.DrawUpper(ScreenFade);
         }
 
-        if (GameEngine.GameScreens.ScreenNumber == WorldMap.ShipWreckScreenNumber)
+        if (GameEngine.GameScreens.ScreenNumber == GameEngine.GameScreens.LandingSite.ScreenNumber)
         {
             GameEngine.IntroSequence.Draw();
         }
@@ -548,18 +549,36 @@ internal class MainGameScreen : IGameScreen
         }
     }
 
+    /// <summary>
+    ///     The planet behind the scenery, shifted sideways a little per screen so that walking along a
+    ///     row reads as travelling across the planet. It moves with the column only, which is deliberate:
+    ///     going up or down a row leaves it where it was.
+    /// </summary>
+    /// <remarks>
+    ///     The fade is worked out in floating point. Written as <c>BackgroundOpacity / ColourLevels.Full
+    ///     * ScreenFade</c> it was an integer division of 150 by 255, which is 0 - so the background was
+    ///     drawn on every frame at an alpha of nothing, and had been since the first commit in the
+    ///     repository. <see cref="ColourHelper.GetXna4Colour" /> had the right of it all along.
+    /// </remarks>
     private void DrawBackground()
     {
-        if (GameEngine.Presentation.DrawBackgrounds)
+        if (!GameEngine.Presentation.DrawBackgrounds)
         {
-            int screenXPos = GameEngine.GameScreens.ScreenNumber % WorldMap.ScreensAcross;
-
-            GameEngine.ContentResourceManager.GetSpriteCollection("Background1")
-                .Begin(BlendState.AlphaBlend);
-            GameEngine.ContentResourceManager.GetSpriteCollection("Background1").DrawSprite(0, screenXPos * BackgroundParallaxStep,
-                0, new Color((byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)(BackgroundOpacity / ColourLevels.Full * ScreenFade)));
-            GameEngine.ContentResourceManager.GetSpriteCollection("Background1").End();
+            return;
         }
+
+        int screenColumn = GameEngine.GameScreens.ScreenNumber % WorldMap.ScreensAcross;
+        int fade = (int)((float)BackgroundOpacity / ColourLevels.Full * ScreenFade);
+
+        SpriteCollection background = GameEngine.ContentResourceManager.GetSpriteCollection("Background1");
+
+        background.Begin(BlendState.AlphaBlend);
+        background.DrawSprite(
+            0,
+            screenColumn * BackgroundParallaxStep,
+            0,
+            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, fade));
+        background.End();
     }
 
     /// <summary>
@@ -594,7 +613,7 @@ internal class MainGameScreen : IGameScreen
 
     private void DrawShipSmoke1()
     {
-        if (GameEngine.GameScreens.ScreenNumber == WorldMap.ShipWreckScreenNumber)
+        if (GameEngine.GameScreens.ScreenNumber == GameEngine.GameScreens.LandingSite.ScreenNumber)
         {
             if (GameEngine.GameScreens.BlobsShipSmoke1 != null)
             {
@@ -605,7 +624,7 @@ internal class MainGameScreen : IGameScreen
 
     private void DrawShipSmoke2()
     {
-        if (GameEngine.GameScreens.ScreenNumber == WorldMap.ShipWreckScreenNumber)
+        if (GameEngine.GameScreens.ScreenNumber == GameEngine.GameScreens.LandingSite.ScreenNumber)
         {
             if (GameEngine.GameScreens.BlobsShipSmoke2 != null)
             {

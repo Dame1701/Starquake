@@ -88,7 +88,8 @@ public class WorldPopulatorTests
         Populate(world);
 
         // Assert
-        Assert.Equal(TestData.MaxCoreElements, world.Count(screen => screen.PickUps.Count > 0));
+        Assert.Equal(TestData.MaxCoreElements,
+            world.Count(screen => screen.PickUps.Any(TestData.IsScattered)));
     }
 
     [Fact]
@@ -120,12 +121,13 @@ public class WorldPopulatorTests
     }
 
     /// <summary>
-    ///     The draw stops one short of <see cref="Collectables.AccessCard" /> (28) and
-    ///     <see cref="Collectables.Key" /> (29), which is why neither has ever appeared on the map.
-    ///     This pins the behaviour as it is; phase 6 is where the two get placed deliberately.
+    ///     The random scatter still never rolls either item: the type draw stops one short of
+    ///     <see cref="Collectables.AccessCard" /> (28) and <see cref="Collectables.Key" /> (29). They are
+    ///     placed deliberately instead, which is what guarantees exactly one of each rather than however
+    ///     many a dice roll happened to produce.
     /// </summary>
     [Fact]
-    public void Populate_NeverScattersTheKeyOrTheAccessCard()
+    public void Populate_PlacesExactlyOneKeyAndOneAccessCard()
     {
         // Arrange
         GameScreenData[] world = TestData.World();
@@ -134,13 +136,85 @@ public class WorldPopulatorTests
         Populate(world);
 
         // Assert
-        Assert.All(
-            world.SelectMany(screen => screen.PickUps),
-            pickUp =>
+        List<InteractiveItem> placed = world.SelectMany(screen => screen.PickUps).ToList();
+
+        Assert.Single(placed, pickUp => pickUp.Type == (int)Collectables.Key);
+        Assert.Single(placed, pickUp => pickUp.Type == (int)Collectables.AccessCard);
+    }
+
+    /// <summary>
+    ///     The rule that keeps the game winnable: neither item may be put anywhere that can only be
+    ///     reached by passing the very gate it opens.
+    /// </summary>
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(7)]
+    [InlineData(99)]
+    public void Populate_PutsNeitherItemBehindTheGateItOpens(int seed)
+    {
+        // Arrange
+        GameScreenData[] world = TestData.World();
+
+        // Act
+        Populate(world, seed);
+
+        // Assert
+        AssertItemIsOnAGateFreeScreen(world, Collectables.Key, Gate.KeyDoor);
+        AssertItemIsOnAGateFreeScreen(world, Collectables.AccessCard, Gate.AccessBooth);
+    }
+
+    /// <summary>
+    ///     Neither item is dropped on top of something already lying there - a power-up, a pyramid, or a
+    ///     pick-up, which is what a core element is.
+    /// </summary>
+    [Fact]
+    public void Populate_PutsNeitherItemOnASquareSomethingElseIsOn()
+    {
+        // Arrange
+        GameScreenData[] world = TestData.World();
+
+        // Act
+        Populate(world);
+
+        // Assert
+        foreach (GameScreenData screen in world)
+        {
+            var squares = new List<(int X, int Y)>();
+
+            if (screen.PowerUp is { } powerUp)
             {
-                Assert.NotEqual((int)Collectables.AccessCard, pickUp.Type);
-                Assert.NotEqual((int)Collectables.Key, pickUp.Type);
-            });
+                squares.Add((powerUp.XLocation, powerUp.YLocation));
+            }
+
+            if (screen.CheopsPyramid is { } pyramid)
+            {
+                squares.Add((pyramid.XLocation, pyramid.YLocation));
+            }
+
+            squares.AddRange(screen.PickUps.Select(pickUp => (pickUp.XLocation, pickUp.YLocation)));
+
+            Assert.Equal(squares.Count, squares.Distinct().Count());
+        }
+    }
+
+    private static void AssertItemIsOnAGateFreeScreen(
+        GameScreenData[] world,
+        Collectables item,
+        Gate gate)
+    {
+        HashSet<int> safe = GateFreeScreens.Find(world, MapFor(world), gate);
+
+        for (int screen = 0; screen < world.Length; screen++)
+        {
+            if (world[screen].PickUps.Any(pickUp => pickUp.Type == (int)item))
+            {
+                Assert.Contains(screen, safe);
+                return;
+            }
+        }
+
+        Assert.Fail(item + " was never placed at all");
     }
 
     [Fact]
@@ -232,25 +306,54 @@ public class WorldPopulatorTests
 
     [Fact]
     public void Populate_PrefersTheTileTheAuthorMarkedForACoreElement()
+        => AssertEveryPickUpLandsOnTheTileMarkedAt(3);
+
+    /// <summary>
+    ///     The scan for the marker used to start at row 1, borrowed from the scan for somewhere to
+    ///     stand an item - which has to start there, because it places on top of the tile it finds and
+    ///     reads the row above it. This one places inside the marked tile and reads nothing else, so
+    ///     the top row is as good a place to mark as any other.
+    /// </summary>
+    [Fact]
+    public void Populate_TheMarkedTileIsOnTheTopRow_IsStillPreferred()
+        => AssertEveryPickUpLandsOnTheTileMarkedAt(0);
+
+    /// <summary>
+    ///     Marks the same tile position on every screen and then checks that every pick-up the scatter
+    ///     placed is on a marked tile.
+    /// </summary>
+    /// <remarks>
+    ///     Which screens get a pick-up is the generator's own business - it draws them at random and
+    ///     then thins them down - so marking one screen and hoping proves nothing under most seeds.
+    ///     Marking all of them means whichever screens it chose are marked ones.
+    /// </remarks>
+    private static void AssertEveryPickUpLandsOnTheTileMarkedAt(int row)
     {
-        // Arrange - a screen with a marked tile among its platforms, and a seed under which it
-        // draws a pick-up
+        // Arrange
+        const int markedColumn = 5;
+
         GameScreenData[] world = TestData.World();
-        world[3].ScreenTiles[5, 3] = new ScreenTile((int)ActionTiles.PreferredCoreLocation);
+        foreach (GameScreenData screen in world)
+        {
+            screen.ScreenTiles[markedColumn, row] = new ScreenTile((int)MarkerTile.PreferredCoreLocation);
+        }
 
         // Act
         Populate(world);
 
-        // Assert - if this screen kept a pick-up, it is on the marked tile
-        if (world[3].PickUps.Count > 0)
+        // Assert - the key and the card are placed wherever there is room, not on the marked tile, so
+        // this is about the scattered pick-ups only
+        List<InteractiveItem> placed = world
+            .SelectMany(screen => screen.PickUps)
+            .Where(TestData.IsScattered)
+            .ToList();
+
+        Assert.NotEmpty(placed);
+        Assert.All(placed, pickUp =>
         {
-            Assert.Equal(
-                5 * TileMetrics.TileWidth + TileMetrics.CollisionCellWidth,
-                world[3].PickUps[0].XLocation);
-            Assert.Equal(
-                3 * TileMetrics.TileHeight + TileMetrics.CollisionCellHeight,
-                world[3].PickUps[0].YLocation);
-        }
+            Assert.Equal(markedColumn * TileMetrics.TileWidth + TileMetrics.CollisionCellWidth, pickUp.XLocation);
+            Assert.Equal(row * TileMetrics.TileHeight + TileMetrics.CollisionCellHeight, pickUp.YLocation);
+        });
     }
 
     [Fact]
@@ -264,7 +367,8 @@ public class WorldPopulatorTests
         populator.Populate([]);
 
         // Assert
-        Assert.Equal(TestData.MaxCoreElements, world.Count(screen => screen.PickUps.Count > 0));
+        Assert.Equal(TestData.MaxCoreElements,
+            world.Count(screen => screen.PickUps.Any(TestData.IsScattered)));
     }
 
     [Fact]
@@ -299,6 +403,15 @@ public class WorldPopulatorTests
     private static class TestData
     {
         public const int MaxCheops = 40;
+
+        /// <summary>
+        ///     Whether a pick-up is one the scatter placed. The key and the access card are put on
+        ///     deliberately once the scatter has finished, so a test about scattering should not count
+        ///     them - and before they were placed at all, every pick-up was a scattered one.
+        /// </summary>
+        public static bool IsScattered(InteractiveItem pickUp)
+            => pickUp.Type != (int)Collectables.Key &&
+               pickUp.Type != (int)Collectables.AccessCard;
 
         public const int MaxCoreElements = 18;
 

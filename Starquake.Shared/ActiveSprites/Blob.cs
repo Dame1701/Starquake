@@ -220,14 +220,6 @@ internal class Blob
     private const int BrokenGlassReachUp = -16;
 
     /// <summary>
-    ///     Where the blob starts, and where it reappears after losing a life.
-    /// </summary>
-    private const int BlobStartXPos = 416;
-
-    /// <inheritdoc cref="BlobStartXPos" />
-    private const int BlobStartYPos = 414;
-
-    /// <summary>
     ///     Where the teleport beam and the shot's smoke trail are emitted from, measured in from the
     ///     top left of the blob and of the shot respectively.
     /// </summary>
@@ -240,10 +232,11 @@ internal class Blob
     private const int FireTrailOffset = 14;
 
     /// <summary>
-    ///     How far into the booth's tile the blob is placed when it steps into a teleporter, so it is
-    ///     standing in the doorway rather than on its edge.
+    ///     How far into a booth's tile the blob has to have walked for it to count as having stepped in.
+    ///     A little past <see cref="BoothMetrics.BlobXOffset" />, so the blob settles back onto the
+    ///     doorway as the booth takes over rather than having to be walked into exactly.
     /// </summary>
-    private const int TeleportBoothXOffset = 20;
+    private const int TeleportBoothEntryReach = 24;
 
     /// <summary>
     ///     Where the blob is put down after coming through a tunnel - just far enough inside the
@@ -401,10 +394,6 @@ internal class Blob
 
         _inventory = new Inventory();
         _unstickProbe = new UnstickProbe(gameScreens.Collisions);
-
-        // Temporary test code to give Blob Access card and Key
-        BlobInventory[1] = Collectables.Key;
-        BlobInventory[0] = Collectables.AccessCard;
     }
 
     /// <summary>
@@ -1232,13 +1221,16 @@ internal class Blob
         {
             if (_tileRightBlob.TileNumber == (int)ActionTiles.TeleportBooth)
             {
-                if (_tileRightBlob.XPosition >= 24 &&
-                    _tileRightBlob.YPosition == 32)
+                // Far enough in to be in the doorway, and standing on the booth's floor rather than
+                // passing it in mid air. Only the X is set from here: the Y test is the arrival
+                // offset, so the blob is already standing exactly where a booth puts it.
+                if (_tileRightBlob.XPosition >= TeleportBoothEntryReach &&
+                    _tileRightBlob.YPosition == BoothMetrics.BlobYOffset)
                 {
                     _screenDirectory.Current = GameScreenType.Teleporter;
 
                     _screenDirectory.Teleporter.Reset();
-                    _blobXPos = _tileRightBlob.MapXPosition * TileMetrics.TileWidth + TeleportBoothXOffset;
+                    _blobXPos = _tileRightBlob.MapXPosition * TileMetrics.TileWidth + BoothMetrics.BlobXOffset;
                     BlobFrame = BlobWalkRightFirstFrame;
                 }
             }
@@ -1952,9 +1944,11 @@ internal class Blob
         // Reset Blob's state
         BlobsState = BlobState.Normal;
 
-        // Reset Blob's position
-        _blobXPos = BlobStartXPos;
-        _blobYPos = BlobStartYPos;
+        // Reset Blob's position. Where that is belongs to the map - the author marks the square the
+        // ship came down on - so it is asked for rather than written down here.
+        Point start = _gameScreens.BlobStartPosition;
+        _blobXPos = start.X;
+        _blobYPos = start.Y;
 
         // Remove Blob from shuttle pads
         _blobOnShuttle = false;

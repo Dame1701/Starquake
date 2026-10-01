@@ -96,28 +96,11 @@ internal class WorldPopulator
 
     /// <summary>
     ///     The tiles no pick-up, power-up or pyramid may be placed on, because each of them already
-    ///     means something to the game - a shuttle, a spike, a bridge, a marker. This was a fifteen-term
-    ///     chain of inequalities.
+    ///     means something to the game - a shuttle, a spike, a bridge. This was a fifteen-term chain of
+    ///     inequalities. Every <see cref="MarkerTile" /> is out of bounds too, which is the point of a
+    ///     marker: the author reserved that square for something, so the scatter leaves it alone.
     /// </summary>
-    private static readonly HashSet<int> TilesNothingMayBePlacedOn =
-    [
-        (int)ActionTiles.ShuttlePlatform,
-        (int)ActionTiles.RemovedShuttlePlatform,
-        (int)ActionTiles.ElectricityNode,
-        (int)ActionTiles.ShuttleTag1,
-        (int)ActionTiles.ShuttleTag2,
-        (int)ActionTiles.ShuttleTag3,
-        (int)ActionTiles.Spike1,
-        (int)ActionTiles.Spike2,
-        (int)ActionTiles.Spike3,
-        (int)ActionTiles.ElectricityGate,
-        (int)ActionTiles.BlankFiller,
-        (int)ActionTiles.ConveyerNasty,
-        (int)ActionTiles.BreakableBridges,
-        SceneryTile1,
-        SceneryTile2,
-        (int)ActionTiles.PreferredCoreLocation
-    ];
+    private static readonly HashSet<int> TilesNothingMayBePlacedOn = BuildTilesNothingMayBePlacedOn();
 
     private readonly ScreenCollisionMap _collisions;
     private readonly Random _randomNumberGenerator;
@@ -152,7 +135,92 @@ internal class WorldPopulator
             screen => screen.PickUps = new List<InteractiveItem>());
 
         MatchSomeCoreElementsToTheCore(screensContainingCoreElements, coreElementsWanted);
+
+        PlaceKeyAndAccessCard();
     }
+
+    /// <summary>
+    ///     Puts the key and the access card on the planet, one of each.
+    /// </summary>
+    /// <remarks>
+    ///     Last of all, and deliberately so. The scatter above empties <see cref="GameScreenData.PickUps" />
+    ///     on every screen it thins out, so a key placed any earlier could be thinned away with the core
+    ///     elements - and <see cref="MatchSomeCoreElementsToTheCore" /> writes over the first pick-up on a
+    ///     screen, which by then would be the key.
+    /// </remarks>
+    private void PlaceKeyAndAccessCard()
+    {
+        // The key first, so that the card cannot be put on the square the key took.
+        PlaceBehindNoGate(Collectables.Key, Gate.KeyDoor);
+        PlaceBehindNoGate(Collectables.AccessCard, Gate.AccessBooth);
+    }
+
+    /// <summary>
+    ///     Puts one item on a random screen that the blob can reach without passing the gate the item
+    ///     itself opens, so that it can never be the thing standing between the blob and itself.
+    /// </summary>
+    /// <remarks>
+    ///     Screens are tried in a random order and the first with somewhere free to stand wins, rather
+    ///     than the whole list being filtered first: almost every screen has room, so this draws once in
+    ///     the ordinary case. A planet with nowhere at all to put the item leaves it unplaced, which a
+    ///     test is what catches - there is nothing sensible to do about it here.
+    /// </remarks>
+    private void PlaceBehindNoGate(Collectables item, Gate gate)
+    {
+        List<int> candidates = GateFreeScreens.Find(_screens, _collisions, gate)
+            .Where(screen => screen != WorldMap.CoreScreenNumber)
+            .ToList();
+
+        while (candidates.Count > 0)
+        {
+            int index = _randomNumberGenerator.Next(candidates.Count);
+            int screenNumber = candidates[index];
+            candidates.RemoveAt(index);
+
+            List<InteractiveItem> free = GetPotentialLocations(screenNumber)
+                .Where(spot => !IsTaken(_screens[screenNumber], spot))
+                .ToList();
+
+            if (free.Count == 0)
+            {
+                continue;
+            }
+
+            InteractiveItem chosen = free[_randomNumberGenerator.Next(free.Count)];
+
+            _screens[screenNumber].PickUps.Add(
+                new InteractiveItem(chosen.XLocation, chosen.YLocation, (int)item));
+
+            return;
+        }
+    }
+
+    /// <summary>
+    ///     Whether something already sits on a square. The core elements are pick-ups like any other, so
+    ///     checking the pick-up list covers them as well.
+    /// </summary>
+    private static bool IsTaken(GameScreenData screen, InteractiveItem spot)
+    {
+        if (IsSameSquare(screen.PowerUp, spot) || IsSameSquare(screen.CheopsPyramid, spot))
+        {
+            return true;
+        }
+
+        foreach (InteractiveItem pickUp in screen.PickUps)
+        {
+            if (IsSameSquare(pickUp, spot))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsSameSquare(InteractiveItem? placed, InteractiveItem spot)
+        => placed is not null &&
+           placed.XLocation == spot.XLocation &&
+           placed.YLocation == spot.YLocation;
 
     /// <summary>
     ///     Whether a code reads unambiguously - no digit appearing twice.
@@ -390,13 +458,20 @@ internal class WorldPopulator
     /// <summary>
     ///     Where this screen's author said a core element would be best placed, if they said so at all.
     /// </summary>
+    /// <remarks>
+    ///     Unlike <see cref="GetPotentialLocations" /> this reads the whole screen including its top
+    ///     row. That loop starts at row 1 because it puts an item on top of the tile it finds, which
+    ///     from the top row would be above the screen, and because it looks at the row above. This
+    ///     one puts the item inside the marked tile and looks at nothing else, so a marker on the top
+    ///     row is as good as a marker anywhere - and it used to be ignored.
+    /// </remarks>
     private InteractiveItem? GetPreferredLocation(int screenNumber)
     {
-        for (int y = 1; y < TileMetrics.TilesDown; y++)
+        for (int y = 0; y < TileMetrics.TilesDown; y++)
         {
             for (int x = 0; x < TileMetrics.TilesAcross; x++)
             {
-                if (_screens[screenNumber].ScreenTiles[x, y].TileImage == (int)ActionTiles.PreferredCoreLocation)
+                if (_screens[screenNumber].ScreenTiles[x, y].TileImage == (int)MarkerTile.PreferredCoreLocation)
                 {
                     return new InteractiveItem(
                         x * TileMetrics.TileWidth + TileMetrics.CollisionCellWidth,
@@ -478,5 +553,32 @@ internal class WorldPopulator
             screensContainingCoreElements[a].PickUps[0].Type = elementsLeftToPlace[elementIndex];
             elementsLeftToPlace.RemoveAt(elementIndex);
         }
+    }
+
+    private static HashSet<int> BuildTilesNothingMayBePlacedOn()
+    {
+        var tiles = new HashSet<int>
+        {
+            (int)ActionTiles.ShuttlePlatform,
+            (int)ActionTiles.RemovedShuttlePlatform,
+            (int)ActionTiles.ElectricityNode,
+            (int)ActionTiles.ShuttleTag1,
+            (int)ActionTiles.ShuttleTag2,
+            (int)ActionTiles.ShuttleTag3,
+            (int)ActionTiles.Spike1,
+            (int)ActionTiles.Spike2,
+            (int)ActionTiles.Spike3,
+            (int)ActionTiles.ElectricityGate,
+            (int)ActionTiles.BreakableBridges,
+            SceneryTile1,
+            SceneryTile2
+        };
+
+        foreach (MarkerTile marker in MarkerTiles.All)
+        {
+            tiles.Add((int)marker);
+        }
+
+        return tiles;
     }
 }

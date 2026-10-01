@@ -72,6 +72,8 @@ internal class GameScreenCollection
         // Load screen data
         _gameScreens = (GameScreenData[])_resources.GetDataResource("GameScreens");
 
+        LandingSite = LandingSite.FindIn(_gameScreens);
+
         Collisions = new ScreenCollisionMap(
             _gameScreens,
             (int[,,])_resources.GetDataResource("ScreenCollisionData"));
@@ -117,6 +119,32 @@ internal class GameScreenCollection
 
     public GameScreenData CurrentGameScreenData => _gameScreens[ScreenNumber];
 
+    /// <summary>
+    ///     Where the blob's ship came down, read off the map rather than written into the game. Looked
+    ///     up once: the map does not change while a game is running, and every frame of the wreck's
+    ///     smoke would otherwise walk all 512 screens looking for the marker again.
+    /// </summary>
+    public LandingSite LandingSite { get; }
+
+    /// <summary>
+    ///     Where the blob stands at the start of a game: centred across the square the author marked,
+    ///     with its feet on the bottom of it.
+    /// </summary>
+    public Point BlobStartPosition => new(
+        LandingSite.BlobStartTileX * TileMetrics.TileWidth +
+        (TileMetrics.TileWidth - SpriteMetrics.SpriteWidth) / 2,
+        LandingSite.BlobStartTileY * TileMetrics.TileHeight +
+        TileMetrics.TileHeight - SpriteMetrics.SpriteHeight);
+
+    /// <summary>
+    ///     The middle of the square the ship comes to rest in. The ship is drawn from its top left and
+    ///     the two graphics sets draw it at different sizes, so the square gives the centre and the
+    ///     caller takes half its own sprite off that.
+    /// </summary>
+    public Point ShipCrashCentre => new(
+        LandingSite.CrashTileX * TileMetrics.TileWidth + TileMetrics.TileWidth / 2,
+        LandingSite.CrashTileY * TileMetrics.TileHeight + TileMetrics.TileHeight / 2);
+
     public IStandardParticleEffect BlobsShipSmoke1 { get; }
 
     public IStandardParticleEffect BlobsShipSmoke2 { get; }
@@ -152,6 +180,25 @@ internal class GameScreenCollection
 
     public GameScreenData GetGameScreen(int number)
         => _gameScreens[number];
+
+    /// <summary>
+    ///     Which screen a teleport destination code reaches, or -1 for a code no screen answers to.
+    ///     The codes are authored in the screen editor and carried in the screen data, so an
+    ///     unrecognised code is an ordinary outcome rather than a missing one - it is what the booth
+    ///     says CODE NOT RECOGNISED to.
+    /// </summary>
+    public int FindScreenByTeleportCode(string code)
+    {
+        for (int screen = 0; screen < _gameScreens.Length; screen++)
+        {
+            if (string.Equals(_gameScreens[screen].TeleportCode, code, StringComparison.OrdinalIgnoreCase))
+            {
+                return screen;
+            }
+        }
+
+        return -1;
+    }
 
     public void Initialise()
     {
@@ -400,7 +447,10 @@ internal class GameScreenCollection
         _keyLockDoors ??= GetKeyLockDoors();
         Renderer.KeyLockDoors = _keyLockDoors;
 
-        if (_keyLockDoors != null)
+        // Counted rather than tested for null. GetKeyLockDoors returns an empty list for a screen with
+        // no doors on it, never null, so asking whether it is null said yes on all 512 screens - which
+        // left the force field running and being drawn everywhere once any door had started it.
+        if (_keyLockDoors.Count > 0)
         {
             Renderer.StartForceField();
 
@@ -408,6 +458,13 @@ internal class GameScreenCollection
             {
                 UpdateKeyLockDoor(keyLockDoor, gameTime, blobHasKey);
             }
+        }
+        else
+        {
+            // Nothing on this screen is emitting, so neither should anything left over from the last
+            // screen that was. Clearing rather than stopping, because stopping would leave the
+            // particles already in the air hanging there unaged.
+            Renderer.ClearForceField();
         }
 
         Renderer.TrackBlobWithOllysEyes(blobXPos, blobYPos);
@@ -498,7 +555,7 @@ internal class GameScreenCollection
     /// </summary>
     public void Reset()
     {
-        ScreenNumber = WorldMap.ShipWreckScreenNumber;
+        ScreenNumber = LandingSite.ScreenNumber;
 
         // The elements the core is asking for are read off here rather than in the populator,
         // which would drag the graphics in behind them.

@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using Starquake.Constants;
 using Starquake.ScreenEditor.Content;
 using Starquake.ScreenEditor.ViewModels;
+using Starquake.Structure;
 
 namespace Starquake.ScreenEditor.Editing;
 
@@ -29,6 +30,8 @@ internal sealed class EditorSession : ViewModelBase
 
     private readonly ObservableCollection<int> _recentTiles = [];
 
+    private MarkerPlacement? _blobStart;
+
     private int[]? _clipboard;
 
     private int _currentScreen;
@@ -40,6 +43,8 @@ internal sealed class EditorSession : ViewModelBase
     private int _selectedTile;
 
     private TileSheet? _sheet;
+
+    private MarkerPlacement? _shipCrashSite;
 
     private bool _showCollision;
 
@@ -61,9 +66,19 @@ internal sealed class EditorSession : ViewModelBase
 
     public EditorSession()
     {
+        Markers = MarkerCatalogue.Paintable
+            .Select(entry => new MarkerChoice(this, entry.Marker, entry.Face))
+            .ToArray();
+
         Document = EditorDocument.CreateEmpty();
         AttachDocument(Document);
+        FindLandingSite();
     }
+
+    /// <summary>
+    ///     The markers the toolbar offers, in the order it offers them.
+    /// </summary>
+    public IReadOnlyList<MarkerChoice> Markers { get; }
 
     public UndoStack Undo { get; } = new();
 
@@ -76,6 +91,24 @@ internal sealed class EditorSession : ViewModelBase
     }
 
     public IReadOnlyList<int> RecentTiles => _recentTiles;
+
+    /// <summary>
+    ///     The marker in hand, or null when what is in hand is an ordinary tile. Markers are picked from
+    ///     the toolbar rather than the palette - there is no artwork to show for one, so a row of them
+    ///     among four hundred pieces of scenery would be a row of identical boxes - and this is what
+    ///     those buttons bind to.
+    /// </summary>
+    public MarkerTile? SelectedMarker
+    {
+        get => MarkerTiles.Contains(_selectedTile) ? (MarkerTile)_selectedTile : null;
+        set
+        {
+            if (value is { } marker)
+            {
+                SelectedTile = (int)marker;
+            }
+        }
+    }
 
     public int CurrentScreen
     {
@@ -91,7 +124,7 @@ internal sealed class EditorSession : ViewModelBase
             SetField(ref _currentScreen, clamped);
             RaisePropertyChanged(nameof(ScreenColumn));
             RaisePropertyChanged(nameof(ScreenRow));
-            RaisePropertyChanged(nameof(ScreenDescription));
+            RaiseTeleportPropertiesChanged();
             Invalidate();
         }
     }
@@ -110,12 +143,135 @@ internal sealed class EditorSession : ViewModelBase
         {
             string description = "Screen " + _currentScreen + "  ·  column " + ScreenColumn + ", row " + ScreenRow;
 
-            return _currentScreen switch
+            description = _currentScreen switch
             {
                 WorldMap.CoreScreenNumber => description + "  ·  planet core",
                 WorldMap.CoreApproachScreenNumber => description + "  ·  core approach",
                 _ => description
             };
+
+            if (_blobStart?.ScreenNumber == _currentScreen)
+            {
+                description += "  ·  Blob starts here";
+            }
+
+            // A booth with no code is not an error - a half built screen is allowed - but it is
+            // worth saying, because nothing else on the screen would show it. A code on a screen
+            // with no booth is worth saying for the opposite reason: the game will still send
+            // somebody here, and there will be no booth for them to arrive in.
+            if (CurrentScreenHasTeleportBooth)
+            {
+                return description + "  ·  teleport code " + (CurrentTeleportCode ?? "not set");
+            }
+
+            return CurrentTeleportCode is null
+                ? description
+                : description + "  ·  teleport code " + CurrentTeleportCode + ", but no booth to arrive in";
+        }
+    }
+
+    /// <summary>
+    ///     Where the blob's ship came down, as the map says: the square it is put down on and the square
+    ///     the wreck rests in. Held rather than asked for, because finding a marker means walking all
+    ///     512 screens and these are read by everything that describes the map.
+    /// </summary>
+    public MarkerPlacement? BlobStart => _blobStart;
+
+    /// <inheritdoc cref="BlobStart" />
+    public MarkerPlacement? ShipCrashSite => _shipCrashSite;
+
+    /// <summary>
+    ///     What is wrong with the landing site, or null when there is nothing wrong with it. The game
+    ///     opens on the screen the start position is on, so a missing marker or a wreck on another
+    ///     screen means a map that does not begin the way its author meant it to.
+    /// </summary>
+    public string? LandingSiteProblem
+    {
+        get
+        {
+            if (_blobStart is not { } start)
+            {
+                return _shipCrashSite is null
+                    ? "No start position has been placed. Blob has nowhere to begin."
+                    : "No start position has been placed, so the crash site is on its own.";
+            }
+
+            if (_shipCrashSite is not { } crash)
+            {
+                return "No crash site has been placed. There would be no wreck to climb out of.";
+            }
+
+            return crash.ScreenNumber == start.ScreenNumber
+                ? null
+                : "The crash site is on screen " + crash.ScreenNumber + ", away from the start on screen " +
+                  start.ScreenNumber + ". Both belong on one screen.";
+        }
+    }
+
+    /// <summary>
+    ///     The landing site as the panel shows it, which has to read as something even when half of it
+    ///     has not been placed.
+    /// </summary>
+    public string LandingSiteDisplay
+    {
+        get
+        {
+            if (_blobStart is not { } start)
+            {
+                return "NOT SET";
+            }
+
+            return "Screen " + start.ScreenNumber + "  ·  start " + Square(start) +
+                   "  ·  crash " + (_shipCrashSite is { } crash ? Square(crash) : "not set");
+        }
+    }
+
+    /// <summary>
+    ///     What the landing site box says underneath: what is wrong with it, or what it means when
+    ///     nothing is.
+    /// </summary>
+    public string LandingSiteNote
+        => LandingSiteProblem ?? "A new game opens here, with Blob stepping out of the wreck.";
+
+    /// <summary>
+    ///     The destination code that reaches the screen being edited, or null if it has none.
+    /// </summary>
+    public string? CurrentTeleportCode => Document.GetTeleportCode(_currentScreen);
+
+    /// <summary>
+    ///     Whether the screen being edited has a teleport booth on it, and so is a screen a code can
+    ///     reach.
+    /// </summary>
+    public bool CurrentScreenHasTeleportBooth => Document.HasTeleportBooth(_currentScreen);
+
+    /// <summary>
+    ///     Whether the teleport box has anything to show: the screen has a booth on it, or it has a
+    ///     code left behind by a booth that was erased.
+    /// </summary>
+    public bool ShowTeleportPanel => CurrentScreenHasTeleportBooth || CurrentTeleportCode is not null;
+
+    /// <summary>
+    ///     The code as the box shows it, which has to read as something even when there is none.
+    /// </summary>
+    public string TeleportCodeDisplay => CurrentTeleportCode ?? "NOT SET";
+
+    /// <summary>
+    ///     What the box says underneath the code. All three cases are worth a sentence: a booth
+    ///     nothing can reach yet, a booth that can be reached, and a code with no booth left to
+    ///     arrive in.
+    /// </summary>
+    public string TeleportCodeNote
+    {
+        get
+        {
+            if (!CurrentScreenHasTeleportBooth)
+            {
+                return "There is no booth on this screen to arrive in.";
+            }
+
+            return CurrentTeleportCode is null
+                ? "Until this is set, no booth can reach this screen."
+                : "Typed into any other booth, this code transports Blob here.";
         }
     }
 
@@ -131,7 +287,14 @@ internal sealed class EditorSession : ViewModelBase
 
             SetField(ref _selectedTile, value);
             RaisePropertyChanged(nameof(SelectedTileDescription));
+            RaisePropertyChanged(nameof(SelectedMarker));
             RememberTile(value);
+
+            foreach (MarkerChoice choice in Markers)
+            {
+                choice.NotifySelectionChanged();
+            }
+
             Invalidate();
         }
     }
@@ -252,6 +415,13 @@ internal sealed class EditorSession : ViewModelBase
     /// </summary>
     public event EventHandler? Invalidated;
 
+    /// <summary>
+    ///     Raised when a teleport booth has been shift-clicked, asking for its code to be set. The
+    ///     session has no way to put a dialog up itself, so the window does that and comes back
+    ///     through <see cref="SetTeleportCode" />.
+    /// </summary>
+    public event EventHandler? TeleportCodeRequested;
+
     public void SetDocument(EditorDocument document)
     {
         DetachDocument(Document);
@@ -265,9 +435,11 @@ internal sealed class EditorSession : ViewModelBase
 
         RebuildVisibleTiles();
 
+        FindLandingSite();
+
         RaisePropertyChanged(nameof(Document));
         RaisePropertyChanged(nameof(CurrentScreen));
-        RaisePropertyChanged(nameof(ScreenDescription));
+        RaiseTeleportPropertiesChanged();
 
         Invalidate();
     }
@@ -279,7 +451,9 @@ internal sealed class EditorSession : ViewModelBase
 
         Document.EnsureCollisionCapacity(sheet.TileCount);
 
-        if (!sheet.Contains(_selectedTile))
+        // A marker survives a change of sheet: it is not on one, so having it in hand says nothing
+        // about which artwork is loaded.
+        if (!sheet.Contains(_selectedTile) && !MarkerTiles.Contains(_selectedTile))
         {
             SelectedTile = 0;
         }
@@ -329,8 +503,33 @@ internal sealed class EditorSession : ViewModelBase
             return;
         }
 
+        TakeAwayMarkerElsewhere(tileImage, x, y);
+
         Document.SetTile(_currentScreen, x, y, tileImage);
         Undo.Record(new TileEdit(_currentScreen, x, y, existing, tileImage));
+    }
+
+    /// <summary>
+    ///     Clears the one already on the map before a marker there should only be one of is laid down
+    ///     somewhere else, so that painting it reads as moving it. Two start positions would leave the
+    ///     game picking one of them, which is worse than either answer.
+    /// </summary>
+    private void TakeAwayMarkerElsewhere(int tileImage, int x, int y)
+    {
+        if (!MarkerTiles.Contains(tileImage) || !MarkerTiles.IsOnePerMap((MarkerTile)tileImage))
+        {
+            return;
+        }
+
+        if (Document.FindMarker((MarkerTile)tileImage) is not { } placed ||
+            (placed.ScreenNumber == _currentScreen && placed.TileX == x && placed.TileY == y))
+        {
+            return;
+        }
+
+        Document.SetTile(placed.ScreenNumber, placed.TileX, placed.TileY, EditorDocument.EmptyTile);
+        Undo.Record(new TileEdit(placed.ScreenNumber, placed.TileX, placed.TileY, tileImage,
+            EditorDocument.EmptyTile));
     }
 
     /// <summary>
@@ -366,6 +565,52 @@ internal sealed class EditorSession : ViewModelBase
             pending.Push((cellX, cellY - 1));
             pending.Push((cellX, cellY + 1));
         }
+    }
+
+    public void RequestTeleportCodeEdit() => TeleportCodeRequested?.Invoke(this, EventArgs.Empty);
+
+    /// <summary>
+    ///     Gives the screen being edited a destination code, or takes its code away when passed null.
+    ///     What is stored is the normalised code, so that it is what the booth matches against rather
+    ///     than however it happened to be typed.
+    /// </summary>
+    public void SetTeleportCode(string? code)
+    {
+        string? normalised = code is null ? null : TeleportCodes.Normalise(code);
+        if (normalised?.Length == 0)
+        {
+            normalised = null;
+        }
+
+        string? existing = Document.GetTeleportCode(_currentScreen);
+        if (existing == normalised)
+        {
+            return;
+        }
+
+        Document.SetTeleportCode(_currentScreen, normalised);
+        Undo.Record(new TeleportCodeEdit(_currentScreen, existing, normalised));
+    }
+
+    /// <summary>
+    ///     What is wrong with a code somebody is typing, or null if nothing is. The booth's keypad can
+    ///     only spell five letters, and a code that already belongs to another screen would leave one
+    ///     of the two unreachable.
+    /// </summary>
+    public string? DescribeTeleportCodeProblem(string code)
+    {
+        string normalised = TeleportCodes.Normalise(code);
+
+        if (!TeleportCodes.IsWellFormed(normalised))
+        {
+            return "A code is exactly " + TeleportCodes.CodeLength + " letters, A to Z.";
+        }
+
+        int owner = Document.FindScreenByTeleportCode(normalised);
+
+        return owner < 0 || owner == _currentScreen
+            ? null
+            : "Screen " + owner + " already answers to that code.";
     }
 
     public void ToggleCollision(int tileImage, int cellX, int cellY)
@@ -446,17 +691,27 @@ internal sealed class EditorSession : ViewModelBase
     {
         document.TileChanged += OnTileChanged;
         document.CollisionMaskChanged += OnCollisionMaskChanged;
+        document.TeleportCodeChanged += OnTeleportCodeChanged;
     }
 
     private void DetachDocument(EditorDocument document)
     {
         document.TileChanged -= OnTileChanged;
         document.CollisionMaskChanged -= OnCollisionMaskChanged;
+        document.TeleportCodeChanged -= OnTeleportCodeChanged;
     }
 
     private void OnTileChanged(int screen, int x, int y)
     {
         _tilesInUse = null;
+
+        // A booth can have just been painted or erased, which changes what the teleport box has to
+        // say about the screen - including whether it is there at all.
+        RaiseTeleportPropertiesChanged();
+
+        // So can either half of the landing site, and that is worth a walk of the map: both are
+        // described wherever they are, not only on the screen they sit on.
+        FindLandingSite();
 
         if (_usedTilesOnly)
         {
@@ -471,9 +726,55 @@ internal sealed class EditorSession : ViewModelBase
 
     private void OnCollisionMaskChanged(int tileImage) => Invalidate();
 
+    private void OnTeleportCodeChanged(int screen)
+    {
+        RaiseTeleportPropertiesChanged();
+        Invalidate();
+    }
+
+    /// <summary>
+    ///     Announces everything that is worked out from the current screen's teleport code. None of
+    ///     it has a backing field to set, so there is nothing to compare and nothing to skip.
+    /// </summary>
+    private void RaiseTeleportPropertiesChanged()
+    {
+        RaisePropertyChanged(nameof(ScreenDescription));
+        RaisePropertyChanged(nameof(CurrentTeleportCode));
+        RaisePropertyChanged(nameof(CurrentScreenHasTeleportBooth));
+        RaisePropertyChanged(nameof(ShowTeleportPanel));
+        RaisePropertyChanged(nameof(TeleportCodeDisplay));
+        RaisePropertyChanged(nameof(TeleportCodeNote));
+    }
+
+    /// <summary>
+    ///     Reads the landing site off the map again. Called after any tile edit, which is more often
+    ///     than it is strictly needed - but an edit is a keystroke's worth of work and this is two
+    ///     walks of an array, against having to work out which edits could have moved a marker.
+    /// </summary>
+    private void FindLandingSite()
+    {
+        _blobStart = Document.FindMarker(MarkerTile.BlobStartPosition);
+        _shipCrashSite = Document.FindMarker(MarkerTile.ShipCrashSite);
+
+        RaisePropertyChanged(nameof(BlobStart));
+        RaisePropertyChanged(nameof(ShipCrashSite));
+        RaisePropertyChanged(nameof(LandingSiteProblem));
+        RaisePropertyChanged(nameof(LandingSiteDisplay));
+        RaisePropertyChanged(nameof(LandingSiteNote));
+        RaisePropertyChanged(nameof(ScreenDescription));
+    }
+
+    /// <summary>
+    ///     A marker's square as a person would say it.
+    /// </summary>
+    private static string Square(MarkerPlacement placement)
+        => placement.TileX + ", " + placement.TileY;
+
     private void RememberTile(int tileImage)
     {
-        if (tileImage < 0)
+        // A marker has a button of its own on the toolbar, so it is never something that had to be
+        // hunted down in the sheet - which is the only thing this row is for.
+        if (tileImage < 0 || MarkerTiles.Contains(tileImage))
         {
             return;
         }

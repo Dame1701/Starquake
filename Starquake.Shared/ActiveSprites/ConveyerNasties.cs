@@ -28,12 +28,7 @@ internal class ConveyerNasties
     {
         get
         {
-            if (_gameScreens.GetCoordsOfTiles(391) != null)
-            {
-                return _gameScreens.GetCoordsOfTiles(391).Count;
-            }
-
-            return 0;
+            return _gameScreens.GetCoordsOfTiles((int)MarkerTile.ConveyerNasty)?.Count ?? 0;
         }
     }
 
@@ -85,7 +80,7 @@ internal class ConveyerNasties
             nasty.PerformPostChangeScreenActions();
         }
 
-        List<Point>? nastiesToGenerate = _gameScreens.GetCoordsOfTiles(391);
+        List<Point>? nastiesToGenerate = _gameScreens.GetCoordsOfTiles((int)MarkerTile.ConveyerNasty);
 
 
         if (nastiesToGenerate != null && nastiesToGenerate.Count > 0)

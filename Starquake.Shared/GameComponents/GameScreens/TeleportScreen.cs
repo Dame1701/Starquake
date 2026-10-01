@@ -30,7 +30,6 @@ internal class TeleportScreen : IGameScreen
     private readonly ToggleKeys _input;
 
 
-    private readonly Dictionary<int, string> _teleportCodes;
     /// <summary>
     ///     The destination code as typed so far, one underscore per letter still to be entered.
     /// </summary>
@@ -85,23 +84,6 @@ internal class TeleportScreen : IGameScreen
         {
             _keyFades[a] = new FaderAnimation(4, randomNumberGenerator);
         }
-
-        _teleportCodes = new Dictionary<int, string>();
-        _teleportCodes.Add(40, "groin");
-        _teleportCodes.Add(31, "axies");
-        _teleportCodes.Add(66, "tooth");
-        _teleportCodes.Add(162, "handy");
-        _teleportCodes.Add(150, "alien");
-        _teleportCodes.Add(213, "pluto");
-        _teleportCodes.Add(289, "ascii");
-        _teleportCodes.Add(343, "orion");
-        _teleportCodes.Add(457, "snowy");
-        _teleportCodes.Add(433, "talon");
-        _teleportCodes.Add(380, "rocky");
-        _teleportCodes.Add(470, "uraiq");
-        _teleportCodes.Add(499, "palma");
-        _teleportCodes.Add(461, "aisle");
-        _teleportCodes.Add(506, "exeon");
     }
 
     public void Reset()
@@ -147,7 +129,7 @@ internal class TeleportScreen : IGameScreen
             _keyPressed = false;
         }
 
-        _teleportCodes.TryGetValue(_gameScreens.ScreenNumber, out _teleportCode);
+        _teleportCode = _gameScreens.CurrentGameScreenData.TeleportCode;
     }
 
     /// <summary>
@@ -192,7 +174,7 @@ internal class TeleportScreen : IGameScreen
     {
         if (!_currentCode.Contains("_") && !_attemptingTeleport)
         {
-            int destinationScreen = FindKey(_teleportCodes, _currentCode);
+            int destinationScreen = _gameScreens.FindScreenByTeleportCode(_currentCode);
             if (destinationScreen > -1)
             {
                 _codeRecognised = true;
@@ -244,12 +226,13 @@ internal class TeleportScreen : IGameScreen
             _presentation.ScreenXOffset = _oldOffsetX;
             _presentation.ScreenYOffset = _oldOffsetY;
 
-            List<Point>? teleporterLocation = _gameScreens.GetCoordsOfTiles(397);
-            if (teleporterLocation != null &&
-                teleporterLocation.Count == 1)
+            // A recognised code moved the screen the moment it was typed, so this puts the blob into a
+            // booth on the screen it has arrived at. A code that was not recognised leaves it in the
+            // booth it walked into, which is where it already is - moving it then would have carried
+            // it across to some other booth on the same screen.
+            if (_codeRecognised)
             {
-                _blob.BlobXPos = teleporterLocation[0].X + 20;
-                _blob.BlobYPos = teleporterLocation[0].Y + 32;
+                ArriveInABooth();
             }
 
             _screenDirectory.MainGame.ScreenFade = 0;
@@ -264,19 +247,25 @@ internal class TeleportScreen : IGameScreen
         }
     }
 
-    private static int FindKey(IDictionary<int, string> lookup, string value)
+    /// <summary>
+    ///     Steps the blob out of a booth on the screen it has just arrived at.
+    /// </summary>
+    /// <remarks>
+    ///     A screen may have any number of booths on it and the blob arrives in the first, because a
+    ///     code belongs to the screen it reaches rather than to any one booth standing on it. A screen
+    ///     with none is left alone rather than guessed at: there is nowhere on it a booth would put the
+    ///     blob, and dropping it into the scenery would be worse than leaving it where it was.
+    /// </remarks>
+    private void ArriveInABooth()
     {
-        foreach (KeyValuePair<int, string> pair in lookup)
+        if (_gameScreens.GetCoordsOfTiles((int)ActionTiles.TeleportBooth) is not { Count: > 0 } booths)
         {
-            if (pair.Value == value.ToLower())
-            {
-                return pair.Key;
-            }
+            return;
         }
 
-        return -1;
+        _blob.BlobXPos = booths[0].X + BoothMetrics.BlobXOffset;
+        _blob.BlobYPos = booths[0].Y + BoothMetrics.BlobYOffset;
     }
-
 
     /// <summary>
     ///     Where each key of the teleporter's keypad sits on the screen, indexed by the same number as

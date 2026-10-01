@@ -21,20 +21,21 @@ internal enum ConfirmChoice
 }
 
 /// <summary>
-///     The "you have unsaved changes" prompt.
+///     The editor's prompts: "you have unsaved changes", and the warnings it gives on the way to
+///     saving.
 /// </summary>
 /// <remarks>
-///     Avalonia has no message box of its own, and this is the only prompt the editor needs, so it
-///     is built here rather than by taking on a dependency for it. It is deliberately a three way
-///     choice: losing an afternoon of map work to a stray Cmd+W would be the single worst thing this
-///     tool could do.
+///     Avalonia has no message box of its own, so this is built here rather than by taking on a
+///     dependency for it. The unsaved-work form is deliberately a three way choice: losing an
+///     afternoon of map work to a stray Cmd+W would be the single worst thing this tool could do.
+///     A warning has nothing to discard, so it offers two.
 /// </remarks>
 internal sealed class ConfirmDialog : Window
 {
 
     private ConfirmChoice _choice = ConfirmChoice.Cancel;
 
-    private ConfirmDialog(string message)
+    private ConfirmDialog(string message, bool offerDiscard, string confirmText)
     {
         Title = "Starquake Screen Editor";
         Width = 420;
@@ -52,9 +53,13 @@ internal sealed class ConfirmDialog : Window
         };
 
         buttons.Children.Add(CreateButton("Cancel", ConfirmChoice.Cancel));
-        buttons.Children.Add(CreateButton("Discard", ConfirmChoice.Discard));
 
-        Button save = CreateButton("Save", ConfirmChoice.Save);
+        if (offerDiscard)
+        {
+            buttons.Children.Add(CreateButton("Discard", ConfirmChoice.Discard));
+        }
+
+        Button save = CreateButton(confirmText, ConfirmChoice.Save);
         save.Classes.Add("primary");
         save.IsDefault = true;
         buttons.Children.Add(save);
@@ -75,11 +80,26 @@ internal sealed class ConfirmDialog : Window
         };
     }
 
+    /// <summary>
+    ///     Asks what to do about work that has not been saved.
+    /// </summary>
     public static Task<ConfirmChoice> AskAsync(Window owner, string message)
     {
-        var dialog = new ConfirmDialog(message);
+        var dialog = new ConfirmDialog(message, true, "Save");
 
         return dialog.ShowDialog<ConfirmChoice>(owner);
+    }
+
+    /// <summary>
+    ///     Warns about something and asks whether to go ahead regardless. There is nothing to discard
+    ///     here - the choice is between saving as things are and going back to fix them - so it is the
+    ///     same window with one button fewer.
+    /// </summary>
+    public static async Task<bool> WarnAsync(Window owner, string message)
+    {
+        var dialog = new ConfirmDialog(message, false, "Save anyway");
+
+        return await dialog.ShowDialog<ConfirmChoice>(owner) == ConfirmChoice.Save;
     }
 
     private Button CreateButton(string text, ConfirmChoice choice)

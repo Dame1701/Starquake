@@ -27,12 +27,16 @@ internal sealed class ShortcutsDialog : Window
         ("Tools", "Right button", "Erase, whichever tool is selected"),
         ("Tools", "Alt and click", "Pick the tile under the pointer"),
         ("Tools", "Drag", "Paint or erase a trail of tiles"),
+        ("Tools", "Shift and click", "Set a teleport booth's destination code"),
 
         ("View", "G / C / T / N", "Grid, collision map, tile numbers, neighbours"),
         ("View", "Ctrl and wheel", "Resize the tiles in the palette"),
 
         ("Moving about", "Arrow keys", "Go to the next screen in that direction"),
         ("Moving about", "Click the map", "Go to that screen; drag to scrub through them"),
+
+        ("Markers", "Toolbar icons", "Pick a position for the game to act on, then paint it as a tile"),
+        ("Markers", "Start / crash site", "Moves rather than repeats - there is one of each per map"),
 
         ("Map", "Ctrl+Z / Ctrl+Shift+Z", "Undo, redo"),
         ("Map", "Ctrl+C / Ctrl+V", "Copy and paste a whole screen"),

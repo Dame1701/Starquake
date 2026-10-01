@@ -107,7 +107,9 @@ internal class ScreenCollisionMap
         {
             for (int x = 0; x < TileMetrics.TilesAcross; x++)
             {
-                if (TileImageAt(x, y) <= -1)
+                // A marker is a position the author noted, not a tile: it has no artwork and no
+                // collision mask, and its number is past the end of the mask data entirely.
+                if (TileImageAt(x, y) <= -1 || MarkerTiles.Contains(TileImageAt(x, y)))
                 {
                     continue;
                 }
@@ -313,6 +315,16 @@ internal class ScreenCollisionMap
     /// </summary>
     public bool CanStandOnTopOf(int tileImage)
         => _tileCollisionData[tileImage, 1, 0] == 1 && _tileCollisionData[tileImage, 2, 0] == 1;
+
+    /// <summary>
+    ///     Whether one cell of one tile image blocks movement. A tile number the collision data does
+    ///     not cover is passable: a marker is numbered past the end of it, and so is anything painted
+    ///     from a sheet larger than the data was built for.
+    /// </summary>
+    public bool IsSolid(int tileImage, int cellAcross, int cellDown)
+        => tileImage >= 0 &&
+           tileImage < _tileCollisionData.GetLength(0) &&
+           _tileCollisionData[tileImage, cellAcross, cellDown] == 1;
 
     private int TileImageAt(int x, int y)
         => _screens[ScreenNumber].ScreenTiles[x, y].TileImage;

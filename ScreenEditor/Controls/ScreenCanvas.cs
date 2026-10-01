@@ -12,6 +12,7 @@ using Starquake.Constants;
 using Starquake.ScreenEditor.Content;
 using Starquake.ScreenEditor.Editing;
 using Starquake.ScreenEditor.Styles;
+using Starquake.Structure;
 
 namespace Starquake.ScreenEditor.Controls;
 
@@ -39,6 +40,12 @@ internal sealed class ScreenCanvas : Control
         AvaloniaProperty.Register<ScreenCanvas, EditorSession?>(nameof(Session));
 
     private static readonly Typeface LabelTypeface = new(FontFamily.Default);
+
+    /// <summary>
+    ///     For the teleport code written across a booth. Heavier than the tile numbers because it is
+    ///     drawn over artwork rather than over a badge in the corner of a tile.
+    /// </summary>
+    private static readonly Typeface CodeTypeface = new(FontFamily.Default, FontStyle.Normal, FontWeight.SemiBold);
 
     private EditorSession? _attached;
 
@@ -101,6 +108,8 @@ internal sealed class ScreenCanvas : Control
             DrawTileNumbers(context, session, layout);
         }
 
+        DrawTeleportCodes(context, session, layout);
+
         DrawHover(context, session, layout);
 
         context.DrawRectangle(null, EditorColours.ScreenEdgePen, layout.Screen);
@@ -131,6 +140,17 @@ internal sealed class ScreenCanvas : Control
         PointerPoint point = e.GetCurrentPoint(this);
         if (!TryHitTest(point.Position, out int x, out int y))
         {
+            return;
+        }
+
+        // Shift and click on a booth sets its destination code. Taken before the tool is applied, so
+        // that the gesture which opens the dialog cannot also paint over the booth it was aimed at.
+        if (e.KeyModifiers.HasFlag(KeyModifiers.Shift) &&
+            session.Document.GetTile(session.CurrentScreen, x, y) == (int)ActionTiles.TeleportBooth)
+        {
+            session.RequestTeleportCodeEdit();
+            e.Handled = true;
+
             return;
         }
 
@@ -326,8 +346,16 @@ internal sealed class ScreenCanvas : Control
         }
 
         int tile = session.Document.GetTile(session.CurrentScreen, _hoverX, _hoverY);
+        string status = _hoverX + ", " + _hoverY + "  ·  " + TileCatalogue.Describe(tile);
 
-        session.HoverStatus = _hoverX + ", " + _hoverY + "  ·  " + TileCatalogue.Describe(tile);
+        // A booth is the one tile that carries something beyond its number, and nothing on the screen
+        // shows what that something is, so the status bar says it and how to change it.
+        if (tile == (int)ActionTiles.TeleportBooth)
+        {
+            status += "  ·  code " + (session.CurrentTeleportCode ?? "not set") + "  ·  shift-click to set";
+        }
+
+        session.HoverStatus = status;
     }
 
     private void DrawPlaceholder(DrawingContext context)
@@ -564,6 +592,51 @@ internal sealed class ScreenCanvas : Control
         }
     }
 
+    /// <summary>
+    ///     Writes the screen's destination code across every teleport booth on it. The code is the
+    ///     one thing about a screen that is not a tile number, and the booth is where anybody looking
+    ///     for it would look. A booth without one says so, because a booth no code reaches is a
+    ///     screen that cannot be teleported to.
+    /// </summary>
+    private static void DrawTeleportCodes(DrawingContext context, EditorSession session, Layout layout)
+    {
+        if (!session.CurrentScreenHasTeleportBooth)
+        {
+            return;
+        }
+
+        string? code = session.CurrentTeleportCode;
+
+        var text = new FormattedText(
+            code ?? "NO CODE",
+            CultureInfo.CurrentCulture,
+            FlowDirection.LeftToRight,
+            CodeTypeface,
+            13,
+            code is null ? EditorColours.MutedBrush : EditorColours.AccentBrush);
+
+        for (int y = 0; y < TileMetrics.TilesDown; y++)
+        {
+            for (int x = 0; x < TileMetrics.TilesAcross; x++)
+            {
+                if (session.Document.GetTile(session.CurrentScreen, x, y) != (int)ActionTiles.TeleportBooth)
+                {
+                    continue;
+                }
+
+                Rect booth = layout.TileRect(x, y);
+                var backing = new Rect(
+                    booth.Center.X - (text.Width + 12) / 2,
+                    booth.Center.Y - (text.Height + 6) / 2,
+                    text.Width + 12,
+                    text.Height + 6);
+
+                context.FillRectangle(new SolidColorBrush(EditorColours.Void, 0.8), backing, 4);
+                context.DrawText(text, new Point(backing.X + 6, backing.Y + 3));
+            }
+        }
+    }
+
     private void DrawHover(DrawingContext context, EditorSession session, Layout layout)
     {
         if (_hoverX < 0 || _hoverY < 0)
@@ -576,7 +649,8 @@ internal sealed class ScreenCanvas : Control
 
         // A ghost of what is about to be laid down beats guessing from a swatch on the far side of
         // the window whether the tile in hand is the right one.
-        if (tool is EditorTool.Paint or EditorTool.Fill && session.Sheet!.Contains(session.SelectedTile))
+        if (tool is EditorTool.Paint or EditorTool.Fill &&
+            (session.Sheet!.Contains(session.SelectedTile) || TileCatalogue.IsMarker(session.SelectedTile)))
         {
             using (context.PushOpacity(0.55))
             {

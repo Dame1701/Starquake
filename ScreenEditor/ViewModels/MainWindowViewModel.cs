@@ -51,6 +51,22 @@ internal class MainWindowViewModel : ViewModelBase
         PreviousScreenCommand = Register(new RelayCommand(() => Session.CurrentScreen--));
         NextScreenCommand = Register(new RelayCommand(() => Session.CurrentScreen++));
 
+        // Only once there is somewhere to go. The start position decides, because that is the screen
+        // the game opens on even when the wreck has been left on another one.
+        GoToLandingSiteCommand = Register(new RelayCommand(
+            () => Session.CurrentScreen = Session.BlobStart!.Value.ScreenNumber,
+            () => Session.BlobStart is not null));
+
+        // Offered for a screen with a booth on it, and for one that has a code without a booth, so
+        // that a code left behind by an erased booth can still be taken away.
+        EditTeleportCodeCommand = Register(new RelayCommand(
+            EditTeleportCodeAsync,
+            () => Session.CurrentScreenHasTeleportBooth || Session.CurrentTeleportCode is not null));
+
+        // Shift-clicking a booth on the canvas asks for the same dialog. The session cannot put one
+        // up itself, so it says it was asked and this answers.
+        Session.TeleportCodeRequested += (_, _) => EditTeleportCodeCommand.Execute(null);
+
         Session.Invalidated += (_, _) => OnSessionChanged();
         Session.Undo.Changed += (_, _) => OnSessionChanged();
         Session.PropertyChanged += (_, _) => OnSessionChanged();
@@ -87,6 +103,16 @@ internal class MainWindowViewModel : ViewModelBase
     public RelayCommand PreviousScreenCommand { get; }
 
     public RelayCommand NextScreenCommand { get; }
+
+    /// <summary>
+    ///     Sets the destination code of the teleport booth on the screen being edited.
+    /// </summary>
+    public RelayCommand EditTeleportCodeCommand { get; }
+
+    /// <summary>
+    ///     Goes to the screen a new game opens on.
+    /// </summary>
+    public RelayCommand GoToLandingSiteCommand { get; }
 
     /// <summary>
     ///     The tile sheets found in the checkout, offered on the File menu so that switching between
@@ -201,6 +227,29 @@ internal class MainWindowViewModel : ViewModelBase
         };
     }
 
+    /// <summary>
+    ///     Asks for a code for the current screen and gives it to the session. Nothing happens if the
+    ///     dialog is cancelled; a code of null is the booth deliberately left without one.
+    /// </summary>
+    private async Task EditTeleportCodeAsync()
+    {
+        if (_owner is null)
+        {
+            return;
+        }
+
+        TeleportCodeChoice? choice = await TeleportCodeDialog.AskAsync(
+            _owner,
+            Session.CurrentScreen,
+            Session.CurrentTeleportCode,
+            Session.DescribeTeleportCodeProblem);
+
+        if (choice is not null)
+        {
+            Session.SetTeleportCode(choice.Code);
+        }
+    }
+
     private async Task ShowShortcutsAsync()
     {
         if (_owner is not null)
@@ -263,9 +312,30 @@ internal class MainWindowViewModel : ViewModelBase
 
     private async Task<bool> SaveMapAsync()
     {
+        if (!await ConfirmLandingSiteAsync())
+        {
+            return false;
+        }
+
         string? path = Session.Document.FilePath;
 
         return path is null ? await SaveMapAsAsync() : Save(path);
+    }
+
+    /// <summary>
+    ///     Says so when the map is about to be written without a landing site the game can use, and
+    ///     lets it be written anyway. Half an authored screen is a normal thing to stop for the day
+    ///     on, so this is a word of warning rather than a refusal - but it is worth the word, because
+    ///     a map with no start position is one the game will quietly open somewhere else entirely.
+    /// </summary>
+    private async Task<bool> ConfirmLandingSiteAsync()
+    {
+        if (Session.LandingSiteProblem is not { } problem || _owner is null)
+        {
+            return true;
+        }
+
+        return await ConfirmDialog.WarnAsync(_owner, problem);
     }
 
     private async Task<bool> SaveMapAsAsync()

@@ -59,7 +59,20 @@ internal sealed class CollisionMaskEditor : Control
     public override void Render(DrawingContext context)
     {
         EditorSession? session = Session;
-        if (session?.Sheet is null || !session.Sheet.Contains(session.SelectedTile))
+        if (session?.Sheet is null)
+        {
+            return;
+        }
+
+        // A marker is not a tile on the sheet, so there is no mask to show for one and nothing here
+        // would do anything. Saying so beats an empty box that looks like something failed to load.
+        if (TileCatalogue.IsMarker(session.SelectedTile))
+        {
+            DrawNote(context, "A marker has no collision - Blob walks through it.");
+            return;
+        }
+
+        if (!session.Sheet.Contains(session.SelectedTile))
         {
             return;
         }
@@ -180,6 +193,26 @@ internal sealed class CollisionMaskEditor : Control
         double height = TileMetrics.TileHeight * scale;
 
         return new Rect(Math.Floor((Bounds.Width - width) / 2), 0, Math.Floor(width), Math.Floor(height));
+    }
+
+    /// <summary>
+    ///     A line of explanation in place of the grid, for a selection there is no mask to show for.
+    /// </summary>
+    private void DrawNote(DrawingContext context, string note)
+    {
+        var text = new FormattedText(
+            note,
+            CultureInfo.CurrentCulture,
+            FlowDirection.LeftToRight,
+            LabelTypeface,
+            11,
+            EditorColours.MutedBrush)
+        {
+            MaxTextWidth = Bounds.Width,
+            TextAlignment = TextAlignment.Center
+        };
+
+        context.DrawText(text, new Point(0, Math.Max(0, (Bounds.Height - text.Height) / 2)));
     }
 
     private void DrawCaption(DrawingContext context, EditorSession session, Rect area)

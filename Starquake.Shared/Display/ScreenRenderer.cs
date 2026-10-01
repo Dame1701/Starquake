@@ -188,6 +188,13 @@ internal class ScreenRenderer
     public void StartForceField()
         => _keyDoorForceFieldNoAccess.Start();
 
+    /// <summary>
+    ///     Stops the force field and kills the particles it has in the air, for a screen with no door
+    ///     on it to emit them.
+    /// </summary>
+    public void ClearForceField()
+        => _keyDoorForceFieldNoAccess.Reset();
+
     private void SetForceFieldEmitters(Color? colour, int quantity, EmitterBlendMode blendMode)
     {
         foreach (string name in ForceFieldEmitterNames)
@@ -273,7 +280,7 @@ internal class ScreenRenderer
                 int tileImage = _screens[ScreenNumber].ScreenTiles[x, y].TileImage;
 
                 // Avoid the tunnel tiles
-                if (IsDrawnOnTheLowerLayer(tileImage) && tileImage < (int)ActionTiles.AccessForceField)
+                if (IsDrawn(tileImage) && tileImage < (int)ActionTiles.AccessForceField)
                 {
                     tiles.DrawSprite(tileImage, x * TileMetrics.TileWidth, y * TileMetrics.TileHeight, colour);
                 }
@@ -298,7 +305,7 @@ internal class ScreenRenderer
             {
                 int tileImage = _screens[ScreenNumber].ScreenTiles[x, y].TileImage;
 
-                if (IsDrawnOnTheLowerLayer(tileImage))
+                if (IsDrawn(tileImage))
                 {
                     animations.Draw(tileImage, x * TileMetrics.TileWidth, y * TileMetrics.TileHeight, colour);
                 }
@@ -307,16 +314,14 @@ internal class ScreenRenderer
     }
 
     /// <summary>
-    ///     Whether a tile is drawn at all. Four of them are markers the level author places rather than
-    ///     scenery - a blank spacer, a conveyer nasty's post, a lift tile, the preferred core location -
-    ///     and neither the tile nor any animation of it is drawn.
+    ///     Whether a tile is drawn at all. A <see cref="MarkerTile" /> is a position the author marked
+    ///     rather than scenery, and the foot of a lift shaft is solid but deliberately invisible;
+    ///     neither the tile nor any animation of it is drawn for any of them.
     /// </summary>
-    private static bool IsDrawnOnTheLowerLayer(int tileImage)
-        => tileImage > -1 && tileImage is not (
-            (int)ActionTiles.BlankFiller or
-            (int)ActionTiles.ConveyerNasty or
-            (int)ActionTiles.TunnelLiftTile or
-            (int)ActionTiles.PreferredCoreLocation);
+    private static bool IsDrawn(int tileImage)
+        => tileImage > -1 &&
+           tileImage != (int)ActionTiles.TunnelLiftTile &&
+           !MarkerTiles.Contains(tileImage);
 
     private void DrawPowerUp(Color colour)
     {
@@ -501,7 +506,9 @@ internal class ScreenRenderer
 
     /// <summary>
     ///     The tunnel mouths, which are lower-layer tiles numbered above everything the blob can stand
-    ///     on and so are drawn over the upper layer rather than under it.
+    ///     on and so are drawn over the upper layer rather than under it. A marker is numbered above
+    ///     them again and is not a tile at all, which is why being past <see cref="LastCollidableTile" />
+    ///     is no longer enough on its own.
     /// </summary>
     private void DrawTunnelEntrances(Color colour)
     {
@@ -515,7 +522,7 @@ internal class ScreenRenderer
             {
                 int tileImage = _screens[ScreenNumber].ScreenTiles[x, y].TileImage;
 
-                if (tileImage > LastCollidableTile)
+                if (tileImage > LastCollidableTile && IsDrawn(tileImage))
                 {
                     tiles.DrawSprite(tileImage, x * TileMetrics.TileWidth, y * TileMetrics.TileHeight, colour);
                 }
@@ -558,12 +565,11 @@ internal class ScreenRenderer
 
     private void DrawKeyDoorForceFields()
     {
-        if (KeyLockDoors != null)
+        // Only where there is a door. An empty list is not null, so this used to draw the field on
+        // every screen in the game - see GameScreenCollection.Update.
+        if (KeyLockDoors is { Count: > 0 })
         {
-            if (_keyDoorForceFieldNoAccess != null)
-            {
-                _keyDoorForceFieldNoAccess.Draw();
-            }
+            _keyDoorForceFieldNoAccess.Draw();
         }
     }
 

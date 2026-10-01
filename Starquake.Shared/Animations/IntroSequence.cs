@@ -19,6 +19,16 @@ namespace Starquake.Animations;
 
 internal class IntroSequence
 {
+    /// <summary>
+    ///     Where the ship comes into view, off the top of the screen and to the left of wherever it is
+    ///     going to land. Unlike the crash site this is not on the map: nothing about it is a place on
+    ///     a screen, it is just far enough out to be off the picture when the fall starts.
+    /// </summary>
+    private const int ShipEntryXPos = 200;
+
+    /// <inheritdoc cref="ShipEntryXPos" />
+    private const int ShipEntryYPos = -160;
+
     private readonly BlobDeathAnimation _blobKiller;
 
 
@@ -36,9 +46,6 @@ internal class IntroSequence
 
     private int _blobSpaceShipEndXPos;
     private int _blobSpaceShipEndYPos;
-
-    private int _blobSpaceShipStartXPos;
-    private int _blobSpaceShipStartYPos;
 
     private float _blobSpaceShipXPos, _blobSpaceShipYPos;
 
@@ -121,17 +128,20 @@ internal class IntroSequence
         _shipRotationSpeed = 10f;
         _sequenceFrameCount = 20;
 
-        _blobSpaceShipStartXPos = 200;
-        _blobSpaceShipStartYPos = -160;
+        // Where it comes down is the square the author marked on the map. The ship is drawn from its
+        // top left and the two graphics sets draw it at different sizes, so the square's middle is
+        // what the two have in common and half a ship is taken off it here.
+        SpriteCollection ship = _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip);
+        Point crashCentre = _gameScreens.ShipCrashCentre;
 
-        _blobSpaceShipEndXPos = 610;
-        _blobSpaceShipEndYPos = 280;
+        _blobSpaceShipEndXPos = crashCentre.X - ship.SpriteWidth / 2;
+        _blobSpaceShipEndYPos = crashCentre.Y - ship.SpriteHeight / 2;
 
-        _xAmountToMoveEachFrame = (_blobSpaceShipEndXPos - (float)_blobSpaceShipStartXPos) / _sequenceFrameCount;
-        _yAmountToMoveEachFrame = (_blobSpaceShipEndYPos - (float)_blobSpaceShipStartYPos) / _sequenceFrameCount;
+        _xAmountToMoveEachFrame = (_blobSpaceShipEndXPos - (float)ShipEntryXPos) / _sequenceFrameCount;
+        _yAmountToMoveEachFrame = (_blobSpaceShipEndYPos - (float)ShipEntryYPos) / _sequenceFrameCount;
 
-        _blobSpaceShipXPos = _blobSpaceShipStartXPos;
-        _blobSpaceShipYPos = _blobSpaceShipStartYPos;
+        _blobSpaceShipXPos = ShipEntryXPos;
+        _blobSpaceShipYPos = ShipEntryYPos;
         _acceleration = 0;
 
 
@@ -342,17 +352,24 @@ internal class IntroSequence
 
             if (_graphicsSet.IsOriginal)
             {
-                _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).Begin(BlendState.AlphaBlend);
+                SpriteCollection originalShip = _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip);
+                originalShip.Begin(BlendState.AlphaBlend);
+
+                // Upright and square on the crash site once it has landed, still tumbling before that.
+                // The resting position used to be a pair of numbers written down here as well, which
+                // happened to be where the fall ended - so it is asked for rather than repeated. It
+                // cannot be the live position: the fall overshoots its target by up to a frame's
+                // travel, and the rotating overload leaves the ship at whatever angle it stopped at.
                 if (SequenceStage == IntroSequenceStage.Finished || SequenceStage == IntroSequenceStage.CaptionFadeUp || SequenceStage == IntroSequenceStage.EndPause)
                 {
-                    _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).DrawSprite(0, 640, 288, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade));
+                    originalShip.DrawSprite(0, _blobSpaceShipEndXPos, _blobSpaceShipEndYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade));
                 }
                 else
                 {
-                    _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
+                    originalShip.DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
                 }
 
-                _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).End();
+                originalShip.End();
             }
             else
             {

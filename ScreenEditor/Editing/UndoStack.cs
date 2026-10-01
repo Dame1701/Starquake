@@ -57,6 +57,19 @@ internal sealed class ScreenEdit(int screen, int[] oldTiles, int[] newTiles) : I
 }
 
 /// <summary>
+///     A screen's teleport destination code changing. Null on either side is a screen that has no
+///     code: setting one for the first time, or taking one away.
+/// </summary>
+internal sealed class TeleportCodeEdit(int screen, string? oldCode, string? newCode) : IEdit
+{
+    public string Name => "teleport code";
+
+    public void Undo(EditorDocument document) => document.SetTeleportCode(screen, oldCode);
+
+    public void Redo(EditorDocument document) => document.SetTeleportCode(screen, newCode);
+}
+
+/// <summary>
 ///     Several edits that should undo together. A brush stroke is the reason this exists: dragging
 ///     across a screen is one gesture to the person doing it, so it should take one press of Ctrl+Z
 ///     to take back rather than one per tile the pointer happened to cross.

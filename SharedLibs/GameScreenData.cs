@@ -34,6 +34,15 @@ public sealed class GameScreenData
     [Key(1)]
     public List<CollisionTile> CollisionMap { get; set; } = [];
 
+    /// <summary>
+    ///     The destination code that reaches the teleport booth on this screen, or null for a screen
+    ///     with no booth on it. Unlike the access codes below this is part of the map rather than
+    ///     drawn afresh each game, because it is something the screen editor authors - see
+    ///     <see cref="Starquake.Structure.TeleportCodes" />.
+    /// </summary>
+    [Key(2)]
+    public string? TeleportCode { get; set; }
+
     [IgnoreMember]
     public bool KeepNastiesTheSame { get; set; }
 

@@ -9,6 +9,10 @@ namespace Starquake.Structure;
 ///     of indices into the tile sheet, so anything the blob can interact with - a platform that can
 ///     be taken away, a spike that kills, a tunnel mouth that leads to the next screen - is only
 ///     distinguishable by the index that was painted there.
+///     <para>
+///         Every one of these is a tile on the sheet. The positions the author marks for the game to
+///         do something at, which are not on it and are never drawn, are <see cref="MarkerTile" />.
+///     </para>
 /// </summary>
 public enum ActionTiles
 {
@@ -19,14 +23,10 @@ public enum ActionTiles
     Spike1 = 404,
     Spike2 = 405,
     ElectricityGate = 406,
-    TunnelLiftTile = 408,
     Spike3 = 416,
     ShuttleTag2 = 418,
     ShuttleTag3 = 417,
-    BlankFiller = 390,
-    ConveyerNasty = 391,
     BreakableBridges = 410,
-    PreferredCoreLocation = 392,
 
     /// <summary>
     ///     The teleporter booth. Walking into one from the left switches the game to the teleporter
@@ -42,6 +42,14 @@ public enum ActionTiles
 
     /// <inheritdoc cref="AccessBoothLeft" />
     AccessBoothRight = 400,
+
+    /// <summary>
+    ///     The foot of a tunnel lift, and the one tile on the sheet with nothing drawn on it. It is
+    ///     solid on every cell, so it reads as a wall the blob cannot see - which is the whole trick
+    ///     of a lift shaft. Not a <see cref="MarkerTile" /> for exactly that reason: a marker is
+    ///     passable as well as invisible.
+    /// </summary>
+    TunnelLiftTile = 408,
 
     /// <summary>
     ///     The body of a tunnel lift - the tiles that carry the blob upwards while it stands under
