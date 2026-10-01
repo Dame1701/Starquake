@@ -141,7 +141,7 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
             if (_screenReadWaitFrames > ScreenReadWaitFrames)
             {
                 _screenDirectory.Get(GameScreenType.MainGame).ScreenFade = 40;
-                _screenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.AccessBooth, Success);
+                _screenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.AccessBooth, new ScreenChange.AccessCode(Success));
 
                 _screenDirectory.Current = GameScreenType.MainGame;
             }
@@ -377,7 +377,7 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
         }
     }
 
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, ScreenChange change)
     {
         //throw new NotImplementedException();
     }

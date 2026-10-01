@@ -35,7 +35,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
     #region IGameScreen Members
 
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, ScreenChange change)
     {
         throw new NotImplementedException();
     }
@@ -287,7 +287,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
             // only do this if the teleport was successful
             if (_codeRecognised && _currentCode != _previousCode.ToUpper())
             {
-                _screenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.Teleporter, null);
+                _screenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.Teleporter, new ScreenChange.FadeIn());
                 _gameScreens.UpdateCollisionMap(true);
             }
             _screenDirectory.Current = GameScreenType.MainGame;

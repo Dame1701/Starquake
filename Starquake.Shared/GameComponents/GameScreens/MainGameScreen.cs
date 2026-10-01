@@ -97,7 +97,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
 
     public int ScreenFade { get; set; }
 
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, ScreenChange change)
     {
         GameEngine.ContentResourceManager.GetSoundFxEngine().DisablePeriodicBackgroundSounds();
 
@@ -114,7 +114,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
             GameEngine.TunnelAnimations.PerformPostChangeScreenActions();
         }
 
-        if (param == null)
+        if (change is ScreenChange.FadeIn)
         {
             ScreenFade = 0;
             ScreenFadeSpeed = ScreenFadeUpSpeed;
@@ -146,24 +146,17 @@ public class MainGameScreen : GameComponentBase, IGameScreen
             GameEngine.GameScreens.ColourAnimations.Start((int)ActionTiles.TeleportBooth, TeleporterAnimationLoops); // Animate the teleporter colour
         }
 
-        if (triggeringScreen == GameScreenType.AccessBooth)
+        // Flash the booth green or red to say whether the code was taken. Only AccessBoothScreen
+        // sends this, so the triggering screen no longer has to be checked as well.
+        if (change is ScreenChange.AccessCode(var accepted))
         {
-            // Test colour animation engine
-            if (param != null)
-            {
-                bool success = (bool)param;
+            Color flash = accepted ? new Color(0, ColourLevels.Full, 0) : new Color(ColourLevels.Full, 0, 0);
+            int speed = accepted ? AccessBoothPassedSpeed : AccessBoothFailedSpeed;
 
-                if (success)
-                {
-                    GameEngine.GameScreens.ColourAnimations.Start((int)ActionTiles.AccessBoothLeft, AccessBoothAnimationLoops, new Color(0, ColourLevels.Full, 0), AccessBoothPassedSpeed);
-                    GameEngine.GameScreens.ColourAnimations.Start((int)ActionTiles.AccessBoothRight, AccessBoothAnimationLoops, new Color(0, ColourLevels.Full, 0), AccessBoothPassedSpeed);
-                }
-                else
-                {
-                    GameEngine.GameScreens.ColourAnimations.Start((int)ActionTiles.AccessBoothLeft, AccessBoothAnimationLoops, new Color(ColourLevels.Full, 0, 0), AccessBoothFailedSpeed);
-                    GameEngine.GameScreens.ColourAnimations.Start((int)ActionTiles.AccessBoothRight, AccessBoothAnimationLoops, new Color(ColourLevels.Full, 0, 0), AccessBoothFailedSpeed);
-                }
-            }
+            GameEngine.GameScreens.ColourAnimations.Start(
+                (int)ActionTiles.AccessBoothLeft, AccessBoothAnimationLoops, flash, speed);
+            GameEngine.GameScreens.ColourAnimations.Start(
+                (int)ActionTiles.AccessBoothRight, AccessBoothAnimationLoops, flash, speed);
         }
     }
 
@@ -211,7 +204,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         GameEngine.Nasties.Reset();
         GameEngine.IntroSequence.Reset();
 
-        PerformPostScreenChangeActions(GameScreenType.None, false);
+        PerformPostScreenChangeActions(GameScreenType.None, new ScreenChange.KeepPicture());
     }
 
     private Guid _testRumbleSoundId;
@@ -281,7 +274,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
 
         GameEngine.ScreenDirectory.Current = GameScreenType.GameOver;
         GameEngine.ScreenDirectory.Get(GameScreenType.GameOver)
-            .PerformPostScreenChangeActions(GameScreenType.MainGame, null);
+            .PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.FadeIn());
     }
 
     /// <summary>
@@ -323,7 +316,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
         {
             GameEngine.ScreenDirectory.Current = GameScreenType.GameComplete;
             GameEngine.ScreenDirectory.Get(GameScreenType.GameComplete)
-                .PerformPostScreenChangeActions(GameScreenType.MainGame, null);
+                .PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.FadeIn());
         }
 
         // Test completing core
@@ -429,7 +422,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
 
             // Change to gameover screen
             GameEngine.ScreenDirectory.Get(GameScreenType.GameOver)
-                .PerformPostScreenChangeActions(GameScreenType.MainGame, null);
+                .PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.FadeIn());
             GameEngine.ScreenDirectory.Current = GameScreenType.GameOver;
         }
     }

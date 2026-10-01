@@ -234,7 +234,7 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
             _gameScreens.ScreenNumber = WorldMap.CoreApproachScreenNumber;
             _screenDirectory.Current = GameScreenType.MainGame;
             _blob.BlobXPos = _gameScreens.ScreenWidth - _blob.BlobWidth;
-            _screenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.PlanetCore, null);
+            _screenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.PlanetCore, new ScreenChange.FadeIn());
 
             _justEnteredCore = true;
             _presentation.BackgroundColour = Color.Black;
@@ -243,7 +243,7 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
         {
             // Finished the game!
             _screenDirectory.Current = GameScreenType.GameComplete;
-            _screenDirectory.Get(GameScreenType.GameComplete).PerformPostScreenChangeActions(GameScreenType.MainGame, null);
+            _screenDirectory.Get(GameScreenType.GameComplete).PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.FadeIn());
         }
         else
         {
@@ -307,7 +307,7 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
 
     #region IGameScreen Members
 
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, ScreenChange change)
     {
         throw new NotImplementedException();
     }

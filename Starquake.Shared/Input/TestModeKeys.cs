@@ -97,7 +97,7 @@ public class TestModeKeys
             if (_gameScreens.ScreenNumber > 0)
             {
                 _gameScreens.ScreenNumber--;
-                _screenDirectory.Get(_screenDirectory.Current).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
+                _screenDirectory.Get(_screenDirectory.Current).PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.KeepPicture());
                 Thread.Sleep(TestModeScreenStepDelayMs);
             }
         }
@@ -107,7 +107,7 @@ public class TestModeKeys
             if (_gameScreens.ScreenNumber < WorldMap.LastScreenNumber)
             {
                 _gameScreens.ScreenNumber++;
-                _screenDirectory.Get(_screenDirectory.Current).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
+                _screenDirectory.Get(_screenDirectory.Current).PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.KeepPicture());
                 Thread.Sleep(TestModeScreenStepDelayMs);
             }
         }
@@ -117,7 +117,7 @@ public class TestModeKeys
             if (_gameScreens.ScreenNumber - WorldMap.ScreensAcross >= 0)
             {
                 _gameScreens.ScreenNumber -= WorldMap.ScreensAcross;
-                _screenDirectory.Get(_screenDirectory.Current).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
+                _screenDirectory.Get(_screenDirectory.Current).PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.KeepPicture());
                 Thread.Sleep(TestModeScreenStepDelayMs);
             }
         }
@@ -127,7 +127,7 @@ public class TestModeKeys
             if (_gameScreens.ScreenNumber + WorldMap.ScreensAcross <= WorldMap.LastScreenNumber)
             {
                 _gameScreens.ScreenNumber += WorldMap.ScreensAcross;
-                _screenDirectory.Get(_screenDirectory.Current).PerformPostScreenChangeActions(GameScreenType.MainGame, true);
+                _screenDirectory.Get(_screenDirectory.Current).PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.KeepPicture());
                 Thread.Sleep(TestModeScreenStepDelayMs);
             }
         }

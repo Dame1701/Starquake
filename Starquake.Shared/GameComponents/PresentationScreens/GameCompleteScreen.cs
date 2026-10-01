@@ -57,7 +57,7 @@ public class GameCompleteScreen : GameScreenBase, IGameScreen
     {
     }
 
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, ScreenChange change)
     {
         _fadeComplete = false;
         ScreenFade = 0;
@@ -70,7 +70,7 @@ public class GameCompleteScreen : GameScreenBase, IGameScreen
         {
             GraphicsDeviceManager.GraphicsDevice.Clear(Presentation.ScreenClearColour);
             ScreenDirectory.Current = GameScreenType.GameOver;
-            ScreenDirectory.Get(GameScreenType.GameOver).PerformPostScreenChangeActions(GameScreenType.GameComplete, null);
+            ScreenDirectory.Get(GameScreenType.GameOver).PerformPostScreenChangeActions(GameScreenType.GameComplete, new ScreenChange.FadeIn());
         }
 
         base.Update(gameTime);

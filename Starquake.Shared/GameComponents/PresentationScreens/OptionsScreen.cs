@@ -191,7 +191,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
 
         GraphicsDeviceManager.GraphicsDevice.Clear(Presentation.ScreenClearColour);
         ScreenDirectory.Current = GameScreenType.ComputerReport;
-        ScreenDirectory.Get(GameScreenType.ComputerReport).PerformPostScreenChangeActions(GameScreenType.Options, null);
+        ScreenDirectory.Get(GameScreenType.ComputerReport).PerformPostScreenChangeActions(GameScreenType.Options, new ScreenChange.FadeIn());
     }
 
     /// <summary>
@@ -311,7 +311,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
     {
     }
 
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, ScreenChange change)
     {
         ScreenFade = 0;
         ScreenFadeSpeed = 5;

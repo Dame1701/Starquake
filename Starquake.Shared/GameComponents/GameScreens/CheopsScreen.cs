@@ -514,7 +514,7 @@ public class CheopsScreen : GameComponentBase, IGameScreen
         }
     }
 
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, ScreenChange change)
     {
 
     }

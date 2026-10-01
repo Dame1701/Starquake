@@ -1,4 +1,4 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
@@ -174,7 +174,7 @@ public class ScreenDirectoryTests
         {
         }
 
-        public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
+        public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, ScreenChange change)
         {
         }
     }

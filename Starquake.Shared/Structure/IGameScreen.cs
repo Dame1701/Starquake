@@ -13,5 +13,9 @@ public interface IGameScreen
     void Update(GameTime gameTime);
     void Reset(object? data);
     void Draw(GameTime gameTime);
-    void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param);
+    /// <summary>
+    ///     Called on a screen once it has been handed control, with whatever the screen handing over
+    ///     had to tell it.
+    /// </summary>
+    void PerformPostScreenChangeActions(GameScreenType triggeringScreen, ScreenChange change);
 }

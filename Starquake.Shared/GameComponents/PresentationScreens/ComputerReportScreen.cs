@@ -60,7 +60,7 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
             ScreenDirectory.Current = GameScreenType.MainGame;
 
             ScreenDirectory.Get(GameScreenType.MainGame).Reset(null);
-            ScreenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.ComputerReport, false);
+            ScreenDirectory.Get(GameScreenType.MainGame).PerformPostScreenChangeActions(GameScreenType.ComputerReport, new ScreenChange.KeepPicture());
         }
 
         if (ScreenFade >= ColourLevels.Full)
@@ -126,7 +126,7 @@ public class ComputerReportScreen : GameScreenBase, IGameScreen
     {
     }
 
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, ScreenChange change)
     {
         _fadeComplete = false;
         ScreenFade = 0;

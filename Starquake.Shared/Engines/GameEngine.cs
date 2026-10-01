@@ -313,7 +313,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
 
     private void Player_OnScreenChanged(GameScreenType triggerScreen)
     {
-        MainScreen.PerformPostScreenChangeActions(triggerScreen, null);
+        MainScreen.PerformPostScreenChangeActions(triggerScreen, new ScreenChange.FadeIn());
     }
 
     private void Player_OnBlobActionRaised(BlobAction action, object? data)

@@ -62,7 +62,7 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
     {
     }
 
-    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, object? param)
+    public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, ScreenChange change)
     {
         _fadeComplete = false;
         ScreenFade = 0;
@@ -75,10 +75,10 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
         if (_gotHighScore)
         {
             // The game over screen hands the score across so a name can be typed into it
-            if (param is not HiScore playersScore)
+            if (change is not ScreenChange.FinalScore(var playersScore))
             {
                 throw new ArgumentException(
-                    "The high score screen needs the player's score to enter a name against.", nameof(param));
+                    "The high score screen needs the player's score to enter a name against.", nameof(change));
             }
 
             _playersHighScore = playersScore;
@@ -99,7 +99,7 @@ public class HiScoreScreen : GameScreenBase, IGameScreen
             {
                 GraphicsDeviceManager.GraphicsDevice.Clear(Presentation.ScreenClearColour);
                 ScreenDirectory.Current = GameScreenType.Options;
-                ScreenDirectory.Get(GameScreenType.Options).PerformPostScreenChangeActions(GameScreenType.HiScores, null);
+                ScreenDirectory.Get(GameScreenType.Options).PerformPostScreenChangeActions(GameScreenType.HiScores, new ScreenChange.FadeIn());
             }
         }
         else
