@@ -153,7 +153,7 @@ internal class StatusPanel
         }
         else if (blob.BlobsState == BlobState.Dead)
         {
-            blob.BlobsState = _stats.TakeALife() ? BlobState.Gameover : BlobState.Normal;
+            blob.BlobsState = _stats.TakeALife() ? BlobState.GameOver : BlobState.Normal;
         }
     }
 

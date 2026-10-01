@@ -403,7 +403,7 @@ internal class MainGameScreen : IGameScreen
 
     private void EndGameIfOutOfLives()
     {
-        if (GameEngine.Player.BlobsState == BlobState.Gameover)
+        if (GameEngine.Player.BlobsState == BlobState.GameOver)
         {
             // Disable the periodic sound engine and kill all soudns immediately
             GameEngine.ContentResourceManager.GetSoundFxEngine().DisablePeriodicBackgroundSounds(true);

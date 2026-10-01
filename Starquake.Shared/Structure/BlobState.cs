@@ -10,5 +10,5 @@ internal enum BlobState
     Overloading,
     Dead,
     Dying,
-    Gameover
+    GameOver
 }
