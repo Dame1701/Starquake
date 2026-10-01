@@ -1,7 +1,8 @@
 # Fixing what the review found
 
-**Phases 0 to 5 have landed, and most of phase 6.** This document was written the way `REFACTORING.md` and
-`DECOUPLING.md` were written before their stages landed, and each finished phase's section has
+**Phases 0 to 5 have landed, and most of phase 6.** This document was written the way
+`REFACTORING.md` and `DECOUPLING.md` were written before their stages landed, and each phase's
+section has
 been replaced with what the work actually decided, as it landed, rather than left as the
 intention. What is left is 6.1 and 6.2, both deferred by decision rather than by difficulty, and
 6.6, which is open.
