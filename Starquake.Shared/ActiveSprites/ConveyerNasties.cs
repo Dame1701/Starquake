@@ -110,6 +110,8 @@ internal class ConveyerNasties
                 {
                     Nasties[a].AnimationDelay = 2;
                 }
+
+                Nasties[a].Initialise();
             }
         }
     }
