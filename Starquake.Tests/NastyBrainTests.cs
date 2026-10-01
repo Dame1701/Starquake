@@ -229,23 +229,6 @@ public class NastyBrainTests
     }
 
     [Fact]
-    public void Reset_ANastySetToBounce_FacesADiagonal()
-    {
-        // Arrange
-        NastyBrain brain = BrainOn(TestData.OpenScreen(), NastyType.CoreGuardian);
-
-        // Act
-        brain.Reset();
-
-        // Assert
-        Assert.Contains(
-            brain.Direction,
-            new[] { Direction.UpLeft, Direction.UpRight, Direction.DownLeft, Direction.DownRight });
-        Assert.Equal(0, brain.State.StepsToMove);
-        Assert.Equal(0, brain.State.StepsMovedCounter);
-    }
-
-    [Fact]
     public void Step_ANastyRunningIntoAWall_NotesWhichWayItWasStopped()
     {
         // Arrange - open floor with a wall in the next column
@@ -310,9 +293,6 @@ public class NastyBrainTests
     {
         var brain = new NastyBrain(MapFor(screen), new Random(4), TestData.MoveSpeed);
         brain.BecomeA(nastyType);
-
-        // What Nasty.Initialise does, and every nasty in the game has had it done
-        brain.Reset();
 
         return brain;
     }

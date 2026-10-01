@@ -258,25 +258,6 @@ internal class NastyBrain
     }
 
     /// <summary>
-    ///     Puts the nasty at the start of a fresh run, facing whichever way its movement type sets
-    ///     off in.
-    /// </summary>
-    public void Reset()
-    {
-        _state.StepsMovedCounter = 0;
-        _state.StepsToMove = 0;
-
-        if (_state.MovementType == MoveType.DiagonalBouncing)
-        {
-            Direction = RandomDiagonal();
-        }
-        else if (_state.MovementType is MoveType.RandomMovement or MoveType.RandomUpDownLeftRight)
-        {
-            Direction = RandomStraightDirection();
-        }
-    }
-
-    /// <summary>
     ///     One frame of a nasty's life: give up chasing if it is stuck, move, then count down towards
     ///     the next change of mind.
     /// </summary>

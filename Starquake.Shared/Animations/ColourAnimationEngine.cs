@@ -233,38 +233,6 @@ internal class ColourAnimationEngine
         lowerTiles.End();
     }
 
-    public void Draw(SpriteCollection sprites)
-    {
-        sprites.Begin(BlendState.Additive);
-
-        for (int y = 0; y < _gameScreens.TilesDown; y++)
-        {
-            for (int x = 0; x < _gameScreens.TilesAcross; x++)
-            {
-                foreach (ColourFaderAnimation colourAnimation in _colourAnimationsRegistered)
-                {
-                    if (colourAnimation.Running &&
-                        colourAnimation.TileNo >= 0)
-                    {
-                        if (_gameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage == colourAnimation.TileNo) // Teleport booths
-                        {
-                            // Layer up the tiles to make the intensity deeper
-                            for (int b = 0; b < colourAnimation.Intensity; b++)
-                            {
-                                sprites.DrawSprite(
-                                    colourAnimation.TileNo,
-                                    x * TileMetrics.TileWidth,
-                                    y * TileMetrics.TileHeight,
-                                    colourAnimation.TransitionColour);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        sprites.End();
-    }
-
     public void DrawUpperLayer()
     {
         SpriteCollection upperTiles = _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles);
