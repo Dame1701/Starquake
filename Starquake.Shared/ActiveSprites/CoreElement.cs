@@ -115,7 +115,7 @@ public class CoreElement
         }
 
         _coreReplacementEffect = (IStandardParticleEffect)_resources.GetParticleEffectInstance("CoreReplacementParticleEffect", ParticleEffectType.Continual, new TimeSpan(0, 0, 0, 0, ReplacementEffectMilliseconds));
-        _coreReplacementEffect.ParticleEffectComplete += coreReplacementEffect_ParticleEffectComplete;
+        _coreReplacementEffect.ParticleEffectComplete += CoreReplacementEffect_ParticleEffectComplete;
     }
 
     public CoreElementState ElementState { get; set; }
@@ -133,7 +133,7 @@ public class CoreElement
         _fader3.SetFadeToZero();
     }
 
-    private void coreReplacementEffect_ParticleEffectComplete()
+    private void CoreReplacementEffect_ParticleEffectComplete()
     {
         // We're all done
         if (OnCoreElementReplaced != null)

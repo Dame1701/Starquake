@@ -52,7 +52,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
         ScreenFadeSpeed = 5;
 
         _keyDefiner = new KeyDefiner(Resources, Font, Input);
-        _keyDefiner.KeyDefinitionComplete += keyDefiner_KeyDefinitionComplete;
+        _keyDefiner.KeyDefinitionComplete += KeyDefiner_KeyDefinitionComplete;
 
         _backgroundImage = Resources.GetSpriteCollection("OptionScreenBackground");
         _foregroundImage = Resources.GetSpriteCollection("OptionScreenForeground");
@@ -69,7 +69,7 @@ public class OptionsScreen : GameScreenBase, IGameScreen
         ];
     }
 
-    private void keyDefiner_KeyDefinitionComplete(object? sender, EventArgs e)
+    private void KeyDefiner_KeyDefinitionComplete(object? sender, EventArgs e)
     {
         _options[3] = new Option("4", "UDK Keyboard . . " + _keyDefiner.GetKeys(), false, Color.White);
 

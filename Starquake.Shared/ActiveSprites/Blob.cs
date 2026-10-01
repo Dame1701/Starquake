@@ -384,7 +384,7 @@ public class Blob : GameComponentBase
             (IPositionalTriggerParticleEffect)_resources.GetParticleEffectInstance("FireSparks",
                 ParticleEffectType.TriggeredMultiLocationTimed, null);
 
-        _blobTeleporterBeam.ParticleEffectComplete += blobTeleporterBeam_ParticleEffectComplete;
+        _blobTeleporterBeam.ParticleEffectComplete += BlobTeleporterBeam_ParticleEffectComplete;
 
         _blobFire = new BlobFire(new FireSurroundings(gameScreens, randomNumberGenerator, this));
 
@@ -1997,7 +1997,7 @@ public class Blob : GameComponentBase
         return temp;
     }
 
-    private void blobTeleporterBeam_ParticleEffectComplete()
+    private void BlobTeleporterBeam_ParticleEffectComplete()
     {
         _startBlobTeleporting = false;
     }

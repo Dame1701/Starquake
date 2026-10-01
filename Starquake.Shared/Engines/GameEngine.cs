@@ -111,6 +111,8 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     ///     The debug keys, in a debug build. Null in a release one, which never builds it.
     /// </summary>
     private TestModeKeys? _testModeKeys;
+
+    private bool _disposed;
     private BreakableBridges? _breakableBridgesEngine;
     private ConveyerNasties? _conveyerNastiesInstance;
 
@@ -244,8 +246,30 @@ public class GameEngine : StartableGameComponentBase, IDisposable
     ///     manager, and every sprite batch and render target to the graphics device, both of which
     ///     the game disposes itself.
     /// </summary>
+    /// <summary>
+    ///     The one thing the engine owns that outlives the game if it is not put down: the sound
+    ///     engine's timer. Everything else it holds belongs to the content manager, which disposes
+    ///     it with the rest of the content.
+    /// </summary>
+    /// <remarks>
+    ///     Called once today, from <c>GameHost.Dispose</c>, which is the only way out of the game.
+    ///     The guard is there so that staying true stays cheap rather than depending on that: a
+    ///     second call does nothing, which is what Dispose is required to do.
+    ///     <para>
+    ///         No finaliser and so no <c>GC.SuppressFinalize</c>. This holds no unmanaged handle of
+    ///         its own - the timer is a managed object with its own finaliser - so a finaliser here
+    ///         would be one more thing to get wrong for no benefit.
+    ///     </para>
+    /// </remarks>
     public void Dispose()
     {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+
         ContentResourceManager.GetSoundFxEngine().Dispose();
     }
 

@@ -190,12 +190,12 @@ public class Nasty : GameComponentBase
 
         _nastyDies = (IStandardParticleEffect)_resources.GetParticleEffectInstance("NastyDies",
             ParticleEffectType.Triggered, null);
-        _nastyDies.ParticleEffectComplete += nastyDies_ParticleEffectComplete;
+        _nastyDies.ParticleEffectComplete += NastyDies_ParticleEffectComplete;
 
         _nastyDiesType2 =
             (IStandardParticleEffect)_resources.GetParticleEffectInstance("NastySplat",
                 ParticleEffectType.Triggered, null);
-        _nastyDiesType2.ParticleEffectComplete += nastyDies_ParticleEffectComplete;
+        _nastyDiesType2.ParticleEffectComplete += NastyDies_ParticleEffectComplete;
     }
 
     /// <summary>
@@ -317,7 +317,7 @@ public class Nasty : GameComponentBase
         }
     }
 
-    private void nastyDies_ParticleEffectComplete()
+    private void NastyDies_ParticleEffectComplete()
     {
         if (NastyState == NastyState.Dead)
         {

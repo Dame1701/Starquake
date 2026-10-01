@@ -4,29 +4,15 @@
 // -
 namespace Starquake.Structure;
 
-public class TileDetected
-{
-
-    public TileDetected(int tileNumber, int xPosition, int yPosition, int mapXPosition, int mapYPosition)
-    {
-        TileNumber = tileNumber;
-        XPosition = xPosition;
-        YPosition = yPosition;
-        MapXPosition = mapXPosition;
-        MapYPosition = mapYPosition;
-    }
-
-    public int TileNumber { get; }
-
-    public int XPosition { get; }
-
-    public int YPosition { get; }
-
-    public int MapXPosition { get; }
-
-    public int MapYPosition { get; }
-
-    public override string ToString()
-        => "TileNo: " + TileNumber + " " + "XPos: " + XPosition + " " + "YPos " +
-           YPosition;
-}
+/// <summary>
+///     A tile something has been found standing on or about to walk into, and where it met it.
+///     <see cref="XPosition" /> and <see cref="YPosition" /> are where inside the tile that was;
+///     <see cref="MapXPosition" /> and <see cref="MapYPosition" /> are which tile of the screen's
+///     grid it is.
+/// </summary>
+public sealed record TileDetected(
+    int TileNumber,
+    int XPosition,
+    int YPosition,
+    int MapXPosition,
+    int MapYPosition);

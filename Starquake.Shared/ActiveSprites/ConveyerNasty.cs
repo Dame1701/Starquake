@@ -103,10 +103,10 @@ public class ConveyerNasty : GameComponentBase
 
         _nastySprite = new SpriteCollection(_graphicsDeviceManager, _contentManager, content.GetContent("conveyerNasty"), SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
         _conveyerNastyDies = (IStandardParticleEffect)_resources.GetParticleEffectInstance("NastyDies", ParticleEffectType.Triggered, null);
-        _conveyerNastyDies.ParticleEffectComplete += conveyerNastyDies_ParticleEffectComplete;
+        _conveyerNastyDies.ParticleEffectComplete += ConveyerNastyDies_ParticleEffectComplete;
     }
 
-    private void conveyerNastyDies_ParticleEffectComplete()
+    private void ConveyerNastyDies_ParticleEffectComplete()
     {
         NastyActive = false;
     }

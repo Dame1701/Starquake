@@ -125,7 +125,7 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
         _randomNumberGenerator = randomNumberGenerator;
 
         _elements = elements;
-        _elements.OnCoreElementReplaced += elements_OnCoreElementReplaced;
+        _elements.OnCoreElementReplaced += Elements_OnCoreElementReplaced;
         _elements.LoadContent();
 
         _coreAliens = new List<Nasty>();
@@ -211,7 +211,7 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
             }
             else
             {
-                elements_OnCoreElementReplaced();
+                Elements_OnCoreElementReplaced();
             }
         }
 
@@ -339,7 +339,7 @@ public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
         }
     }
 
-    private void elements_OnCoreElementReplaced()
+    private void Elements_OnCoreElementReplaced()
     {
         if (_elementsToReplace.Count > 0)
         {

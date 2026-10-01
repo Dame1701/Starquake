@@ -64,236 +64,78 @@ public class ToggleKeys
         }
     }
 
+    /// <summary>
+    ///     The two-character label a key is shown as on the define-keys screen, where there is only
+    ///     room for two. Anything without one is shown by its own name.
+    /// </summary>
+    /// <remarks>
+    ///     This was a 232-line ladder of <c>if (key == Keys.X) return "Y";</c>, which is a lookup
+    ///     table written as control flow. Two oddities in it are kept because they are what the
+    ///     screen currently shows: <see cref="Keys.Up" /> has no entry, so it reads "Up" while the
+    ///     other three arrows read DN, LF and RT; and four labels are used twice over - RT for both
+    ///     Right and Enter, BS for both browser Search and Stop, CL for CapsLock and OemClear, and a
+    ///     full stop for Decimal and OemPeriod.
+    /// </remarks>
     public static string GetFriendlyName(Keys key)
-    {
-        if (key == Keys.NumPad0)
+        => key switch
         {
-            return "N0";
-        }
-        if (key == Keys.NumPad1)
-        {
-            return "N1";
-        }
-        if (key == Keys.NumPad2)
-        {
-            return "N2";
-        }
-        if (key == Keys.NumPad3)
-        {
-            return "N3";
-        }
-        if (key == Keys.NumPad4)
-        {
-            return "N4";
-        }
-        if (key == Keys.NumPad5)
-        {
-            return "N5";
-        }
-        if (key == Keys.NumPad6)
-        {
-            return "N6";
-        }
-        if (key == Keys.NumPad7)
-        {
-            return "N7";
-        }
-        if (key == Keys.NumPad8)
-        {
-            return "N8";
-        }
-        if (key == Keys.NumPad9)
-        {
-            return "N9";
-        }
-        if (key == Keys.Down)
-        {
-            return "DN";
-        }
-        if (key == Keys.Left)
-        {
-            return "LF";
-        }
-        if (key == Keys.Right)
-        {
-            return "RT";
-        }
-        if (key == Keys.RightAlt)
-        {
-            return "RA";
-        }
-        if (key == Keys.LeftAlt)
-        {
-            return "LA";
-        }
-        if (key == Keys.Space)
-        {
-            return "SP";
-        }
-        if (key == Keys.Subtract)
-        {
-            return "-";
-        }
-        if (key == Keys.Add)
-        {
-            return "+";
-        }
-        if (key == Keys.CapsLock)
-        {
-            return "CL";
-        }
-        if (key == Keys.Decimal)
-        {
-            return ".";
-        }
-        if (key == Keys.Delete)
-        {
-            return "DL";
-        }
-        if (key == Keys.Divide)
-        {
-            return "/";
-        }
-        if (key == Keys.LeftControl)
-        {
-            return "LC";
-        }
-        if (key == Keys.RightControl)
-        {
-            return "RC";
-        }
-        if (key == Keys.RightShift)
-        {
-            return "RS";
-        }
-        if (key == Keys.LeftShift)
-        {
-            return "LS";
-        }
-        if (key == Keys.LeftWindows)
-        {
-            return "LW";
-        }
-        if (key == Keys.RightWindows)
-        {
-            return "RW";
-        }
-        if (key == Keys.Enter)
-        {
-            return "RT";
-        }
-        if (key == Keys.Back)
-        {
-            return "BK";
-        }
-        if (key == Keys.BrowserBack)
-        {
-            return "BB";
-        }
-        if (key == Keys.BrowserFavorites)
-        {
-            return "BF";
-        }
-        if (key == Keys.BrowserHome)
-        {
-            return "BH";
-        }
-        if (key == Keys.BrowserRefresh)
-        {
-            return "BR";
-        }
-        if (key == Keys.BrowserSearch)
-        {
-            return "BS";
-        }
-        if (key == Keys.BrowserStop)
-        {
-            return "BS";
-        }
-        if (key == Keys.Escape)
-        {
-            return "ES";
-        }
-        if (key == Keys.Tab)
-        {
-            return "TB";
-        }
-        if (key == Keys.Help)
-        {
-            return "HP";
-        }
-        if (key == Keys.Home)
-        {
-            return "HM";
-        }
-        if (key == Keys.Insert)
-        {
-            return "IN";
-        }
-        if (key == Keys.MediaNextTrack)
-        {
-            return "MN";
-        }
-        if (key == Keys.MediaPreviousTrack)
-        {
-            return "MP";
-        }
-        if (key == Keys.MediaStop)
-        {
-            return "MS";
-        }
-        if (key == Keys.Multiply)
-        {
-            return "*";
-        }
-        if (key == Keys.PageUp)
-        {
-            return "PU";
-        }
-        if (key == Keys.PageDown)
-        {
-            return "PD";
-        }
-        if (key == Keys.End)
-        {
-            return "ED";
-        }
-        if (key == Keys.OemBackslash)
-        {
-            return @"\";
-        }
-        if (key == Keys.OemClear)
-        {
-            return "CL";
-        }
-        if (key == Keys.OemComma)
-        {
-            return ",";
-        }
-        if (key == Keys.OemQuestion)
-        {
-            return "?";
-        }
-        if (key == Keys.OemQuotes)
-        {
-            return "\"";
-        }
-        if (key == Keys.OemPeriod)
-        {
-            return ".";
-        }
-        if (key == Keys.OemOpenBrackets)
-        {
-            return "{";
-        }
-        if (key == Keys.OemCloseBrackets)
-        {
-            return "}";
-        }
-        if (key == Keys.OemTilde)
-        {
-            return "@";
-        }
-        return key.ToString();
-    }
+            Keys.NumPad0 => "N0",
+            Keys.NumPad1 => "N1",
+            Keys.NumPad2 => "N2",
+            Keys.NumPad3 => "N3",
+            Keys.NumPad4 => "N4",
+            Keys.NumPad5 => "N5",
+            Keys.NumPad6 => "N6",
+            Keys.NumPad7 => "N7",
+            Keys.NumPad8 => "N8",
+            Keys.NumPad9 => "N9",
+            Keys.Down => "DN",
+            Keys.Left => "LF",
+            Keys.Right => "RT",
+            Keys.RightAlt => "RA",
+            Keys.LeftAlt => "LA",
+            Keys.Space => "SP",
+            Keys.Subtract => "-",
+            Keys.Add => "+",
+            Keys.CapsLock => "CL",
+            Keys.Decimal => ".",
+            Keys.Delete => "DL",
+            Keys.Divide => "/",
+            Keys.LeftControl => "LC",
+            Keys.RightControl => "RC",
+            Keys.RightShift => "RS",
+            Keys.LeftShift => "LS",
+            Keys.LeftWindows => "LW",
+            Keys.RightWindows => "RW",
+            Keys.Enter => "RT",
+            Keys.Back => "BK",
+            Keys.BrowserBack => "BB",
+            Keys.BrowserFavorites => "BF",
+            Keys.BrowserHome => "BH",
+            Keys.BrowserRefresh => "BR",
+            Keys.BrowserSearch => "BS",
+            Keys.BrowserStop => "BS",
+            Keys.Escape => "ES",
+            Keys.Tab => "TB",
+            Keys.Help => "HP",
+            Keys.Home => "HM",
+            Keys.Insert => "IN",
+            Keys.MediaNextTrack => "MN",
+            Keys.MediaPreviousTrack => "MP",
+            Keys.MediaStop => "MS",
+            Keys.Multiply => "*",
+            Keys.PageUp => "PU",
+            Keys.PageDown => "PD",
+            Keys.End => "ED",
+            Keys.OemBackslash => @"\",
+            Keys.OemClear => "CL",
+            Keys.OemComma => ",",
+            Keys.OemQuestion => "?",
+            Keys.OemQuotes => "\"",
+            Keys.OemPeriod => ".",
+            Keys.OemOpenBrackets => "{",
+            Keys.OemCloseBrackets => "}",
+            Keys.OemTilde => "@",
+            _ => key.ToString()
+        };
 }
