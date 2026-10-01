@@ -28,7 +28,7 @@ namespace Starquake.Input;
 ///         player's own pause and quit keys.
 ///     </para>
 /// </remarks>
-public class TestModeKeys
+internal class TestModeKeys
 {
     /// <summary>
     ///     Test-mode cheats: how many lives F2 hands back, and how long the screen-stepping keys wait

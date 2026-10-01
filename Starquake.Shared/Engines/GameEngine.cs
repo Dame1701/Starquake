@@ -27,7 +27,7 @@ using Starquake.Structure;
 
 namespace Starquake.Engines;
 
-public class GameEngine : StartableGameComponentBase, IDisposable
+internal class GameEngine : StartableGameComponentBase, IDisposable
 {
     /// <summary>
     ///     A percentage, complete. The loader reports its progress as one, so this is what it reports

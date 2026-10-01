@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Structure;
 
-public class StartableGameComponentBase
+internal class StartableGameComponentBase
 {
     protected StartableGameComponentBase()
     {

@@ -9,7 +9,7 @@ namespace Starquake.Constants;
 ///     in eight-bit channel levels rather than in floats, so nearly every fade counter runs between
 ///     these two numbers and nearly every draw call tints with them.
 /// </summary>
-public static class ColourLevels
+internal static class ColourLevels
 {
     /// <summary>
     ///     A fully lit channel, and so also fully opaque when it is the alpha channel being set.

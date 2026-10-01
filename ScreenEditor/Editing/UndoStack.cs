@@ -7,7 +7,7 @@ namespace Starquake.ScreenEditor.Editing;
 /// <summary>
 ///     One reversible change to the map.
 /// </summary>
-public interface IEdit
+internal interface IEdit
 {
 
     /// <summary>
@@ -23,7 +23,7 @@ public interface IEdit
 /// <summary>
 ///     A single tile on a single screen changing from one number to another.
 /// </summary>
-public sealed class TileEdit(int screen, int x, int y, int oldTile, int newTile) : IEdit
+internal sealed class TileEdit(int screen, int x, int y, int oldTile, int newTile) : IEdit
 {
     public string Name => "tile";
 
@@ -35,7 +35,7 @@ public sealed class TileEdit(int screen, int x, int y, int oldTile, int newTile)
 /// <summary>
 ///     One cell of one tile image's collision mask being made solid or passable.
 /// </summary>
-public sealed class CollisionEdit(int tileImage, int cellX, int cellY, bool solid) : IEdit
+internal sealed class CollisionEdit(int tileImage, int cellX, int cellY, bool solid) : IEdit
 {
     public string Name => "collision";
 
@@ -47,7 +47,7 @@ public sealed class CollisionEdit(int tileImage, int cellX, int cellY, bool soli
 /// <summary>
 ///     A whole screen being replaced at once, as a paste, a fill or a clear does.
 /// </summary>
-public sealed class ScreenEdit(int screen, int[] oldTiles, int[] newTiles) : IEdit
+internal sealed class ScreenEdit(int screen, int[] oldTiles, int[] newTiles) : IEdit
 {
     public string Name => "screen";
 
@@ -61,7 +61,7 @@ public sealed class ScreenEdit(int screen, int[] oldTiles, int[] newTiles) : IEd
 ///     across a screen is one gesture to the person doing it, so it should take one press of Ctrl+Z
 ///     to take back rather than one per tile the pointer happened to cross.
 /// </summary>
-public sealed class CompoundEdit(string name, IReadOnlyList<IEdit> edits) : IEdit
+internal sealed class CompoundEdit(string name, IReadOnlyList<IEdit> edits) : IEdit
 {
     public string Name { get; } = name;
 
@@ -87,7 +87,7 @@ public sealed class CompoundEdit(string name, IReadOnlyList<IEdit> edits) : IEdi
 ///     The undo history. Edits are recorded as they are applied rather than replayed through here,
 ///     so the stack never applies an edit it has not been given both halves of.
 /// </summary>
-public sealed class UndoStack
+internal sealed class UndoStack
 {
 
     /// <summary>

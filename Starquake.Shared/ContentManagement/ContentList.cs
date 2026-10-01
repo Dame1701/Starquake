@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Content;
 
 namespace Starquake.ContentManagement;
 
-public class ContentList
+internal class ContentList
 {
     private readonly List<ContentEntry> _content;
 

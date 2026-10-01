@@ -17,7 +17,7 @@ namespace Starquake.ScreenEditor.Converters;
 ///     only thing that ever unchecks one is another being checked, and acting on that would undo the
 ///     change that caused it.
 /// </remarks>
-public sealed class EnumMatchConverter : IValueConverter
+internal sealed class EnumMatchConverter : IValueConverter
 {
 
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)

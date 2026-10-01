@@ -16,7 +16,7 @@ namespace Starquake.Constants;
 ///         step or an NTP correction landed mid-wait.
 ///     </para>
 /// </summary>
-public static class LogicClock
+internal static class LogicClock
 {
     /// <summary>
     ///     How many logic frames make a second. 50 matches the PAL original; 60 is the NTSC speed

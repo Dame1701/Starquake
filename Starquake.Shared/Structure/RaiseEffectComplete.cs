@@ -4,4 +4,4 @@
 // -
 namespace Starquake.Structure;
 
-public delegate void RaiseEffectComplete();
+internal delegate void RaiseEffectComplete();

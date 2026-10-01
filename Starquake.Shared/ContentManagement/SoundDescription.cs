@@ -6,7 +6,7 @@ using Starquake.Structure;
 
 namespace Starquake.ContentManagement;
 
-public sealed record SoundDescription(
+internal sealed record SoundDescription(
     string ResourceName,
     string FilePath,
     SoundEffectInstanceType InstanceType,

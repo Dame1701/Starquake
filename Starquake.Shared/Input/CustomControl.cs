@@ -21,7 +21,7 @@ namespace Starquake.Input;
 ///         the five methods cannot disagree with each other or with ToggleKeys inside a frame.
 ///     </para>
 /// </remarks>
-public class CustomControl
+internal class CustomControl
 {
     /// <summary>
     ///     How far the stick has to be pushed before it counts as a direction. The blob's movement is

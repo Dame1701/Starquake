@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Scoring;
 
-public class HiScore
+internal class HiScore
 {
     public int AdventureScore;
     public string Name = string.Empty;

@@ -17,7 +17,7 @@ using Starquake.Structure;
 
 namespace Starquake.GameComponents.GameScreens;
 
-public class TeleportScreen : GameComponentBase, IGameScreen
+internal class TeleportScreen : GameComponentBase, IGameScreen
 {
     private readonly Blob _blob;
     private readonly BitmapFont _font;

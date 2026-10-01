@@ -10,7 +10,7 @@ using Starquake.Structure;
 
 namespace Starquake.Animations;
 
-public class TunnelLiftAnimationEngine : GameComponentBase
+internal class TunnelLiftAnimationEngine : GameComponentBase
 {
 
     /// <summary>

@@ -19,7 +19,7 @@ namespace Starquake.ScreenEditor.Controls;
 ///     including the four the game never draws. Those get a marker of the editor's own rather than
 ///     the flat placeholder block the sheet holds for them - see <see cref="TileCatalogue" />.
 /// </remarks>
-public static class TileRenderer
+internal static class TileRenderer
 {
 
     /// <summary>

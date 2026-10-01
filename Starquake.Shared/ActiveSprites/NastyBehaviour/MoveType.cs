@@ -9,7 +9,7 @@ namespace Starquake.ActiveSprites.NastyBehaviour;
 ///     from the first two, and a spiky one always uses <see cref="SpikeyMovement" /> - which is why
 ///     the draws use the count of this enum and its ordering matters.
 /// </summary>
-public enum MoveType
+internal enum MoveType
 {
     RandomMovement,
     RandomUpDownLeftRight,

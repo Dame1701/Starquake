@@ -11,7 +11,7 @@ using Starquake.Structure;
 
 namespace Starquake.Particles;
 
-public class ContinuousParticleEffect : IStandardParticleEffect
+internal class ContinuousParticleEffect : IStandardParticleEffect
 {
     private readonly GraphicsSet _graphicsSet;
     private readonly ParticleEffect _mercuryParticleEffect;

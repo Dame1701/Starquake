@@ -16,7 +16,7 @@ using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
 
-public class ConveyerNasty : GameComponentBase
+internal class ConveyerNasty : GameComponentBase
 {
 
     /// <summary>

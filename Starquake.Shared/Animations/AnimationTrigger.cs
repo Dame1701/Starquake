@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Animations;
 
-public class AnimationTrigger
+internal class AnimationTrigger
 {
     protected readonly bool UseTrigger;
 

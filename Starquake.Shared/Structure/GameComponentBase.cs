@@ -19,7 +19,7 @@ namespace Starquake.Structure;
 ///         visible in its own constructor and can be narrowed on its own.
 ///     </para>
 /// </summary>
-public abstract class GameComponentBase
+internal abstract class GameComponentBase
 {
     public virtual void LoadContent()
     {

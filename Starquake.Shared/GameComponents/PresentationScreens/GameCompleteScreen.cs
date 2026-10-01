@@ -18,7 +18,7 @@ using Starquake.Structure;
 
 namespace Starquake.GameComponents.PresentationScreens;
 
-public class GameCompleteScreen : GameScreenBase, IGameScreen
+internal class GameCompleteScreen : GameScreenBase, IGameScreen
 {
     private readonly SpriteCollection _backgroundImage;
     private readonly CoreElements _elements;

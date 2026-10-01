@@ -6,4 +6,4 @@ using Microsoft.Xna.Framework.Audio;
 
 namespace Starquake.Sounds;
 
-public sealed record MultiInstanceSoundEffect(SoundEffect Sound, int MaxInstances, bool KillOnScreenChange);
+internal sealed record MultiInstanceSoundEffect(SoundEffect Sound, int MaxInstances, bool KillOnScreenChange);

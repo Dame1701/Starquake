@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 
 namespace Starquake.Structure;
 
-public interface IGameScreen
+internal interface IGameScreen
 {
     int ScreenFade { get; set; }
 

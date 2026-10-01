@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 
 namespace Starquake.GameComponents.PresentationScreens;
 
-public class Option
+internal class Option
 {
     public readonly string ActivationKey;
     public readonly string OptionText;

@@ -7,7 +7,7 @@ using Starquake.Structure;
 
 namespace Starquake.Particles;
 
-public interface IParticleEffect
+internal interface IParticleEffect
 {
     ParticleEffect Effect { get; }
     bool EffectActive { get; }

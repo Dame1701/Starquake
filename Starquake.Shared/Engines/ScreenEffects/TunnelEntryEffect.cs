@@ -22,7 +22,7 @@ namespace Starquake.Engines.ScreenEffects;
 ///         coming out is slower than going in, so the new screen settles rather than snapping.
 ///     </para>
 /// </summary>
-public abstract class TunnelEntryEffect : ScreenEffectBase
+internal abstract class TunnelEntryEffect : ScreenEffectBase
 {
     /// <summary>
     ///     How long the screen stays black at the pinch - the time spent inside the tunnel. Without

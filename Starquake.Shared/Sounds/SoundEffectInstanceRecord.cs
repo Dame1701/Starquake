@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Audio;
 
 namespace Starquake.Sounds;
 
-public class SoundEffectInstanceRecord
+internal class SoundEffectInstanceRecord
 {
     public readonly bool KillOnScreenChange;
     public readonly SoundEffectInstance SoundInstance;

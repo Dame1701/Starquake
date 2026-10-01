@@ -9,7 +9,7 @@ using Starquake.Structure;
 
 namespace Starquake.Engines.ScreenEffects;
 
-public class ScreenEffectEngine : GameComponentBase
+internal class ScreenEffectEngine : GameComponentBase
 {
     private readonly GraphicsDeviceManager _graphicsDeviceManager;
     private readonly PresentationSettings _presentation;

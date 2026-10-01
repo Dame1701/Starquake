@@ -22,7 +22,7 @@ namespace Starquake.Structure;
 ///         only ones there are.
 ///     </para>
 /// </remarks>
-public abstract record ScreenChange
+internal abstract record ScreenChange
 {
     private ScreenChange()
     {

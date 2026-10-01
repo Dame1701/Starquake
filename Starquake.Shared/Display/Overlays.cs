@@ -10,7 +10,7 @@ using Starquake.Helpers;
 
 namespace Starquake.Display;
 
-public class Overlays
+internal class Overlays
 {
     /// <summary>
     ///     The pause banner, laid out as a bordered box: a bar across the top and bottom, a post down

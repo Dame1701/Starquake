@@ -18,7 +18,7 @@ namespace Starquake.ScreenEditor.Dialogs;
 ///     knew to ask. The shortcuts that make this quick to use - holding Alt to pick a tile, dragging
 ///     the world map to scrub through screens - are the ones nobody would think to hover over.
 /// </remarks>
-public sealed class ShortcutsDialog : Window
+internal sealed class ShortcutsDialog : Window
 {
 
     private static readonly (string Group, string Keys, string Meaning)[] Shortcuts =

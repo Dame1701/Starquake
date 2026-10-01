@@ -12,7 +12,7 @@ using Starquake.Structure;
 
 namespace Starquake.Animations;
 
-public class ColourAnimationEngine : GameComponentBase
+internal class ColourAnimationEngine : GameComponentBase
 {
 
     private readonly List<ColourFaderAnimation> _colourAnimationsRegistered;

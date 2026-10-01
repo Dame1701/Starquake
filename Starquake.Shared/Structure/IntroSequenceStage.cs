@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Structure;
 
-public enum IntroSequenceStage
+internal enum IntroSequenceStage
 {
     None,
     InitialPause,

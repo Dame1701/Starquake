@@ -17,7 +17,7 @@ namespace Starquake.ScreenEditor.Controls;
 /// <summary>
 ///     Which set of tiles a <see cref="TilePalette" /> is showing.
 /// </summary>
-public enum TilePaletteSource
+internal enum TilePaletteSource
 {
 
     /// <summary>
@@ -40,7 +40,7 @@ public enum TilePaletteSource
 ///     single image with a couple of marks on it; four hundred templated list items to achieve the
 ///     same thing would cost far more than it is worth.
 /// </remarks>
-public sealed class TilePalette : Control
+internal sealed class TilePalette : Control
 {
 
     /// <summary>

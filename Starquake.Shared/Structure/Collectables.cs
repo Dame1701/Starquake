@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Structure;
 
-public enum Collectables
+internal enum Collectables
 {
     None = 255,
     AccessCard = 28,

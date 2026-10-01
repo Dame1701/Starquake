@@ -4,4 +4,4 @@
 // -
 namespace Starquake.ContentManagement;
 
-public sealed record ContentEntry(string Name, string FilePath);
+internal sealed record ContentEntry(string Name, string FilePath);

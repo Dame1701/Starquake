@@ -14,7 +14,7 @@ using Starquake.Structure;
 
 namespace Starquake.GameComponents.GameScreens;
 
-public class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
+internal class PlanetCoreScreen : GameComponentBase, IRealTimeGameScreen
 {
 
 

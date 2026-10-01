@@ -18,7 +18,7 @@ namespace Starquake.ScreenEditor.Editing;
 ///     repaint rather than which property changed. Each one takes a session and listens to it; this
 ///     class is the single place that decides what counts as a change worth repainting for.
 /// </remarks>
-public sealed class EditorSession : ViewModelBase
+internal sealed class EditorSession : ViewModelBase
 {
 
     /// <summary>

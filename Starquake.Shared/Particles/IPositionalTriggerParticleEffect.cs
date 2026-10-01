@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 namespace Starquake.Particles;
 
 // A particle effect that can be initialised from multiple positions with their own durational lifetimes, an example are the post fire sparks
-public interface IPositionalTriggerParticleEffect : IParticleEffect
+internal interface IPositionalTriggerParticleEffect : IParticleEffect
 {
     void Start(int xPos, int yPos);
     void Update(GameTime gameTime);

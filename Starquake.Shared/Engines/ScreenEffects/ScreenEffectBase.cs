@@ -7,7 +7,7 @@ using Starquake.Structure;
 
 namespace Starquake.Engines.ScreenEffects;
 
-public abstract class ScreenEffectBase
+internal abstract class ScreenEffectBase
 {
     protected int EffectDuration;
     protected int EffectSpeed;

@@ -16,7 +16,7 @@ using Starquake.WorldGeneration;
 
 namespace Starquake.Display;
 
-public class GameScreenCollection : GameComponentBase
+internal class GameScreenCollection : GameComponentBase
 {
 
 

@@ -12,7 +12,7 @@ using Starquake.Input;
 
 namespace Starquake.GameComponents.PresentationScreens;
 
-public class KeyDefiner
+internal class KeyDefiner
 {
 
     private readonly BitmapFont _font;

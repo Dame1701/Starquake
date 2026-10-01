@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Animations;
 
-public class Animation
+internal class Animation
 {
     private int _currentFrame;
 

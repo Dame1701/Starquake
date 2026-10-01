@@ -24,7 +24,7 @@ namespace Starquake.WorldGeneration;
 ///         is a constant rather than something to ask a sprite sheet for.
 ///     </para>
 /// </remarks>
-public class WorldPopulator
+internal class WorldPopulator
 {
     /// <summary>
     ///     How many of the 512 screens are given a pick-up.

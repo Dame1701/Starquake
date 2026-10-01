@@ -17,7 +17,7 @@ namespace Starquake.ScreenEditor.Content;
 ///     has to write it back exactly as the game's reader expects rather than in whatever shape is
 ///     convenient.
 /// </remarks>
-public static class ScreenDataFile
+internal static class ScreenDataFile
 {
 
     /// <summary>

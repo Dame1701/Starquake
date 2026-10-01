@@ -7,7 +7,7 @@ using Starquake.Structure;
 namespace Starquake.Engines.ScreenEffects;
 
 /// <inheritdoc cref="TunnelEntryEffect" />
-public class LeftTunnelEntryEffect : TunnelEntryEffect
+internal class LeftTunnelEntryEffect : TunnelEntryEffect
 {
     public LeftTunnelEntryEffect()
     {

@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 
 namespace Starquake.Sprites;
 
-public class SpritePixel
+internal class SpritePixel
 {
     public SpritePixel()
     {

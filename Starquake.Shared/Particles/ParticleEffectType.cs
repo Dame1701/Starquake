@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Particles;
 
-public enum ParticleEffectType
+internal enum ParticleEffectType
 {
     Triggered,
     Continual,

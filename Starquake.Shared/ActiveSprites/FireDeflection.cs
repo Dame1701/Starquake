@@ -14,7 +14,7 @@ namespace Starquake.ActiveSprites;
 ///     number generator over the range <see cref="Left" /> to <see cref="Right" />, so they have
 ///     to stay adjacent and <see cref="None" /> has to stay outside that range.
 /// </remarks>
-public enum FireDeflection
+internal enum FireDeflection
 {
     /// <summary>Still going the way it was fired.</summary>
     None = 0,

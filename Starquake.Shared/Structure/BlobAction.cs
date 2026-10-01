@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Structure;
 
-public enum BlobAction
+internal enum BlobAction
 {
     LaidPlatform,
     FiredLazer,

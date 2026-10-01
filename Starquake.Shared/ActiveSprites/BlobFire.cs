@@ -26,7 +26,7 @@ namespace Starquake.ActiveSprites;
 ///         The asymmetry that produced the drift is no longer expressible.
 ///     </para>
 /// </remarks>
-public sealed class BlobFire(IFireSurroundings surroundings)
+internal sealed class BlobFire(IFireSurroundings surroundings)
 {
     /// <summary>
     ///     The shot itself - a thin sliver <see cref="Width" /> across and <see cref="Length" />

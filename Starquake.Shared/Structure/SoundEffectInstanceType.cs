@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Structure;
 
-public enum SoundEffectInstanceType
+internal enum SoundEffectInstanceType
 {
     Single,
     Multi

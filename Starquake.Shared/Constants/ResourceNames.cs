@@ -18,7 +18,7 @@ namespace Starquake.Constants;
 ///         asked for as well as the place it is loaded.
 ///     </para>
 /// </summary>
-public sealed class ResourceNames
+internal sealed class ResourceNames
 {
     /// <summary>
     ///     The redrawn artwork, which is what the game starts in.

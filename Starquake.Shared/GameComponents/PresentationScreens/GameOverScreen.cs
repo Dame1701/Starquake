@@ -20,7 +20,7 @@ using Starquake.Structure;
 
 namespace Starquake.GameComponents.PresentationScreens;
 
-public class GameOverScreen : GameScreenBase, IGameScreen
+internal class GameOverScreen : GameScreenBase, IGameScreen
 {
     private readonly SpriteCollection _backgroundImage;
     private readonly CoreElements _elements;

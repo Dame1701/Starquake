@@ -10,7 +10,7 @@ using Starquake.Structure;
 
 namespace Starquake.Particles;
 
-public class TriggeredParticleEffect : IStandardParticleEffect
+internal class TriggeredParticleEffect : IStandardParticleEffect
 {
     private readonly GraphicsSet _graphicsSet;
 

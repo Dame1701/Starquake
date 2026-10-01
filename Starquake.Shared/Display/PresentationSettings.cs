@@ -16,7 +16,7 @@ namespace Starquake.Display;
 ///         that draw and written by the four that change what the picture looks like.
 ///     </para>
 /// </summary>
-public sealed class PresentationSettings
+internal sealed class PresentationSettings
 {
     /// <summary>
     ///     The game is composed at a fixed <see cref="CompositionSize.Width" /> by

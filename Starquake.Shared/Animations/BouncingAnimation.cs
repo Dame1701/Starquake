@@ -10,7 +10,7 @@ using Starquake.Sprites;
 
 namespace Starquake.Animations;
 
-public class BouncingAnimation
+internal class BouncingAnimation
 {
     private readonly double _friction = 1.00;
 

@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Structure;
 
-public enum NastyType
+internal enum NastyType
 {
     CurleyWurley,
     Cushion,

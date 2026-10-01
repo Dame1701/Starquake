@@ -10,7 +10,7 @@ using Starquake.Sprites;
 
 namespace Starquake.ActiveSprites;
 
-public class BreakableBridge
+internal class BreakableBridge
 {
 
     private readonly SpriteCollection _breakableBridge;

@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Structure;
 
-public enum TileType
+internal enum TileType
 {
     ElectricityNode = 394,
     ElectricityGate = 406

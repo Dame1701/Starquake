@@ -25,7 +25,7 @@ namespace Starquake.GameComponents;
 ///         <c>GameEngine</c>, which let each page reach any of its thirty members instead.
 ///     </para>
 /// </summary>
-public class GameScreenBase : GameComponentBase
+internal class GameScreenBase : GameComponentBase
 {
     protected readonly BitmapFont Font;
     protected readonly GraphicsDeviceManager GraphicsDeviceManager;

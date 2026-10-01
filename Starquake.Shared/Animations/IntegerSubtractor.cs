@@ -6,7 +6,7 @@ using Starquake.Constants;
 
 namespace Starquake.Animations;
 
-public class IntegerSubtractor : AnimationTrigger
+internal class IntegerSubtractor : AnimationTrigger
 {
     private readonly int _finalValue;
     private readonly int _initialValue;

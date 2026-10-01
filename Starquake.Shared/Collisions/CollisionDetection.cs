@@ -7,7 +7,7 @@ using Starquake.Structure;
 
 namespace Starquake.Collisions;
 
-public static class CollisionDetection
+internal static class CollisionDetection
 {
     /// <summary>
     ///     Checks for a collision between two objects and returns the amount of distance that it is legal to travel

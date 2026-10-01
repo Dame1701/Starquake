@@ -24,7 +24,7 @@ namespace Starquake.Input;
 ///         CustomControl, so two of those reads could disagree inside one frame.
 ///     </para>
 /// </remarks>
-public class ToggleKeys
+internal class ToggleKeys
 {
     private Keys _heldKey = Keys.None;
     private Keys _toggledKey = Keys.None;

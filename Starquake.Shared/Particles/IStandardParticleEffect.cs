@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 namespace Starquake.Particles;
 
 // All standard triggered and continual with and without duration particle effects
-public interface IStandardParticleEffect : IParticleEffect
+internal interface IStandardParticleEffect : IParticleEffect
 {
     void Start();
     void Update(int xPos, int yPos, GameTime gameTime);

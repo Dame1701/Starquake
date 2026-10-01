@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Structure;
 
-public enum NastyState
+internal enum NastyState
 {
     Disabled,
     PreConception,

@@ -18,7 +18,7 @@ using Starquake.Structure;
 
 namespace Starquake.GameComponents.PresentationScreens;
 
-public class HiScoreScreen : GameScreenBase, IGameScreen
+internal class HiScoreScreen : GameScreenBase, IGameScreen
 {
     private readonly SpriteCollection _backgroundImage;
     private readonly SpriteCollection _foregroundImage;

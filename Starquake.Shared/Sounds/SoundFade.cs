@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Sounds;
 
-public enum SoundFade
+internal enum SoundFade
 {
     None,
     Slow,

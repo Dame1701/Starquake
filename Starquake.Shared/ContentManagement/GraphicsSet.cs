@@ -23,7 +23,7 @@ namespace Starquake.ContentManagement;
 ///         set that was in play when it was built.
 ///     </para>
 /// </summary>
-public sealed class GraphicsSet
+internal sealed class GraphicsSet
 {
     /// <summary>
     ///     The names the ten swappable sprite sheets are registered under for whichever set is in

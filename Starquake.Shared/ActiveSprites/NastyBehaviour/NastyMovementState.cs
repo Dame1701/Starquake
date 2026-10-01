@@ -22,7 +22,7 @@ namespace Starquake.ActiveSprites.NastyBehaviour;
 ///         where that decision is written down instead of being an omission.
 ///     </para>
 /// </remarks>
-public record struct NastyMovementState
+internal record struct NastyMovementState
 {
     /// <summary>Which of the six ways of moving this nasty is currently using.</summary>
     public MoveType MovementType { get; set; }

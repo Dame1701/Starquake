@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Starquake.Engines;
 
-public class RenderViewPort
+internal class RenderViewPort
 {
 
     public RenderViewPort(GraphicsDeviceManager graphics, string name, int xPos, int yPos, int width, int height)

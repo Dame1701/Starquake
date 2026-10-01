@@ -12,7 +12,7 @@ using Starquake.Structure;
 
 namespace Starquake.Animations;
 
-public class KeyScanner
+internal class KeyScanner
 {
 
     private readonly bool _flicker;

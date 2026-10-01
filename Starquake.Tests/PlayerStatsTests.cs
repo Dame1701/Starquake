@@ -41,11 +41,16 @@ public class PlayerStatsTests
         Assert.Equal(TestData.StartingPlatforms, stats.Platforms);
     }
 
+    // Internal rather than public, here and in the theories below that take one. The parameter
+    // is one of the game's own types, and those are internal now - this project only sees them
+    // through InternalsVisibleTo, which is not enough to let a public signature here name one.
+    // Dropping to internal costs nothing: xunit requires the test class to be public, not its
+    // test methods, so these are still found and still run.
     [Theory]
     [InlineData(PowerUp.EnergySmall, TestData.SmallTopUp)]
     [InlineData(PowerUp.EnergyMedium, TestData.MediumTopUp)]
     [InlineData(PowerUp.EnergyFull, TestData.FullTopUp)]
-    public void GotPowerUp_AnEnergyPowerUp_AddsItsOwnAmount(PowerUp powerUp, int expectedTopUp)
+    internal void GotPowerUp_AnEnergyPowerUp_AddsItsOwnAmount(PowerUp powerUp, int expectedTopUp)
     {
         // Arrange
         PlayerStats stats = NewStats();

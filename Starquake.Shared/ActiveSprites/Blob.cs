@@ -23,7 +23,7 @@ using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
 
-public class Blob : GameComponentBase
+internal class Blob : GameComponentBase
 {
     /// <summary>
     ///     How fast the tunnel transition plays, in pixels of play area a frame. It sets the pace of

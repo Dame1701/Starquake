@@ -16,7 +16,7 @@ namespace Starquake.Constants;
 ///         the host, and the game should not have to name its host to find out how big it is.
 ///     </para>
 /// </summary>
-public static class CompositionSize
+internal static class CompositionSize
 {
     /// <summary>
     ///     The width every screen, panel and overlay is positioned against.

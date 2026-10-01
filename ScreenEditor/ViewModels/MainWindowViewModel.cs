@@ -14,7 +14,7 @@ namespace Starquake.ScreenEditor.ViewModels;
 ///     The window's commands and the state that only the window cares about. The editing state
 ///     itself lives in <see cref="EditorSession" />, which the drawn surfaces share.
 /// </summary>
-public class MainWindowViewModel : ViewModelBase
+internal class MainWindowViewModel : ViewModelBase
 {
 
     private readonly List<RelayCommand> _commands = [];
@@ -368,4 +368,4 @@ public class MainWindowViewModel : ViewModelBase
 /// <summary>
 ///     A tile sheet the editor found for itself, ready to be put on a menu.
 /// </summary>
-public sealed record TileSheetChoice(string Name, string Path);
+internal sealed record TileSheetChoice(string Name, string Path);
