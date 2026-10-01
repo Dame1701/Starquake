@@ -1,9 +1,9 @@
 # Fixing what the review found
 
-**Phases 0 to 4 have landed.** This document was written the way `REFACTORING.md` and
+**Phases 0 to 5 have landed.** This document was written the way `REFACTORING.md` and
 `DECOUPLING.md` were written before their stages landed, and each finished phase's section has
 been replaced with what the work actually decided, as it landed, rather than left as the
-intention. Phases 5 and 6 are still the plan.
+intention. Phase 6 is still the plan.
 
 It covers a full review of the game carried out against `ef5a6a3`. Every finding is here; the
 ordering is the point of the document. `ProjectMercury` was out of scope throughout.
@@ -334,34 +334,73 @@ leaving for the next reader to rediscover: its remaining bulk is not separable s
 state machine that draws itself. Splitting it needs the update logic and the draw code prised
 apart first, and that is a different task from moving four field clusters into four files.
 
-## Phase 5 — performance
+## Phase 5 — performance *(landed)*
 
-Deliberately after 4.6, which has landed: the renderer split is where these live, and doing both
-at once would have made the diff unreadable. None of it matters on a modern GPU at 60 Hz — it is the difference
-between running on a Raspberry Pi and not.
+Done after 4.6, as planned: the renderer split is where most of this lived, and doing both at
+once would have made the diff unreadable.
 
-**5.1 — batch the tile draws.** Each screen is an 8 × 6 grid. `DrawLowerTile` runs 48 times a
-frame and per tile does a dictionary lookup, a cast, then a full `SpriteBatch.Begin()` → one
-`Draw` → `End()`. `DrawUpperTilePatch` does the same 48 more times with two lookups each. Both are
-`ScreenRenderer`'s since 4.6, which is what that split was for. A `Begin`/`End` pair flushes a draw call, so
-the tile layers alone issue up to 5,700 flushes a second to draw at most 96 sprites — batching is
-the entire purpose of `SpriteBatch`. Both layers draw from one sheet each, so hoisting `Begin`
-and `End` out of the loops is one batch per layer.
+**5.1 — the tile layers are batched** (`4260cb1`). Both layers opened and closed a `SpriteBatch`
+per tile, so the two of them issued up to 144 draw-call flushes a frame to draw at most 96
+sprites. They issue three.
 
-**5.2 — the two sort modes.** `SpriteSortMode.Immediate` (4 sites) flushes on every `Draw`.
-`BackToFront` (48 sites) sorts by layer depth, on batches of one sprite with no depth set.
+Batching reorders work, so three orderings had to be checked rather than assumed. Lower tiles
+never overlap each other, being a grid of distinct cells. The animated patches are a second pass
+now, and every animated sprite is registered at most one tile big, so none can be covered by a
+base tile drawn later. The upper layer is two passes because the patches and the tunnel entrances
+come off different sheets — and **every row offset in `UpperLayerPatchFor` is 0 or 1, never
+negative**, so a tunnel entrance sharing a cell with a patch was always drawn after it anyway.
 
-**5.3 — resolve sprite sheets once.** 277 calls to `GetSpriteCollection(string)`, each a string
-hash, a dictionary probe and an unbox. The sheets only change identity across the F8 art swap, so
-`GraphicsSet` could hand out the resolved `SpriteCollection` rather than its name. `DrawPowerUp`
-alone does three lookups for one sheet in four lines.
+The new batches are `Deferred`, which issues the draws in call order. That is the point:
+`Immediate` would have flushed per sprite and undone the batching.
+
+**5.2 — nothing sorts by a constant any more** (`393b360`). **Nothing in the game sets a layer
+depth** — every `SpriteBatch.Draw` in `SpriteCollection` passes nought — so `BackToFront` at 46
+sites was a sort by a constant key. That costs a sort and leaves the order among equal keys
+unspecified, because MonoGame sorts with `Array.Sort`, which is not stable.
+
+Not hypothetical: `Nasty.DrawLiveNasty` draws a smoking nasty **three times at the same position
+in one batch**, in grey, red and green, with no depth between them. Which colour ended up on top
+was unspecified. It is now the last one drawn, which is what the code reads as meaning.
+
+Of `SpriteCollection.Begin`'s 39 callers that named a mode, 37 asked for `BackToFront` and 2 for
+`Immediate`. Neither was wanted, so **the overload that takes a mode is gone** and neither can be
+asked for again.
+
+Safe to sweep because a scan for a `Begin` opened while another was still open found no genuinely
+interleaved batches — only `if`/`else` branches sharing one `End`, and two overload declarations.
+Had any existed, `Immediate` → `Deferred` would have reversed the order two batches reached the
+device in.
+
+**5.3 — one lookup per sheet per method** (`fe10a3a`). 261 `GetSpriteCollection` calls down to
+143; `CoreElement.Draw` alone made 15 of them for four sheets. `ColourAnimationEngine`'s two
+passes were the only hot ones, resolving the sheet four times per animated tile inside three
+nested loops — and reading the x and y step off the sheet's own `SpriteWidth`, the upper pass
+reading it off the *lower* sheet, which is the same number only because every tile sheet is
+registered at `TileMetrics.TileWidth` by `TileHeight`. Those are the constants now.
+
+**The plan oversold this item and the record should say so.** A short-string hash and a dictionary
+probe, 261 times a frame, is a few microseconds — it is not what would stop the game running on a
+Raspberry Pi, and 5.1's draw calls were. What it is actually worth is that
+`_resources.GetSpriteCollection(_graphicsSet.Names.Pickups)` written three times in four lines is
+noise.
+
+### What phase 5 was not able to verify
+
+None of this has been seen running. The build is clean, the 147 tests pass and the game boots and
+loads, but the three changes are all to *drawing*, and the one thing that would settle them is
+looking at the screen. Driving the game from a script got as far as the options screen —
+`System.Events` can hold a named key like space long enough for the 60 Hz poll to catch it, but
+not a digit, and the options screen needs `0` — so **the main game screen has not been looked at
+since the renderer changed.** Someone should play a screen or two and check the tiles, the
+upper-layer patches over the lift shafts and booths, the tunnel mouths, Olly, and a smoking nasty.
 
 ## Phase 6 — features and finish
 
 Nothing depends on these, which is why they are last rather than because they do not matter.
 
-**6.1 — place the key and the access card**, then remove the two inventory lines. Depends on 4.3.
-See the next section.
+**6.1 — place the key and the access card**, then remove the two inventory lines. 4.3 has landed,
+so the seeded, tested `WorldPopulator` this goes in now exists. See *The key and the access card*
+below; the placement algorithm is still an open question and is being thought about separately.
 
 **6.2 — persist hi-scores.** `HiScores` hardcodes eight names in its constructor and
 `AddScoreToTable` writes only to memory, so the table resets on every launch. There is no read or
