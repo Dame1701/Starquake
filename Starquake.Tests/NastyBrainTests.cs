@@ -202,6 +202,32 @@ public class NastyBrainTests
         Assert.Equal(MoveType.SpikeyMovement, brain.State.MovementType);
     }
 
+    /// <summary>
+    ///     The core guardian is the one nasty whose direction nothing else ever sets. It takes its
+    ///     own branch of <c>MoveNasty</c>, skipping the counter branch that hands every other
+    ///     movement type a <see cref="Direction.None" /> to choose from, and <c>DiagonalBouncing</c>
+    ///     picks a diagonal only when the direction is already None. Left at the enum's default of
+    ///     Up it would set off upwards and never turn - <c>Reflected</c> has no case for a
+    ///     non-diagonal, so nothing it hit would send it back either.
+    /// </summary>
+    [Fact]
+    public void Step_ACoreGuardianBuiltTheWayTheCoreBuildsOne_FacesADiagonal()
+    {
+        // Arrange - BecomeA and nothing else, which is all PlanetCoreScreen does to one
+        var brain = new NastyBrain(MapFor(TestData.OpenScreen()), new Random(4), TestData.MoveSpeed);
+        brain.BecomeA(NastyType.CoreGuardian);
+        brain.XPos = TestData.Middle;
+        brain.YPos = TestData.Middle;
+
+        // Act
+        brain.Step(TestData.BlobX, TestData.BlobY);
+
+        // Assert
+        Assert.Contains(
+            brain.Direction,
+            new[] { Direction.UpLeft, Direction.UpRight, Direction.DownLeft, Direction.DownRight });
+    }
+
     [Fact]
     public void Reset_ANastySetToBounce_FacesADiagonal()
     {

@@ -165,6 +165,10 @@ internal class NastyBrain
         _collisions = collisions;
         _randomNumberGenerator = randomNumberGenerator;
         _state.MoveSpeed = moveSpeed;
+
+        // Not travelling anywhere yet, which is what every movement method reads as "choose one".
+        // Left at the enum's default of Up, the core guardian would never choose at all.
+        _state.Direction = Direction.None;
     }
 
     /// <summary>
