@@ -88,6 +88,9 @@ internal class SpriteCollection
         get;
     }
 
+    /// <param name="blendState">
+    ///     Blend State for the device
+    /// </param>
     /// <param name="transform">
     ///     Only wanted when drawing straight to the back buffer, where it scales and centres the
     ///     composition - see PresentationSettings.Transform. Drawing into a render target the
