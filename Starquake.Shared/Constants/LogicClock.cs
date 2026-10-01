@@ -23,7 +23,7 @@ internal static class LogicClock
     ///     and is what the game runs at. <c>GameHost</c> paces itself from this and is the only
     ///     thing that may change it.
     /// </summary>
-    public const int FramesPerSecond = 60;
+    public const int FramesPerSecond = 50;
 
     /// <summary>
     ///     How many frames a given number of seconds is.

@@ -65,7 +65,7 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
             new Option("4", "UDK Keyboard . . " + _keyDefiner.GetKeys(), false, Color.White),
             new Option("5", "Define your own keys", false, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full)),
             new Option("0", "Start game", false, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full)),
-            new Option("Q", "Quit", false, Color.White)
+            new Option("Q", "Quit to title screen", false, Color.White)
         ];
     }
 

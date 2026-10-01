@@ -16,11 +16,7 @@ public sealed record CollisionTile(int TileImage, int XPos, int YPos, CollisionT
     [Key(2)] public int YPos { get; } = YPos;
 
     [Key(3)]
-    public CollisionTileType CollisionTileType
-    {
-        get;
-        set;
-    } = CollisionTileType;
+    public CollisionTileType CollisionTileType { get; set; } = CollisionTileType;
 
     public override string ToString()
         => "TileImage: " + TileImage + ", XPos: " + XPos + ", YPos: " + YPos + ", ColType: " + CollisionTileType;

@@ -35,7 +35,7 @@ internal static class MarkerCatalogue
             MaterialIconKind.SquareOutline,
             "SPACER",
             "Spacer",
-            "A gap that stays a gap. Nothing is drawn here and nothing is scattered here."),
+            "A gap that stays a gap. No nasties spawn here and no pickups will appear."),
 
         [(int)MarkerTile.ConveyerNasty] = new MarkerFace(
             MaterialIconKind.Bug,
