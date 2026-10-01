@@ -730,21 +730,21 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     private void RegisterScreenEffectViewPorts()
     {
         ScreenEffectEngine.RegisterViewPort(
-            "GameArea",
+            ViewPorts.GameArea,
             Presentation.ScreenXOffset,
             Presentation.ScreenYOffset + BlobStatusPanel.Height + 10,
             GameScreens.ScreenWidth,
             GameScreens.ScreenHeight);
 
         ScreenEffectEngine.RegisterViewPort(
-            "StatusArea",
+            ViewPorts.StatusArea,
             Presentation.ScreenXOffset + 2,
             Presentation.ScreenYOffset,
             BlobStatusPanel.Width,
             BlobStatusPanel.Height);
 
         ScreenEffectEngine.RegisterViewPort(
-            "EntireScreen",
+            ViewPorts.EntireScreen,
             0,
             0,
             CompositionSize.Width,
@@ -925,11 +925,11 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
                 ScreenDirectory.Current == GameScreenType.Teleporter ||
                 ScreenDirectory.Current == GameScreenType.AccessBooth)
             {
-                ScreenEffectEngine.SelectRenderViewPort("StatusArea"); // StatusPanelArea;
+                ScreenEffectEngine.SelectRenderViewPort(ViewPorts.StatusArea);
                 BlobStatusPanel.Draw();
             }
 
-            ScreenEffectEngine.SelectRenderViewPort("GameArea"); // GameArea;
+            ScreenEffectEngine.SelectRenderViewPort(ViewPorts.GameArea);
             _graphicsDeviceMgr.GraphicsDevice.Clear(Presentation.ScreenClearColour);
 
             IGameScreen? screenToDraw = ScreenDirectory.CurrentScreen;

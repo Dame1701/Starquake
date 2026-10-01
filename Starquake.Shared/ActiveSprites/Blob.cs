@@ -364,14 +364,14 @@ internal class Blob
         BlobsState = BlobState.Normal;
 
         _blobTeleporterBeam =
-            (IStandardParticleEffect)_resources.GetParticleEffectInstance("BeamMeUp_Small",
+            (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.BeamMeUpSmall,
                 ParticleEffectType.Triggered, null);
         _blobFireTrail =
-            (IStandardParticleEffect)_resources.GetParticleEffectInstance("FireTrail", ParticleEffectType.Continual,
+            (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.FireTrail, ParticleEffectType.Continual,
                 null);
 
         _blobFireSparks =
-            (IPositionalTriggerParticleEffect)_resources.GetParticleEffectInstance("FireSparks",
+            (IPositionalTriggerParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.FireSparks,
                 ParticleEffectType.TriggeredMultiLocationTimed, null);
 
         _blobTeleporterBeam.ParticleEffectComplete += BlobTeleporterBeam_ParticleEffectComplete;
@@ -642,7 +642,7 @@ internal class Blob
             if (!_blobOnShuttle && _blobFallHeight == 0)
             {
                 _resources.GetSoundFxEngine()
-                    .PlaySound("BlobRun", true);
+                    .PlaySound(Assets.Sounds.BlobRun, true);
             }
         }
     }
@@ -677,7 +677,7 @@ internal class Blob
 
             if (!_blobOnShuttle && _blobFallHeight == 0)
             {
-                _resources.GetSoundFxEngine().PlaySound("BlobRun", true);
+                _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobRun, true);
             }
         }
     }
@@ -733,7 +733,7 @@ internal class Blob
                             _blobYPos = newYPos;
 
                             _resources.GetSoundFxEngine()
-                                .PlaySound("BlobJumps", 0.3f, false);
+                                .PlaySound(Assets.Sounds.BlobJumps, 0.3f, false);
 
                             if (OnBlobActionRaised != null)
                             {
@@ -754,7 +754,7 @@ internal class Blob
                     {
                         _blobYPos = _blobYPos - JumpHeightWithoutPlatforms;
                         _resources.GetSoundFxEngine()
-                            .PlaySound("BlobJumpsNoPlatforms", 1f, false);
+                            .PlaySound(Assets.Sounds.BlobJumpsNoPlatforms, 1f, false);
                     }
                 }
             }
@@ -809,7 +809,7 @@ internal class Blob
                 else
                 {
                     _resources.GetSoundFxEngine()
-                        .PlaySound("BlobPickUp", 0.3f, false);
+                        .PlaySound(Assets.Sounds.BlobPickUp, 0.3f, false);
 
                     _inventoryAccessed = true;
 
@@ -905,7 +905,7 @@ internal class Blob
             if (fallDistance > 0 && _blobTotalDistanceFallen > FallSoundDistance)
             {
                 _blobFallsSoundId = _resources.GetSoundFxEngine()
-                    .PlaySound("BlobFalls", true);
+                    .PlaySound(Assets.Sounds.BlobFalls, true);
             }
 
             if (falling == 0)
@@ -987,7 +987,7 @@ internal class Blob
                 if (_blobCanFire)
                 {
                     // Play sound
-                    _resources.GetSoundFxEngine().PlaySound("BlobLazer");
+                    _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobLazer);
 
                     _blobFire.Launch(_blobXPos + FireOffset, _blobYPos + FireOffset);
                     _blobFireFade = 0;
@@ -1293,7 +1293,7 @@ internal class Blob
                     _screenEffects.ExecuteScreenEffect(ScreenEffectType.LeftTunnelEntry, TunnelEntrySpeed,
                         -1, true);
                     _resources.GetSoundFxEngine()
-                        .PlaySound("TunnelSwish1", 0.8f, false);
+                        .PlaySound(Assets.Sounds.TunnelSwish1, 0.8f, false);
                     OnScreenChanged(GameScreenType.None);
                 }
             }
@@ -1329,7 +1329,7 @@ internal class Blob
                     _screenEffects.ExecuteScreenEffect(ScreenEffectType.RightTunnelEntry,
                         TunnelEntrySpeed, -1, true);
                     _resources.GetSoundFxEngine()
-                        .PlaySound("TunnelSwish2", 0.8f, false);
+                        .PlaySound(Assets.Sounds.TunnelSwish2, 0.8f, false);
                     OnScreenChanged(GameScreenType.None);
                 }
             }
@@ -1345,7 +1345,7 @@ internal class Blob
             if (_blobFallHeight >= BridgeBreakingFallHeight)
             {
                 // Play the sound
-                _resources.GetSoundFxEngine().PlaySound("BridgeBreak");
+                _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BridgeBreak);
 
                 // Add the tile to the list of tiles to reset on screen change
                 _tilesToReset.Add(new ResetTile(_tileBelowBlob, _gameScreens.ScreenNumber));
@@ -1433,7 +1433,7 @@ internal class Blob
             if (moveBlob)
             {
                 _blobTunnelLiftSoundId = _resources.GetSoundFxEngine()
-                    .PlaySound("TunnelLift", true);
+                    .PlaySound(Assets.Sounds.TunnelLift, true);
                 _blobYPos -= TunnelLiftSpeed;
                 _distanceInTunnelLift += TunnelLiftSpeed;
             }
@@ -1519,7 +1519,7 @@ internal class Blob
     {
         if (_blobAlarmSoundCounter == 1)
         {
-            _resources.GetSoundFxEngine().PlaySound("BlobOverloadAlarm", 1.0f, false);
+            _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobOverloadAlarm, 1.0f, false);
         }
 
         if (_blobOverloadState < OverloadExploded && _blobAlarmSoundCounter < OverloadAlarmFrames)
@@ -1560,7 +1560,7 @@ internal class Blob
 
                 if (_blobOverloadState == OverloadExploded)
                 {
-                    _resources.GetSoundFxEngine().PlaySound("BlobExplodes", false);
+                    _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobExplodes, false);
                     _blobKiller.Trigger(BlobXPos, BlobYPos, true);
                     BlobsState = BlobState.Dying;
                 }
@@ -1784,7 +1784,7 @@ internal class Blob
         {
             if (_graphicsSet.IsOriginal)
             {
-                SpriteCollection blobShuttleOriginal = _resources.GetSpriteCollection("BlobShuttleOriginal");
+                SpriteCollection blobShuttleOriginal = _resources.GetSpriteCollection(Assets.Graphics.BlobShuttleOriginal);
                 blobShuttleOriginal.Begin(BlendState.AlphaBlend);
                 blobShuttleOriginal.DrawSprite(
                     _blobShuttleAnim.CurrentFrame, _blobXPos, _blobYPos + SpriteMetrics.SpriteHeight,
@@ -1793,7 +1793,7 @@ internal class Blob
             }
             else
             {
-                SpriteCollection blobShuttle = _resources.GetSpriteCollection("BlobShuttle");
+                SpriteCollection blobShuttle = _resources.GetSpriteCollection(Assets.Graphics.BlobShuttle);
                 blobShuttle.Begin(BlendState.AlphaBlend);
                 blobShuttle.DrawSprite(0, _blobXPos,
                     _blobYPos + SpriteMetrics.SpriteHeight, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
@@ -1820,7 +1820,7 @@ internal class Blob
             {
                 if (_blobOnShuttle)
                 {
-                    SpriteCollection blobFire2Original = _resources.GetSpriteCollection("BlobFire2Original");
+                    SpriteCollection blobFire2Original = _resources.GetSpriteCollection(Assets.Graphics.BlobFire2Original);
                     blobFire2Original.Begin(BlendState.Additive);
                     blobFire2Original.DrawSprite(
                         _blobAnimFire1.CurrentFrame, BlobFireX, BlobFireY,
@@ -1831,7 +1831,7 @@ internal class Blob
                 }
                 else
                 {
-                    SpriteCollection blobFire1 = _resources.GetSpriteCollection("BlobFire1");
+                    SpriteCollection blobFire1 = _resources.GetSpriteCollection(Assets.Graphics.BlobFire1);
                     blobFire1.Begin(BlendState.Additive);
                     blobFire1.DrawSprite(
                         _blobAnimFire1.CurrentFrame, BlobFireX, BlobFireY - FireOffset,
@@ -1845,7 +1845,7 @@ internal class Blob
             {
                 if (_blobOnShuttle)
                 {
-                    SpriteCollection blobFire2 = _resources.GetSpriteCollection("BlobFire2");
+                    SpriteCollection blobFire2 = _resources.GetSpriteCollection(Assets.Graphics.BlobFire2);
                     blobFire2.Begin(BlendState.Additive);
                     blobFire2.DrawSprite(
                         _blobAnimFire2.CurrentFrame, BlobFireX, BlobFireY,
@@ -1899,7 +1899,7 @@ internal class Blob
 
         if (_blobOnShuttle)
         {
-            SpriteCollection blobShuttle = _resources.GetSpriteCollection("BlobShuttle");
+            SpriteCollection blobShuttle = _resources.GetSpriteCollection(Assets.Graphics.BlobShuttle);
             blobShuttle.Begin(BlendState.AlphaBlend);
             blobShuttle.DrawSprite(0, _blobXPos,
                 _blobYPos + SpriteMetrics.SpriteHeight, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));

@@ -82,7 +82,7 @@ internal class Nasties
         _nastyCount = nastyCount;
         _nasties = new List<Nasty>();
         _nastySmokes =
-            (IPositionalTriggerParticleEffect)_resources.GetParticleEffectInstance("BasicSmokePlume",
+            (IPositionalTriggerParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.BasicSmokePlume,
                 ParticleEffectType.TriggeredMultiLocationTimed, null);
 
     }
@@ -230,11 +230,11 @@ internal class Nasties
 
                     if (_nasties[a].NastyType == NastyType.Spiky)
                     {
-                        _resources.GetSoundFxEngine().PlaySound("BlobExplodes");
+                        _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobExplodes);
                     }
                     else
                     {
-                        _resources.GetSoundFxEngine().PlaySound("NastyDeath");
+                        _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.NastyDeath);
                     }
 
                     if (OnNastyInteractionWithBlob != null)

@@ -4,6 +4,7 @@
 // -
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Sprites;
@@ -38,8 +39,8 @@ internal class BreakableBridge
         _graphicsSet = graphicsSet;
         _screenEffects = screenEffects;
 
-        _breakableBridge = resources.GetSpriteCollection("BreakableBridge");
-        _breakableBridgeOriginal = resources.GetSpriteCollection("BreakableBridgeOriginal");
+        _breakableBridge = resources.GetSpriteCollection(Assets.Graphics.BreakableBridge);
+        _breakableBridgeOriginal = resources.GetSpriteCollection(Assets.Graphics.BreakableBridgeOriginal);
 
         _textureDrawer = new SpriteBatch(graphics.GraphicsDevice);
         _matrix = new SpritePixelMatrix(_breakableBridge.SpriteWidth * _breakableBridge.SpriteHeight, randomNumberGenerator);
@@ -81,7 +82,7 @@ internal class BreakableBridge
             }
 
             // Set the render targer back to the screen
-            _screenEffects.SelectRenderViewPort("GameArea", false);
+            _screenEffects.SelectRenderViewPort(ViewPorts.GameArea, false);
 
             _textureDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             _textureDrawer.Draw(

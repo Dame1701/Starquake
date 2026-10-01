@@ -4,6 +4,7 @@
 // -
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Starquake.Constants;
 using Starquake.Display;
 using Starquake.Structure;
 
@@ -124,7 +125,7 @@ internal class ScreenEffectEngine
             if (screenEffect.ScreenEffectType == screenEffectToExecute)
             {
                 ActiveScreenEffect = screenEffect;
-                ActiveScreenEffect.TriggerEffect(GetRenderViewPort("GameArea"), effectSpeed, effectDuration);
+                ActiveScreenEffect.TriggerEffect(GetRenderViewPort(ViewPorts.GameArea), effectSpeed, effectDuration);
                 _haltBlobAndNastiesRequested = haltBlobAndNasties;
                 break;
             }

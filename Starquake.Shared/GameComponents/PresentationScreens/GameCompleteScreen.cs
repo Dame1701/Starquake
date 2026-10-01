@@ -48,8 +48,8 @@ internal class GameCompleteScreen : GameScreenBase, IGameScreen
         ScreenFade = 0;
         ScreenFadeSpeed = 5;
 
-        _backgroundImage = Resources.GetSpriteCollection("GameCompleteScreenBackground");
-        _foregroundImage = Resources.GetSpriteCollection("GameCompleteScreenForeground");
+        _backgroundImage = Resources.GetSpriteCollection(Assets.Graphics.GameCompleteScreenBackground);
+        _foregroundImage = Resources.GetSpriteCollection(Assets.Graphics.GameCompleteScreenForeground);
     }
 
     public void PerformPostScreenChangeActions()
@@ -73,7 +73,7 @@ internal class GameCompleteScreen : GameScreenBase, IGameScreen
 
     public void Draw()
     {
-        ScreenEffects.SelectRenderViewPort("EntireScreen");
+        ScreenEffects.SelectRenderViewPort(ViewPorts.EntireScreen);
         _backgroundImage.Begin(BlendState.AlphaBlend);
 
         if (_fadeComplete)

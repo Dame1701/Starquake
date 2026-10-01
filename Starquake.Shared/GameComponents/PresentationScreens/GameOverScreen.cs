@@ -56,8 +56,8 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
         ScreenFade = 0;
         ScreenFadeSpeed = 5;
 
-        _backgroundImage = Resources.GetSpriteCollection("GameOverScreenBackground");
-        _foregroundImage = Resources.GetSpriteCollection("GameOverScreenForeground");
+        _backgroundImage = Resources.GetSpriteCollection(Assets.Graphics.GameOverScreenBackground);
+        _foregroundImage = Resources.GetSpriteCollection(Assets.Graphics.GameOverScreenForeground);
     }
 
     public void PerformPostScreenChangeActions()
@@ -89,7 +89,7 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
 
     public void Draw()
     {
-        ScreenEffects.SelectRenderViewPort("EntireScreen");
+        ScreenEffects.SelectRenderViewPort(ViewPorts.EntireScreen);
         _backgroundImage.Begin(BlendState.AlphaBlend);
 
         if (_fadeComplete)

@@ -188,18 +188,18 @@ internal class Nasty
         _nastyDiesAnimation.Repeat = true;
         _nastyDiesAnimation.AnimateForwards = true;
 
-        _nastySpriteOriginal = _resources.GetSpriteCollection("NastiesOriginal")
+        _nastySpriteOriginal = _resources.GetSpriteCollection(Assets.Graphics.NastiesOriginal)
             .Clone();
-        _nastySpriteNew = _resources.GetSpriteCollection("Nasties").Clone();
+        _nastySpriteNew = _resources.GetSpriteCollection(Assets.Graphics.Nasties).Clone();
 
         CheckSpritesInUse();
 
-        _nastyDies = (IStandardParticleEffect)_resources.GetParticleEffectInstance("NastyDies",
+        _nastyDies = (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.NastyDies,
             ParticleEffectType.Triggered, null);
         _nastyDies.ParticleEffectComplete += NastyDies_ParticleEffectComplete;
 
         _nastyDiesType2 =
-            (IStandardParticleEffect)_resources.GetParticleEffectInstance("NastySplat",
+            (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.NastySplat,
                 ParticleEffectType.Triggered, null);
         _nastyDiesType2.ParticleEffectComplete += NastyDies_ParticleEffectComplete;
     }
@@ -495,7 +495,7 @@ internal class Nasty
                 return;
             }
 
-            _resources.GetSoundFxEngine().PlaySound("NastyAppear", 0.1F, false);
+            _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.NastyAppear, 0.1F, false);
             Movement.StartFirstMovement();
             _deathFadeLevel = ColourLevels.Full;
             _deathScale = 1f;
@@ -829,7 +829,7 @@ internal class Nasty
 
         if (_graphicsSet.IsOriginal)
         {
-            SpriteCollection blobFire2Original = _resources.GetSpriteCollection("BlobFire2Original");
+            SpriteCollection blobFire2Original = _resources.GetSpriteCollection(Assets.Graphics.BlobFire2Original);
             blobFire2Original.Begin(BlendState.AlphaBlend);
             blobFire2Original.DrawSprite(
                 _nastyDiesAnimation.CurrentFrame, XPos, YPos,

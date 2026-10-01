@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.ActiveSprites;
 using Starquake.Animations;
+using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.GameComponents;
 using Starquake.Scoring;
@@ -102,9 +103,9 @@ internal class StatusPanel
     private Collectables[]? _blobsInventory;
     private int _slotToScan = -1;
 
-    public int Width => _resources.GetSpriteCollection("StatusPanelGraphic").SpriteWidth;
+    public int Width => _resources.GetSpriteCollection(Assets.Graphics.StatusPanelGraphic).SpriteWidth;
 
-    public int Height => _resources.GetSpriteCollection("StatusPanelGraphic").SpriteHeight;
+    public int Height => _resources.GetSpriteCollection(Assets.Graphics.StatusPanelGraphic).SpriteHeight;
 
     public StatusPanel(
         ResourceManager resources,
@@ -177,7 +178,7 @@ internal class StatusPanel
 
     public void Draw()
     {
-        SpriteCollection statusPanelGraphic = _resources.GetSpriteCollection("StatusPanelGraphic");
+        SpriteCollection statusPanelGraphic = _resources.GetSpriteCollection(Assets.Graphics.StatusPanelGraphic);
         statusPanelGraphic.Begin(BlendState.AlphaBlend);
         statusPanelGraphic.DrawSprite(0, 0, 0, Color.White);
         statusPanelGraphic.End();
@@ -235,7 +236,7 @@ internal class StatusPanel
         PanelNumbers.Draw(LivesXPos, LivesYPos, _stats.BlobLives.ToString("00"), _resources, Color.White);
 
         // draw overlay
-        SpriteCollection statusPanelOverlay = _resources.GetSpriteCollection("StatusPanelOverlay");
+        SpriteCollection statusPanelOverlay = _resources.GetSpriteCollection(Assets.Graphics.StatusPanelOverlay);
         statusPanelOverlay.Begin(BlendState.AlphaBlend);
         statusPanelOverlay.DrawSprite(0, 22, 26, Color.White);
         statusPanelOverlay.End();

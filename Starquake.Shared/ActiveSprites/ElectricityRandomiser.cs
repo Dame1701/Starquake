@@ -3,6 +3,7 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
+using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Sounds;
 
@@ -82,7 +83,7 @@ internal class ElectricityRandomiser
             if (!_electricitySoundPlayed)
             {
                 // Play sound
-                _soundId = _resources.GetSoundFxEngine().PlaySound("ElectricityNodes", 0.3F);
+                _soundId = _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.ElectricityNodes, 0.3F);
 
                 _electricitySoundPlayed = true;
             }

@@ -70,7 +70,7 @@ internal class GameScreenCollection
         CollAreaHeight = collAreaHeight;
 
         // Load screen data
-        _gameScreens = (GameScreenData[])_resources.GetDataResource("GameScreens");
+        _gameScreens = (GameScreenData[])_resources.GetDataResource(Assets.Data.GameScreens);
 
         LandingSite = LandingSite.FindIn(_gameScreens);
         CoreExit = CoreExit.FindIn(_gameScreens);
@@ -78,7 +78,7 @@ internal class GameScreenCollection
 
         Collisions = new ScreenCollisionMap(
             _gameScreens,
-            (int[,,])_resources.GetDataResource("ScreenCollisionData"));
+            (int[,,])_resources.GetDataResource(Assets.Data.ScreenCollisionData));
 
         _worldPopulator = new WorldPopulator(_gameScreens, Collisions, randomNumberGenerator);
 
@@ -87,14 +87,13 @@ internal class GameScreenCollection
             graphicsSet,
             _gameScreens,
             ColourAnimations,
-            (IStandardParticleEffect)resources.GetParticleEffectInstance(
-                "ForceField", ParticleEffectType.Continual, null));
+            (IStandardParticleEffect)resources.GetParticleEffectInstance(Assets.Effects.ForceField, ParticleEffectType.Continual, null));
 
         BlobsShipSmoke1 =
-            (IStandardParticleEffect)_resources.GetParticleEffectInstance("BasicSmokePlume",
+            (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.BasicSmokePlume,
                 ParticleEffectType.Continual, null);
         BlobsShipSmoke2 =
-            (IStandardParticleEffect)_resources.GetParticleEffectInstance("BasicSmokePlume2",
+            (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.BasicSmokePlume2,
                 ParticleEffectType.Continual, null);
 
         // Make this better in the future...?

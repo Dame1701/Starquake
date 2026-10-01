@@ -148,7 +148,7 @@ internal class GlobalHotkeys
 
         _artworkSwapped();
 
-        _resources.GetSoundFxEngine().PlaySound("AccessSuccess", 1f, false);
+        _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.AccessSuccess, 1f, false);
     }
 
     private bool InPlay()

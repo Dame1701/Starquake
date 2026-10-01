@@ -5,6 +5,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Starquake.Collisions;
+using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Structure;
@@ -164,7 +165,7 @@ internal class ConveyerNasties
                             _blob.RegisterFireHit();
                             Nasties[a].NastyState = NastyState.Shot;
 
-                            _resources.GetSoundFxEngine().PlaySound("BlobExplodes");
+                            _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobExplodes);
 
                             if (OnNastyInteractionWithBlob != null)
                             {

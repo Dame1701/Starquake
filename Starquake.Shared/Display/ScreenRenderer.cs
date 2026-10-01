@@ -380,7 +380,7 @@ internal class ScreenRenderer
             return;
         }
 
-        SpriteCollection ollyBackground = _resources.GetSpriteCollection("OllyBackground");
+        SpriteCollection ollyBackground = _resources.GetSpriteCollection(Assets.Graphics.OllyBackground);
         ollyBackground.Begin(BlendState.AlphaBlend);
         ollyBackground.DrawSprite(0, 382, 146, colour);
         ollyBackground.End();
@@ -538,24 +538,24 @@ internal class ScreenRenderer
         {
             if (_graphicsSet.IsOriginal)
             {
-                SpriteCollection ollyOriginal = _resources.GetSpriteCollection("OllyOriginal");
+                SpriteCollection ollyOriginal = _resources.GetSpriteCollection(Assets.Graphics.OllyOriginal);
                 ollyOriginal.Begin(BlendState.AlphaBlend);
                 ollyOriginal.DrawSprite(0, 384, 100, colour);
                 ollyOriginal.End();
             }
             else
             {
-                SpriteCollection ollyLower = _resources.GetSpriteCollection("OllyLower");
+                SpriteCollection ollyLower = _resources.GetSpriteCollection(Assets.Graphics.OllyLower);
                 ollyLower.Begin(BlendState.AlphaBlend);
                 ollyLower.DrawSprite(0, 382, 146, colour);
                 ollyLower.End();
 
-                SpriteCollection ollyEyes = _resources.GetSpriteCollection("OllyEyes");
+                SpriteCollection ollyEyes = _resources.GetSpriteCollection(Assets.Graphics.OllyEyes);
                 ollyEyes.Begin(BlendState.AlphaBlend);
                 ollyEyes.DrawSprite(0, _ollyEyesX, _ollyEyesY, colour);
                 ollyEyes.End();
 
-                SpriteCollection ollyUpper = _resources.GetSpriteCollection("OllyUpper");
+                SpriteCollection ollyUpper = _resources.GetSpriteCollection(Assets.Graphics.OllyUpper);
                 ollyUpper.Begin(BlendState.AlphaBlend);
                 ollyUpper.DrawSprite(0, 450, 166, colour);
                 ollyUpper.End();
@@ -578,7 +578,7 @@ internal class ScreenRenderer
         if (_graphicsSet.IsRedrawn)
         {
             // Status panel shadow
-            SpriteCollection statusPanelShadow = _resources.GetSpriteCollection("StatusPanelShadow");
+            SpriteCollection statusPanelShadow = _resources.GetSpriteCollection(Assets.Graphics.StatusPanelShadow);
             statusPanelShadow.Begin(BlendState.AlphaBlend);
             statusPanelShadow.DrawSprite(0, 0, 0, Color.White);
             statusPanelShadow.End();

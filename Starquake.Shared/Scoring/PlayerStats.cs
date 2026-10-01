@@ -293,24 +293,24 @@ internal class PlayerStats
     private void TopUpEnergy(int amount)
     {
         EnergyLevel += amount;
-        _sounds.PlaySound("PowerUp2", false);
+        _sounds.PlaySound(Assets.Sounds.PowerUp2, false);
     }
 
     private void TopUpFirePower(int amount)
     {
         FirePower += amount;
-        _sounds.PlaySound("PowerUp3", 0.5f, false);
+        _sounds.PlaySound(Assets.Sounds.PowerUp3, 0.5f, false);
     }
 
     private void TopUpPlatforms(int amount)
     {
         Platforms += amount;
-        _sounds.PlaySound("PowerUp1", false);
+        _sounds.PlaySound(Assets.Sounds.PowerUp1, false);
     }
 
     private void GiveExtraLife()
     {
         BlobLives++;
-        _sounds.PlaySound("LifePowerUp", false);
+        _sounds.PlaySound(Assets.Sounds.LifePowerUp, false);
     }
 }

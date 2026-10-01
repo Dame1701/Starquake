@@ -4,6 +4,7 @@
 // -
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
+using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Structure;
 
@@ -180,7 +181,7 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
 
         if (GetSoundState(_periodicBackgroundSoundsId) != SoundState.Playing)
         {
-            _periodicBackgroundSoundsId = PlaySound("BackgroundSound1", PeriodicSoundVolume, false);
+            _periodicBackgroundSoundsId = PlaySound(Assets.Sounds.BackgroundSound1, PeriodicSoundVolume, false);
         }
     }
 

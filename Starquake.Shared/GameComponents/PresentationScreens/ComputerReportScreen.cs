@@ -48,8 +48,8 @@ internal class ComputerReportScreen : GameScreenBase, IGameScreen
         ScreenFade = 0;
         ScreenFadeSpeed = 5;
 
-        _backgroundImage = Resources.GetSpriteCollection("ComputerReportScreenBackground");
-        _foregroundImage = Resources.GetSpriteCollection("ComputerReportScreenForeground");
+        _backgroundImage = Resources.GetSpriteCollection(Assets.Graphics.ComputerReportScreenBackground);
+        _foregroundImage = Resources.GetSpriteCollection(Assets.Graphics.ComputerReportScreenForeground);
     }
 
     public override void Update(GameTime gameTime)
@@ -84,7 +84,7 @@ internal class ComputerReportScreen : GameScreenBase, IGameScreen
 
     public void Draw()
     {
-        ScreenEffects.SelectRenderViewPort("EntireScreen");
+        ScreenEffects.SelectRenderViewPort(ViewPorts.EntireScreen);
         _backgroundImage.Begin(BlendState.AlphaBlend);
 
         if (_fadeComplete)

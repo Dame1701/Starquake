@@ -102,7 +102,7 @@ internal class CoreElement
             _fader3 = new ElementFader(randomNumberGenerator, Direction.Down);
         }
 
-        _coreReplacementEffect = (IStandardParticleEffect)_resources.GetParticleEffectInstance("CoreReplacementParticleEffect", ParticleEffectType.Continual, new TimeSpan(0, 0, 0, 0, ReplacementEffectMilliseconds));
+        _coreReplacementEffect = (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.CoreReplacementParticleEffect, ParticleEffectType.Continual, new TimeSpan(0, 0, 0, 0, ReplacementEffectMilliseconds));
         _coreReplacementEffect.ParticleEffectComplete += CoreReplacementEffect_ParticleEffectComplete;
     }
 
@@ -177,7 +177,7 @@ internal class CoreElement
         }
         else if (ElementState == CoreElementState.Missing)
         {
-            SpriteCollection accessCodesGray = _resources.GetSpriteCollection("AccessCodesGray");
+            SpriteCollection accessCodesGray = _resources.GetSpriteCollection(Assets.Graphics.AccessCodesGray);
             accessCodesGray.Begin(BlendState.AlphaBlend);
             accessCodesGray.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)fade));
             accessCodesGray.End();

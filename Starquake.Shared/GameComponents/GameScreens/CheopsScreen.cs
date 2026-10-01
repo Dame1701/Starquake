@@ -272,7 +272,7 @@ internal class CheopsScreen : IGameScreen
 
     public void Update(GameTime gameTime)
     {
-        _resources.GetSoundFxEngine().PlaySound("MachineryBackground", 0.5f, true);
+        _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.MachineryBackground, 0.5f, true);
 
         if (!_elementSelectionMode)
         {
@@ -343,14 +343,14 @@ internal class CheopsScreen : IGameScreen
     {
         if (_graphicsSet.IsOriginal)
         {
-            SpriteCollection cheopsPyramidOriginal = _resources.GetSpriteCollection("CheopsPyramidOriginal");
+            SpriteCollection cheopsPyramidOriginal = _resources.GetSpriteCollection(Assets.Graphics.CheopsPyramidOriginal);
             cheopsPyramidOriginal.Begin(BlendState.AlphaBlend);
             cheopsPyramidOriginal.DrawSprite(0, 750, 69);
             cheopsPyramidOriginal.End();
         }
         else
         {
-            SpriteCollection cheopsPyramid = _resources.GetSpriteCollection("CheopsPyramid");
+            SpriteCollection cheopsPyramid = _resources.GetSpriteCollection(Assets.Graphics.CheopsPyramid);
             cheopsPyramid.Begin(BlendState.AlphaBlend);
             cheopsPyramid.DrawSprite(0, 750, 69);
             cheopsPyramid.End();
@@ -402,7 +402,7 @@ internal class CheopsScreen : IGameScreen
                     // Don't allow the sound to be called more than once
                     if (!_soundPlayed)
                     {
-                        _resources.GetSoundFxEngine().PlaySound("AccessSuccess", 1f, false);
+                        _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.AccessSuccess, 1f, false);
                         _soundPlayed = true;
                     }
                 }
@@ -427,7 +427,7 @@ internal class CheopsScreen : IGameScreen
                     // Don't allow the sound to be called more than once
                     if (!_soundPlayed)
                     {
-                        _resources.GetSoundFxEngine().PlaySound("AccessFailed", 1f, false);
+                        _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.AccessFailed, 1f, false);
                         _soundPlayed = true;
                     }
                 }
@@ -469,7 +469,7 @@ internal class CheopsScreen : IGameScreen
                 _screenDirectory.Current = GameScreenType.MainGame;
                 _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
                 _gameScreens.UpdateCollisionMap(false);
-                _resources.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+                _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPickUp, 0.5f, false);
             }
             else if (_input.KeyboardState.IsKeyDown(Keys.D2))
             {
@@ -478,7 +478,7 @@ internal class CheopsScreen : IGameScreen
                 _screenDirectory.Current = GameScreenType.MainGame;
                 _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
                 _gameScreens.UpdateCollisionMap(false);
-                _resources.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+                _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPickUp, 0.5f, false);
             }
             else if (_input.KeyboardState.IsKeyDown(Keys.D3))
             {
@@ -487,7 +487,7 @@ internal class CheopsScreen : IGameScreen
                 _screenDirectory.Current = GameScreenType.MainGame;
                 _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
                 _gameScreens.UpdateCollisionMap(false);
-                _resources.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+                _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPickUp, 0.5f, false);
             }
             else if (_input.KeyboardState.IsKeyDown(Keys.D4))
             {
@@ -496,7 +496,7 @@ internal class CheopsScreen : IGameScreen
                 _screenDirectory.Current = GameScreenType.MainGame;
                 _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
                 _gameScreens.UpdateCollisionMap(false);
-                _resources.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+                _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPickUp, 0.5f, false);
             }
             else if (_input.KeyboardState.IsKeyDown(Keys.D5))
             {
@@ -505,7 +505,7 @@ internal class CheopsScreen : IGameScreen
                 _screenDirectory.Current = GameScreenType.MainGame;
                 _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
                 _gameScreens.UpdateCollisionMap(false);
-                _resources.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+                _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPickUp, 0.5f, false);
             }
         }
     }

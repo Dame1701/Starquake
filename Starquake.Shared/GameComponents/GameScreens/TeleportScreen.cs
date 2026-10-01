@@ -103,7 +103,7 @@ internal class TeleportScreen : IGameScreen
 
     public void Update(GameTime gameTime)
     {
-        _resources.GetSoundFxEngine().PlaySound("MachineryBackground", 0.5f, true);
+        _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.MachineryBackground, 0.5f, true);
 
         foreach (FaderAnimation keyFade in _keyFades)
         {
@@ -142,7 +142,7 @@ internal class TeleportScreen : IGameScreen
         {
             if (_input.KeyboardState.IsKeyDown((Keys)a))
             {
-                _resources.GetSoundFxEngine().PlaySound("TeleportKeyClick", 0.5f, false);
+                _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.TeleportKeyClick, 0.5f, false);
 
                 _keyPressed = true;
                 _keyIdPressed = a;
@@ -180,11 +180,11 @@ internal class TeleportScreen : IGameScreen
                 _codeRecognised = true;
 
                 _gameScreens.ScreenNumber = destinationScreen;
-                _resources.GetSoundFxEngine().PlaySound("Teleport", false);
+                _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.Teleport, false);
             }
             else
             {
-                _resources.GetSoundFxEngine().PlaySound("TeleportInvalidCode", 0.8f, false);
+                _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.TeleportInvalidCode, 0.8f, false);
             }
 
             _attemptingTeleport = true;
@@ -303,7 +303,7 @@ internal class TeleportScreen : IGameScreen
 
     private void DrawInteriorLowerLayer()
     {
-        SpriteCollection teleportInteriorLower = _resources.GetSpriteCollection("TeleportInteriorLower");
+        SpriteCollection teleportInteriorLower = _resources.GetSpriteCollection(Assets.Graphics.TeleportInteriorLower);
         teleportInteriorLower.Begin(BlendState.AlphaBlend);
         teleportInteriorLower.DrawSprite(0, 0, 0, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
         teleportInteriorLower.End();
@@ -412,7 +412,7 @@ internal class TeleportScreen : IGameScreen
 
     private void DrawInteriorUpperLayer()
     {
-        SpriteCollection teleportInteriorUpper = _resources.GetSpriteCollection("TeleportInteriorUpper");
+        SpriteCollection teleportInteriorUpper = _resources.GetSpriteCollection(Assets.Graphics.TeleportInteriorUpper);
         teleportInteriorUpper.Begin(BlendState.AlphaBlend);
         teleportInteriorUpper.DrawSprite(0, 51, 42, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
         teleportInteriorUpper.End();
@@ -424,7 +424,7 @@ internal class TeleportScreen : IGameScreen
     /// </summary>
     private void DrawKeyHighlights()
     {
-        SpriteCollection overlays = _resources.GetSpriteCollection("TeleporterKeyOverlays");
+        SpriteCollection overlays = _resources.GetSpriteCollection(Assets.Graphics.TeleporterKeyOverlays);
 
         overlays.Begin(BlendState.Additive);
 
@@ -446,7 +446,7 @@ internal class TeleportScreen : IGameScreen
 
     private void DrawPowerSupply()
     {
-        SpriteCollection teleporterPowerSupply = _resources.GetSpriteCollection("TeleporterPowerSupply");
+        SpriteCollection teleporterPowerSupply = _resources.GetSpriteCollection(Assets.Graphics.TeleporterPowerSupply);
         teleporterPowerSupply.Begin(BlendState.AlphaBlend);
         teleporterPowerSupply.DrawSprite(0, 754, 6, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_powerSupplyFader.FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
         teleporterPowerSupply.End();

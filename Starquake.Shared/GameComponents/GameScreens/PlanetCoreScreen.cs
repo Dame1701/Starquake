@@ -134,8 +134,8 @@ internal class PlanetCoreScreen : IGameScreen
             _coreAliens.Add(coreAlien);
         }
 
-        _coreComputationEffect = (IStandardParticleEffect)_resources.GetParticleEffectInstance("BinaryEffect", ParticleEffectType.Continual, null);
-        _coreSparks = (IStandardParticleEffect)_resources.GetParticleEffectInstance("CoreSparks", ParticleEffectType.Continual, null);
+        _coreComputationEffect = (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.BinaryEffect, ParticleEffectType.Continual, null);
+        _coreSparks = (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.CoreSparks, ParticleEffectType.Continual, null);
     }
 
 

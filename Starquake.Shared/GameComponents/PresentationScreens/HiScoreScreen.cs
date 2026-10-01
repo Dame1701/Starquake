@@ -52,8 +52,8 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
         ScreenFade = 0;
         ScreenFadeSpeed = 5;
 
-        _backgroundImage = Resources.GetSpriteCollection("HiScoreScreenBackground");
-        _foregroundImage = Resources.GetSpriteCollection("HiScoreScreenForeground");
+        _backgroundImage = Resources.GetSpriteCollection(Assets.Graphics.HiScoreScreenBackground);
+        _foregroundImage = Resources.GetSpriteCollection(Assets.Graphics.HiScoreScreenForeground);
         _hiscoreList = new HiScores();
     }
 
@@ -145,7 +145,7 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
 
     public void Draw()
     {
-        ScreenEffects.SelectRenderViewPort("EntireScreen");
+        ScreenEffects.SelectRenderViewPort(ViewPorts.EntireScreen);
         _backgroundImage.Begin(BlendState.AlphaBlend);
 
         if (_fadeComplete)

@@ -5,6 +5,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Engines.ScreenEffects;
 using Starquake.SharedLibs;
@@ -44,8 +45,8 @@ internal class JumpPlatform
         _randomNumberGenerator = randomNumberGenerator;
         _screenEffects = screenEffects;
 
-        _jumpPlatform = resources.GetSpriteCollection("JumpPlatforms").Clone();
-        _jumpPlatformOriginal = resources.GetSpriteCollection("JumpPlatformsOriginal").Clone();
+        _jumpPlatform = resources.GetSpriteCollection(Assets.Graphics.JumpPlatforms).Clone();
+        _jumpPlatformOriginal = resources.GetSpriteCollection(Assets.Graphics.JumpPlatformsOriginal).Clone();
 
         XPos = position.X;
         YPos = position.Y;
@@ -138,7 +139,7 @@ internal class JumpPlatform
 
 
             // Set the render targer back to the screen
-            _screenEffects.SelectRenderViewPort("GameArea", false);
+            _screenEffects.SelectRenderViewPort(ViewPorts.GameArea, false);
 
             if (_dissolveTime > 0)
             {

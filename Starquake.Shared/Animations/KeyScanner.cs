@@ -53,7 +53,7 @@ internal class KeyScanner
         if (!ScanStarted)
         {
             ScanStarted = true;
-            _resources.GetSoundFxEngine().PlaySound("ScanCode", 0.3f, false);
+            _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.ScanCode, 0.3f, false);
         }
     }
 
@@ -133,7 +133,7 @@ internal class KeyScanner
             }
 
             // Draw the scanlines
-            SpriteCollection scanLine = _resources.GetSpriteCollection("ScanLine");
+            SpriteCollection scanLine = _resources.GetSpriteCollection(Assets.Graphics.ScanLine);
             scanLine.Begin(BlendState.Additive);
             scanLine.DrawSprite(0, xPos - 4, _scanLineY + yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_scanLineFade));
             scanLine.End();

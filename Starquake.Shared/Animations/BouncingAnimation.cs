@@ -61,7 +61,7 @@ internal class BouncingAnimation
     {
         if (Triggered)
         {
-            _resources.GetSoundFxEngine().PlaySound("BlobPartClang", false);
+            _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPartClang, false);
             _yDelta = -_yDelta;
         }
     }
@@ -70,7 +70,7 @@ internal class BouncingAnimation
     {
         if (Triggered)
         {
-            _resources.GetSoundFxEngine().PlaySound("BlobPartClang", false);
+            _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPartClang, false);
             _xDelta = -_xDelta;
         }
     }

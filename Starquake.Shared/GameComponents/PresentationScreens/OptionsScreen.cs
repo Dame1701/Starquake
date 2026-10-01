@@ -54,8 +54,8 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
         _keyDefiner = new KeyDefiner(Resources, Font, Input);
         _keyDefiner.KeyDefinitionComplete += KeyDefiner_KeyDefinitionComplete;
 
-        _backgroundImage = Resources.GetSpriteCollection("OptionScreenBackground");
-        _foregroundImage = Resources.GetSpriteCollection("OptionScreenForeground");
+        _backgroundImage = Resources.GetSpriteCollection(Assets.Graphics.OptionScreenBackground);
+        _foregroundImage = Resources.GetSpriteCollection(Assets.Graphics.OptionScreenForeground);
 
         _options =
         [
@@ -154,7 +154,7 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
         {
             _definingKeys = true;
             _keyDefiner.Reset();
-            Resources.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+            Resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPickUp, 0.5f, false);
             return;
         }
 
@@ -169,7 +169,7 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
 
         ClearSelectedOptions();
         _options[option].Selected = true;
-        Resources.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+        Resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPickUp, 0.5f, false);
     }
 
     /// <summary>
@@ -259,7 +259,7 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
 
     public void Draw()
     {
-        ScreenEffects.SelectRenderViewPort("EntireScreen");
+        ScreenEffects.SelectRenderViewPort(ViewPorts.EntireScreen);
 
         _backgroundImage.Begin(BlendState.AlphaBlend);
         _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));

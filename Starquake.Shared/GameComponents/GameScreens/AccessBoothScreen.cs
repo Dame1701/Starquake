@@ -103,7 +103,7 @@ internal class AccessBoothScreen : IGameScreen
 
     public void Update(GameTime gameTime)
     {
-        _resources.GetSoundFxEngine().PlaySound("MachineryBackground", 0.5f, true);
+        _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.MachineryBackground, 0.5f, true);
 
         _blobAnim1.Update();
         _blobAnim2.Update();
@@ -216,7 +216,7 @@ internal class AccessBoothScreen : IGameScreen
             // Don't allow the sound to be called more than once
             if (!_soundPlayed)
             {
-                _resources.GetSoundFxEngine().PlaySound("AccessSuccess", 1f, false);
+                _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.AccessSuccess, 1f, false);
                 _soundPlayed = true;
             }
         }
@@ -241,7 +241,7 @@ internal class AccessBoothScreen : IGameScreen
             // Don't allow the sound to be called more than once
             if (!_soundPlayed)
             {
-                _resources.GetSoundFxEngine().PlaySound("AccessFailed", 1f, false);
+                _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.AccessFailed, 1f, false);
                 _soundPlayed = true;
             }
         }

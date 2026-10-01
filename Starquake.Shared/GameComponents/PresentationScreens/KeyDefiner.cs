@@ -94,7 +94,7 @@ internal class KeyDefiner
             {
                 if (pressedKey != Keys.None && !KeyAlreadyUsed(pressedKey))
                 {
-                    _resources.GetSoundFxEngine().PlaySound("BlobPickUp", 0.5f, false);
+                    _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPickUp, 0.5f, false);
                     DefinedKeys[_definedKeyIndex] = pressedKey;
                     _definedKeyIndex++;
                 }

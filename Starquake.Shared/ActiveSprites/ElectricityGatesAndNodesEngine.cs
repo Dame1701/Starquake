@@ -279,14 +279,14 @@ internal class ElectricityGatesAndNodesEngine
                             {
                                 if (_graphicsSet.IsRedrawn)
                                 {
-                                    SpriteCollection electricityNodeElectricity1 = _resources.GetSpriteCollection("ElectricityNodeElectricity1");
+                                    SpriteCollection electricityNodeElectricity1 = _resources.GetSpriteCollection(Assets.Graphics.ElectricityNodeElectricity1);
                                     electricityNodeElectricity1.Begin(BlendState.Additive);
                                     electricityNodeElectricity1.DrawSprite(_electricityAnimation.CurrentFrame, secondLayerTile.TileLocation.X + 28, secondLayerTile.TileLocation.Y - 18, Color.White);
                                     electricityNodeElectricity1.End();
                                 }
                                 else
                                 {
-                                    SpriteCollection electricityOriginal = _resources.GetSpriteCollection("ElectricityOriginal");
+                                    SpriteCollection electricityOriginal = _resources.GetSpriteCollection(Assets.Graphics.ElectricityOriginal);
                                     electricityOriginal.Begin(BlendState.Additive);
                                     electricityOriginal.DrawSprite(_electricityAnimationOriginal.CurrentFrame, secondLayerTile.TileLocation.X + OriginalArcXOffset, secondLayerTile.TileLocation.Y - OriginalNodeArcYRise, Color.White);
                                     electricityOriginal.End();
@@ -308,14 +308,14 @@ internal class ElectricityGatesAndNodesEngine
                             {
                                 if (_graphicsSet.IsRedrawn)
                                 {
-                                    SpriteCollection electricityNodeElectricity1 = _resources.GetSpriteCollection("ElectricityNodeElectricity1");
+                                    SpriteCollection electricityNodeElectricity1 = _resources.GetSpriteCollection(Assets.Graphics.ElectricityNodeElectricity1);
                                     electricityNodeElectricity1.Begin(BlendState.Additive);
                                     electricityNodeElectricity1.DrawSprite(_electricityAnimation.CurrentFrame, secondLayerTile.TileLocation.X + 28, secondLayerTile.TileLocation.Y + 14, Color.White);
                                     electricityNodeElectricity1.End();
                                 }
                                 else
                                 {
-                                    SpriteCollection electricityOriginal = _resources.GetSpriteCollection("ElectricityOriginal");
+                                    SpriteCollection electricityOriginal = _resources.GetSpriteCollection(Assets.Graphics.ElectricityOriginal);
                                     electricityOriginal.Begin(BlendState.Additive);
                                     electricityOriginal.DrawSprite(_electricityAnimationOriginal.CurrentFrame, secondLayerTile.TileLocation.X + OriginalArcXOffset, secondLayerTile.TileLocation.Y + OriginalGateArcYOffset, Color.White);
                                     electricityOriginal.End();

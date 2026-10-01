@@ -135,7 +135,7 @@ internal class MainGameScreen : IGameScreen
         if (triggeringScreen == GameScreenType.MainGame)
         {
             // Reset viewport back to game area
-            GameEngine.ScreenEffectEngine.SelectRenderViewPort("GameArea");
+            GameEngine.ScreenEffectEngine.SelectRenderViewPort(ViewPorts.GameArea);
         }
 
         // Update score for each new screen visited
@@ -306,7 +306,7 @@ internal class MainGameScreen : IGameScreen
 
         if (GameEngine.Input.KeyboardState.IsKeyDown(Keys.T))
         {
-            _testRumbleSoundId = GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("Rumble", true);
+            _testRumbleSoundId = GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound(Assets.Sounds.Rumble, true);
         }
         else if (GameEngine.Input.KeyboardState.IsKeyUp(Keys.R))
         {
@@ -467,7 +467,7 @@ internal class MainGameScreen : IGameScreen
                 _shakingScreenCounter++;
 
                 // Play rumble sound
-                _shakeRumbleSoundId = GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound("Rumble", true);
+                _shakeRumbleSoundId = GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound(Assets.Sounds.Rumble, true);
 
                 if (_shakingScreenCounter > _shakingScreenCount)
                 {

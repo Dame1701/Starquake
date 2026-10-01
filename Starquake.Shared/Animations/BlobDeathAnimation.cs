@@ -5,6 +5,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.ActiveSprites;
+using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Particles;
@@ -88,7 +89,7 @@ internal class BlobDeathAnimation
     public void LoadContent()
     {
         _blobFragmentBounceSparks = (IPositionalTriggerParticleEffect)_resources
-            .GetParticleEffectInstance("FireSparks", ParticleEffectType.TriggeredMultiLocationTimed, null);
+            .GetParticleEffectInstance(Assets.Effects.FireSparks, ParticleEffectType.TriggeredMultiLocationTimed, null);
 
         // Each fragment needs its own explosion emitter, but they all spark off the one effect
         _bouncingParticles.Clear();
@@ -97,7 +98,7 @@ internal class BlobDeathAnimation
             _bouncingParticles.Add(new BouncingParticle(_resources, _gameScreens, _randomNumberGenerator, fragmentSpriteNumber)
             {
                 Fireball = (IStandardParticleEffect)_resources
-                    .GetParticleEffectInstance("BlobFragmentExplosion", ParticleEffectType.Continual, null),
+                    .GetParticleEffectInstance(Assets.Effects.BlobFragmentExplosion, ParticleEffectType.Continual, null),
                 SparkEffect = _blobFragmentBounceSparks
             });
         }
@@ -147,7 +148,7 @@ internal class BlobDeathAnimation
     {
         if (_graphicsSet.IsOriginal)
         {
-            _resources.GetSpriteCollection("BlobFire2Original")
+            _resources.GetSpriteCollection(Assets.Graphics.BlobFire2Original)
                 .Begin(BlendState.AlphaBlend);
 
             foreach (BouncingParticle bouncingParticle in _bouncingParticles)
@@ -155,13 +156,13 @@ internal class BlobDeathAnimation
                 if (bouncingParticle.Triggered)
                 {
                     bouncingParticle.Draw(
-                        _resources.GetSpriteCollection("BlobFire2Original"),
+                        _resources.GetSpriteCollection(Assets.Graphics.BlobFire2Original),
                         screenFade,
                         _blobDeathParticlesOriginal.CurrentFrame);
                 }
             }
 
-            _resources.GetSpriteCollection("BlobFire2Original").End();
+            _resources.GetSpriteCollection(Assets.Graphics.BlobFire2Original).End();
         }
         else
         {
@@ -174,12 +175,12 @@ internal class BlobDeathAnimation
 
                 if (_drawBlobParts)
                 {
-                    _resources.GetSpriteCollection("BlobParts")
+                    _resources.GetSpriteCollection(Assets.Graphics.BlobParts)
                         .Begin(BlendState.AlphaBlend);
 
-                    bouncingParticle.Draw(_resources.GetSpriteCollection("BlobParts"), screenFade);
+                    bouncingParticle.Draw(_resources.GetSpriteCollection(Assets.Graphics.BlobParts), screenFade);
 
-                    _resources.GetSpriteCollection("BlobParts").End();
+                    _resources.GetSpriteCollection(Assets.Graphics.BlobParts).End();
                 }
                 else
                 {
