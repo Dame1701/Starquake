@@ -49,9 +49,11 @@ internal static class NastyHelpers
             return;
         }
 
-        effect["Copy of Left Splat"].ReleaseColour.Value = colours.LeftSplat.ToVector3();
-        effect["Copy of Right Splat"].ReleaseColour.Value = colours.RightSplat.ToVector3();
-        effect["Copy of Splodges"].ReleaseColour.Value = colours.Splodges.ToVector3();
+        // The names the effect's content file gives these, now that a deep copy keeps them rather
+        // than prefixing every one with "Copy of".
+        effect["Left Splat"].ReleaseColour.Value = colours.LeftSplat.ToVector3();
+        effect["Right Splat"].ReleaseColour.Value = colours.RightSplat.ToVector3();
+        effect["Splodges"].ReleaseColour.Value = colours.Splodges.ToVector3();
     }
 
     /// <summary>

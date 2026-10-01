@@ -299,7 +299,11 @@ namespace ProjectMercury.Emitters
             emitter.Enabled                  = this.Enabled;
             emitter.MinimumTriggerPeriod     = this.MinimumTriggerPeriod;
             emitter.Modifiers                = this.Modifiers.DeepCopy();
-            emitter.Name                     = String.Format("Copy of {0}", this.Name);
+            // Kept as it is, not renamed. An emitter is addressed by the name its content file
+            // gives it - the game looks up the two that make a key door's force field, and the
+            // engine's own TimelineController looks one up per timeline event - and every effect
+            // instance is a deep copy, so renaming the parts here left nothing findable by name.
+            emitter.Name                     = this.Name;
             emitter.ParticleTexture          = this.ParticleTexture;
             emitter.ParticleTextureAssetName = this.ParticleTextureAssetName ?? String.Empty;
             emitter.ReleaseColour            = this.ReleaseColour;
