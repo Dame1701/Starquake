@@ -344,21 +344,24 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
     private void DrawInteriorLowerLayer()
     {
-        _resources.GetSpriteCollection("TeleportInteriorLower").Begin(BlendState.AlphaBlend);
-        _resources.GetSpriteCollection("TeleportInteriorLower").DrawSprite(0, 0, 0, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
-        _resources.GetSpriteCollection("TeleportInteriorLower").End();
+        SpriteCollection teleportInteriorLower = _resources.GetSpriteCollection("TeleportInteriorLower");
+        teleportInteriorLower.Begin(BlendState.AlphaBlend);
+        teleportInteriorLower.DrawSprite(0, 0, 0, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
+        teleportInteriorLower.End();
     }
 
     private void DrawTeleportPad()
     {
-        _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).Begin(BlendState.AlphaBlend);
-        _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).DrawSprite(397, 550, 96, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
+        SpriteCollection lowerScreenTiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
+        lowerScreenTiles.Begin(BlendState.AlphaBlend);
+        lowerScreenTiles.DrawSprite(397, 550, 96, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
 
         _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).End();
 
-        _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).Begin(BlendState.AlphaBlend);
-        _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).DrawSprite(7, 550, 96, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
-        _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).End();
+        SpriteCollection upperScreenTiles = _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles);
+        upperScreenTiles.Begin(BlendState.AlphaBlend);
+        upperScreenTiles.DrawSprite(7, 550, 96, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
+        upperScreenTiles.End();
     }
 
     private void DrawConsoleText()
@@ -448,9 +451,10 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
     private void DrawInteriorUpperLayer()
     {
-        _resources.GetSpriteCollection("TeleportInteriorUpper").Begin(BlendState.AlphaBlend);
-        _resources.GetSpriteCollection("TeleportInteriorUpper").DrawSprite(0, 51, 42, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
-        _resources.GetSpriteCollection("TeleportInteriorUpper").End();
+        SpriteCollection teleportInteriorUpper = _resources.GetSpriteCollection("TeleportInteriorUpper");
+        teleportInteriorUpper.Begin(BlendState.AlphaBlend);
+        teleportInteriorUpper.DrawSprite(0, 51, 42, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ScreenFade));
+        teleportInteriorUpper.End();
     }
 
     /// <summary>
@@ -481,9 +485,10 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
     private void DrawPowerSupply()
     {
-        _resources.GetSpriteCollection("TeleporterPowerSupply").Begin(BlendState.AlphaBlend);
-        _resources.GetSpriteCollection("TeleporterPowerSupply").DrawSprite(0, 754, 6, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_powerSupplyFader.FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
-        _resources.GetSpriteCollection("TeleporterPowerSupply").End();
+        SpriteCollection teleporterPowerSupply = _resources.GetSpriteCollection("TeleporterPowerSupply");
+        teleporterPowerSupply.Begin(BlendState.AlphaBlend);
+        teleporterPowerSupply.DrawSprite(0, 754, 6, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_powerSupplyFader.FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
+        teleporterPowerSupply.End();
     }
 
     #endregion

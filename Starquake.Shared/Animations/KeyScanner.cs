@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Helpers;
+using Starquake.Sprites;
 using Starquake.Structure;
 
 namespace Starquake.Animations;
@@ -105,9 +106,10 @@ public class KeyScanner
     public void Draw(int codeNumber, int xPos, int yPos)
     {
         // Draw the code keys
-        _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).Begin(BlendState.AlphaBlend);
-        _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite(codeNumber, xPos + 2, yPos + 6, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
-        _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
+        SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
+        pickups.Begin(BlendState.AlphaBlend);
+        pickups.DrawSprite(codeNumber, xPos + 2, yPos + 6, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
+        pickups.End();
 
         var height = _scanLineY > 64 ? 64 : _scanLineY;
 
@@ -116,22 +118,25 @@ public class KeyScanner
         {
             if (_matched)
             {
-                _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesPassed).Begin(BlendState.AlphaBlend);
-                _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesPassed).DrawSpriteSubSection(codeNumber, xPos + 2, yPos + 6, new Rectangle(0, 0, 64, height), ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
-                _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesPassed).End();
+                SpriteCollection accessCodesPassed = _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesPassed);
+                accessCodesPassed.Begin(BlendState.AlphaBlend);
+                accessCodesPassed.DrawSpriteSubSection(codeNumber, xPos + 2, yPos + 6, new Rectangle(0, 0, 64, height), ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
+                accessCodesPassed.End();
 
             }
             else
             {
-                _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesFailed).Begin(BlendState.AlphaBlend);
-                _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesFailed).DrawSpriteSubSection(codeNumber, xPos + 2, yPos + 6, new Rectangle(0, 0, 64, height), ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
-                _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesFailed).End();
+                SpriteCollection accessCodesFailed = _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesFailed);
+                accessCodesFailed.Begin(BlendState.AlphaBlend);
+                accessCodesFailed.DrawSpriteSubSection(codeNumber, xPos + 2, yPos + 6, new Rectangle(0, 0, 64, height), ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
+                accessCodesFailed.End();
             }
 
             // Draw the scanlines
-            _resources.GetSpriteCollection("ScanLine").Begin(BlendState.Additive);
-            _resources.GetSpriteCollection("ScanLine").DrawSprite(0, xPos - 4, _scanLineY + yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_scanLineFade));
-            _resources.GetSpriteCollection("ScanLine").End();
+            SpriteCollection scanLine = _resources.GetSpriteCollection("ScanLine");
+            scanLine.Begin(BlendState.Additive);
+            scanLine.DrawSprite(0, xPos - 4, _scanLineY + yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_scanLineFade));
+            scanLine.End();
         }
     }
 }

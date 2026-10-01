@@ -202,7 +202,9 @@ public class ColourAnimationEngine : GameComponentBase
 
     public override void Draw(GameTime gameTime)
     {
-        _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).Begin(BlendState.Additive);
+        SpriteCollection lowerTiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
+
+        lowerTiles.Begin(BlendState.Additive);
 
         for (int y = 0; y < _gameScreens.TilesDown; y++)
         {
@@ -217,15 +219,18 @@ public class ColourAnimationEngine : GameComponentBase
                             // Layer up the tiles to make the intensity deeper
                             for (int b = 0; b < colourAnimation.Intensity; b++)
                             {
-                                _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).DrawSprite(colourAnimation.TileNo, x * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteWidth,
-                                    y * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteHeight, colourAnimation.TransitionColour);
+                                lowerTiles.DrawSprite(
+                                    colourAnimation.TileNo,
+                                    x * TileMetrics.TileWidth,
+                                    y * TileMetrics.TileHeight,
+                                    colourAnimation.TransitionColour);
                             }
                         }
                     }
                 }
             }
         }
-        _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).End();
+        lowerTiles.End();
     }
 
     public void Draw(SpriteCollection sprites)
@@ -246,8 +251,11 @@ public class ColourAnimationEngine : GameComponentBase
                             // Layer up the tiles to make the intensity deeper
                             for (int b = 0; b < colourAnimation.Intensity; b++)
                             {
-                                sprites.DrawSprite(colourAnimation.TileNo, x * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteWidth,
-                                    y * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteHeight, colourAnimation.TransitionColour);
+                                sprites.DrawSprite(
+                                    colourAnimation.TileNo,
+                                    x * TileMetrics.TileWidth,
+                                    y * TileMetrics.TileHeight,
+                                    colourAnimation.TransitionColour);
                             }
                         }
                     }
@@ -259,7 +267,9 @@ public class ColourAnimationEngine : GameComponentBase
 
     public void DrawUpperLayer()
     {
-        _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).Begin(BlendState.Additive);
+        SpriteCollection upperTiles = _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles);
+
+        upperTiles.Begin(BlendState.Additive);
 
         for (int y = 0; y < _gameScreens.TilesDown; y++)
         {
@@ -275,14 +285,17 @@ public class ColourAnimationEngine : GameComponentBase
                             // Layer up the tiles to make the intensity deeper
                             for (int b = 0; b < colourAnimation.Intensity; b++)
                             {
-                                _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).DrawSprite(colourAnimation.UpperTileToDraw, x * _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).SpriteWidth,
-                                    y * _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).SpriteHeight, colourAnimation.TransitionColour);
+                                upperTiles.DrawSprite(
+                                    colourAnimation.UpperTileToDraw,
+                                    x * TileMetrics.TileWidth,
+                                    y * TileMetrics.TileHeight,
+                                    colourAnimation.TransitionColour);
                             }
                         }
                     }
                 }
             }
         }
-        _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).End();
+        upperTiles.End();
     }
 }

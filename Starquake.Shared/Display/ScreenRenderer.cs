@@ -395,11 +395,10 @@ public class ScreenRenderer
             return;
         }
 
-        _resources.GetSpriteCollection("OllyBackground")
-            .Begin(BlendState.AlphaBlend);
-        _resources.GetSpriteCollection("OllyBackground")
-            .DrawSprite(0, 382, 146, colour);
-        _resources.GetSpriteCollection("OllyBackground").End();
+        SpriteCollection ollyBackground = _resources.GetSpriteCollection("OllyBackground");
+        ollyBackground.Begin(BlendState.AlphaBlend);
+        ollyBackground.DrawSprite(0, 382, 146, colour);
+        ollyBackground.End();
     }
 
     public void DrawUpperLayer(Color colour)
@@ -552,29 +551,27 @@ public class ScreenRenderer
         {
             if (_graphicsSet.IsOriginal)
             {
-                _resources.GetSpriteCollection("OllyOriginal")
-                    .Begin(BlendState.AlphaBlend);
-                _resources.GetSpriteCollection("OllyOriginal")
-                    .DrawSprite(0, 384, 100, colour);
-                _resources.GetSpriteCollection("OllyOriginal").End();
+                SpriteCollection ollyOriginal = _resources.GetSpriteCollection("OllyOriginal");
+                ollyOriginal.Begin(BlendState.AlphaBlend);
+                ollyOriginal.DrawSprite(0, 384, 100, colour);
+                ollyOriginal.End();
             }
             else
             {
-                _resources.GetSpriteCollection("OllyLower")
-                    .Begin(BlendState.AlphaBlend);
-                _resources.GetSpriteCollection("OllyLower").DrawSprite(0, 382, 146, colour);
-                _resources.GetSpriteCollection("OllyLower").End();
+                SpriteCollection ollyLower = _resources.GetSpriteCollection("OllyLower");
+                ollyLower.Begin(BlendState.AlphaBlend);
+                ollyLower.DrawSprite(0, 382, 146, colour);
+                ollyLower.End();
 
-                _resources.GetSpriteCollection("OllyEyes")
-                    .Begin(BlendState.AlphaBlend);
-                _resources.GetSpriteCollection("OllyEyes")
-                    .DrawSprite(0, _ollyEyesX, _ollyEyesY, colour);
-                _resources.GetSpriteCollection("OllyEyes").End();
+                SpriteCollection ollyEyes = _resources.GetSpriteCollection("OllyEyes");
+                ollyEyes.Begin(BlendState.AlphaBlend);
+                ollyEyes.DrawSprite(0, _ollyEyesX, _ollyEyesY, colour);
+                ollyEyes.End();
 
-                _resources.GetSpriteCollection("OllyUpper")
-                    .Begin(BlendState.AlphaBlend);
-                _resources.GetSpriteCollection("OllyUpper").DrawSprite(0, 450, 166, colour);
-                _resources.GetSpriteCollection("OllyUpper").End();
+                SpriteCollection ollyUpper = _resources.GetSpriteCollection("OllyUpper");
+                ollyUpper.Begin(BlendState.AlphaBlend);
+                ollyUpper.DrawSprite(0, 450, 166, colour);
+                ollyUpper.End();
             }
         }
     }
@@ -595,11 +592,10 @@ public class ScreenRenderer
         if (_graphicsSet.IsRedrawn)
         {
             // Status panel shadow
-            _resources.GetSpriteCollection("StatusPanelShadow")
-                .Begin(BlendState.AlphaBlend);
-            _resources.GetSpriteCollection("StatusPanelShadow")
-                .DrawSprite(0, 0, 0, Color.White);
-            _resources.GetSpriteCollection("StatusPanelShadow").End();
+            SpriteCollection statusPanelShadow = _resources.GetSpriteCollection("StatusPanelShadow");
+            statusPanelShadow.Begin(BlendState.AlphaBlend);
+            statusPanelShadow.DrawSprite(0, 0, 0, Color.White);
+            statusPanelShadow.End();
         }
     }
 

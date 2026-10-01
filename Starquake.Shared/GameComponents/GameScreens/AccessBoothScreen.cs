@@ -11,6 +11,7 @@ using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Fonts;
+using Starquake.Sprites;
 using Starquake.Structure;
 
 namespace Starquake.GameComponents.GameScreens;
@@ -174,19 +175,21 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
 
     private void DrawBoothDoors()
     {
-        _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).Begin(BlendState.AlphaBlend);
-        _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).DrawSprite(399, 380, 160);
-        _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).DrawSprite(400, 508, 160);
+        SpriteCollection lowerScreenTiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
+        lowerScreenTiles.Begin(BlendState.AlphaBlend);
+        lowerScreenTiles.DrawSprite(399, 380, 160);
+        lowerScreenTiles.DrawSprite(400, 508, 160);
 
         _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).End();
     }
 
     private void DrawDoorHighlights()
     {
-        _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).Begin(BlendState.AlphaBlend);
-        _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).DrawSprite(9, 380, 160);
-        _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).DrawSprite(10, 508, 160);
-        _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).End();
+        SpriteCollection upperScreenTiles = _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles);
+        upperScreenTiles.Begin(BlendState.AlphaBlend);
+        upperScreenTiles.DrawSprite(9, 380, 160);
+        upperScreenTiles.DrawSprite(10, 508, 160);
+        upperScreenTiles.End();
     }
 
     /// <summary>

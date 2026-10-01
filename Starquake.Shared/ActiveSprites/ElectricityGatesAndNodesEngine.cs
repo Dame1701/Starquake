@@ -283,15 +283,17 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
                             {
                                 if (_graphicsSet.IsRedrawn)
                                 {
-                                    _resources.GetSpriteCollection("ElectricityNodeElectricity1").Begin(BlendState.Additive);
-                                    _resources.GetSpriteCollection("ElectricityNodeElectricity1").DrawSprite(_electricityAnimation.CurrentFrame, secondLayerTile.TileLocation.X + 28, secondLayerTile.TileLocation.Y - 18, Color.White);
-                                    _resources.GetSpriteCollection("ElectricityNodeElectricity1").End();
+                                    SpriteCollection electricityNodeElectricity1 = _resources.GetSpriteCollection("ElectricityNodeElectricity1");
+                                    electricityNodeElectricity1.Begin(BlendState.Additive);
+                                    electricityNodeElectricity1.DrawSprite(_electricityAnimation.CurrentFrame, secondLayerTile.TileLocation.X + 28, secondLayerTile.TileLocation.Y - 18, Color.White);
+                                    electricityNodeElectricity1.End();
                                 }
                                 else
                                 {
-                                    _resources.GetSpriteCollection("ElectricityOriginal").Begin(BlendState.Additive);
-                                    _resources.GetSpriteCollection("ElectricityOriginal").DrawSprite(_electricityAnimationOriginal.CurrentFrame, secondLayerTile.TileLocation.X + OriginalArcXOffset, secondLayerTile.TileLocation.Y - OriginalNodeArcYRise, Color.White);
-                                    _resources.GetSpriteCollection("ElectricityOriginal").End();
+                                    SpriteCollection electricityOriginal = _resources.GetSpriteCollection("ElectricityOriginal");
+                                    electricityOriginal.Begin(BlendState.Additive);
+                                    electricityOriginal.DrawSprite(_electricityAnimationOriginal.CurrentFrame, secondLayerTile.TileLocation.X + OriginalArcXOffset, secondLayerTile.TileLocation.Y - OriginalNodeArcYRise, Color.White);
+                                    electricityOriginal.End();
                                 }
                             }
                         }
@@ -310,15 +312,17 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
                             {
                                 if (_graphicsSet.IsRedrawn)
                                 {
-                                    _resources.GetSpriteCollection("ElectricityNodeElectricity1").Begin(BlendState.Additive);
-                                    _resources.GetSpriteCollection("ElectricityNodeElectricity1").DrawSprite(_electricityAnimation.CurrentFrame, secondLayerTile.TileLocation.X + 28, secondLayerTile.TileLocation.Y + 14, Color.White);
-                                    _resources.GetSpriteCollection("ElectricityNodeElectricity1").End();
+                                    SpriteCollection electricityNodeElectricity1 = _resources.GetSpriteCollection("ElectricityNodeElectricity1");
+                                    electricityNodeElectricity1.Begin(BlendState.Additive);
+                                    electricityNodeElectricity1.DrawSprite(_electricityAnimation.CurrentFrame, secondLayerTile.TileLocation.X + 28, secondLayerTile.TileLocation.Y + 14, Color.White);
+                                    electricityNodeElectricity1.End();
                                 }
                                 else
                                 {
-                                    _resources.GetSpriteCollection("ElectricityOriginal").Begin(BlendState.Additive);
-                                    _resources.GetSpriteCollection("ElectricityOriginal").DrawSprite(_electricityAnimationOriginal.CurrentFrame, secondLayerTile.TileLocation.X + OriginalArcXOffset, secondLayerTile.TileLocation.Y + OriginalGateArcYOffset, Color.White);
-                                    _resources.GetSpriteCollection("ElectricityOriginal").End();
+                                    SpriteCollection electricityOriginal = _resources.GetSpriteCollection("ElectricityOriginal");
+                                    electricityOriginal.Begin(BlendState.Additive);
+                                    electricityOriginal.DrawSprite(_electricityAnimationOriginal.CurrentFrame, secondLayerTile.TileLocation.X + OriginalArcXOffset, secondLayerTile.TileLocation.Y + OriginalGateArcYOffset, Color.White);
+                                    electricityOriginal.End();
                                 }
                             }
                         }
@@ -424,17 +428,16 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
                 new Point(nasty.XLocation - ConveyerGateLightNearXOffset, nasty.YLocation + GateLightYOffset),
                 new Point(nasty.XLocation + ConveyerGateLightXOffset, nasty.YLocation + GateLightYOffset));
 
-            _resources.GetSpriteCollection("ElectricityNodeElectricity1")
-                .Begin(BlendState.Additive);
-            _resources.GetSpriteCollection("ElectricityNodeElectricity1")
-                .DrawSprite(
+            SpriteCollection electricityNodeElectricity1 = _resources.GetSpriteCollection("ElectricityNodeElectricity1");
+            electricityNodeElectricity1.Begin(BlendState.Additive);
+            electricityNodeElectricity1.DrawSprite(
                     _electricityAnimation.CurrentFrame,
                     nasty.XLocation,
                     nasty.YLocation + ConveyerArcYOffset,
                     Color.White,
                     ConveyerArcScale,
                     0);
-            _resources.GetSpriteCollection("ElectricityNodeElectricity1").End();
+            electricityNodeElectricity1.End();
         }
     }
 

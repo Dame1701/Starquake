@@ -21,6 +21,7 @@ using Starquake.Particles;
 using Starquake.Scoring;
 using Starquake.SharedLibs;
 using Starquake.Sounds;
+using Starquake.Sprites;
 using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
@@ -1789,13 +1790,13 @@ public class Blob : GameComponentBase
 
     private void DrawBlobSprite(int screenFade)
     {
-        _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites)
-            .Begin(BlendState.AlphaBlend);
-        _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites).DrawSprite(BlobFrame,
+        SpriteCollection blobSprites = _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites);
+        blobSprites.Begin(BlendState.AlphaBlend);
+        blobSprites.DrawSprite(BlobFrame,
             _blobXPos, _blobYPos,
             ColourHelper.GetXna4Colour(ColourLevels.Full, (byte)_blobEnergyDrainCounter, (byte)_blobEnergyDrainCounter,
                 (byte)(_teleportFadeLevel * ((double)screenFade / ColourLevels.Full))), 1f, 0f);
-        _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites).End();
+        blobSprites.End();
     }
 
     private void DrawShuttle(int screenFade)
@@ -1804,20 +1805,20 @@ public class Blob : GameComponentBase
         {
             if (_graphicsSet.IsOriginal)
             {
-                _resources.GetSpriteCollection("BlobShuttleOriginal")
-                    .Begin(BlendState.AlphaBlend);
-                _resources.GetSpriteCollection("BlobShuttleOriginal").DrawSprite(
+                SpriteCollection blobShuttleOriginal = _resources.GetSpriteCollection("BlobShuttleOriginal");
+                blobShuttleOriginal.Begin(BlendState.AlphaBlend);
+                blobShuttleOriginal.DrawSprite(
                     _blobShuttleAnim.CurrentFrame, _blobXPos, _blobYPos + SpriteMetrics.SpriteHeight,
                     ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
-                _resources.GetSpriteCollection("BlobShuttleOriginal").End();
+                blobShuttleOriginal.End();
             }
             else
             {
-                _resources.GetSpriteCollection("BlobShuttle")
-                    .Begin(BlendState.AlphaBlend);
-                _resources.GetSpriteCollection("BlobShuttle").DrawSprite(0, _blobXPos,
+                SpriteCollection blobShuttle = _resources.GetSpriteCollection("BlobShuttle");
+                blobShuttle.Begin(BlendState.AlphaBlend);
+                blobShuttle.DrawSprite(0, _blobXPos,
                     _blobYPos + SpriteMetrics.SpriteHeight, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
-                _resources.GetSpriteCollection("BlobShuttle").End();
+                blobShuttle.End();
             }
         }
     }
@@ -1840,40 +1841,40 @@ public class Blob : GameComponentBase
             {
                 if (_blobOnShuttle)
                 {
-                    _resources.GetSpriteCollection("BlobFire2Original")
-                        .Begin(BlendState.Additive);
-                    _resources.GetSpriteCollection("BlobFire2Original").DrawSprite(
+                    SpriteCollection blobFire2Original = _resources.GetSpriteCollection("BlobFire2Original");
+                    blobFire2Original.Begin(BlendState.Additive);
+                    blobFire2Original.DrawSprite(
                         _blobAnimFire1.CurrentFrame, BlobFireX, BlobFireY,
                         ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
                             (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), 1.0f, 0f, true,
                         _session.Paused);
-                    _resources.GetSpriteCollection("BlobFire2Original").End();
+                    blobFire2Original.End();
                 }
                 else
                 {
-                    _resources.GetSpriteCollection("BlobFire1")
-                        .Begin(BlendState.Additive);
-                    _resources.GetSpriteCollection("BlobFire1").DrawSprite(
+                    SpriteCollection blobFire1 = _resources.GetSpriteCollection("BlobFire1");
+                    blobFire1.Begin(BlendState.Additive);
+                    blobFire1.DrawSprite(
                         _blobAnimFire1.CurrentFrame, BlobFireX, BlobFireY - FireOffset,
                         ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
                             (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), 1.0f, 0f, true,
                         _session.Paused);
-                    _resources.GetSpriteCollection("BlobFire1").End();
+                    blobFire1.End();
                 }
             }
             else
             {
                 if (_blobOnShuttle)
                 {
-                    _resources.GetSpriteCollection("BlobFire2")
-                        .Begin(BlendState.Additive);
-                    _resources.GetSpriteCollection("BlobFire2").DrawSprite(
+                    SpriteCollection blobFire2 = _resources.GetSpriteCollection("BlobFire2");
+                    blobFire2.Begin(BlendState.Additive);
+                    blobFire2.DrawSprite(
                         _blobAnimFire2.CurrentFrame, BlobFireX, BlobFireY,
                         ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
                             (byte)(_blobFireFade * ((double)screenFade / ColourLevels.Full))), 1.0f, 10f,
                         true,
                         _session.Paused);
-                    _resources.GetSpriteCollection("BlobFire2").End();
+                    blobFire2.End();
                 }
             }
         }
@@ -1908,22 +1909,22 @@ public class Blob : GameComponentBase
         // Make blob flicker
         if (_blobAlarmSoundCounter % 2 == 0)
         {
-            _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites)
-                .Begin(BlendState.AlphaBlend);
-            _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites).DrawSprite(
+            SpriteCollection blobSprites = _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites);
+            blobSprites.Begin(BlendState.AlphaBlend);
+            blobSprites.DrawSprite(
                 BlobFrame, _blobXPos, _blobYPos,
                 ColourHelper.GetXna4Colour(ColourLevels.Full, (byte)_blobEnergyDrainCounter, (byte)_blobEnergyDrainCounter,
                     (byte)(_teleportFadeLevel * ((double)screenFade / ColourLevels.Full))), 1f, 0f);
-            _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites).End();
+            blobSprites.End();
         }
 
         if (_blobOnShuttle)
         {
-            _resources.GetSpriteCollection("BlobShuttle")
-                .Begin(BlendState.AlphaBlend);
-            _resources.GetSpriteCollection("BlobShuttle").DrawSprite(0, _blobXPos,
+            SpriteCollection blobShuttle = _resources.GetSpriteCollection("BlobShuttle");
+            blobShuttle.Begin(BlendState.AlphaBlend);
+            blobShuttle.DrawSprite(0, _blobXPos,
                 _blobYPos + SpriteMetrics.SpriteHeight, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
-            _resources.GetSpriteCollection("BlobShuttle").End();
+            blobShuttle.End();
         }
     }
 

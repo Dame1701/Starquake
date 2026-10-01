@@ -4,6 +4,7 @@
 // -
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.ContentManagement;
+using Starquake.Sprites;
 using Starquake.Structure;
 
 namespace Starquake.Animations;
@@ -152,8 +153,9 @@ public class BlobAccessBoothAnim
     public void Draw()
     {
         // Draw blob animation
-        _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites).Begin(BlendState.AlphaBlend);
-        _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites).DrawSprite(_blobFrame, _blobX, 192);
-        _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites).End();
+        SpriteCollection blobSprites = _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites);
+        blobSprites.Begin(BlendState.AlphaBlend);
+        blobSprites.DrawSprite(_blobFrame, _blobX, 192);
+        blobSprites.End();
     }
 }

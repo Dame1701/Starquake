@@ -11,6 +11,7 @@ using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.GameComponents;
 using Starquake.Scoring;
+using Starquake.Sprites;
 using Starquake.Structure;
 
 namespace Starquake.Display;
@@ -191,9 +192,10 @@ public class StatusPanel : GameComponentBase
 
     public override void Draw(GameTime gameTime)
     {
-        _resources.GetSpriteCollection("StatusPanelGraphic").Begin(BlendState.AlphaBlend);
-        _resources.GetSpriteCollection("StatusPanelGraphic").DrawSprite(0, 0, 0, Color.White);
-        _resources.GetSpriteCollection("StatusPanelGraphic").End();
+        SpriteCollection statusPanelGraphic = _resources.GetSpriteCollection("StatusPanelGraphic");
+        statusPanelGraphic.Begin(BlendState.AlphaBlend);
+        statusPanelGraphic.DrawSprite(0, 0, 0, Color.White);
+        statusPanelGraphic.End();
 
         // Draw inventory
         if (_blobsInventory != null)
@@ -226,17 +228,20 @@ public class StatusPanel : GameComponentBase
         }
 
         // Draw energybars
-        _resources.GetSpriteCollection("EnerygyBar").Begin(BlendState.AlphaBlend);
-        _resources.GetSpriteCollection("EnerygyBar").DrawSprite(0, BarXPos, EnergyBarYPos, (int)(_stats.EnergyLevel * EnergyBarScale), BarHeight, Color.White);
-        _resources.GetSpriteCollection("EnerygyBar").End();
+        SpriteCollection enerygyBar = _resources.GetSpriteCollection("EnerygyBar");
+        enerygyBar.Begin(BlendState.AlphaBlend);
+        enerygyBar.DrawSprite(0, BarXPos, EnergyBarYPos, (int)(_stats.EnergyLevel * EnergyBarScale), BarHeight, Color.White);
+        enerygyBar.End();
 
-        _resources.GetSpriteCollection("JumpBar").Begin(BlendState.AlphaBlend);
-        _resources.GetSpriteCollection("JumpBar").DrawSprite(0, BarXPos, JumpBarYPos, (int)(_stats.Platforms * JumpBarScale), BarHeight, Color.White);
-        _resources.GetSpriteCollection("JumpBar").End();
+        SpriteCollection jumpBar = _resources.GetSpriteCollection("JumpBar");
+        jumpBar.Begin(BlendState.AlphaBlend);
+        jumpBar.DrawSprite(0, BarXPos, JumpBarYPos, (int)(_stats.Platforms * JumpBarScale), BarHeight, Color.White);
+        jumpBar.End();
 
-        _resources.GetSpriteCollection("AmmoBar").Begin(BlendState.AlphaBlend);
-        _resources.GetSpriteCollection("AmmoBar").DrawSprite(0, BarXPos, AmmoBarYPos, (int)(_stats.FirePower * AmmoBarScale), BarHeight, Color.White);
-        _resources.GetSpriteCollection("AmmoBar").End();
+        SpriteCollection ammoBar = _resources.GetSpriteCollection("AmmoBar");
+        ammoBar.Begin(BlendState.AlphaBlend);
+        ammoBar.DrawSprite(0, BarXPos, AmmoBarYPos, (int)(_stats.FirePower * AmmoBarScale), BarHeight, Color.White);
+        ammoBar.End();
 
         // Draw score
         PanelNumbers.Draw(ScoreXPos, ScoreYPos, _stats.PlayerScore.ToString("000000"), _resources, Color.White);
@@ -245,9 +250,10 @@ public class StatusPanel : GameComponentBase
         PanelNumbers.Draw(LivesXPos, LivesYPos, _stats.BlobLives.ToString("00"), _resources, Color.White);
 
         // draw overlay
-        _resources.GetSpriteCollection("StatusPanelOverlay").Begin(BlendState.AlphaBlend);
-        _resources.GetSpriteCollection("StatusPanelOverlay").DrawSprite(0, 22, 26, Color.White);
-        _resources.GetSpriteCollection("StatusPanelOverlay").End();
+        SpriteCollection statusPanelOverlay = _resources.GetSpriteCollection("StatusPanelOverlay");
+        statusPanelOverlay.Begin(BlendState.AlphaBlend);
+        statusPanelOverlay.DrawSprite(0, 22, 26, Color.White);
+        statusPanelOverlay.End();
     }
 
     #endregion

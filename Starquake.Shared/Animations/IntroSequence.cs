@@ -12,6 +12,7 @@ using Starquake.Fonts;
 using Starquake.GameComponents;
 using Starquake.GameComponents.GameScreens;
 using Starquake.Sounds;
+using Starquake.Sprites;
 using Starquake.Structure;
 
 namespace Starquake.Animations;
@@ -355,29 +356,34 @@ public class IntroSequence : GameComponentBase
             }
             else
             {
-                _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).Begin(BlendState.AlphaBlend);
-                _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
-                _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).End();
+                SpriteCollection blobsShip = _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip);
+                blobsShip.Begin(BlendState.AlphaBlend);
+                blobsShip.DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
+                blobsShip.End();
 
                 if (SequenceStage != IntroSequenceStage.Finished && SequenceStage != IntroSequenceStage.EndPause)
                 {
-                    _resources.GetSpriteCollection("BlobsShipHazardLights").Begin(BlendState.AlphaBlend);
-                    _resources.GetSpriteCollection("BlobsShipHazardLights").DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, 0), 1.0f, _shipRotationSpeed, true, false);
-                    _resources.GetSpriteCollection("BlobsShipHazardLights").End();
+                    SpriteCollection blobsShipHazardLights = _resources.GetSpriteCollection("BlobsShipHazardLights");
+                    blobsShipHazardLights.Begin(BlendState.AlphaBlend);
+                    blobsShipHazardLights.DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, 0), 1.0f, _shipRotationSpeed, true, false);
+                    blobsShipHazardLights.End();
 
-                    _resources.GetSpriteCollection("BlobsShipHeadLights").Begin(BlendState.AlphaBlend);
-                    _resources.GetSpriteCollection("BlobsShipHeadLights").DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
-                    _resources.GetSpriteCollection("BlobsShipHeadLights").End();
+                    SpriteCollection blobsShipHeadLights = _resources.GetSpriteCollection("BlobsShipHeadLights");
+                    blobsShipHeadLights.Begin(BlendState.AlphaBlend);
+                    blobsShipHeadLights.DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
+                    blobsShipHeadLights.End();
                 }
                 else
                 {
-                    _resources.GetSpriteCollection("BlobsShipHazardLights").Begin(BlendState.AlphaBlend);
-                    _resources.GetSpriteCollection("BlobsShipHazardLights").DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_blobShipHazardLightFlash.FadeLevel * ((double)MainScreen.ScreenFade / ColourLevels.Full))), 1.0f, _shipRotationSpeed, true, false);
-                    _resources.GetSpriteCollection("BlobsShipHazardLights").End();
+                    SpriteCollection blobsShipHazardLights = _resources.GetSpriteCollection("BlobsShipHazardLights");
+                    blobsShipHazardLights.Begin(BlendState.AlphaBlend);
+                    blobsShipHazardLights.DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_blobShipHazardLightFlash.FadeLevel * ((double)MainScreen.ScreenFade / ColourLevels.Full))), 1.0f, _shipRotationSpeed, true, false);
+                    blobsShipHazardLights.End();
 
-                    _resources.GetSpriteCollection("BlobsShipHeadLights").Begin(BlendState.AlphaBlend);
-                    _resources.GetSpriteCollection("BlobsShipHeadLights").DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_blobShipHeadLightFlash.FadeLevel * ((double)MainScreen.ScreenFade / ColourLevels.Full))), 1.0f, _shipRotationSpeed, true, false);
-                    _resources.GetSpriteCollection("BlobsShipHeadLights").End();
+                    SpriteCollection blobsShipHeadLights = _resources.GetSpriteCollection("BlobsShipHeadLights");
+                    blobsShipHeadLights.Begin(BlendState.AlphaBlend);
+                    blobsShipHeadLights.DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_blobShipHeadLightFlash.FadeLevel * ((double)MainScreen.ScreenFade / ColourLevels.Full))), 1.0f, _shipRotationSpeed, true, false);
+                    blobsShipHeadLights.End();
                 }
             }
 

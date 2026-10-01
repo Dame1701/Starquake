@@ -805,12 +805,12 @@ public class Nasty : GameComponentBase
 
         if (_graphicsSet.IsOriginal)
         {
-            _resources.GetSpriteCollection("BlobFire2Original")
-                .Begin(BlendState.AlphaBlend);
-            _resources.GetSpriteCollection("BlobFire2Original").DrawSprite(
+            SpriteCollection blobFire2Original = _resources.GetSpriteCollection("BlobFire2Original");
+            blobFire2Original.Begin(BlendState.AlphaBlend);
+            blobFire2Original.DrawSprite(
                 _nastyDiesAnimation.CurrentFrame, XPos, YPos,
                 ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, screenFade), 1f, 0f);
-            _resources.GetSpriteCollection("BlobFire2Original").End();
+            blobFire2Original.End();
         }
     }
 

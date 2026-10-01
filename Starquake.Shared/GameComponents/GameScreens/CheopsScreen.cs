@@ -15,6 +15,7 @@ using Starquake.Display;
 using Starquake.Fonts;
 using Starquake.Input;
 using Starquake.SharedLibs;
+using Starquake.Sprites;
 using Starquake.Structure;
 
 namespace Starquake.GameComponents.GameScreens;
@@ -346,15 +347,17 @@ public class CheopsScreen : GameComponentBase, IGameScreen
     {
         if (_graphicsSet.IsOriginal)
         {
-            _resources.GetSpriteCollection("CheopsPyramidOriginal").Begin(BlendState.AlphaBlend);
-            _resources.GetSpriteCollection("CheopsPyramidOriginal").DrawSprite(0, 750, 69);
-            _resources.GetSpriteCollection("CheopsPyramidOriginal").End();
+            SpriteCollection cheopsPyramidOriginal = _resources.GetSpriteCollection("CheopsPyramidOriginal");
+            cheopsPyramidOriginal.Begin(BlendState.AlphaBlend);
+            cheopsPyramidOriginal.DrawSprite(0, 750, 69);
+            cheopsPyramidOriginal.End();
         }
         else
         {
-            _resources.GetSpriteCollection("CheopsPyramid").Begin(BlendState.AlphaBlend);
-            _resources.GetSpriteCollection("CheopsPyramid").DrawSprite(0, 750, 69);
-            _resources.GetSpriteCollection("CheopsPyramid").End();
+            SpriteCollection cheopsPyramid = _resources.GetSpriteCollection("CheopsPyramid");
+            cheopsPyramid.Begin(BlendState.AlphaBlend);
+            cheopsPyramid.DrawSprite(0, 750, 69);
+            cheopsPyramid.End();
         }
     }
 
