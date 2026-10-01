@@ -953,7 +953,7 @@ public class GameEngine : StartableGameComponentBase, IDisposable
             return;
         }
 
-        _scanlines.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront, Presentation.Transform);
+        _scanlines.Begin(BlendState.AlphaBlend, Presentation.Transform);
         _scanlines.DrawSprite(0, 0, 0,
             new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ColourLevels.Full));
         _scanlines.End();

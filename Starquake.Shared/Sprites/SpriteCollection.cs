@@ -98,14 +98,21 @@ public class SpriteCollection
     ///     composition - see PresentationSettings.Transform. Drawing into a render target the
     ///     game composes at its own fixed size, so there it is left null.
     /// </param>
+    /// <summary>
+    ///     Opens a batch. Everything drawn until <see cref="End" /> is queued and issued in the order
+    ///     the calls were made.
+    /// </summary>
+    /// <remarks>
+    ///     There was a second overload taking a <see cref="SpriteSortMode" />, and 37 of its 39
+    ///     callers asked for <c>BackToFront</c>. Nothing in the game sets a layer depth - every
+    ///     <c>Draw</c> below passes nought - so that was a sort by a constant key, which costs a sort
+    ///     and leaves the order among equal keys unspecified. The other two asked for
+    ///     <c>Immediate</c>, which flushes a draw call per sprite. Neither was wanted, so neither can
+    ///     be asked for.
+    /// </remarks>
     public void Begin(BlendState blendState, Matrix? transform = null)
     {
         Sprites.Begin(SpriteSortMode.Deferred, blendState, null, null, null, null, transform);
-    }
-
-    public void Begin(BlendState blendState, SpriteSortMode sortMode, Matrix? transform = null)
-    {
-        Sprites.Begin(sortMode, blendState, null, null, null, null, transform);
     }
 
     public void DrawSpriteUnscaled(int spriteNumber, int xPosition, int yPosition)

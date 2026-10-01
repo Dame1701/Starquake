@@ -410,7 +410,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
             _font.WriteText(_presentation.ScreenXOffset + 88, _presentation.ScreenYOffset + 431, "NOW TELEPORTING", new Color(0, ColourLevels.Full - _teleportingMessageFader.FadeLevel, 0), ColourLevels.Full);
 
-            _shapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+            _shapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             _shapeDrawer.FillRectangle(new Rectangle(556, 446, 28, 28), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
             _shapeDrawer.FillRectangle(new Rectangle(592, 442, 36, 36), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
             _shapeDrawer.FillRectangle(new Rectangle(636, 440, 40, 40), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
@@ -426,7 +426,7 @@ public class TeleportScreen : GameComponentBase, IGameScreen
 
             _font.WriteText(_presentation.ScreenXOffset + 49, _presentation.ScreenYOffset + 431, "CODE NOT RECOGNISED", new Color(ColourLevels.Full - _teleportingMessageFader.FadeLevel, 0, 0), ColourLevels.Full);
 
-            _shapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+            _shapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             _shapeDrawer.FillRectangle(new Rectangle(590, 446, 28, 28), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
             _shapeDrawer.FillRectangle(new Rectangle(626, 442, 36, 36), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
             _shapeDrawer.End();

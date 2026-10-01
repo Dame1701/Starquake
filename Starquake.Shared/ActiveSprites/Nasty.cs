@@ -708,7 +708,7 @@ public class Nasty : GameComponentBase
 
     private void DrawCoreGuardian(int nastyImage, int screenFade)
     {
-        _nastySprite.Begin(BlendState.Additive, SpriteSortMode.BackToFront);
+        _nastySprite.Begin(BlendState.Additive);
 
         // Choose the image
         _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
@@ -722,7 +722,7 @@ public class Nasty : GameComponentBase
     /// </summary>
     private void DrawBirth(int nastyImage, int screenFade)
     {
-        _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
+        _nastySprite.Begin(BlendState.AlphaBlend);
 
         // Choose the image
         _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
@@ -737,7 +737,7 @@ public class Nasty : GameComponentBase
         // Choose the image
         if (Smoking)
         {
-            _nastySprite.Begin(BlendState.Additive, SpriteSortMode.BackToFront);
+            _nastySprite.Begin(BlendState.Additive);
             _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
                 ColourHelper.GetXna4Colour(ShotNastyGrey, ShotNastyGrey, ShotNastyGrey, (byte)screenFade));
             _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
@@ -747,7 +747,7 @@ public class Nasty : GameComponentBase
         }
         else
         {
-            _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
+            _nastySprite.Begin(BlendState.AlphaBlend);
             _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
                 ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
         }
@@ -795,7 +795,7 @@ public class Nasty : GameComponentBase
 
         if (_deathFadeLevel > 0)
         {
-            _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
+            _nastySprite.Begin(BlendState.AlphaBlend);
             _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
                 ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
                     (byte)(_deathFadeLevel * ((double)screenFade / ColourLevels.Full))), _deathScale, DeathRotateSpeed,
@@ -806,7 +806,7 @@ public class Nasty : GameComponentBase
         if (_graphicsSet.IsOriginal)
         {
             _resources.GetSpriteCollection("BlobFire2Original")
-                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
+                .Begin(BlendState.AlphaBlend);
             _resources.GetSpriteCollection("BlobFire2Original").DrawSprite(
                 _nastyDiesAnimation.CurrentFrame, XPos, YPos,
                 ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, screenFade), 1f, 0f);

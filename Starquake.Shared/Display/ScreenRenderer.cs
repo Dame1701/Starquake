@@ -233,7 +233,7 @@ public class ScreenRenderer
         int objNo = 0;
 
         _resources.GetSpriteCollection(_graphicsSet.Names.Pickups)
-            .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
+            .Begin(BlendState.AlphaBlend);
         for (int y = 0; y < 3; y++)
         {
             for (int x = 0; x < 3; x++)
@@ -346,7 +346,7 @@ public class ScreenRenderer
         }
 
         SpriteCollection powerUps = _resources.GetSpriteCollection(_graphicsSet.Names.PowerUps);
-        powerUps.Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate);
+        powerUps.Begin(BlendState.AlphaBlend);
         powerUps.DrawSprite(powerUp.Type, powerUp.XLocation, powerUp.YLocation, colour);
         powerUps.End();
     }
@@ -359,7 +359,7 @@ public class ScreenRenderer
         }
 
         _resources.GetSpriteCollection(_graphicsSet.Names.Pickups)
-            .Begin(BlendState.AlphaBlend, SpriteSortMode.Immediate);
+            .Begin(BlendState.AlphaBlend);
         foreach (InteractiveItem pickUp in _screens[ScreenNumber].PickUps)
         {
             _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite(
@@ -380,7 +380,7 @@ public class ScreenRenderer
         SpriteCollection sprites = _resources.GetSpriteCollection(
             _graphicsSet.IsOriginal ? "CheopsPyramidOriginal" : "CheopsPyramid");
 
-        sprites.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
+        sprites.Begin(BlendState.AlphaBlend);
         sprites.DrawSprite(0, pyramid.XLocation, pyramid.YLocation, colour);
         sprites.End();
     }

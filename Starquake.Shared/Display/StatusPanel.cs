@@ -191,7 +191,7 @@ public class StatusPanel : GameComponentBase
 
     public override void Draw(GameTime gameTime)
     {
-        _resources.GetSpriteCollection("StatusPanelGraphic").Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
+        _resources.GetSpriteCollection("StatusPanelGraphic").Begin(BlendState.AlphaBlend);
         _resources.GetSpriteCollection("StatusPanelGraphic").DrawSprite(0, 0, 0, Color.White);
         _resources.GetSpriteCollection("StatusPanelGraphic").End();
 
@@ -199,7 +199,7 @@ public class StatusPanel : GameComponentBase
         if (_blobsInventory != null)
         {
             // Draw items
-            _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
+            _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).Begin(BlendState.AlphaBlend);
             for (int a = 0; a < _blobsInventory.Length; a++)
             {
                 // Draw numbers above object

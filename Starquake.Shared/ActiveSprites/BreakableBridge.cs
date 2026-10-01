@@ -70,13 +70,13 @@ public class BreakableBridge
 
             if (_graphicsSet.IsOriginal)
             {
-                _breakableBridgeOriginal.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
+                _breakableBridgeOriginal.Begin(BlendState.AlphaBlend);
                 _breakableBridgeOriginal.DrawSprite(0, 0, 0, _matrix.Matrix);
                 _breakableBridgeOriginal.End();
             }
             else
             {
-                _breakableBridge.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
+                _breakableBridge.Begin(BlendState.AlphaBlend);
                 _breakableBridge.DrawSprite(0, 0, 0, _matrix.Matrix);
                 _breakableBridge.End();
             }
@@ -84,7 +84,7 @@ public class BreakableBridge
             // Set the render targer back to the screen
             _screenEffects.SelectRenderViewPort("GameArea", false);
 
-            _textureDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+            _textureDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             _textureDrawer.Draw(
                 _renderTarget,
                 new Rectangle(_xPos + _breakableBridge.SpriteWidth / 2, _yPos + _breakableBridge.SpriteHeight / 2,

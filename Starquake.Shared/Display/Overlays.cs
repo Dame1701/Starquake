@@ -65,7 +65,7 @@ public class Overlays
 
     public static void Paused(int xPos, int yPos, Shapes shapeDrawer, BitmapFont font)
     {
-        shapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+        shapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
         shapeDrawer.FillRectangle(new Rectangle(0 + xPos, 0 + yPos, BannerWidth, BorderThickness), ColourHelper.GetXna4Colour(BorderRed, 0, 0, BannerAlpha));
         shapeDrawer.FillRectangle(new Rectangle(0 + xPos, BorderThickness + yPos, BorderThickness, PostHeight), ColourHelper.GetXna4Colour(BorderRed, 0, 0, BannerAlpha));
         shapeDrawer.FillRectangle(new Rectangle(PanelInset + xPos, PanelInset + yPos, PanelWidth, PanelHeight), ColourHelper.GetXna4Colour(PanelGrey, PanelGrey, PanelGrey, BannerAlpha));

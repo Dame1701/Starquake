@@ -1790,7 +1790,7 @@ public class Blob : GameComponentBase
     private void DrawBlobSprite(int screenFade)
     {
         _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites)
-            .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
+            .Begin(BlendState.AlphaBlend);
         _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites).DrawSprite(BlobFrame,
             _blobXPos, _blobYPos,
             ColourHelper.GetXna4Colour(ColourLevels.Full, (byte)_blobEnergyDrainCounter, (byte)_blobEnergyDrainCounter,
@@ -1805,7 +1805,7 @@ public class Blob : GameComponentBase
             if (_graphicsSet.IsOriginal)
             {
                 _resources.GetSpriteCollection("BlobShuttleOriginal")
-                    .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
+                    .Begin(BlendState.AlphaBlend);
                 _resources.GetSpriteCollection("BlobShuttleOriginal").DrawSprite(
                     _blobShuttleAnim.CurrentFrame, _blobXPos, _blobYPos + SpriteMetrics.SpriteHeight,
                     ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
@@ -1814,7 +1814,7 @@ public class Blob : GameComponentBase
             else
             {
                 _resources.GetSpriteCollection("BlobShuttle")
-                    .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
+                    .Begin(BlendState.AlphaBlend);
                 _resources.GetSpriteCollection("BlobShuttle").DrawSprite(0, _blobXPos,
                     _blobYPos + SpriteMetrics.SpriteHeight, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
                 _resources.GetSpriteCollection("BlobShuttle").End();
@@ -1841,7 +1841,7 @@ public class Blob : GameComponentBase
                 if (_blobOnShuttle)
                 {
                     _resources.GetSpriteCollection("BlobFire2Original")
-                        .Begin(BlendState.Additive, SpriteSortMode.BackToFront);
+                        .Begin(BlendState.Additive);
                     _resources.GetSpriteCollection("BlobFire2Original").DrawSprite(
                         _blobAnimFire1.CurrentFrame, BlobFireX, BlobFireY,
                         ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
@@ -1852,7 +1852,7 @@ public class Blob : GameComponentBase
                 else
                 {
                     _resources.GetSpriteCollection("BlobFire1")
-                        .Begin(BlendState.Additive, SpriteSortMode.BackToFront);
+                        .Begin(BlendState.Additive);
                     _resources.GetSpriteCollection("BlobFire1").DrawSprite(
                         _blobAnimFire1.CurrentFrame, BlobFireX, BlobFireY - FireOffset,
                         ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
@@ -1866,7 +1866,7 @@ public class Blob : GameComponentBase
                 if (_blobOnShuttle)
                 {
                     _resources.GetSpriteCollection("BlobFire2")
-                        .Begin(BlendState.Additive, SpriteSortMode.BackToFront);
+                        .Begin(BlendState.Additive);
                     _resources.GetSpriteCollection("BlobFire2").DrawSprite(
                         _blobAnimFire2.CurrentFrame, BlobFireX, BlobFireY,
                         ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
@@ -1909,7 +1909,7 @@ public class Blob : GameComponentBase
         if (_blobAlarmSoundCounter % 2 == 0)
         {
             _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites)
-                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
+                .Begin(BlendState.AlphaBlend);
             _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites).DrawSprite(
                 BlobFrame, _blobXPos, _blobYPos,
                 ColourHelper.GetXna4Colour(ColourLevels.Full, (byte)_blobEnergyDrainCounter, (byte)_blobEnergyDrainCounter,
@@ -1920,7 +1920,7 @@ public class Blob : GameComponentBase
         if (_blobOnShuttle)
         {
             _resources.GetSpriteCollection("BlobShuttle")
-                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
+                .Begin(BlendState.AlphaBlend);
             _resources.GetSpriteCollection("BlobShuttle").DrawSprite(0, _blobXPos,
                 _blobYPos + SpriteMetrics.SpriteHeight, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
             _resources.GetSpriteCollection("BlobShuttle").End();
@@ -1930,7 +1930,7 @@ public class Blob : GameComponentBase
     private void DrawOverloadFlare()
     {
         _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites)
-            .Begin(BlendState.Additive, SpriteSortMode.BackToFront);
+            .Begin(BlendState.Additive);
 
         float temp = _blobScale - OverloadFlareFirstScale;
         for (int a = 0; a < OverloadFlareCopies; a++)

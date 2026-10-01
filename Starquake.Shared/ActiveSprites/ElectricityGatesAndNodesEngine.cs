@@ -283,13 +283,13 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
                             {
                                 if (_graphicsSet.IsRedrawn)
                                 {
-                                    _resources.GetSpriteCollection("ElectricityNodeElectricity1").Begin(BlendState.Additive, SpriteSortMode.BackToFront);
+                                    _resources.GetSpriteCollection("ElectricityNodeElectricity1").Begin(BlendState.Additive);
                                     _resources.GetSpriteCollection("ElectricityNodeElectricity1").DrawSprite(_electricityAnimation.CurrentFrame, secondLayerTile.TileLocation.X + 28, secondLayerTile.TileLocation.Y - 18, Color.White);
                                     _resources.GetSpriteCollection("ElectricityNodeElectricity1").End();
                                 }
                                 else
                                 {
-                                    _resources.GetSpriteCollection("ElectricityOriginal").Begin(BlendState.Additive, SpriteSortMode.BackToFront);
+                                    _resources.GetSpriteCollection("ElectricityOriginal").Begin(BlendState.Additive);
                                     _resources.GetSpriteCollection("ElectricityOriginal").DrawSprite(_electricityAnimationOriginal.CurrentFrame, secondLayerTile.TileLocation.X + OriginalArcXOffset, secondLayerTile.TileLocation.Y - OriginalNodeArcYRise, Color.White);
                                     _resources.GetSpriteCollection("ElectricityOriginal").End();
                                 }
@@ -310,13 +310,13 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
                             {
                                 if (_graphicsSet.IsRedrawn)
                                 {
-                                    _resources.GetSpriteCollection("ElectricityNodeElectricity1").Begin(BlendState.Additive, SpriteSortMode.BackToFront);
+                                    _resources.GetSpriteCollection("ElectricityNodeElectricity1").Begin(BlendState.Additive);
                                     _resources.GetSpriteCollection("ElectricityNodeElectricity1").DrawSprite(_electricityAnimation.CurrentFrame, secondLayerTile.TileLocation.X + 28, secondLayerTile.TileLocation.Y + 14, Color.White);
                                     _resources.GetSpriteCollection("ElectricityNodeElectricity1").End();
                                 }
                                 else
                                 {
-                                    _resources.GetSpriteCollection("ElectricityOriginal").Begin(BlendState.Additive, SpriteSortMode.BackToFront);
+                                    _resources.GetSpriteCollection("ElectricityOriginal").Begin(BlendState.Additive);
                                     _resources.GetSpriteCollection("ElectricityOriginal").DrawSprite(_electricityAnimationOriginal.CurrentFrame, secondLayerTile.TileLocation.X + OriginalArcXOffset, secondLayerTile.TileLocation.Y + OriginalGateArcYOffset, Color.White);
                                     _resources.GetSpriteCollection("ElectricityOriginal").End();
                                 }
@@ -425,7 +425,7 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
                 new Point(nasty.XLocation + ConveyerGateLightXOffset, nasty.YLocation + GateLightYOffset));
 
             _resources.GetSpriteCollection("ElectricityNodeElectricity1")
-                .Begin(BlendState.Additive, SpriteSortMode.BackToFront);
+                .Begin(BlendState.Additive);
             _resources.GetSpriteCollection("ElectricityNodeElectricity1")
                 .DrawSprite(
                     _electricityAnimation.CurrentFrame,
@@ -446,7 +446,7 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
     {
         SpriteCollection lights = _resources.GetSpriteCollection(spriteName);
 
-        lights.Begin(BlendState.Additive, SpriteSortMode.BackToFront);
+        lights.Begin(BlendState.Additive);
 
         foreach (Point at in new[]
                  {
@@ -465,7 +465,7 @@ public class ElectricityGatesAndNodesEngine : GameComponentBase
     {
         SpriteCollection arc = _resources.GetSpriteCollection(spriteName);
 
-        arc.Begin(BlendState.Additive, SpriteSortMode.BackToFront);
+        arc.Begin(BlendState.Additive);
         arc.DrawSprite(frame, at.X, at.Y, Color.White);
         arc.End();
     }

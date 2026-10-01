@@ -207,7 +207,7 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
             _font.WriteText(310, 500, "ACCESS AUTHORISED", 2, new Color(0, ColourLevels.Full, 0), (byte)_resultMessageFade);
             _font.End();
 
-            _shapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+            _shapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             _shapeDrawer.FillRectangle(new Rectangle(756, 504, 28, 28), new Color(0, (byte)_resultMessageFade, 0));
             _shapeDrawer.FillRectangle(new Rectangle(792, 500, 36, 36), new Color(0, (byte)_resultMessageFade, 0));
             _shapeDrawer.FillRectangle(new Rectangle(836, 498, 40, 40), new Color(0, (byte)_resultMessageFade, 0));
@@ -232,7 +232,7 @@ public class AccessBoothScreen : GameComponentBase, IGameScreen
             _font.WriteText(300, 500, "ACCESS CODE INVALID", 2, Color.Red, (byte)_resultMessageFade);
             _font.End();
 
-            _shapeDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+            _shapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             _shapeDrawer.FillRectangle(new Rectangle(746, 504, 28, 28), new Color(_resultMessageFade, 0, 0, 0));
             _shapeDrawer.FillRectangle(new Rectangle(782, 500, 36, 36), new Color(_resultMessageFade, 0, 0, 0));
             _shapeDrawer.FillRectangle(new Rectangle(826, 498, 40, 40), new Color(_resultMessageFade, 0, 0, 0));

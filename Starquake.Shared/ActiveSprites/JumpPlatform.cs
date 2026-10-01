@@ -145,7 +145,7 @@ internal class JumpPlatform
 
             if (_dissolveTime > 0)
             {
-                _textureDrawer.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+                _textureDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
 
                 _textureDrawer.Draw(
                     _renderTarget,

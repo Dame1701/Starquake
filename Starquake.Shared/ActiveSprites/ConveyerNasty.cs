@@ -237,7 +237,7 @@ public class ConveyerNasty : GameComponentBase
 
             if (_deathFadeLevel > 0)
             {
-                _nastySprite.Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
+                _nastySprite.Begin(BlendState.AlphaBlend);
                 _nastySprite.DrawSprite(_anim.CurrentFrame, XLocation, YLocation + HangsBelowRailBy, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)(_deathFadeLevel * ((double)screenFade / ColourLevels.Full))), _deathScale, 0f);
                 _nastySprite.End();
             }

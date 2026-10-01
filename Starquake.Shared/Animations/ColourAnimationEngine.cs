@@ -202,7 +202,7 @@ public class ColourAnimationEngine : GameComponentBase
 
     public override void Draw(GameTime gameTime)
     {
-        _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).Begin(BlendState.Additive, SpriteSortMode.BackToFront);
+        _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles).Begin(BlendState.Additive);
 
         for (int y = 0; y < _gameScreens.TilesDown; y++)
         {
@@ -230,7 +230,7 @@ public class ColourAnimationEngine : GameComponentBase
 
     public void Draw(SpriteCollection sprites)
     {
-        sprites.Begin(BlendState.Additive, SpriteSortMode.BackToFront);
+        sprites.Begin(BlendState.Additive);
 
         for (int y = 0; y < _gameScreens.TilesDown; y++)
         {
@@ -259,7 +259,7 @@ public class ColourAnimationEngine : GameComponentBase
 
     public void DrawUpperLayer()
     {
-        _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).Begin(BlendState.Additive, SpriteSortMode.BackToFront);
+        _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).Begin(BlendState.Additive);
 
         for (int y = 0; y < _gameScreens.TilesDown; y++)
         {

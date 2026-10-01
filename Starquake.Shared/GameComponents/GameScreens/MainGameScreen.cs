@@ -575,7 +575,7 @@ public class MainGameScreen : GameComponentBase, IGameScreen
             int screenXPos = GameEngine.GameScreens.ScreenNumber % WorldMap.ScreensAcross;
 
             GameEngine.ContentResourceManager.GetSpriteCollection("Background1")
-                .Begin(BlendState.AlphaBlend, SpriteSortMode.BackToFront);
+                .Begin(BlendState.AlphaBlend);
             GameEngine.ContentResourceManager.GetSpriteCollection("Background1").DrawSprite(0, screenXPos * BackgroundParallaxStep,
                 0, new Color((byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)(BackgroundOpacity / ColourLevels.Full * ScreenFade)));
             GameEngine.ContentResourceManager.GetSpriteCollection("Background1").End();
