@@ -252,6 +252,8 @@ internal class ScreenRenderer
         DrawLowerTiles(colour);
         DrawTileAnimations(colour);
 
+        _colourAnimations.Draw();
+
         // The intro sequence flies over a screen whose objects have not been placed yet
         bool objectsArePlaced = !introSequenceRunning || introSequenceStage == IntroSequenceStage.EndPause;
 
