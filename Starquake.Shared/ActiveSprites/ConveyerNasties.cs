@@ -20,8 +20,6 @@ internal class ConveyerNasties : GameComponentBase
     private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
 
-    #region IGameComponent Members
-
     public event RaiseInteractionWithBlob? OnNastyInteractionWithBlob;
 
     public List<ConveyerNasty> Nasties { get; }
@@ -194,7 +192,5 @@ internal class ConveyerNasties : GameComponentBase
             }
         }
     }
-
-    #endregion
 
 }

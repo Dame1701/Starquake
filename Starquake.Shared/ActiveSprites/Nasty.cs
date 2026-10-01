@@ -282,8 +282,6 @@ internal class Nasty : GameComponentBase
         }
     }
 
-    #region IGameComponent Members
-
     private Point GetNastySpawnLocation()
     {
         // Get all locations where we can have nasties from the current game screen
@@ -811,7 +809,5 @@ internal class Nasty : GameComponentBase
             blobFire2Original.End();
         }
     }
-
-    #endregion
 
 }

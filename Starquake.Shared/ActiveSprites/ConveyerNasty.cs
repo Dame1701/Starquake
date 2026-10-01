@@ -59,8 +59,6 @@ internal class ConveyerNasty : GameComponentBase
         set => _anim.Delay = value;
     }
 
-    #region IGameComponent Members
-
     private readonly SpriteCollection _nastySprite;
     private readonly IStandardParticleEffect _conveyerNastyDies;
 
@@ -242,7 +240,5 @@ internal class ConveyerNasty : GameComponentBase
             }
         }
     }
-
-    #endregion
 
 }

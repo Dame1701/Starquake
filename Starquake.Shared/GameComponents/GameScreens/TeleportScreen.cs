@@ -40,8 +40,6 @@ internal class TeleportScreen : GameComponentBase, IGameScreen
 
     #endregion
 
-    #region IGameComponent Members
-
     private readonly Dictionary<int, string> _teleportCodes;
     /// <summary>
     ///     The destination code as typed so far, one underscore per letter still to be entered.
@@ -475,7 +473,5 @@ internal class TeleportScreen : GameComponentBase, IGameScreen
         teleporterPowerSupply.DrawSprite(0, 754, 6, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_powerSupplyFader.FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
         teleporterPowerSupply.End();
     }
-
-    #endregion
 
 }

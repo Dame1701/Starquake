@@ -141,16 +141,6 @@ internal class CoreElement
         }
     }
 
-    public void Initialise()
-    {
-
-    }
-
-    public void PerformPostChangeScreenActions()
-    {
-
-    }
-
     public void Update(GameTime gameTime)
     {
         if (ElementState == CoreElementState.Missing)

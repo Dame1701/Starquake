@@ -88,8 +88,6 @@ internal class Nasties : GameComponentBase
     }
     public event RaiseInteractionWithBlob? OnNastyInteractionWithBlob;
 
-    #region IGameComponent Members
-
     public override void LoadContent()
     {
         // Create double the number needed for screen swap operations
@@ -438,7 +436,5 @@ internal class Nasties : GameComponentBase
             }
         }
     }
-
-    #endregion
 
 }

@@ -173,8 +173,6 @@ internal class MainGameScreen : GameComponentBase, IGameScreen
         ScreenFadeSpeed = 12;
     }
 
-    #region IGameComponent Members
-
     public MainGameScreen(GameEngine gameEngineReference)
     {
         GameEngine = gameEngineReference;
@@ -626,7 +624,5 @@ internal class MainGameScreen : GameComponentBase, IGameScreen
             }
         }
     }
-
-    #endregion
 
 }

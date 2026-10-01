@@ -114,8 +114,6 @@ internal class ElectricityGatesAndNodesEngine : GameComponentBase
     private List<SecondLayerTile>? _secondLayerTiles;
     public ElectricityRandomiser[]? ElectricityNodeControllers { get; private set; }
 
-    #region IGameComponent Members
-
     public event EventHandler? OnBlobStruckByElectricity;
 
     public ElectricityGatesAndNodesEngine(
@@ -485,7 +483,5 @@ internal class ElectricityGatesAndNodesEngine : GameComponentBase
 
         return controllers;
     }
-
-    #endregion
 
 }

@@ -106,8 +106,6 @@ internal class StatusPanel : GameComponentBase
 
     public int Height => _resources.GetSpriteCollection("StatusPanelGraphic").SpriteHeight;
 
-    #region IGameComponent Members
-
     public StatusPanel(
         ResourceManager resources,
         GraphicsSet graphicsSet,
@@ -122,17 +120,6 @@ internal class StatusPanel : GameComponentBase
 
         _inventoryScanner = new KeyScanner(resources, graphicsSet, randomNumberGenerator, false);
     }
-
-    public void Initialise()
-    {
-
-    }
-
-    public void PerformPostChangeScreenActions()
-    {
-        throw new NotImplementedException();
-    }
-
 
     /// <summary>
     ///     Steps the panel. Takes the blob rather than holding it, and is told whether the intro is
@@ -253,7 +240,5 @@ internal class StatusPanel : GameComponentBase
         statusPanelOverlay.DrawSprite(0, 22, 26, Color.White);
         statusPanelOverlay.End();
     }
-
-    #endregion
 
 }
