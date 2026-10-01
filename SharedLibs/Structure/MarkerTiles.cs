@@ -56,7 +56,14 @@ public enum MarkerTile
     ///     the wreck smokes here for the rest of the game, so it belongs on the same screen as
     ///     <see cref="BlobStartPosition" /> - the blob climbs out of the wreck it arrived in.
     /// </summary>
-    ShipCrashSite = 504
+    ShipCrashSite = 504,
+
+    /// <summary>
+    ///     Where the blob is put down on leaving the planet core. The screen this is on is the one the
+    ///     core keeps running for and the one nasties are disabled on, so it is the core's doorstep
+    ///     rather than merely a position - see <see cref="CoreExit" />.
+    /// </summary>
+    CoreExitPosition = 505
 }
 
 /// <summary>
@@ -76,11 +83,13 @@ public static class MarkerTiles
 
     /// <summary>
     ///     Whether there is meant to be exactly one of a marker on the whole planet. The landing site
-    ///     is the only thing that works that way - a game opens on one screen, so there is one start
-    ///     position and one wreck - and the screen editor is what holds the map to it.
+    ///     and the core's doorstep work that way - a game opens on one screen and there is one core to
+    ///     step out of - and the screen editor is what holds the map to it.
     /// </summary>
     public static bool IsOnePerMap(MarkerTile marker)
-        => marker is MarkerTile.BlobStartPosition or MarkerTile.ShipCrashSite;
+        => marker is MarkerTile.BlobStartPosition
+            or MarkerTile.ShipCrashSite
+            or MarkerTile.CoreExitPosition;
 
     /// <summary>
     ///     Whether a tile number is a marker. Asked once per tile per frame while a screen is drawn and

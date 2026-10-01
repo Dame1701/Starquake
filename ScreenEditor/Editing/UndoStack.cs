@@ -2,6 +2,8 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+using Starquake.SharedLibs;
+
 namespace Starquake.ScreenEditor.Editing;
 
 /// <summary>
@@ -67,6 +69,23 @@ internal sealed class TeleportCodeEdit(int screen, string? oldCode, string? newC
     public void Undo(EditorDocument document) => document.SetTeleportCode(screen, oldCode);
 
     public void Redo(EditorDocument document) => document.SetTeleportCode(screen, newCode);
+}
+
+/// <summary>
+///     The planet core moving. Null on either side is a map that does not place it and so falls back to
+///     where the game used to keep it.
+/// </summary>
+internal sealed class CoreEdit(
+    int oldScreen,
+    CorePlacement? oldPlacement,
+    int newScreen,
+    CorePlacement? newPlacement) : IEdit
+{
+    public string Name => "core position";
+
+    public void Undo(EditorDocument document) => document.SetCore(oldScreen, oldPlacement);
+
+    public void Redo(EditorDocument document) => document.SetCore(newScreen, newPlacement);
 }
 
 /// <summary>

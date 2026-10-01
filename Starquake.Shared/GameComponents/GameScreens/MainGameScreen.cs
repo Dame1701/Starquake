@@ -145,7 +145,9 @@ internal class MainGameScreen : IGameScreen
             GameEngine.Stats.PlayerScore += ScoreForReachingCore;
         }
 
-        if (GameEngine.GameScreens.ScreenNumber == WorldMap.CoreScreenNumber)
+        // Walking onto the screen that carries the core hands over to the core screen entirely. Which
+        // screen that is comes off the map.
+        if (GameEngine.GameScreens.ScreenNumber == GameEngine.GameScreens.CoreSite.ScreenNumber)
         {
             GameEngine.ScreenDirectory.Current = GameScreenType.PlanetCore;
         }

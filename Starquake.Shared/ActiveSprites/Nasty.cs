@@ -412,12 +412,12 @@ internal class Nasty
 
     public void Update(GameTime gameTime)
     {
-        if (_gameScreens.ScreenNumber == WorldMap.CoreApproachScreenNumber)
+        if (_gameScreens.ScreenNumber == _gameScreens.CoreExit.ScreenNumber)
         {
             NastyState = NastyState.Disabled;
         }
 
-        if (_gameScreens.ScreenNumber == WorldMap.CoreScreenNumber)
+        if (_gameScreens.ScreenNumber == _gameScreens.CoreSite.ScreenNumber)
         {
             NastyType = NastyType.CoreGuardian;
             Movement.StopChasing();

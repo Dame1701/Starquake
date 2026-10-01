@@ -34,5 +34,16 @@ internal enum EditorTool
     /// <summary>
     ///     Selects whatever tile the pointer is over, so it can be painted elsewhere.
     /// </summary>
-    Pick
+    Pick,
+
+    /// <summary>
+    ///     Puts the planet core where the pointer is, and drags it about.
+    /// </summary>
+    /// <remarks>
+    ///     The one tool that does not work on the tile grid. The core is a position rather than a tile -
+    ///     it is one and a half tiles across and has never been tile-aligned - so this places it at
+    ///     <see cref="Starquake.Structure.CoreSite.PositionStep" /> resolution instead, and there is one
+    ///     core on a planet so placing it anywhere moves it from wherever it was.
+    /// </remarks>
+    Core
 }

@@ -103,6 +103,7 @@ internal class WorldPopulator
     private static readonly HashSet<int> TilesNothingMayBePlacedOn = BuildTilesNothingMayBePlacedOn();
 
     private readonly ScreenCollisionMap _collisions;
+    private readonly int _coreScreen;
     private readonly Random _randomNumberGenerator;
     private readonly GameScreenData[] _screens;
 
@@ -111,6 +112,10 @@ internal class WorldPopulator
         _screens = screens;
         _collisions = collisions;
         _randomNumberGenerator = randomNumberGenerator;
+
+        // The screen the core is on is seeded by the core itself and left out of the scatter. Read off
+        // the map, because the author chooses which screen that is.
+        _coreScreen = CoreSite.FindIn(screens).ScreenNumber;
     }
 
     /// <summary>
@@ -168,7 +173,7 @@ internal class WorldPopulator
     private void PlaceBehindNoGate(Collectables item, Gate gate)
     {
         List<int> candidates = GateFreeScreens.Find(_screens, _collisions, gate)
-            .Where(screen => screen != WorldMap.CoreScreenNumber)
+            .Where(screen => screen != _coreScreen)
             .ToList();
 
         while (candidates.Count > 0)
@@ -279,7 +284,7 @@ internal class WorldPopulator
         for (int a = 0; a < _screens.Length; a++)
         {
             // The core screen is seeded differently and is left out of the scatter
-            if (a == WorldMap.CoreScreenNumber)
+            if (a == _coreScreen)
             {
                 continue;
             }

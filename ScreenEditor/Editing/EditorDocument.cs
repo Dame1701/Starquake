@@ -75,6 +75,12 @@ internal sealed class EditorDocument
     public event Action<int>? CollisionMaskChanged;
 
     /// <summary>
+    ///     Raised whenever the planet core moves. Nothing else on a screen is drawn from it, but it is
+    ///     outlined on the canvas and described in the panel, and both have to keep up with an undo.
+    /// </summary>
+    public event Action? CoreChanged;
+
+    /// <summary>
     ///     Raised whenever a screen's teleport code changes. Nothing is drawn from it, but the screen
     ///     it belongs to is described in two places that have to keep up with an undo.
     /// </summary>
@@ -126,6 +132,33 @@ internal sealed class EditorDocument
     /// </summary>
     public MarkerPlacement? FindMarker(MarkerTile marker)
         => MarkerTiles.Locate(Screens, marker);
+
+    /// <summary>
+    ///     Where the planet core is, or where the game would fall back to if the map does not say.
+    /// </summary>
+    public CoreSite FindCore() => CoreSite.FindIn(Screens);
+
+    /// <summary>
+    ///     Puts the core on a screen at a position, taking it off whatever screen had it. There is one
+    ///     core on a planet, so this moves it rather than adding another - and the moving is
+    ///     <see cref="CoreSite.PlaceOn" />'s, because it is a rule about the map rather than about
+    ///     editing one.
+    /// </summary>
+    public void SetCore(int screen, CorePlacement? placement)
+    {
+        if (!CoreSite.PlaceOn(Screens, screen, placement))
+        {
+            return;
+        }
+
+        IsDirty = true;
+        CoreChanged?.Invoke();
+    }
+
+    /// <summary>
+    ///     How many screens carry a core, which should only ever be nought or one.
+    /// </summary>
+    public int CoreCount => CoreSite.CountOn(Screens);
 
     /// <summary>
     ///     The destination code that reaches a screen's teleport booth, or null for a screen that has

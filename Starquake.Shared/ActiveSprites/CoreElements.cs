@@ -18,16 +18,15 @@ internal class CoreElements
     ///     The core is a three by three block of elements sitting in the middle of the core room.
     ///     Each element is drawn a sprite apart, and the whole block starts here.
     /// </summary>
-    private const int CoreGridAcross = 3;
+    /// <summary>
+    ///     How many elements the core is across and down. Read from <see cref="CoreSite" /> rather than
+    ///     said again here, because the screen editor outlines the same area and the two must agree.
+    ///     Where the core sits is no longer here at all: it is on the map, and is passed in.
+    /// </summary>
+    private const int CoreGridAcross = CoreSite.SpritesAcross;
 
     /// <inheritdoc cref="CoreGridAcross" />
-    private const int CoreGridDown = 3;
-
-    /// <inheritdoc cref="CoreGridAcross" />
-    private const int CoreXPos = 416;
-
-    /// <inheritdoc cref="CoreGridAcross" />
-    private const int CoreYPos = 192;
+    private const int CoreGridDown = CoreSite.SpritesDown;
 
     /// <summary>
     ///     What finishing the core is worth.
@@ -156,11 +155,9 @@ internal class CoreElements
         return elementsReplaced;
     }
 
-    public List<CollisionTile> GetCollisionMap()
+    public List<CollisionTile> GetCollisionMap(int coreX, int coreY)
     {
         var toReturn = new List<CollisionTile>();
-        int coreX = CoreXPos;
-        int coreY = CoreYPos;
 
         for (int y = 0; y < CoreGridDown; y++)
         {
@@ -184,10 +181,8 @@ internal class CoreElements
         }
     }
 
-    public void Draw(bool replacingElement)
+    public void Draw(int coreX, int coreY, bool replacingElement)
     {
-        int coreX = CoreXPos;
-        int coreY = CoreYPos;
         int counter = 0;
 
         for (int y = 0; y < CoreGridDown; y++)

@@ -12,6 +12,7 @@ using Starquake.Constants;
 using Starquake.ScreenEditor.Content;
 using Starquake.ScreenEditor.Editing;
 using Starquake.ScreenEditor.Styles;
+using Starquake.SharedLibs;
 using Starquake.Structure;
 
 namespace Starquake.ScreenEditor.Controls;
@@ -36,6 +37,19 @@ internal sealed class ScreenCanvas : Control
     /// </summary>
     private const int NeighbourTiles = 1;
 
+    /// <summary>
+    ///     How many chequer squares make up one collision cell, each way. Two, so the square is sixteen
+    ///     game pixels - fine enough to read as a texture rather than as blocks, and an even number of
+    ///     squares to a tile either way, which is what lets the pattern carry across a tile boundary.
+    /// </summary>
+    private const int ChequerSquaresPerCell = 2;
+
+    /// <inheritdoc cref="ChequerSquaresPerCell" />
+    private const int ChequerSquaresAcrossTile = TileMetrics.CollisionCellsAcrossTile * ChequerSquaresPerCell;
+
+    /// <inheritdoc cref="ChequerSquaresPerCell" />
+    private const int ChequerSquaresDownTile = TileMetrics.CollisionCellsDownTile * ChequerSquaresPerCell;
+
     public static readonly StyledProperty<EditorSession?> SessionProperty =
         AvaloniaProperty.Register<ScreenCanvas, EditorSession?>(nameof(Session));
 
@@ -47,6 +61,14 @@ internal sealed class ScreenCanvas : Control
     /// </summary>
     private static readonly Typeface CodeTypeface = new(FontFamily.Default, FontStyle.Normal, FontWeight.SemiBold);
 
+    /// <summary>
+    ///     The planet core's area: a wash with the nine elements picked out inside it.
+    /// </summary>
+    private static readonly IBrush CoreFillBrush = new SolidColorBrush(EditorColours.Accent, 0.16);
+
+    /// <inheritdoc cref="CoreFillBrush" />
+    private static readonly IPen CoreElementPen = new Pen(new SolidColorBrush(EditorColours.Accent, 0.5));
+
     private EditorSession? _attached;
 
     private int _hoverX = -1;
@@ -54,6 +76,14 @@ internal sealed class ScreenCanvas : Control
     private int _hoverY = -1;
 
     private EditorTool _strokeTool;
+
+    private bool _placingCore;
+
+    /// <summary>
+    ///     Where the pointer is in the screen's own pixels, or null when it is off the screen. The tile
+    ///     the pointer is over is not enough for the core, which is placed between tiles.
+    /// </summary>
+    private Point? _pointerOnScreen;
 
     private bool _stroking;
 
@@ -108,6 +138,8 @@ internal sealed class ScreenCanvas : Control
             DrawTileNumbers(context, session, layout);
         }
 
+        DrawCore(context, session, layout);
+
         DrawTeleportCodes(context, session, layout);
 
         DrawHover(context, session, layout);
@@ -155,6 +187,21 @@ internal sealed class ScreenCanvas : Control
         }
 
         _strokeTool = ToolFor(point, e.KeyModifiers, session.Tool);
+
+        // The core is a position rather than a tile, so it is placed from the pointer in screen pixels
+        // and does not go through the tile-based tools at all.
+        if (_strokeTool == EditorTool.Core)
+        {
+            _placingCore = true;
+            session.Undo.Begin("core position");
+            PlaceCore(session, point.Position);
+
+            e.Pointer.Capture(this);
+            e.Handled = true;
+
+            return;
+        }
+
         _stroking = true;
 
         session.Undo.Begin(DescribeStroke(_strokeTool));
@@ -174,16 +221,29 @@ internal sealed class ScreenCanvas : Control
             return;
         }
 
-        bool inside = TryHitTest(e.GetPosition(this), out int x, out int y);
+        Point position = e.GetPosition(this);
+        bool inside = TryHitTest(position, out int x, out int y);
         bool moved = inside ? x != _hoverX || y != _hoverY : _hoverX >= 0;
 
         _hoverX = inside ? x : -1;
         _hoverY = inside ? y : -1;
 
-        if (moved)
+        // The core is placed between tiles, so following it needs a repaint per pixel rather than per
+        // tile - but only while its tool is in hand, or every other tool would repaint far more often
+        // than it has any reason to.
+        Point? previous = _pointerOnScreen;
+        _pointerOnScreen = inside ? ScreenPixel(session, position) : null;
+
+        if (moved || (session.Tool == EditorTool.Core && _pointerOnScreen != previous))
         {
             ReportHover(session);
             InvalidateVisual();
+        }
+
+        if (_placingCore)
+        {
+            PlaceCore(session, e.GetPosition(this));
+            return;
         }
 
         // Dragging paints a trail; the other two tools would either repeat themselves pointlessly
@@ -215,6 +275,7 @@ internal sealed class ScreenCanvas : Control
 
         _hoverX = -1;
         _hoverY = -1;
+        _pointerOnScreen = null;
 
         if (Session is not null)
         {
@@ -283,13 +344,28 @@ internal sealed class ScreenCanvas : Control
 
     private void EndStroke()
     {
-        if (!_stroking)
+        if (!_stroking && !_placingCore)
         {
             return;
         }
 
         _stroking = false;
+        _placingCore = false;
         Session?.Undo.Commit();
+    }
+
+    /// <summary>
+    ///     Puts the core where the pointer is, measured in the screen's own pixels so that the position
+    ///     means the same thing whatever size the canvas is drawn at. The pointer is taken as the middle
+    ///     of the core rather than its corner, which is how dragging something about ought to feel.
+    /// </summary>
+    private void PlaceCore(EditorSession session, Point position)
+    {
+        Point pixel = ScreenPixel(session, position);
+
+        session.PlaceCore(
+            (int)pixel.X - CoreSite.AreaWidth / 2,
+            (int)pixel.Y - CoreSite.AreaHeight / 2);
     }
 
     private void Reattach(EditorSession? session)
@@ -355,6 +431,16 @@ internal sealed class ScreenCanvas : Control
             status += "  ·  code " + (session.CurrentTeleportCode ?? "not set") + "  ·  shift-click to set";
         }
 
+        // The core is not a tile, so nothing above would mention it. Worth saying where the pointer is
+        // over it, because that is the only way to tell it apart from the scenery underneath.
+        CoreSite core = session.Core;
+
+        if (core.ScreenNumber == session.CurrentScreen)
+        {
+            status += "  ·  core at " + core.XPos + ", " + core.YPos +
+                      (session.CoreIsPlaced ? string.Empty : " (not placed - this is the fallback)");
+        }
+
         session.HoverStatus = status;
     }
 
@@ -386,7 +472,7 @@ internal sealed class ScreenCanvas : Control
 
                 if (tile == EditorDocument.EmptyTile)
                 {
-                    DrawEmptyTile(context, layout, destination);
+                    DrawEmptyTile(context, layout, destination, x, y);
                     continue;
                 }
 
@@ -396,16 +482,28 @@ internal sealed class ScreenCanvas : Control
     }
 
     /// <summary>
-    ///     Fills a tile position that holds nothing with a chequer on the collision grid, which both
-    ///     marks it as a hole and shows the grid the collision map is built on.
+    ///     Fills a tile position that holds nothing with a chequer, which marks it as a hole.
     /// </summary>
-    private static void DrawEmptyTile(DrawingContext context, Layout layout, Rect destination)
+    /// <remarks>
+    ///     The square is half a collision cell, and which squares are filled is worked out from the
+    ///     position on the screen rather than within the tile. Both of those are about the pattern
+    ///     running on across a tile boundary. It used to be a whole cell and counted from the tile's own
+    ///     corner, and a tile is three cells down - an odd number, so every tile below the first started
+    ///     the pattern out of phase and two rows of the same colour met at the seam. Halving the square
+    ///     makes the count even either way; counting from the screen is what makes it not matter.
+    /// </remarks>
+    private static void DrawEmptyTile(DrawingContext context, Layout layout, Rect destination, int tileX, int tileY)
     {
-        for (int cellY = 0; cellY < TileMetrics.CollisionCellsDownTile; cellY++)
+        double square = layout.Cell / ChequerSquaresPerCell;
+
+        for (int down = 0; down < ChequerSquaresDownTile; down++)
         {
-            for (int cellX = 0; cellX < TileMetrics.CollisionCellsAcrossTile; cellX++)
+            for (int across = 0; across < ChequerSquaresAcrossTile; across++)
             {
-                if ((cellX + cellY) % 2 != 0)
+                int screenX = tileX * ChequerSquaresAcrossTile + across;
+                int screenY = tileY * ChequerSquaresDownTile + down;
+
+                if ((screenX + screenY) % 2 != 0)
                 {
                     continue;
                 }
@@ -413,10 +511,10 @@ internal sealed class ScreenCanvas : Control
                 context.FillRectangle(
                     EditorColours.VoidChequerBrush,
                     new Rect(
-                        destination.X + cellX * layout.Cell,
-                        destination.Y + cellY * layout.Cell,
-                        layout.Cell,
-                        layout.Cell));
+                        destination.X + across * square,
+                        destination.Y + down * square,
+                        square,
+                        square));
             }
         }
     }
@@ -637,6 +735,85 @@ internal sealed class ScreenCanvas : Control
         }
     }
 
+    /// <summary>
+    ///     The planet core's area, outlined where it sits on this screen, with the nine elements it holds
+    ///     marked out inside it.
+    /// </summary>
+    /// <remarks>
+    ///     Drawn rather than described because the core is the one authored thing that is not a tile: it
+    ///     is one and a half tiles across by two down and sits at a position of its own, so the only way
+    ///     to see whether it fits the room around it is to see it. An unplaced core is drawn faintly at
+    ///     the position the game would fall back to.
+    /// </remarks>
+    private static void DrawCore(DrawingContext context, EditorSession session, Layout layout)
+    {
+        CoreSite core = session.Core;
+
+        if (core.ScreenNumber != session.CurrentScreen)
+        {
+            return;
+        }
+
+        using DrawingContext.PushedState faded = context.PushOpacity(session.CoreIsPlaced ? 1 : 0.45);
+
+        DrawCoreArea(context, CoreArea(layout, core.XPos, core.YPos));
+    }
+
+    /// <summary>
+    ///     The core as the canvas draws it, wherever it is being drawn: a wash, the nine elements picked
+    ///     out inside it, and an edge. One method, so the core following the pointer is the same picture
+    ///     as the core already placed rather than a sketch of it.
+    /// </summary>
+    private static void DrawCoreArea(DrawingContext context, Rect area)
+    {
+        context.FillRectangle(CoreFillBrush, area);
+
+        double element = area.Width / CoreSite.SpritesAcross;
+
+        for (int down = 0; down < CoreSite.SpritesDown; down++)
+        {
+            for (int across = 0; across < CoreSite.SpritesAcross; across++)
+            {
+                context.DrawRectangle(null, CoreElementPen, new Rect(
+                    area.X + across * element,
+                    area.Y + down * element,
+                    element,
+                    element));
+            }
+        }
+
+        context.DrawRectangle(null, EditorColours.AccentPen, area);
+    }
+
+    /// <summary>
+    ///     Where a core at a screen position lands on the canvas.
+    /// </summary>
+    private static Rect CoreArea(Layout layout, int xPos, int yPos)
+    {
+        double scale = layout.Screen.Width / TileMetrics.PlayAreaWidth;
+
+        return new Rect(
+            layout.Screen.X + xPos * scale,
+            layout.Screen.Y + yPos * scale,
+            CoreSite.AreaWidth * scale,
+            CoreSite.AreaHeight * scale);
+    }
+
+    /// <summary>
+    ///     A pointer position in the screen's own pixels, which is what the core is placed in. An
+    ///     instance method rather than a static one because it needs the control's size to know what the
+    ///     canvas is drawn at.
+    /// </summary>
+    private Point ScreenPixel(EditorSession session, Point position)
+    {
+        Layout layout = Layout.For(Bounds.Size, session.ShowNeighbours);
+        double scale = layout.Screen.Width / TileMetrics.PlayAreaWidth;
+
+        return new Point(
+            (position.X - layout.Screen.X) / scale,
+            (position.Y - layout.Screen.Y) / scale);
+    }
+
     private void DrawHover(DrawingContext context, EditorSession session, Layout layout)
     {
         if (_hoverX < 0 || _hoverY < 0)
@@ -644,8 +821,27 @@ internal sealed class ScreenCanvas : Control
             return;
         }
 
+        EditorTool tool = _stroking || _placingCore ? _strokeTool : session.Tool;
+
+        // The core is not a tile, so its ghost is the core itself at the position it would land on -
+        // snapped exactly as placing it would snap, so what is shown is what would be stamped down.
+        if (tool == EditorTool.Core)
+        {
+            if (_pointerOnScreen is { } pointer)
+            {
+                CorePlacement landing = CoreSite.Snap(
+                    (int)pointer.X - CoreSite.AreaWidth / 2,
+                    (int)pointer.Y - CoreSite.AreaHeight / 2);
+
+                using DrawingContext.PushedState ghost = context.PushOpacity(0.55);
+
+                DrawCoreArea(context, CoreArea(layout, landing.XPos, landing.YPos));
+            }
+
+            return;
+        }
+
         Rect destination = layout.TileRect(_hoverX, _hoverY);
-        EditorTool tool = _stroking ? _strokeTool : session.Tool;
 
         // A ghost of what is about to be laid down beats guessing from a swatch on the far side of
         // the window whether the tile in hand is the right one.

@@ -43,6 +43,15 @@ public sealed class GameScreenData
     [Key(2)]
     public string? TeleportCode { get; set; }
 
+    /// <summary>
+    ///     Where the planet core sits on this screen, or null for the 511 screens that do not carry it.
+    ///     Part of the map for the same reason the teleport code is - the screen editor authors it - and
+    ///     a position rather than a marker tile because the core does not fit the tile grid. See
+    ///     <see cref="Starquake.Structure.CoreSite" />.
+    /// </summary>
+    [Key(3)]
+    public CorePlacement? Core { get; set; }
+
     [IgnoreMember]
     public bool KeepNastiesTheSame { get; set; }
 

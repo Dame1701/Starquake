@@ -73,6 +73,8 @@ internal class GameScreenCollection
         _gameScreens = (GameScreenData[])_resources.GetDataResource("GameScreens");
 
         LandingSite = LandingSite.FindIn(_gameScreens);
+        CoreExit = CoreExit.FindIn(_gameScreens);
+        CoreSite = CoreSite.FindIn(_gameScreens);
 
         Collisions = new ScreenCollisionMap(
             _gameScreens,
@@ -127,14 +129,39 @@ internal class GameScreenCollection
     public LandingSite LandingSite { get; }
 
     /// <summary>
+    ///     The core's doorstep, read off the map. Looked up once for the same reason as
+    ///     <see cref="LandingSite" />: three things ask about it, one of them every frame.
+    /// </summary>
+    public CoreExit CoreExit { get; }
+
+    /// <summary>
+    ///     Where the planet core is, read off the map. Looked up once, like the other authored positions.
+    /// </summary>
+    public CoreSite CoreSite { get; }
+
+    /// <summary>
+    ///     The core's top left corner on the screen that carries it.
+    /// </summary>
+    public Point CorePosition => new(CoreSite.XPos, CoreSite.YPos);
+
+    /// <summary>
     ///     Where the blob stands at the start of a game: centred across the square the author marked,
     ///     with its feet on the bottom of it.
     /// </summary>
-    public Point BlobStartPosition => new(
-        LandingSite.BlobStartTileX * TileMetrics.TileWidth +
-        (TileMetrics.TileWidth - SpriteMetrics.SpriteWidth) / 2,
-        LandingSite.BlobStartTileY * TileMetrics.TileHeight +
-        TileMetrics.TileHeight - SpriteMetrics.SpriteHeight);
+    public Point BlobStartPosition => StandingIn(LandingSite.BlobStartTileX, LandingSite.BlobStartTileY);
+
+    /// <summary>
+    ///     Where the blob stands on leaving the core: the square the author marked, the same way round
+    ///     as <see cref="BlobStartPosition" />.
+    /// </summary>
+    public Point CoreExitPosition => StandingIn(CoreExit.TileX, CoreExit.TileY);
+
+    /// <summary>
+    ///     The blob standing in a marked square: centred across it, with its feet on the bottom of it.
+    /// </summary>
+    private static Point StandingIn(int tileX, int tileY) => new(
+        tileX * TileMetrics.TileWidth + (TileMetrics.TileWidth - SpriteMetrics.SpriteWidth) / 2,
+        tileY * TileMetrics.TileHeight + TileMetrics.TileHeight - SpriteMetrics.SpriteHeight);
 
     /// <summary>
     ///     The middle of the square the ship comes to rest in. The ship is drawn from its top left and

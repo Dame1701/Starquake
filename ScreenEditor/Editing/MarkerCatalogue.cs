@@ -44,7 +44,7 @@ internal static class MarkerCatalogue
             "Where a floor nasty walks. One is created for each of these on the screen."),
 
         [(int)MarkerTile.PreferredCoreLocation] = new MarkerFace(
-            MaterialIconKind.Atom,
+            MaterialIconKind.Extension,
             "CORE",
             "Core element",
             "Where a core element is put, for a screen that would otherwise scatter one somewhere " +
@@ -63,6 +63,13 @@ internal static class MarkerCatalogue
             "Ship crash site",
             "Where Blob's ship comes down and the wreck smokes for the rest of the game. Belongs on " +
             "the same screen as the start position."),
+
+        [(int)MarkerTile.CoreExitPosition] = new MarkerFace(
+            MaterialIconKind.DoorOpen,
+            "CORE EXIT",
+            "Core exit",
+            "Where Blob steps out of the planet core. The screen this is on is the core's doorstep: it " +
+            "is kept running while Blob stands there, and nasties are switched off on it."),
 
         [(int)ActionTiles.TunnelLiftTile] = new MarkerFace(
             MaterialIconKind.ArrowUpBold,

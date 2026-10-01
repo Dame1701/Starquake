@@ -158,6 +158,40 @@ public class LandingSiteTests
         Assert.Equal(LandingSite.Original, LandingSite.FindIn(world));
     }
 
+    [Fact]
+    public void CoreExit_AMarkedSquare_IsReadOffTheMap()
+    {
+        // Arrange
+        GameScreenData[] world = TestData.World();
+        world[412].ScreenTiles[2, 3] = new ScreenTile((int)MarkerTile.CoreExitPosition);
+
+        // Act
+        CoreExit exit = CoreExit.FindIn(world);
+
+        // Assert
+        Assert.Equal(new CoreExit(412, 2, 3), exit);
+    }
+
+    /// <summary>
+    ///     A map saved before the marker existed still has to put the blob somewhere it can stand on
+    ///     leaving the core, so the doorstep the game shipped with is the fallback.
+    /// </summary>
+    [Fact]
+    public void CoreExit_NoMarker_FallsBackToTheDoorstepTheGameShippedWith()
+        => Assert.Equal(CoreExit.Original, CoreExit.FindIn(TestData.World()));
+
+    /// <summary>
+    ///     The doorstep is a single square, so unlike the core itself it needs no finer resolution than
+    ///     the tile grid - which is what lets it be a marker at all.
+    /// </summary>
+    [Fact]
+    public void CoreExit_TheShippedDoorstep_IsBesideTheCore()
+        => Assert.Equal(WorldMap.CoreApproachScreenNumber, CoreExit.Original.ScreenNumber);
+
+    [Fact]
+    public void IsOnePerMap_TheCoreDoorstep_IsOnePerMap()
+        => Assert.True(MarkerTiles.IsOnePerMap(MarkerTile.CoreExitPosition));
+
     /// <summary>
     ///     What <see cref="MarkerTiles.Contains" /> is asked about a square nothing has been painted on.
     /// </summary>

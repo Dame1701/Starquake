@@ -54,12 +54,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     private const int NastiesPerScreen = 4;
 
     /// <summary>
-    ///     The screen the off-screen game screens are kept ticking over for, so the core is still
-    ///     working when the blob walks back into it.
-    /// </summary>
-    private const int ScreenKeptRunningOffScreen = WorldMap.CoreApproachScreenNumber;
-
-    /// <summary>
     ///     The screen an inventory hand-over from the core was once done on. The code is still here
     ///     but commented out.
     /// </summary>
@@ -885,7 +879,9 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             return;
         }
 
-        if (GameScreens.ScreenNumber == ScreenKeptRunningOffScreen)
+        // The core's doorstep, so the core is still working when the blob walks back into it. Read off
+        // the map rather than written down, because the author chooses where the core is.
+        if (GameScreens.ScreenNumber == GameScreens.CoreExit.ScreenNumber)
         {
             ScreenDirectory.PlanetCore.UpdateOffScreen(gameTime);
         }

@@ -217,9 +217,15 @@ internal class PlanetCoreScreen : IGameScreen
         // Leave the core room
         if (!_replacingElements && _entryTime > CoreVisitFrames)
         {
-            _gameScreens.ScreenNumber = WorldMap.CoreApproachScreenNumber;
+            // The square the author marked, rather than the screen beside the core and hard against its
+            // right-hand wall. The Y is set now as well as the X: it used to be whatever height the blob
+            // happened to be at inside the core room, which on any other screen could be mid air.
+            Point exit = _gameScreens.CoreExitPosition;
+
+            _gameScreens.ScreenNumber = _gameScreens.CoreExit.ScreenNumber;
             _screenDirectory.Current = GameScreenType.MainGame;
-            _blob.BlobXPos = _gameScreens.ScreenWidth - _blob.BlobWidth;
+            _blob.BlobXPos = exit.X;
+            _blob.BlobYPos = exit.Y;
             _screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.PlanetCore, new ScreenChange.FadeIn());
 
             _justEnteredCore = true;
@@ -277,7 +283,10 @@ internal class PlanetCoreScreen : IGameScreen
             }
         }
 
-        _elements.Draw(_replacingElements);
+        // Where the core is comes off the map, so it is asked for rather than known here.
+        Point core = _gameScreens.CorePosition;
+
+        _elements.Draw(core.X, core.Y, _replacingElements);
     }
 
     /// <summary>
@@ -285,10 +294,11 @@ internal class PlanetCoreScreen : IGameScreen
     /// </summary>
     private void EnterCore()
     {
-        _gameScreens.ScreenNumber = WorldMap.CoreScreenNumber;
+        _gameScreens.ScreenNumber = _gameScreens.CoreSite.ScreenNumber;
 
         // Add the collision map for the core elements
-        _gameScreens.CurrentGameScreenData.CollisionMap.AddRange(_elements.GetCollisionMap());
+        Point core = _gameScreens.CorePosition;
+        _gameScreens.CurrentGameScreenData.CollisionMap.AddRange(_elements.GetCollisionMap(core.X, core.Y));
 
         List<Point> potentialLocations = _gameScreens.GetNastyPotentialLocations();
         if (potentialLocations.Count < _coreAlienCount)

@@ -235,6 +235,26 @@
                         <materialIcons:MaterialIcon Width="19" Height="19" Kind="Eyedropper" />
                     </RadioButton>
 
+                    <!--
+                        With the tools rather than with the markers, because it is a tool: the core is a
+                        position rather than a tile, so placing it is a click and a drag in pixels and not
+                        something painted into a square.
+                    -->
+                    <RadioButton Classes="tool" GroupName="tool"
+                                 IsChecked="{Binding Session.Tool, Mode=TwoWay,
+                                             Converter={StaticResource EnumMatch}, ConverterParameter=Core}">
+                        <ToolTip.Tip>
+                            <ToolTip>
+                                <StackPanel MaxWidth="260" Spacing="2">
+                                    <TextBlock Classes="tipTitle" Text="Planet core" />
+                                    <TextBlock Classes="tipBody"
+                                               Text="Drag the core about. It is nine elements, one and a half tiles across by two down, and it is placed to 16 pixels rather than to the tile grid - so it does not snap like a tile. There is one on a planet, so placing it moves it." />
+                                </StackPanel>
+                            </ToolTip>
+                        </ToolTip.Tip>
+                        <materialIcons:MaterialIcon Width="19" Height="19" Kind="Atom" />
+                    </RadioButton>
+
                     <Separator Classes="toolbar" />
 
                     <!--

@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using Starquake.Constants;
 using Starquake.ScreenEditor.Content;
 using Starquake.ScreenEditor.ViewModels;
+using Starquake.SharedLibs;
 using Starquake.Structure;
 
 namespace Starquake.ScreenEditor.Editing;
@@ -31,6 +32,10 @@ internal sealed class EditorSession : ViewModelBase
     private readonly ObservableCollection<int> _recentTiles = [];
 
     private MarkerPlacement? _blobStart;
+
+    private MarkerPlacement? _coreExit;
+
+    private CoreSite _core = CoreSite.Original;
 
     private int[]? _clipboard;
 
@@ -72,7 +77,7 @@ internal sealed class EditorSession : ViewModelBase
 
         Document = EditorDocument.CreateEmpty();
         AttachDocument(Document);
-        FindLandingSite();
+        FindAuthoredPositions();
     }
 
     /// <summary>
@@ -143,16 +148,22 @@ internal sealed class EditorSession : ViewModelBase
         {
             string description = "Screen " + _currentScreen + "  ·  column " + ScreenColumn + ", row " + ScreenRow;
 
-            description = _currentScreen switch
+            if (_core.ScreenNumber == _currentScreen)
             {
-                WorldMap.CoreScreenNumber => description + "  ·  planet core",
-                WorldMap.CoreApproachScreenNumber => description + "  ·  core approach",
-                _ => description
-            };
+                description += "  ·  planet core";
+            }
 
             if (_blobStart?.ScreenNumber == _currentScreen)
             {
                 description += "  ·  Blob starts here";
+            }
+
+            // The core's doorstep is worth saying wherever it is, because the screen it sits on is kept
+            // running while Blob stands there and has its nasties switched off - neither of which
+            // anything on the screen would show.
+            if (_coreExit?.ScreenNumber == _currentScreen)
+            {
+                description += "  ·  Blob leaves the core here";
             }
 
             // A booth with no code is not an error - a half built screen is allowed - but it is
@@ -179,6 +190,23 @@ internal sealed class EditorSession : ViewModelBase
 
     /// <inheritdoc cref="BlobStart" />
     public MarkerPlacement? ShipCrashSite => _shipCrashSite;
+
+    /// <summary>
+    ///     Where Blob is put down on leaving the planet core, as the map says, or null if no square has
+    ///     been marked and the game will fall back to the one it shipped with.
+    /// </summary>
+    public MarkerPlacement? CoreExit => _coreExit;
+
+    /// <summary>
+    ///     Where the planet core is. Never null: a map that does not place it reads back as the position
+    ///     the game falls back to, which is what it would actually use.
+    /// </summary>
+    public CoreSite Core => _core;
+
+    /// <summary>
+    ///     Whether the map places the core itself, as opposed to reading back the fallback.
+    /// </summary>
+    public bool CoreIsPlaced => Document.CoreCount > 0;
 
     /// <summary>
     ///     What is wrong with the landing site, or null when there is nothing wrong with it. The game
@@ -435,7 +463,7 @@ internal sealed class EditorSession : ViewModelBase
 
         RebuildVisibleTiles();
 
-        FindLandingSite();
+        FindAuthoredPositions();
 
         RaisePropertyChanged(nameof(Document));
         RaisePropertyChanged(nameof(CurrentScreen));
@@ -491,6 +519,10 @@ internal sealed class EditorSession : ViewModelBase
 
             case EditorTool.Pick:
                 SelectedTile = Document.GetTile(_currentScreen, x, y);
+                break;
+
+            case EditorTool.Core:
+                // Handled by the canvas, which has the pointer in pixels rather than in tiles.
                 break;
         }
     }
@@ -565,6 +597,34 @@ internal sealed class EditorSession : ViewModelBase
             pending.Push((cellX, cellY - 1));
             pending.Push((cellX, cellY + 1));
         }
+    }
+
+    /// <summary>
+    ///     Puts the planet core where the pointer is, given a position in screen pixels. Rounded to the
+    ///     step the core is placed on and held inside the screen, so the whole of it stays visible.
+    /// </summary>
+    public void PlaceCore(int xPos, int yPos)
+    {
+        CoreSite existing = Document.FindCore();
+        CorePlacement placement = CoreSite.Snap(xPos, yPos);
+
+        bool wasPlaced = CoreIsPlaced;
+
+        if (wasPlaced &&
+            existing.ScreenNumber == _currentScreen &&
+            existing.XPos == placement.XPos &&
+            existing.YPos == placement.YPos)
+        {
+            return;
+        }
+
+        Document.SetCore(_currentScreen, placement);
+
+        Undo.Record(new CoreEdit(
+            existing.ScreenNumber,
+            wasPlaced ? new CorePlacement(existing.XPos, existing.YPos) : null,
+            _currentScreen,
+            placement));
     }
 
     public void RequestTeleportCodeEdit() => TeleportCodeRequested?.Invoke(this, EventArgs.Empty);
@@ -692,6 +752,7 @@ internal sealed class EditorSession : ViewModelBase
         document.TileChanged += OnTileChanged;
         document.CollisionMaskChanged += OnCollisionMaskChanged;
         document.TeleportCodeChanged += OnTeleportCodeChanged;
+        document.CoreChanged += OnCoreChanged;
     }
 
     private void DetachDocument(EditorDocument document)
@@ -699,6 +760,7 @@ internal sealed class EditorSession : ViewModelBase
         document.TileChanged -= OnTileChanged;
         document.CollisionMaskChanged -= OnCollisionMaskChanged;
         document.TeleportCodeChanged -= OnTeleportCodeChanged;
+        document.CoreChanged -= OnCoreChanged;
     }
 
     private void OnTileChanged(int screen, int x, int y)
@@ -711,7 +773,7 @@ internal sealed class EditorSession : ViewModelBase
 
         // So can either half of the landing site, and that is worth a walk of the map: both are
         // described wherever they are, not only on the screen they sit on.
-        FindLandingSite();
+        FindAuthoredPositions();
 
         if (_usedTilesOnly)
         {
@@ -725,6 +787,12 @@ internal sealed class EditorSession : ViewModelBase
     }
 
     private void OnCollisionMaskChanged(int tileImage) => Invalidate();
+
+    private void OnCoreChanged()
+    {
+        FindAuthoredPositions();
+        Invalidate();
+    }
 
     private void OnTeleportCodeChanged(int screen)
     {
@@ -747,17 +815,23 @@ internal sealed class EditorSession : ViewModelBase
     }
 
     /// <summary>
-    ///     Reads the landing site off the map again. Called after any tile edit, which is more often
-    ///     than it is strictly needed - but an edit is a keystroke's worth of work and this is two
-    ///     walks of an array, against having to work out which edits could have moved a marker.
+    ///     Reads the authored positions off the map again - the landing site and the core's doorstep.
+    ///     Called after any tile edit, which is more often than it is strictly needed - but an edit is a
+    ///     keystroke's worth of work and this is a few walks of an array, against having to work out
+    ///     which edits could have moved a marker.
     /// </summary>
-    private void FindLandingSite()
+    private void FindAuthoredPositions()
     {
         _blobStart = Document.FindMarker(MarkerTile.BlobStartPosition);
         _shipCrashSite = Document.FindMarker(MarkerTile.ShipCrashSite);
+        _coreExit = Document.FindMarker(MarkerTile.CoreExitPosition);
+        _core = Document.FindCore();
 
         RaisePropertyChanged(nameof(BlobStart));
         RaisePropertyChanged(nameof(ShipCrashSite));
+        RaisePropertyChanged(nameof(CoreExit));
+        RaisePropertyChanged(nameof(Core));
+        RaisePropertyChanged(nameof(CoreIsPlaced));
         RaisePropertyChanged(nameof(LandingSiteProblem));
         RaisePropertyChanged(nameof(LandingSiteDisplay));
         RaisePropertyChanged(nameof(LandingSiteNote));
