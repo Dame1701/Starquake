@@ -8,7 +8,7 @@ internal enum NastyType
 {
     CurleyWurley,
     Cushion,
-    Scorpian,
+    Scorpion,
     FriedEgg,
     Spiky,
     Snail,

@@ -213,18 +213,18 @@ internal class StatusPanel
             _inventoryScanner.Draw((int)_blobsInventory[_slotToScan], InventorySlotSpacing * _slotToScan + InventoryScannerXPos, InventoryScannerYPos);
         }
 
-        // Draw energybars
-        SpriteCollection enerygyBar = _resources.GetSpriteCollection("EnerygyBar");
-        enerygyBar.Begin(BlendState.AlphaBlend);
-        enerygyBar.DrawSprite(0, BarXPos, EnergyBarYPos, (int)(_stats.EnergyLevel * EnergyBarScale), BarHeight, Color.White);
-        enerygyBar.End();
+        // Draw the energy bar
+        SpriteCollection energyBar = _resources.GetSpriteCollection(Assets.Graphics.EnergyBar);
+        energyBar.Begin(BlendState.AlphaBlend);
+        energyBar.DrawSprite(0, BarXPos, EnergyBarYPos, (int)(_stats.EnergyLevel * EnergyBarScale), BarHeight, Color.White);
+        energyBar.End();
 
-        SpriteCollection jumpBar = _resources.GetSpriteCollection("JumpBar");
+        SpriteCollection jumpBar = _resources.GetSpriteCollection(Assets.Graphics.JumpBar);
         jumpBar.Begin(BlendState.AlphaBlend);
         jumpBar.DrawSprite(0, BarXPos, JumpBarYPos, (int)(_stats.Platforms * JumpBarScale), BarHeight, Color.White);
         jumpBar.End();
 
-        SpriteCollection ammoBar = _resources.GetSpriteCollection("AmmoBar");
+        SpriteCollection ammoBar = _resources.GetSpriteCollection(Assets.Graphics.AmmoBar);
         ammoBar.Begin(BlendState.AlphaBlend);
         ammoBar.DrawSprite(0, BarXPos, AmmoBarYPos, (int)(_stats.FirePower * AmmoBarScale), BarHeight, Color.White);
         ammoBar.End();

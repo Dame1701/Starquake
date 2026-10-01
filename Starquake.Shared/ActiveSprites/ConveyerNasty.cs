@@ -90,7 +90,7 @@ internal class ConveyerNasty
         _deathScale = 1f;
 
         _nastySprite = new SpriteCollection(graphics, contentManager, content.GetContent("conveyerNasty"), SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        _conveyerNastyDies = (IStandardParticleEffect)resources.GetParticleEffectInstance("NastyDies", ParticleEffectType.Triggered, null);
+        _conveyerNastyDies = (IStandardParticleEffect)resources.GetParticleEffectInstance(Assets.Effects.NastyDies, ParticleEffectType.Triggered, null);
         _conveyerNastyDies.ParticleEffectComplete += ConveyerNastyDies_ParticleEffectComplete;
     }
 

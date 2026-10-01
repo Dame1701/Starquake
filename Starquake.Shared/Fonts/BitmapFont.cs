@@ -70,7 +70,7 @@ internal class BitmapFont
         _fontSpriteBatch.DrawString(_font, text, new Vector2(xPos, yPos), ColourHelper.GetXna4Colour(colour.R, colour.G, colour.B, screenFade));
     }
 
-    // Write spome text with a predefined leading
+    // Write some text with a predefined leading
     public void WriteText(int xPos, int yPos, string text, int leading, Color colour, byte screenFade)
     {
         for (int a = 0; a < text.Length; a++)

@@ -21,7 +21,7 @@ internal static class NastyHelpers
     ///     so it is a table rather than a rule.
     /// </summary>
     /// <remarks>
-    ///     Scorpian and Helicopter share a set. That is how it was written, and whether it is deliberate
+    ///     Scorpion and Helicopter share a set. That is how it was written, and whether it is deliberate
     ///     or a copy-and-paste is not something this refactor can tell.
     /// </remarks>
     private static readonly Dictionary<NastyType, SplatColours> SplatColoursByNasty = new()
@@ -35,7 +35,7 @@ internal static class NastyHelpers
         [NastyType.CurleyWurley] = new SplatColours(new Color(168, 163, 252), new Color(109, 109, 253), White),
         [NastyType.Bird] = new SplatColours(new Color(0, 0, 211), new Color(148, 148, 217), new Color(188, 62, 0)),
         [NastyType.Ghost] = new SplatColours(new Color(0, 151, 43), new Color(88, 0, 88), White),
-        [NastyType.Scorpian] = new SplatColours(new Color(177, 8, 8), new Color(130, 2, 2), new Color(230, 230, 230)),
+        [NastyType.Scorpion] = new SplatColours(new Color(177, 8, 8), new Color(130, 2, 2), new Color(230, 230, 230)),
         [NastyType.DragonFly] = new SplatColours(new Color(8, 150, 219), new Color(50, 111, 85), new Color(76, 191, 142)),
         [NastyType.Helicopter] = new SplatColours(new Color(177, 8, 8), new Color(130, 2, 2), new Color(230, 230, 230)),
         [NastyType.Hippo] = new SplatColours(new Color(229, 120, 252), new Color(137, 115, 251), new Color(145, 49, 50)),

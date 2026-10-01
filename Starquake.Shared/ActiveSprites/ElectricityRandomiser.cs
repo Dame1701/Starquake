@@ -47,7 +47,7 @@ internal class ElectricityRandomiser
         _counter = 0;
         if (nodeReset)
         {
-            // Longer interval if we have reset, probably becuase Blob has died so give the player chance to respond
+            // Longer interval if we have reset, probably because Blob has died so give the player chance to respond
             _counterTarget = _randomGenerator.Next(240, 300); // Random number between four seconds and a five seconds
         }
         else if (changedScreens)

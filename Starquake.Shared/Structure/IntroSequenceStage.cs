@@ -9,7 +9,7 @@ internal enum IntroSequenceStage
     None,
     InitialPause,
     ShipFalling,
-    ShipExploading,
+    ShipExploding,
     PreFadePause,
     CaptionFadeUp,
     CaptionFadeDown,

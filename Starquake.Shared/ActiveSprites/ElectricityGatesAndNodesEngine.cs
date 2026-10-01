@@ -122,7 +122,7 @@ internal class ElectricityGatesAndNodesEngine
         GraphicsSet graphicsSet,
         Blob blob,
         Random randomNumberGenerator,
-        ConveyerNasties convyrNasties)
+        ConveyerNasties conveyerNasties)
     {
         _resources = resources;
         _gameScreens = gameScreens;
@@ -130,7 +130,7 @@ internal class ElectricityGatesAndNodesEngine
         _blob = blob;
         _randomNumberGenerator = randomNumberGenerator;
 
-        _conveyerNasties = convyrNasties;
+        _conveyerNasties = conveyerNasties;
 
         _electricityAnimationOriginal = new Animation();
         _electricityAnimationOriginal.FirstFrame = 0;
@@ -412,7 +412,7 @@ internal class ElectricityGatesAndNodesEngine
 
     private void DrawConveyerNastyArcs()
     {
-        foreach (ConveyerNasty nasty in _conveyerNasties!.Nasties)
+        foreach (ConveyerNasty nasty in _conveyerNasties.Nasties)
         {
             if (!nasty.NastyActive)
             {
@@ -424,7 +424,7 @@ internal class ElectricityGatesAndNodesEngine
                 new Point(nasty.XLocation - ConveyerGateLightNearXOffset, nasty.YLocation + GateLightYOffset),
                 new Point(nasty.XLocation + ConveyerGateLightXOffset, nasty.YLocation + GateLightYOffset));
 
-            SpriteCollection electricityNodeElectricity1 = _resources.GetSpriteCollection("ElectricityNodeElectricity1");
+            SpriteCollection electricityNodeElectricity1 = _resources.GetSpriteCollection(Assets.Graphics.ElectricityNodeElectricity1);
             electricityNodeElectricity1.Begin(BlendState.Additive);
             electricityNodeElectricity1.DrawSprite(
                     _electricityAnimation.CurrentFrame,

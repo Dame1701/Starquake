@@ -422,7 +422,7 @@ internal class MainGameScreen : IGameScreen
     {
         if (GameEngine.Player.BlobsState == BlobState.GameOver)
         {
-            // Disable the periodic sound engine and kill all soudns immediately
+            // Disable the periodic sound engine and kill all sounds immediately
             GameEngine.ContentResourceManager.GetSoundFxEngine().DisablePeriodicBackgroundSounds(true);
 
             // Change to gameover screen

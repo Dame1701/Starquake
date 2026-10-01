@@ -525,9 +525,9 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             RandomNumberGenerator);
         ConveyerNastiesInstance.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
 
-        var converyerNastyGraphics = new ContentList();
-        converyerNastyGraphics.AddContent("conveyerNasty", "Graphics\\ConveryerNasty");
-        ConveyerNastiesInstance.LoadContent(converyerNastyGraphics);
+        var conveyerNastyGraphics = new ContentList();
+        conveyerNastyGraphics.AddContent("conveyerNasty", "Graphics\\ConveyerNasty");
+        ConveyerNastiesInstance.LoadContent(conveyerNastyGraphics);
 
         _electricityNodeGateEngine = new ElectricityGatesAndNodesEngine(
             ContentResourceManager,

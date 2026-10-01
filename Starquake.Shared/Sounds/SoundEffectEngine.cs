@@ -372,7 +372,7 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
     private Guid PlayMultiInstance(string soundName, float volume)
     {
         // Create a new instance, but maybe keep a list of all instances created so we can put a max seal of the number of instances per sound allowed
-        if (!_multiInstanceSoundEffects.TryGetValue(soundName, out MultiInstanceSoundEffect? misxf))
+        if (!_multiInstanceSoundEffects.TryGetValue(soundName, out MultiInstanceSoundEffect? multiInstanceSound))
         {
             return Guid.Empty;
         }
@@ -387,9 +387,9 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
             }
         }
 
-        SoundEffectInstanceRecord soundToPlay = playing.Count > 1 && playing.Count >= misxf.MaxInstances
+        SoundEffectInstanceRecord soundToPlay = playing.Count > 1 && playing.Count >= multiInstanceSound.MaxInstances
             ? StealLongestPlaying(playing)
-            : CreateNewInstance(soundName, misxf);
+            : CreateNewInstance(soundName, multiInstanceSound);
 
         soundToPlay.SoundInstance.Volume = volume;
         soundToPlay.SoundInstance.Play();
@@ -425,14 +425,14 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
         return soundToPlay;
     }
 
-    private SoundEffectInstanceRecord CreateNewInstance(string soundName, MultiInstanceSoundEffect misxf)
+    private SoundEffectInstanceRecord CreateNewInstance(string soundName, MultiInstanceSoundEffect multiInstanceSound)
     {
         var soundToPlay = new SoundEffectInstanceRecord(
             soundName,
-            misxf.Sound.CreateInstance(),
+            multiInstanceSound.Sound.CreateInstance(),
             Environment.TickCount64,
             0,
-            misxf.KillOnScreenChange)
+            multiInstanceSound.KillOnScreenChange)
         {
             // Set the ID of the sound we're playing
             Id = Guid.NewGuid()

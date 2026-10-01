@@ -113,7 +113,7 @@ internal class ScreenEffectEngine
 
     public void ExecuteScreenEffect(ScreenEffectType screenEffectToExecute, int effectSpeed, int effectDuration, bool haltBlobAndNasties)
     {
-        // Only allow one effect to execute at a time - may need to implement an overrride system....
+        // Only allow one effect to execute at a time - may need to implement an override system....
         foreach (ScreenEffectBase screenEffect in _screenEffects)
         {
             screenEffect.Reset();

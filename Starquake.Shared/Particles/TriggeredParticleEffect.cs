@@ -72,8 +72,8 @@ internal class TriggeredParticleEffect : IStandardParticleEffect
                 var position = new Vector2(xPos, yPos);
                 _mercuryParticleEffect.Trigger(ref position);
 
-                // Workaround for a bizzare bug that seems to stop the particle from working
-                // unless we trigger until we get an active partical count.....
+                // Workaround for a bizarre bug that seems to stop the particle from working
+                // unless we trigger until we get an active particle count.....
                 if (_mercuryParticleEffect.ActiveParticlesCount > 0)
                 {
                     _triggered = true;

@@ -166,7 +166,7 @@ internal class IntroSequence
         {
             UpdateShipFalling();
         }
-        else if (SequenceStage == IntroSequenceStage.ShipExploading)
+        else if (SequenceStage == IntroSequenceStage.ShipExploding)
         {
             UpdateShipExploding();
         }
@@ -224,7 +224,7 @@ internal class IntroSequence
         }
         else
         {
-            SequenceStage = IntroSequenceStage.ShipExploading;
+            SequenceStage = IntroSequenceStage.ShipExploding;
             _blobKiller.Trigger(_blobSpaceShipEndXPos, _blobSpaceShipEndYPos, false, 100, 200);
         }
     }
@@ -232,7 +232,7 @@ internal class IntroSequence
     private void UpdateShipExploding()
     {
         SequenceStage = IntroSequenceStage.PreFadePause;
-        _shipExplosionSound = _resources.GetSoundFxEngine().PlaySound("BlobShipExplodes");
+        _shipExplosionSound = _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobShipExplodes);
         _presentation.ScreenClearColour = Color.White;
     }
 

@@ -428,7 +428,7 @@ internal class NastyBrain
 
         if (_firstMovement)
         {
-            // Change movespeed to 1 if this is the first movement - allows the nasties to sppear moving slowly
+            // Change move speed to 1 if this is the first movement - allows the nasties to appear moving slowly
             _state.MoveSpeed = FirstMovementSpeed;
             _state.MovementChangeCount = FirstMovementDuration;
             _firstMovement = false;

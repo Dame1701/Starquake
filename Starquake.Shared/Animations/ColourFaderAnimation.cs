@@ -24,7 +24,7 @@ internal class ColourFaderAnimation
     // Is the animation running?
     public bool Running;
 
-    // How fast to do the colour fase
+    // How fast to do the colour fade
     public int Speed;
 
     // Is the animation stopping

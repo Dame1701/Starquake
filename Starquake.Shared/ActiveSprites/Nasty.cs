@@ -124,7 +124,7 @@ internal class Nasty
     private int _birthTimer;
 
     // Counters
-    private int _conceptionwaitCounter;
+    private int _conceptionWaitCounter;
 
     private bool _deathAnticlockwise;
 
@@ -138,7 +138,7 @@ internal class Nasty
     //bool attractedToBlobFlag;
 
 
-    // When shot monsters usually dissappear for good but there is a small chance they'll regenerate
+    // When shot monsters usually disappear for good but there is a small chance they'll regenerate
     // Tech stuff
     private SpriteCollection _nastySprite;
 
@@ -273,7 +273,7 @@ internal class Nasty
         _nastyType = copySource._nastyType;
         _nastyDeadPauseCounter = copySource._nastyDeadPauseCounter;
 
-        // If the basty is dead reset it to conceptive state
+        // If the nasty is dead reset it to conceptive state
         if (copySource.NastyState == NastyState.Dead)
         {
             NastyState = NastyState.PreConception;
@@ -334,7 +334,7 @@ internal class Nasty
             // Extend this to pause for random time before bringing a nasty back to life
             _nastyDeadPauseCounter = 0;
             NastyState = NastyState.PreConception;
-            _conceptionwaitCounter = _randomNumberGenerator.Next(0, LongestConceptionWait);
+            _conceptionWaitCounter = _randomNumberGenerator.Next(0, LongestConceptionWait);
         }
     }
 
@@ -389,7 +389,7 @@ internal class Nasty
         }
         if (temp == 10)
         {
-            return NastyType.Scorpian;
+            return NastyType.Scorpion;
         }
         if (temp == 11)
         {
@@ -462,7 +462,7 @@ internal class Nasty
     /// </summary>
     private void BeginConception()
     {
-        _conceptionwaitCounter = _randomNumberGenerator.Next(0, ShortestConceptionWaitOnCoreScreen);
+        _conceptionWaitCounter = _randomNumberGenerator.Next(0, ShortestConceptionWaitOnCoreScreen);
         NastyState = NastyState.Conception;
 
         if (!KeepNastyTheSame)
@@ -475,9 +475,9 @@ internal class Nasty
 
     private void WaitToBeBorn()
     {
-        if (_conceptionwaitCounter > 0)
+        if (_conceptionWaitCounter > 0)
         {
-            _conceptionwaitCounter--;
+            _conceptionWaitCounter--;
         }
         else
         {
@@ -629,7 +629,7 @@ internal class Nasty
             else
             {
                 NastyState = NastyState.PreConception;
-                _conceptionwaitCounter = _randomNumberGenerator.Next(0, LongestConceptionWait);
+                _conceptionWaitCounter = _randomNumberGenerator.Next(0, LongestConceptionWait);
                 _nastyDeadPauseCounter = 0;
             }
         }
