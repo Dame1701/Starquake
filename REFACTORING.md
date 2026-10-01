@@ -234,15 +234,18 @@ is data, and already as clear as it is going to get.
 
 - `UpdateFire` — 608. Stage 3.
 - `UnstickBlobFromTiles` — 97. Pre-existing and untouched; it belongs to stage 4's tail.
+  *Since moved whole into `UnstickProbe` by `PLAN.md` 4.7, where it is a question - given where
+  the blob is, where should he be - and has tests.*
 - `ChangeScreenIfOffEdge` — 88. Four sibling blocks, one per screen edge, with no comments left in
   it. Splitting it would produce four methods named after the four edges and read no better.
 
 ### Noted, not fixed
 
 - `LayJumpPlatformOrJump` still contains the empty `if (temp == -1) { }` and the comment about
-  `-1` sitting above a test for `-1000`. Left exactly as found, per the plan.
+  `-1` sitting above a test for `-1000`. Left exactly as found, per the plan. *Fixed in `d31561b`.*
 - `DrawOverloadFlare` and `LayJumpPlatformOrJump` both have a local called `temp`. Worth renaming,
-  not in a move commit.
+  not in a move commit. *Half done: `LayJumpPlatformOrJump`'s is `newYPos`; the other is still
+  `temp`.*
 
 ---
 
@@ -425,6 +428,9 @@ they cleared and are now one `TrimTo`.
 string: long because it is data, and a dictionary would not read better. The plan offered "leave
 it" as an acceptable outcome and that is the outcome.
 
+*Taken later, in `ea37940`: a `switch` expression says the same table in a third of the lines,
+and it has tests now. The reasoning above still holds for why stage 4 did not do it.*
+
 ### The tail — done
 
 All 31 are done. `ToggleKeys.GetFriendlyName` is the only method in `Starquake.Shared` still over
@@ -507,47 +513,44 @@ seven assignments each and are now five calls to one factory; the rest stands, f
 
 ## Follow-ups this work found and deliberately did not take
 
-Each of these is a real finding, noted rather than acted on so that it gets its own commit the way
-`ab470df`, `482b2ba` and the `Next(0, 3)` fix did.
+Eleven were listed here. Seven have since been taken, by the work `PLAN.md` describes, and are
+struck from this list rather than left to be re-found; the commit each landed in is named in case
+the reasoning is wanted. **Four are still open.**
 
-- **`Blob.LayJumpPlatformOrJump`** still has the empty `if (temp == -1) { }` and the comment about
-  `-1` sitting above a test for `-1000`. Carried over from stage 2.
-- **`BuildScreenCollisionMap`'s `screenChanged` parameter does almost nothing.** The
-  `!screenChanged` path removes game-object tiles from the collision map, and then the map is
-  replaced wholesale on the next line, so that work is discarded. Both paths end up appending the
-  screen's objects to a freshly built map in the same order. All the parameter actually controls is
-  whether `_keyLockDoors` is cleared. Worth confirming and then simplifying.
-- **`CollisionDetection` keeps its intermediate values in static fields**, which is why test
-  parallelisation is off. It is a latent bug in the game too, the moment anything touches collision
-  off the update thread.
+### Still open
+
 - **The point-blank push-through applies only to horizontally fired shots** (stage 3). It looks
-  accidental; fixing it changes the game.
-- **`DrawOverloadFlare` and `LayJumpPlatformOrJump` both have a local called `temp`**, as do
-  several methods in `Nasty`. Carried over from stage 2.
-- **`Blob` has ~60 fields**, many now used by exactly one method. The plan called this out in stage
-  2 and it is still true, now with the reads visible.
+  accidental; fixing it changes the game, which is why it is still here.
+- **`Blob` is the one god class left standing.** It had ~60 fields when this was written and has
+  123 now that the reads are visible. `PLAN.md` phase 4 took the two parts of it that were
+  arithmetic rather than drawing - the unstick probe and the inventory - and stopped there, because
+  the rest is one state machine that draws itself. Splitting it needs the update logic and the draw
+  code prised apart first, which is a different task from moving field clusters into files.
 - **The guards are one level deeper than they need to be.** Stage 2 kept every guard verbatim
   rather than inverting it, on purpose. Later stages did invert the simple ones where it flattened
   a whole method. The stage 2 methods could have the same pass now that each can be read alone.
+- **`Scorpian` and `Helicopter` splatter identical colours.** Still true, and
+  `NastyHelpers.ApplyNastyColours` has a `///` saying so. Could be deliberate, could be a paste;
+  nobody has asked the question of whoever drew them.
 
-Found in the tail, and the two worth looking at first:
+A fifth is half open. **Three methods still have a local called `temp`** - `Blob.DrawOverloadFlare`,
+`Blob.AccessInventory` and `Nasty.GetRandomNastyType` - though
+`LayJumpPlatformOrJump`'s is now `newYPos`.
 
-- **Three bounds tests look one out.** `Blob.ChangeScreenOffRightEdge`,
-  `Blob.ChangeScreenOffBottomEdge` and `GameEngine`'s NumPad2 test-mode key all guard with
-  `ScreenNumber + n <= WorldMap.ScreenCount`. `ScreenCount` is 512, the screen array is allocated
-  at exactly that length, and the last valid index is therefore 511 — which `WorldMap` already
-  names `LastScreenNumber`. Walking off the right or bottom edge of the final screen looks like it
-  would step onto screen 512 and throw. The matching left and top tests use `>= 0` and are right,
-  and `StepBetweenScreens`'s NumPad6 correctly uses `< WorldMap.LastScreenNumber`, so the three
-  above are the odd ones out. All preserved exactly as found: a one-character change to a bounds
-  test is precisely the thing that wants its own commit and its own play-test.
-- **`GameScreenCollection.PowerUpIsInTheWay` compares a pixel location against a tile index**
-  (`powerUpOnScreen.XLocation == x + 32`, where `x` counts tiles), and reads the power-up of the
-  screen currently being displayed rather than the one being filled in. Either could be a defect.
-  It has a `///` saying so.
-- **`Scorpian` and `Helicopter` splatter identical colours.** Visible now that the fourteen sets are
-  a table rather than fourteen arms. Could be deliberate, could be a paste.
-- **`SoundEffectEngine` has a commented-out spin-wait** labelled "Hack to make the sounds actually
-  stop!". If stopping a sound is genuinely not synchronous, something downstream may still depend on
-  the old timing.
+### Taken
 
+- **`Blob.LayJumpPlatformOrJump`'s empty `if (temp == -1) { }`** - `d31561b`. `GetNewJumpPlatform`
+  never returned -1; it returns -1000, which is now `JumpPlatforms.NoRoomForPlatform` and says why
+  it has to be well below any real answer.
+- **`BuildScreenCollisionMap`'s `screenChanged` parameter** - `d31561b`. Confirmed to control only
+  the key-door cache, and simplified. The removal it also did walked the list by index while
+  removing from it, so it would have skipped every second match had it mattered.
+- **`CollisionDetection`'s static intermediate values** - `eaaa1f0`. They are locals, and test
+  parallelisation is back on.
+- **The three bounds tests that looked one out** - `105a07c`. They were.
+- **`GameScreenCollection.PowerUpIsInTheWay`** - `d31561b`. Deleted rather than fixed: it could
+  never fire, and making it fire would have made world generation worse rather than better.
+- **`SoundEffectEngine`'s commented-out spin-wait** - already gone in `9a490e5`, before `PLAN.md`
+  was written. That plan carried it forward stale.
+- **`ToggleKeys.GetFriendlyName`**, left alone by stage 4 as the plan allowed - `ea37940`. It is a
+  switch expression, and the two oddities in its table now have tests pinning them.
