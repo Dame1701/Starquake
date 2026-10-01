@@ -29,10 +29,10 @@ Each head builds to an assembly named `Starquake`, so `Starquake.Shared.dll` plu
 `SharedLibs` has no MonoGame dependency, so there is nothing to multi-target for and a single
 `net9.0` build serves the game and the editor alike. As well as the screen data structures it
 holds the constants that describe the shape of the world — `TileMetrics`, `WorldMap`,
-`TunnelTiles` and `ActionTiles`. The editor has to agree with the game about every one of
-those, so they live in one place rather than being written down twice; they kept their
-`Starquake.Constants` and `Starquake.Structure` namespaces when they moved, so the game's own
-sources did not change.
+`TunnelTiles`, `ActionTiles`, `MarkerTiles`, `LandingSite` and `TeleportCodes`. The editor has
+to agree with the game about every one of those, so they live in one place rather than being
+written down twice; the ones that moved there kept their `Starquake.Constants` and
+`Starquake.Structure` namespaces on the way, so the game's own sources did not change.
 
 `ScreenEditor` is an Avalonia app and nothing in the game references it. It is on Avalonia
 11.3 rather than the 11.2 it was generated against, because `Material.Icons.Avalonia` — the

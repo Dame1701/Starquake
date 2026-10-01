@@ -224,11 +224,13 @@ followed by properties.
 More to the point, it does not want splitting. It is a flat list of initialisations, and nine of
 the fields it sets are `readonly`, so extracting them needs factory methods that return a value
 rather than methods that do a job — five `CreateWalkLeftAnimation`-shaped methods whose names
-repeat the field names they assign. The two section comments in it are `// Clear inventory items`,
+repeat the field names they assign. The one section comment left in it is `// Clear inventory items`,
 naming a four-line loop that is not dead (`Collectables.None` is 255, not 0, so the loop is
-required), and `// Temporary test code to give Blob Access card and Key`, which is a why and
-stays. This is the `ToggleKeys.GetFriendlyName` case the plan already concedes: long because it
-is data, and already as clear as it is going to get.
+required). The second, `// Temporary test code to give Blob Access card and Key`, was judged here to
+be "a why and stays" - it has since gone, along with the two lines under it, now that
+`WorldPopulator` places both items on the map. See `PLAN.md`. This is the
+`ToggleKeys.GetFriendlyName` case the plan already concedes: long because it is data, and already as
+clear as it is going to get.
 
 ### Still over 80 lines in `Blob.cs`
 
