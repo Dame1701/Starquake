@@ -61,7 +61,7 @@ public class ToggleKeysTests
     [Fact]
     public void GetFriendlyName_EveryLabel_FitsTheTwoCharactersTheScreenHas()
     {
-        foreach (Keys key in System.Enum.GetValues<Keys>())
+        foreach (Keys key in Enum.GetValues<Keys>())
         {
             string label = ToggleKeys.GetFriendlyName(key);
 

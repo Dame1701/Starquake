@@ -2,8 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
-using Starquake.ActiveSprites;
 using Starquake.ActiveSprites.NastyBehaviour;
 using Starquake.Collisions;
 using Starquake.Constants;

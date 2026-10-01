@@ -2,11 +2,9 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;

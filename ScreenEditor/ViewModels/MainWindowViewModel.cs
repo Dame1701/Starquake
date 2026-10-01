@@ -2,11 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using Starquake.ScreenEditor.Content;

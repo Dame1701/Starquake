@@ -2,11 +2,8 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System.Collections.Generic;
-using System;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.ActiveSprites.BlobParts;
 using Starquake.Animations;
 using Starquake.Collisions;

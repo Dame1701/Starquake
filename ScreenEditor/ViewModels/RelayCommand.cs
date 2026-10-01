@@ -2,8 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Starquake.ScreenEditor.ViewModels;

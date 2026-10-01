@@ -2,8 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
-using System.Collections.Generic;
 using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;

@@ -2,18 +2,14 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
 using System.Diagnostics;
-using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Starquake.ActiveSprites;
 using Starquake.Constants;
-using Starquake.ContentManagement;
 using Starquake.Engines;
 using Starquake.Helpers;
-using Starquake.Input;
 using Starquake.Sounds;
 using Starquake.Structure;
 

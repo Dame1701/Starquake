@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace Starquake.Input;

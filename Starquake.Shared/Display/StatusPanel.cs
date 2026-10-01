@@ -2,12 +2,10 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.ActiveSprites;
 using Starquake.Animations;
-using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.GameComponents;
 using Starquake.Scoring;

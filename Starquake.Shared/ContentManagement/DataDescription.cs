@@ -2,8 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
-
 namespace Starquake.ContentManagement;
 
 internal class DataDescription

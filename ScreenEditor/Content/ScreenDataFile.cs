@@ -2,8 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System;
-using System.IO;
 using MessagePack;
 using Starquake.ScreenEditor.Editing;
 using Starquake.SharedLibs;
