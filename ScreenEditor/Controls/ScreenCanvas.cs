@@ -26,7 +26,7 @@ namespace Starquake.ScreenEditor.Controls;
 ///     that stops a tile short of the edge, or a tunnel mouth with nothing on the other side of it,
 ///     is obvious here and invisible on a screen drawn on its own.
 /// </remarks>
-public sealed class ScreenCanvas : Control
+internal sealed class ScreenCanvas : Control
 {
 
     /// <summary>

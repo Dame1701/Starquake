@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Structure;
 
-public enum Direction
+internal enum Direction
 {
     Up,
     Down,

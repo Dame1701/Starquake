@@ -14,7 +14,7 @@ using Starquake.Structure;
 
 namespace Starquake.ContentManagement;
 
-public class ResourceManager : StartableGameComponentBase
+internal class ResourceManager : StartableGameComponentBase
 {
     /// <summary>
     ///     The percentage reported once everything has loaded, and how long the "Launching Game" message

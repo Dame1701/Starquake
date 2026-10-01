@@ -17,7 +17,7 @@ using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
 
-public class Nasty : GameComponentBase
+internal class Nasty : GameComponentBase
 {
 
     // The number of frames for the birth to appear (60 frames = 1 second)

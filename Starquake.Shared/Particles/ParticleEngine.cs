@@ -10,7 +10,7 @@ using Starquake.ContentManagement;
 
 namespace Starquake.Particles;
 
-public class ParticleEngine
+internal class ParticleEngine
 {
     private readonly ContentManager _contentManager;
     private readonly GraphicsSet _graphicsSet;

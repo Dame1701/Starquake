@@ -22,7 +22,7 @@ namespace Starquake.ContentManagement;
 ///         is the one place it is known to matter, and the rest was not worth risking to tidy.
 ///     </para>
 /// </summary>
-public static class ContentManifest
+internal static class ContentManifest
 {
     /// <summary>
     ///     Registers everything the game loads. The order is the order it was found in.

@@ -10,7 +10,7 @@ using Starquake.ScreenEditor.Views;
 
 namespace Starquake.ScreenEditor;
 
-public class App : Application
+internal class App : Application
 {
     public override void Initialize()
     {

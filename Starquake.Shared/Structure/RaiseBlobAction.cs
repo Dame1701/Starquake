@@ -4,4 +4,4 @@
 // -
 namespace Starquake.Structure;
 
-public delegate void RaiseBlobAction(BlobAction action, object? data);
+internal delegate void RaiseBlobAction(BlobAction action, object? data);

@@ -11,7 +11,7 @@ namespace Starquake.ActiveSprites;
 ///     is the stepping and boundary rules and nothing else, which is what lets them be exercised
 ///     without a screen, a content pipeline or a graphics device.
 /// </summary>
-public interface IFireSurroundings
+internal interface IFireSurroundings
 {
     int ScreenWidth { get; }
 

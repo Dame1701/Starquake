@@ -22,7 +22,7 @@ namespace Starquake.ActiveSprites.BlobParts;
 ///         so the blob does the moving and this does the arithmetic.
 ///     </para>
 /// </remarks>
-public class UnstickProbe
+internal class UnstickProbe
 {
     /// <summary>
     ///     How thick a slice is tested when working out which way a stuck blob has to be nudged to

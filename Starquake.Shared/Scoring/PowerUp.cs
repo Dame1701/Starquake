@@ -9,7 +9,7 @@ namespace Starquake.Scoring;
 ///     these with <c>Next(8)</c> and the number reaches <see cref="PlayerStats" /> as the sprite it
 ///     was drawn as. They were eight named ints compared against in an if/else chain.
 /// </summary>
-public enum PowerUp
+internal enum PowerUp
 {
     EnergyMedium = 0,
     EnergySmall = 1,

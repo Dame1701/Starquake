@@ -9,7 +9,7 @@ using Starquake.Engines.ScreenEffects;
 
 namespace Starquake.ActiveSprites;
 
-public class BreakableBridges
+internal class BreakableBridges
 {
     private readonly List<BreakableBridge> _bridges;
     private readonly GameScreenCollection _gameScreens;

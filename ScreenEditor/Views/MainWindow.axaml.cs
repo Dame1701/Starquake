@@ -10,7 +10,7 @@ using Starquake.ScreenEditor.ViewModels;
 
 namespace Starquake.ScreenEditor.Views;
 
-public partial class MainWindow : Window
+internal partial class MainWindow : Window
 {
 
     private bool _closeConfirmed;

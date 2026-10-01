@@ -30,7 +30,7 @@ namespace Starquake.Scoring;
 ///         class does not need to know what a blob is.
 ///     </para>
 /// </remarks>
-public class PlayerStats
+internal class PlayerStats
 {
     /// <summary>
     ///     How long the blob goes between losing a bar of energy, in logic frames - four seconds.

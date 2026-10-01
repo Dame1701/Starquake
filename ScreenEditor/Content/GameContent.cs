@@ -13,7 +13,7 @@ namespace Starquake.ScreenEditor.Content;
 ///     the executable to the solution folder finds it in a normal checkout, and the file menu is
 ///     still there for the times it does not.
 /// </remarks>
-public static class GameContent
+internal static class GameContent
 {
 
     /// <summary>

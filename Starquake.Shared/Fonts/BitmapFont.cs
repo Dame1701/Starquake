@@ -8,7 +8,7 @@ using Starquake.Helpers;
 
 namespace Starquake.Fonts;
 
-public class BitmapFont
+internal class BitmapFont
 {
     private readonly SpriteFont _font;
 

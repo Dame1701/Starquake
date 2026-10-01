@@ -9,7 +9,7 @@ using Starquake.Structure;
 
 namespace Starquake.Animations;
 
-public class BlobAccessBoothAnim
+internal class BlobAccessBoothAnim
 {
     private readonly Animation _animLeft;
     private readonly Animation _animRight;

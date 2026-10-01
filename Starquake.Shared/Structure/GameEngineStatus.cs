@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Structure;
 
-public enum GameEngineStatus
+internal enum GameEngineStatus
 {
     NotStarted,
     StartingGraphicsLoaded,

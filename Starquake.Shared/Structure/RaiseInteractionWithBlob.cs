@@ -4,4 +4,4 @@
 // -
 namespace Starquake.Structure;
 
-public delegate void RaiseInteractionWithBlob(NastyInteractionType interactionType, NastyType nastyType);
+internal delegate void RaiseInteractionWithBlob(NastyInteractionType interactionType, NastyType nastyType);

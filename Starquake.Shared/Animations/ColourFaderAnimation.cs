@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 
 namespace Starquake.Animations;
 
-public class ColourFaderAnimation
+internal class ColourFaderAnimation
 {
 
     // Animation direction

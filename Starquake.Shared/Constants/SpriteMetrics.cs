@@ -10,7 +10,7 @@ namespace Starquake.Constants;
 ///     cut into frames of one standard size, so a sprite's width and height are the same number
 ///     nearly everywhere and worth saying once.
 /// </summary>
-public static class SpriteMetrics
+internal static class SpriteMetrics
 {
     /// <summary>
     ///     The standard sprite frame. Every sheet that holds a moving object is cut into frames of

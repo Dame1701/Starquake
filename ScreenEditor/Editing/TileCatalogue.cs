@@ -17,7 +17,7 @@ namespace Starquake.ScreenEditor.Editing;
 ///     <see cref="ActionTiles" /> and <see cref="TunnelTiles" /> say so, and the editor reads the
 ///     same two sources rather than keeping its own list that could drift out of step with them.
 /// </remarks>
-public static class TileCatalogue
+internal static class TileCatalogue
 {
 
     /// <summary>

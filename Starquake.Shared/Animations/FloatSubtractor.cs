@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Animations;
 
-public class FloatSubtractor : AnimationTrigger
+internal class FloatSubtractor : AnimationTrigger
 {
     private readonly float _finalValue;
     private readonly float _initialValue;

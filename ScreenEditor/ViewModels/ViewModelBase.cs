@@ -17,7 +17,7 @@ namespace Starquake.ScreenEditor.ViewModels;
 ///     reactive framework for two methods is a dependency that has to be kept in step with Avalonia
 ///     for nothing, so it is these two methods instead.
 /// </remarks>
-public abstract class ViewModelBase : INotifyPropertyChanged
+internal abstract class ViewModelBase : INotifyPropertyChanged
 {
 
     public event PropertyChangedEventHandler? PropertyChanged;

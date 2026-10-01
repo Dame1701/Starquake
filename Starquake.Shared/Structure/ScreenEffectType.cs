@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Structure;
 
-public enum ScreenEffectType
+internal enum ScreenEffectType
 {
     None,
     AdditiveFade,

@@ -10,7 +10,7 @@ namespace Starquake.Structure;
 ///     <see cref="MapXPosition" /> and <see cref="MapYPosition" /> are which tile of the screen's
 ///     grid it is.
 /// </summary>
-public sealed record TileDetected(
+internal sealed record TileDetected(
     int TileNumber,
     int XPosition,
     int YPosition,

@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Structure;
 
-public enum ActionEvent
+internal enum ActionEvent
 {
     Teleported
 }

@@ -10,7 +10,7 @@ using Starquake.SharedLibs;
 
 namespace Starquake.ActiveSprites;
 
-public class JumpPlatforms
+internal class JumpPlatforms
 {
     /// <summary>
     ///     What <see cref="GetNewJumpPlatform" /> answers when there is no room for one. It has to be

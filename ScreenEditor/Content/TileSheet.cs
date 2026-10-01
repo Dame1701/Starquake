@@ -19,7 +19,7 @@ namespace Starquake.ScreenEditor.Content;
 ///     colours up front, which is what lets the world map draw five hundred screens at once without
 ///     five hundred trips back to the full size artwork.
 /// </remarks>
-public sealed class TileSheet : IDisposable
+internal sealed class TileSheet : IDisposable
 {
 
     /// <summary>

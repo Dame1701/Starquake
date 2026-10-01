@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 
 namespace Starquake.Sprites;
 
-public class SpritePixelMatrix
+internal class SpritePixelMatrix
 {
     private readonly Random _randomNumberGenerator;
 

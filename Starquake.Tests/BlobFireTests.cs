@@ -17,10 +17,15 @@ namespace Starquake.Tests;
 /// </summary>
 public class BlobFireTests
 {
+    // Internal rather than public, here and in the theories below that take one. The parameter
+    // is one of the game's own types, and those are internal now - this project only sees them
+    // through InternalsVisibleTo, which is not enough to let a public signature here name one.
+    // Dropping to internal costs nothing: xunit requires the test class to be public, not its
+    // test methods, so these are still found and still run.
     [Theory]
     [InlineData(Direction.Up, 100, 84)]
     [InlineData(Direction.Down, 100, 116)]
-    public void Advance_FiredAlongTheVerticalAxis_MovesThatWayAndRecordsNoDistance(
+    internal void Advance_FiredAlongTheVerticalAxis_MovesThatWayAndRecordsNoDistance(
         Direction firedIn,
         int startY,
         int expectedY)
@@ -43,7 +48,7 @@ public class BlobFireTests
     [Theory]
     [InlineData(Direction.Left, 100, 84)]
     [InlineData(Direction.Right, 100, 116)]
-    public void Advance_FiredAlongTheHorizontalAxis_MovesThatWayAndRecordsTheDistance(
+    internal void Advance_FiredAlongTheHorizontalAxis_MovesThatWayAndRecordsTheDistance(
         Direction firedIn,
         int startX,
         int expectedX)
@@ -153,7 +158,7 @@ public class BlobFireTests
     [InlineData(Direction.Right, TestData.AtHighEdgeX, TestData.MidScreenY)]
     [InlineData(Direction.Up, TestData.MidScreenX, TestData.PastLowEdge)]
     [InlineData(Direction.Down, TestData.MidScreenX, TestData.AtHighEdgeY)]
-    public void Advance_ReachesTheScreenEdgeTravellingStraight_DiesQuietly(Direction firedIn, int x, int y)
+    internal void Advance_ReachesTheScreenEdgeTravellingStraight_DiesQuietly(Direction firedIn, int x, int y)
     {
         // Arrange
         var surroundings = new Surroundings();
@@ -256,7 +261,7 @@ public class BlobFireTests
     [InlineData(Direction.None)]
     [InlineData(Direction.UpLeft)]
     [InlineData(Direction.Up)]
-    public void Advance_OnFootInADirectionItCannotTravel_DropsTheShot(Direction firedIn)
+    internal void Advance_OnFootInADirectionItCannotTravel_DropsTheShot(Direction firedIn)
     {
         // Arrange
         var surroundings = new Surroundings();
@@ -274,7 +279,7 @@ public class BlobFireTests
     [Theory]
     [InlineData(Direction.None)]
     [InlineData(Direction.DownRight)]
-    public void Advance_FromAShuttleInADirectionItCannotTravel_LeavesTheShotWhereItIs(Direction firedIn)
+    internal void Advance_FromAShuttleInADirectionItCannotTravel_LeavesTheShotWhereItIs(Direction firedIn)
     {
         // Arrange
         var surroundings = new Surroundings();

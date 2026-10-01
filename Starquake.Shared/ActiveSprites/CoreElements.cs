@@ -12,7 +12,7 @@ using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
 
-public class CoreElements : GameComponentBase
+internal class CoreElements : GameComponentBase
 {
 
     /// <summary>

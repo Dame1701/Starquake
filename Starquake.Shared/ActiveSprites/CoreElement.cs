@@ -15,7 +15,7 @@ using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
 
-public class CoreElement
+internal class CoreElement
 {
     /// <summary>
     ///     How an element being put back is animated: the one the blob is carrying shrinks from three

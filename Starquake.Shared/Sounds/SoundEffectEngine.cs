@@ -9,7 +9,7 @@ using Starquake.Structure;
 
 namespace Starquake.Sounds;
 
-public class SoundEffectEngine(ContentManager content) : IDisposable
+internal class SoundEffectEngine(ContentManager content) : IDisposable
 {
     /// <summary>
     ///     How long the background rumble waits before its first outing once it is switched on, and

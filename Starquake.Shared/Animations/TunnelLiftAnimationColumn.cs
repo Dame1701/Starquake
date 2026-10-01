@@ -9,7 +9,7 @@ using Starquake.Sprites;
 
 namespace Starquake.Animations;
 
-public class TunnelLiftAnimationColumn
+internal class TunnelLiftAnimationColumn
 {
     private readonly List<TunnelLiftAnimationSection> _sections;
 

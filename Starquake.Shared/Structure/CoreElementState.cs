@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Structure;
 
-public enum CoreElementState
+internal enum CoreElementState
 {
     Missing,
     Replacing,

@@ -22,7 +22,7 @@ namespace Starquake.GameComponents;
 ///         engine reads <see cref="Current" /> each frame and updates and draws whatever it names.
 ///     </para>
 /// </summary>
-public sealed class ScreenDirectory
+internal sealed class ScreenDirectory
 {
     private readonly Dictionary<GameScreenType, IGameScreen> _screens = new();
 

@@ -10,7 +10,7 @@ using Starquake.Structure;
 
 namespace Starquake.Animations;
 
-public class AnimTile : GameComponentBase
+internal class AnimTile : GameComponentBase
 {
     private readonly GraphicsSet _graphicsSet;
 

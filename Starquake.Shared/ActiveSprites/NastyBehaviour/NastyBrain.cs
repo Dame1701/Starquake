@@ -23,7 +23,7 @@ namespace Starquake.ActiveSprites.NastyBehaviour;
 ///         the release that fixes it are both in here, and both exist because it happens.
 ///     </para>
 /// </remarks>
-public class NastyBrain
+internal class NastyBrain
 {
     /// <summary>
     ///     How long a nasty may sit at the same position while chasing before it gives up chasing -

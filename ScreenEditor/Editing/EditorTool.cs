@@ -13,7 +13,7 @@ namespace Starquake.ScreenEditor.Editing;
 ///     for the toolbar to rub out one tile and again to carry on painting is the sort of thing that
 ///     makes an editor tiring to use.
 /// </remarks>
-public enum EditorTool
+internal enum EditorTool
 {
 
     /// <summary>

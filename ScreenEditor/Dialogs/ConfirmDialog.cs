@@ -13,7 +13,7 @@ namespace Starquake.ScreenEditor.Dialogs;
 /// <summary>
 ///     What somebody chose when asked about unsaved work.
 /// </summary>
-public enum ConfirmChoice
+internal enum ConfirmChoice
 {
     Save,
     Discard,
@@ -29,7 +29,7 @@ public enum ConfirmChoice
 ///     choice: losing an afternoon of map work to a stray Cmd+W would be the single worst thing this
 ///     tool could do.
 /// </remarks>
-public sealed class ConfirmDialog : Window
+internal sealed class ConfirmDialog : Window
 {
 
     private ConfirmChoice _choice = ConfirmChoice.Cancel;

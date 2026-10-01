@@ -15,7 +15,7 @@ namespace Starquake.ScreenEditor.ViewModels;
 ///     job needs. <see cref="RaiseCanExecuteChanged" /> is called from the one place that knows when
 ///     anything has changed - the session - rather than from each command separately.
 /// </remarks>
-public sealed class RelayCommand : ICommand
+internal sealed class RelayCommand : ICommand
 {
 
     private readonly Func<bool>? _canExecute;

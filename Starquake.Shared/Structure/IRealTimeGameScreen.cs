@@ -9,7 +9,7 @@ namespace Starquake.Structure;
 /// <summary>
 ///     Game screens that need to carry on updating even when they're not active
 /// </summary>
-public interface IRealTimeGameScreen : IGameScreen
+internal interface IRealTimeGameScreen : IGameScreen
 {
     void UpdateOffScreen(GameTime gameTime);
 }

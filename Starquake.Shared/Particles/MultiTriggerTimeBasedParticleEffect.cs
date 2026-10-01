@@ -10,7 +10,7 @@ using Starquake.Structure;
 
 namespace Starquake.Particles;
 
-public class MultiTriggerTimeBasedParticleEffect : IPositionalTriggerParticleEffect
+internal class MultiTriggerTimeBasedParticleEffect : IPositionalTriggerParticleEffect
 {
     private readonly GraphicsSet _graphicsSet;
     private readonly ParticleEffect _mercuryParticleEffect;

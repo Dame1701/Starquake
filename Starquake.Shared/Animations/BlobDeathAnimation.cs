@@ -12,7 +12,7 @@ using Starquake.Structure;
 
 namespace Starquake.Animations;
 
-public class BlobDeathAnimation : GameComponentBase
+internal class BlobDeathAnimation : GameComponentBase
 {
     // The six fragment sprites Blob comes apart into. Deliberately not a straight run
     private static readonly int[] FragmentSpriteNumbers = [0, 1, 1, 2, 3, 5];

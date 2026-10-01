@@ -17,7 +17,7 @@ using Starquake.Structure;
 
 namespace Starquake.GameComponents.PresentationScreens;
 
-public class OptionsScreen : GameScreenBase, IGameScreen
+internal class OptionsScreen : GameScreenBase, IGameScreen
 {
     private readonly GameSession _session;
 

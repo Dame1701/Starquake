@@ -31,7 +31,7 @@ namespace Starquake.ScreenEditor.Controls;
 ///         repeat every time a tile is painted.
 ///     </para>
 /// </remarks>
-public sealed class WorldMapView : Control
+internal sealed class WorldMapView : Control
 {
 
     /// <summary>

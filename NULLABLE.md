@@ -130,9 +130,11 @@ and write them as `utf-8-sig`. `ProjectMercury` sources are **Latin-1** and will
 **`ProjectMercury` is out of scope.** A 2009 fork kept deliberately unmodernised, with
 `<Nullable>disable</Nullable>` and an explanatory comment in both its `.csproj` files.
 
-**`ScreenEditor/Program.cs` `BuildAvaloniaApp` must stay public.** Nothing in the solution calls
-it except `Main`, so every inspection suggests making it private. The Avalonia visual designer
-finds it by name at runtime. The same caution applies to anything reachable only from `.axaml`.
+**`ScreenEditor/Program.cs` `BuildAvaloniaApp` must stay public, and so must `Program`.** Nothing
+in the solution calls it except `Main`, so every inspection suggests making it private. The
+Avalonia visual designer finds it by name at runtime, which is also why `Program` is the one
+public type left in an otherwise internal editor. The same caution applies to anything reachable
+only from `.axaml`.
 
 **A name that is not registered now throws.** If a new sprite, sound, data resource or particle
 effect is added, register it in `GameEngine.DefineContent` or the game fails loudly at startup,

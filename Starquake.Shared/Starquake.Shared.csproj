@@ -33,6 +33,17 @@
     </ItemGroup>
 
     <ItemGroup>
+        <!--
+          GameHost is the only type a head needs to see, so it is the only public one in here;
+          everything else the game is made of is internal. The tests reach past that rather than
+          forcing a public surface to exist for their benefit: what they exercise - collision
+          detection, the nasty brain, the world populator - is the inside of the game, and making
+          it public would be describing it as an API that nothing outside this solution consumes.
+        -->
+        <InternalsVisibleTo Include="Starquake.Tests"/>
+    </ItemGroup>
+
+    <ItemGroup>
         <None Update="Content\Fonts\elektoraSmall.spritefont">
             <SubType>Designer</SubType>
         </None>

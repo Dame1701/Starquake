@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Starquake.Helpers;
 
-public static class TextureHelper
+internal static class TextureHelper
 {
     public static Texture2D Texture2DFromFile(GraphicsDevice graphicsDevice, string fileName)
     {

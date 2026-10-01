@@ -24,7 +24,7 @@ namespace Starquake.Input;
 ///     underneath them have changed, and it does that through a callback the engine supplies
 ///     rather than by holding the engine.
 /// </remarks>
-public class GlobalHotkeys
+internal class GlobalHotkeys
 {
     /// <summary>
     ///     The screens the player is considered to be in play on. Pause and fullscreen only mean

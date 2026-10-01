@@ -7,7 +7,7 @@ using Starquake.SharedLibs;
 
 namespace Starquake.Structure;
 
-public class KeyLockDoor
+internal class KeyLockDoor
 {
     public readonly List<CollisionTile> CollisionTiles;
     public Point Location;

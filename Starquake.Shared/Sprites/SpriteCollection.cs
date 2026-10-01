@@ -10,7 +10,7 @@ using Starquake.Helpers;
 
 namespace Starquake.Sprites;
 
-public class SpriteCollection
+internal class SpriteCollection
 {
     private readonly ContentManager _contentManager;
 

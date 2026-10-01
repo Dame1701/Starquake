@@ -4,4 +4,4 @@
 // -
 namespace Starquake.Structure;
 
-public delegate void RaiseEngineComponentStatusChanged(string message, int percentComplete, GameEngineStatus status);
+internal delegate void RaiseEngineComponentStatusChanged(string message, int percentComplete, GameEngineStatus status);

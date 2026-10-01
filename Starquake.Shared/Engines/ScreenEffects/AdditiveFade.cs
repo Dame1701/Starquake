@@ -9,7 +9,7 @@ using Starquake.Structure;
 
 namespace Starquake.Engines.ScreenEffects;
 
-public class AdditiveFade : ScreenEffectBase
+internal class AdditiveFade : ScreenEffectBase
 {
     private readonly PresentationSettings _presentation;
 

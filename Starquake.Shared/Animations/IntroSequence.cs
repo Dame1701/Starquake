@@ -17,7 +17,7 @@ using Starquake.Structure;
 
 namespace Starquake.Animations;
 
-public class IntroSequence : GameComponentBase
+internal class IntroSequence : GameComponentBase
 {
     private readonly BlobDeathAnimation _blobKiller;
 

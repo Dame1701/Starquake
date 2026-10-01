@@ -7,7 +7,7 @@ using Starquake.ContentManagement;
 
 namespace Starquake.Structure;
 
-public interface IGameComponent
+internal interface IGameComponent
 {
     event RaiseScreenChanged OnScreenChanged;
     void LoadContent(ContentList content);

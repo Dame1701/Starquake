@@ -24,7 +24,7 @@ namespace Starquake.Structure;
 ///         this untestable - and it would only be re-homing a reference, which narrows nothing.
 ///     </para>
 /// </summary>
-public sealed class GameSession
+internal sealed class GameSession
 {
     private bool _paused;
 

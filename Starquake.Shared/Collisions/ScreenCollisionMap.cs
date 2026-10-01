@@ -30,7 +30,7 @@ namespace Starquake.Collisions;
 ///         <see cref="TileMetrics.TileHeight" />, so asking was the same answer the long way round.
 ///     </para>
 /// </remarks>
-public class ScreenCollisionMap
+internal class ScreenCollisionMap
 {
     /// <summary>
     ///     Collision tiles carrying an image number beyond this are game objects rather than scenery -

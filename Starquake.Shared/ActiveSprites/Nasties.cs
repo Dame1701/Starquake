@@ -17,7 +17,7 @@ using Starquake.Structure;
 namespace Starquake.ActiveSprites;
 
 // This wraps multiple nasties
-public class Nasties : GameComponentBase
+internal class Nasties : GameComponentBase
 {
 
     /// <summary>

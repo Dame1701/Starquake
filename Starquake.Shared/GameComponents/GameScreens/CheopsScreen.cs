@@ -18,7 +18,7 @@ using Starquake.Structure;
 
 namespace Starquake.GameComponents.GameScreens;
 
-public class CheopsScreen : GameComponentBase, IGameScreen
+internal class CheopsScreen : GameComponentBase, IGameScreen
 {
 
 

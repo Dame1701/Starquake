@@ -15,7 +15,7 @@ namespace Starquake.ScreenEditor.Styles;
 ///     drawing code directly, the XAML through <c>x:Static</c> - so that the chrome and the canvas
 ///     cannot drift apart.
 /// </remarks>
-public static class EditorColours
+internal static class EditorColours
 {
 
     /// <summary>

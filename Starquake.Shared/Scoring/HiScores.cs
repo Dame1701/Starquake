@@ -11,7 +11,7 @@ using Starquake.Helpers;
 
 namespace Starquake.Scoring;
 
-public class HiScores
+internal class HiScores
 {
     private readonly List<HiScore> _scores;
 

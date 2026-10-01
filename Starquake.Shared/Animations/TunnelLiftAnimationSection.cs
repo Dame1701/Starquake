@@ -6,7 +6,7 @@ using Starquake.Constants;
 
 namespace Starquake.Animations;
 
-public class TunnelLiftAnimationSection
+internal class TunnelLiftAnimationSection
 {
     private readonly int _delayStart;
     private int _delayCounter;

@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Starquake.Input;
 
-public class PlayerKeySet
+internal class PlayerKeySet
 {
     public Keys Down;
     public Keys Fire;

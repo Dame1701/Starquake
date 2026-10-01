@@ -27,7 +27,7 @@ namespace Starquake.GameComponents.PresentationScreens;
 ///         rather than a render view port - there is no screen effect engine yet to own one.
 ///     </para>
 /// </remarks>
-public class LoadingScreen
+internal class LoadingScreen
 {
     /// <summary>
     ///     How much of a colour channel the loading screen's fade moves by, each logic frame.

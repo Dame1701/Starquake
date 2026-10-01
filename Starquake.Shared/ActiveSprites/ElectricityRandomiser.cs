@@ -8,7 +8,7 @@ using Starquake.Sounds;
 
 namespace Starquake.ActiveSprites;
 
-public class ElectricityRandomiser
+internal class ElectricityRandomiser
 {
 
     private readonly Random _randomGenerator;

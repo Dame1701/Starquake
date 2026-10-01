@@ -23,7 +23,7 @@ namespace Starquake.ScreenEditor.Controls;
 ///     makes it solid everywhere that platform has ever been painted. That is worth knowing before
 ///     clicking, which is why the panel says so rather than leaving it to be discovered.
 /// </remarks>
-public sealed class CollisionMaskEditor : Control
+internal sealed class CollisionMaskEditor : Control
 {
 
     /// <summary>

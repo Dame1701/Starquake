@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Structure;
 
-public enum BlobState
+internal enum BlobState
 {
     Normal,
     Overloading,

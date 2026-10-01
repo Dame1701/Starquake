@@ -20,7 +20,7 @@ namespace Starquake.ActiveSprites.BlobParts;
 ///     get at an item three places back, the blob has to cycle everything in front of it out onto
 ///     the floor and pick it all up again.
 /// </remarks>
-public class Inventory
+internal class Inventory
 {
     /// <summary>
     ///     How many things the blob can carry. Picking something up pushes the whole inventory along

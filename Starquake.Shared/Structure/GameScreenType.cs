@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Structure;
 
-public enum GameScreenType
+internal enum GameScreenType
 {
     None,
     Teleporter,

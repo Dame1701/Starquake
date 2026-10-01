@@ -7,7 +7,7 @@ using Starquake.Structure;
 
 namespace Starquake.Animations;
 
-public class AnimTileEngine : GameComponentBase
+internal class AnimTileEngine : GameComponentBase
 {
     public AnimTileEngine()
     {

@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Structure;
 
-public enum NastyInteractionType
+internal enum NastyInteractionType
 {
     HitBlob,
     BlobShot

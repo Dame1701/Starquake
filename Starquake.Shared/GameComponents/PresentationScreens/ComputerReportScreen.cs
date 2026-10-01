@@ -17,7 +17,7 @@ using Starquake.Structure;
 
 namespace Starquake.GameComponents.PresentationScreens;
 
-public class ComputerReportScreen : GameScreenBase, IGameScreen
+internal class ComputerReportScreen : GameScreenBase, IGameScreen
 {
     private readonly Random _randomNumberGenerator;
 

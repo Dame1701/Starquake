@@ -25,7 +25,7 @@ namespace Starquake.ScreenEditor.Editing;
 ///         derived data in step with edits that will never be read.
 ///     </para>
 /// </remarks>
-public sealed class EditorDocument
+internal sealed class EditorDocument
 {
 
     /// <summary>

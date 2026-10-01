@@ -12,7 +12,7 @@ using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
 
-public class BouncingParticle
+internal class BouncingParticle
 {
 
     /// <summary>

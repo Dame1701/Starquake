@@ -11,7 +11,7 @@ using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
 
-public class ConveyerNasties : GameComponentBase
+internal class ConveyerNasties : GameComponentBase
 {
     private readonly Blob _blob;
     private readonly ContentManager _contentManager;

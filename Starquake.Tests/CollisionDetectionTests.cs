@@ -97,12 +97,17 @@ public class CollisionDetectionTests
         Assert.False(collided);
     }
 
+    // Internal rather than public, here and in the theories below that take one. The parameter
+    // is one of the game's own types, and those are internal now - this project only sees them
+    // through InternalsVisibleTo, which is not enough to let a public signature here name one.
+    // Dropping to internal costs nothing: xunit requires the test class to be public, not its
+    // test methods, so these are still found and still run.
     [Theory]
     [InlineData(Direction.Up)]
     [InlineData(Direction.Down)]
     [InlineData(Direction.Left)]
     [InlineData(Direction.Right)]
-    public void CheckDirection_NothingInTheWay_AllowsTheFullVelocity(Direction direction)
+    internal void CheckDirection_NothingInTheWay_AllowsTheFullVelocity(Direction direction)
     {
         // Arrange
         var obstacleWellClear = new Rectangle(TestData.WellClear, TestData.WellClear, TestData.BoxSize, TestData.BoxSize);
@@ -123,7 +128,7 @@ public class CollisionDetectionTests
     [InlineData(Direction.Down, 0, 0, 0, TestData.GapBeforeObstacle)]
     [InlineData(Direction.Left, TestData.GapBeforeObstacle, 0, 0, 0)]
     [InlineData(Direction.Right, 0, 0, TestData.GapBeforeObstacle, 0)]
-    public void CheckDirection_ObstacleWithinTheVelocity_AllowsOnlyTheGap(
+    internal void CheckDirection_ObstacleWithinTheVelocity_AllowsOnlyTheGap(
         Direction direction,
         int moverX,
         int moverY,
@@ -162,7 +167,7 @@ public class CollisionDetectionTests
     [InlineData(Direction.None)]
     [InlineData(Direction.UpLeft)]
     [InlineData(Direction.DownRight)]
-    public void CheckDirection_DirectionItDoesNotStepIn_AllowsNothing(Direction direction)
+    internal void CheckDirection_DirectionItDoesNotStepIn_AllowsNothing(Direction direction)
     {
         // Arrange
         var obstacleWellClear = new Rectangle(TestData.WellClear, TestData.WellClear, TestData.BoxSize, TestData.BoxSize);

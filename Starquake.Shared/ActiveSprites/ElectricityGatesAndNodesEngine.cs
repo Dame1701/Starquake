@@ -13,7 +13,7 @@ using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
 
-public class ElectricityGatesAndNodesEngine : GameComponentBase
+internal class ElectricityGatesAndNodesEngine : GameComponentBase
 {
 
     /// <summary>

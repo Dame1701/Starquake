@@ -11,7 +11,7 @@ namespace Starquake.Display;
 ///     An extended version of the SpriteBatch class that supports line and
 ///     rectangle drawing.
 /// </summary>
-public class Shapes : SpriteBatch
+internal class Shapes : SpriteBatch
 {
 
     public Shapes(GraphicsDevice graphicsDevice)

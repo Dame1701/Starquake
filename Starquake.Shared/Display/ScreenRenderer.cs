@@ -31,7 +31,7 @@ namespace Starquake.Display;
 ///         now a change to one class.
 ///     </para>
 /// </remarks>
-public class ScreenRenderer
+internal class ScreenRenderer
 {
     /// <summary>
     ///     Anything numbered above this is scenery drawn on the upper layer rather than a tile the

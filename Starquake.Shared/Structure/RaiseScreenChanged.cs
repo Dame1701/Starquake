@@ -4,4 +4,4 @@
 // -
 namespace Starquake.Structure;
 
-public delegate void RaiseScreenChanged(GameScreenType triggerScreen);
+internal delegate void RaiseScreenChanged(GameScreenType triggerScreen);
