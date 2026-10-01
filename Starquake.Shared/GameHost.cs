@@ -117,7 +117,7 @@ public class GameHost : Game
     protected override void Initialize()
     {
         // The engine defines and initialises its own content as it is built
-        _gameEngine = new GameEngine(_graphics, Content, _input);
+        _gameEngine = new GameEngine(_graphics, Content, _input, Window, Exit);
 
         // This will eventually call LoadContent
         base.Initialize();

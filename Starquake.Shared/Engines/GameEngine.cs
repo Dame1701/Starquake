@@ -67,6 +67,19 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     private readonly GraphicsDeviceManager _graphicsDeviceMgr;
 
     /// <summary>
+    ///     The host's window. Held only to hand to <see cref="GlobalHotkeys" />, which has to drop
+    ///     the window's border when it goes fullscreen; nothing else in the engine touches it.
+    /// </summary>
+    private readonly GameWindow _window;
+
+    /// <summary>
+    ///     Closes the game. The host's <c>Exit</c>, held only to hand to
+    ///     <see cref="GlobalHotkeys" /> - ending the process is the host's to do, not the engine's,
+    ///     and a callback is how the artwork swap already reaches back the other way.
+    /// </summary>
+    private readonly Action _quitGame;
+
+    /// <summary>
     ///     Which of the two sets of artwork the game is drawn with, and the sheet names that go
     ///     with it. Switched by <see cref="SwitchGraphicsSetIfAsked" />; read live by everything
     ///     that draws.
@@ -159,12 +172,16 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     public GameEngine(
         GraphicsDeviceManager graphics,
         ContentManager content,
-        ToggleKeys input)
+        ToggleKeys input,
+        GameWindow window,
+        Action quitGame)
     {
         Input = input;
         // Setup graphics device and content management
         _graphicsDeviceMgr = graphics;
         ContentMgr = content;
+        _window = window;
+        _quitGame = quitGame;
 
         // The one generator the game logic draws from, so a game can be reproduced from its seed.
         // The sound engine is deliberately not given it: its only draw happens on a thread pool
@@ -356,8 +373,10 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             Presentation,
             _graphicsSet,
             _graphicsDeviceMgr,
+            _window,
             ContentResourceManager,
-            ArtworkSwapped);
+            ArtworkSwapped,
+            _quitGame);
 
         // Core Elements
         Elements = new CoreElements(Stats, ContentResourceManager, _graphicsSet, RandomNumberGenerator);

@@ -14,8 +14,8 @@ using Starquake.Structure;
 namespace Starquake.Input;
 
 /// <summary>
-///     The four keys that work anywhere in the game rather than belonging to a screen: pause,
-///     fullscreen, the backdrops and the artwork swap.
+///     The five keys that work anywhere in the game rather than belonging to a screen: pause,
+///     fullscreen, the backdrops, the artwork swap and quit.
 /// </summary>
 /// <remarks>
 ///     These are not the composition root and they are not the frame loop, which is what
@@ -40,6 +40,7 @@ internal class GlobalHotkeys
     ];
 
     private readonly Action _artworkSwapped;
+    private readonly Action _quitGame;
     private readonly GraphicsDeviceManager _graphicsDeviceManager;
     private readonly GraphicsSet _graphicsSet;
     private readonly ToggleKeys _input;
@@ -47,6 +48,7 @@ internal class GlobalHotkeys
     private readonly ResourceManager _resources;
     private readonly ScreenDirectory _screenDirectory;
     private readonly GameSession _session;
+    private readonly GameWindow _window;
 
     public GlobalHotkeys(
         ToggleKeys input,
@@ -55,8 +57,10 @@ internal class GlobalHotkeys
         PresentationSettings presentation,
         GraphicsSet graphicsSet,
         GraphicsDeviceManager graphics,
+        GameWindow window,
         ResourceManager resources,
-        Action artworkSwapped)
+        Action artworkSwapped,
+        Action quitGame)
     {
         _input = input;
         _screenDirectory = screenDirectory;
@@ -64,8 +68,10 @@ internal class GlobalHotkeys
         _presentation = presentation;
         _graphicsSet = graphicsSet;
         _graphicsDeviceManager = graphics;
+        _window = window;
         _resources = resources;
         _artworkSwapped = artworkSwapped;
+        _quitGame = quitGame;
     }
 
     public void Update()
@@ -74,6 +80,37 @@ internal class GlobalHotkeys
         ToggleFullScreenIfAsked();
         ToggleBackgroundsIfAsked();
         SwitchGraphicsSetIfAsked();
+        QuitIfAsked();
+    }
+
+    /// <summary>
+    ///     Q closes the game, but only while it is paused. Escape closes it from anywhere and is
+    ///     handled by the host itself, which is where ending the process belongs; this one is here
+    ///     because the pause it reads is the session's, which this class already owns.
+    /// </summary>
+    /// <remarks>
+    ///     The pause is what makes Q safe to take. Q is not a spare key during play: the original
+    ///     Spectrum layout binds it to <em>up</em>, so quitting on it unconditionally ended the game
+    ///     every time that player tried to climb. It is also <c>PlayerKeySet.Quit</c> in two of the
+    ///     four layouts, which <c>MainGameScreen</c> reads to abandon a game to the Game Over screen.
+    ///     Pausing first settles both: nothing is being steered, and while the hand-over to Game Over
+    ///     is still reached in the same logic frame, the process ends before it can be seen.
+    ///     <para>
+    ///         Only an in-play screen can be paused - <see cref="TogglePauseIfAsked" /> will not pause
+    ///         anything else - so on the menus Escape remains the way out.
+    ///     </para>
+    /// </remarks>
+    private void QuitIfAsked()
+    {
+        if (!_session.Paused)
+        {
+            return;
+        }
+
+        if (_input.GetPressedKey() == Keys.Q)
+        {
+            _quitGame();
+        }
     }
 
     /// <summary>
@@ -160,29 +197,55 @@ internal class GlobalHotkeys
     ///     size. The game itself never changes size: it always composes at
     ///     <see cref="CompositionSize.Width" /> x <see cref="CompositionSize.Height" /> and
     ///     Presentation.Transform scales that onto whatever back buffer we end up with.
-    ///     HardwareModeSwitch has to be on. Borderless (the false case) looks like the friendlier
-    ///     option, but on macOS it produces a window clamped to the desktop area *below* the menu
-    ///     bar - a back buffer 39 points short, sat 39 points down the screen, with the picture
-    ///     centred inside that rather than inside the display.
+    ///     <para>
+    ///         A hardware mode switch was used here and is not needed: the game scales onto any back
+    ///         buffer, so there is nothing to gain from changing the display's mode, and on a Retina
+    ///         Mac it left the window server stroking a one point #333333 outline round all four
+    ///         edges of the display. Measured rather than guessed - the window itself sat at exactly
+    ///         0,0 by the full display size and its own contents were black to the last pixel on
+    ///         every edge, so the grey was composited outside it and was not the game's to draw or
+    ///         to clear. Borderless with no mode switch is the combination that has no outline.
+    ///     </para>
+    ///     <para>
+    ///         Borderless alone was tried before and rejected, because on its own it gives a window
+    ///         clamped to the desktop area *below* the menu bar - 39 points short and 39 points down.
+    ///         Dropping the window's border is what stops that: a bordered window cannot cover the
+    ///         menu bar, and a borderless one can. The two changes only work together.
+    ///     </para>
     /// </summary>
     private void ToggleFullScreen()
     {
-        _graphicsDeviceManager.HardwareModeSwitch = true;
+        _graphicsDeviceManager.HardwareModeSwitch = false;
 
-        if (_graphicsDeviceManager.IsFullScreen)
+        bool goingFullScreen = !_graphicsDeviceManager.IsFullScreen;
+
+        if (goingFullScreen)
         {
-            _graphicsDeviceManager.PreferredBackBufferWidth = CompositionSize.Width;
-            _graphicsDeviceManager.PreferredBackBufferHeight = CompositionSize.Height;
-        }
-        else
-        {
+            // Before the switch, not after: SDL ignores a border change on a window that is
+            // already fullscreen, so asking for it afterwards does nothing at all.
+            _window.IsBorderless = true;
+
             DisplayMode desktop = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
 
             _graphicsDeviceManager.PreferredBackBufferWidth = desktop.Width;
             _graphicsDeviceManager.PreferredBackBufferHeight = desktop.Height;
         }
+        else
+        {
+            _graphicsDeviceManager.PreferredBackBufferWidth = CompositionSize.Width;
+            _graphicsDeviceManager.PreferredBackBufferHeight = CompositionSize.Height;
+        }
 
-        _graphicsDeviceManager.IsFullScreen = !_graphicsDeviceManager.IsFullScreen;
+        _graphicsDeviceManager.IsFullScreen = goingFullScreen;
         _graphicsDeviceManager.ApplyChanges();
+
+        if (!goingFullScreen)
+        {
+            // And after the switch coming back, for that same reason - which is the whole of why
+            // this is not one assignment either side of ApplyChanges. Asking for the border while
+            // the window was still fullscreen left it borderless in a window, with no title bar
+            // and so no way to close the game with the mouse.
+            _window.IsBorderless = false;
+        }
     }
 }
