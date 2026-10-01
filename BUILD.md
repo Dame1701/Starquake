@@ -164,8 +164,10 @@ unsigned bundles are killed on launch on Apple Silicon.
 **An incremental build sometimes deletes the built content.** If the game starts failing with
 `ContentLoadException ... BootScreen2.xnb`, the `Content` folder under a head's output is empty
 and nothing you changed caused it: MSBuild's `IncrementalClean` removed it during a parallel
-build. Build again, or build with `-m:1`, which does not do it. See PLAN.md 6.6 for the
-measurements and the candidate fixes.
+build - the copy into `bin/` is skipped and last time's copies are then swept away. Build again,
+or build with `-m:1`, which does not do it in six runs out of six. See PLAN.md 6.6 for the
+measurements and the candidate fixes, and note that `DisableIncrementalClean` has been tried and
+makes it worse.
 
 **Content asset names use backslashes** (`"Graphics\\BootScreen2"`). MonoGame's
 `TitleContainer` normalises those to the platform separator, so they work on Linux and macOS

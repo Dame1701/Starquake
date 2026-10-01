@@ -1,9 +1,10 @@
 # Fixing what the review found
 
-**Phases 0 to 5 have landed.** This document was written the way `REFACTORING.md` and
+**Phases 0 to 5 have landed, and most of phase 6.** This document was written the way `REFACTORING.md` and
 `DECOUPLING.md` were written before their stages landed, and each finished phase's section has
 been replaced with what the work actually decided, as it landed, rather than left as the
-intention. Phase 6 is still the plan.
+intention. What is left is 6.1 and 6.2, both deferred by decision rather than by difficulty, and
+6.6, which is open.
 
 It covers a full review of the game carried out against `ef5a6a3`. Every finding is here; the
 ordering is the point of the document. `ProjectMercury` was out of scope throughout.
@@ -394,90 +395,104 @@ not a digit, and the options screen needs `0` — so **the main game screen has 
 since the renderer changed.** Someone should play a screen or two and check the tiles, the
 upper-layer patches over the lift shafts and booths, the tunnel mouths, Olly, and a smoking nasty.
 
-## Phase 6 — features and finish
+## Phase 6 — features and finish *(6.3, 6.4 and 6.5 landed; 6.1 and 6.2 deferred by decision; 6.6 open)*
 
 Nothing depends on these, which is why they are last rather than because they do not matter.
 
-**6.1 — place the key and the access card**, then remove the two inventory lines. 4.3 has landed,
-so the seeded, tested `WorldPopulator` this goes in now exists. See *The key and the access card*
-below; the placement algorithm is still an open question and is being thought about separately.
+**6.1 — place the key and the access card.** *Not done, deliberately.* 4.3 has landed, so the
+seeded, tested `WorldPopulator` this goes in now exists and nothing blocks it technically. What is
+open is the placement algorithm itself, which is being thought about separately — see *The key and
+the access card* below for what the map actually constrains. **The two temporary lines in
+`Blob`'s constructor stay until it is, because deleting them without replacing them makes the game
+unwinnable.**
 
-**6.2 — persist hi-scores.** `HiScores` hardcodes eight names in its constructor and
-`AddScoreToTable` writes only to memory, so the table resets on every launch. There is no read or
-write to disk anywhere in the solution. The name-entry screen is already fully built.
+**6.2 — persist hi-scores.** *Not done, deliberately.* The original game never remembered them
+either, so this is a new feature rather than a defect, and it may or may not be wanted. Left as
+written: `HiScores` hardcodes eight names in its constructor, `AddScoreToTable` writes only to
+memory, and there is no read or write to disk anywhere in the solution. The name-entry screen is
+already fully built, so the work is a file format and two calls.
 
-**6.3 — replace the `object? param` channel.**
-`IGameScreen.PerformPostScreenChangeActions(GameScreenType, object? param)` carries four
-unrelated meanings: "do not reset the screen fade" (`MainGameScreen.cs:118`), "the access code was
-correct" but only when the trigger is `AccessBooth` (`MainGameScreen.cs:155`, an unchecked
-`(bool)` cast), a `HiScore` (`HiScoreScreen.cs:79`), and a `true` from `GameEngine`'s test keys
-meaning the first of those. One record per transition, or a small closed hierarchy.
+**6.3 — the `object? param` channel is four named changes** (`314a9d4`). It carried four unrelated
+meanings, told apart by a null check and an unchecked `(bool)` cast.
 
-**6.4 — language tidying.** `ToggleKeys.GetFriendlyName` as a `switch` expression — 232 lines to
-about 45, and the last method in the game over 80. `REFACTORING.md` left it alone deliberately;
-the modern form is what changes the calculation. `TileDetected`, `SecondLayerTile`, `ResetTile`,
-`HiScore` and `KeyLockDoor` are data carriers with a constructor and get-only properties, so they
-are `record`s. And the two Visual Studio designer-era method names,
-`Nasty.nastyDies_ParticleEffectComplete` and `Blob.blobTeleporterBeam_ParticleEffectComplete` —
-nothing else in the codebase looks like that.
+The overloading was worse than four meanings in one parameter. **Two call sites were passing
+`true` and one `false` purely to be non-null**, which is exactly why the booth's genuine
+true-or-false could not be distinguished from them — the booth's `bool` suppressed the screen fade
+as a side effect of being a `bool` at all. `ScreenChange` is a closed hierarchy of the four with a
+private constructor: `FadeIn` at ten call sites, `KeepPicture` at six, `AccessCode` and
+`FinalScore` at one each, which is the whole channel.
 
-**6.5 — `GameEngine.Dispose` to the standard pattern.** No idempotence flag, no
-`GC.SuppressFinalize`. It works because it is called once from `GameHost.Dispose`, and phase 1's
-analysers will flag it.
+**6.4 — the lookup table, three records, six handler names** (`ea37940`).
 
-**6.6 — stop the incremental build deleting the built content.** Found while play-testing phase 4
-rather than in the review, and the only item here that stops the game running at all.
+`GetFriendlyName` is a `switch` expression and `ToggleKeys` is 276 lines to 141. **Two oddities in
+that table are kept and now have tests saying so**, because both are what the define-keys screen
+shows today: `Keys.Up` has no entry at all, so it reads "Up" beside DN, LF and RT; and four labels
+are used by two keys each — RT for Right and Enter, BS for both browser buttons, CL for CapsLock
+and OemClear, a full stop for Decimal and OemPeriod — so those pairs are genuinely
+indistinguishable in the two characters the screen has.
+
+`TileDetected`, `SecondLayerTile` and `ResetTile` are records. **`HiScore` and `KeyLockDoor` are
+not, though this plan listed them**: both are mutated after construction — `HiScore` has its name
+typed into it and is built by object initialiser, `KeyLockDoor` accumulates collision tiles — so
+neither has the shape the item describes, and giving `HiScore` value equality would change how a
+list of eight scores behaves for no benefit.
+
+The designer-era method names: **this plan named two and there are six.** The house style is
+`PascalCase_Event` and nine handlers already follow it, so the six `camelCase` ones were renamed
+to match rather than to anything new.
+
+**6.5 — `GameEngine.Dispose` is idempotent** (`ea37940`). A guard, so a second call does nothing.
+No finaliser and so no `GC.SuppressFinalize`: it holds no unmanaged handle of its own — the sound
+timer is a managed object with its own — so a finaliser would be one more thing to get wrong for
+no benefit.
+
+**6.6 — stop the incremental build deleting the built content.** *Still open, and now better
+understood.* Found while play-testing phase 4, and the only item here that stops the game running
+at all.
 
 *The symptom.* An incremental `dotnet build Starquake.sln` sometimes empties
 `Starquake.Shared/bin/<Config>/net9.0/Content/`, and the heads' copies with it. The next launch
-dies on the first line of content it touches:
+dies on the first asset it touches:
 
 ```
 ContentLoadException: The content file was not found.
-  Could not find file '.../Starquake.Mac/bin/Debug/net9.0/Content/Graphics/BootScreen2.xnb'
-     at Starquake.GameComponents.PresentationScreens.LoadingScreen..ctor
+  Could not find file '.../Content/Graphics/BootScreen2.xnb'
 ```
 
-Building again usually puts it back, which is what makes it so easy to misread as a stale output
-folder or as something the last edit broke. It is neither.
+*What was measured.* Twelve runs of rebuild-then-build: the default parallel build kept the
+content three times and deleted it three; `-m:1` kept it six out of six. **`dotnet build
+Starquake.sln -m:1` is a reliable workaround.**
 
-*What was measured.* Twelve runs of rebuild-then-build:
+*The mechanism.* MSBuild's `IncrementalClean` does the deleting — a `-v detailed` log of a failing
+run names it — because it removes everything in the previous build's `FileListAbsolute.txt` that
+the current build did not re-declare as a file write.
 
-| | Content kept | Content deleted |
-| --- | --- | --- |
-| Default (parallel) | 3 | 3 |
-| `-m:1` (serial) | 6 | 0 |
+**But `IncrementalClean` is the symptom, not the cause, and an afternoon's attempt to fix it there
+made things worse.** Setting `DisableIncrementalClean` on `Starquake.Shared` turned an
+intermittent failure into one on every single build: with nothing deleting, the content still
+never appeared, which proves the copy is being *skipped* rather than undone. The MGCB output in
+`Content/bin/DesktopGL/` is intact and correct throughout — only the copy into `bin/` is missing.
 
-So it is a parallel-build race, and `dotnet build Starquake.sln -m:1` is a reliable workaround
-until it is fixed.
+*Where that points.* `MonoGame.Content.Builder.Task.targets` collects the built files into its
+`ExtraContent` item with a **wildcard evaluated inside the `RunContentBuilder` target**
+(`Include="%(ContentReference.ContentOutputDir)\**\*.*"`), and `IncludeContent` turns that into
+the `Content` items the SDK copies. If that glob comes back empty, there are no items, so nothing
+is copied *and* nothing is declared — and `IncrementalClean` then removes last time's copies as no
+longer produced. Both observed failures follow from one empty glob. `Starquake.Shared`
+multi-targets, so its two frameworks build concurrently and share MSBuild's process-wide
+file-enumeration cache, which would explain why it is intermittent and why serial builds never
+show it.
 
-*The mechanism, from a `-v detailed` log of a failing run.* MSBuild's **`IncrementalClean`** does
-the deleting, in `Starquake.Shared`'s `net9.0` build:
+*That last paragraph is a hypothesis, not a finding.* The next person should take a binary log
+(`dotnet build Starquake.sln -bl`) of a failing run and look at what `ExtraContent` actually
+contains, rather than trust it.
 
-```
-Target "IncrementalClean" ... (target "CoreBuild" depends on it):
-  Task "Delete"
-    Deleting file ".../bin/Debug/net9.0/Content/Fonts/elektoraMedium.xnb".
-    Deleting file ".../bin/Debug/net9.0/Content/Graphics/AccessCodesFailed.xnb".
-```
-
-`IncrementalClean` deletes everything in the *previous* build's `FileListAbsolute.txt` that the
-*current* build did not re-declare as a file write. `RunContentBuilder` and `IncludeContent` both
-ran in that same build, so the `Content` items existed; what is missing is the copy step
-registering them. `Starquake.Shared` multi-targets, so its two frameworks build concurrently, and
-the three `net9.0` consumers of that output - the library itself and the Linux and macOS heads -
-are all copying from the same folder at the same time.
-
-*What has not been pinned* is the exact interleaving that loses the registration. The 50/50 split
-and the timestamp-based `PreserveNewest` copy both point at two builds disagreeing about whether
-a file needed copying, but that is a hypothesis and the next person should take a binary log
-(`dotnet build Starquake.sln -bl`) of a failing run rather than take this paragraph's word for it.
-
-*Candidates, cheapest first.* Declare the content copy's outputs so `IncrementalClean` can see
-them whether or not the copy ran; or build the content under one target framework only and let
-the other take it from there, which is the same reasoning `BUILD.md` already gives for building
-it once in `Starquake.Shared` rather than in each head; or set `DisableIncrementalClean` for
-`Starquake.Shared`, which is the blunt fix and leaves stale outputs behind for ever.
+*Candidates, now that the obvious one is ruled out.* Copy the content with a target of our own
+that has explicit `Inputs`/`Outputs` and registers its results in `FileWrites`, rather than
+relying on the upstream glob — bearing in mind the heads take their copies from
+`Starquake.Shared` through the project reference, so it has to feed that too. Or build the content
+under one target framework and have the other take it from there. `DisableIncrementalClean` is
+**not** a candidate: it has been tried and it is worse.
 
 ## The key and the access card
 
@@ -575,8 +590,8 @@ target frameworks. `NoWarn=1591` is needed because `GenerateDocumentationFile` f
 with missing-doc warnings that are not the point. Since 1.1 a plain `dotnet build Starquake.sln`
 reports them, as errors.
 
-**The test count** by running the tests: 65 before phase 4 and 147 after it, which is the measure
-that phase set for itself.
+**The test count** by running the tests: 65 before phase 4, 147 after it - which is the measure
+that phase set for itself - and 159 after phase 6.
 
 **The line and field counts** with `wc -l` and a `grep -cE` over the private declarations, and the
 methods over 80 lines with the `awk` script in `REFACTORING.md` — including its known false
