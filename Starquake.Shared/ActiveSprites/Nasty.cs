@@ -324,9 +324,6 @@ internal class Nasty
         }
     }
 
-    public void Initialise()
-        => Movement.Reset();
-
     /// <summary>
     ///     Picks a nasty at random. The range runs one past the fifteen types so that Spiky, the
     ///     last, comes up twice as often as the rest - Bird is also drawn twice, at 0 and at 14.

@@ -108,17 +108,6 @@ internal class Nasties
         }
     }
 
-    public void Initialise()
-    {
-        for (int a = 0; a < _nastyCount * 2; a++)
-        {
-            _nasties[a].Initialise();
-        }
-
-        // Maybe we should call this on start of the game for all involved....?
-        PerformPostChangeScreenActions();
-    }
-
     public void Reset()
     {
         for (int a = 0; a < _nastyCount; a++)
