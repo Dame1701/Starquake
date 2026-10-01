@@ -386,6 +386,60 @@ nothing else in the codebase looks like that.
 `GC.SuppressFinalize`. It works because it is called once from `GameHost.Dispose`, and phase 1's
 analysers will flag it.
 
+**6.6 — stop the incremental build deleting the built content.** Found while play-testing phase 4
+rather than in the review, and the only item here that stops the game running at all.
+
+*The symptom.* An incremental `dotnet build Starquake.sln` sometimes empties
+`Starquake.Shared/bin/<Config>/net9.0/Content/`, and the heads' copies with it. The next launch
+dies on the first line of content it touches:
+
+```
+ContentLoadException: The content file was not found.
+  Could not find file '.../Starquake.Mac/bin/Debug/net9.0/Content/Graphics/BootScreen2.xnb'
+     at Starquake.GameComponents.PresentationScreens.LoadingScreen..ctor
+```
+
+Building again usually puts it back, which is what makes it so easy to misread as a stale output
+folder or as something the last edit broke. It is neither.
+
+*What was measured.* Twelve runs of rebuild-then-build:
+
+| | Content kept | Content deleted |
+| --- | --- | --- |
+| Default (parallel) | 3 | 3 |
+| `-m:1` (serial) | 6 | 0 |
+
+So it is a parallel-build race, and `dotnet build Starquake.sln -m:1` is a reliable workaround
+until it is fixed.
+
+*The mechanism, from a `-v detailed` log of a failing run.* MSBuild's **`IncrementalClean`** does
+the deleting, in `Starquake.Shared`'s `net9.0` build:
+
+```
+Target "IncrementalClean" ... (target "CoreBuild" depends on it):
+  Task "Delete"
+    Deleting file ".../bin/Debug/net9.0/Content/Fonts/elektoraMedium.xnb".
+    Deleting file ".../bin/Debug/net9.0/Content/Graphics/AccessCodesFailed.xnb".
+```
+
+`IncrementalClean` deletes everything in the *previous* build's `FileListAbsolute.txt` that the
+*current* build did not re-declare as a file write. `RunContentBuilder` and `IncludeContent` both
+ran in that same build, so the `Content` items existed; what is missing is the copy step
+registering them. `Starquake.Shared` multi-targets, so its two frameworks build concurrently, and
+the three `net9.0` consumers of that output - the library itself and the Linux and macOS heads -
+are all copying from the same folder at the same time.
+
+*What has not been pinned* is the exact interleaving that loses the registration. The 50/50 split
+and the timestamp-based `PreserveNewest` copy both point at two builds disagreeing about whether
+a file needed copying, but that is a hypothesis and the next person should take a binary log
+(`dotnet build Starquake.sln -bl`) of a failing run rather than take this paragraph's word for it.
+
+*Candidates, cheapest first.* Declare the content copy's outputs so `IncrementalClean` can see
+them whether or not the copy ran; or build the content under one target framework only and let
+the other take it from there, which is the same reasoning `BUILD.md` already gives for building
+it once in `Starquake.Shared` rather than in each head; or set `DisableIncrementalClean` for
+`Starquake.Shared`, which is the blunt fix and leaves stale outputs behind for ever.
+
 ## The key and the access card
 
 The two lines at `Blob.cs:423` under the comment "Temporary test code to give Blob Access card and

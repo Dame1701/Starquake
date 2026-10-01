@@ -161,6 +161,12 @@ against `Contents/Resources`, so the built content is copied there, while the bi
 builds a bundle that fails on the first texture load. The bundle is ad-hoc signed because
 unsigned bundles are killed on launch on Apple Silicon.
 
+**An incremental build sometimes deletes the built content.** If the game starts failing with
+`ContentLoadException ... BootScreen2.xnb`, the `Content` folder under a head's output is empty
+and nothing you changed caused it: MSBuild's `IncrementalClean` removed it during a parallel
+build. Build again, or build with `-m:1`, which does not do it. See PLAN.md 6.6 for the
+measurements and the candidate fixes.
+
 **Content asset names use backslashes** (`"Graphics\\BootScreen2"`). MonoGame's
 `TitleContainer` normalises those to the platform separator, so they work on Linux and macOS
 as-is; there is no need to convert them.
