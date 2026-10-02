@@ -27,6 +27,7 @@ rule in *The rule each extraction is placed by* and discovering the codebase bro
 | --- | --- |
 | `cf95609` | Five fades off the draw path: the blob's energy-drain tint, his teleport fade-in, the glow on a shot, and the fade and shrink of a dead nasty and a dead conveyer nasty. `ConveyerNasty` had no `Dead` branch in `Update` at all. |
 | `32c0345` | `SpriteCollection` held one rotation angle and advanced it inside `End`. The angle moves to the nasty, the blob's shuttle flame and the intro's ship, one per logic frame. `GameSession` falls out of `Nasty`, `Nasties` and `PlanetCoreScreen` with the `paused` flag that existed to freeze the spin. |
+| **Stage 2** | `BlobWeapon`. Ten fields and seven methods out, 219 code lines, and the back-reference that made the blob hand out `this` mid-construction. Twelve tests - but only over the one rule in it that is pure, which is not what this plan promised. |
 | **Stage 1** | `BlobSurroundings`. Four `TileDetected?` fields become one value, probed by a free function against a `ScreenCollisionMap` and handed to each of the eight readers as the tile it actually uses. Eight tests, where there could be none before. `Blob` 36 mutable fields to 33. |
 | `07db88c` | The two booth screens asked for their verdict sound while drawing - hence the latch stopping it playing sixty times a second - and started a logic-frame wait from a draw. Plus three idempotent draw-time writes that left logic waiting on a frame having been drawn. |
 
@@ -45,8 +46,8 @@ closed* rather than assuming it still says what it said.
 237 tests passing, 0 warnings, 0 errors
 ```
 
-Measured before stage 1. It is now 245 tests, and `Blob` is at 1,478 code lines over 33 mutable
-fields.
+Measured before stage 1. It is now 257 tests, and `Blob` is at 1,259 code lines over 28 mutable
+fields and 16 held objects - from 1,492, 36 and 21.
 
 | Class | Lines | Code | Held objects | Mutable fields | Verdict |
 | --- | --- | --- | --- | --- | --- |
@@ -69,7 +70,7 @@ commits above - an angle that now belongs to them, and a `GameSession` that neve
 | Stage | Track | What comes out | Of | Tests with it |
 | --- | --- | --- | --- | --- |
 | ~~1~~ | `Blob` | `BlobSurroundings` | 4 fields into 1, 1 method | **done** - 8 tests |
-| 2 | `Blob` | `BlobWeapon` | 9 fields, 7 methods, ~200 lines | Yes |
+| ~~2~~ | `Blob` | `BlobWeapon` | 10 fields, 7 methods, 219 lines | **done** - 12 tests, see below |
 | 3 | `Blob` | `BlobFall` | 5 fields, 3 methods | Yes, the best of them |
 | 4 | `Blob` | `TunnelLiftRide` | 4 fields, 3 methods, ~155 lines | No |
 | 5 | `Blob` | `OverloadSequence` | 7 fields, 5 methods | No |
@@ -258,32 +259,63 @@ One thing the tests pinned down on the way: the probe reports which tile *image*
 never consults the collision mask. That is what its callers need - a shuttle pad and a tunnel mouth
 are walked into, not blocked by - and it is why the tests place tiles and set no cells.
 
-## Stage 2 — `BlobWeapon`
+## Stage 2 — `BlobWeapon` — **done**
 
-The biggest single win, and the one with a seam already cut for it.
+Ten fields, seven methods and the nested `FireSurroundings` out of `Blob`, into a 265-line class.
+`Blob` drops 219 code lines, five held objects and five mutable fields, and three members off its
+public surface.
 
-| Takes | |
+| Moved | |
 | --- | --- |
 | Fields | `_blobCanFire`, `_blobFire`, `_blobFireFade`, `_blobFireRotation`, `_directionBlobFired`, `_blobAnimFire1`, `_blobAnimFire2`, `_blobFireTrail`, `_blobFireSparks`, `_blobOnShuttleCached` |
-| Methods | `StartFiring`, `UpdateFire`, `AdvanceFireAppearance`, `StopFireEffects`, `PointBlankReach`, `DrawFire`, `DrawUpper`, `RegisterFireHit` |
-| Members | `BlobFireX`, `BlobFireY`, `BlobHasFired` |
-| Type | the nested `FireSurroundings` (`Blob.cs:2008`) goes with it |
+| Methods | `StartFiring`, `UpdateFire`, `AdvanceFireAppearance`, `StopFireEffects`, `PointBlankReach`, `DrawFire`, `CheckForBlobCollisionWithObject`, `GetCollisionObjects` |
+| Members | `BlobFireX`, `BlobFireY`, `BlobHasFired`, `RegisterFireHit` become `Weapon.X`, `.Y`, `.HasFired`, `.RegisterHit` |
+| Type | `FireSurroundings` |
 
-Roughly 200 lines. `BlobFire` is already the projectile and already testable without a screen; this
-is the launcher, which is the half that stayed behind.
+**The back-reference is gone, which was the point as much as the size.** `FireSurroundings` held the
+blob for one call - `ThrowSparks` - and that was the only reason `Blob`'s constructor handed out
+`this` before it had finished running. The weapon owns the sparks, so `FireSurroundings` takes the
+effect instead and the blob gives out nothing.
 
-**It also removes a back-reference.** `FireSurroundings.ThrowSparks` reaches into
-`blob._blobFireSparks` (`Blob.cs:2028`) and that is the only reason it holds the blob at all. With
-the sparks owned by the weapon, `FireSurroundings` needs the screen collection and a `Random` and
-nothing else — so the nested private class can stop being nested.
+`PointBlankReach` took `CheckForBlobCollisionWithObject` and `GetCollisionObjects` with it: each had
+exactly one caller, all the way up the chain, so the whole question of what the blob is standing on
+belonged to the shot and nothing else used it.
 
-What the weapon needs handed to it per frame: the blob's position, `DirectionBlobMoved`, whether he
-is on the shuttle, and `PlayerStats.FirePower`. It raises `BlobAction.FiredLazer` the same way, via
-a callback the blob provides rather than by holding the blob.
+**The plan was wrong about the tests, and this is the honest version.** It said the fire rules would
+be "a constructor and three calls" on the far side. They are not: `BlobWeapon`'s constructor pulls
+two particle effects out of the `ResourceManager`, and `DrawFire` a sprite sheet, so the class cannot
+be built without the content pipeline. Extracting it did not make it testable.
 
-Tests: the fire-direction rules are currently reachable only through a live blob. On the far side of
-this stage they are a constructor and three calls — which is how `BlobFireTests` came to have
-fourteen of them.
+What *is* testable is the one rule in it that is pure, and it is the rule worth having: which way a
+shot leaves. On the shuttle he fires whichever way he is moving, including up and down; on foot a
+shot only ever goes left or right, so a blob standing still fires the way he last walked. That is now
+`static BlobWeapon.DirectionOfShot(directionBlobMoved, onShuttle, lastFired)` and has twelve tests,
+including the two cases that follow from carrying the last direction - getting off the shuttle still
+aimed upwards, and firing upwards until he walks again.
+
+The lesson for stages 3 to 5: **ask what in the cluster is arithmetic before promising a test for the
+cluster.** Stage 3 is five counters and genuinely pure; stages 4 and 5 were already conceded to be
+effects and sound.
+
+**Kept verbatim, deliberately.** `StartFiring`'s three nested conditions and its two-armed direction
+test moved unchanged, and `StopFireEffects` kept its `if (!HasFired)` rather than becoming an early
+return. `REFACTORING.md` is explicit that a move commit is the wrong place to spend the risk of
+inverting a guard, and flattening those is one of its open follow-ups. The one thing tidied on the way
+was the local called `temp`, which that document also lists.
+
+Verified as motion rather than rewriting: every moved body is textually identical to its original
+once the field renames and the one intended parameter change are substituted back.
+
+Two things that are not identical, both stated rather than smuggled:
+
+- `Blob.Update` stepped the sparks, then the teleport beam, then the trail. The weapon steps the
+  sparks and the trail together, so the beam now goes first. The three are independent particle
+  effects.
+- `StartFiring`, `UpdateFire` and `StopFireEffects` were three consecutive calls in
+  `UpdateNormalState` and are now one `Weapon.Step`, which calls the same three in the same order.
+
+`Animation.Looping` came out of `Blob`'s private `LoopingAnimation` so both classes can build a cycle
+without repeating seven property assignments. `Nasty` still assigns them by hand and was left alone.
 
 ## Stage 3 — `BlobFall`
 

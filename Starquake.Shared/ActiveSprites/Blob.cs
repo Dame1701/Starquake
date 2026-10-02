@@ -72,22 +72,13 @@ internal class Blob
     private const int BlobTurnToRightFrame = 4;
 
     /// <summary>
-    ///     The shuttle's own animation, and the two the blob's gun muzzle uses. Frames are advanced
-    ///     one per <see cref="AnimationDelay" /> logic frames.
+    ///     The shuttle's own animation. Frames are advanced one per <see cref="AnimationDelay" />
+    ///     logic frames.
     /// </summary>
     private const int ShuttleLastFrame = 3;
 
     /// <inheritdoc cref="ShuttleLastFrame" />
-    private const int FireAnimLastFrame = 3;
-
-    /// <inheritdoc cref="ShuttleLastFrame" />
-    private const int ShuttleFireAnimLastFrame = 23;
-
-    /// <inheritdoc cref="ShuttleLastFrame" />
     private const int AnimationDelay = 2;
-
-    /// <inheritdoc cref="ShuttleLastFrame" />
-    private const int ShuttleFireAnimationDelay = 1;
 
     /// <summary>
     ///     Gravity. The blob starts falling at <see cref="BlobInitialFallSpeed" /> pixels a frame and
@@ -128,11 +119,6 @@ internal class Blob
 
     /// <inheritdoc cref="TunnelLiftSpeed" />
     private const int TunnelLiftMinimumRide = 8;
-
-    /// <summary>
-    ///     Where a shot leaves the blob, measured in from its top left corner.
-    /// </summary>
-    private const int FireOffset = 16;
 
     /// <summary>
     ///     How the blob comes apart when it dies. It swells to <see cref="OverloadMaxScale" />, then
@@ -182,19 +168,7 @@ internal class Blob
     private const int EnergyDrainFadeStep = 16;
 
     /// <inheritdoc cref="EnergyDrainFadeStep" />
-    private const int FireFadeStep = 16;
-
-    /// <inheritdoc cref="EnergyDrainFadeStep" />
     private const int TeleportFadeStep = 8;
-
-    /// <summary>
-    ///     How fast the shuttle's flame turns, in degrees a frame, and one whole revolution - which is
-    ///     where the angle wraps.
-    /// </summary>
-    private const float ShuttleFireRotateSpeed = 10f;
-
-    /// <inheritdoc cref="ShuttleFireRotateSpeed" />
-    private const float FullTurn = 360f;
 
     /// <summary>
     ///     How fast the blob walks, in pixels a logic frame, horizontally and vertically.
@@ -237,9 +211,6 @@ internal class Blob
     /// <inheritdoc cref="TeleportBeamXOffset" />
     private const int TeleportBeamYOffset = 50;
 
-    /// <inheritdoc cref="TeleportBeamXOffset" />
-    private const int FireTrailOffset = 14;
-
     /// <summary>
     ///     How far into a booth's tile the blob has to have walked for it to count as having stepped in.
     ///     A little past <see cref="BoothMetrics.BlobXOffset" />, so the blob settles back onto the
@@ -258,15 +229,10 @@ internal class Blob
 
     /// <inheritdoc cref="TunnelExitLeftXOffset" />
     private const int TunnelExitYOffset = 32;
-    private readonly Animation _blobAnimFire1;
-    private readonly Animation _blobAnimFire2;
 
     private readonly Animation _blobAnimLeft;
     private readonly Animation _blobAnimRight;
 
-    private readonly BlobFire _blobFire;
-    private readonly IPositionalTriggerParticleEffect _blobFireSparks;
-    private readonly IStandardParticleEffect _blobFireTrail;
 
     private readonly JumpPlatforms _blobJumpPlatformEngine;
     private readonly BlobDeathAnimation _blobKiller;
@@ -284,7 +250,6 @@ internal class Blob
     private readonly List<ResetTile> _tilesToReset = [];
     private int _blobAlarmSoundCounter;
 
-    private bool _blobCanFire = true;
     private int _blobDistanceFallen;
 
     private int _blobEnergyDrainCounter;
@@ -292,13 +257,8 @@ internal class Blob
 
     private int _blobFallSpeed = BlobInitialFallSpeed;
     private Guid _blobFallsSoundId;
-    private int _blobFireFade;
-
-    private float _blobFireRotation;
-
     private int _blobFrameOnEntry;
     private bool _blobOnShuttle;
-    private bool _blobOnShuttleCached;
     private bool _blobOnShuttleOnEntry;
     private bool _blobOnShuttlePad;
     private int _blobOverloadState;
@@ -316,7 +276,6 @@ internal class Blob
 
     private int _blobYPos;
 
-    private Direction _directionBlobFired = Direction.None;
     private Direction _directionGoingThroughTunnel = Direction.None;
     private int _distanceInTunnelLift;
     private bool _inTunnelLift;
@@ -377,31 +336,20 @@ internal class Blob
         _blobTeleporterBeam =
             (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.BeamMeUpSmall,
                 ParticleEffectType.Triggered, null);
-        _blobFireTrail =
-            (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.FireTrail, ParticleEffectType.Continual,
-                null);
-
-        _blobFireSparks =
-            (IPositionalTriggerParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.FireSparks,
-                ParticleEffectType.TriggeredMultiLocationTimed, null);
-
         _blobTeleporterBeam.ParticleEffectComplete += BlobTeleporterBeam_ParticleEffectComplete;
 
-        _blobFire = new BlobFire(new FireSurroundings(gameScreens, randomNumberGenerator, this));
+        Weapon = new BlobWeapon(resources, gameScreens, graphicsSet, stats, randomNumberGenerator,
+            () => OnBlobActionRaised?.Invoke(BlobAction.FiredLazer, null));
 
-        // Fire location starts same as Blob's screen location
-        _blobFire.Launch(_blobXPos + FireOffset, _blobYPos + FireOffset);
-        _blobFireFade = 0;
+        // The shot starts where the blob is, which at this point is the origin - he is put onto a screen
+        // afterwards, and that goes through PerformPostChangeScreenActions.
+        Weapon.ResetTo(_blobXPos, _blobYPos);
 
-        // Every one of these loops forward with no yoyo except the left walk, which runs backwards
-        // through the same frames, and the shuttle fire, which is slower
-        _blobShuttleAnim = LoopingAnimation(0, ShuttleLastFrame, AnimationDelay, true);
-        _blobAnimLeft = LoopingAnimation(BlobWalkLeftFirstFrame, BlobWalkLeftLastFrame, AnimationDelay, false);
-        _blobAnimRight = LoopingAnimation(BlobWalkRightFirstFrame, BlobWalkRightLastFrame, AnimationDelay, true);
-        _blobAnimFire1 = LoopingAnimation(0, FireAnimLastFrame, AnimationDelay, true);
-        _blobAnimFire2 = LoopingAnimation(0, ShuttleFireAnimLastFrame, ShuttleFireAnimationDelay, true);
-
-        _directionBlobFired = Direction.Right;
+        // Both of these loop forward with no yoyo except the left walk, which runs backwards through the
+        // right walk's frames
+        _blobShuttleAnim = Animation.Looping(0, ShuttleLastFrame, AnimationDelay, true);
+        _blobAnimLeft = Animation.Looping(BlobWalkLeftFirstFrame, BlobWalkLeftLastFrame, AnimationDelay, false);
+        _blobAnimRight = Animation.Looping(BlobWalkRightFirstFrame, BlobWalkRightLastFrame, AnimationDelay, true);
 
         _inventory = new Inventory();
         _unstickProbe = new UnstickProbe(gameScreens.Collisions);
@@ -449,11 +397,11 @@ internal class Blob
 
     public int BlobVSpeed { get; set; } = BlobWalkSpeed;
 
-    public int BlobFireX => _blobFire.X;
-
-    public int BlobFireY => _blobFire.Y;
-
-    public bool BlobHasFired { get; private set; }
+    /// <summary>
+    ///     The lazer. A nasty asks it whether a shot is in flight and where it is, and tells it when it
+    ///     has been hit.
+    /// </summary>
+    public BlobWeapon Weapon { get; }
 
     public CustomControl BlobsControl { get; }
 
@@ -488,12 +436,6 @@ internal class Blob
     }
 
     // Blob has hit something
-    public void RegisterFireHit()
-    {
-        BlobHasFired = false;
-        _blobCanFire = true;
-    }
-
     public void TriggerBlobTeleportedAnimation()
     {
         _blobTeleporterBeam.Start();
@@ -525,9 +467,8 @@ internal class Blob
         }
 
         // Update the teleport beam effect - probably should have a boolean to stop drawing when not needed.....
-        _blobFireSparks.Update(gameTime);
         _blobTeleporterBeam.Update(_blobXPos + TeleportBeamXOffset, _blobYPos + TeleportBeamYOffset, gameTime);
-        _blobFireTrail.Update(BlobFireX + FireTrailOffset, BlobFireY + FireTrailOffset, gameTime);
+        Weapon.UpdateEffects(gameTime);
 
         if (!changedScreens)
         {
@@ -564,9 +505,11 @@ internal class Blob
             ApplyGravity();
         }
 
-        StartFiring();
-        UpdateFire();
-        StopFireEffects();
+        Weapon.Step(
+            BlobsControl.HasFired(),
+            new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight),
+            DirectionBlobMoved,
+            _blobOnShuttle);
 
         bool changedScreens = ChangeScreenIfOffEdge();
 
@@ -846,17 +789,6 @@ internal class Blob
     /// </summary>
     /// <param name="firstFrame">Also the frame it starts on.</param>
     /// <param name="animateForwards">False to run the frames backwards, which is how the left walk works.</param>
-    private static Animation LoopingAnimation(int firstFrame, int lastFrame, int delay, bool animateForwards)
-        => new()
-        {
-            FirstFrame = firstFrame,
-            CurrentFrame = firstFrame,
-            LastFrame = lastFrame,
-            Yoyo = false,
-            Delay = delay,
-            Repeat = true,
-            AnimateForwards = animateForwards
-        };
 
     /// <summary>
     ///     Un-latches the up and down controls so that holding either only acts once, and puts the
@@ -993,121 +925,6 @@ internal class Blob
         }
 
         return fallDistance;
-    }
-
-    private void StartFiring()
-    {
-        if (BlobsControl.HasFired())
-        {
-            if (_stats.FirePower > 0)
-            {
-                if (_blobCanFire)
-                {
-                    // Play sound
-                    _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobLazer);
-
-                    _blobFire.Launch(_blobXPos + FireOffset, _blobYPos + FireOffset);
-                    _blobFireFade = 0;
-
-                    _blobCanFire = false;
-                    BlobHasFired = true;
-
-                    if (OnBlobActionRaised != null)
-                    {
-                        OnBlobActionRaised(BlobAction.FiredLazer, null);
-                    }
-
-                    if (_blobOnShuttle)
-                    {
-                        _directionBlobFired = DirectionBlobMoved;
-                    }
-                    else
-                    {
-                        if (DirectionBlobMoved == Direction.Left)
-                        {
-                            _directionBlobFired = Direction.Left;
-                        }
-                        else if (DirectionBlobMoved == Direction.Right)
-                        {
-                            _directionBlobFired = Direction.Right;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private void UpdateFire()
-    {
-        if (!BlobHasFired)
-        {
-            return;
-        }
-
-        _blobFireTrail.Start();
-
-        if (!_blobFire.Advance(_directionBlobFired, _blobOnShuttleCached, PointBlankReach()))
-        {
-            BlobHasFired = false;
-            _blobCanFire = true;
-        }
-
-        _blobAnimFire1.GetNextFrame();
-        _blobAnimFire2.GetNextFrame();
-
-        AdvanceFireAppearance();
-    }
-
-    /// <summary>
-    ///     How the shot looks this frame: its additive glow comes up to full over the first few frames
-    ///     of flight so it does not appear at full brightness on the frame it is launched, and the
-    ///     shuttle's flame turns as it goes.
-    /// </summary>
-    /// <remarks>
-    ///     Both of these were done while drawing, which ran them at the display's refresh rate rather
-    ///     than the logic clock. The angle was the sprite sheet's own and advanced once per draw batch;
-    ///     it belongs to the shot.
-    /// </remarks>
-    private void AdvanceFireAppearance()
-    {
-        if (!BlobHasFired)
-        {
-            return;
-        }
-
-        if (_blobFireFade < ColourLevels.Full)
-        {
-            _blobFireFade += FireFadeStep;
-        }
-
-        if (_blobFireFade > ColourLevels.Full)
-        {
-            _blobFireFade = ColourLevels.Full;
-        }
-
-        _blobFireRotation = _blobFireRotation < FullTurn
-            ? _blobFireRotation + ShuttleFireRotateSpeed
-            : 0f;
-    }
-
-    /// <summary>
-    ///     How far a shot has to travel before the thing the blob is standing on is allowed to stop
-    ///     it, or null if he is standing on nothing. Without this a shot fired while stood over a
-    ///     collectable dies on the spot.
-    /// </summary>
-    private int? PointBlankReach()
-        => CheckForBlobCollisionWithObject(new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight), out int offset)
-            ? offset + BlobWidth / 2
-            : null;
-
-    private void StopFireEffects()
-    {
-        if (!BlobHasFired)
-        {
-            _blobFireTrail.Stop();
-
-            _blobOnShuttleCached = _blobOnShuttle;
-        }
     }
 
     /// <summary>
@@ -1569,9 +1386,7 @@ internal class Blob
         {
             if (!_blobKiller.Triggered)
             {
-                BlobHasFired = false;
-                _blobCanFire = true;
-                _blobFireTrail.Stop();
+                Weapon.Disarm();
 
                 _blobJumpPlatformEngine.ResetPlatforms();
                 OnBlobDiedAndRespawned?.Invoke();
@@ -1662,12 +1477,7 @@ internal class Blob
 
     public void PerformPostChangeScreenActions()
     {
-        // Reset blob's fire
-        BlobHasFired = false;
-        _blobCanFire = true;
-
-        _blobFire.Launch(_blobXPos + FireOffset, _blobYPos + FireOffset);
-        _blobFireFade = 0;
+        Weapon.ResetTo(_blobXPos, _blobYPos);
 
         _blobJumpPlatformEngine.ResetPlatforms();
 
@@ -1724,8 +1534,7 @@ internal class Blob
         }
 
         _tilesToReset.Clear();
-        _blobFireSparks.Reset();
-        _blobFireTrail.Reset();
+        Weapon.ResetEffects();
     }
 
     public void Draw(int screenFade)
@@ -1752,14 +1561,14 @@ internal class Blob
 
     private void DrawNormalState(int screenFade)
     {
-        _blobFireTrail.Draw();
+        Weapon.DrawTrail();
 
         DrawBlobSprite(screenFade);
         DrawShuttle(screenFade);
 
         _blobJumpPlatformEngine.Draw();
 
-        DrawFire(screenFade);
+        Weapon.Draw(screenFade, _blobOnShuttle);
         DrawTeleportBeam();
     }
 
@@ -1839,50 +1648,6 @@ internal class Blob
         }
     }
 
-    private void DrawFire(int screenFade)
-    {
-        if (BlobHasFired)
-        {
-            if (_graphicsSet.IsOriginal)
-            {
-                if (_blobOnShuttle)
-                {
-                    SpriteCollection blobFire2Original = _resources.GetSpriteCollection(Assets.Graphics.BlobFire2Original);
-                    blobFire2Original.Begin(BlendState.Additive);
-                    blobFire2Original.DrawSprite(
-                        _blobAnimFire1.CurrentFrame, BlobFireX, BlobFireY,
-                        ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
-                            (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), 1.0f, 0f);
-                    blobFire2Original.End();
-                }
-                else
-                {
-                    SpriteCollection blobFire1 = _resources.GetSpriteCollection(Assets.Graphics.BlobFire1);
-                    blobFire1.Begin(BlendState.Additive);
-                    blobFire1.DrawSprite(
-                        _blobAnimFire1.CurrentFrame, BlobFireX, BlobFireY - FireOffset,
-                        ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
-                            (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), 1.0f, 0f);
-                    blobFire1.End();
-                }
-            }
-            else
-            {
-                if (_blobOnShuttle)
-                {
-                    SpriteCollection blobFire2 = _resources.GetSpriteCollection(Assets.Graphics.BlobFire2);
-                    blobFire2.Begin(BlendState.Additive);
-                    blobFire2.DrawSprite(
-                        _blobAnimFire2.CurrentFrame, BlobFireX, BlobFireY,
-                        ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
-                            (byte)(_blobFireFade * ((double)screenFade / ColourLevels.Full))), 1.0f,
-                        MathHelper.ToRadians(_blobFireRotation));
-                    blobFire2.End();
-                }
-            }
-        }
-    }
-
     private void DrawTeleportBeam()
     {
         if (_startBlobTeleporting)
@@ -1951,7 +1716,7 @@ internal class Blob
 
     public void DrawUpper(int screenFade)
     {
-        _blobFireSparks.Draw(screenFade);
+        Weapon.DrawSparks(screenFade);
     }
 
     public void Reset()
@@ -1980,79 +1745,9 @@ internal class Blob
         PerformPostChangeScreenActions();
     }
 
-    /// <summary>
-    ///     Gets collision objects on the current screen which aren't tiles i.e Cheops Pyramids, CoreElements
-    /// </summary>
-    private List<InteractiveItem> GetCollisionObjects()
-    {
-        var temp = new List<InteractiveItem>();
-        if (_gameScreens.CurrentGameScreenData.CheopsPyramid != null)
-        {
-            temp.Add(_gameScreens.CurrentGameScreenData.CheopsPyramid);
-        }
-
-        foreach (InteractiveItem t in _gameScreens.CurrentGameScreenData.PickUps)
-        {
-            temp.Add(t);
-        }
-
-        return temp;
-    }
-
     private void BlobTeleporterBeam_ParticleEffectComplete()
     {
         _startBlobTeleporting = false;
     }
 
-    private bool CheckForBlobCollisionWithObject(Rectangle blobsPosition, out int offset)
-    {
-        offset = 0;
-
-        foreach (InteractiveItem t in GetCollisionObjects())
-        {
-            if (!CollisionDetection.Check(blobsPosition, new Rectangle(t.XLocation, t.YLocation, SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight)))
-            {
-                continue;
-            }
-
-            offset = blobsPosition.X - t.XLocation;
-            if (offset < 0)
-            {
-                offset = -offset;
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    ///     Joins a <see cref="BlobFire" /> to the game it is flying through. Everything the shot
-    ///     asks about is answered from here, so the shot itself knows about nothing but its own
-    ///     position - which is what lets its rules be tested without a screen or a graphics device.
-    /// </summary>
-    private sealed class FireSurroundings(GameScreenCollection gameScreens, Random randomNumberGenerator, Blob blob)
-        : IFireSurroundings
-    {
-        public int ScreenWidth => gameScreens.ScreenWidth;
-
-        public int ScreenHeight => gameScreens.ScreenHeight;
-
-        /// <inheritdoc />
-        /// <remarks>
-        ///     The shot is not the blob, so it gets none of the leniency the collision map gives him.
-        /// </remarks>
-        public int DistanceClear(Direction direction, int x, int y, int width, int height, int distance)
-            => gameScreens.CheckCollision(direction, x, y, width, height, distance, false);
-
-        /// <inheritdoc />
-        public FireDeflection ChooseDeflection()
-            => (FireDeflection)randomNumberGenerator.Next(
-                (int)FireDeflection.Left,
-                (int)FireDeflection.Right + 1);
-
-        /// <inheritdoc />
-        public void ThrowSparks(int x, int y) => blob._blobFireSparks.Start(x, y);
-    }
 }

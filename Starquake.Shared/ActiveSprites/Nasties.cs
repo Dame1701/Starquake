@@ -203,11 +203,11 @@ internal class Nasties
 
     private void TakeAnyFireHit(int a)
     {
-        if (_blob.BlobHasFired)
+        if (_blob.Weapon.HasFired)
         {
             if (CollisionDetection.Check(
-                    _blob.BlobFireX,
-                    _blob.BlobFireY,
+                    _blob.Weapon.X,
+                    _blob.Weapon.Y,
                     FireWidth,
                     FireHeight,
                     _nasties[a].XPos,
@@ -218,7 +218,7 @@ internal class Nasties
                 if (_nasties[a].NastyState == NastyState.Normal ||
                     _nasties[a].NastyState == NastyState.Birth)
                 {
-                    _blob.RegisterFireHit();
+                    _blob.Weapon.RegisterHit();
                     _nasties[a].NastyState = NastyState.Shot;
 
                     if (_nasties[a].NastyType == NastyType.Spiky)

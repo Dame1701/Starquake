@@ -148,11 +148,11 @@ internal class ConveyerNasties
                 }
 
                 // Has blob shot a nasty
-                if (_blob.BlobHasFired)
+                if (_blob.Weapon.HasFired)
                 {
                     if (CollisionDetection.Check(
-                            _blob.BlobFireX,
-                            _blob.BlobFireY,
+                            _blob.Weapon.X,
+                            _blob.Weapon.Y,
                             32,
                             32,
                             Nasties[a].XLocation,
@@ -162,7 +162,7 @@ internal class ConveyerNasties
                     {
                         if (Nasties[a].NastyActive)
                         {
-                            _blob.RegisterFireHit();
+                            _blob.Weapon.RegisterHit();
                             Nasties[a].NastyState = NastyState.Shot;
 
                             _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobExplodes);
