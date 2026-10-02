@@ -576,58 +576,15 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     }
 
     /// <summary>
-    ///     The tiles that pulse, and how each one pulses. A long literal list, and nothing but a list.
+    ///     The tiles that pulse. Which ones and how is level design rather than anything the engine
+    ///     decides, so the table is <see cref="ColourAnimatedTiles" />'s and this only registers it.
     /// </summary>
     private void RegisterColourAnimations()
     {
-        GameScreens.ColourAnimations.RegisterTile(new ColourFaderAnimation
+        foreach (ColourFaderAnimation animation in ColourAnimatedTiles.All())
         {
-            TileNo = (int)ActionTiles.TeleportBooth,
-            UpperTileToDraw = 7,
-            Intensity = 4,
-            TransitionColour = new Color(0, 0, ColourLevels.Full),
-            Speed = 8
-        }); // Teleport booths
-        GameScreens.ColourAnimations.RegisterTile(new ColourFaderAnimation
-        {
-            TileNo = (int)ActionTiles.AccessBoothLeft,
-            UpperTileToDraw = 9,
-            Intensity = 2,
-            TransitionColour = new Color(0, ColourLevels.Full, 0),
-            Speed = 32
-        }); // Access tunnel left
-        GameScreens.ColourAnimations.RegisterTile(new ColourFaderAnimation
-        {
-            TileNo = (int)ActionTiles.AccessBoothRight,
-            UpperTileToDraw = 10,
-            Intensity = 2,
-            TransitionColour = new Color(ColourLevels.Full, 0, 0),
-            Speed = 32
-        }); // Access tunnel right
-        GameScreens.ColourAnimations.RegisterTile(new ColourFaderAnimation
-        {
-            TileNo = (int)ActionTiles.ShuttleTag1,
-            UpperTileToDraw = -1,
-            Intensity = 2,
-            TransitionColour = new Color(ColourLevels.Full, ColourLevels.Full, 0),
-            Speed = 16
-        }); // Yellow teleport tag
-        GameScreens.ColourAnimations.RegisterTile(new ColourFaderAnimation
-        {
-            TileNo = (int)ActionTiles.ShuttleTag3,
-            UpperTileToDraw = -1,
-            Intensity = 6,
-            TransitionColour = new Color(ColourLevels.Full, 0, 0),
-            Speed = 16
-        }); // Red teleport tag
-        GameScreens.ColourAnimations.RegisterTile(new ColourFaderAnimation
-        {
-            TileNo = (int)ActionTiles.ShuttleTag2,
-            UpperTileToDraw = -1,
-            Intensity = 6,
-            TransitionColour = new Color(0, 100, ColourLevels.Full),
-            Speed = 16
-        }); // Blue teleport tag
+            GameScreens.ColourAnimations.RegisterTile(animation);
+        }
     }
 
     /// <summary>

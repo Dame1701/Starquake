@@ -27,6 +27,7 @@ rule in *The rule each extraction is placed by* and discovering the codebase bro
 | --- | --- |
 | `cf95609` | Five fades off the draw path: the blob's energy-drain tint, his teleport fade-in, the glow on a shot, and the fade and shrink of a dead nasty and a dead conveyer nasty. `ConveyerNasty` had no `Dead` branch in `Update` at all. |
 | `32c0345` | `SpriteCollection` held one rotation angle and advanced it inside `End`. The angle moves to the nasty, the blob's shuttle flame and the intro's ship, one per logic frame. `GameSession` falls out of `Nasty`, `Nasties` and `PlanetCoreScreen` with the `paused` flag that existed to freeze the spin. |
+| **Stage 8** | `ColourAnimatedTiles` out of `GameEngine`, and **the rest of the stage recommended against** - measured, not guessed. See below. |
 | **Stage 7** | `CanvasViewOptions`, `AuthoredPositions` and `TilePaletteState` out of `EditorSession`. 19 mutable fields to 5; 597 code lines to 404. Two of the plan's five clusters are recommended against rather than done - see below. |
 | **Stage 6** | `ScreenPainter`, `ScreenLayout` and `Hover` out of `ScreenCanvas`. 912 lines to 400; the control drops out of the table entirely. No tests - it draws. |
 | **Stage 5** | `BlobOverload` and `BlobEntryPoint`. Six fields and the death's arithmetic out, plus ten constants. Twelve tests. **`Blob` is no longer the worst class in the codebase by mutable field count** - `GameEngine` is. |
@@ -83,7 +84,7 @@ commits above - an angle that now belongs to them, and a `GameSession` that neve
 | ~~5~~ | `Blob` | `BlobOverload`, `BlobEntryPoint` | 6 fields, 10 constants | **done** - 12 tests |
 | ~~6~~ | Editor | `ScreenPainter` + 2 values | 437 lines of `ScreenCanvas` | **done** |
 | ~~7~~ | Editor | three clusters out of `EditorSession` | 14 of 19 fields | **done** |
-| 8 | Engine | `GameComposition` | ~330 lines of `GameEngine` | No |
+| ~~8~~ | Engine | `ColourAnimatedTiles` only | 55 lines of `GameEngine` | **done, reduced** |
 | 9 | — | `NastyLifecycle`, `ScreenShake`, the fade | 7 + 3 + 2 fields | Yes for the last two |
 
 Stages 1 to 5 are in order and each assumes the one before. Tracks B and C are independent of track A
@@ -632,28 +633,63 @@ rebuild, before believing a clean one.
 
 # Track C — the two that are not what they look like
 
-## Stage 8 — `GameComposition` out of `GameEngine`
+## Stage 8 — mostly **recommended against**, and the measurement that says so
 
-`GameEngine` is not a god class by behaviour any more; `DECOUPLING.md` spent twenty-odd commits
-making sure of that. What it still is, is the thing that builds everything and the thing everything
-reaches each other through, and those are the same fact.
+The plan wanted a `GameComposition` holding the ~330 lines of construction, on the grounds that it
+would leave `GameEngine` a frame loop and strip the twelve `NotBeforeContentLoads` guards of their
+callers. Measured rather than assumed, neither half holds up.
 
-Around 330 of its 998 lines are construction: `BuildComponentsNeedingLoadedContent` (118,
-`GameEngine.cs:464`), `BuildGameScreens` (111, `:638`), `RegisterColourAnimations` (56, `:582`),
-`RegisterScreenEffectViewPorts` and `DefineFonts`. Those move to a `GameComposition` that builds the
-actor graph and hands back what was built. What stays is `Update`, `Draw`, `Dispose` and the seven
-event-relay handlers — a frame loop, which is what the class is named after.
+**The construction reads 42 members of the engine, and eleven of them are both its inputs and its
+outputs.** It is a chain: build the planet, build the blob from the planet, build the nasties from
+both, and register the screens from all of it. `Elements`, `Stats`, `Session`, `ScreenEffectEngine`,
+`BlobStatusPanel`, `GameScreens`, `Player`, `BlobKiller`, `BreakableBridgesEngine`,
+`ConveyerNastiesInstance` and `ElectricityNodeGateEngine` are each written by one step and read by a
+later one. A `GameComposition` cannot take inputs and hand back outputs, because the intermediate
+values
+*are* both - so it would have to own the whole actor graph, about twenty fields, and `GameEngine` would
+forward to it.
 
-**The twelve `NotBeforeContentLoads` properties (`GameEngine.cs:213-249`) are the measure of whether
-this worked.** They exist so that a class built before content can reach, later, something built
-after it. Every one of them is a route from any file to any actor. Once something else owns the
-graph and hands each actor its collaborators directly, they have no callers — and that is the
-remaining half of `DECOUPLING.md`'s stage 6, which is why this stage is where it belongs rather than
-in that document's second pass.
+That is this document's own named failure case, one paragraph up in *The rule each extraction is
+placed by*: a class that renames a slice of the god object rather than removing the coupling. Twenty
+fields moved from one class to another, with every call site redirected and nothing made simpler, is
+worse than leaving it alone.
 
-Check the order before building anything to manage it. That has been the right move five times
-running in `DECOUPLING.md`, and three of its "blocked on construction order" findings turned out to
-be a constructor sitting in `Initialise()` for no reason.
+**And the guards would not lose a single caller.** They exist because the engine is constructed before
+content loads, so its actor fields are null in that window - which stays true whoever builds them.
+The guards go only if the engine itself is built after content, and that is a `GameHost` change
+about when the engine exists, not a `GameEngine` change about who constructs what. Worth separating,
+because the plan put it here and it does not belong here.
+
+The one piece of `BuildGameScreens` that looks separable is the ten `ScreenDirectory.Add(new ...)`
+rows, and each row takes six to ten of those 42 members - so the registration list would need a
+twelve parameter constructor to say the same thing. `RegisterScreenEffectViewPorts` is twenty-three
+lines wiring four live objects together; as a static method it would take four parameters to save
+twenty-three lines, which is a trade not worth making.
+
+### What did come out: `ColourAnimatedTiles`
+
+`RegisterColourAnimations` was 55 lines, and its own doc comment described it exactly - *"a long literal
+list, and nothing but a list"*. Six rows of level design: which tile pulses, which tile is laid over
+it, how hard, towards what colour, how fast. It touched one engine member.
+
+It is now a table in `Starquake.Shared/Animations`, and the engine's method is a `foreach` over it.
+The six rows are verified identical - tile, upper tile, intensity, colour and speed each compared
+against the original, in registration order.
+
+A factory rather than a static array, deliberately: `ColourFaderAnimation` is where a pulse keeps
+its running state, so a shared set would make the registered animations and the live ones the same
+objects.
+
+Two constants came out of the rows with it: `-1` as "no upper tile", and the `100` of green that
+keeps the blue shuttle tag from reading as pure blue. The trailing `// Teleport booths`-style
+comments on three rows are gone because `TileNo = (int)ActionTiles.TeleportBooth` already says it;
+the three that named the tag colours moved into the table's doc comment, which is the only place
+those colours are written down.
+
+`GameEngine` is at 579 code lines from 623. It is still the class in this document's table with the most
+mutable fields, at 24, and that is now a `DECOUPLING.md` question rather than this document's:
+fourteen of the 24 are the actor fields behind the guards, and what they want is the engine built
+later, not the actors built elsewhere.
 
 ## Stage 9 — the small true extractions
 
