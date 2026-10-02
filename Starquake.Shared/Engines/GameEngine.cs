@@ -53,12 +53,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     private const int NastiesPerScreen = 4;
 
-    /// <summary>
-    ///     The screen an inventory hand-over from the core was once done on. The code is still here
-    ///     but commented out.
-    /// </summary>
-    private const int CoreInventoryHandoverScreen = 197;
-
     public readonly ContentManager ContentMgr;
 
     public readonly ResourceManager ContentResourceManager;
@@ -127,7 +121,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     // Game Sequences
     private IntroSequence? _introSequence;
 
-    private MainGameScreen? _mainScreen;
     private Nasties? _nasties;
 
 
@@ -139,9 +132,8 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
 
     private SpriteCollection _scanlines;
 
-    private ScreenEffectEngine? _screenEffectEngine;
+    private ScreenEffectEngine _screenEffectEngine;
 
-    private GameSession? _session;
 
 
     // Tunnel lift animations
@@ -222,10 +214,11 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     public TunnelLiftAnimationEngine TunnelAnimations => NotBeforeContentLoads(_tunnelAnimations);
 
     /// <summary>
-    ///     The game being played - score, lives, pause and controls. Does not exist until
-    ///     <see cref="Initialise" /> has run, which is before any content loads.
+    ///     The game being played - score, lives, pause and controls. Built by
+    ///     <see cref="Initialise" />, which the constructor calls, so it exists for as long as the engine
+    ///     does - the options screen can change the controls before any content has loaded.
     /// </summary>
-    public GameSession Session => NotBeforeContentLoads(_session);
+    public GameSession Session { get; private set; }
 
     /// <inheritdoc cref="GameScreens" />
     public IntroSequence IntroSequence => NotBeforeContentLoads(_introSequence);
@@ -242,11 +235,12 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     /// <inheritdoc cref="GameScreens" />
     public ElectricityGatesAndNodesEngine ElectricityNodeGateEngine => NotBeforeContentLoads(_electricityNodeGateEngine);
 
-    /// <inheritdoc cref="GameScreens" />
-    public ScreenEffectEngine ScreenEffectEngine => NotBeforeContentLoads(_screenEffectEngine);
-
-    /// <inheritdoc cref="GameScreens" />
-    private MainGameScreen MainScreen => NotBeforeContentLoads(_mainScreen);
+    /// <summary>
+    ///     The screen effects. Built by <see cref="Initialise" /> like the session, and for the same
+    ///     reason it is not among the guarded members below: it exists before any content does. Its view
+    ///     ports are registered later, because those need dimensions only the loaded content knows.
+    /// </summary>
+    public ScreenEffectEngine ScreenEffectEngine => _screenEffectEngine;
 
     /// <summary>
     ///     Called by the host on the way out. The sound engine's timer is the only thing the engine
@@ -345,7 +339,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
 
     private void Player_OnScreenChanged(GameScreenType triggerScreen)
     {
-        MainScreen.PerformPostScreenChangeActions(triggerScreen, new ScreenChange.FadeIn());
+        ScreenDirectory.MainGame.PerformPostScreenChangeActions(triggerScreen, new ScreenChange.FadeIn());
     }
 
     private void Player_OnBlobActionRaised(BlobAction action, object? data)
@@ -356,15 +350,15 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     }
 
     [MemberNotNull(nameof(BlobStatusPanel), nameof(Stats), nameof(Elements), nameof(_hotkeys),
-        nameof(ShapeDrawer))]
+        nameof(ShapeDrawer), nameof(Session), nameof(_screenEffectEngine))]
     private void Initialise()
     {
         Stats = new PlayerStats(ContentResourceManager.GetSoundFxEngine());
         BlobStatusPanel = new StatusPanel(ContentResourceManager, _graphicsSet, ScreenDirectory, RandomNumberGenerator, Stats);
 
-        _session = new GameSession();
-        _session.OnPausedChanged += Session_OnPausedChanged;
-        _session.OnPlayerKeysChanged += Session_OnPlayerKeysChanged;
+        Session = new GameSession();
+        Session.OnPausedChanged += Session_OnPausedChanged;
+        Session.OnPlayerKeysChanged += Session_OnPlayerKeysChanged;
 
         _hotkeys = new GlobalHotkeys(
             Input,
@@ -588,14 +582,15 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     }
 
     /// <summary>
-    ///     Only the main game screen is kept in a field of its own, because two places in this class talk
-    ///     to it directly rather than through the dictionary.
+    ///     Builds the ten screens and registers each with <see cref="ScreenDirectory" />, which is what
+    ///     holds them from here on - including the main game screen, which this used to keep a field of
+    ///     its own for as well.
     /// </summary>
     private void BuildGameScreens()
     {
         GameScreens.Initialise();
 
-        _mainScreen = new MainGameScreen(this);
+        var mainScreen = new MainGameScreen(this);
 
         ScreenDirectory.Add(new OptionsScreen(
             ContentResourceManager,
@@ -645,7 +640,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             Elements,
             Input));
 
-        ScreenDirectory.Add(_mainScreen);
+        ScreenDirectory.Add(mainScreen);
         ScreenDirectory.Add(new TeleportScreen(
             ContentResourceManager,
             Font2,
@@ -692,7 +687,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         // used to do this walked them. It reached LoadContent by downcasting every screen back to
         // a shared base class, where the other eight inherited it as a no-op.
         ScreenDirectory.Options.LoadContent();
-        _mainScreen.LoadContent();
+        ScreenDirectory.MainGame.LoadContent();
     }
 
     /// <summary>
@@ -860,21 +855,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             ScreenDirectory.PlanetCore.UpdateOffScreen(gameTime);
         }
 
-        if (GameScreens.ScreenNumber == CoreInventoryHandoverScreen)
-        {
-            /*
-            int counter = 4;
-            if (Elements.GetActiveElements().Count < 4)
-            {
-                counter = Elements.GetActiveElements().Count;
-            }
-
-            for (int a = 0; a < counter; a++)
-            {
-                Player.BlobInventory[a] = (enCollectables)Elements.GetActiveElements()[a].CurrentElement;
-            }
-             */
-        }
     }
 
     private void CalculatePresentationTransform()
@@ -921,8 +901,8 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             _loadingScreen.Draw(PercentComplete, FullyLoadedPercent);
         }
 
-        // Screen effects compose over whatever was just drawn, and only exist once the game does
-        _screenEffectEngine?.Draw();
+        // Screen effects compose over whatever was just drawn
+        _screenEffectEngine.Draw();
 
         DrawScanlines();
     }
