@@ -27,6 +27,7 @@ rule in *The rule each extraction is placed by* and discovering the codebase bro
 | --- | --- |
 | `cf95609` | Five fades off the draw path: the blob's energy-drain tint, his teleport fade-in, the glow on a shot, and the fade and shrink of a dead nasty and a dead conveyer nasty. `ConveyerNasty` had no `Dead` branch in `Update` at all. |
 | `32c0345` | `SpriteCollection` held one rotation angle and advanced it inside `End`. The angle moves to the nasty, the blob's shuttle flame and the intro's ship, one per logic frame. `GameSession` falls out of `Nasty`, `Nasties` and `PlanetCoreScreen` with the `paused` flag that existed to freeze the spin. |
+| **Stage 6** | `ScreenPainter`, `ScreenLayout` and `Hover` out of `ScreenCanvas`. 912 lines to 400; the control drops out of the table entirely. No tests - it draws. |
 | **Stage 5** | `BlobOverload` and `BlobEntryPoint`. Six fields and the death's arithmetic out, plus ten constants. Twelve tests. **`Blob` is no longer the worst class in the codebase by mutable field count** - `GameEngine` is. |
 | **Stage 4** | `TunnelLift`. Three counters and the 83-line ride out, into 111 code lines. Nineteen tests - the plan said none were to be had here, and was wrong for the reason stage 3 found. The two tunnel-mouth detectors the plan grouped with it stay where they are. |
 | **Stage 3** | `BlobFall`. Four counters and the tunnel-mouth shuffle out, into 99 code lines that need a collision map and nothing else. Eleven tests, and this time the plan's promise held - see below for why, and for the one case left uncovered. |
@@ -79,7 +80,7 @@ commits above - an angle that now belongs to them, and a `GameSession` that neve
 | ~~3~~ | `Blob` | `BlobFall` | 4 fields, 2 methods | **done** - 11 tests |
 | ~~4~~ | `Blob` | `TunnelLift` | 3 fields, 1 method, 83 lines | **done** - 19 tests |
 | ~~5~~ | `Blob` | `BlobOverload`, `BlobEntryPoint` | 6 fields, 10 constants | **done** - 12 tests |
-| 6 | Editor | `ScreenPainter` | ~500 lines of `ScreenCanvas` | No |
+| ~~6~~ | Editor | `ScreenPainter` + 2 values | 437 lines of `ScreenCanvas` | **done** |
 | 7 | Editor | five clusters out of `EditorSession` | 19 fields | Some |
 | 8 | Engine | `GameComposition` | ~330 lines of `GameEngine` | No |
 | 9 | — | `NastyLifecycle`, `ScreenShake`, the fade | 7 + 3 + 2 fields | Yes for the last two |
@@ -496,28 +497,42 @@ the position because everything is relative to it.
 Independent of track A — different project, no shared code — so these can go in any order relative
 to the blob, and stage 6 is the cheapest thing in this document.
 
-## Stage 6 — `ScreenPainter` out of `ScreenCanvas`
+## Stage 6 — `ScreenPainter` out of `ScreenCanvas` — **done**
 
-Eleven `Draw*` methods plus `StripRange`, `CoreArea`, `ScreenPixel` and the `Layout` record struct
-(`ScreenCanvas.cs:447-873`) are around 500 lines, and the split is already most of the way made:
-**seven of those fourteen members are `static` as they stand, and five more read nothing from the
-control at all** — they take `(DrawingContext, EditorSession, Layout)` and use only those. Twelve of
-the fourteen move to a `ScreenPainter` unchanged.
+Thirteen drawing members, the `Layout` struct and seven drawing resources out of the control. 437 lines
+moved; `ScreenCanvas` goes from 912 lines to **400**, and at 265 code lines it is no longer in this
+document's table at all.
 
-Only two need anything. `DrawPlaceholder` reads `Bounds` and takes a `Rect` instead.
-`DrawHover` is the real one: it reads `_pointerOnScreen`, `_stroking`, `_strokeTool`, `_placingCore`,
-`_hoverX` and `_hoverY`, which are *input* state and stay with the control — so the painter is handed
-a hover value rather than the six fields. That one parameter is the whole seam, and it is worth
-noticing that it is only drawing that needed any of the control's state in the first place.
+Three files, not one, because the control still needs two of the things the drawing needs:
 
-What is left is an Avalonia control of about 350 lines doing input and hit-testing: the four
-`OnPointer*` overrides plus `OnPointerCaptureLost`, `OnKeyDown`, `ToolFor`, `TryHitTest`,
-`EndStroke`, `ReportHover`, `PlaceCore` and the attach/detach pair. The painter becomes the only
-thing in the editor that knows tile geometry, which is where `CollisionMaskEditor` and `WorldMapView`
-should eventually be getting theirs from too.
+- **`ScreenPainter`** (347 code lines, no state at all) — every `Draw*`, plus `Paint`, which took over
+  `Render`'s body. Which overlays go down and in what order is drawing policy and belongs here.
+- **`ScreenLayout`** — the `Layout` record struct, promoted out of the control because `TryHitTest` and
+  `ScreenPixel` need the same geometry to turn a pointer position back into a tile. `NeighbourTiles`
+  moved onto it, since `For` is what reads it.
+- **`Hover`** — the one thing the painter needed that the session does not carry. `DrawHover` reached
+  into six control fields: the hovered tile, the pointer position, whether a stroke is in progress, and
+  which tool it started with. Those are *input* state and stay with the control, which now hands over a
+  value. That one parameter is the whole seam.
 
-Near-mechanical, no behaviour risk, and the largest line reduction per unit of effort here. It does
-not need any of the rest of this document to have happened.
+`ScreenCanvas.Render` is two lines. What is left of the control is the dependency property, the six
+`OnPointer*`/`OnKeyDown` overrides, `ToolFor`, `TryHitTest`, `EndStroke`, `PlaceCore`, `ReportHover`,
+`ScreenPixel` and the attach/detach pair — input and hit-testing, which is what a control is for.
+
+**Pure motion, mechanically checked.** All thirteen moved bodies are textually identical to their
+originals once `Layout` → `ScreenLayout`, the six hover fields → the `Hover` value, and `Bounds` →
+the `bounds` parameter are substituted back. The layout struct differs in exactly two ways, both
+intended: `private` became `internal`, and it gained the `NeighbourTiles` const.
+
+Three usings fell out of the canvas with the drawing (`System.Globalization`,
+`ScreenEditor.Styles`, `SharedLibs`), which the analyser does not flag here, so they were checked by
+hand against the types each provides.
+
+**No tests, and none to be had.** Everything moved writes to a `DrawingContext`; there is no arithmetic
+in it that a test could assert on without a rendering surface. `ScreenLayout.For` is the one exception -
+it is pure geometry and could be pinned - but it is twelve lines that the whole editor exercises
+visibly on every resize, so a test would be describing what the window already demonstrates. The
+stage's value is the 437 lines and the control dropping out of the table, not coverage.
 
 ## Stage 7 — `EditorSession`'s five clusters
 
