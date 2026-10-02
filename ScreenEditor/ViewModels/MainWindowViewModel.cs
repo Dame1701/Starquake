@@ -54,8 +54,8 @@ internal class MainWindowViewModel : ViewModelBase
         // Only once there is somewhere to go. The start position decides, because that is the screen
         // the game opens on even when the wreck has been left on another one.
         GoToLandingSiteCommand = Register(new RelayCommand(
-            () => Session.CurrentScreen = Session.BlobStart!.Value.ScreenNumber,
-            () => Session.BlobStart is not null));
+            () => Session.CurrentScreen = Session.Positions.BlobStart!.Value.ScreenNumber,
+            () => Session.Positions.BlobStart is not null));
 
         // Offered for a screen with a booth on it, and for one that has a code without a booth, so
         // that a code left behind by an erased booth can still be taken away.
@@ -330,7 +330,7 @@ internal class MainWindowViewModel : ViewModelBase
     /// </summary>
     private async Task<bool> ConfirmLandingSiteAsync()
     {
-        if (Session.LandingSiteProblem is not { } problem || _owner is null)
+        if (Session.Positions.LandingSiteProblem is not { } problem || _owner is null)
         {
             return true;
         }

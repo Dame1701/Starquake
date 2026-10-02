@@ -166,7 +166,7 @@ internal sealed class WorldMapView : Control
 
         if (Session is not null)
         {
-            Session.HoverStatus = string.Empty;
+            Session.View.HoverStatus = string.Empty;
         }
 
         InvalidateVisual();
@@ -229,7 +229,7 @@ internal sealed class WorldMapView : Control
             return;
         }
 
-        session.HoverStatus = _hoverScreen < 0
+        session.View.HoverStatus = _hoverScreen < 0
             ? string.Empty
             : "Screen " + _hoverScreen +
               "  ·  column " + _hoverScreen % WorldMap.ScreensAcross +

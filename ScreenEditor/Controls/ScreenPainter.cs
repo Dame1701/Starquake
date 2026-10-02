@@ -76,26 +76,26 @@ internal static class ScreenPainter
             return;
         }
 
-        ScreenLayout layout = ScreenLayout.For(bounds, session.ShowNeighbours);
+        ScreenLayout layout = ScreenLayout.For(bounds, session.View.ShowNeighbours);
 
-        if (session.ShowNeighbours)
+        if (session.View.ShowNeighbours)
         {
             DrawNeighbours(context, session, layout);
         }
 
         DrawScreen(context, session, layout);
 
-        if (session.ShowCollision)
+        if (session.View.ShowCollision)
         {
             DrawCollision(context, session, layout);
         }
 
-        if (session.ShowGrid)
+        if (session.View.ShowGrid)
         {
             DrawGrid(context, layout);
         }
 
-        if (session.ShowTileNumbers)
+        if (session.View.ShowTileNumbers)
         {
             DrawTileNumbers(context, session, layout);
         }
@@ -397,14 +397,14 @@ internal static class ScreenPainter
     /// </remarks>
     private static void DrawCore(DrawingContext context, EditorSession session, ScreenLayout layout)
     {
-        CoreSite core = session.Core;
+        CoreSite core = session.Positions.Core;
 
         if (core.ScreenNumber != session.CurrentScreen)
         {
             return;
         }
 
-        using DrawingContext.PushedState faded = context.PushOpacity(session.CoreIsPlaced ? 1 : 0.45);
+        using DrawingContext.PushedState faded = context.PushOpacity(session.Positions.CoreIsPlaced ? 1 : 0.45);
 
         DrawCoreArea(context, CoreArea(layout, core.XPos, core.YPos));
     }

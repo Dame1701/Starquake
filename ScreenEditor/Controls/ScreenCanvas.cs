@@ -214,7 +214,7 @@ internal sealed class ScreenCanvas : Control
 
         if (Session is not null)
         {
-            Session.HoverStatus = string.Empty;
+            Session.View.HoverStatus = string.Empty;
         }
 
         InvalidateVisual();
@@ -333,7 +333,7 @@ internal sealed class ScreenCanvas : Control
             return false;
         }
 
-        ScreenLayout layout = ScreenLayout.For(Bounds.Size, session.ShowNeighbours);
+        ScreenLayout layout = ScreenLayout.For(Bounds.Size, session.View.ShowNeighbours);
         if (!layout.Screen.Contains(position))
         {
             return false;
@@ -352,7 +352,7 @@ internal sealed class ScreenCanvas : Control
     {
         if (_hoverX < 0)
         {
-            session.HoverStatus = string.Empty;
+            session.View.HoverStatus = string.Empty;
             return;
         }
 
@@ -368,15 +368,15 @@ internal sealed class ScreenCanvas : Control
 
         // The core is not a tile, so nothing above would mention it. Worth saying where the pointer is
         // over it, because that is the only way to tell it apart from the scenery underneath.
-        CoreSite core = session.Core;
+        CoreSite core = session.Positions.Core;
 
         if (core.ScreenNumber == session.CurrentScreen)
         {
             status += "  ·  core at " + core.XPos + ", " + core.YPos +
-                      (session.CoreIsPlaced ? string.Empty : " (not placed - this is the fallback)");
+                      (session.Positions.CoreIsPlaced ? string.Empty : " (not placed - this is the fallback)");
         }
 
-        session.HoverStatus = status;
+        session.View.HoverStatus = status;
     }
 
     /// <summary>
@@ -386,7 +386,7 @@ internal sealed class ScreenCanvas : Control
     /// </summary>
     private Point ScreenPixel(EditorSession session, Point position)
     {
-        ScreenLayout layout = ScreenLayout.For(Bounds.Size, session.ShowNeighbours);
+        ScreenLayout layout = ScreenLayout.For(Bounds.Size, session.View.ShowNeighbours);
         double scale = layout.Screen.Width / TileMetrics.PlayAreaWidth;
 
         return new Point(

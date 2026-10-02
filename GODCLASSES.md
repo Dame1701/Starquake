@@ -27,6 +27,7 @@ rule in *The rule each extraction is placed by* and discovering the codebase bro
 | --- | --- |
 | `cf95609` | Five fades off the draw path: the blob's energy-drain tint, his teleport fade-in, the glow on a shot, and the fade and shrink of a dead nasty and a dead conveyer nasty. `ConveyerNasty` had no `Dead` branch in `Update` at all. |
 | `32c0345` | `SpriteCollection` held one rotation angle and advanced it inside `End`. The angle moves to the nasty, the blob's shuttle flame and the intro's ship, one per logic frame. `GameSession` falls out of `Nasty`, `Nasties` and `PlanetCoreScreen` with the `paused` flag that existed to freeze the spin. |
+| **Stage 7** | `CanvasViewOptions`, `AuthoredPositions` and `TilePaletteState` out of `EditorSession`. 19 mutable fields to 5; 597 code lines to 404. Two of the plan's five clusters are recommended against rather than done - see below. |
 | **Stage 6** | `ScreenPainter`, `ScreenLayout` and `Hover` out of `ScreenCanvas`. 912 lines to 400; the control drops out of the table entirely. No tests - it draws. |
 | **Stage 5** | `BlobOverload` and `BlobEntryPoint`. Six fields and the death's arithmetic out, plus ten constants. Twelve tests. **`Blob` is no longer the worst class in the codebase by mutable field count** - `GameEngine` is. |
 | **Stage 4** | `TunnelLift`. Three counters and the 83-line ride out, into 111 code lines. Nineteen tests - the plan said none were to be had here, and was wrong for the reason stage 3 found. The two tunnel-mouth detectors the plan grouped with it stay where they are. |
@@ -81,7 +82,7 @@ commits above - an angle that now belongs to them, and a `GameSession` that neve
 | ~~4~~ | `Blob` | `TunnelLift` | 3 fields, 1 method, 83 lines | **done** - 19 tests |
 | ~~5~~ | `Blob` | `BlobOverload`, `BlobEntryPoint` | 6 fields, 10 constants | **done** - 12 tests |
 | ~~6~~ | Editor | `ScreenPainter` + 2 values | 437 lines of `ScreenCanvas` | **done** |
-| 7 | Editor | five clusters out of `EditorSession` | 19 fields | Some |
+| ~~7~~ | Editor | three clusters out of `EditorSession` | 14 of 19 fields | **done** |
 | 8 | Engine | `GameComposition` | ~330 lines of `GameEngine` | No |
 | 9 | — | `NastyLifecycle`, `ScreenShake`, the fade | 7 + 3 + 2 fields | Yes for the last two |
 
@@ -195,6 +196,11 @@ dotnet test Starquake.Tests/Starquake.Tests.csproj  # must stay green
 Plus the draw-path check in the appendix, which must keep coming back empty. It is cheap and it is
 the one piece of this that a reviewer cannot eyeball: a `Draw` that advances a counter looks like
 ordinary code and goes wrong only on somebody else's monitor.
+
+**Read the build's summary line rather than grepping it for an error prefix.** The editor's XAML errors
+are `AVLN####`, so a filter written for `CS` and `IDE` drops them - and the XAML task is skipped as up
+to date on a second build even when the first one failed, which makes a repeated build on a broken file
+report success. Stage 7 met both. See it for the detail.
 
 Stages 1 to 5 change the blob, which no test covers end to end, so each also wants the game launched
 and the touched behaviour exercised by hand: walking and falling, firing on foot and on the shuttle,
@@ -534,30 +540,93 @@ it is pure geometry and could be pinned - but it is twelve lines that the whole 
 visibly on every resize, so a test would be describing what the window already demonstrates. The
 stage's value is the 437 lines and the control dropping out of the table, not coverage.
 
-## Stage 7 — `EditorSession`'s five clusters
+## Stage 7 — `EditorSession`'s clusters — **done, three of five**
 
-Nineteen mutable fields in five groups with no overlap at all between them:
+19 mutable fields to **5**, and 597 code lines to **404**. The five that stay are the five that
+should: `_currentScreen`, because everything else is relative to it; `_sheet`, because the loaded
+artwork is read by four separate controls and is not the palette's to own; and `_selectedTile` with
+`_tool`, for the reason below.
 
-| Extract | Fields | Notes |
+| Extracted | Fields | What it is |
 | --- | --- | --- |
-| `CanvasViewOptions` | `_showGrid`, `_showCollision`, `_showNeighbours`, `_showTileNumbers`, `_paletteTileWidth`, `_hoverStatus` | Pure preferences. No logic whatever — six properties and a `PropertyChanged` |
-| `TilePaletteState` | `_selectedTile`, `_tileFilter`, `_usedTilesOnly`, `_visibleTiles`, `_tilesInUse`, `_recentTiles`, `_sheet` | With `RebuildVisibleTiles`, `Matches`, `TilesInUse`, `RememberTile`, `SelectedMarker`, `SelectedTileDescription` |
-| `MarkerPlacements` | `_blobStart`, `_shipCrashSite`, `_coreExit`, `_core` | With `FindAuthoredPositions`, `TakeAwayMarkerElsewhere`, `PlaceCore`, `Square` and the two `*Note`/`*Display` pairs |
-| `ScreenOperations` | `_clipboard` | With `CopyScreen`, `PasteScreen`, `ClearScreen`, `FloodScreen`, `MoveScreen`, `ReplaceScreen`, `CanPaste` |
-| `TeleportCodeEditor` | — | `CurrentTeleportCode`, `CurrentScreenHasTeleportBooth`, `ShowTeleportPanel`, `TeleportCodeDisplay`, `SetTeleportCode`, `DescribeTeleportCodeProblem`, `RaiseTeleportPropertiesChanged` |
+| `CanvasViewOptions` | 6 | The four overlay toggles, the palette's tile width and the hover status line. Preferences about looking, with nothing in them about the map |
+| `AuthoredPositions` | 4 | The blob's start, the crash site, the core exit and the core, with the landing-site verdict built on the first two |
+| `TilePaletteState` | 5 | The filter, the used-tiles-only switch, the visible list, the in-use cache and the recent row |
 
-`_currentScreen` stays on the session. Like the blob's position it is what everything else is
-relative to, and the sub-objects are handed it or handed the document.
+### Where the plan was wrong, and where this session's own work changed it
 
-**The cost is bindings, and it is small enough to pay.** `EditorSession` is a `ViewModelBase`, and
-`MainWindow.axaml` binds seventeen distinct members through it across 25 lines — eight of those
-occurrences being the four view toggles. Exposing each cluster as a property means those become
-`Session.View.ShowGrid` and so on. The four controls reach it in code rather than XAML — `ScreenCanvas`
-uses 22 members, `TilePalette` 8, `WorldMapView` 5, `CollisionMaskEditor` 6 — and those are
-compiler-checked, so the churn is mechanical and visible.
+**`_selectedTile` does not belong with the palette.** The plan put it in `TilePaletteState` along with
+the filtering. Earlier in this same session, the editor gained an invariant - *what is in hand
+follows the tool* - which ties `SelectedTile` and `Tool` together through one `WhatGoesInHandFor`
+switch: erase takes nothing, the brush takes the last ordinary tile back, fill never takes a marker.
+They are now one concept, "what the next click will do", and splitting them across two objects would
+have put that switch on one side of a boundary and half its state on the other. They stay together
+on the session.
 
-Do this after stage 6, not before: `ScreenCanvas` is the heaviest consumer of the session and it is
-easier to re-point 22 members once the control is half the size.
+So `TilePaletteState` is about what the palette *offers*, not about what is *chosen* - which is a
+better cut than the plan's, and one only visible after the tool work.
+
+**Two of the five clusters are recommended against.**
+
+- *`ScreenOperations`* would move **one** field, `_clipboard`, and would need `Document`, `Undo`,
+  `_currentScreen` and `_selectedTile` to do it. Four collaborators to re-home one field is a worse
+class
+  than the one it came out of.
+- *`TeleportCodeEditor`* has **no fields at all**. Its seven members read and write the document
+directly.
+  By this document's own measure - how many mutable fields a class owns - extracting it buys
+nothing, and
+  it would add an indirection to every call.
+
+Both were listed from the field map, which cannot see that one of them has nothing to move and the
+other would need half the session to move it.
+
+### The pattern that made this cheap
+
+`CanvasViewOptions` is handed the session's `Invalidate`, so changing a toggle still raises the one
+`Invalidated` event the canvas already listens to rather than a second event for the same purpose.
+
+`TilePaletteState` needed the sheet and the map, both of which change over a session's life. Rather than
+hold a reference back to the session or take two `Func<>`s, it is *handed* them: `Rebind(sheet,
+document)` is called from the two places either one changes, and `MapChanged()` from the one place
+the map's contents change. The object has no view of the session at all.
+
+### The cost, which was the predicted one
+
+33 call sites re-pointed for the view options, and 13 XAML bindings across all three objects -
+`Session.ShowGrid` becomes `Session.View.ShowGrid`. The compiler found every one of both kinds.
+
+The editor has compiled bindings on - `AvaloniaUseCompiledBindingsByDefault` in the csproj and
+`x:DataType` on the window - so a stale binding path is a build error rather than a silent failure at
+run time:
+
+```
+MainWindow.axaml(466,34): Avalonia error AVLN2000: Unable to resolve property or method
+of name 'TileFilter' on type 'Starquake.ScreenEditor.Editing.EditorSession'.
+```
+
+All 81 bindings in `MainWindow.axaml` are covered, both its `DataTemplate`s declare an `x:DataType`,
+and the other two `.axaml` files hold no bindings at all. Nothing falls back to reflection, so
+explicit `{CompiledBinding}` would buy nothing over the plain `{Binding}` the file already uses.
+
+### Two ways to not notice an AVLN error, both met while doing this
+
+Worth writing down, because both of them look like a clean build.
+
+**Filtering the build output by error prefix.** `dotnet build | grep "error C"` catches `CS` and `IDE`
+and silently drops `AVLN2000`. Read the summary line, or grep for `error` alone.
+
+**Building twice.** The XAML compilation task is skipped as up to date on the second run, *even when
+the first run failed*, so a repeated build on an unchanged broken file reports success:
+
+```
+build 1   (broken binding)   1 Error(s)   AVLN2000
+build 2   (same file)        0 Error(s)   <- the task never re-ran
+touch the .axaml             1 Error(s)   <- back again
+```
+
+So an `AVLN` result is only trustworthy on the first build after a change. `touch` the `.axaml`, or
+rebuild, before believing a clean one.
 
 ---
 

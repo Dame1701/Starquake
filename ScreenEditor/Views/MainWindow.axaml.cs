@@ -75,19 +75,19 @@ internal partial class MainWindow : Window
                 break;
 
             case Key.G:
-                session.ShowGrid = !session.ShowGrid;
+                session.View.ShowGrid = !session.View.ShowGrid;
                 break;
 
             case Key.C:
-                session.ShowCollision = !session.ShowCollision;
+                session.View.ShowCollision = !session.View.ShowCollision;
                 break;
 
             case Key.T:
-                session.ShowTileNumbers = !session.ShowTileNumbers;
+                session.View.ShowTileNumbers = !session.View.ShowTileNumbers;
                 break;
 
             case Key.N:
-                session.ShowNeighbours = !session.ShowNeighbours;
+                session.View.ShowNeighbours = !session.View.ShowNeighbours;
                 break;
 
             default:

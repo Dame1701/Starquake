@@ -85,7 +85,7 @@ internal sealed class TilePalette : Control
     }
 
     private double TileWidth
-        => Source == TilePaletteSource.Recent ? RecentTileWidth : Session?.PaletteTileWidth ?? 80;
+        => Source == TilePaletteSource.Recent ? RecentTileWidth : Session?.View.PaletteTileWidth ?? 80;
 
     private double TileHeight
         => TileWidth * TileMetrics.TileHeight / TileMetrics.TileWidth;
@@ -94,8 +94,8 @@ internal sealed class TilePalette : Control
         => Session is null
             ? []
             : Source == TilePaletteSource.Recent
-                ? Session.RecentTiles
-                : Session.VisibleTiles;
+                ? Session.Palette.RecentTiles
+                : Session.Palette.VisibleTiles;
 
     public override void Render(DrawingContext context)
     {
@@ -204,7 +204,7 @@ internal sealed class TilePalette : Control
 
         if (Session is not null)
         {
-            Session.HoverStatus = tile < 0 ? string.Empty : TileCatalogue.Describe(tile);
+            Session.View.HoverStatus = tile < 0 ? string.Empty : TileCatalogue.Describe(tile);
         }
 
         InvalidateVisual();
@@ -218,7 +218,7 @@ internal sealed class TilePalette : Control
 
         if (Session is not null)
         {
-            Session.HoverStatus = string.Empty;
+            Session.View.HoverStatus = string.Empty;
         }
 
         InvalidateVisual();
@@ -235,7 +235,7 @@ internal sealed class TilePalette : Control
             return;
         }
 
-        Session.PaletteTileWidth += e.Delta.Y * 8;
+        Session.View.PaletteTileWidth += e.Delta.Y * 8;
         e.Handled = true;
     }
 

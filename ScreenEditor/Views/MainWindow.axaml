@@ -75,13 +75,13 @@
                 </MenuItem>
                 <MenuItem Header="_View">
                     <MenuItem Header="Tile grid" ToggleType="CheckBox" InputGesture="G"
-                              IsChecked="{Binding Session.ShowGrid, Mode=TwoWay}" />
+                              IsChecked="{Binding Session.View.ShowGrid, Mode=TwoWay}" />
                     <MenuItem Header="Collision map" ToggleType="CheckBox" InputGesture="C"
-                              IsChecked="{Binding Session.ShowCollision, Mode=TwoWay}" />
+                              IsChecked="{Binding Session.View.ShowCollision, Mode=TwoWay}" />
                     <MenuItem Header="Tile numbers" ToggleType="CheckBox" InputGesture="T"
-                              IsChecked="{Binding Session.ShowTileNumbers, Mode=TwoWay}" />
+                              IsChecked="{Binding Session.View.ShowTileNumbers, Mode=TwoWay}" />
                     <MenuItem Header="Neighbouring screens" ToggleType="CheckBox" InputGesture="N"
-                              IsChecked="{Binding Session.ShowNeighbours, Mode=TwoWay}" />
+                              IsChecked="{Binding Session.View.ShowNeighbours, Mode=TwoWay}" />
                 </MenuItem>
                 <MenuItem Header="_Help">
                     <MenuItem Header="Keyboard shortcuts…" Command="{Binding ShowShortcutsCommand}" />
@@ -292,7 +292,7 @@
 
                     <Separator Classes="toolbar" />
 
-                    <ToggleButton Classes="chip" IsChecked="{Binding Session.ShowGrid, Mode=TwoWay}">
+                    <ToggleButton Classes="chip" IsChecked="{Binding Session.View.ShowGrid, Mode=TwoWay}">
                         <ToolTip.Tip>
                             <ToolTip>
                                 <StackPanel MaxWidth="260" Spacing="2">
@@ -309,7 +309,7 @@
                         <materialIcons:MaterialIcon Width="19" Height="19" Kind="Grid" />
                     </ToggleButton>
 
-                    <ToggleButton Classes="chip" IsChecked="{Binding Session.ShowCollision, Mode=TwoWay}">
+                    <ToggleButton Classes="chip" IsChecked="{Binding Session.View.ShowCollision, Mode=TwoWay}">
                         <ToolTip.Tip>
                             <ToolTip>
                                 <StackPanel MaxWidth="260" Spacing="2">
@@ -326,7 +326,7 @@
                         <materialIcons:MaterialIcon Width="19" Height="19" Kind="Wall" />
                     </ToggleButton>
 
-                    <ToggleButton Classes="chip" IsChecked="{Binding Session.ShowTileNumbers, Mode=TwoWay}">
+                    <ToggleButton Classes="chip" IsChecked="{Binding Session.View.ShowTileNumbers, Mode=TwoWay}">
                         <ToolTip.Tip>
                             <ToolTip>
                                 <StackPanel MaxWidth="260" Spacing="2">
@@ -343,7 +343,7 @@
                         <materialIcons:MaterialIcon Width="19" Height="19" Kind="Numeric" />
                     </ToggleButton>
 
-                    <ToggleButton Classes="chip" IsChecked="{Binding Session.ShowNeighbours, Mode=TwoWay}">
+                    <ToggleButton Classes="chip" IsChecked="{Binding Session.View.ShowNeighbours, Mode=TwoWay}">
                         <ToolTip.Tip>
                             <ToolTip>
                                 <StackPanel MaxWidth="260" Spacing="2">
@@ -385,7 +385,7 @@
             <Grid ColumnDefinitions="*,Auto,Auto">
                 <TextBlock Grid.Column="0" Classes="status" Text="{Binding DocumentStatus}" />
                 <TextBlock Grid.Column="1" Classes="status statusStrong" Margin="16,0"
-                           Text="{Binding Session.HoverStatus}" />
+                           Text="{Binding Session.View.HoverStatus}" />
                 <TextBlock Grid.Column="2" Classes="status accent" Text="{Binding Session.SelectedTileDescription}" />
             </Grid>
         </Border>
@@ -433,9 +433,9 @@
                             <TextBlock Classes="header" Text="LANDING SITE" Margin="0" />
                             <TextBlock Classes="accent" FontSize="15" FontWeight="SemiBold"
                                        TextWrapping="Wrap"
-                                       Text="{Binding Session.LandingSiteDisplay}" />
+                                       Text="{Binding Session.Positions.LandingSiteDisplay}" />
                             <TextBlock Classes="status" TextWrapping="Wrap"
-                                       Text="{Binding Session.LandingSiteNote}" />
+                                       Text="{Binding Session.Positions.LandingSiteNote}" />
                             <Button Classes="quiet" Content="Go to screen" Margin="0,2,0,0"
                                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
                                     Command="{Binding GoToLandingSiteCommand}" />
@@ -463,10 +463,10 @@
                     <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,10">
                         <TextBox Grid.Column="0" Classes="search"
                                  Watermark="Filter by number or name"
-                                 Text="{Binding Session.TileFilter, Mode=TwoWay}" />
+                                 Text="{Binding Session.Palette.TileFilter, Mode=TwoWay}" />
                         <ToggleButton Grid.Column="1" Classes="chip" Content="Used" Margin="6,0,0,0"
                                       ToolTip.Tip="Show only the tiles this map actually uses"
-                                      IsChecked="{Binding Session.UsedTilesOnly, Mode=TwoWay}" />
+                                      IsChecked="{Binding Session.Palette.UsedTilesOnly, Mode=TwoWay}" />
                     </Grid>
 
                     <StackPanel DockPanel.Dock="Top">
