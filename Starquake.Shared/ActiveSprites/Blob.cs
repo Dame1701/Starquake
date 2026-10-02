@@ -93,43 +93,9 @@ internal class Blob
     private const int JumpHeightWithoutPlatforms = TileMetrics.CollisionCellHeight;
 
     /// <summary>
-    ///     How the blob comes apart when it dies. It swells to <see cref="OverloadMaxScale" />, then
-    ///     shrinks through zero to <see cref="OverloadMinScale" /> - drawing at a negative scale is
-    ///     what turns it inside out - and then explodes.
+    ///     The alpha each copy of the blob is drawn at during the explosion flare. The sizes and how many
+    ///     there are belong to <see cref="BlobOverload" />; this is a drawing colour, so it stays here.
     /// </summary>
-    private const int OverloadSwelling = 0;
-
-    /// <inheritdoc cref="OverloadSwelling" />
-    private const int OverloadShrinking = 1;
-
-    /// <inheritdoc cref="OverloadSwelling" />
-    private const int OverloadExploded = 3;
-
-    /// <inheritdoc cref="OverloadSwelling" />
-    private const float OverloadScaleStep = 0.30f;
-
-    /// <inheritdoc cref="OverloadSwelling" />
-    private const float OverloadMaxScale = 1.6f;
-
-    /// <inheritdoc cref="OverloadSwelling" />
-    private const float OverloadMinScale = -1f;
-
-    /// <summary>
-    ///     How long the alarm sounds before the blob comes apart, and how many copies of it are drawn
-    ///     at once during the explosion to give the flare its depth.
-    /// </summary>
-    private const int OverloadAlarmFrames = 60;
-
-    /// <inheritdoc cref="OverloadAlarmFrames" />
-    private const int OverloadFlareCopies = 5;
-
-    /// <inheritdoc cref="OverloadAlarmFrames" />
-    private const float OverloadFlareFirstScale = 0.4f;
-
-    /// <inheritdoc cref="OverloadAlarmFrames" />
-    private const float OverloadFlareScaleStep = 0.2f;
-
-    /// <inheritdoc cref="OverloadAlarmFrames" />
     private const int OverloadFlareAlpha = 150;
 
     /// <summary>
@@ -220,21 +186,15 @@ internal class Blob
     private readonly ScreenEffectEngine _screenEffects;
     private readonly PlayerStats _stats;
     private readonly List<ResetTile> _tilesToReset = [];
-    private int _blobAlarmSoundCounter;
 
 
     private int _blobEnergyDrainCounter;
 
     private Guid _blobFallsSoundId;
-    private int _blobFrameOnEntry;
     private bool _blobOnShuttle;
-    private bool _blobOnShuttleOnEntry;
     private bool _blobOnShuttlePad;
-    private int _blobOverloadState;
 
-    private float _blobScale = 1f;
 
-    private Point _blobScreenEntryLocation;
     private Direction _blobsLastAnimDirection = Direction.None;
     private bool _blobTouched;
 
@@ -246,6 +206,8 @@ internal class Blob
 
     private Direction _directionGoingThroughTunnel = Direction.None;
     private readonly BlobFall _fall = new();
+    private readonly BlobEntryPoint _entryPoint = new();
+    private readonly BlobOverload _overload = new();
     private readonly TunnelLift _lift;
     private readonly Inventory _inventory;
     private readonly UnstickProbe _unstickProbe;
@@ -343,7 +305,7 @@ internal class Blob
         set
         {
             _blobXPos = value;
-            _blobScreenEntryLocation.X = value;
+            _entryPoint.XPos = value;
         }
     }
 
@@ -353,7 +315,7 @@ internal class Blob
         set
         {
             _blobYPos = value;
-            _blobScreenEntryLocation.Y = value;
+            _entryPoint.YPos = value;
         }
     }
 
@@ -403,10 +365,9 @@ internal class Blob
 
         _resetBlobToScreenEntryPoint = resetBlobToScreenEntryPoint;
 
-        _blobOverloadState = overloadFirst ? OverloadSwelling : OverloadExploded;
+        _overload.Begin(overloadFirst);
 
         BlobsState = BlobState.Overloading;
-        _blobAlarmSoundCounter = 0;
     }
 
     // Blob has hit something
@@ -449,9 +410,7 @@ internal class Blob
             return;
         }
 
-        _blobScreenEntryLocation = new Point(BlobXPos, BlobYPos);
-        _blobOnShuttleOnEntry = _blobOnShuttle;
-        _blobFrameOnEntry = BlobFrame;
+        _entryPoint.Record(BlobXPos, BlobYPos, BlobFrame, _blobOnShuttle);
     }
 
     /// <summary>
@@ -1193,14 +1152,14 @@ internal class Blob
     /// </summary>
     private void UpdateOverloadingState()
     {
-        if (_blobAlarmSoundCounter == 1)
+        if (_overload.AlarmJustStarted)
         {
             _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobOverloadAlarm, 1.0f, false);
         }
 
-        if (_blobOverloadState < OverloadExploded && _blobAlarmSoundCounter < OverloadAlarmFrames)
+        if (_overload.AlarmSounding)
         {
-            _blobAlarmSoundCounter++;
+            _overload.CountAnAlarmFrame();
         }
         else
         {
@@ -1211,28 +1170,7 @@ internal class Blob
                 _blobJumpPlatformEngine.ResetPlatforms();
                 OnBlobDiedAndRespawned?.Invoke();
 
-                if (_blobOverloadState == OverloadSwelling)
-                {
-                    _blobScale = _blobScale + OverloadScaleStep;
-
-                    if (_blobScale > OverloadMaxScale)
-                    {
-                        _blobOverloadState = OverloadShrinking;
-                        _blobScale = OverloadMaxScale;
-                    }
-                }
-                else if (_blobOverloadState == OverloadShrinking)
-                {
-                    _blobScale = _blobScale - OverloadScaleStep;
-
-                    if (_blobScale < OverloadMinScale)
-                    {
-                        _blobScale = OverloadMinScale;
-                        _blobOverloadState = OverloadExploded;
-                    }
-                }
-
-                if (_blobOverloadState == OverloadExploded)
+                if (_overload.Swell() == OverloadStage.Exploded)
                 {
                     _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobExplodes, false);
                     _blobKiller.Trigger(BlobXPos, BlobYPos, true);
@@ -1246,17 +1184,16 @@ internal class Blob
     {
         if (!_blobKiller.Triggered)
         {
-            _blobOverloadState = OverloadSwelling;
-            _blobScale = 1.0f;
+            _overload.Reset();
             // If Blob is killed by a spiky tile, we reset his position to when he entered
             if (_resetBlobToScreenEntryPoint)
             {
-                _blobYPos = _blobScreenEntryLocation.Y;
-                _blobXPos = _blobScreenEntryLocation.X;
-                _blobOnShuttle = _blobOnShuttleOnEntry;
+                _blobYPos = _entryPoint.YPos;
+                _blobXPos = _entryPoint.XPos;
+                _blobOnShuttle = _entryPoint.OnShuttle;
                 _gameScreens.ChangeShuttlePlatformState(_blobOnShuttle);
                 _gameScreens.UpdateCollisionMap(false);
-                BlobFrame = _blobFrameOnEntry;
+                BlobFrame = _entryPoint.Frame;
                 _lift.LetGo();
                 _fall.StartFallingAgain();
 
@@ -1366,7 +1303,7 @@ internal class Blob
                 DrawNormalState(screenFade);
                 break;
             }
-            case BlobState.Overloading when _blobAlarmSoundCounter < OverloadAlarmFrames:
+            case BlobState.Overloading when _overload.ShowingTheAlarm:
             {
                 DrawOverloadAlarmState(screenFade);
                 break;
@@ -1492,7 +1429,7 @@ internal class Blob
     private void DrawOverloadAlarmState(int screenFade)
     {
         // Make blob flicker
-        if (_blobAlarmSoundCounter % 2 == 0)
+        if (_overload.Visible)
         {
             SpriteCollection blobSprites = _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites);
             blobSprites.Begin(BlendState.AlphaBlend);
@@ -1518,17 +1455,11 @@ internal class Blob
         _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites)
             .Begin(BlendState.Additive);
 
-        float temp = _blobScale - OverloadFlareFirstScale;
-        for (int a = 0; a < OverloadFlareCopies; a++)
+        foreach (float scale in _overload.FlareScales())
         {
-            if (temp >= 0f)
-            {
-                _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites)
-                    .DrawSprite(BlobFrame, _blobXPos, _blobYPos,
-                        ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, OverloadFlareAlpha), temp, 0f);
-            }
-
-            temp += OverloadFlareScaleStep;
+            _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites)
+                .DrawSprite(BlobFrame, _blobXPos, _blobYPos,
+                    ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, OverloadFlareAlpha), scale, 0f);
         }
 
         _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites).End();

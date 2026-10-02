@@ -27,6 +27,7 @@ rule in *The rule each extraction is placed by* and discovering the codebase bro
 | --- | --- |
 | `cf95609` | Five fades off the draw path: the blob's energy-drain tint, his teleport fade-in, the glow on a shot, and the fade and shrink of a dead nasty and a dead conveyer nasty. `ConveyerNasty` had no `Dead` branch in `Update` at all. |
 | `32c0345` | `SpriteCollection` held one rotation angle and advanced it inside `End`. The angle moves to the nasty, the blob's shuttle flame and the intro's ship, one per logic frame. `GameSession` falls out of `Nasty`, `Nasties` and `PlanetCoreScreen` with the `paused` flag that existed to freeze the spin. |
+| **Stage 5** | `BlobOverload` and `BlobEntryPoint`. Six fields and the death's arithmetic out, plus ten constants. Twelve tests. **`Blob` is no longer the worst class in the codebase by mutable field count** - `GameEngine` is. |
 | **Stage 4** | `TunnelLift`. Three counters and the 83-line ride out, into 111 code lines. Nineteen tests - the plan said none were to be had here, and was wrong for the reason stage 3 found. The two tunnel-mouth detectors the plan grouped with it stay where they are. |
 | **Stage 3** | `BlobFall`. Four counters and the tunnel-mouth shuffle out, into 99 code lines that need a collision map and nothing else. Eleven tests, and this time the plan's promise held - see below for why, and for the one case left uncovered. |
 | **Stage 2** | `BlobWeapon`. Ten fields and seven methods out, 219 code lines, and the back-reference that made the blob hand out `this` mid-construction. Twelve tests - but only over the one rule in it that is pure, which is not what this plan promised. |
@@ -48,8 +49,10 @@ closed* rather than assuming it still says what it said.
 237 tests passing, 0 warnings, 0 errors
 ```
 
-Measured before stage 1. It is now 287 tests, and `Blob` is at 1,122 code lines over 22 mutable
-fields and 17 held objects - from 1,492, 36 and 21.
+Measured before stage 1, and the verdict column is now out of date: **after stages 1 to 5 `Blob` holds
+16 mutable fields, fewer than `GameEngine`'s 24 or `EditorSession`'s 19.** It is still the largest file,
+at 1,081 code lines against `GameEngine`'s 623, but it is no longer the god class this document was
+written about. 299 tests.
 
 | Class | Lines | Code | Held objects | Mutable fields | Verdict |
 | --- | --- | --- | --- | --- | --- |
@@ -75,7 +78,7 @@ commits above - an angle that now belongs to them, and a `GameSession` that neve
 | ~~2~~ | `Blob` | `BlobWeapon` | 10 fields, 7 methods, 219 lines | **done** - 12 tests, see below |
 | ~~3~~ | `Blob` | `BlobFall` | 4 fields, 2 methods | **done** - 11 tests |
 | ~~4~~ | `Blob` | `TunnelLift` | 3 fields, 1 method, 83 lines | **done** - 19 tests |
-| 5 | `Blob` | `OverloadSequence` | 7 fields, 5 methods | No |
+| ~~5~~ | `Blob` | `BlobOverload`, `BlobEntryPoint` | 6 fields, 10 constants | **done** - 12 tests |
 | 6 | Editor | `ScreenPainter` | ~500 lines of `ScreenCanvas` | No |
 | 7 | Editor | five clusters out of `EditorSession` | 19 fields | Some |
 | 8 | Engine | `GameComposition` | ~330 lines of `GameEngine` | No |
@@ -415,33 +418,76 @@ as a cap. That is a defect question, and it gets its own commit if it gets one a
   him off to the right. That is preserved as an `||` rather than an early return, and the comment at
   the site says why.
 
-## Stage 5 — `OverloadSequence`, and what is left
+## Stage 5 — `BlobOverload` and `BlobEntryPoint` — **done**
 
-`_blobOverloadState`, `_blobAlarmSoundCounter`, `_blobScale`, `_resetBlobToScreenEntryPoint` with
-`KillBlob`, `UpdateOverloadingState`, `UpdateDyingState`, `DrawOverloadAlarmState` and
-`DrawOverloadFlare`.
+Two extractions, because the group turned out to be two things. `Blob` drops 41 code lines, six mutable
+fields and ten constants, and lands at **16 mutable fields - fewer than `GameEngine` or
+`EditorSession`.** This is where it stops being the subject of this document.
 
-Two of the three `BlobState` cases leave with this, and `Blob.Update`'s switch drops to one real
-case and two delegations. The entry-point snapshot — `_blobScreenEntryLocation`, `_blobFrameOnEntry`,
-`_blobOnShuttleOnEntry` — is written by `Update` and read only by `UpdateDyingState`, so it goes too,
-which is three more fields than the list above.
+**`BlobOverload`** owns the shape of a death: the alarm counter, the stage, and the scale, with the
+swell-shrink-explode progression and the flare's geometry. 64 code lines, needs nothing at all to
+construct, and has twelve tests - the most thorough of the five pieces taken out of the blob.
 
-What remains in `Blob` after stage 5: position, walking, control reading, the four screen-edge
-changes, the inventory, the shuttle, the teleport fade, the event surface and a `Draw` that
-dispatches. Around 500 lines and a dozen fields.
+**`BlobEntryPoint`** collapses `_blobScreenEntryLocation`, `_blobFrameOnEntry` and
+`_blobOnShuttleOnEntry` into one named object. Worth checking before believing: arriving is written
+from two places, and both are genuine arrivals - `Update` records walking or falling onto a screen, and
+the position setters record being *placed*, which is what a teleport booth, an access booth and the
+planet core's exit all do. Those three call sites are why the setters write it at all.
 
-**The shuttle and the teleport fade are deliberately left.** The shuttle is four fields and four
-methods, but `_blobOnShuttle` is read by **fourteen** methods across every other group — it is a mode
-the whole class is aware of, and extracting the behaviour while that bit stays public buys less than
-the churn costs. Teleport arrival is three fields and four methods totalling 33 lines; it is small
-enough to be fine where it is. Both are worth revisiting once stages 1 to 5 have landed and the
-class can
-be read in one sitting, and neither is worth doing before that.
+### The condition that looks vacuous and is not
 
-**`PerformPostChangeScreenActions` is the check on all of this.** It is 68 lines, and it touches the
-fire group, the position group, the tunnel group, the jump platforms and the bridge tile resets. On
-the far side it should be a fan-out of one call per owner. If it does not collapse to that, the
-groups are wrong.
+`UpdateOverloadingState` tested `_blobOverloadState < OverloadExploded && _blobAlarmSoundCounter <
+OverloadAlarmFrames`. The first half reads like dead weight: the swell only runs once the counter has
+reached sixty, so the stage cannot have advanced while the counter is still below it.
+
+It is the mechanism by which a death skips the alarm. `KillBlob(_, overloadFirst: false)` sets the stage
+to `Exploded` with the counter at nought, so the first half is false from the start and the whole alarm
+phase is stepped over - that is how spikes, electricity, a nasty and the debug key kill instantly, while
+running out of energy (the only `overloadFirst: true` caller, in `StatusPanel`) gets its second of
+warning. `BlobOverload.AlarmSounding` keeps both halves and the doc comment on `Begin` says why.
+
+Worth the paragraph because `PLAN.md` has a section on exactly this shape - conditions from the original
+port that are always true - and this one is the counter-example.
+
+`OverloadSwelling`, `OverloadShrinking` and `OverloadExploded` were `int` constants numbered 0, 1 and
+**3**. Nothing ever held the gap at 2, and the only comparison made of them was against `Exploded`, so
+they became an `OverloadStage` enum.
+
+### What did not move, and the plan's last wrong prediction
+
+The plan said two of the three `BlobState` cases would leave with this stage, and `Blob.Update`'s switch
+would drop to "one real case and two delegations". It has not, and should not. What moved is the
+arithmetic *inside* `UpdateOverloadingState` and `UpdateDyingState`; the methods themselves stay,
+because between them they touch the death animation, the weapon, the jump platforms, the planet, the
+`OnBlobDiedAndRespawned` event, the blob's position and his height. `UpdateDyingState` is almost
+entirely the business of putting a blob back together, which is the blob's own business.
+
+That is the third stage in a row where the plan's prediction about *shape* was wrong while its
+prediction about *which fields cluster* was right. The fields were measured; the shapes were guessed.
+
+### Flare geometry, and a note on the drawing rule
+
+`FlareScales()` yields the sizes the explosion's copies are drawn at, so the stack geometry - five
+copies, growing outward, skipping any that would come out inside out - is testable and `Blob` keeps only
+the `foreach` and the alpha. That is a partial exception to *a cluster takes its `Draw` with it*: the
+drawing itself needs the blob's sprite sheet, position and frame, so moving it would mean handing over
+most of the blob, exactly as a `BlobRenderer` would. The geometry moved and the drawing stayed.
+
+---
+
+# After the blob
+
+Five stages in, `Blob` has gone from 1,492 code lines over 36 mutable fields to **1,081 over 16**, and
+from 237 tests in the suite to 299. Five of the eight field groups are gone.
+
+What is left in it is one subject: a blob that walks, falls, carries things, rides a shuttle, changes
+screens and dies - holding a weapon, a fall, a lift, an overload and an entry point, each of which can
+be reasoned about and most of which can be tested. The three groups left inside it, named in stage 5's
+original plan as deliberately-left, are still the right call: the shuttle because `_blobOnShuttle` is a
+mode fourteen methods are aware of, the teleport fade because it is three fields and thirty lines, and
+the position because everything is relative to it.
+
+**The remaining four stages are not about the blob**, and nothing in them depends on anything above.
 
 ---
 
