@@ -657,9 +657,11 @@ worse than leaving it alone.
 
 **And the guards would not lose a single caller.** They exist because the engine is constructed before
 content loads, so its actor fields are null in that window - which stays true whoever builds them.
-The guards go only if the engine itself is built after content, and that is a `GameHost` change
-about when the engine exists, not a `GameEngine` change about who constructs what. Worth separating,
-because the plan put it here and it does not belong here.
+The guards go only if the thing holding the actors does not exist until content has loaded - and that
+is **not** the engine, which cannot be built later: it registers the content manifest, starts the load
+and draws the progress while it runs. What could do it is splitting the engine's two lives in two, and
+that is written up under *The engine's two lives* at the end of this document rather than here, because
+it is a proposal rather than a stage.
 
 The one piece of `BuildGameScreens` that looks separable is the ten `ScreenDirectory.Add(new ...)`
 rows, and each row takes six to ten of those 42 members - so the registration list would need a
@@ -831,8 +833,8 @@ survived measurement, and one turned into two findings rather than an extraction
 fewer than `GameEngine`'s 24 or what `EditorSession` held when this started. `GameEngine` is the one
 left, and what it needs is not an extraction: fourteen of its 24 fields are the actor fields behind
 the
-`NotBeforeContentLoads` guards, and those want the engine built *after* content loads, which is
-`GameHost`'s shape rather than `GameEngine`'s. That is `DECOUPLING.md`'s question now.
+`NotBeforeContentLoads` guards. Those cannot be removed by building the engine later, because the engine
+is what drives the load - see *The engine's two lives* below.
 
 ### What the stages taught that the plan could not know
 
@@ -861,6 +863,48 @@ alone" into "stop the sound". Both would have been invisible in review and neith
 a test. `REFACTORING.md` already said to move guards unchanged; what stage 9 adds is that the risk
 is not only inverted conditions but *elided side effects*, a drawn random number among them.
 
+### The engine's two lives
+
+`GameEngine` is the one class in the table still at 24 mutable fields, and measuring why settles what -
+if anything - to do about it.
+
+**Fourteen of the 24 are the actor fields behind the twelve `NotBeforeContentLoads` guards.** They are
+null until content has loaded because the engine exists before it has: the constructor registers the
+content manifest, `LoadContent` starts the load on a background thread, and the engine draws the loading
+screen while it runs. So the engine cannot be built after content - it is what drives the content.
+
+**And the coupling it was blamed for is already gone.** `DECOUPLING.md` finished at "60 coupled files to
+2", and those two are exactly right: `GameHost`, which constructs the engine and should, and
+`MainGameScreen`, which holds it deliberately. Every other mention of `GameEngine` in the solution is a
+doc comment about the history or the `GameEngineStatus` enum - checked by name, one file at a time.
+`PLAN.md` already decided `MainGameScreen` keeps the engine, on the grounds that it uses eighteen of its
+members because it *is* the main game, and that an eighteen-parameter constructor or a bag object made
+for it would both be worse. That still reads correctly.
+
+So the 24 fields are not a coupling problem and not a size problem. They are **one class living two
+lives**: a loader that defines content, shows progress and owns the things needing none of it, and
+a game
+that owns the actors. The guards are how that is expressed today.
+
+**The one change that would remove them** is to make those two lives two objects: the engine keeps the
+resource manager, the fonts, the loading screen, the session, the stats, the status panel, the screen
+effects and the presentation; a second object, built once on the `Started` status, owns the ten guarded
+actors as non-nullable fields. Twelve guards and fourteen nullable fields become one nullable field and
+one guard apiece in `Update` and `Draw`.
+
+It is a real improvement and it is not free:
+
+- `MainGameScreen` uses members from both halves, so it would hold two references where it holds one.
+  That is the opposite of what the last stage concluded about handing a class two things when it wants
+  one.
+- The null-ness does not disappear, it concentrates. Whether `if (_game is not { } game) return;` twice
+  is better than twelve guarded properties is a judgement about which reads better, not a measurement.
+- It is the first change in either document that would touch `GameHost`.
+
+Left as a proposal rather than done. It is bigger than anything else in this file, both plan documents
+treat this area as settled, and the case for it rests on a preference rather than on a count - which is
+the one kind of change in this codebase that has wanted its author's say rather than a measurement.
+
 ### Left deliberately undone
 
 - ~~**`Nasty`'s lifecycle counters and `CopyFromSource`**~~ - done. One of the eleven was genuinely
@@ -870,7 +914,8 @@ is not only inverted conditions but *elided side effects*, a drawn random number
 - ~~**`IntroSequence`'s `"GameArea"` string literal**~~ - done. It was the last view-port name not
   using `ViewPorts`, and an unknown name throws rather than being ignored, so it was a crash waiting
   on a typo rather than a silent no-op.
-- **`GameEngine`'s construction**, which is `DECOUPLING.md`'s, for the reason stage 8 gives.
+- **`GameEngine`'s two lives** - the only remaining idea for its 24 fields, written up above as a
+  proposal because the case for it is a preference rather than a count.
 
 ---
 
