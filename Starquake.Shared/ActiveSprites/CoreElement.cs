@@ -130,8 +130,16 @@ internal class CoreElement
         }
     }
 
-    public void Update(GameTime gameTime)
+    /// <summary>
+    ///     One logic frame of this element. The position is passed in because the replacement effect is
+    ///     emitted from the element's centre - drawing used to latch it into a field for this to read,
+    ///     which left the effect playing at wherever the element was last drawn.
+    /// </summary>
+    public void Update(GameTime gameTime, int xPos, int yPos)
     {
+        _xPos = xPos;
+        _yPos = yPos;
+
         if (ElementState == CoreElementState.Missing)
         {
             _fader1.Update();
@@ -164,6 +172,14 @@ internal class CoreElement
             _coreReplacementEffect.Update(_xPos + SpriteMetrics.HalfSpriteWidth, _yPos + SpriteMetrics.HalfSpriteHeight, gameTime);
         }
 
+        // Latched at the end of the first logic frame of the replacement, so everything above starts
+        // on the second one. Drawing used to set it, at the same point in the frame but on the draw
+        // path - which made a logic gate wait on a frame having been drawn.
+        if (ElementState == CoreElementState.Replacing)
+        {
+            _elementReplacementStarted = true;
+        }
+
     }
 
     public void Draw(int xPos, int yPos, int fade)
@@ -186,9 +202,6 @@ internal class CoreElement
 
     public void Draw(int xPos, int yPos, bool replacingElement)
     {
-        _xPos = xPos;
-        _yPos = yPos;
-
         if (ElementState == CoreElementState.Missing)
         {
             if (replacingElement)
@@ -218,11 +231,6 @@ internal class CoreElement
         }
         else if (ElementState == CoreElementState.Replacing)
         {
-            if (!_elementReplacementStarted)
-            {
-                _elementReplacementStarted = true;
-            }
-
             SpriteCollection pickupsIlluminated = _resources.GetSpriteCollection(_graphicsSet.Names.PickupsIlluminated);
             pickupsIlluminated.Begin(BlendState.Additive);
             pickupsIlluminated.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, _elementFader.ByteModifier), _currentElementDownScaler.Modifier, 0);

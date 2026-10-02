@@ -318,8 +318,35 @@ internal class CheopsScreen : IGameScreen
             }
         }
 
+        AnnounceScanResult();
+
     }
 
+
+    /// <summary>
+    ///     The pyramid's verdict, once both scanners have read: the sound, and the start of the wait
+    ///     that moves the screen on. Done last so the wait is a whole
+    ///     <see cref="ScreenReadWaitFrames" /> long rather than one frame short of it.
+    /// </summary>
+    /// <remarks>
+    ///     This was <see cref="DrawElementsOnOffer" />'s job, which meant the sound was asked for once
+    ///     per drawn frame and needed a latch to stop it playing sixty times a second. Both belong on
+    ///     the logic clock: the wait is counted in logic frames, so starting it from a draw tied the
+    ///     length of the pause to the display's refresh rate.
+    /// </remarks>
+    private void AnnounceScanResult()
+    {
+        if (_elementSelectionMode || !_accessCodes[1].Scanned || _soundPlayed)
+        {
+            return;
+        }
+
+        _resources.GetSoundFxEngine()
+            .PlaySound(_codeSucceeded ? Assets.Sounds.AccessSuccess : Assets.Sounds.AccessFailed, 1f, false);
+
+        _soundPlayed = true;
+        _screenReadWaitFrames = 0;
+    }
 
     public void Draw()
     {
@@ -375,12 +402,6 @@ internal class CheopsScreen : IGameScreen
             // Draw the result
             if (_accessCodes[1].Scanned)
             {
-                // Start the pause timer
-                if (_screenReadWaitFrames == ScreenReadNotWaiting)
-                {
-                    _screenReadWaitFrames = 0;
-                }
-
                 if (_codeSucceeded)
                 {
                     _shapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
@@ -398,13 +419,6 @@ internal class CheopsScreen : IGameScreen
                     _shapeDrawer.FillRectangle(new Rectangle(812, 500, 36, 36), new Color(0, _resultMessageFade, 0));
                     _shapeDrawer.FillRectangle(new Rectangle(856, 498, 40, 40), new Color(0, _resultMessageFade, 0));
                     _shapeDrawer.End();
-
-                    // Don't allow the sound to be called more than once
-                    if (!_soundPlayed)
-                    {
-                        _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.AccessSuccess, 1f, false);
-                        _soundPlayed = true;
-                    }
                 }
                 else
                 {
@@ -423,13 +437,6 @@ internal class CheopsScreen : IGameScreen
                     _shapeDrawer.FillRectangle(new Rectangle(812, 500, 36, 36), new Color(_resultMessageFade, 0, 0, 0));
                     _shapeDrawer.FillRectangle(new Rectangle(856, 498, 40, 40), new Color(_resultMessageFade, 0, 0, 0));
                     _shapeDrawer.End();
-
-                    // Don't allow the sound to be called more than once
-                    if (!_soundPlayed)
-                    {
-                        _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.AccessFailed, 1f, false);
-                        _soundPlayed = true;
-                    }
                 }
             }
         }

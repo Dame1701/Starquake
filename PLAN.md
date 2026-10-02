@@ -47,6 +47,11 @@ tunnel traversal and the death sequence - are each particle effects, sounds and 
 around two or three counters, so moving them would add no testable surface. Splitting `Blob`
 properly needs its update logic and its draw code prised apart first, which is a different task.
 
+**Reopened — see `GODCLASSES.md`.** Measuring fields rather than clusters found two candidates this
+section does not name, one of them the most testable thing left in the class, and the prerequisite
+named above turns out to be unmeetable: the draw path advances the animation counters, so update and
+draw cannot be prised apart at all. That document argues it out and lays out the order.
+
 ### Phase 5's changes have mostly still not been seen running
 
 All three performance items change *drawing*, the build is clean and the tests pass. Script-driven

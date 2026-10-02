@@ -150,7 +150,7 @@ internal class PlanetCoreScreen : IGameScreen
             _coreAliens[a].Update(gameTime);
         }
 
-        _elements.Update(gameTime);
+        _elements.Update(gameTime, _gameScreens.CorePosition);
 
         _coreSparks.Start();
         _coreSparks.Update(CoreCentreX, CoreCentreY, gameTime);

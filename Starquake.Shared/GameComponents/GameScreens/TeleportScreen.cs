@@ -130,6 +130,14 @@ internal class TeleportScreen : IGameScreen
         }
 
         _teleportCode = _gameScreens.CurrentGameScreenData.TeleportCode;
+
+        // The code of the booth blob walked into, held across the teleport so RunTeleportAttempt can
+        // tell an arrival on a new screen from one that went nowhere. Drawing used to latch this,
+        // which left a logic decision depending on a frame having been drawn.
+        if (!_attemptingTeleport)
+        {
+            _previousCode = _teleportCode ?? string.Empty;
+        }
     }
 
     /// <summary>
@@ -325,11 +333,6 @@ internal class TeleportScreen : IGameScreen
 
     private void DrawConsoleText()
     {
-        if (!_attemptingTeleport)
-        {
-            _previousCode = _teleportCode ?? string.Empty;
-        }
-
         _font.Begin(BlendState.AlphaBlend);
 
         _font.WriteText(100, 64, "YOU HAVE ENTERED", 2, Color.White, (byte)ScreenFade);

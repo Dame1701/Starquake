@@ -173,11 +173,20 @@ internal class CoreElements
         return toReturn;
     }
 
-    public void Update(GameTime gameTime)
+    public void Update(GameTime gameTime, Point corePosition)
     {
-        foreach (CoreElement element in Elements)
+        int counter = 0;
+
+        for (int y = 0; y < CoreGridDown; y++)
         {
-            element.Update(gameTime);
+            for (int x = 0; x < CoreGridAcross; x++)
+            {
+                Elements[counter].Update(
+                    gameTime,
+                    corePosition.X + x * SpriteMetrics.SpriteWidth,
+                    corePosition.Y + y * SpriteMetrics.SpriteHeight);
+                counter++;
+            }
         }
     }
 

@@ -143,6 +143,33 @@ internal class AccessBoothScreen : IGameScreen
                 _screenDirectory.Current = GameScreenType.MainGame;
             }
         }
+
+        AnnounceScanResult();
+    }
+
+    /// <summary>
+    ///     The booth's verdict, once all three scanners have read: the sound, and the start of the
+    ///     wait that sends blob back to the game. Done last so the wait is a whole
+    ///     <see cref="ScreenReadWaitFrames" /> long rather than one frame short of it.
+    /// </summary>
+    /// <remarks>
+    ///     This was <see cref="DrawScanResult" />'s job, which meant the sound was asked for once per
+    ///     drawn frame and needed a latch to stop it playing sixty times a second. Both belong on the
+    ///     logic clock: the wait is counted in logic frames, so starting it from a draw tied the
+    ///     length of the pause to the display's refresh rate.
+    /// </remarks>
+    private void AnnounceScanResult()
+    {
+        if (!_accessCodes[2].Scanned || _soundPlayed)
+        {
+            return;
+        }
+
+        _resources.GetSoundFxEngine()
+            .PlaySound(Success ? Assets.Sounds.AccessSuccess : Assets.Sounds.AccessFailed, 1f, false);
+
+        _soundPlayed = true;
+        _screenReadWaitFrames = 0;
     }
 
     public void Draw()
@@ -190,8 +217,8 @@ internal class AccessBoothScreen : IGameScreen
     }
 
     /// <summary>
-    ///     What the booth says once all three scanners have read. Also starts the wait that sends blob back
-    ///     to the game, which is why a Draw is allowed to change state here.
+    ///     What the booth says once all three scanners have read. The sound and the wait that sends
+    ///     blob back to the game are <see cref="AnnounceScanResult" />'s, so this only draws.
     /// </summary>
     private void DrawScanResult()
     {
@@ -212,13 +239,6 @@ internal class AccessBoothScreen : IGameScreen
             _shapeDrawer.FillRectangle(new Rectangle(792, 500, 36, 36), new Color(0, (byte)_resultMessageFade, 0));
             _shapeDrawer.FillRectangle(new Rectangle(836, 498, 40, 40), new Color(0, (byte)_resultMessageFade, 0));
             _shapeDrawer.End();
-
-            // Don't allow the sound to be called more than once
-            if (!_soundPlayed)
-            {
-                _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.AccessSuccess, 1f, false);
-                _soundPlayed = true;
-            }
         }
         else
         {
@@ -237,22 +257,7 @@ internal class AccessBoothScreen : IGameScreen
             _shapeDrawer.FillRectangle(new Rectangle(782, 500, 36, 36), new Color(_resultMessageFade, 0, 0, 0));
             _shapeDrawer.FillRectangle(new Rectangle(826, 498, 40, 40), new Color(_resultMessageFade, 0, 0, 0));
             _shapeDrawer.End();
-
-            // Don't allow the sound to be called more than once
-            if (!_soundPlayed)
-            {
-                _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.AccessFailed, 1f, false);
-                _soundPlayed = true;
-            }
         }
-
-        // Start the pause timer
-        if (_screenReadWaitFrames == ScreenReadNotWaiting)
-        {
-            _screenReadWaitFrames = 0;
-        }
-
-        _soundPlayed = true;
     }
 
     /// <summary>
