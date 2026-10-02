@@ -17,6 +17,15 @@ using Starquake.Structure;
 
 namespace Starquake.GameComponents.GameScreens;
 
+/// <summary>
+///     The game being played: the planet drawn, the blob and everything chasing him stepped, and the
+///     score kept. Every other screen is somewhere the blob has gone, and this is where he comes back to.
+/// </summary>
+/// <remarks>
+///     Not a <c>GameScreenBase</c>, which is for the five full-screen pages of text. This is the only
+///     other screen that fades itself up, which makes it look like a sixth of those - see that class for
+///     why it is not, and <see cref="ScreenFadeUp" /> for the four lines the two genuinely shared.
+/// </remarks>
 internal class MainGameScreen : IGameScreen
 {
 
@@ -327,17 +336,7 @@ internal class MainGameScreen : IGameScreen
     }
 
     private void FadeScreenBackUp()
-    {
-        if (ScreenFade < ColourLevels.Full)
-        {
-            ScreenFade = ScreenFade + ScreenFadeSpeed;
-        }
-
-        if (ScreenFade > ColourLevels.Full)
-        {
-            ScreenFade = ColourLevels.Full;
-        }
-    }
+        => ScreenFade = ScreenFadeUp.Advanced(ScreenFade, ScreenFadeSpeed);
 
     private void UpdateBlob(GameTime gameTime)
     {

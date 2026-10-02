@@ -774,20 +774,42 @@ None of this is testable. `Nasty` needs the content pipeline to construct, as `B
 check is the reasoning above plus returning to a screen and watching for a nasty that should still be
 waiting.
 
-### The fade pair — not an extraction, a duplication
+### The fade pair — a duplication, and the question behind it — **fixed**
 
 The plan listed `ScreenFade`, `ScreenFadeSpeed` and `FadeScreenBackUp` as a cluster to take out of
-`MainGameScreen`. They should not come out; they should stop being written twice. `GameScreenBase`
-already has all three - the same two properties and the same four-line fade-up inside its `Update` -
-and
-`MainGameScreen` implements `IGameScreen` directly rather than inheriting it, so the two are independent
-copies of one piece of arithmetic.
+`MainGameScreen`. They were not a cluster; they were a copy. `GameScreenBase` had the same two members
+and the same four-line fade-up inside its `Update`, character for character but for a `+=`, and
+`MainGameScreen` implements `IGameScreen` directly rather than inheriting it. Taking it out of one would
+have left the copy in the other and made it three places.
 
-Extracting from `MainGameScreen` alone would leave the copy in `GameScreenBase` and make it three
-places. The work is to share one, which means either `MainGameScreen` inherits the base or both take
-a small
-`ScreenFadeUp` value - and that is a question about why the main screen is the one page not built on
-`GameScreenBase`, which is a bigger and more interesting question than this document's.
+Both now call `ScreenFadeUp.Advanced(level, speed)`, which is six tests' worth of arithmetic in one
+place: brightening by the speed, stopping at full rather than wrapping a colour byte, resting at full,
+and changing nothing at a speed of nought - which is what a screen that is not fading holds, and the
+reason the game can call it every frame without a flag.
+
+**And the question behind it is answered: `MainGameScreen` should not inherit `GameScreenBase`,
+and it was
+not an oversight.** Measured rather than assumed:
+
+| | Of the base's seven members |
+| --- | --- |
+| The five pages that inherit it | all seven, each |
+| `MainGameScreen` | **five** - not the font, not the graphics device |
+| `TeleportScreen` | five |
+| `CheopsScreen` | four |
+| `AccessBoothScreen` | three |
+| `PlanetCoreScreen` | two |
+
+`GameScreenBase` is for a full-screen page of text over a cleared screen that hands over on a key press,
+and its own doc says so. The five screens under `GameScreens` are places the blob has gone, which is a
+different thing. `MainGameScreen` is the only one of them that fades itself up, which is what made
+it look
+like a sixth page - and if it inherited, it would hold both the base's seven and the engine it needs
+thirteen members from, which is worse than holding one.
+
+A base class fitting none of its five subclasses exactly would be a worse answer than five constructors
+each naming what they use, which is what `DECOUPLING.md` spent twenty commits arriving at. The reasoning
+is now written on both classes rather than only here.
 
 ---
 
@@ -843,8 +865,8 @@ is not only inverted conditions but *elided side effects*, a drawn random number
 
 - ~~**`Nasty`'s lifecycle counters and `CopyFromSource`**~~ - done. One of the eleven was genuinely
   missing and now carries; the rule for the other ten is written on the method. See stage 9.
-- **The fade duplicated between `MainGameScreen` and `GameScreenBase`**, which wants the two sharing one
-  rather than a third copy - see stage 9.
+- ~~**The fade duplicated between `MainGameScreen` and `GameScreenBase`**~~ - done, as
+  `ScreenFadeUp`, with why the main screen is not a `GameScreenBase` written on both classes.
 - **`IntroSequence`'s `"GameArea"` string literal**, the last of the view-port names not using
   `ViewPorts`.
 - **`GameEngine`'s construction**, which is `DECOUPLING.md`'s, for the reason stage 8 gives.
