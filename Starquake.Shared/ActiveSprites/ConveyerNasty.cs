@@ -30,6 +30,9 @@ internal class ConveyerNasty
     /// </summary>
     private const float DeathShrinkStep = 0.01f;
 
+    /// <inheritdoc cref="DeathShrinkStep" />
+    private const int DeathFadeStep = 20;
+
 
     private readonly Animation _anim;
     private readonly GameScreenCollection _gameScreens;
@@ -174,6 +177,38 @@ internal class ConveyerNasty
             NastyState = NastyState.Dead;
             NastyActive = false;
         }
+        else if (NastyState == NastyState.Dead)
+        {
+            FadeAndShrinkTheCorpse();
+        }
+    }
+
+    /// <summary>
+    ///     The corpse fading and shrinking away under the explosion. One logic frame's worth, so it
+    ///     takes the same time on every machine - it used to be done while drawing, which tied it to
+    ///     the display's refresh rate.
+    /// </summary>
+    private void FadeAndShrinkTheCorpse()
+    {
+        if (_deathFadeLevel > 0)
+        {
+            _deathFadeLevel = _deathFadeLevel - DeathFadeStep;
+        }
+
+        if (_deathFadeLevel < 0)
+        {
+            _deathFadeLevel = 0;
+        }
+
+        if (_deathScale > 0)
+        {
+            _deathScale = _deathScale - DeathShrinkStep;
+        }
+
+        if (_deathScale < 0)
+        {
+            _deathScale = 0;
+        }
     }
 
     public void Draw(int screenFade)
@@ -188,28 +223,6 @@ internal class ConveyerNasty
         {
             // Draw the explosion
             _conveyerNastyDies.Draw();
-
-            // Fade the nasty out as it explodes
-            if (_deathFadeLevel > 0)
-            {
-                _deathFadeLevel = _deathFadeLevel - 20;
-            }
-
-            if (_deathFadeLevel < 0)
-            {
-                _deathFadeLevel = 0;
-            }
-
-            // Shrink the nasty as it explodes
-            if (_deathScale > 0)
-            {
-                _deathScale = _deathScale - DeathShrinkStep;
-            }
-
-            if (_deathScale < 0)
-            {
-                _deathScale = 0;
-            }
 
             if (_deathFadeLevel > 0)
             {

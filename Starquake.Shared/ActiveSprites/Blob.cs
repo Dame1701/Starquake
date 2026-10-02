@@ -569,6 +569,9 @@ internal class Blob
 
         _blobJumpPlatformEngine.Update(_gameScreens);
 
+        FadeEnergyDrainTint();
+        FadeInAfterTeleport();
+
         return changedScreens;
     }
 
@@ -1037,6 +1040,35 @@ internal class Blob
 
         _blobAnimFire1.GetNextFrame();
         _blobAnimFire2.GetNextFrame();
+
+        AdvanceFireAppearance();
+    }
+
+    /// <summary>
+    ///     How the shot looks this frame: its additive glow comes up to full over the first few frames
+    ///     of flight, so it does not appear at full brightness on the frame it is launched.
+    /// </summary>
+    /// <remarks>
+    ///     This was done while drawing, which ran it at the display's refresh rate rather than the logic
+    ///     clock - so the glow came up faster the better the monitor, and carried on coming up while the
+    ///     game was paused.
+    /// </remarks>
+    private void AdvanceFireAppearance()
+    {
+        if (!BlobHasFired)
+        {
+            return;
+        }
+
+        if (_blobFireFade < ColourLevels.Full)
+        {
+            _blobFireFade += FireFadeStep;
+        }
+
+        if (_blobFireFade > ColourLevels.Full)
+        {
+            _blobFireFade = ColourLevels.Full;
+        }
     }
 
     /// <summary>
@@ -1712,7 +1744,6 @@ internal class Blob
     {
         _blobFireTrail.Draw();
 
-        FadeEnergyDrainTint();
         DrawBlobSprite(screenFade);
         DrawShuttle(screenFade);
 
@@ -1720,7 +1751,6 @@ internal class Blob
 
         DrawFire(screenFade);
         DrawTeleportBeam();
-        FadeInAfterTeleport();
     }
 
     /// <summary>
@@ -1803,16 +1833,6 @@ internal class Blob
     {
         if (BlobHasFired)
         {
-            if (_blobFireFade < ColourLevels.Full)
-            {
-                _blobFireFade = _blobFireFade + FireFadeStep;
-            }
-
-            if (_blobFireFade > ColourLevels.Full)
-            {
-                _blobFireFade = ColourLevels.Full;
-            }
-
             if (_graphicsSet.IsOriginal)
             {
                 if (_blobOnShuttle)

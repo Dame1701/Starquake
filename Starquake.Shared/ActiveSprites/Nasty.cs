@@ -84,6 +84,9 @@ internal class Nasty
     /// <inheritdoc cref="DeathShrinkStep" />
     private const float DeathRotateSpeed = 16f;
 
+    /// <inheritdoc cref="DeathShrinkStep" />
+    private const int DeathFadeStep = 20;
+
     /// <summary>
     ///     How fast a live nasty rocks from side to side as it walks.
     /// </summary>
@@ -618,6 +621,28 @@ internal class Nasty
 
     private void UpdateDeath()
     {
+        // Fade the nasty out as it explodes
+        if (_deathFadeLevel > 0)
+        {
+            _deathFadeLevel = _deathFadeLevel - DeathFadeStep;
+        }
+
+        if (_deathFadeLevel < 0)
+        {
+            _deathFadeLevel = 0;
+        }
+
+        // Shrink the nasty as it explodes
+        if (_deathScale > 0)
+        {
+            _deathScale = _deathScale - DeathShrinkStep;
+        }
+
+        if (_deathScale < 0)
+        {
+            _deathScale = 0;
+        }
+
         if (_graphicsSet.IsOriginal)
         {
             _nastyDiesAnimation.GetNextFrame();
@@ -774,28 +799,6 @@ internal class Nasty
         // Draw the explosion and the splat
         _nastyDies.Draw();
         _nastyDiesType2.Draw();
-
-        // Fade the nasty out as it explodes
-        if (_deathFadeLevel > 0)
-        {
-            _deathFadeLevel = _deathFadeLevel - 20;
-        }
-
-        if (_deathFadeLevel < 0)
-        {
-            _deathFadeLevel = 0;
-        }
-
-        // Shrink the nasty as it explodes
-        if (_deathScale > 0)
-        {
-            _deathScale = _deathScale - DeathShrinkStep;
-        }
-
-        if (_deathScale < 0)
-        {
-            _deathScale = 0;
-        }
 
         if (_deathFadeLevel > 0)
         {
