@@ -37,6 +37,27 @@ internal class BouncingParticle
     /// <inheritdoc cref="FireballXOffset" />
     private const int FireballYOffset = 5;
 
+    /// <summary>
+    ///     How hard a part is thrown sideways, in pixels a logic frame. Which way is a coin flip.
+    /// </summary>
+    private const int SlowestSideways = 4;
+
+    /// <inheritdoc cref="SlowestSideways" />
+    private const int FastestSideways = 12;
+
+    /// <summary>
+    ///     How hard a part is thrown upward, and the gravity that brings it back down. The throw used to
+    ///     be <em>downward</em> at one to nineteen pixels a frame, so the parts dribbled off the bottom of
+    ///     the blob instead of bursting out of him.
+    /// </summary>
+    private const int SlowestUpward = 10;
+
+    /// <inheritdoc cref="SlowestUpward" />
+    private const int FastestUpward = 22;
+
+    /// <inheritdoc cref="SlowestUpward" />
+    private const double Gravity = 1.0;
+
     private readonly GameScreenCollection _gameScreens;
     private readonly BouncingAnimation _particleBounce;
     private readonly Random _randomNumberGenerator;
@@ -76,7 +97,7 @@ internal class BouncingParticle
         // emitter's buffer at the positions they froze at when the bounce stopped
         Fireball.Reset();
 
-        int xSpeed = _randomNumberGenerator.Next(4, 12);
+        int xSpeed = _randomNumberGenerator.Next(SlowestSideways, FastestSideways);
 
         int xDirection = _randomNumberGenerator.Next(0, 2);
         if (xDirection == 0)
@@ -86,9 +107,11 @@ internal class BouncingParticle
 
         Fireball.Start();
 
+        // Negative is upward, so the parts are thrown out of him and fall back rather than starting
+        // downward. The gravity was a Next(1, 2), which can only ever return the one.
         _particleBounce.Trigger(
-            _randomNumberGenerator.Next(1, 2),
-            _randomNumberGenerator.Next(1, 20),
+            Gravity,
+            -_randomNumberGenerator.Next(SlowestUpward, FastestUpward),
             xSpeed, effectMinDuration, effectMaxDuration);
     }
 

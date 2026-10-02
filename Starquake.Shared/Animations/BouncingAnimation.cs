@@ -12,7 +12,21 @@ namespace Starquake.Animations;
 
 internal class BouncingAnimation
 {
-    private readonly double _friction = 1.00;
+    /// <summary>
+    ///     How much of a part's life it spends at full size and full brightness before it starts to go.
+    ///     It used to begin shrinking and fading on the very first frame, which left the parts small and
+    ///     translucent for nearly all of the flight - the explosion was there but barely readable.
+    /// </summary>
+    private const double TimeAtFullSize = 0.6;
+
+    /// <summary>
+    ///     How fast a part tumbles, in degrees a logic frame. It used to be a half-degree either way,
+    ///     which over the whole life came to less than a sixth of a turn - a wobble rather than a tumble.
+    /// </summary>
+    private const float SlowestTumble = 3f;
+
+    /// <inheritdoc cref="SlowestTumble" />
+    private const float FastestTumble = 9f;
 
     private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
@@ -54,7 +68,34 @@ internal class BouncingAnimation
         _fade = ColourLevels.Full;
         _scale = 1.0f;
         _effectDuration = _randomNumberGenerator.Next(effectMinDuration, effectMaxDuration);
-        _rotationSpeed = (float)(_randomNumberGenerator.NextDouble() - 0.5);
+
+        _rotationSpeed = (float)(SlowestTumble + _randomNumberGenerator.NextDouble() * (FastestTumble - SlowestTumble));
+
+        if (_randomNumberGenerator.Next(0, 2) == 0)
+        {
+            _rotationSpeed = -_rotationSpeed;
+        }
+    }
+
+    /// <summary>
+    ///     A part holds its size and brightness for <see cref="TimeAtFullSize" /> of its life and then goes
+    ///     out over what is left, rather than shrinking and fading from the moment it is thrown.
+    /// </summary>
+    private void FadeAndShrinkOverTheTail()
+    {
+        int framesAtFullSize = (int)(_effectDuration * TimeAtFullSize);
+
+        if (_effectDurationCounter < framesAtFullSize)
+        {
+            return;
+        }
+
+        // At least one frame, so a very short life still ends at nothing rather than dividing by nought.
+        int tail = Math.Max(_effectDuration - framesAtFullSize, 1);
+        double throughTheTail = Math.Min((double)(_effectDurationCounter - framesAtFullSize) / tail, 1.0);
+
+        _scale = (float)(1.0 - throughTheTail);
+        _fade = ColourLevels.Full * (1.0 - throughTheTail);
     }
 
     public void YBounce()
@@ -80,29 +121,11 @@ internal class BouncingAnimation
         if (Triggered)
         {
             _yDelta += _gravity;
-            _yDelta /= _friction;
 
-            _rotation = _rotation + _rotationSpeed;
+            _rotation += _rotationSpeed;
 
-            if (_scale > 0)
-            {
-                _scale = _scale - 1f / _effectDuration;
-            }
-            else
-            {
-                _scale = 0;
-            }
+            FadeAndShrinkOverTheTail();
 
-            if (_fade > 0)
-            {
-                _fade = _fade - ColourLevels.Full / (double)_effectDuration;
-            }
-            else
-            {
-                _fade = 0;
-            }
-
-            // Fade the particles out
             if (_effectDurationCounter > _effectDuration)
             {
                 Triggered = false;
