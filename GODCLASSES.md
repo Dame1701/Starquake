@@ -737,26 +737,42 @@ The plan wanted the birth and death counters out of `Nasty`. Measured, the lifec
 particle effects, an animation, the art set, the resource manager, the movement brain, the position
 and ten of its own counters - most of the class, which is stage 8's problem at a smaller scale.
 
-**But deciding it turned up something worth more than the extraction.** `CopyFromSource` is how a screen
-swap hands the spare set of nasties the live set's state, and `NastyMovementState` exists because
-that method used to assign seventeen fields by hand and silently drop anything added later. The
-movement half is fixed. **The lifecycle half is not**: of its ten counters, `CopyFromSource` carries
-exactly one -
-`_nastyDeadPauseCounter` - and says nothing about `_birthColourLevel`, `_birthFadeLevel`,
-`_birthRotateSpeed`, `_birthScale`, `_birthTimer`, `_conceptionWaitCounter`, `_deathAnticlockwise`,
-`_deathFadeLevel`, `_deathScale` or `_rotation`.
+**But deciding it turned up a real bug, since fixed** - see *The conception counter* below. The
+extraction is still not worth doing: with the carrying rule written down on `CopyFromSource`, the thing
+the extraction was for is already answered.
 
-Some of those are deliberately dropped - a nasty mid-birth becomes `Normal` on a swap, so its birth
-counters should reset. Whether *all nine* are deliberate is the open question, and `_deathFadeLevel`
-and
-`_deathScale` are the suspicious ones: a nasty mid-death becomes `PreConception`, which resets it
-anyway,
-but the fade and scale are left wherever they stopped and are what the next death starts from.
+### The conception counter — **fixed**
 
-The right shape is the one `NastyMovementState` already proved - a record struct of the counters
-that copies whole, with the effects staying on `Nasty` - and the right order is to decide which of
-the ten should carry *first*, as its own commit, because that is a behaviour question and not a
-move. Left undone deliberately rather than smuggled into a refactor.
+`CopyFromSource` is the snapshot taken of the nasties on a screen being left, and the restore is a
+`Swap` of whole objects - so anything the snapshot misses is lost. It carried one of the eleven
+lifecycle values and said nothing about the other ten.
+
+Ten of those eleven are correctly not carried, and working out why is what the method's doc comment now
+says: **a counter has to carry only if a state the snapshot can be restored into reads it before setting
+it.** The five birth counters are not read because `Birth` is turned into `Normal` on the way in. The
+death values are not read because `Nasties` turns a dead or shot nasty into `PreConception` before
+copying, and `StartDying` sets them anyway. `PreConception` sets everything it needs, and `Disabled`
+reads nothing.
+
+**`_conceptionWaitCounter` is the exception, and was the bug.** `Conception` reads it in `WaitToBeBorn`
+without setting it, so a nasty part way through waiting to appear came back from a screen with whatever
+count the spare half happened to hold - nought, usually, which made it appear at once instead of
+finishing its wait. It carries now.
+
+Two things were wrong in this document's first account of it. `_deathFadeLevel` and `_deathScale` were
+named as the suspicious pair, and they are not: both are set in `WaitToBeBorn` and again in
+`StartDying`, so they are written before anything can read them. And the count was ten values, not nine.
+
+A dead branch went with the fix. `if (copySource.NastyState == NastyState.Dead) NastyState =
+NastyState.PreConception;` was unreachable - the caller converts `Dead` before copying - and had no
+effect even if reached, because the `if`/`else` below it assigned `NastyState` again in every case.
+Simulated across all seven states to be sure: the old and new forms agree on every one. Its comment,
+*"If the nasty is dead reset it to conceptive state"*, described a real intention that
+`StoreNastiesFromScreenWeLeft` carries out - which is why the game has always worked.
+
+None of this is testable. `Nasty` needs the content pipeline to construct, as `BlobWeapon` does, so the
+check is the reasoning above plus returning to a screen and watching for a nasty that should still be
+waiting.
 
 ### The fade pair — not an extraction, a duplication
 
@@ -825,9 +841,8 @@ is not only inverted conditions but *elided side effects*, a drawn random number
 
 ### Left deliberately undone
 
-- **`Nasty`'s lifecycle counters and `CopyFromSource`.** Nine of ten are dropped on a screen swap and it
-  is not written down which of them should be - see stage 9. A behaviour question, and the next thing
-  worth doing in this file.
+- ~~**`Nasty`'s lifecycle counters and `CopyFromSource`**~~ - done. One of the eleven was genuinely
+  missing and now carries; the rule for the other ten is written on the method. See stage 9.
 - **The fade duplicated between `MainGameScreen` and `GameScreenBase`**, which wants the two sharing one
   rather than a third copy - see stage 9.
 - **`IntroSequence`'s `"GameArea"` string literal**, the last of the view-port names not using

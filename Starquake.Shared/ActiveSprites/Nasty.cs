@@ -264,15 +264,50 @@ internal class Nasty
     }
 
     /// <summary>
-    ///     Takes over another nasty's state, which is how a screen swap works: twice the number of
-    ///     nasties needed are kept, and the spare set is given the live set's state rather than being
-    ///     built again.
+    ///     Takes a snapshot of another nasty, which is how leaving a screen works: twice the number of
+    ///     nasties needed are kept, and the set being left is copied into the spare half in case the blob
+    ///     comes back to it.
     /// </summary>
     /// <remarks>
-    ///     The movement half used to be seventeen assignments here, two of them written twice, out of
-    ///     a class with about thirty-five fields - so anything added to the class afterwards was
-    ///     silently dropped at every screen change and nothing said so. It is one assignment of a
-    ///     record struct now, and what is inside that struct is the answer to which state carries.
+    ///     The movement half used to be seventeen assignments here, two of them written twice, out of a
+    ///     class with about thirty-five fields - so anything added to the class afterwards was silently
+    ///     dropped at every screen change and nothing said so. It is one assignment of a record struct
+    ///     now, and what is inside that struct is the answer to which movement state carries.
+    ///     <para>
+    ///         The lifecycle half is the list below, and the rule it follows is that a counter carries
+    ///         only if a state the snapshot can be restored into reads it before setting it. Working
+    ///         through the five states a snapshot can hold:
+    ///     </para>
+    ///     <list type="bullet">
+    ///         <item>
+    ///             <see cref="NastyState.Conception" /> reads <c>_conceptionWaitCounter</c> in
+    ///             <see cref="WaitToBeBorn" /> without setting it, so that one has to carry. It did not,
+    ///             and a nasty part way through waiting to appear came back from a screen with whatever
+    ///             count the spare happened to hold - nought, usually, which made it appear at once.
+    ///         </item>
+    ///         <item>
+    ///             <see cref="NastyState.Birth" /> is turned into <see cref="NastyState.Normal" /> below,
+    ///             so the five birth counters are never read from a snapshot. They are also all set
+    ///             together in <see cref="WaitToBeBorn" /> on the frame a birth begins.
+    ///         </item>
+    ///         <item>
+    ///             <see cref="NastyState.Dead" /> cannot be in a snapshot at all: <c>Nasties</c> turns a
+    ///             dead or shot nasty into <see cref="NastyState.PreConception" /> before copying it, so
+    ///             a screen is never returned to empty. The death values are set in
+    ///             <see cref="StartDying" /> anyway. <c>_nastyDeadPauseCounter</c> is carried regardless,
+    ///             so that this method is a complete snapshot on its own terms rather than on the
+    ///             caller's.
+    ///         </item>
+    ///         <item>
+    ///             <see cref="NastyState.PreConception" /> sets everything it needs in
+    ///             <see cref="BeginConception" />, and <see cref="NastyState.Disabled" /> reads nothing.
+    ///         </item>
+    ///     </list>
+    ///     <para>
+    ///         <c>_rotation</c> is deliberately not carried. It is only ever drawn with, and a restored
+    ///         nasty starting at the angle the spare was left at looks no different from one starting at
+    ///         the angle it had - there is nothing to be right about.
+    ///     </para>
     /// </remarks>
     public void CopyFromSource(Nasty copySource)
     {
@@ -283,23 +318,13 @@ internal class Nasty
 
         KeepNastyTheSame = copySource.KeepNastyTheSame;
         _nastyType = copySource._nastyType;
+        _conceptionWaitCounter = copySource._conceptionWaitCounter;
         _nastyDeadPauseCounter = copySource._nastyDeadPauseCounter;
 
-        // If the nasty is dead reset it to conceptive state
-        if (copySource.NastyState == NastyState.Dead)
-        {
-            NastyState = NastyState.PreConception;
-        }
-
         // Ensure that we don't carry on generating after moving screens
-        if (copySource.NastyState == NastyState.Birth)
-        {
-            NastyState = NastyState.Normal;
-        }
-        else
-        {
-            NastyState = copySource.NastyState;
-        }
+        NastyState = copySource.NastyState == NastyState.Birth
+            ? NastyState.Normal
+            : copySource.NastyState;
     }
 
     /// <summary>
