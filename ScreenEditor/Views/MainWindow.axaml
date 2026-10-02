@@ -235,10 +235,14 @@
                         <materialIcons:MaterialIcon Width="19" Height="19" Kind="Eyedropper" />
                     </RadioButton>
 
+                    <Separator Classes="toolbar" />
+
                     <!--
-                        With the tools rather than with the markers, because it is a tool: the core is a
-                        position rather than a tile, so placing it is a click and a drag in pixels and not
-                        something painted into a square.
+                        With the markers rather than with the tools, because that is what it is to the
+                        author: one position marked on the planet, like the blob's start point. It stays in
+                        the tool group because placing it is a click and a drag in pixels rather than
+                        something painted into a square - the grouping is what it does, the side of the
+                        divider is what it means.
                     -->
                     <RadioButton Classes="tool" GroupName="tool"
                                  IsChecked="{Binding Session.Tool, Mode=TwoWay,
@@ -254,8 +258,6 @@
                         </ToolTip.Tip>
                         <materialIcons:MaterialIcon Width="19" Height="19" Kind="Atom" />
                     </RadioButton>
-
-                    <Separator Classes="toolbar" />
 
                     <!--
                         The markers. Up here rather than in the palette because there is no artwork for

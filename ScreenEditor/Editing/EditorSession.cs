@@ -323,6 +323,15 @@ internal sealed class EditorSession : ViewModelBase
                 choice.NotifySelectionChanged();
             }
 
+            // Choosing something to lay down is the prelude to laying it down, so it puts the brush
+            // back in hand. Fill is left alone because flooding with a tile just chosen is a reasonable
+            // thing to want - but not with a marker, which Fill never holds.
+            if (value != EditorDocument.EmptyTile &&
+                (MarkerTiles.Contains(value) || _tool is EditorTool.Erase or EditorTool.Pick or EditorTool.Core))
+            {
+                Tool = EditorTool.Paint;
+            }
+
             Invalidate();
         }
     }
@@ -334,10 +343,47 @@ internal sealed class EditorSession : ViewModelBase
         get => _tool;
         set
         {
+            SelectedTile = WhatGoesInHandFor(value);
+
             SetField(ref _tool, value);
             Invalidate();
         }
     }
+
+    /// <summary>
+    ///     What should be in hand for a given tool. The swatch lit in the palette and the marker button
+    ///     lit on the toolbar both mean "this is what would be laid down", so a tool that lays nothing
+    ///     down must leave them dark, and a tool that lays something down must have something to lay.
+    /// </summary>
+    private int WhatGoesInHandFor(EditorTool tool)
+        => tool switch
+        {
+            // Nothing. The rubber ignores what is in hand, the dropper is about to replace it, and the
+            // core is placed by position rather than as a tile.
+            EditorTool.Erase or EditorTool.Pick or EditorTool.Core => EditorDocument.EmptyTile,
+
+            // Something, or the brush paints holes. Picking it up after erasing brings back the tile
+            // that was in hand before rather than leaving it empty.
+            EditorTool.Paint when _selectedTile == EditorDocument.EmptyTile => LastOrdinaryTile,
+
+            // Something, and never a marker: a marker is a position the author marks, so flooding a
+            // screen with "this is where the blob starts" is not a thing anyone wants.
+            EditorTool.Fill when _selectedTile == EditorDocument.EmptyTile || SelectedMarker is not null
+                => LastOrdinaryTile,
+
+            _ => _selectedTile
+        };
+
+    /// <summary>
+    ///     What goes back in hand when the brush is picked up with nothing in it: the last ordinary tile
+    ///     the author had, or the first of the sheet if they have not reached for one yet - which is also
+    ///     what a session opens with.
+    /// </summary>
+    /// <remarks>
+    ///     <see cref="RecentTiles" /> never holds a marker or an empty tile, so its head is an ordinary
+    ///     tile by construction - see <see cref="RememberTile" />.
+    /// </remarks>
+    private int LastOrdinaryTile => _recentTiles.Count > 0 ? _recentTiles[0] : 0;
 
     public bool ShowGrid
     {

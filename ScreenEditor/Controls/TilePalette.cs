@@ -182,14 +182,10 @@ internal sealed class TilePalette : Control
             return;
         }
 
+        // Picking a tile is almost always the prelude to painting with it, and the session puts the
+        // brush back in hand for us - choosing something to lay down is what selects the brush now, so
+        // asserting it a second time here would be the same rule in two places.
         session.SelectedTile = tile;
-
-        // Picking a tile is almost always the prelude to painting with it, so it puts the brush
-        // back in hand rather than leaving whatever tool was last used selected.
-        if (session.Tool is EditorTool.Pick or EditorTool.Erase)
-        {
-            session.Tool = EditorTool.Paint;
-        }
 
         e.Handled = true;
     }
