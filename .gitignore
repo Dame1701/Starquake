@@ -385,3 +385,7 @@ MigrationBackup/
 
 # macOS Finder leaves these behind in any folder it has looked at.
 .DS_Store
+
+# MGCB writes a build report next to Content.mgcb on every content build. It is output, not
+# a source, and the copies under Content/obj are already ignored by the obj rule above.
+.mgstats
