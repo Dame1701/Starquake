@@ -27,6 +27,7 @@ rule in *The rule each extraction is placed by* and discovering the codebase bro
 | --- | --- |
 | `cf95609` | Five fades off the draw path: the blob's energy-drain tint, his teleport fade-in, the glow on a shot, and the fade and shrink of a dead nasty and a dead conveyer nasty. `ConveyerNasty` had no `Dead` branch in `Update` at all. |
 | `32c0345` | `SpriteCollection` held one rotation angle and advanced it inside `End`. The angle moves to the nasty, the blob's shuttle flame and the intro's ship, one per logic frame. `GameSession` falls out of `Nasty`, `Nasties` and `PlanetCoreScreen` with the `paused` flag that existed to freeze the spin. |
+| **Stage 3** | `BlobFall`. Four counters and the tunnel-mouth shuffle out, into 99 code lines that need a collision map and nothing else. Eleven tests, and this time the plan's promise held - see below for why, and for the one case left uncovered. |
 | **Stage 2** | `BlobWeapon`. Ten fields and seven methods out, 219 code lines, and the back-reference that made the blob hand out `this` mid-construction. Twelve tests - but only over the one rule in it that is pure, which is not what this plan promised. |
 | **Stage 1** | `BlobSurroundings`. Four `TileDetected?` fields become one value, probed by a free function against a `ScreenCollisionMap` and handed to each of the eight readers as the tile it actually uses. Eight tests, where there could be none before. `Blob` 36 mutable fields to 33. |
 | `07db88c` | The two booth screens asked for their verdict sound while drawing - hence the latch stopping it playing sixty times a second - and started a logic-frame wait from a draw. Plus three idempotent draw-time writes that left logic waiting on a frame having been drawn. |
@@ -46,7 +47,7 @@ closed* rather than assuming it still says what it said.
 237 tests passing, 0 warnings, 0 errors
 ```
 
-Measured before stage 1. It is now 257 tests, and `Blob` is at 1,259 code lines over 28 mutable
+Measured before stage 1. It is now 268 tests, and `Blob` is at 1,189 code lines over 24 mutable
 fields and 16 held objects - from 1,492, 36 and 21.
 
 | Class | Lines | Code | Held objects | Mutable fields | Verdict |
@@ -71,7 +72,7 @@ commits above - an angle that now belongs to them, and a `GameSession` that neve
 | --- | --- | --- | --- | --- |
 | ~~1~~ | `Blob` | `BlobSurroundings` | 4 fields into 1, 1 method | **done** - 8 tests |
 | ~~2~~ | `Blob` | `BlobWeapon` | 10 fields, 7 methods, 219 lines | **done** - 12 tests, see below |
-| 3 | `Blob` | `BlobFall` | 5 fields, 3 methods | Yes, the best of them |
+| ~~3~~ | `Blob` | `BlobFall` | 4 fields, 2 methods | **done** - 11 tests |
 | 4 | `Blob` | `TunnelLiftRide` | 4 fields, 3 methods, ~155 lines | No |
 | 5 | `Blob` | `OverloadSequence` | 7 fields, 5 methods | No |
 | 6 | Editor | `ScreenPainter` | ~500 lines of `ScreenCanvas` | No |
@@ -317,17 +318,48 @@ Two things that are not identical, both stated rather than smuggled:
 `Animation.Looping` came out of `Blob`'s private `LoopingAnimation` so both classes can build a cycle
 without repeating seven property assignments. `Nasty` still assigns them by hand and was left alone.
 
-## Stage 3 — `BlobFall`
+## Stage 3 — `BlobFall` — **done**
 
-`_blobFallHeight`, `_blobFallSpeed`, `_blobDistanceFallen`, `_blobTotalDistanceFallen`,
-`_blobFallsSoundId` with `ApplyGravity`, `EdgeShuffleTowardOpening` and the landing arithmetic in
-`ChangeScreenOffBottomEdge`.
+The four counters - `_blobFallHeight`, `_blobFallSpeed`, `_blobDistanceFallen`,
+`_blobTotalDistanceFallen` - with the gravity arithmetic and `EdgeShuffleTowardOpening`, into 99 code
+lines. `Blob` drops 70 code lines and four mutable fields, and four constants go with them.
 
-Five fields, and the fall-damage sums are the part of the blob most worth having under test: how far
-is a safe drop, when the total resets, and what the tunnel-mouth shuffle does at the boundary.
-`EdgeShuffleTowardOpening` is 51 lines of pure geometry against the collision map and needs nothing
-else. `WalkLeft`/`WalkRight` keep their one line that zeroes the fall height — they call the fall
-object instead of writing the field.
+**The plan's promise held this time, and the reason is worth writing down.** `BlobFall` needs a
+`ScreenCollisionMap` and nothing else, so it constructs in a test. Two things made that true, and
+neither was luck:
+
+- `GameScreenCollection.CheckCollision` is a pure delegate to `ScreenCollisionMap.CheckCollision`,
+  exactly as `CheckTileByObject` was for stage 1. The planet is not needed, only the map.
+- **The falling sound stayed behind.** It is the one part of gravity that needs the resource manager,
+  and taking it would have made the class as untestable as `BlobWeapon` is. So `Step` returns whether
+  the drop has become audible and `Blob` plays the sound. That is the whole difference between a stage
+  that earned tests and one that did not.
+
+Eleven tests: the starting speed, standing on the ground, the step up in speed on the fourth frame of
+a drop, the terminal speed being reached and never exceeded, a short drop being silent, a long one
+becoming audible, landing clearing the fall height, and the shuffle not firing on a blob nobody is
+steering.
+
+**`StartFallingAgain` clears the speed and not the total, deliberately.** A drop through the bottom of
+one screen onto the next is one fall: clearing the total too would cut the falling sound off at every
+screen boundary, and a test pins it.
+
+**One case is left uncovered rather than approximated.** The shuffle *catching* the lip of an opening
+needs a fall fast enough to overshoot it and a ledge inside that overshoot, and the probe is a
+65-pixel box one blob width to the side - so the geometry takes several tiles of hand-built collision
+cells to construct. The first attempt at it put the blob inside its own ledge, which the test caught.
+The negative case is covered and the positive one is named in the test's remarks.
+
+Two things that are not identical, stated rather than smuggled:
+
+- `ApplyGravity` played and stopped the falling sound *before* the shuffle ran. The decision is taken
+  at the same point, but `Blob` now acts on it after `Step` returns, which is after the shuffle. The
+  shuffle does not touch the sound.
+- The repeated `CheckCollision(Direction.Down, ...)` - the same call either side of the speed step -
+  is one private `DistanceToTheGround`, and the two `x = x + y` counters are `+=`.
+
+`EdgeShuffleTowardOpening` moved verbatim: its body is textually identical once the field reads become
+the parameters it is handed.
 
 ## Stage 4 — `TunnelLiftRide`
 

@@ -81,25 +81,6 @@ internal class Blob
     private const int AnimationDelay = 2;
 
     /// <summary>
-    ///     Gravity. The blob starts falling at <see cref="BlobInitialFallSpeed" /> pixels a frame and
-    ///     gains one every <see cref="FallSpeedIncreaseDistance" /> pixels until it reaches
-    ///     <see cref="BlobMaxFallSpeed" />, which is what makes a long drop feel like one.
-    /// </summary>
-    private const int BlobInitialFallSpeed = 4;
-
-    /// <inheritdoc cref="BlobInitialFallSpeed" />
-    private const int BlobMaxFallSpeed = 12;
-
-    /// <inheritdoc cref="BlobInitialFallSpeed" />
-    private const int FallSpeedIncreaseDistance = 12;
-
-    /// <summary>
-    ///     How far the blob has to have fallen before the falling sound starts, so a step down off a
-    ///     platform is silent.
-    /// </summary>
-    private const int FallSoundDistance = SpriteMetrics.SpriteHeight;
-
-    /// <summary>
     ///     How far the blob has to land from to break a breakable bridge. Anything shorter and the
     ///     bridge holds.
     /// </summary>
@@ -250,12 +231,9 @@ internal class Blob
     private readonly List<ResetTile> _tilesToReset = [];
     private int _blobAlarmSoundCounter;
 
-    private int _blobDistanceFallen;
 
     private int _blobEnergyDrainCounter;
-    private int _blobFallHeight;
 
-    private int _blobFallSpeed = BlobInitialFallSpeed;
     private Guid _blobFallsSoundId;
     private int _blobFrameOnEntry;
     private bool _blobOnShuttle;
@@ -267,7 +245,6 @@ internal class Blob
 
     private Point _blobScreenEntryLocation;
     private Direction _blobsLastAnimDirection = Direction.None;
-    private int _blobTotalDistanceFallen;
     private bool _blobTouched;
 
     private Guid _blobTunnelLiftSoundId = Guid.Empty;
@@ -279,6 +256,7 @@ internal class Blob
     private Direction _directionGoingThroughTunnel = Direction.None;
     private int _distanceInTunnelLift;
     private bool _inTunnelLift;
+    private readonly BlobFall _fall = new();
     private readonly Inventory _inventory;
     private readonly UnstickProbe _unstickProbe;
 
@@ -599,7 +577,7 @@ internal class Blob
             DirectionBlobMoved = Direction.Left;
             _blobsLastAnimDirection = Direction.Left;
 
-            if (!_blobOnShuttle && _blobFallHeight == 0)
+            if (!_blobOnShuttle && _fall.Height == 0)
             {
                 _resources.GetSoundFxEngine()
                     .PlaySound(Assets.Sounds.BlobRun, true);
@@ -635,7 +613,7 @@ internal class Blob
             DirectionBlobMoved = Direction.Right;
             _blobsLastAnimDirection = Direction.Right;
 
-            if (!_blobOnShuttle && _blobFallHeight == 0)
+            if (!_blobOnShuttle && _fall.Height == 0)
             {
                 _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobRun, true);
             }
@@ -825,106 +803,27 @@ internal class Blob
     {
         if (!_inTunnelLift) // Can't fall if we are in a tunnel lift
         {
-            int falling = _gameScreens.CheckCollision(Direction.Down, _blobXPos, _blobYPos,
-                BlobWidth, BlobHeight, _blobFallSpeed, true);
+            Fall fall = _fall.Step(
+                _gameScreens.Collisions,
+                new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight),
+                BlobsControl.MovedLeft(),
+                BlobsControl.MovedRight());
 
-            if (falling > 0)
-            {
-                _blobDistanceFallen = _blobDistanceFallen + falling;
-                _blobTotalDistanceFallen = _blobTotalDistanceFallen + falling;
-
-                if (_blobDistanceFallen > FallSpeedIncreaseDistance && _blobFallSpeed < BlobMaxFallSpeed)
-                {
-                    _blobFallSpeed++;
-                    _blobDistanceFallen = 0;
-                }
-            }
-            else
-            {
-                _blobTotalDistanceFallen = 0;
-                _blobDistanceFallen = 0;
-                _blobFallSpeed = BlobInitialFallSpeed;
-                _blobFallHeight = 0;
-            }
-
-            // Fall - arrrgh!!!
-            int fallDistance = _gameScreens.CheckCollision(Direction.Down, _blobXPos, _blobYPos,
-                BlobWidth, BlobHeight, _blobFallSpeed, true);
-
-            if (fallDistance > 0 && _blobTotalDistanceFallen > FallSoundDistance)
+            if (fall.Audible)
             {
                 _blobFallsSoundId = _resources.GetSoundFxEngine()
                     .PlaySound(Assets.Sounds.BlobFalls, true);
             }
 
-            if (falling == 0)
+            if (fall.OnTheGround)
             {
                 _resources.GetSoundFxEngine()
                     .StopSound(_blobFallsSoundId, SoundFade.Fast);
             }
 
-            // Check to see if Blob can potentially enter a teleport booth, tunnel etc.
-            fallDistance = EdgeShuffleTowardOpening(fallDistance);
-
-            _blobYPos = _blobYPos + fallDistance;
-            _blobFallHeight = _blobFallHeight + fallDistance;
+            // Fall - arrrgh!!!
+            _blobYPos = _blobYPos + fall.Distance;
         }
-    }
-
-    /// <summary>
-    ///     Cuts the fall short at the lip of an opening he is being walked into, so that holding a
-    ///     direction while falling past a teleport booth or tunnel mouth lands him in it rather than
-    ///     dropping him past it.
-    /// </summary>
-    private int EdgeShuffleTowardOpening(int fallDistance)
-    {
-        if (BlobsControl.MovedRight())
-        {
-            for (int a = 0; a < fallDistance; a++)
-            {
-                if (_gameScreens.CheckCollision(Direction.Down, _blobXPos + BlobWidth,
-                        _blobYPos + a, BlobWidth + 1, BlobHeight, 1, true) == 0)
-                {
-                    if (_gameScreens.CheckCollision(Direction.Right, _blobXPos + BlobWidth,
-                            _blobYPos + a, BlobWidth, BlobHeight, 1, true) > 0)
-                    {
-                        fallDistance = a;
-
-                        if (fallDistance == 0)
-                        {
-                            fallDistance = 1;
-                        }
-
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (BlobsControl.MovedLeft())
-        {
-            for (int a = 0; a < fallDistance; a++)
-            {
-                if (_gameScreens.CheckCollision(Direction.Down, _blobXPos - BlobWidth,
-                        _blobYPos + a, BlobWidth + 1, BlobHeight, 1, true) == 0)
-                {
-                    if (_gameScreens.CheckCollision(Direction.Right, _blobXPos - BlobWidth,
-                            _blobYPos + a, BlobWidth, BlobHeight, 1, true) > 0)
-                    {
-                        fallDistance = a;
-
-                        if (fallDistance == 0)
-                        {
-                            fallDistance = 1;
-                        }
-
-                        break;
-                    }
-                }
-            }
-        }
-
-        return fallDistance;
     }
 
     /// <summary>
@@ -1024,8 +923,7 @@ internal class Blob
         _blobYPos = 0;
 
         // He is falling onto the new screen, so the fall starts again from the top of it
-        _blobDistanceFallen = 0;
-        _blobFallSpeed = BlobInitialFallSpeed;
+        _fall.StartFallingAgain();
 
         RaiseScreenChangedToMainGame();
 
@@ -1198,7 +1096,7 @@ internal class Blob
     {
         if (below is { TileNumber: (int)ActionTiles.BreakableBridges })
         {
-            if (_blobFallHeight >= BridgeBreakingFallHeight)
+            if (_fall.Height >= BridgeBreakingFallHeight)
             {
                 // Play the sound
                 _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BridgeBreak);
@@ -1438,7 +1336,7 @@ internal class Blob
                 _gameScreens.UpdateCollisionMap(false);
                 BlobFrame = _blobFrameOnEntry;
                 _inTunnelLift = false;
-                _blobFallSpeed = BlobInitialFallSpeed;
+                _fall.StartFallingAgain();
 
                 if (_blobOnShuttle)
                 {
