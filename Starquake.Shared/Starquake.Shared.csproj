@@ -24,14 +24,22 @@
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <!-- Content.mgcb is named explicitly below; don't glob for it as well. -->
         <EnableMGCBItems>false</EnableMGCBItems>
+        <!--
+          The content's sources - the art, the sounds, the particle effect XML - are part of the
+          project and worth seeing in it. What MGCB builds them into is not: Content.mgcb declares
+          its own bin and obj next to the sources, so those two are excluded here rather than the
+          whole of Content\. Excluding them as default items rather than removing them afterwards
+          means MSBuild never enumerates the few hundred .xnb files in the first place.
+        -->
+        <DefaultItemExcludes>$(DefaultItemExcludes);Content\bin\**;Content\obj\**;**\.DS_Store</DefaultItemExcludes>
     </PropertyGroup>
 
     <ItemGroup>
         <!-- Compiled into each head instead, but kept visible here where it lives. -->
         <Compile Remove="Program.cs"/>
         <None Include="Program.cs"/>
+        <!-- No code lives under Content; this keeps it that way if any ever appears. -->
         <Compile Remove="Content\**" />
-        <None Remove="Content\**" />
     </ItemGroup>
 
     <ItemGroup>
