@@ -93,7 +93,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     public readonly ScreenDirectory ScreenDirectory = new();
 
-    private BlobDeathAnimation? _blobKiller;
 
     /// <summary>
     ///     The boot screen. Built before anything else, because it is what is on screen while
@@ -109,24 +108,19 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     /// <summary>
     ///     The debug keys, in a debug build. Null in a release one, which never builds it.
     /// </summary>
+    private RunningGame? _game;
+
     private TestModeKeys? _testModeKeys;
 
     private bool _disposed;
-    private BreakableBridges? _breakableBridgesEngine;
-    private ConveyerNasties? _conveyerNastiesInstance;
 
-    private ElectricityGatesAndNodesEngine? _electricityNodeGateEngine;
-    private GameScreenCollection? _gameScreens;
 
     // Game Sequences
-    private IntroSequence? _introSequence;
 
-    private Nasties? _nasties;
 
 
     private bool _particleTestTrigger;
 
-    private Blob? _player;
 
 
 
@@ -137,7 +131,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
 
 
     // Tunnel lift animations
-    private TunnelLiftAnimationEngine? _tunnelAnimations;
 
     public StatusPanel BlobStatusPanel;
 
@@ -197,48 +190,51 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     public ToggleKeys Input { get; }
 
     /// <summary>
-    ///     Everything below is built by the <see cref="GameEngineStatus.Started" /> handler, because
-    ///     each of them needs resources that are still loading before that. Nothing outside the boot
-    ///     screen runs before then, so rather than have several hundred readers ask whether the game
-    ///     has loaded yet, each says so once here and says it by failing loudly.
+    ///     The game once its content has loaded, or a thrown exception saying it has not. This is the one
+    ///     place in the engine that can answer "not yet": the nine things behind it were each a nullable
+    ///     field under its own identical guard, which read as nine separate doubts rather than the single
+    ///     real one. Nothing outside the boot screen runs before the game exists.
     /// </summary>
-    public GameScreenCollection GameScreens => NotBeforeContentLoads(_gameScreens);
+    private RunningGame Game => NotBeforeContentLoads(_game);
 
-    /// <inheritdoc cref="GameScreens" />
-    public Blob Player => NotBeforeContentLoads(_player);
+    /// <inheritdoc cref="RunningGame.GameScreens" />
+    public GameScreenCollection GameScreens => Game.GameScreens;
 
-    /// <inheritdoc cref="GameScreens" />
-    public BreakableBridges BreakableBridgesEngine => NotBeforeContentLoads(_breakableBridgesEngine);
+    /// <inheritdoc cref="RunningGame.Player" />
+    public Blob Player => Game.Player;
 
-    /// <inheritdoc cref="GameScreens" />
-    public TunnelLiftAnimationEngine TunnelAnimations => NotBeforeContentLoads(_tunnelAnimations);
+    /// <inheritdoc cref="RunningGame.BreakableBridges" />
+    public BreakableBridges BreakableBridgesEngine => Game.BreakableBridges;
+
+    /// <inheritdoc cref="RunningGame.TunnelAnimations" />
+    public TunnelLiftAnimationEngine TunnelAnimations => Game.TunnelAnimations;
+
+    /// <inheritdoc cref="RunningGame.IntroSequence" />
+    public IntroSequence IntroSequence => Game.IntroSequence;
+
+    /// <inheritdoc cref="RunningGame.Nasties" />
+    public Nasties Nasties => Game.Nasties;
+
+    /// <inheritdoc cref="RunningGame.BlobKiller" />
+    public BlobDeathAnimation BlobKiller => Game.BlobKiller;
+
+    /// <inheritdoc cref="RunningGame.ConveyerNasties" />
+    public ConveyerNasties ConveyerNastiesInstance => Game.ConveyerNasties;
+
+    /// <inheritdoc cref="RunningGame.ElectricityNodeGates" />
+    public ElectricityGatesAndNodesEngine ElectricityNodeGateEngine => Game.ElectricityNodeGates;
 
     /// <summary>
-    ///     The game being played - score, lives, pause and controls. Built by
-    ///     <see cref="Initialise" />, which the constructor calls, so it exists for as long as the engine
-    ///     does - the options screen can change the controls before any content has loaded.
+    ///     The game being played - score, lives, pause and controls. Built by <see cref="Initialise" />,
+    ///     which the constructor calls, so it exists for as long as the engine does: the options screen can
+    ///     change the controls before any content has loaded, which is why it is not one of the nine above.
     /// </summary>
     public GameSession Session { get; private set; }
 
-    /// <inheritdoc cref="GameScreens" />
-    public IntroSequence IntroSequence => NotBeforeContentLoads(_introSequence);
-
-    /// <inheritdoc cref="GameScreens" />
-    public Nasties Nasties => NotBeforeContentLoads(_nasties);
-
-    /// <inheritdoc cref="GameScreens" />
-    public BlobDeathAnimation BlobKiller => NotBeforeContentLoads(_blobKiller);
-
-    /// <inheritdoc cref="GameScreens" />
-    public ConveyerNasties ConveyerNastiesInstance => NotBeforeContentLoads(_conveyerNastiesInstance);
-
-    /// <inheritdoc cref="GameScreens" />
-    public ElectricityGatesAndNodesEngine ElectricityNodeGateEngine => NotBeforeContentLoads(_electricityNodeGateEngine);
-
     /// <summary>
-    ///     The screen effects. Built by <see cref="Initialise" /> like the session, and for the same
-    ///     reason it is not among the guarded members below: it exists before any content does. Its view
-    ///     ports are registered later, because those need dimensions only the loaded content knows.
+    ///     The screen effects. Built by <see cref="Initialise" /> like the session, and for the same reason
+    ///     it is not one of the nine: it exists before any content does. Its view ports are registered
+    ///     later, because those need dimensions only the loaded content knows.
     /// </summary>
     public ScreenEffectEngine ScreenEffectEngine => _screenEffectEngine;
 
@@ -273,18 +269,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         _disposed = true;
 
         ContentResourceManager.GetSoundFxEngine().Dispose();
-    }
-
-    private void Session_OnPlayerKeysChanged(PlayerKeySet playerKeys)
-    {
-        // The blob does not exist until content has loaded, and the options screen can be used
-        // before then; it reads the set back off the session when it is built.
-        if (_player is not { BlobsControl: not null })
-        {
-            return;
-        }
-
-        Player.BlobsControl.PlayerKeySet = playerKeys;
     }
 
     /// <summary>
@@ -358,7 +342,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
 
         Session = new GameSession();
         Session.OnPausedChanged += Session_OnPausedChanged;
-        Session.OnPlayerKeysChanged += Session_OnPlayerKeysChanged;
 
         _hotkeys = new GlobalHotkeys(
             Input,
@@ -441,10 +424,14 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             return;
         }
 
-        BuildComponentsNeedingLoadedContent();
+        _game = BuildComponentsNeedingLoadedContent();
+
+        // Everything from here reads the game through the engine's own accessors, which answer now that
+        // _game is assigned.
         RegisterColourAnimations();
         BuildGameScreens();
         RegisterScreenEffectViewPorts();
+        BuildTestModeKeys();
 
         ContentResourceManager.Initialise();
 
@@ -452,121 +439,137 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     }
 
     /// <summary>
-    ///     The blob, the screen collection and the colour animation engine all need resources that do not
-    ///     exist until content loads, which is why none of them is built in the constructor.
+    ///     Builds the nine things that need loaded content, in the order they need each other: the planet
+    ///     first, then what reads it, then the blob, then what chases him. Each is a local until the last
+    ///     is built, because the engine's own accessors for them answer "not yet" until <see cref="_game" />
+    ///     is assigned - which is the point of doing it this way rather than nine fields filled one at a
+    ///     time.
     /// </summary>
-    private void BuildComponentsNeedingLoadedContent()
+    private RunningGame BuildComponentsNeedingLoadedContent()
     {
-        // Game Screens. Built here rather than in the constructor because the screen data and
-        // the collision map it needs are resources, and those do not exist until content loads
-        _gameScreens =
-            new GameScreenCollection(
-                ContentResourceManager,
-                _graphicsSet,
-                Elements,
-                RandomNumberGenerator,
-                TileMetrics.TilesAcross,
-                TileMetrics.TilesDown,
-                TileMetrics.CollisionCellWidth,
-                TileMetrics.CollisionCellHeight);
-
-        // Tunnel lift animations. After the screen collection, which it reads the lift shafts from.
-        _tunnelAnimations = new TunnelLiftAnimationEngine(ContentResourceManager, GameScreens, _graphicsSet);
-
-        // The blob's death throes. After the screen collection, which each thrown-off fragment
-        // bounces around.
-        _blobKiller = new BlobDeathAnimation(ContentResourceManager, GameScreens, _graphicsSet, RandomNumberGenerator);
-
-        // Its fragments each take a particle effect instance, so this cannot run until the
-        // resources are loaded - which is now, not when the load was started.
-        BlobKiller.LoadContent();
-
-        // The breakable bridges, before the blob that breaks them. Each bridge composes itself into
-        // a render target and then asks the screen effect engine for a view port to draw through,
-        // but only when it draws - so it needs the engine to exist, not its view ports.
-        _breakableBridgesEngine = new BreakableBridges(
+        // The planet. Built here rather than in the constructor because the screen data and the collision
+        // map it needs are resources, and those do not exist until content loads.
+        var gameScreens = new GameScreenCollection(
             ContentResourceManager,
-            GameScreens,
+            _graphicsSet,
+            Elements,
+            RandomNumberGenerator,
+            TileMetrics.TilesAcross,
+            TileMetrics.TilesDown,
+            TileMetrics.CollisionCellWidth,
+            TileMetrics.CollisionCellHeight);
+
+        // Tunnel lift animations. After the planet, which it reads the lift shafts from.
+        var tunnelAnimations = new TunnelLiftAnimationEngine(ContentResourceManager, gameScreens, _graphicsSet);
+
+        // The blob's death throes. After the planet, which each thrown-off fragment bounces around.
+        var blobKiller = new BlobDeathAnimation(ContentResourceManager, gameScreens, _graphicsSet, RandomNumberGenerator);
+
+        // Its fragments each take a particle effect instance, so this cannot run until the resources are
+        // loaded - which is now, not when the load was started.
+        blobKiller.LoadContent();
+
+        // The breakable bridges, before the blob that breaks them. Each bridge composes itself into a
+        // render target and then asks the screen effect engine for a view port to draw through, but only
+        // when it draws - so it needs the engine to exist, not its view ports.
+        var breakableBridges = new BreakableBridges(
+            ContentResourceManager,
+            gameScreens,
             _graphicsDeviceMgr,
             _graphicsSet,
             RandomNumberGenerator,
             ScreenEffectEngine);
 
-        // The blob. After the planet it walks around and the death animation it triggers, neither of
-        // which needs the blob back, and built here rather than in Initialise because the three
-        // particle effects he carries are resources that do not exist until content loads.
-        _player = new Blob(
+        // The blob. After the planet it walks around and the death animation it triggers, neither of which
+        // needs the blob back.
+        var player = new Blob(
             ContentResourceManager,
-            GameScreens,
+            gameScreens,
             _graphicsDeviceMgr,
             _graphicsSet,
             ScreenDirectory,
             ScreenEffectEngine,
             Stats,
             Session,
-            BlobKiller,
-            BreakableBridgesEngine,
+            blobKiller,
+            breakableBridges,
             RandomNumberGenerator,
             Input);
-        Player.OnScreenChanged += Player_OnScreenChanged;
-        Player.OnBlobActionRaised += Player_OnBlobActionRaised;
+        player.OnScreenChanged += Player_OnScreenChanged;
+        player.OnBlobActionRaised += Player_OnBlobActionRaised;
 
-        // The intro sequence flies the blob's ship in over the planet and blows it up, so it
-        // comes after both the planet and the death animation.
-        _introSequence = new IntroSequence(
+        // Subscribed here rather than with the session's other event in Initialise, so that there is no
+        // window in which the keys can change and there is no blob to tell. The options screen can be used
+        // before content has loaded, and the blob reads the current set off the session as it is built.
+        Session.OnPlayerKeysChanged += keys => player.BlobsControl.PlayerKeySet = keys;
+
+        // The intro sequence flies the blob's ship in over the planet and blows it up, so it comes after
+        // both the planet and the death animation.
+        var introSequence = new IntroSequence(
             ContentResourceManager,
             Font2,
-            GameScreens,
+            gameScreens,
             _graphicsSet,
             Presentation,
             ScreenDirectory,
             ScreenEffectEngine,
-            BlobKiller,
+            blobKiller,
             RandomNumberGenerator);
 
-        Presentation.ScreenXOffset = (_graphicsDeviceMgr.PreferredBackBufferWidth - GameScreens.ScreenWidth) / 2;
+        Presentation.ScreenXOffset = (_graphicsDeviceMgr.PreferredBackBufferWidth - gameScreens.ScreenWidth) / 2;
         Presentation.ScreenYOffset = 10;
 
-        // The conveyer nasties and the electricity engine. Both chase the blob and read the
-        // planet, so both are built here rather than in Initialise, where neither existed yet.
-        _conveyerNastiesInstance = new ConveyerNasties(
+        // The conveyer nasties and the electricity engine. Both chase the blob and read the planet, so
+        // both are built here rather than in Initialise, where neither existed yet.
+        var conveyerNasties = new ConveyerNasties(
             ContentResourceManager,
             ContentMgr,
-            GameScreens,
+            gameScreens,
             _graphicsDeviceMgr,
-            Player,
+            player,
             RandomNumberGenerator);
-        ConveyerNastiesInstance.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
+        conveyerNasties.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
 
         var conveyerNastyGraphics = new ContentList();
         conveyerNastyGraphics.AddContent("conveyerNasty", "Graphics\\ConveyerNasty");
-        ConveyerNastiesInstance.LoadContent(conveyerNastyGraphics);
+        conveyerNasties.LoadContent(conveyerNastyGraphics);
 
-        _electricityNodeGateEngine = new ElectricityGatesAndNodesEngine(
+        var electricityNodeGates = new ElectricityGatesAndNodesEngine(
             ContentResourceManager,
-            GameScreens,
+            gameScreens,
             _graphicsSet,
-            Player,
+            player,
             RandomNumberGenerator,
-            ConveyerNastiesInstance);
-        ElectricityNodeGateEngine.OnBlobStruckByElectricity += ElectricityNodeGateEngine_OnBlobStruckByElectricity;
-        Player.OnBlobDiedAndRespawned += ElectricityNodeGateEngine.Reset;
+            conveyerNasties);
+        electricityNodeGates.OnBlobStruckByElectricity += ElectricityNodeGateEngine_OnBlobStruckByElectricity;
+        player.OnBlobDiedAndRespawned += electricityNodeGates.Reset;
 
-        // The nasties last of the three: they chase the blob, read the planet, and ask the other two
-        // where the conveyers and the electricity are.
-        _nasties = new Nasties(
+        // The nasties last of the three: they chase the blob, read the planet, and ask the other two where
+        // the conveyers and the electricity are.
+        var nasties = new Nasties(
             ContentResourceManager,
-            GameScreens,
+            gameScreens,
             _graphicsSet,
-            Player,
+            player,
             RandomNumberGenerator,
-            ConveyerNastiesInstance,
-            ElectricityNodeGateEngine,
+            conveyerNasties,
+            electricityNodeGates,
             NastiesPerScreen,
             Input);
-        Nasties.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
+        nasties.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
 
-        BuildTestModeKeys();
+        return new RunningGame
+        {
+            GameScreens = gameScreens,
+            Player = player,
+            BreakableBridges = breakableBridges,
+            TunnelAnimations = tunnelAnimations,
+            IntroSequence = introSequence,
+            Nasties = nasties,
+            BlobKiller = blobKiller,
+            ConveyerNasties = conveyerNasties,
+            ElectricityNodeGates = electricityNodeGates
+        };
     }
 
     /// <summary>

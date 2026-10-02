@@ -826,7 +826,7 @@ survived measurement, and one turned into two findings rather than an extraction
 | `ScreenCanvas` | 624 code / 7 mutable | **265 / 7** | the drawing out; off this table |
 | `EditorSession` | 597 code / 19 mutable | **404 / 5** | three clusters out |
 | `MainGameScreen` | 424 code / 6 mutable | **392 / 3** | the tremor out |
-| `GameEngine` | 625 code / 24 mutable | **579 / 24** | the pulsing tiles out; the rest argued down |
+| `GameEngine` | 625 code / 24 mutable | **557 / 14** | the pulsing tiles out, then its two lives split |
 | Tests in the suite | 237 | **307** | |
 
 **`Blob` is no longer the god class this document was written about** - at 16 mutable fields it holds
@@ -863,47 +863,54 @@ alone" into "stop the sound". Both would have been invisible in review and neith
 a test. `REFACTORING.md` already said to move guards unchanged; what stage 9 adds is that the risk
 is not only inverted conditions but *elided side effects*, a drawn random number among them.
 
-### The engine's two lives
+### The engine's two lives — **done**
 
-`GameEngine` is the one class in the table still at 24 mutable fields, and measuring why settles what -
-if anything - to do about it.
+`GameEngine` held fourteen nullable fields behind twelve `NotBeforeContentLoads` guards. It now holds
+**two**, behind **one**, and 579 code lines have become 557.
 
-**Fourteen of the 24 are the actor fields behind the twelve `NotBeforeContentLoads` guards.** They are
-null until content has loaded because the engine exists before it has: the constructor registers the
-content manifest, `LoadContent` starts the load on a background thread, and the engine draws the loading
-screen while it runs. So the engine cannot be built after content - it is what drives the content.
+Three of the twelve were never guarding anything.
 
-**And the coupling it was blamed for is already gone.** `DECOUPLING.md` finished at "60 coupled files to
-2", and those two are exactly right: `GameHost`, which constructs the engine and should, and
-`MainGameScreen`, which holds it deliberately. Every other mention of `GameEngine` in the solution is a
-doc comment about the history or the `GameEngineStatus` enum - checked by name, one file at a time.
-`PLAN.md` already decided `MainGameScreen` keeps the engine, on the grounds that it uses eighteen of its
-members because it *is* the main game, and that an eighteen-parameter constructor or a bag object made
-for it would both be worse. That still reads correctly.
+- `_session` and `_screenEffectEngine` are built by `Initialise`, which the *constructor* calls, so
+  neither has been null since the engine was first constructible. `Session`'s own doc comment said so -
+  *"does not exist until `Initialise` has run, which is before any content loads"* - underneath a guard
+  named for content loading. Both joined the `[MemberNotNull]` list the five things built beside
+them were
+  already on.
+- `_mainScreen` was a second copy of what `ScreenDirectory` already holds behind its own guard.
+All three
+  of its uses were inside one method, so a local serves, and the one reader afterwards says
+  `ScreenDirectory.MainGame` - which the method next to it already did.
 
-So the 24 fields are not a coupling problem and not a size problem. They are **one class living two
-lives**: a loader that defines content, shows progress and owns the things needing none of it, and
-a game
-that owns the actors. The guards are how that is expressed today.
+The other nine are the real thing, and the fix was to say "not yet" once rather than nine times.
+`RunningGame` holds all nine as non-nullable `required` properties; `GameEngine` holds one
+`RunningGame?` and one `Game` accessor; the nine public properties became one-line delegations. **The
+engine's public surface did not change at all**, so no caller needed touching - the nine identical
+doubts became the single real one, which is whether the game has started.
 
-**The one change that would remove them** is to make those two lives two objects: the engine keeps the
-resource manager, the fonts, the loading screen, the session, the stats, the status panel, the screen
-effects and the presentation; a second object, built once on the `Started` status, owns the ten guarded
-actors as non-nullable fields. Twelve guards and fourteen nullable fields become one nullable field and
-one guard apiece in `Update` and `Draw`.
+**The construction became locals.** `BuildComponentsNeedingLoadedContent` built nine fields one at a
+time and the later ones read the earlier through the guarded properties. It now builds nine locals
+and returns the `RunningGame`, which is what makes the fields unnecessary rather than merely fewer.
+Verified: all nine constructions in the same order, the same `LoadContent` calls, and the same
+subscriptions.
 
-It is a real improvement and it is not free:
+**One guard disappeared rather than moving.** `Session_OnPlayerKeysChanged` tested whether the blob
+existed, because the options screen can change the controls before content has loaded. The
+subscription is made where the blob is built instead - `Session.OnPlayerKeysChanged += keys =>
+player.BlobsControl.PlayerKeySet = keys` - so there is no window in which the keys can change and
+there is no blob to tell. The handler and its test are both gone.
 
-- `MainGameScreen` uses members from both halves, so it would hold two references where it holds one.
-  That is the opposite of what the last stage concluded about handing a class two things when it wants
-  one.
-- The null-ness does not disappear, it concentrates. Whether `if (_game is not { } game) return;` twice
-  is better than twelve guarded properties is a judgement about which reads better, not a measurement.
-- It is the first change in either document that would touch `GameHost`.
+And a dead branch went with the rest: `UpdateScreensLeftRunningOffScreen` tested the screen number
+against `CoreInventoryHandoverScreen` to run a body that is entirely commented out and refers to
+`enCollectables`, a type renamed before this port. The constant went too.
 
-Left as a proposal rather than done. It is bigger than anything else in this file, both plan documents
-treat this area as settled, and the case for it rests on a preference rather than on a count - which is
-the one kind of change in this codebase that has wanted its author's say rather than a measurement.
+**What is left nullable is `_game` and `_testModeKeys`**, and both are honest: one is the boot-to-game
+boundary, checked once at the single point the two phases meet; the other is only built in a debug
+build.
+
+What I proposed before doing this was wrong in a way worth recording. I argued the cost was
+`MainGameScreen` holding two references or eighteen constructor parameters, and recommended against it
+on that basis. It holds neither: the nine properties stayed on the engine as delegations, so the
+class that reads them never knew. The measurement I had was right; what I inferred from it was not.
 
 ### Left deliberately undone
 
@@ -914,8 +921,8 @@ the one kind of change in this codebase that has wanted its author's say rather 
 - ~~**`IntroSequence`'s `"GameArea"` string literal**~~ - done. It was the last view-port name not
   using `ViewPorts`, and an unknown name throws rather than being ignored, so it was a crash waiting
   on a typo rather than a silent no-op.
-- **`GameEngine`'s two lives** - the only remaining idea for its 24 fields, written up above as a
-  proposal because the case for it is a preference rather than a count.
+- ~~**`GameEngine`'s two lives**~~ - done. Fourteen nullable fields behind twelve guards became two
+  behind one.
 
 ---
 
