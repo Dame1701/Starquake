@@ -867,8 +867,9 @@ is not only inverted conditions but *elided side effects*, a drawn random number
   missing and now carries; the rule for the other ten is written on the method. See stage 9.
 - ~~**The fade duplicated between `MainGameScreen` and `GameScreenBase`**~~ - done, as
   `ScreenFadeUp`, with why the main screen is not a `GameScreenBase` written on both classes.
-- **`IntroSequence`'s `"GameArea"` string literal**, the last of the view-port names not using
-  `ViewPorts`.
+- ~~**`IntroSequence`'s `"GameArea"` string literal**~~ - done. It was the last view-port name not
+  using `ViewPorts`, and an unknown name throws rather than being ignored, so it was a crash waiting
+  on a typo rather than a silent no-op.
 - **`GameEngine`'s construction**, which is `DECOUPLING.md`'s, for the reason stage 8 gives.
 
 ---

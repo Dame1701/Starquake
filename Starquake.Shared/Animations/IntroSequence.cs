@@ -294,7 +294,7 @@ internal class IntroSequence
 
             _rumbleAmount = _rumbleAmount - 0.5;
 
-            _screenEffects.MoveViewPort("GameArea", xShakeOffset, yShakeOffset);
+            _screenEffects.MoveViewPort(ViewPorts.GameArea, xShakeOffset, yShakeOffset);
 
             // Play rumble sound
             _rumbleSound = _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.Rumble, true);
