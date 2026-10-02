@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Starquake.ActiveSprites;
 using Starquake.Constants;
+using Starquake.Display;
 using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Sounds;
@@ -33,26 +34,6 @@ internal class MainGameScreen : IGameScreen
     ///     The stock of platforms and shots the test-mode cheat key hands over.
     /// </summary>
     private const int TestModeSuppliesRestored = 60;
-
-    /// <summary>
-    ///     How the background rumble is decided. Each frame one number in
-    ///     <see cref="ShakeOdds" /> is drawn, and drawing <see cref="ShakeTrigger" /> starts a shake
-    ///     lasting somewhere between <see cref="ShakeShortest" /> and <see cref="ShakeLongest" />
-    ///     frames. The quake that ends the intro is held for <see cref="IntroShakeDuration" />.
-    /// </summary>
-    private const int ShakeOdds = 2000;
-
-    /// <inheritdoc cref="ShakeOdds" />
-    private const int ShakeTrigger = 1;
-
-    /// <inheritdoc cref="ShakeOdds" />
-    private const int ShakeShortest = 180;
-
-    /// <inheritdoc cref="ShakeOdds" />
-    private const int ShakeLongest = 300;
-
-    /// <inheritdoc cref="ShakeOdds" />
-    private const int IntroShakeDuration = 500;
 
     /// <summary>
     ///     How far the backdrop is slid sideways per column of the map, so that walking east across a
@@ -95,13 +76,12 @@ internal class MainGameScreen : IGameScreen
     private const int AccessBoothFailedSpeed = 3;
     private readonly GameEngine GameEngine;
 
+    private readonly ScreenShake _shake = new();
+
     private int _framesPlayed;
 
     private Guid _shakeRumbleSoundId = Guid.Empty;
 
-    private bool _shakingScreen;
-    private int _shakingScreenCount;
-    private int _shakingScreenCounter;
 
     private int ScreenFadeSpeed { get; set; }
 
@@ -435,66 +415,38 @@ internal class MainGameScreen : IGameScreen
     ///     The occasional rumble. It starts itself at random, always runs once as the intro sequence hands
     ///     over, and is suppressed while a screen effect owns the viewport.
     /// </summary>
+    /// <summary>
+    ///     One frame of the ground moving. Whether it moves and by how much is
+    ///     <see cref="ScreenShake" />'s; the rumble and the view port are this screen's, because only it
+    ///     has the sound engine and the screen effects.
+    /// </summary>
     private void ShakeScreen()
     {
-        int xShakeOffset = 0;
-        int yShakeOffset = 0;
-
-        if (!GameEngine.IntroSequence.SequenceRunning)
+        // Null while a screen effect is composing the picture: the view port is its to move, and the
+        // rumble is left exactly as it was rather than stopped.
+        if (_shake.Step(
+                GameEngine.RandomNumberGenerator,
+                GameEngine.IntroSequence.SequenceRunning,
+                GameEngine.IntroSequence.SequenceStage == IntroSequenceStage.EndPause,
+                GameEngine.ScreenEffectEngine.ActiveScreenEffect != null) is not { } shake)
         {
-            int shakingScreenTime = GameEngine.RandomNumberGenerator.Next(0, ShakeOdds);
-
-            if (shakingScreenTime == ShakeTrigger && !_shakingScreen)
-            {
-                _shakingScreenCount = GameEngine.RandomNumberGenerator.Next(ShakeShortest, ShakeLongest);
-                _shakingScreen = true;
-            }
+            return;
         }
 
-        if (GameEngine.IntroSequence.SequenceStage == IntroSequenceStage.EndPause)
+        if (shake.Rumbling)
         {
-            _shakingScreenCount = IntroShakeDuration;
-            _shakingScreen = true;
+            _shakeRumbleSoundId = GameEngine.ContentResourceManager.GetSoundFxEngine()
+                .PlaySound(Assets.Sounds.Rumble, true);
+        }
+        else
+        {
+            GameEngine.ContentResourceManager.GetSoundFxEngine()
+                .StopSound(_shakeRumbleSoundId, SoundFade.Medium);
         }
 
-        if (GameEngine.ScreenEffectEngine.ActiveScreenEffect == null)
+        if (shake.MovesTheViewPort)
         {
-            if (_shakingScreen)
-            {
-                xShakeOffset = GameEngine.RandomNumberGenerator.Next(0, 5);
-                yShakeOffset = GameEngine.RandomNumberGenerator.Next(0, 5);
-
-                _shakingScreenCounter++;
-
-                // Play rumble sound
-                _shakeRumbleSoundId = GameEngine.ContentResourceManager.GetSoundFxEngine().PlaySound(Assets.Sounds.Rumble, true);
-
-                if (_shakingScreenCounter > _shakingScreenCount)
-                {
-                    _shakingScreenCounter = 0;
-                    _shakingScreen = false;
-                }
-            }
-            else
-            {
-                if (xShakeOffset > 0)
-                {
-                    xShakeOffset = xShakeOffset - 1;
-                }
-
-                if (yShakeOffset > 0)
-                {
-                    yShakeOffset = yShakeOffset - 1;
-                }
-
-                GameEngine.ContentResourceManager.GetSoundFxEngine()
-                    .StopSound(_shakeRumbleSoundId, SoundFade.Medium);
-            }
-
-            if (yShakeOffset > 0 && xShakeOffset > 0)
-            {
-                GameEngine.ScreenEffectEngine.MoveViewPort("GameArea", xShakeOffset, yShakeOffset);
-            }
+            GameEngine.ScreenEffectEngine.MoveViewPort(ViewPorts.GameArea, shake.XOffset, shake.YOffset);
         }
     }
 

@@ -27,6 +27,7 @@ rule in *The rule each extraction is placed by* and discovering the codebase bro
 | --- | --- |
 | `cf95609` | Five fades off the draw path: the blob's energy-drain tint, his teleport fade-in, the glow on a shot, and the fade and shrink of a dead nasty and a dead conveyer nasty. `ConveyerNasty` had no `Dead` branch in `Update` at all. |
 | `32c0345` | `SpriteCollection` held one rotation angle and advanced it inside `End`. The angle moves to the nasty, the blob's shuttle flame and the intro's ship, one per logic frame. `GameSession` falls out of `Nasty`, `Nasties` and `PlanetCoreScreen` with the `paused` flag that existed to freeze the spin. |
+| **Stage 9** | `ScreenShake` out of `MainGameScreen`, with eight tests. `NastyLifecycle` recommended against, and a latent bug in `CopyFromSource` found while deciding that. The fade pair turns out to be duplicated with `GameScreenBase` rather than needing extraction. |
 | **Stage 8** | `ColourAnimatedTiles` out of `GameEngine`, and **the rest of the stage recommended against** - measured, not guessed. See below. |
 | **Stage 7** | `CanvasViewOptions`, `AuthoredPositions` and `TilePaletteState` out of `EditorSession`. 19 mutable fields to 5; 597 code lines to 404. Two of the plan's five clusters are recommended against rather than done - see below. |
 | **Stage 6** | `ScreenPainter`, `ScreenLayout` and `Hover` out of `ScreenCanvas`. 912 lines to 400; the control drops out of the table entirely. No tests - it draws. |
@@ -85,7 +86,7 @@ commits above - an angle that now belongs to them, and a `GameSession` that neve
 | ~~6~~ | Editor | `ScreenPainter` + 2 values | 437 lines of `ScreenCanvas` | **done** |
 | ~~7~~ | Editor | three clusters out of `EditorSession` | 14 of 19 fields | **done** |
 | ~~8~~ | Engine | `ColourAnimatedTiles` only | 55 lines of `GameEngine` | **done, reduced** |
-| 9 | — | `NastyLifecycle`, `ScreenShake`, the fade | 7 + 3 + 2 fields | Yes for the last two |
+| ~~9~~ | — | `ScreenShake` | 3 fields, 63 lines | **done** - 8 tests |
 
 Stages 1 to 5 are in order and each assumes the one before. Tracks B and C are independent of track A
 and of each other. Stage 6 is the cheapest thing here and needs nothing to have happened first.
@@ -691,36 +692,147 @@ mutable fields, at 24, and that is now a `DECOUPLING.md` question rather than th
 fourteen of the 24 are the actor fields behind the guards, and what they want is the engine built
 later, not the actors built elsewhere.
 
-## Stage 9 — the small true extractions
+## Stage 9 — `ScreenShake`, and two findings instead of two extractions — **done**
 
-Two classes where the god-class reading is wrong but there is real work anyway.
+### `ScreenShake`
 
-**`Nasty`** — the lifecycle group is `_birthColourLevel`, `_birthFadeLevel`, `_birthScale`,
-`_birthTimer`, `_conceptionWaitCounter`, `_nastyDeadPauseCounter`, `_deathAnticlockwise`, `_rotation`
-with `BeginConception`, `WaitToBeBorn`, `UpdateBirth`, `StartDying`, `UpdateDeath`,
-`AdvanceRotation`. It separates cleanly
-from the drawing, and **`CopyFromSource` is a trap sitting on top of it**
-(`Nasty.cs:265`). A screen swap hands the spare set the live set's state, and what carries is: the
-whole `NastyMovementState` record struct, plus `NastyType`/`XPos`/`YPos`/`KeepNastyTheSame`, plus
-`_nastyType` and `_nastyDeadPauseCounter` by hand. The birth counters deliberately do **not** carry —
-a nasty mid-birth becomes `Normal` on the swap. So anything the lifecycle object owns must either
-sit inside a copied value or be named in `CopyFromSource`, and the birth fields must stay
-uncarried. `_rotation` arrived with `32c0345` and is deliberately uncarried for the same reason - a
-swap resets a birth or a death, so there is no spin to continue - which is written on the field.
+Three fields and 63 lines out of `MainGameScreen`, which drops to 392 code lines over three mutable
+fields. Eight tests, by the trade stage 3 found: the rumble and the view port stay with the screen,
+because only it has the sound engine and the screen effects, and `Step` hands back a `Shake` saying
+what to do. Seeded generator, so a failure repeats.
 
-That is the exact mistake `NastyMovementState` was created to end, and it will not announce itself:
-it shows up as a nasty that occasionally keeps growing after a screen change.
+**Two things in the original had to be preserved exactly, and both were nearly lost.**
 
-**`MainGameScreen`** does not want splitting, and `PLAN.md`'s *Still deliberately out of scope* has
-already settled that: it uses every actor because it *is* the main game, and the alternatives are an
-eighteen-parameter constructor or a bag object existing solely for it. Nothing here disturbs that. Its
-problem is 18 distinct `GameEngine` members, which is `DECOUPLING.md`'s job rather than this
-document's — it is the widest of the six broad consumers that document has always said it comes down
-to. What it does have is two extractions that are not splitting-on-size: `ScreenShake`
-(`_shakingScreen`, `_shakingScreenCount`, `_shakingScreenCounter` with `ShakeScreen`, 63 lines at
-`MainGameScreen.cs:438`) and the fade pair (`ScreenFade`, `ScreenFadeSpeed`, `FadeScreenBackUp`,
-`ResetScreenFade`). Both are arithmetic over a counter, both are currently untested, and both are
-testable the moment they are their own class.
+*The roll happens on every frame, shaking or not.* The original drew `Next(0, 2000)` whenever the intro
+was not running and only then asked whether it was already shaking. The obvious tidy - `!_shaking &&
+Next(...) == Trigger` - short-circuits the draw, and that generator is the one the nasties move
+from, so rolling it on a different set of frames moves every random thing in the game. Caught by
+simulating both versions against one seed over 60,000 frames: identical draw counts and identical
+output.
+
+*A screen effect means leave everything alone, not stop.* The original's whole body sat inside
+`if (ActiveScreenEffect == null)`, so while an effect was composing the picture neither the rumble's
+start nor its stop was reached. Returning a plain "not shaking" would have stopped the rumble on
+every frame of a tunnel entry. `Step` returns `Shake?`, and null means *leave the sound and the view
+port as they are* - which is what that outer `if` meant.
+
+A test wrote down a third thing. A tremor's last frame still shakes and clears the flag, so the next
+frame's roll can start another immediately: **two tremors can run back to back with no still frame
+between them.** An unbroken run of 471 frames out of the test's seed is two tremors, not one over
+length, which is why the upper bound is asserted against the shortest run observed.
+
+Two defects came out with it, both dead rather than wrong:
+
+- `ShakeScreen`'s `else` branch decremented `xShakeOffset` and `yShakeOffset` under `if (... > 0)`. Both
+  are locals set to nought at the top of each call, and that branch runs only when nothing has assigned
+  them, so neither test could ever pass. A ramp-down that never ramped, because the offsets it meant to
+  persist were locals.
+- The view port was named `"GameArea"` as a string literal, where `ViewPorts.GameArea` has existed since
+  `12cb6c8` took the other names out of literals. `IntroSequence` still has the same literal, which is
+  the remaining one.
+
+### `NastyLifecycle` — recommended against, and a bug found while deciding
+
+The plan wanted the birth and death counters out of `Nasty`. Measured, the lifecycle touches two
+particle effects, an animation, the art set, the resource manager, the movement brain, the position
+and ten of its own counters - most of the class, which is stage 8's problem at a smaller scale.
+
+**But deciding it turned up something worth more than the extraction.** `CopyFromSource` is how a screen
+swap hands the spare set of nasties the live set's state, and `NastyMovementState` exists because
+that method used to assign seventeen fields by hand and silently drop anything added later. The
+movement half is fixed. **The lifecycle half is not**: of its ten counters, `CopyFromSource` carries
+exactly one -
+`_nastyDeadPauseCounter` - and says nothing about `_birthColourLevel`, `_birthFadeLevel`,
+`_birthRotateSpeed`, `_birthScale`, `_birthTimer`, `_conceptionWaitCounter`, `_deathAnticlockwise`,
+`_deathFadeLevel`, `_deathScale` or `_rotation`.
+
+Some of those are deliberately dropped - a nasty mid-birth becomes `Normal` on a swap, so its birth
+counters should reset. Whether *all nine* are deliberate is the open question, and `_deathFadeLevel`
+and
+`_deathScale` are the suspicious ones: a nasty mid-death becomes `PreConception`, which resets it
+anyway,
+but the fade and scale are left wherever they stopped and are what the next death starts from.
+
+The right shape is the one `NastyMovementState` already proved - a record struct of the counters
+that copies whole, with the effects staying on `Nasty` - and the right order is to decide which of
+the ten should carry *first*, as its own commit, because that is a behaviour question and not a
+move. Left undone deliberately rather than smuggled into a refactor.
+
+### The fade pair — not an extraction, a duplication
+
+The plan listed `ScreenFade`, `ScreenFadeSpeed` and `FadeScreenBackUp` as a cluster to take out of
+`MainGameScreen`. They should not come out; they should stop being written twice. `GameScreenBase`
+already has all three - the same two properties and the same four-line fade-up inside its `Update` -
+and
+`MainGameScreen` implements `IGameScreen` directly rather than inheriting it, so the two are independent
+copies of one piece of arithmetic.
+
+Extracting from `MainGameScreen` alone would leave the copy in `GameScreenBase` and make it three
+places. The work is to share one, which means either `MainGameScreen` inherits the base or both take
+a small
+`ScreenFadeUp` value - and that is a question about why the main screen is the one page not built on
+`GameScreenBase`, which is a bigger and more interesting question than this document's.
+
+---
+
+## Where this ended up
+
+All nine stages are closed. Six were done as written or close to it, two were cut down to what
+survived measurement, and one turned into two findings rather than an extraction.
+
+| Class | At the start | Now | |
+| --- | --- | --- | --- |
+| `Blob` | 1,483 code / 36 mutable | **1,081 / 16** | five pieces out, four of them tested |
+| `ScreenCanvas` | 624 code / 7 mutable | **265 / 7** | the drawing out; off this table |
+| `EditorSession` | 597 code / 19 mutable | **404 / 5** | three clusters out |
+| `MainGameScreen` | 424 code / 6 mutable | **392 / 3** | the tremor out |
+| `GameEngine` | 625 code / 24 mutable | **579 / 24** | the pulsing tiles out; the rest argued down |
+| Tests in the suite | 237 | **307** | |
+
+**`Blob` is no longer the god class this document was written about** - at 16 mutable fields it holds
+fewer than `GameEngine`'s 24 or what `EditorSession` held when this started. `GameEngine` is the one
+left, and what it needs is not an extraction: fourteen of its 24 fields are the actor fields behind
+the
+`NotBeforeContentLoads` guards, and those want the engine built *after* content loads, which is
+`GameHost`'s shape rather than `GameEngine`'s. That is `DECOUPLING.md`'s question now.
+
+### What the stages taught that the plan could not know
+
+**Whether an extraction earns tests comes down to one thing: can the resource manager be left behind.**
+Not the size of the cluster. Stage 2 took ten fields and 219 lines out of the blob and could test
+one static function, because `BlobWeapon`'s constructor pulls two particle effects and a sprite
+sheet. Stage 3 took four fields and got eleven tests, by leaving the falling *sound* with the blob
+and returning a flag. Stages 4, 5 and 9 repeated that trade deliberately - callbacks for the lift's
+sound, nothing at all for the overload, a `Shake?` for the tremor - and each one earned its tests.
+The plan predicted no tests for three of those four.
+
+**The plan measured fields accurately and guessed at shapes.** Every stage where it said *which fields
+cluster* was right. Every stage where it said *what the result would look like* needed correcting:
+stage 1's four fields became one rather than none, stage 4 was two unrelated things, stage 5 did not
+empty the `BlobState` switch, stage 7's palette had the wrong contents, stage 8's composition would
+have recreated the god object under a new name.
+
+**Three of nine stages were partly or wholly the wrong thing to do**, and finding that out cost
+less than
+doing them would have. The measurement that stopped stage 8 took one script; the composition it
+would have produced would have touched every call site in the engine.
+
+**Guards move verbatim, and the reason is sharper than style.** Stage 9 nearly lost two behaviours to
+obvious tidies - short-circuiting a random draw that the nasties share, and turning "leave the sound
+alone" into "stop the sound". Both would have been invisible in review and neither would have failed
+a test. `REFACTORING.md` already said to move guards unchanged; what stage 9 adds is that the risk
+is not only inverted conditions but *elided side effects*, a drawn random number among them.
+
+### Left deliberately undone
+
+- **`Nasty`'s lifecycle counters and `CopyFromSource`.** Nine of ten are dropped on a screen swap and it
+  is not written down which of them should be - see stage 9. A behaviour question, and the next thing
+  worth doing in this file.
+- **The fade duplicated between `MainGameScreen` and `GameScreenBase`**, which wants the two sharing one
+  rather than a third copy - see stage 9.
+- **`IntroSequence`'s `"GameArea"` string literal**, the last of the view-port names not using
+  `ViewPorts`.
+- **`GameEngine`'s construction**, which is `DECOUPLING.md`'s, for the reason stage 8 gives.
 
 ---
 
