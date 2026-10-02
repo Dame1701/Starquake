@@ -331,10 +331,12 @@ internal class Blob
 
     private int _teleportFadeLevel;
 
-    private TileDetected? _tileAboveBlob;
-    private TileDetected? _tileBelowBlob;
-    private TileDetected? _tileLeftBlob;
-    private TileDetected? _tileRightBlob;
+    /// <summary>
+    ///     The last reading of what is around him. A field rather than a local because the shuttle pad
+    ///     is acted on at the start of the frame after the one that detected it - see
+    ///     <see cref="UpdateNormalState" />.
+    /// </summary>
+    private BlobSurroundings _surroundings;
 
     public Blob(
         ResourceManager resources,
@@ -543,7 +545,10 @@ internal class Blob
     /// </summary>
     private bool UpdateNormalState()
     {
-        HandleShuttlePad();
+        // Deliberately last frame's reading. DetectShuttlePad set _blobOnShuttlePad from the same
+        // reading at the end of that frame, so the flag and the tile under it are a matched pair;
+        // probing again here would act on a flag that no longer describes the tile it is given.
+        HandleShuttlePad(_surroundings.Below);
         WalkLeft();
         WalkRight();
 
@@ -565,14 +570,14 @@ internal class Blob
 
         bool changedScreens = ChangeScreenIfOffEdge();
 
-        DetectSurroundingTiles();
-        DetectShuttlePad();
-        DetectTeleporter();
-        DetectAccessBooth();
-        changedScreens |= DetectLeftHandTunnel();
-        changedScreens |= DetectRightHandTunnel();
-        BreakBridgeUnderfoot();
-        RideTunnelLift();
+        _surroundings = DetectSurroundingTiles();
+        DetectShuttlePad(_surroundings.Below);
+        DetectTeleporter(_surroundings.Right);
+        DetectAccessBooth(_surroundings.Left, _surroundings.Right);
+        changedScreens |= DetectLeftHandTunnel(_surroundings.Left);
+        changedScreens |= DetectRightHandTunnel(_surroundings.Right);
+        BreakBridgeUnderfoot(_surroundings.Below);
+        RideTunnelLift(_surroundings.Above);
         CheckSpikes();
         CollectPowerUp();
 
@@ -584,13 +589,13 @@ internal class Blob
         return changedScreens;
     }
 
-    private void HandleShuttlePad()
+    private void HandleShuttlePad(TileDetected? below)
     {
         if (_blobOnShuttlePad)
         {
-            if (_tileBelowBlob != null)
+            if (below != null)
             {
-                switch (_tileBelowBlob.TileNumber)
+                switch (below.TileNumber)
                 {
                     // Change the map to reflect shuttle has been taken
                     case (int)ActionTiles.ShuttlePlatform:
@@ -1218,39 +1223,30 @@ internal class Blob
         }
     }
 
-    private void DetectSurroundingTiles()
-    {
-        _tileAboveBlob = _gameScreens.CheckTileByObject(Direction.Up, _blobXPos, _blobYPos,
+    /// <summary>
+    ///     Looks around him. Riding the shuttle makes him taller, and the extra height is the shuttle
+    ///     underneath him rather than more blob, so the ground is looked for from his own feet.
+    /// </summary>
+    private BlobSurroundings DetectSurroundingTiles()
+        => BlobSurroundings.Around(
+            _gameScreens.Collisions,
+            _blobXPos,
+            _blobYPos,
             BlobWidth,
-            BlobHeight, BlobVSpeed);
+            BlobHeight,
+            _blobOnShuttle ? BlobHeight - ShuttleHeight : BlobHeight,
+            BlobHSpeed,
+            BlobVSpeed);
 
-        if (_blobOnShuttle)
-        {
-            _tileBelowBlob = _gameScreens.CheckTileByObject(Direction.Down, _blobXPos, _blobYPos,
-                BlobWidth, BlobHeight - ShuttleHeight, BlobVSpeed); // Subtract the shuttle height off
-        }
-        else
-        {
-            _tileBelowBlob = _gameScreens.CheckTileByObject(Direction.Down, _blobXPos, _blobYPos,
-                BlobWidth, BlobHeight, BlobVSpeed);
-        }
-
-        _tileLeftBlob = _gameScreens.CheckTileByObject(Direction.Left, _blobXPos, _blobYPos,
-            BlobWidth,
-            BlobHeight, BlobHSpeed);
-        _tileRightBlob = _gameScreens.CheckTileByObject(Direction.Right, _blobXPos, _blobYPos,
-            BlobWidth, BlobHeight, BlobHSpeed);
-    }
-
-    private void DetectShuttlePad()
+    private void DetectShuttlePad(TileDetected? below)
     {
         _blobOnShuttlePad = false;
-        if (_tileBelowBlob != null)
+        if (below != null)
         {
-            if ((ActionTiles)_tileBelowBlob.TileNumber == ActionTiles.ShuttlePlatform ||
-                (ActionTiles)_tileBelowBlob.TileNumber == ActionTiles.RemovedShuttlePlatform)
+            if ((ActionTiles)below.TileNumber == ActionTiles.ShuttlePlatform ||
+                (ActionTiles)below.TileNumber == ActionTiles.RemovedShuttlePlatform)
             {
-                if (_tileBelowBlob.XPosition == 32 && _tileBelowBlob.YPosition == 0)
+                if (below.XPosition == 32 && below.YPosition == 0)
                 {
                     _blobOnShuttlePad = true;
                 }
@@ -1258,22 +1254,22 @@ internal class Blob
         }
     }
 
-    private void DetectTeleporter()
+    private void DetectTeleporter(TileDetected? toTheRight)
     {
-        if (_tileRightBlob != null && BlobsControl.MovedRight())
+        if (toTheRight != null && BlobsControl.MovedRight())
         {
-            if (_tileRightBlob.TileNumber == (int)ActionTiles.TeleportBooth)
+            if (toTheRight.TileNumber == (int)ActionTiles.TeleportBooth)
             {
                 // Far enough in to be in the doorway, and standing on the booth's floor rather than
                 // passing it in mid air. Only the X is set from here: the Y test is the arrival
                 // offset, so the blob is already standing exactly where a booth puts it.
-                if (_tileRightBlob.XPosition >= TeleportBoothEntryReach &&
-                    _tileRightBlob.YPosition == BoothMetrics.BlobYOffset)
+                if (toTheRight.XPosition >= TeleportBoothEntryReach &&
+                    toTheRight.YPosition == BoothMetrics.BlobYOffset)
                 {
                     _screenDirectory.Current = GameScreenType.Teleporter;
 
                     _screenDirectory.Teleporter.Reset();
-                    _blobXPos = _tileRightBlob.MapXPosition * TileMetrics.TileWidth + BoothMetrics.BlobXOffset;
+                    _blobXPos = toTheRight.MapXPosition * TileMetrics.TileWidth + BoothMetrics.BlobXOffset;
                     BlobFrame = BlobWalkRightFirstFrame;
                 }
             }
@@ -1284,36 +1280,36 @@ internal class Blob
     ///     Each side detects the booth on one side of blob and then reports the map position of the
     ///     tile on his other side, which is why both tiles have to be there for either to trigger.
     /// </summary>
-    private void DetectAccessBooth()
+    private void DetectAccessBooth(TileDetected? toTheLeft, TileDetected? toTheRight)
     {
-        if (_tileLeftBlob is { TileNumber: (int)ActionTiles.AccessBoothRight } &&
-            _tileRightBlob != null)
+        if (toTheLeft is { TileNumber: (int)ActionTiles.AccessBoothRight } &&
+            toTheRight != null)
         {
-            if (_tileLeftBlob.XPosition <= 46 &&
-                _tileLeftBlob.YPosition == 32)
+            if (toTheLeft.XPosition <= 46 &&
+                toTheLeft.YPosition == 32)
             {
-                _screenDirectory.AccessBooth.Reset(Direction.Left, _tileRightBlob.MapXPosition);
+                _screenDirectory.AccessBooth.Reset(Direction.Left, toTheRight.MapXPosition);
                 _screenDirectory.Current = GameScreenType.AccessBooth;
             }
         }
 
-        if (_tileRightBlob is { TileNumber: (int)ActionTiles.AccessBoothLeft } &&
-            _tileLeftBlob != null)
+        if (toTheRight is { TileNumber: (int)ActionTiles.AccessBoothLeft } &&
+            toTheLeft != null)
         {
-            if (_tileRightBlob.XPosition >= 24 &&
-                _tileRightBlob.YPosition == 32)
+            if (toTheRight.XPosition >= 24 &&
+                toTheRight.YPosition == 32)
             {
-                _screenDirectory.AccessBooth.Reset(Direction.Right, _tileLeftBlob.MapXPosition);
+                _screenDirectory.AccessBooth.Reset(Direction.Right, toTheLeft.MapXPosition);
                 _screenDirectory.Current = GameScreenType.AccessBooth;
             }
         }
     }
 
-    private bool DetectLeftHandTunnel()
+    private bool DetectLeftHandTunnel(TileDetected? toTheLeft)
     {
         bool changedScreens = false;
 
-        if (_tileLeftBlob?.TileNumber is
+        if (toTheLeft?.TileNumber is
             TunnelTiles.LeftMouth1 or
             TunnelTiles.LeftMouth2 or
             TunnelTiles.LeftMouth3 or
@@ -1325,7 +1321,7 @@ internal class Blob
             TunnelTiles.LeftMouth9 or
             TunnelTiles.LeftMouth10)
         {
-            if (_tileLeftBlob.XPosition <= 32 && _tileLeftBlob.YPosition == 32)
+            if (toTheLeft.XPosition <= 32 && toTheLeft.YPosition == 32)
             {
                 _gameScreens.ScreenNumber--;
                 _directionGoingThroughTunnel = Direction.Left;
@@ -1345,11 +1341,11 @@ internal class Blob
         return changedScreens;
     }
 
-    private bool DetectRightHandTunnel()
+    private bool DetectRightHandTunnel(TileDetected? toTheRight)
     {
         bool changedScreens = false;
 
-        if (_tileRightBlob?.TileNumber is
+        if (toTheRight?.TileNumber is
             TunnelTiles.RightMouth1 or
             TunnelTiles.RightMouth2 or
             TunnelTiles.RightMouth3 or
@@ -1361,7 +1357,7 @@ internal class Blob
             TunnelTiles.RightMouth9 or
             TunnelTiles.RightMouth10)
         {
-            if (_tileRightBlob.XPosition >= 32 && _tileRightBlob.YPosition == 32)
+            if (toTheRight.XPosition >= 32 && toTheRight.YPosition == 32)
             {
                 _gameScreens.ScreenNumber++;
                 _directionGoingThroughTunnel = Direction.Right;
@@ -1381,9 +1377,9 @@ internal class Blob
         return changedScreens;
     }
 
-    private void BreakBridgeUnderfoot()
+    private void BreakBridgeUnderfoot(TileDetected? below)
     {
-        if (_tileBelowBlob is { TileNumber: (int)ActionTiles.BreakableBridges })
+        if (below is { TileNumber: (int)ActionTiles.BreakableBridges })
         {
             if (_blobFallHeight >= BridgeBreakingFallHeight)
             {
@@ -1391,32 +1387,32 @@ internal class Blob
                 _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BridgeBreak);
 
                 // Add the tile to the list of tiles to reset on screen change
-                _tilesToReset.Add(new ResetTile(_tileBelowBlob, _gameScreens.ScreenNumber));
+                _tilesToReset.Add(new ResetTile(below, _gameScreens.ScreenNumber));
 
                 // Remove the tile
                 _gameScreens.CurrentGameScreenData
-                    .ScreenTiles[_tileBelowBlob.MapXPosition, _tileBelowBlob.MapYPosition].TileImage = -1;
+                    .ScreenTiles[below.MapXPosition, below.MapYPosition].TileImage = -1;
 
                 // Add the tile to the Breakable bridges engine
                 _breakableBridges.AddBridge(
-                    _gameScreens.ConvertToScreenCoords(_tileBelowBlob.MapXPosition,
-                        _tileBelowBlob.MapYPosition));
+                    _gameScreens.ConvertToScreenCoords(below.MapXPosition,
+                        below.MapYPosition));
             }
         }
     }
 
-    private void RideTunnelLift()
+    private void RideTunnelLift(TileDetected? above)
     {
-        if (_tileAboveBlob != null)
+        if (above != null)
         {
-            switch (_tileAboveBlob.TileNumber)
+            switch (above.TileNumber)
             {
                 case (int)ActionTiles.TunnelLiftShaft1 or
                     (int)ActionTiles.TunnelLiftShaft2 or
                     (int)ActionTiles.TunnelLiftTile or
                     (int)ActionTiles.TunnelLiftShaft3:
                 {
-                    if (_tileAboveBlob.XPosition == 32)
+                    if (above.XPosition == 32)
                     {
                         if (!_inTunnelLift)
                         {
@@ -1432,7 +1428,7 @@ internal class Blob
                     (int)ActionTiles.TunnelLiftTop2 or
                     (int)ActionTiles.TunnelLiftTop3:
                 {
-                    if (_tileAboveBlob.YPosition == 96)
+                    if (above.YPosition == 96)
                     {
                         _inTunnelLift = false;
                     }
@@ -1445,11 +1441,11 @@ internal class Blob
         if (_inTunnelLift)
         {
             bool moveBlob = true;
-            if (_tileAboveBlob?.TileNumber is (int)ActionTiles.TunnelLiftShaft1 or
+            if (above?.TileNumber is (int)ActionTiles.TunnelLiftShaft1 or
                 (int)ActionTiles.TunnelLiftShaft2 or
                 (int)ActionTiles.TunnelLiftShaft3)
             {
-                if (_tileAboveBlob.YPosition == 96)
+                if (above.YPosition == 96)
                 {
                     if (BlobsControl.MovedLeft() && _gameScreens.CheckCollision(Direction.Left,
                             _blobXPos, _blobYPos, BlobWidth, BlobHeight, BlobHSpeed, true) > 0)

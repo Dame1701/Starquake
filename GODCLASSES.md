@@ -27,6 +27,7 @@ rule in *The rule each extraction is placed by* and discovering the codebase bro
 | --- | --- |
 | `cf95609` | Five fades off the draw path: the blob's energy-drain tint, his teleport fade-in, the glow on a shot, and the fade and shrink of a dead nasty and a dead conveyer nasty. `ConveyerNasty` had no `Dead` branch in `Update` at all. |
 | `32c0345` | `SpriteCollection` held one rotation angle and advanced it inside `End`. The angle moves to the nasty, the blob's shuttle flame and the intro's ship, one per logic frame. `GameSession` falls out of `Nasty`, `Nasties` and `PlanetCoreScreen` with the `paused` flag that existed to freeze the spin. |
+| **Stage 1** | `BlobSurroundings`. Four `TileDetected?` fields become one value, probed by a free function against a `ScreenCollisionMap` and handed to each of the eight readers as the tile it actually uses. Eight tests, where there could be none before. `Blob` 36 mutable fields to 33. |
 | `07db88c` | The two booth screens asked for their verdict sound while drawing - hence the latch stopping it playing sixty times a second - and started a logic-frame wait from a draw. Plus three idempotent draw-time writes that left logic waiting on a frame having been drawn. |
 
 **`GameHost` runs the logic at a fixed fifty hertz and draws once per vertical retrace**, so anything
@@ -43,6 +44,9 @@ closed* rather than assuming it still says what it said.
 ```
 237 tests passing, 0 warnings, 0 errors
 ```
+
+Measured before stage 1. It is now 245 tests, and `Blob` is at 1,478 code lines over 33 mutable
+fields.
 
 | Class | Lines | Code | Held objects | Mutable fields | Verdict |
 | --- | --- | --- | --- | --- | --- |
@@ -64,7 +68,7 @@ commits above - an angle that now belongs to them, and a `GameSession` that neve
 
 | Stage | Track | What comes out | Of | Tests with it |
 | --- | --- | --- | --- | --- |
-| 1 | `Blob` | `BlobSurroundings` | 4 fields, 1 method | Yes |
+| ~~1~~ | `Blob` | `BlobSurroundings` | 4 fields into 1, 1 method | **done** - 8 tests |
 | 2 | `Blob` | `BlobWeapon` | 9 fields, 7 methods, ~200 lines | Yes |
 | 3 | `Blob` | `BlobFall` | 5 fields, 3 methods | Yes, the best of them |
 | 4 | `Blob` | `TunnelLiftRide` | 4 fields, 3 methods, ~155 lines | No |
@@ -222,20 +226,37 @@ The surroundings row is the clearest signal in the matrix: `DetectSurroundingTil
 fields and **eight** unrelated methods silently depend on having been run first. That is why stage 1
 is stage 1.
 
-## Stage 1 — `BlobSurroundings`
+## Stage 1 — `BlobSurroundings` — **done**
 
-The four `TileDetected?` fields become a record struct built once per frame and passed in.
+The four `TileDetected?` fields become one `readonly record struct`, probed by
+`BlobSurroundings.Around` and handed to each reader as the tile it uses -
+`DetectTeleporter(TileDetected?
+toTheRight)` rather than the whole value, so each signature says what it depends on.
 
-- Moves: `DetectSurroundingTiles` becomes a function returning the value.
-- Changes: `DetectShuttlePad`, `DetectTeleporter`, `DetectAccessBooth`, `DetectLeftHandTunnel`,
-  `DetectRightHandTunnel`, `BreakBridgeUnderfoot`, `RideTunnelLift`, `HandleShuttlePad` take it as a
-  parameter instead of reading fields.
-- Fields: 35 mutable → 31.
+**Four fields became one, not none, and that is the stage's finding.** The plan said a local passed
+in, and 35 fields down to 31. It cannot be a local, because `HandleShuttlePad` runs *before*
+`DetectSurroundingTiles` in `UpdateNormalState` and reads the previous frame's tile. That looked like
+a bug worth its own commit - a method reading a stale probe because of where it had been dropped -
+and it is not one. `DetectShuttlePad` sets `_blobOnShuttlePad` from the same reading at the end of the
+frame, so the flag and the tile beneath it are a matched pair, and probing afresh at the top of the
+next frame would hand `HandleShuttlePad` a tile that no longer matches the flag telling it to act. The
+detection genuinely spans the frame boundary. One field holds it, and the boundary is written down at
+the call site instead of being an accident of ordering.
 
-Smallest stage here and deliberately first. It costs four fields and buys the thing every later
-stage needs: the hidden ordering dependency inside `UpdateNormalState` becomes an argument, so when
-a cluster moves out it is visible what it is being given. Testable on its own against a collision
-map, which is one more class off the "needs a graphics device" list.
+So the count is 36 mutable fields to 33. The gain is not the three fields; it is that eight methods
+which silently required a ninth to have run first now take what they need as an argument.
+
+**Eight tests, where there could be none before.** `GameScreenCollection.CheckTileByObject` is a pure
+delegate to `ScreenCollisionMap.CheckTileByObject`, so `Around` takes the map and nothing else - no
+content pipeline, no graphics device. The tests pin the four directions against each other (a
+transposition in a four-line constructor is exactly the mistake this refactor could have made) and
+the separate downward reach, which is the one piece of real behaviour the probe encodes: riding the
+shuttle makes the blob taller, the extra height is shuttle rather than blob, so the ground has to be
+looked for from his own feet or he reads the floor through the shuttle.
+
+One thing the tests pinned down on the way: the probe reports which tile *image* is in the way and
+never consults the collision mask. That is what its callers need - a shuttle pad and a tunnel mouth
+are walked into, not blocked by - and it is why the tests place tiles and set no cells.
 
 ## Stage 2 — `BlobWeapon`
 
