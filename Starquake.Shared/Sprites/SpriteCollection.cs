@@ -24,11 +24,7 @@ internal class SpriteCollection
 
     private readonly int[] _spriteTexturePosY;
 
-    private bool _clockWise = true;
-
     private byte _fade;
-
-    private float _rotationSpeed = 1f;
 
     private SpriteBatch? _sprites;
 
@@ -65,12 +61,6 @@ internal class SpriteCollection
                 counter++;
             }
         }
-    }
-
-    public float SpriteRotation
-    {
-        get;
-        private set;
     }
 
     public int SpriteWidth
@@ -256,6 +246,15 @@ internal class SpriteCollection
         }
     }
 
+    /// <summary>
+    ///     Draws one sprite at an angle, in radians, about its own centre.
+    /// </summary>
+    /// <remarks>
+    ///     The angle belongs to the caller. This class used to hold one itself, advanced by a speed
+    ///     inside <see cref="End" /> - so the spin ran at the display's refresh rate rather than the
+    ///     logic clock, a sheet drawn twice in a frame spun twice as fast, and everything drawing from
+    ///     one of the shared collections the resource manager hands out shared a single angle.
+    /// </remarks>
     public void DrawSprite(int spriteNumber, int xPosition, int yPosition, Color spriteColour, float scale,
         float rotation)
     {
@@ -276,51 +275,12 @@ internal class SpriteCollection
     }
 
 
-    public void DrawSprite(int spriteNumber, int xPosition, int yPosition, Color spriteColour, float scale,
-        float rotationSpeed, bool clockwise, bool paused)
-    {
-        const float hScaling = 1f;
-        const float vScaling = 1f;
-
-        _clockWise = clockwise;
-
-        if (paused)
-        {
-            _rotationSpeed = 0;
-        }
-        else
-        {
-            _rotationSpeed = rotationSpeed;
-        }
-
-        Sprites.Draw(_spriteImages,
-            new Vector2((float)((xPosition + SpriteWidth / 2.0) * hScaling),
-                (float)((yPosition + SpriteHeight / 2.0) * vScaling)),
-            new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
-                SpriteHeight),
-            ColourHelper.GetXna4Colour(spriteColour.R, spriteColour.G, spriteColour.B, spriteColour.A),
-            MathHelper.ToRadians(SpriteRotation),
-            new Vector2((float)SpriteWidth / 2, (float)SpriteHeight / 2),
-            new Vector2(hScaling * scale, vScaling * scale),
-            SpriteEffects.None, 0);
-    }
-
+    /// <inheritdoc cref="DrawSprite(int,int,Microsoft.Xna.Framework.Color,float,float)" />
     public void DrawSprite(int spriteNumber, float xPosition, float yPosition, Color spriteColour, float scale,
-        float rotationSpeed, bool clockwise, bool paused)
+        float rotation)
     {
         const float hScaling = 1f;
         const float vScaling = 1f;
-
-        _clockWise = clockwise;
-
-        if (paused)
-        {
-            _rotationSpeed = 0;
-        }
-        else
-        {
-            _rotationSpeed = rotationSpeed;
-        }
 
         Sprites.Draw(_spriteImages,
             new Vector2((float)(xPosition + SpriteWidth / 2.0) * hScaling,
@@ -328,45 +288,14 @@ internal class SpriteCollection
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
                 SpriteHeight),
             ColourHelper.GetXna4Colour(spriteColour.R, spriteColour.G, spriteColour.B, spriteColour.A),
-            MathHelper.ToRadians(SpriteRotation),
+            rotation,
             new Vector2((float)SpriteWidth / 2, (float)SpriteHeight / 2),
             new Vector2(hScaling * scale, vScaling * scale),
             SpriteEffects.None, 0);
     }
 
-    public void End()
-    {
-        Sprites.End();
-        Update();
-    }
+    public void End() => Sprites.End();
 
-    private void Update()
-    {
-        if (_clockWise)
-        {
-            if (SpriteRotation < 360f)
-            {
-                SpriteRotation += _rotationSpeed;
-            }
-
-            if (SpriteRotation >= 360f)
-            {
-                SpriteRotation = 0f;
-            }
-        }
-        else
-        {
-            if (SpriteRotation > 0f)
-            {
-                SpriteRotation -= _rotationSpeed;
-            }
-
-            if (SpriteRotation <= 0f)
-            {
-                SpriteRotation = 360f;
-            }
-        }
-    }
 
     /// <summary>
     ///     The batch this collection draws through, built on first use rather than on construction.
@@ -401,10 +330,7 @@ internal class SpriteCollection
             SpriteWidth,
             SpriteHeight)
         {
-            _fade = _fade,
-            _clockWise = _clockWise,
-            _rotationSpeed = _rotationSpeed,
-            SpriteRotation = SpriteRotation
+            _fade = _fade
         };
 
         return clonedSpriteCollection;

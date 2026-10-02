@@ -93,6 +93,11 @@ internal class Nasty
     private const float NastyRockSpeed = 4f;
 
     /// <summary>
+    ///     One whole revolution in degrees, which is where <see cref="_rotation" /> wraps.
+    /// </summary>
+    private const float FullTurn = 360f;
+
+    /// <summary>
     ///     The colours the different nasties are tinted: grey for one that has been shot, red for a
     ///     spiky one, green for a conveyer one.
     /// </summary>
@@ -115,7 +120,6 @@ internal class Nasty
     private readonly SpriteCollection _nastySpriteOriginal;
     private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
-    private readonly GameSession _session;
 
     private int _birthColourLevel;
 
@@ -147,6 +151,13 @@ internal class Nasty
 
     private NastyType _nastyType;
 
+    /// <summary>
+    ///     Which way round this nasty is drawn, in degrees. The angle used to live on this nasty's
+    ///     cloned sprite sheet, advanced once per draw batch - so the spin ran at the display's refresh
+    ///     rate rather than the logic clock. It is not carried across a screen swap, which is the same
+    ///     as it was: the clones belong to the nasty, and a swap resets a birth or a death anyway.
+    /// </summary>
+    private float _rotation;
 
     // Position
 
@@ -154,7 +165,6 @@ internal class Nasty
         ResourceManager resources,
         GameScreenCollection gameScreens,
         GraphicsSet graphicsSet,
-        GameSession session,
         Blob blob,
         Random randomNumberGenerator,
         int xposition,
@@ -164,7 +174,6 @@ internal class Nasty
         _resources = resources;
         _gameScreens = gameScreens;
         _graphicsSet = graphicsSet;
-        _session = session;
         _blob = blob;
         _randomNumberGenerator = randomNumberGenerator;
 
@@ -449,6 +458,8 @@ internal class Nasty
 
         UpdateDeathEffects(gameTime);
 
+        AdvanceRotation();
+
         if (!ShouldAnimate())
         {
             return;
@@ -571,16 +582,15 @@ internal class Nasty
         {
             // The nasty prefers to stop spinning square, but it must stop either way.
             //
-            // This used to end the birth only on a frame where the rotation read exactly zero.
-            // The angle is advanced in SpriteCollection.End, on the draw path, while this runs on
-            // the update path, and the two do not run under the same conditions: a screen effect
-            // holding gameplay skips the nasty's update and still draws it, so the spin carries on
-            // past zero with nobody watching. Zero is also only ever read for a single frame in
-            // every revolution - the wrap assigns the literal, and the settled speed does not
-            // divide 360 - so one missed frame cost a further whole revolution, and an update that
-            // kept missing it cost every one of them. That is the nasty that span and never
-            // stabilised.
-            if (_nastySprite.SpriteRotation < _birthRotateSpeed ||
+            // This used to end the birth only on a frame where the rotation read exactly zero, and
+            // zero is read for a single frame in every revolution - the wrap assigns the literal,
+            // and the settled speed does not divide 360. The angle was also advanced on the draw
+            // path while this ran on the update path, so a frame drawn without an update spun it
+            // past zero with nobody watching, and a missed frame cost a whole further revolution.
+            // That is the nasty that span and never stabilised. The angle is now advanced by this
+            // nasty's own update, so the two cannot drift apart, and the test is a range rather
+            // than an equality. The spin-out limit stays as the backstop.
+            if (_rotation < _birthRotateSpeed ||
                 _birthTimer > BirthPeriod + BirthSpinOutLimit)
             {
                 NastyState = NastyState.Normal;
@@ -742,13 +752,42 @@ internal class Nasty
         }
     }
 
+    /// <summary>
+    ///     One logic frame of spin. Which speed applies is decided by what this nasty is doing, which
+    ///     is the same thing that decides which of the four draw methods runs - the guardian rocks,
+    ///     a nasty being born spins down to square, a corpse spins away, and a live nasty is still.
+    /// </summary>
+    private void AdvanceRotation()
+    {
+        float speed = NastyState switch
+        {
+            NastyState.Birth => _birthRotateSpeed,
+            NastyState.Dead => DeathRotateSpeed,
+            _ => NastyType == NastyType.CoreGuardian ? NastyRockSpeed : 0f
+        };
+
+        if (speed == 0f)
+        {
+            return;
+        }
+
+        if (NastyState == NastyState.Dead && _deathAnticlockwise)
+        {
+            _rotation = _rotation > 0f ? _rotation - speed : FullTurn;
+        }
+        else
+        {
+            _rotation = _rotation < FullTurn ? _rotation + speed : 0f;
+        }
+    }
+
     private void DrawCoreGuardian(int nastyImage, int screenFade)
     {
         _nastySprite.Begin(BlendState.Additive);
 
         // Choose the image
         _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade), 1.0f, NastyRockSpeed, true, _session.Paused);
+            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade), 1.0f, MathHelper.ToRadians(_rotation));
         _nastySprite.End();
     }
 
@@ -763,8 +802,8 @@ internal class Nasty
         // Choose the image
         _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
             ColourHelper.GetXna4Colour((byte)_birthColourLevel, (byte)_birthColourLevel, ColourLevels.Full,
-                (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), _birthScale, _birthRotateSpeed,
-            true, _session.Paused);
+                (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), _birthScale,
+            MathHelper.ToRadians(_rotation));
         _nastySprite.End();
     }
 
@@ -805,8 +844,8 @@ internal class Nasty
             _nastySprite.Begin(BlendState.AlphaBlend);
             _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
                 ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
-                    (byte)(_deathFadeLevel * ((double)screenFade / ColourLevels.Full))), _deathScale, DeathRotateSpeed,
-                _deathAnticlockwise, _session.Paused);
+                    (byte)(_deathFadeLevel * ((double)screenFade / ColourLevels.Full))), _deathScale,
+                MathHelper.ToRadians(_rotation));
             _nastySprite.End();
         }
 

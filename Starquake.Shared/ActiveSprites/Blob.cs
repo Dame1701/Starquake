@@ -188,6 +188,15 @@ internal class Blob
     private const int TeleportFadeStep = 8;
 
     /// <summary>
+    ///     How fast the shuttle's flame turns, in degrees a frame, and one whole revolution - which is
+    ///     where the angle wraps.
+    /// </summary>
+    private const float ShuttleFireRotateSpeed = 10f;
+
+    /// <inheritdoc cref="ShuttleFireRotateSpeed" />
+    private const float FullTurn = 360f;
+
+    /// <summary>
     ///     How fast the blob walks, in pixels a logic frame, horizontally and vertically.
     /// </summary>
     private const int BlobWalkSpeed = 8;
@@ -271,7 +280,6 @@ internal class Blob
     private readonly ResourceManager _resources;
     private readonly ScreenDirectory _screenDirectory;
     private readonly ScreenEffectEngine _screenEffects;
-    private readonly GameSession _session;
     private readonly PlayerStats _stats;
     private readonly List<ResetTile> _tilesToReset = [];
     private int _blobAlarmSoundCounter;
@@ -285,6 +293,8 @@ internal class Blob
     private int _blobFallSpeed = BlobInitialFallSpeed;
     private Guid _blobFallsSoundId;
     private int _blobFireFade;
+
+    private float _blobFireRotation;
 
     private int _blobFrameOnEntry;
     private bool _blobOnShuttle;
@@ -346,7 +356,6 @@ internal class Blob
         _screenDirectory = screenDirectory;
         _screenEffects = screenEffects;
         _stats = stats;
-        _session = session;
         _blobKiller = blobKiller;
         _breakableBridges = breakableBridges;
 
@@ -1046,12 +1055,13 @@ internal class Blob
 
     /// <summary>
     ///     How the shot looks this frame: its additive glow comes up to full over the first few frames
-    ///     of flight, so it does not appear at full brightness on the frame it is launched.
+    ///     of flight so it does not appear at full brightness on the frame it is launched, and the
+    ///     shuttle's flame turns as it goes.
     /// </summary>
     /// <remarks>
-    ///     This was done while drawing, which ran it at the display's refresh rate rather than the logic
-    ///     clock - so the glow came up faster the better the monitor, and carried on coming up while the
-    ///     game was paused.
+    ///     Both of these were done while drawing, which ran them at the display's refresh rate rather
+    ///     than the logic clock. The angle was the sprite sheet's own and advanced once per draw batch;
+    ///     it belongs to the shot.
     /// </remarks>
     private void AdvanceFireAppearance()
     {
@@ -1069,6 +1079,10 @@ internal class Blob
         {
             _blobFireFade = ColourLevels.Full;
         }
+
+        _blobFireRotation = _blobFireRotation < FullTurn
+            ? _blobFireRotation + ShuttleFireRotateSpeed
+            : 0f;
     }
 
     /// <summary>
@@ -1842,8 +1856,7 @@ internal class Blob
                     blobFire2Original.DrawSprite(
                         _blobAnimFire1.CurrentFrame, BlobFireX, BlobFireY,
                         ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
-                            (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), 1.0f, 0f, true,
-                        _session.Paused);
+                            (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), 1.0f, 0f);
                     blobFire2Original.End();
                 }
                 else
@@ -1853,8 +1866,7 @@ internal class Blob
                     blobFire1.DrawSprite(
                         _blobAnimFire1.CurrentFrame, BlobFireX, BlobFireY - FireOffset,
                         ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
-                            (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), 1.0f, 0f, true,
-                        _session.Paused);
+                            (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), 1.0f, 0f);
                     blobFire1.End();
                 }
             }
@@ -1867,9 +1879,8 @@ internal class Blob
                     blobFire2.DrawSprite(
                         _blobAnimFire2.CurrentFrame, BlobFireX, BlobFireY,
                         ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
-                            (byte)(_blobFireFade * ((double)screenFade / ColourLevels.Full))), 1.0f, 10f,
-                        true,
-                        _session.Paused);
+                            (byte)(_blobFireFade * ((double)screenFade / ColourLevels.Full))), 1.0f,
+                        MathHelper.ToRadians(_blobFireRotation));
                     blobFire2.End();
                 }
             }

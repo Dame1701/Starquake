@@ -54,14 +54,12 @@ internal class Nasties
     private readonly IPositionalTriggerParticleEffect _nastySmokes;
     private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
-    private readonly GameSession _session;
     private int _previousScreenVisited;
 
     public Nasties(
         ResourceManager resources,
         GameScreenCollection gameScreens,
         GraphicsSet graphicsSet,
-        GameSession session,
         Blob blob,
         Random randomNumberGenerator,
         ConveyerNasties conveyerNasties,
@@ -72,7 +70,6 @@ internal class Nasties
         _resources = resources;
         _gameScreens = gameScreens;
         _graphicsSet = graphicsSet;
-        _session = session;
         _blob = blob;
         _randomNumberGenerator = randomNumberGenerator;
         _conveyerNasties = conveyerNasties;
@@ -99,7 +96,6 @@ internal class Nasties
                     _resources,
                     _gameScreens,
                     _graphicsSet,
-                    _session,
                     _blob,
                     _randomNumberGenerator,
                     0,

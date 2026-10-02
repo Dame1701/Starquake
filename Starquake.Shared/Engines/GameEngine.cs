@@ -564,7 +564,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             ContentResourceManager,
             GameScreens,
             _graphicsSet,
-            Session,
             Player,
             RandomNumberGenerator,
             ConveyerNastiesInstance,
@@ -706,7 +705,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             GameScreens,
             _graphicsSet,
             ScreenDirectory,
-            Session,
             Player,
             RandomNumberGenerator,
             Elements));

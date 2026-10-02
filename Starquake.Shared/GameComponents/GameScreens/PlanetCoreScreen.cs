@@ -103,7 +103,6 @@ internal class PlanetCoreScreen : IGameScreen
         GameScreenCollection gameScreens,
         GraphicsSet graphicsSet,
         ScreenDirectory screenDirectory,
-        GameSession session,
         Blob blob,
         Random randomNumberGenerator,
         CoreElements elements)
@@ -123,7 +122,6 @@ internal class PlanetCoreScreen : IGameScreen
                 _resources,
                 _gameScreens,
                 graphicsSet,
-                session,
                 _blob,
                 randomNumberGenerator,
                 0,

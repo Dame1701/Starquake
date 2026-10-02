@@ -29,6 +29,11 @@ internal class IntroSequence
     /// <inheritdoc cref="ShipEntryXPos" />
     private const int ShipEntryYPos = -160;
 
+    /// <summary>
+    ///     One whole revolution in degrees, which is where <see cref="_shipRotation" /> wraps.
+    /// </summary>
+    private const float FullTurn = 360f;
+
     private readonly BlobDeathAnimation _blobKiller;
 
 
@@ -63,6 +68,15 @@ internal class IntroSequence
     private Guid _shipExplosionSound = Guid.Empty;
 
     private float _shipRotationSpeed;
+
+    /// <summary>
+    ///     Which way round the ship is drawn, in degrees. Held here and handed to all four sheets the
+    ///     ship is composed from, so they turn together: each sheet used to keep its own angle and
+    ///     advance it as it was drawn, which tied the spin to the display's refresh rate and left any
+    ///     sheet that a frame skipped behind the others.
+    /// </summary>
+    private float _shipRotation;
+
     private int _startPauseCounter;
 
     private int _startPauseFrameCount;
@@ -157,6 +171,10 @@ internal class IntroSequence
     /// </summary>
     public void Update(GameTime gameTime)
     {
+        _shipRotation = _shipRotation < FullTurn
+            ? _shipRotation + _shipRotationSpeed
+            : 0f;
+
         if (SequenceStage == IntroSequenceStage.InitialPause)
         {
             UpdateInitialPause();
@@ -366,7 +384,7 @@ internal class IntroSequence
                 }
                 else
                 {
-                    originalShip.DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
+                    originalShip.DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, MathHelper.ToRadians(_shipRotation));
                 }
 
                 originalShip.End();
@@ -375,31 +393,31 @@ internal class IntroSequence
             {
                 SpriteCollection blobsShip = _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip);
                 blobsShip.Begin(BlendState.AlphaBlend);
-                blobsShip.DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
+                blobsShip.DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, MathHelper.ToRadians(_shipRotation));
                 blobsShip.End();
 
                 if (SequenceStage != IntroSequenceStage.Finished && SequenceStage != IntroSequenceStage.EndPause)
                 {
                     SpriteCollection blobsShipHazardLights = _resources.GetSpriteCollection(Assets.Graphics.BlobsShipHazardLights);
                     blobsShipHazardLights.Begin(BlendState.AlphaBlend);
-                    blobsShipHazardLights.DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, 0), 1.0f, _shipRotationSpeed, true, false);
+                    blobsShipHazardLights.DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, 0), 1.0f, MathHelper.ToRadians(_shipRotation));
                     blobsShipHazardLights.End();
 
                     SpriteCollection blobsShipHeadLights = _resources.GetSpriteCollection(Assets.Graphics.BlobsShipHeadLights);
                     blobsShipHeadLights.Begin(BlendState.AlphaBlend);
-                    blobsShipHeadLights.DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, _shipRotationSpeed, true, false);
+                    blobsShipHeadLights.DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade), 1.0f, MathHelper.ToRadians(_shipRotation));
                     blobsShipHeadLights.End();
                 }
                 else
                 {
                     SpriteCollection blobsShipHazardLights = _resources.GetSpriteCollection(Assets.Graphics.BlobsShipHazardLights);
                     blobsShipHazardLights.Begin(BlendState.AlphaBlend);
-                    blobsShipHazardLights.DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_blobShipHazardLightFlash.FadeLevel * ((double)MainScreen.ScreenFade / ColourLevels.Full))), 1.0f, _shipRotationSpeed, true, false);
+                    blobsShipHazardLights.DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_blobShipHazardLightFlash.FadeLevel * ((double)MainScreen.ScreenFade / ColourLevels.Full))), 1.0f, MathHelper.ToRadians(_shipRotation));
                     blobsShipHazardLights.End();
 
                     SpriteCollection blobsShipHeadLights = _resources.GetSpriteCollection(Assets.Graphics.BlobsShipHeadLights);
                     blobsShipHeadLights.Begin(BlendState.AlphaBlend);
-                    blobsShipHeadLights.DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_blobShipHeadLightFlash.FadeLevel * ((double)MainScreen.ScreenFade / ColourLevels.Full))), 1.0f, _shipRotationSpeed, true, false);
+                    blobsShipHeadLights.DrawSprite(0, _blobSpaceShipXPos, _blobSpaceShipYPos, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_blobShipHeadLightFlash.FadeLevel * ((double)MainScreen.ScreenFade / ColourLevels.Full))), 1.0f, MathHelper.ToRadians(_shipRotation));
                     blobsShipHeadLights.End();
                 }
             }
