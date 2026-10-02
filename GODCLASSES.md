@@ -27,6 +27,7 @@ rule in *The rule each extraction is placed by* and discovering the codebase bro
 | --- | --- |
 | `cf95609` | Five fades off the draw path: the blob's energy-drain tint, his teleport fade-in, the glow on a shot, and the fade and shrink of a dead nasty and a dead conveyer nasty. `ConveyerNasty` had no `Dead` branch in `Update` at all. |
 | `32c0345` | `SpriteCollection` held one rotation angle and advanced it inside `End`. The angle moves to the nasty, the blob's shuttle flame and the intro's ship, one per logic frame. `GameSession` falls out of `Nasty`, `Nasties` and `PlanetCoreScreen` with the `paused` flag that existed to freeze the spin. |
+| **Stage 4** | `TunnelLift`. Three counters and the 83-line ride out, into 111 code lines. Nineteen tests - the plan said none were to be had here, and was wrong for the reason stage 3 found. The two tunnel-mouth detectors the plan grouped with it stay where they are. |
 | **Stage 3** | `BlobFall`. Four counters and the tunnel-mouth shuffle out, into 99 code lines that need a collision map and nothing else. Eleven tests, and this time the plan's promise held - see below for why, and for the one case left uncovered. |
 | **Stage 2** | `BlobWeapon`. Ten fields and seven methods out, 219 code lines, and the back-reference that made the blob hand out `this` mid-construction. Twelve tests - but only over the one rule in it that is pure, which is not what this plan promised. |
 | **Stage 1** | `BlobSurroundings`. Four `TileDetected?` fields become one value, probed by a free function against a `ScreenCollisionMap` and handed to each of the eight readers as the tile it actually uses. Eight tests, where there could be none before. `Blob` 36 mutable fields to 33. |
@@ -47,8 +48,8 @@ closed* rather than assuming it still says what it said.
 237 tests passing, 0 warnings, 0 errors
 ```
 
-Measured before stage 1. It is now 268 tests, and `Blob` is at 1,189 code lines over 24 mutable
-fields and 16 held objects - from 1,492, 36 and 21.
+Measured before stage 1. It is now 287 tests, and `Blob` is at 1,122 code lines over 22 mutable
+fields and 17 held objects - from 1,492, 36 and 21.
 
 | Class | Lines | Code | Held objects | Mutable fields | Verdict |
 | --- | --- | --- | --- | --- | --- |
@@ -73,7 +74,7 @@ commits above - an angle that now belongs to them, and a `GameSession` that neve
 | ~~1~~ | `Blob` | `BlobSurroundings` | 4 fields into 1, 1 method | **done** - 8 tests |
 | ~~2~~ | `Blob` | `BlobWeapon` | 10 fields, 7 methods, 219 lines | **done** - 12 tests, see below |
 | ~~3~~ | `Blob` | `BlobFall` | 4 fields, 2 methods | **done** - 11 tests |
-| 4 | `Blob` | `TunnelLiftRide` | 4 fields, 3 methods, ~155 lines | No |
+| ~~4~~ | `Blob` | `TunnelLift` | 3 fields, 1 method, 83 lines | **done** - 19 tests |
 | 5 | `Blob` | `OverloadSequence` | 7 fields, 5 methods | No |
 | 6 | Editor | `ScreenPainter` | ~500 lines of `ScreenCanvas` | No |
 | 7 | Editor | five clusters out of `EditorSession` | 19 fields | Some |
@@ -361,14 +362,58 @@ Two things that are not identical, stated rather than smuggled:
 `EdgeShuffleTowardOpening` moved verbatim: its body is textually identical once the field reads become
 the parameters it is handed.
 
-## Stage 4 — `TunnelLiftRide`
+## Stage 4 — `TunnelLift` — **done**
 
-`_inTunnelLift`, `_distanceInTunnelLift`, `_blobTunnelLiftSoundId`, `_directionGoingThroughTunnel`
-with `RideTunnelLift` (83 lines, `Blob.cs:1362`), `DetectLeftHandTunnel` and `DetectRightHandTunnel`.
+`_inTunnelLift`, `_distanceInTunnelLift` and `_blobTunnelLiftSoundId`'s decisions with the 83-line
+`RideTunnelLift`, into 111 code lines. `Blob` drops 67 code lines, two mutable fields and two
+constants.
 
-`_inTunnelLift` is read as a guard by `AccessInventory`, `ApplyGravity`, `ChangeScreenOffTopEdge` and
-`UpdateDyingState`, so the bit stays queryable on the blob as a property over the ride object. The
-behaviour is what moves. This is the one group that is already a mode in all but name.
+**The plan grouped two unrelated things under this stage, and only one of them moved.** It listed
+`DetectLeftHandTunnel` and `DetectRightHandTunnel` alongside the lift because all three say "tunnel".
+They share nothing else: the lift is a vertical mode with three counters and one collaborator, while
+the detectors are a *screen change* - they touch `_gameScreens`, `_screenEffects`, `_resources` and the
+`OnScreenChanged` event to set one field, `_directionGoingThroughTunnel`, which only
+`PerformPostChangeScreenActions` reads. Four collaborators and an event for one field is not a cluster
+worth extracting; it is the blob changing screens, which is what the blob is for. They stay.
+
+So the measured group was three fields and one method, not four and three.
+
+**Nineteen tests, where the plan said there would be none.** It had this stage down as "effects and
+sound wrapped around counters", and stage 3 found what actually decides that: whether the resource
+manager can be left behind. Here it can, by the same trade - the lift takes its sound as two
+callbacks, so `Blob` keeps the sound engine and the lift keeps the decision about when to start and
+stop. The tests count those callbacks, because *when* the sound starts is part of the behaviour.
+
+What they pin: getting on only under the middle of a shaft (walking past the edge of one must not grab
+him), all four shaft tiles carrying him, the three recognised tops ending the ride, the minimum ride
+before he may step off sideways, steering into a wall not counting as a way out, and the minimum ride
+counting afresh from each shaft - so a blob who has ridden once cannot step straight out of the next
+one he enters.
+
+### A fourth lift top that the ride has never recognised
+
+`ActionTiles.TunnelLiftTopAlternate` (396) is documented as a lift top, and both `ScreenRenderer` and
+`TunnelLiftAnimationEngine` treat it as one. `RideTunnelLift` never has - its switch lists
+`TunnelLiftTop1`, `2` and `3` only.
+
+Measured against the shipped map rather than guessed at: **tile 396 is placed fifteen times across
+nine screens and is never directly above a shaft tile**, so it never caps one and the asymmetry cannot
+bite today. Were a screen ever authored with it as the top of a shaft, the ride would carry on
+straight past it.
+
+Left exactly as found, and pinned by a test that says so in its name. A move is the wrong commit to
+change behaviour in, and this is worth a decision rather than a reflex: the screen editor could make
+it reachable tomorrow, so either the ride should recognise 396 or the editor should refuse to place it
+as a cap. That is a defect question, and it gets its own commit if it gets one at all.
+
+**Two things that are not identical, stated rather than smuggled:**
+
+- The distance test was inside each direction's arm; it is now checked once, before either. Logically
+  identical - both arms did the same thing - and the only observable difference is that
+  `CheckCollision` is not called at all when the ride is too short, which is a pure query.
+- The original's `else if` meant that holding both directions with a wall to the left still stepped
+  him off to the right. That is preserved as an `||` rather than an early return, and the comment at
+  the site says why.
 
 ## Stage 5 — `OverloadSequence`, and what is left
 

@@ -93,15 +93,6 @@ internal class Blob
     private const int JumpHeightWithoutPlatforms = TileMetrics.CollisionCellHeight;
 
     /// <summary>
-    ///     How far up the blob is carried each frame by a tunnel lift, and how far it has to have
-    ///     risen before it is allowed to step out sideways at the top.
-    /// </summary>
-    private const int TunnelLiftSpeed = 8;
-
-    /// <inheritdoc cref="TunnelLiftSpeed" />
-    private const int TunnelLiftMinimumRide = 8;
-
-    /// <summary>
     ///     How the blob comes apart when it dies. It swells to <see cref="OverloadMaxScale" />, then
     ///     shrinks through zero to <see cref="OverloadMinScale" /> - drawing at a negative scale is
     ///     what turns it inside out - and then explodes.
@@ -254,9 +245,8 @@ internal class Blob
     private int _blobYPos;
 
     private Direction _directionGoingThroughTunnel = Direction.None;
-    private int _distanceInTunnelLift;
-    private bool _inTunnelLift;
     private readonly BlobFall _fall = new();
+    private readonly TunnelLift _lift;
     private readonly Inventory _inventory;
     private readonly UnstickProbe _unstickProbe;
 
@@ -318,6 +308,12 @@ internal class Blob
 
         Weapon = new BlobWeapon(resources, gameScreens, graphicsSet, stats, randomNumberGenerator,
             () => OnBlobActionRaised?.Invoke(BlobAction.FiredLazer, null));
+
+        _lift = new TunnelLift(
+            () => _blobTunnelLiftSoundId = _resources.GetSoundFxEngine()
+                .PlaySound(Assets.Sounds.TunnelLift, true),
+            () => _resources.GetSoundFxEngine()
+                .StopSound(_blobTunnelLiftSoundId, SoundFade.None));
 
         // The shot starts where the blob is, which at this point is the origin - he is put onto a screen
         // afterwards, and that goes through PerformPostChangeScreenActions.
@@ -735,7 +731,7 @@ internal class Blob
             !BlobsControl.MovedRight())
         {
             if (!_inventoryAccessed &&
-                !_inTunnelLift &&
+                !_lift.Riding &&
                 !inAccessForceField)
             {
                 if (accessingCheops)
@@ -801,7 +797,7 @@ internal class Blob
     /// </summary>
     private void ApplyGravity()
     {
-        if (!_inTunnelLift) // Can't fall if we are in a tunnel lift
+        if (!_lift.Riding) // Can't fall if we are in a tunnel lift
         {
             Fall fall = _fall.Step(
                 _gameScreens.Collisions,
@@ -893,7 +889,7 @@ internal class Blob
 
         RaiseScreenChangedToMainGame();
 
-        if (_blobOnShuttle || _inTunnelLift)
+        if (_blobOnShuttle || _lift.Riding)
         {
             _blobYPos = _gameScreens.ScreenHeight - BlobHeight;
         }
@@ -1117,87 +1113,13 @@ internal class Blob
     }
 
     private void RideTunnelLift(TileDetected? above)
-    {
-        if (above != null)
-        {
-            switch (above.TileNumber)
-            {
-                case (int)ActionTiles.TunnelLiftShaft1 or
-                    (int)ActionTiles.TunnelLiftShaft2 or
-                    (int)ActionTiles.TunnelLiftTile or
-                    (int)ActionTiles.TunnelLiftShaft3:
-                {
-                    if (above.XPosition == 32)
-                    {
-                        if (!_inTunnelLift)
-                        {
-                            _distanceInTunnelLift = 0;
-                        }
-
-                        _inTunnelLift = true;
-                    }
-
-                    break;
-                }
-                case (int)ActionTiles.TunnelLiftTop1 or
-                    (int)ActionTiles.TunnelLiftTop2 or
-                    (int)ActionTiles.TunnelLiftTop3:
-                {
-                    if (above.YPosition == 96)
-                    {
-                        _inTunnelLift = false;
-                    }
-
-                    break;
-                }
-            }
-        }
-
-        if (_inTunnelLift)
-        {
-            bool moveBlob = true;
-            if (above?.TileNumber is (int)ActionTiles.TunnelLiftShaft1 or
-                (int)ActionTiles.TunnelLiftShaft2 or
-                (int)ActionTiles.TunnelLiftShaft3)
-            {
-                if (above.YPosition == 96)
-                {
-                    if (BlobsControl.MovedLeft() && _gameScreens.CheckCollision(Direction.Left,
-                            _blobXPos, _blobYPos, BlobWidth, BlobHeight, BlobHSpeed, true) > 0)
-                    {
-                        if (_distanceInTunnelLift > TunnelLiftMinimumRide)
-                        {
-                            _inTunnelLift = false;
-                            moveBlob = false;
-                        }
-                    }
-                    else if (BlobsControl.MovedRight() &&
-                             _gameScreens.CheckCollision(Direction.Right, _blobXPos, _blobYPos,
-                                 BlobWidth, BlobHeight, BlobHSpeed, true) > 0)
-                    {
-                        if (_distanceInTunnelLift > TunnelLiftMinimumRide)
-                        {
-                            _inTunnelLift = false;
-                            moveBlob = false;
-                        }
-                    }
-                }
-            }
-
-            if (moveBlob)
-            {
-                _blobTunnelLiftSoundId = _resources.GetSoundFxEngine()
-                    .PlaySound(Assets.Sounds.TunnelLift, true);
-                _blobYPos -= TunnelLiftSpeed;
-                _distanceInTunnelLift += TunnelLiftSpeed;
-            }
-            else
-            {
-                _resources.GetSoundFxEngine()
-                    .StopSound(_blobTunnelLiftSoundId, SoundFade.None);
-            }
-        }
-    }
+        => _blobYPos -= _lift.Step(
+            _gameScreens.Collisions,
+            new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight),
+            above,
+            BlobsControl.MovedLeft(),
+            BlobsControl.MovedRight(),
+            BlobHSpeed);
 
     private void CheckSpikes()
     {
@@ -1335,7 +1257,7 @@ internal class Blob
                 _gameScreens.ChangeShuttlePlatformState(_blobOnShuttle);
                 _gameScreens.UpdateCollisionMap(false);
                 BlobFrame = _blobFrameOnEntry;
-                _inTunnelLift = false;
+                _lift.LetGo();
                 _fall.StartFallingAgain();
 
                 if (_blobOnShuttle)
