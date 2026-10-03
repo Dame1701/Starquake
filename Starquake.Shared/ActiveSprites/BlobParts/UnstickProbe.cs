@@ -32,8 +32,7 @@ internal class UnstickProbe
 
     private readonly ScreenCollisionMap _collisions;
 
-    public UnstickProbe(ScreenCollisionMap collisions)
-        => _collisions = collisions;
+    public UnstickProbe(ScreenCollisionMap collisions) => _collisions = collisions;
 
     /// <summary>
     ///     Where the blob should be, given where he is. The same position back if he is not stuck.
@@ -57,43 +56,40 @@ internal class UnstickProbe
     /// <summary>
     ///     Which way blob has to move to get off an edge he is caught on.
     /// </summary>
-    private static Point PushAwayFrom(Direction edge)
-        => edge switch
-        {
-            Direction.Up => new Point(0, 1),
-            Direction.Down => new Point(0, -1),
-            Direction.Left => new Point(1, 0),
-            _ => new Point(-1, 0)
-        };
+    private static Point PushAwayFrom(Direction edge) => edge switch
+    {
+        Direction.Up => new Point(0, 1),
+        Direction.Down => new Point(0, -1),
+        Direction.Left => new Point(1, 0),
+        _ => new Point(-1, 0)
+    };
 
-    private static Direction OppositeOf(Direction edge)
-        => edge switch
-        {
-            Direction.Up => Direction.Down,
-            Direction.Down => Direction.Up,
-            Direction.Left => Direction.Right,
-            _ => Direction.Left
-        };
+    private static Direction OppositeOf(Direction edge) => edge switch
+    {
+        Direction.Up => Direction.Down,
+        Direction.Down => Direction.Up,
+        Direction.Left => Direction.Right,
+        _ => Direction.Left
+    };
 
     /// <summary>
     ///     The thin strip along one edge of blob that is tested for being buried in scenery.
     /// </summary>
-    private static Rectangle EdgeProbe(Rectangle blob, Direction edge)
-        => edge switch
-        {
-            Direction.Up => new Rectangle(blob.X, blob.Y, blob.Width, UnstickProbeThickness),
-            Direction.Down => new Rectangle(
-                blob.X,
-                blob.Y + (blob.Height - UnstickProbeThickness),
-                blob.Width,
-                UnstickProbeThickness),
-            Direction.Left => new Rectangle(blob.X, blob.Y, UnstickProbeThickness, blob.Height),
-            _ => new Rectangle(
-                blob.X + (blob.Width - UnstickProbeThickness),
-                blob.Y,
-                UnstickProbeThickness,
-                blob.Height)
-        };
+    private static Rectangle EdgeProbe(Rectangle blob, Direction edge) => edge switch
+    {
+        Direction.Up => new Rectangle(blob.X, blob.Y, blob.Width, UnstickProbeThickness),
+        Direction.Down => new Rectangle(
+            blob.X,
+            blob.Y + (blob.Height - UnstickProbeThickness),
+            blob.Width,
+            UnstickProbeThickness),
+        Direction.Left => new Rectangle(blob.X, blob.Y, UnstickProbeThickness, blob.Height),
+        _ => new Rectangle(
+            blob.X + (blob.Width - UnstickProbeThickness),
+            blob.Y,
+            UnstickProbeThickness,
+            blob.Height)
+    };
 
     private Rectangle FreeOfEdge(Rectangle blob, Direction edge)
     {
