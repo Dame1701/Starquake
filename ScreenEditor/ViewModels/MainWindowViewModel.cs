@@ -67,6 +67,14 @@ internal class MainWindowViewModel : ViewModelBase
         // up itself, so it says it was asked and this answers.
         Session.TeleportCodeRequested += (_, _) => EditTeleportCodeCommand.Execute(null);
 
+        // Offered for a screen with a sign on it, and for one still pointed somewhere by a sign that
+        // was erased, so that what the erased sign said can still be taken off the screen.
+        EditSignpostCommand = Register(new RelayCommand(
+            EditSignpostAsync,
+            () => Session.CurrentScreenHasSignpost || Session.CurrentSignpostedScreen is not null));
+
+        Session.SignpostRequested += (_, _) => EditSignpostCommand.Execute(null);
+
         Session.Invalidated += (_, _) => OnSessionChanged();
         Session.Undo.Changed += (_, _) => OnSessionChanged();
         Session.PropertyChanged += (_, _) => OnSessionChanged();
@@ -108,6 +116,11 @@ internal class MainWindowViewModel : ViewModelBase
     ///     Sets the destination code of the teleport booth on the screen being edited.
     /// </summary>
     public RelayCommand EditTeleportCodeCommand { get; }
+
+    /// <summary>
+    ///     Points the signposts on the screen being edited at the teleporter they advertise.
+    /// </summary>
+    public RelayCommand EditSignpostCommand { get; }
 
     /// <summary>
     ///     Goes to the screen a new game opens on.
@@ -247,6 +260,29 @@ internal class MainWindowViewModel : ViewModelBase
         if (choice is not null)
         {
             Session.SetTeleportCode(choice.Code);
+        }
+    }
+
+    /// <summary>
+    ///     Asks which teleporter the signs on the current screen point at. Nothing happens if the
+    ///     dialog is cancelled; a screen of null is a sign deliberately left blank.
+    /// </summary>
+    private async Task EditSignpostAsync()
+    {
+        if (_owner is null)
+        {
+            return;
+        }
+
+        SignpostChoice? choice = await SignpostDialog.AskAsync(
+            _owner,
+            Session.CurrentScreen,
+            Session.CurrentSignpostedScreen,
+            Session.Document.TeleportDestinations());
+
+        if (choice is not null)
+        {
+            Session.SetSignpostedScreen(choice.Screen);
         }
     }
 

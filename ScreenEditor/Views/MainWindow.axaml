@@ -421,6 +421,28 @@
                     </Border>
 
                     <!--
+                        Only on a screen with a signpost on it, or one still pointed somewhere by a
+                        sign that was erased. What a sign reads is not a tile number either, and the
+                        board the artwork draws is blank, so nothing else would show it.
+                    -->
+                    <Border DockPanel.Dock="Bottom" Margin="0,14,0,0" Padding="11,9"
+                            BorderThickness="1" CornerRadius="5"
+                            BorderBrush="{DynamicResource EditorBorderBrush}"
+                            Background="{DynamicResource EditorBackgroundBrush}"
+                            IsVisible="{Binding Session.ShowSignpostPanel}">
+                        <StackPanel Spacing="6">
+                            <TextBlock Classes="header" Text="SIGNPOST" Margin="0" />
+                            <TextBlock Classes="accent" FontSize="25" FontWeight="SemiBold"
+                                       Text="{Binding Session.SignpostCodeDisplay}" />
+                            <TextBlock Classes="status" TextWrapping="Wrap"
+                                       Text="{Binding Session.SignpostNote}" />
+                            <Button Classes="quiet" Content="Set sign…" Margin="0,2,0,0"
+                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    Command="{Binding EditSignpostCommand}" />
+                        </StackPanel>
+                    </Border>
+
+                    <!--
                         Always on, unlike the teleport box: there is one landing site on the whole
                         planet and a map without it does not start, so it is worth seeing from
                         whichever screen is open rather than only from the one it is on.

@@ -27,7 +27,7 @@ internal sealed class ShortcutsDialog : Window
         ("Tools", "Right button", "Erase, whichever tool is selected"),
         ("Tools", "Alt and click", "Pick the tile under the pointer"),
         ("Tools", "Drag", "Paint or erase a trail of tiles"),
-        ("Tools", "Shift and click", "Set a teleport booth's destination code"),
+        ("Tools", "Shift and click", "Set a teleport booth's destination code, or a signpost's teleporter"),
 
         ("View", "G / C / T / N", "Grid, collision map, tile numbers, neighbours"),
         ("View", "Ctrl and wheel", "Resize the tiles in the palette"),

@@ -72,6 +72,20 @@ internal sealed class TeleportCodeEdit(int screen, string? oldCode, string? newC
 }
 
 /// <summary>
+///     A screen's signpost being pointed at a different screen. Null on either side is a sign with
+///     nothing to say: one that has not been pointed anywhere, or one whose code has been taken off
+///     it.
+/// </summary>
+internal sealed class SignpostEdit(int screen, int? oldSignposted, int? newSignposted) : IEdit
+{
+    public string Name => "signpost";
+
+    public void Undo(EditorDocument document) => document.SetSignpostedScreen(screen, oldSignposted);
+
+    public void Redo(EditorDocument document) => document.SetSignpostedScreen(screen, newSignposted);
+}
+
+/// <summary>
 ///     The planet core moving. Null on either side is a map that does not place it and so falls back to
 ///     where the game used to keep it.
 /// </summary>

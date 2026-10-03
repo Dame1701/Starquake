@@ -8,6 +8,7 @@ using Starquake.Animations;
 using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Fonts;
 using Starquake.Particles;
 using Starquake.SharedLibs;
 using Starquake.Structure;
@@ -63,6 +64,7 @@ internal class GameScreenCollection : IDynamicCollisionCells
         GraphicsSet graphicsSet,
         CoreElements elements,
         Random randomNumberGenerator,
+        BitmapFont signpostFont,
         int tilesAcross,
         int tilesDown,
         int collAreaWidth,
@@ -106,7 +108,8 @@ internal class GameScreenCollection : IDynamicCollisionCells
             graphicsSet,
             _gameScreens,
             ColourAnimations,
-            (IStandardParticleEffect)resources.GetParticleEffectInstance(Assets.Effects.ForceField, ParticleEffectType.Continual, null));
+            (IStandardParticleEffect)resources.GetParticleEffectInstance(Assets.Effects.ForceField, ParticleEffectType.Continual, null),
+            signpostFont);
 
         BlobsShipSmoke1 =
             (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.BasicSmokePlume,

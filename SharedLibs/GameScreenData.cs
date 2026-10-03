@@ -52,6 +52,15 @@ public sealed class GameScreenData
     [Key(3)]
     public CorePlacement? Core { get; set; }
 
+    /// <summary>
+    ///     The screen whose teleport code the signpost on this screen spells out, or null for a
+    ///     screen with no signpost on it. Authored in the screen editor like the two above, and a
+    ///     screen number rather than the code itself so that renaming a code moves every sign that
+    ///     points at it - see <see cref="Starquake.Structure.Signposts" />.
+    /// </summary>
+    [Key(4)]
+    public int? SignpostedScreen { get; set; }
+
     [IgnoreMember]
     public bool KeepNastiesTheSame { get; set; }
 

@@ -35,6 +35,13 @@ public enum ActionTiles
     TeleportBooth = 397,
 
     /// <summary>
+    ///     The signpost that tells the player a teleport code. The board is blank artwork and the
+    ///     game writes the code across it, so this is a tile that has to be recognised by number
+    ///     even though walking into it does nothing - see <see cref="Starquake.Structure.Signposts" />.
+    /// </summary>
+    TeleportSignpost = 364,
+
+    /// <summary>
     ///     The two halves of an access booth. Which one Blob walks into decides which side of the
     ///     booth it appears on, so they are distinct tiles rather than one tile tested twice.
     /// </summary>

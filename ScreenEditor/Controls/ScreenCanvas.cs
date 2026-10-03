@@ -122,6 +122,17 @@ internal sealed class ScreenCanvas : Control
             return;
         }
 
+        // And on a signpost it asks which teleporter the sign points at, for the same reason: what
+        // the sign says is not a tile number, so there is nowhere else on the canvas to change it.
+        if (e.KeyModifiers.HasFlag(KeyModifiers.Shift) &&
+            session.Document.GetTile(session.CurrentScreen, x, y) == (int)ActionTiles.TeleportSignpost)
+        {
+            session.RequestSignpostEdit();
+            e.Handled = true;
+
+            return;
+        }
+
         _strokeTool = ToolFor(point, e.KeyModifiers, session.Tool);
 
         // The core is a position rather than a tile, so it is placed from the pointer in screen pixels
@@ -347,6 +358,13 @@ internal sealed class ScreenCanvas : Control
         if (tile == (int)ActionTiles.TeleportBooth)
         {
             status += "  ·  code " + (session.CurrentTeleportCode ?? "not set") + "  ·  shift-click to set";
+        }
+
+        // Nor does a sign's number say which teleporter it advertises.
+        if (tile == (int)ActionTiles.TeleportSignpost)
+        {
+            status += "  ·  reads " + (session.Document.GetSignpostCode(session.CurrentScreen) ?? "blank") +
+                      "  ·  shift-click to set";
         }
 
         // The core is not a tile, so nothing above would mention it. Worth saying where the pointer is

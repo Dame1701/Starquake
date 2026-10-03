@@ -195,6 +195,54 @@ internal sealed class EditorSession : ViewModelBase
     public string TeleportCodeDisplay => CurrentTeleportCode ?? "NOT SET";
 
     /// <summary>
+    ///     Whether the screen being edited has a signpost on it to write a code across.
+    /// </summary>
+    public bool CurrentScreenHasSignpost => Document.HasSignpost(_currentScreen);
+
+    /// <summary>
+    ///     The screen the signposts on the screen being edited are pointed at, or null if they have
+    ///     not been pointed at one.
+    /// </summary>
+    public int? CurrentSignpostedScreen => Document.GetSignpostedScreen(_currentScreen);
+
+    /// <summary>
+    ///     Whether the signpost box has anything to show: a sign on the screen, or a screen still
+    ///     pointed at by a sign that has been erased.
+    /// </summary>
+    public bool ShowSignpostPanel => CurrentScreenHasSignpost || CurrentSignpostedScreen is not null;
+
+    /// <summary>
+    ///     The code the signs on this screen read, as the box shows it. A sign is drawn blank when
+    ///     there is none, so the box has to say what the canvas cannot.
+    /// </summary>
+    public string SignpostCodeDisplay => Document.GetSignpostCode(_currentScreen) ?? "BLANK";
+
+    /// <summary>
+    ///     What the box says underneath the sign's code. The three things worth saying are a sign
+    ///     with nothing on it, a sign pointed at a screen whose code has since been taken away, and a
+    ///     sign that is doing its job.
+    /// </summary>
+    public string SignpostNote
+    {
+        get
+        {
+            if (!CurrentScreenHasSignpost)
+            {
+                return "There is no signpost on this screen to write a code on.";
+            }
+
+            if (CurrentSignpostedScreen is not { } signposted)
+            {
+                return "Until this is set, the sign stands blank.";
+            }
+
+            return Document.GetSignpostCode(_currentScreen) is null
+                ? "Screen " + signposted + " has lost its code, so the sign has nothing to say."
+                : "The sign tells the player how to reach screen " + signposted + ".";
+        }
+    }
+
+    /// <summary>
     ///     What the box says underneath the code. All three cases are worth a sentence: a booth
     ///     nothing can reach yet, a booth that can be reached, and a code with no booth left to
     ///     arrive in.
@@ -313,6 +361,9 @@ internal sealed class EditorSession : ViewModelBase
     ///     through <see cref="SetTeleportCode" />.
     /// </summary>
     public event EventHandler? TeleportCodeRequested;
+
+    /// <inheritdoc cref="TeleportCodeRequested" />
+    public event EventHandler? SignpostRequested;
 
     public void SetDocument(EditorDocument document)
     {
@@ -492,6 +543,9 @@ internal sealed class EditorSession : ViewModelBase
 
     public void RequestTeleportCodeEdit() => TeleportCodeRequested?.Invoke(this, EventArgs.Empty);
 
+    /// <inheritdoc cref="RequestTeleportCodeEdit" />
+    public void RequestSignpostEdit() => SignpostRequested?.Invoke(this, EventArgs.Empty);
+
     /// <summary>
     ///     Gives the screen being edited a destination code, or takes its code away when passed null.
     ///     What is stored is the normalised code, so that it is what the booth matches against rather
@@ -513,6 +567,23 @@ internal sealed class EditorSession : ViewModelBase
 
         Document.SetTeleportCode(_currentScreen, normalised);
         Undo.Record(new TeleportCodeEdit(_currentScreen, existing, normalised));
+    }
+
+    /// <summary>
+    ///     Points the signposts on the screen being edited at a screen, or leaves them blank when
+    ///     passed null. What is stored is the screen rather than its code, so a code renamed later
+    ///     renames what the sign reads with it.
+    /// </summary>
+    public void SetSignpostedScreen(int? signposted)
+    {
+        int? existing = Document.GetSignpostedScreen(_currentScreen);
+        if (existing == signposted)
+        {
+            return;
+        }
+
+        Document.SetSignpostedScreen(_currentScreen, signposted);
+        Undo.Record(new SignpostEdit(_currentScreen, existing, signposted));
     }
 
     /// <summary>
@@ -615,6 +686,7 @@ internal sealed class EditorSession : ViewModelBase
         document.TileChanged += OnTileChanged;
         document.CollisionMaskChanged += OnCollisionMaskChanged;
         document.TeleportCodeChanged += OnTeleportCodeChanged;
+        document.SignpostChanged += OnSignpostChanged;
         document.CoreChanged += OnCoreChanged;
     }
 
@@ -623,6 +695,7 @@ internal sealed class EditorSession : ViewModelBase
         document.TileChanged -= OnTileChanged;
         document.CollisionMaskChanged -= OnCollisionMaskChanged;
         document.TeleportCodeChanged -= OnTeleportCodeChanged;
+        document.SignpostChanged -= OnSignpostChanged;
         document.CoreChanged -= OnCoreChanged;
     }
 
@@ -659,9 +732,16 @@ internal sealed class EditorSession : ViewModelBase
         Invalidate();
     }
 
+    private void OnSignpostChanged(int screen)
+    {
+        RaiseTeleportPropertiesChanged();
+        Invalidate();
+    }
+
     /// <summary>
-    ///     Announces everything that is worked out from the current screen's teleport code. None of
-    ///     it has a backing field to set, so there is nothing to compare and nothing to skip.
+    ///     Announces everything that is worked out from the current screen's teleport code and from
+    ///     the signpost that may be standing on it. None of it has a backing field to set, so there
+    ///     is nothing to compare and nothing to skip.
     /// </summary>
     private void RaiseTeleportPropertiesChanged()
     {
@@ -671,6 +751,11 @@ internal sealed class EditorSession : ViewModelBase
         RaisePropertyChanged(nameof(ShowTeleportPanel));
         RaisePropertyChanged(nameof(TeleportCodeDisplay));
         RaisePropertyChanged(nameof(TeleportCodeNote));
+        RaisePropertyChanged(nameof(CurrentScreenHasSignpost));
+        RaisePropertyChanged(nameof(CurrentSignpostedScreen));
+        RaisePropertyChanged(nameof(ShowSignpostPanel));
+        RaisePropertyChanged(nameof(SignpostCodeDisplay));
+        RaisePropertyChanged(nameof(SignpostNote));
     }
 
     /// <summary>

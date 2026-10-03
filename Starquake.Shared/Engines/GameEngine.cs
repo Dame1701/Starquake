@@ -445,6 +445,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             _graphicsSet,
             Elements,
             RandomNumberGenerator,
+            Font1,
             TileMetrics.TilesAcross,
             TileMetrics.TilesDown,
             TileMetrics.CollisionCellWidth,

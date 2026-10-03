@@ -1,4 +1,4 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
@@ -62,6 +62,37 @@ internal static class ScreenPainter
     private static readonly IPen CoreElementPen = new Pen(new SolidColorBrush(EditorColours.Accent, 0.5));
 
     /// <summary>
+    ///     Where a signpost's code sits on the tile it is painted on, as a fraction of it: the middle
+    ///     of the board across, and the foot of the lettering down. The game writes the code into a
+    ///     box measured off that board - see <see cref="Signposts" /> - and lines it up by the foot
+    ///     of its capitals, so lining this up the same way is what keeps the canvas showing where the
+    ///     letters will actually land.
+    /// </summary>
+    private const double BoardCentreX =
+        (Signposts.TextLeft + Signposts.TextWidth / 2.0) / TileMetrics.TileWidth;
+
+    /// <inheritdoc cref="BoardCentreX" />
+    private const double BoardBaselineY =
+        (Signposts.TextTop + Signposts.TextHeight) / (double)TileMetrics.TileHeight;
+
+    /// <summary>
+    ///     How solid a signpost's code is drawn, matching the ink the game writes it in - the board
+    ///     shows through the letters rather than being covered by them.
+    /// </summary>
+    private static readonly IBrush SignpostInkBrush = new SolidColorBrush(Colors.Black, 0.75);
+
+    /// <summary>
+    ///     The game's own typeface, which is not a label font and is not drawn like one: this stands
+    ///     in for lettering painted on a board, so it is the face the game will write the code in
+    ///     rather than the one the editor's other labels use. Bold, because the game thickens its own
+    ///     for the same reason - see <c>ScreenRenderer.SignpostStrokeWidening</c>.
+    /// </summary>
+    private static readonly Typeface SignpostTypeface = new(
+        new FontFamily("avares://ScreenEditor/Fonts/elektora.ttf#Elektora"),
+        FontStyle.Normal,
+        FontWeight.Bold);
+
+    /// <summary>
     ///     One frame of the canvas. Which overlays are drawn is the session's to say; the order they go
     ///     down in is this method's, and it is the whole of the drawing policy.
     /// </summary>
@@ -103,6 +134,8 @@ internal static class ScreenPainter
         DrawCore(context, session, layout);
 
         DrawTeleportCodes(context, session, layout);
+
+        DrawSignpostCodes(context, session, layout);
 
         DrawHover(context, session, layout, hover);
 
@@ -381,6 +414,61 @@ internal static class ScreenPainter
 
                 context.FillRectangle(new SolidColorBrush(EditorColours.Void, 0.8), backing, 4);
                 context.DrawText(text, new Point(backing.X + 6, backing.Y + 3));
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Writes what every signpost on the screen reads across the sign itself. The game writes the
+    ///     code onto a blank board, so without this the canvas would show a blank board too and there
+    ///     would be no way to see what the sign says without opening a dialog.
+    /// </summary>
+    private static void DrawSignpostCodes(DrawingContext context, EditorSession session, ScreenLayout layout)
+    {
+        if (!session.CurrentScreenHasSignpost)
+        {
+            return;
+        }
+
+        string? code = session.Document.GetSignpostCode(session.CurrentScreen);
+
+        var text = new FormattedText(
+            code ?? "BLANK",
+            CultureInfo.CurrentCulture,
+            FlowDirection.LeftToRight,
+            SignpostTypeface,
+            13,
+            code is null ? EditorColours.MutedBrush : SignpostInkBrush);
+
+        for (int y = 0; y < TileMetrics.TilesDown; y++)
+        {
+            for (int x = 0; x < TileMetrics.TilesAcross; x++)
+            {
+                if (session.Document.GetTile(session.CurrentScreen, x, y) != (int)ActionTiles.TeleportSignpost)
+                {
+                    continue;
+                }
+
+                // Over the board, not over the middle of the tile. The sign hangs from the top of
+                // its square and the post below it is most of the artwork, so anything centred on
+                // the tile sits a third of a tile below the words it stands for.
+                Rect sign = layout.TileRect(x, y);
+                var where = new Point(
+                    sign.X + sign.Width * BoardCentreX - text.Width / 2,
+                    sign.Y + sign.Height * BoardBaselineY - text.Baseline);
+
+                // A code is drawn as the game draws it - black, straight onto the board, which is
+                // gold and needs nothing behind the letters to read. "BLANK" is not a preview of
+                // anything, because a sign with no code is drawn blank; it is a note that there is
+                // nothing to preview, so it keeps the chip the editor's other notes are drawn on.
+                if (code is null)
+                {
+                    var backing = new Rect(where.X - 6, where.Y - 3, text.Width + 12, text.Height + 6);
+
+                    context.FillRectangle(new SolidColorBrush(EditorColours.Void, 0.8), backing, 4);
+                }
+
+                context.DrawText(text, where);
             }
         }
     }

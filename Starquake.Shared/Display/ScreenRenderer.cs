@@ -8,6 +8,7 @@ using ProjectMercury.Emitters;
 using Starquake.Animations;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Fonts;
 using Starquake.Particles;
 using Starquake.SharedLibs;
 using Starquake.Sprites;
@@ -112,12 +113,33 @@ internal class ScreenRenderer
     /// </summary>
     private static readonly string[] ForceFieldEmitterNames = ["Emitter01", "Emitter05"];
 
+    /// <summary>
+    ///     The colour a signpost's code is written in. The board the artwork draws is gold, and black
+    ///     on it is what reads from across a room.
+    /// </summary>
+    private static readonly Color SignpostInk = Color.Black;
+
+    /// <summary>
+    ///     How solid that ink is. Short of opaque, because the letters the sign used to carry were
+    ///     painted thinly enough to let the board show through them, and ink that covers it
+    ///     completely reads as a label stuck on the sign rather than as part of it.
+    /// </summary>
+    private const int SignpostInkLevel = 190;
+
+    /// <summary>
+    ///     How far the code is written a second time, to thicken it. The font is a light one at the
+    ///     size a board leaves for five letters, so a single pass comes out finer than the lettering
+    ///     it stands in for; a pass offset by a pixel is the cheapest way to put the weight back.
+    /// </summary>
+    private const int SignpostStrokeWidening = 1;
+
 
     private readonly ColourAnimationEngine _colourAnimations;
     private readonly GraphicsSet _graphicsSet;
     private readonly IStandardParticleEffect _keyDoorForceFieldNoAccess;
     private readonly ResourceManager _resources;
     private readonly GameScreenData[] _screens;
+    private readonly BitmapFont _signpostFont;
 
     /// <summary>
     ///     Where Olly's eyes are looking. He is the face in the backdrop, and his eyes follow Blob
@@ -131,13 +153,15 @@ internal class ScreenRenderer
         GraphicsSet graphicsSet,
         GameScreenData[] screens,
         ColourAnimationEngine colourAnimations,
-        IStandardParticleEffect keyDoorForceField)
+        IStandardParticleEffect keyDoorForceField,
+        BitmapFont signpostFont)
     {
         _resources = resources;
         _graphicsSet = graphicsSet;
         _screens = screens;
         _colourAnimations = colourAnimations;
         _keyDoorForceFieldNoAccess = keyDoorForceField;
+        _signpostFont = signpostFont;
     }
 
     /// <summary>
@@ -242,6 +266,7 @@ internal class ScreenRenderer
     {
         DrawLowerTiles(colour);
         DrawTileAnimations(colour);
+        DrawSignposts(colour);
 
         _colourAnimations.Draw();
 
@@ -315,6 +340,59 @@ internal class ScreenRenderer
                 }
             }
         }
+    }
+
+    /// <summary>
+    ///     Writes the code the signposts on this screen advertise across the board each of them draws.
+    ///     The whole screen shares one code, so it is looked up and laid out once however many signs
+    ///     are standing on it.
+    /// </summary>
+    /// <remarks>
+    ///     The code is fitted to the board rather than drawn at a size chosen here: as tall as the
+    ///     board's lettering unless five letters of it would then run off the end, in which case it is
+    ///     the width that decides. That is two sums rather than a constant because the only thing that
+    ///     knows how wide a code comes out is the font, and a signpost has no room to be wrong in.
+    /// </remarks>
+    private void DrawSignposts(Color colour)
+    {
+        // The original sheet has nothing drawn at 364 at all - the signpost is the redrawn artwork's
+        // own - so there is no board to write on and the code would hang in mid-air.
+        if (_graphicsSet.IsOriginal || Signposts.CodeShownOn(_screens, ScreenNumber) is not { } code)
+        {
+            return;
+        }
+
+        float scale = Math.Min(
+            (float)Signposts.TextHeight / _signpostFont.CapitalHeight,
+            Signposts.TextWidth / _signpostFont.MeasureString(code).X);
+
+        int left = Signposts.TextLeft + (int)Math.Round((Signposts.TextWidth - _signpostFont.MeasureString(code).X * scale) / 2);
+        int top = Signposts.TextTop - (int)Math.Round(_signpostFont.CapitalTop * scale);
+
+        // The screen's own fade carries the ink's, so that a sign dims with the room it stands in
+        // rather than staying put while everything around it goes dark.
+        var ink = (byte)(colour.A * SignpostInkLevel / ColourLevels.Full);
+
+        _signpostFont.Begin(BlendState.AlphaBlend);
+
+        for (int y = 0; y < TileMetrics.TilesDown; y++)
+        {
+            for (int x = 0; x < TileMetrics.TilesAcross; x++)
+            {
+                if (_screens[ScreenNumber].ScreenTiles[x, y].TileImage != (int)ActionTiles.TeleportSignpost)
+                {
+                    continue;
+                }
+
+                int textX = x * TileMetrics.TileWidth + left;
+                int textY = y * TileMetrics.TileHeight + top;
+
+                _signpostFont.WriteScaledText(textX, textY, code, SignpostInk, ink, scale);
+                _signpostFont.WriteScaledText(textX + SignpostStrokeWidening, textY, code, SignpostInk, ink, scale);
+            }
+        }
+
+        _signpostFont.End();
     }
 
     /// <summary>

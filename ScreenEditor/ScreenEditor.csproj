@@ -22,6 +22,17 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <!--
+          The game's own typeface, linked out of the game's content rather than copied, so that the
+          editor draws a signpost's code in the face the game will write it in. MGCB bakes this same
+          .ttf into the two spritefonts the game loads; this is the only way to show those letter
+          shapes on an Avalonia canvas, which cannot read a spritefont.
+        -->
+        <AvaloniaResource Include="..\Starquake.Shared\Content\Fonts\elektora.ttf"
+                          Link="Fonts/elektora.ttf"/>
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Avalonia"/>
         <PackageReference Include="Avalonia.Desktop"/>
         <PackageReference Include="Avalonia.Themes.Fluent"/>

@@ -9,6 +9,12 @@ using Starquake.Structure;
 namespace Starquake.ScreenEditor.Editing;
 
 /// <summary>
+///     A screen a teleport code reaches, named by the code so that it can be offered as a choice.
+///     What a signpost is pointed at is one of these.
+/// </summary>
+internal readonly record struct TeleportDestination(int Screen, string Code);
+
+/// <summary>
 ///     The map being edited: every screen on the planet, plus the collision mask that says which
 ///     parts of each tile in the sheet are solid.
 /// </summary>
@@ -85,6 +91,13 @@ internal sealed class EditorDocument
     ///     it belongs to is described in two places that have to keep up with an undo.
     /// </summary>
     public event Action<int>? TeleportCodeChanged;
+
+    /// <summary>
+    ///     Raised whenever a screen's signpost is pointed at a different screen. The code the sign
+    ///     reads is drawn over it on the canvas, so unlike a teleport code this does change the
+    ///     picture.
+    /// </summary>
+    public event Action<int>? SignpostChanged;
 
     /// <summary>
     ///     An empty planet: every screen present but blank, and every tile passable.
@@ -216,6 +229,58 @@ internal sealed class EditorDocument
         }
 
         return -1;
+    }
+
+    /// <summary>
+    ///     The screen whose teleport code the signposts on a screen spell out, or null for a screen
+    ///     whose signs have not been pointed at one.
+    /// </summary>
+    public int? GetSignpostedScreen(int screen)
+        => Screens[screen].SignpostedScreen;
+
+    public void SetSignpostedScreen(int screen, int? signposted)
+    {
+        if (Screens[screen].SignpostedScreen == signposted)
+        {
+            return;
+        }
+
+        Screens[screen].SignpostedScreen = signposted;
+        IsDirty = true;
+        SignpostChanged?.Invoke(screen);
+    }
+
+    /// <summary>
+    ///     Whether a screen has a signpost on it. A signposted screen is only any use to one that
+    ///     does - there would be nothing to write the code on otherwise.
+    /// </summary>
+    public bool HasSignpost(int screen) => Signposts.StandOn(Screens[screen]);
+
+    /// <summary>
+    ///     What the signposts on a screen read, or null if there is nothing for them to say.
+    /// </summary>
+    public string? GetSignpostCode(int screen) => Signposts.CodeShownOn(Screens, screen);
+
+    /// <summary>
+    ///     Every screen a sign could be pointed at: the ones that have a code for it to show, in
+    ///     code order so that a list of them reads alphabetically rather than by where on the map
+    ///     each one happens to sit.
+    /// </summary>
+    public IReadOnlyList<TeleportDestination> TeleportDestinations()
+    {
+        var destinations = new List<TeleportDestination>();
+
+        for (int screen = 0; screen < Screens.Length; screen++)
+        {
+            if (Screens[screen].TeleportCode is { } code)
+            {
+                destinations.Add(new TeleportDestination(screen, code));
+            }
+        }
+
+        destinations.Sort((first, second) => string.CompareOrdinal(first.Code, second.Code));
+
+        return destinations;
     }
 
     /// <summary>
