@@ -7,6 +7,9 @@ using Starquake.Structure;
 
 namespace Starquake.Helpers;
 
+/// <summary>
+///     Geometry shared by anything that needs to place something against a sprite rather than draw it.
+/// </summary>
 internal static class SpriteHelpers
 {
     /// <summary>
@@ -14,44 +17,27 @@ internal static class SpriteHelpers
     ///     top left
     /// </summary>
     /// <param name="direction">Direction the sprite is moving in</param>
-    /// <param name="SpriteLocation">The size of the sprite</param>
-    /// <returns></returns>
+    /// <param name="spriteWidth">Width of the sprite in pixels</param>
+    /// <param name="spriteHeight">Height of the sprite in pixels</param>
+    /// <returns>
+    ///     The offset from the sprite's top left corner to the edge or corner it is leading with, or its centre when
+    ///     <see cref="Direction.None" />.
+    /// </returns>
     public static Point GetSpriteLocationOffset(Direction direction, int spriteWidth, int spriteHeight)
     {
-        if (direction == Direction.UpRight)
+        return direction switch
         {
-            return new Point(0, 0);
-        }
-        if (direction == Direction.Up)
-        {
-            return new Point(spriteWidth / 2, 0);
-        }
-        if (direction == Direction.UpRight)
-        {
-            return new Point(spriteWidth, 0);
-        }
-        if (direction == Direction.Left)
-        {
-            return new Point(0, spriteHeight / 2);
-        }
-        if (direction == Direction.DownLeft)
-        {
-            return new Point(0, spriteHeight);
-        }
-        if (direction == Direction.Down)
-        {
-            return new Point(spriteWidth / 2, spriteHeight);
-        }
-        if (direction == Direction.DownRight)
-        {
-            return new Point(spriteWidth, spriteHeight);
-        }
-        if (direction == Direction.Right)
-        {
-            return new Point(spriteWidth, spriteHeight / 2);
-        }
+            Direction.UpLeft => new Point(0, 0),
+            Direction.Up => new Point(spriteWidth / 2, 0),
+            Direction.UpRight => new Point(spriteWidth, 0),
+            Direction.Left => new Point(0, spriteHeight / 2),
+            Direction.DownLeft => new Point(0, spriteHeight),
+            Direction.Down => new Point(spriteWidth / 2, spriteHeight),
+            Direction.DownRight => new Point(spriteWidth, spriteHeight),
+            Direction.Right => new Point(spriteWidth, spriteHeight / 2),
+            _ => new Point(spriteWidth / 2, spriteHeight / 2)
+        };
 
         // no direction so return the centre of the sprite
-        return new Point(spriteWidth / 2, spriteHeight / 2);
     }
 }
