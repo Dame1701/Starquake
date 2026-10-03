@@ -27,6 +27,19 @@ internal class CheopsScreen : IGameScreen
     ///     is a slot index everywhere else, and no inventory is anywhere near this long.
     /// </summary>
     private const int NoItemSelected = 255;
+
+    /// <summary>
+    ///     How many elements the pyramid puts on offer, which is also how many number keys pick one.
+    ///     The artwork counts them out as "1." to "5." across the screen, so the number is a fact
+    ///     about the picture as much as about the choice.
+    /// </summary>
+    private const int ElementsOnOffer = 5;
+
+    /// <summary>
+    ///     The key that takes each offered element, in the order they are drawn.
+    /// </summary>
+    private static readonly Keys[] SelectionKeys = [Keys.D1, Keys.D2, Keys.D3, Keys.D4, Keys.D5];
+
     private readonly Blob _blob;
     private readonly CoreElements _elements;
     private readonly BitmapFont _font;
@@ -235,7 +248,7 @@ internal class CheopsScreen : IGameScreen
     private void ChooseElementsOnOffer()
     {
         {
-            _itemsToSelect = new InteractiveItem[5];
+            _itemsToSelect = new InteractiveItem[ElementsOnOffer];
 
             // Get an element from the core if there is one, if there isn't we've completed the game and this should never happen....
             List<CoreElement> activeElements = _elements.GetActiveElements();
@@ -244,14 +257,14 @@ internal class CheopsScreen : IGameScreen
 
             if (activeElements.Count > 0)
             {
-                coreElementSlot = _randomNumberGenerator.Next(0, 5);
+                coreElementSlot = _randomNumberGenerator.Next(0, ElementsOnOffer);
                 coreElement = activeElements[_randomNumberGenerator.Next(0, activeElements.Count)].CurrentElement;
             }
 
             // The item to swap takes the first slot the core element did not
             int swapItemSlot = coreElementSlot == 0 ? 1 : 0;
 
-            for (int a = 0; a < 5; a++)
+            for (int a = 0; a < ElementsOnOffer; a++)
             {
                 if (a == coreElementSlot)
                 {
@@ -320,6 +333,41 @@ internal class CheopsScreen : IGameScreen
 
         AnnounceScanResult();
 
+        if (_elementSelectionMode)
+        {
+            TakeChosenElement();
+        }
+    }
+
+    /// <summary>
+    ///     The swap itself, once the player has pressed one of the five number keys: the chosen
+    ///     element replaces what Blob was giving up, the pyramid is spent, and the game resumes.
+    /// </summary>
+    /// <remarks>
+    ///     This was five copies of the same seven lines inside <see cref="DrawElementSelection" />,
+    ///     one per key. Reading the keyboard and handing the screen over from a draw meant the swap
+    ///     was attempted once per drawn frame rather than once per logic frame - nearly three times
+    ///     a frame at 144Hz - and went on being attempted while the game was paused, because
+    ///     <c>Draw</c> does not stop when <c>Update</c> does.
+    /// </remarks>
+    private void TakeChosenElement()
+    {
+        for (int slot = 0; slot < ElementsOnOffer; slot++)
+        {
+            if (!_input.KeyboardState.IsKeyDown(SelectionKeys[slot]))
+            {
+                continue;
+            }
+
+            _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[slot].Type;
+            _screenDirectory.MainGame.ScreenFade = 40;
+            _screenDirectory.Current = GameScreenType.MainGame;
+            _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
+            _gameScreens.UpdateCollisionMap(false);
+            _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPickUp, 0.5f, false);
+
+            return;
+        }
     }
 
 
@@ -447,74 +495,24 @@ internal class CheopsScreen : IGameScreen
     /// </summary>
     private void DrawElementSelection()
     {
+        _font.Begin(BlendState.AlphaBlend);
+        _font.WriteText(378, 190, "EXCHANGE       FOR", 2, Color.White, ColourLevels.Full);
+        _font.WriteText(65, 266, "1.              2.             3.            4.             5.", 2, Color.OrangeRed, ColourLevels.Full);
+        _font.WriteText(327, 432, "HIT ANY KEY FROM  TO", 2, Color.CornflowerBlue, ColourLevels.Full);
+        _font.WriteText(690, 432, "1", 2, Color.White, ColourLevels.Full);
+        _font.WriteText(783, 432, "5", 2, Color.White, ColourLevels.Full);
+        _font.End();
+
+        SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
+        pickups.Begin(BlendState.AlphaBlend);
+        pickups.DrawSprite((int)_blob.BlobInventory[_itemToSwap], 590, 168, Color.White);
+
+        for (int a = 0; a < ElementsOnOffer; a++)
         {
-            _font.Begin(BlendState.AlphaBlend);
-            _font.WriteText(378, 190, "EXCHANGE       FOR", 2, Color.White, ColourLevels.Full);
-            _font.WriteText(65, 266, "1.              2.             3.            4.             5.", 2, Color.OrangeRed, ColourLevels.Full);
-            _font.WriteText(327, 432, "HIT ANY KEY FROM  TO", 2, Color.CornflowerBlue, ColourLevels.Full);
-            _font.WriteText(690, 432, "1", 2, Color.White, ColourLevels.Full);
-            _font.WriteText(783, 432, "5", 2, Color.White, ColourLevels.Full);
-
-            _font.End();
-
-            _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).Begin(BlendState.AlphaBlend);
-
-            // Need to select something from the inventory randomly ignoring access card and key unless they are the only items....
-            _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite((int)_blob.BlobInventory[_itemToSwap], 590, 168, Color.White);
-
-            for (int a = 0; a < 5; a++)
-            {
-                _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite(_itemsToSelect[a].Type, a * 216 + 100, 298, Color.White);
-            }
-
-            _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
-
-            if (_input.KeyboardState.IsKeyDown(Keys.D1))
-            {
-                _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[0].Type;
-                _screenDirectory.MainGame.ScreenFade = 40;
-                _screenDirectory.Current = GameScreenType.MainGame;
-                _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
-                _gameScreens.UpdateCollisionMap(false);
-                _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPickUp, 0.5f, false);
-            }
-            else if (_input.KeyboardState.IsKeyDown(Keys.D2))
-            {
-                _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[1].Type;
-                _screenDirectory.MainGame.ScreenFade = 40;
-                _screenDirectory.Current = GameScreenType.MainGame;
-                _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
-                _gameScreens.UpdateCollisionMap(false);
-                _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPickUp, 0.5f, false);
-            }
-            else if (_input.KeyboardState.IsKeyDown(Keys.D3))
-            {
-                _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[2].Type;
-                _screenDirectory.MainGame.ScreenFade = 40;
-                _screenDirectory.Current = GameScreenType.MainGame;
-                _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
-                _gameScreens.UpdateCollisionMap(false);
-                _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPickUp, 0.5f, false);
-            }
-            else if (_input.KeyboardState.IsKeyDown(Keys.D4))
-            {
-                _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[3].Type;
-                _screenDirectory.MainGame.ScreenFade = 40;
-                _screenDirectory.Current = GameScreenType.MainGame;
-                _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
-                _gameScreens.UpdateCollisionMap(false);
-                _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPickUp, 0.5f, false);
-            }
-            else if (_input.KeyboardState.IsKeyDown(Keys.D5))
-            {
-                _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[4].Type;
-                _screenDirectory.MainGame.ScreenFade = 40;
-                _screenDirectory.Current = GameScreenType.MainGame;
-                _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
-                _gameScreens.UpdateCollisionMap(false);
-                _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPickUp, 0.5f, false);
-            }
+            pickups.DrawSprite(_itemsToSelect[a].Type, a * 216 + 100, 298, Color.White);
         }
+
+        pickups.End();
     }
 
     #endregion
