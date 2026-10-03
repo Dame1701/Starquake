@@ -667,7 +667,8 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             ScreenDirectory,
             Player,
             RandomNumberGenerator,
-            Elements));
+            Elements,
+            ShapeDrawer));
         ScreenDirectory.Add(new AccessBoothScreen(
             BlobStatusPanel,
             ContentResourceManager,

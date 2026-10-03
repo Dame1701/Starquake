@@ -226,6 +226,12 @@ internal static class Assets
         ///     <c>OverloadSettings</c>.
         /// </summary>
         public const string Overload = @"Shaders\Overload";
+
+        /// <summary>
+        ///     The funnel of energy turning about the planet's core. See
+        ///     <c>CoreEnergySettings</c>.
+        /// </summary>
+        public const string CoreFunnel = @"Shaders\CoreFunnel";
     }
 
     /// <summary>

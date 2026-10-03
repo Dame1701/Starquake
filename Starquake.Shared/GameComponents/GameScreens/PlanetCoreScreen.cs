@@ -12,6 +12,7 @@ using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Helpers;
 using Starquake.Particles;
+using Starquake.Sprites;
 using Starquake.SharedLibs;
 using Starquake.Structure;
 
@@ -76,6 +77,11 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
     /// <inheritdoc cref="CoreCentreX" />
     private const int CoreCentreY = TileMetrics.PlayAreaHeight / 2;
+
+    /// <summary>
+    ///     How many frames the electricity artwork has, so the beams crawl as well as move.
+    /// </summary>
+    private const int CoreArcFrames = 10;
     private readonly Blob _blob;
 
     private readonly List<Nasty> _coreAliens;
@@ -88,6 +94,19 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     private readonly Queue<int> _elementsToReplace = new();
     private readonly GameScreenCollection _gameScreens;
     private readonly ResourceManager _resources;
+
+    /// <summary>
+    ///     The quad the funnel is drawn over. A <c>SpriteBatch</c> with a one by one white texture,
+    ///     which is all a shader that works every pixel out for itself needs.
+    /// </summary>
+    private readonly Shapes _shapes;
+
+    /// <summary>
+    ///     Logic frames the core has been running, which turns the funnel and moves the beams. It
+    ///     counts while Blob is elsewhere too - the core is the one room that carries on off
+    ///     screen, so it would be odd for its energy to stop and wait for him.
+    /// </summary>
+    private int _coreFrame;
     private readonly ScreenDirectory _screenDirectory;
     private int _blankingTilesOpacity;
     private int _coreAlienCount = MaxCoreAliens;
@@ -105,8 +124,11 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
         ScreenDirectory screenDirectory,
         Blob blob,
         Random randomNumberGenerator,
-        CoreElements elements)
+        CoreElements elements,
+        Shapes shapes)
     {
+        _shapes = shapes;
+
         _resources = resources;
         _gameScreens = gameScreens;
         _screenDirectory = screenDirectory;
@@ -209,6 +231,13 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
     public void Draw()
     {
+        // Under everything else in the room, so the elements and the guardians sit in the funnel
+        // rather than behind it.
+        if (!_replacingElements)
+        {
+            DrawFunnel();
+        }
+
         if (!_replacingElements)
         {
             _coreComputationEffect.Draw();
@@ -239,6 +268,86 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
         Point core = _gameScreens.CorePosition;
 
         _elements.Draw(core.X, core.Y, _replacingElements);
+
+        if (!_replacingElements)
+        {
+            DrawBeamsAcrossTheElements(core);
+        }
+    }
+
+    /// <summary>
+    ///     The funnel of energy turning about the core, drawn over a plain filled rectangle rather
+    ///     than over any artwork - every pixel of it is worked out by the shader, so there is
+    ///     nothing to sample and <c>Shapes</c>' one by one white texture is the whole quad.
+    /// </summary>
+    private void DrawFunnel()
+    {
+        Effect funnel = _resources.GetEffect(Assets.Shaders.CoreFunnel);
+
+        funnel.Parameters["Turned"].SetValue(CoreEnergySettings.TurnedBy(_coreFrame));
+        funnel.Parameters["Arms"].SetValue(CoreEnergySettings.Arms);
+        funnel.Parameters["Twist"].SetValue(CoreEnergySettings.Twist);
+        funnel.Parameters["Brightness"].SetValue(CoreEnergySettings.Brightness);
+        funnel.Parameters["ThroatBrightness"].SetValue(
+            CoreEnergySettings.Brightness * CoreEnergySettings.ThroatShare);
+        funnel.Parameters["ThroatColour"].SetValue(CoreEnergySettings.ThroatColour);
+        funnel.Parameters["ArmColour"].SetValue(CoreEnergySettings.ArmColour);
+
+        // The three spans are constants, so their reciprocals are worked out here rather than
+        // costing a divide on every pixel - see the shader, which has no slots to spare.
+        funnel.Parameters["OuterEdge"].SetValue(CoreEnergySettings.OuterEdge);
+        funnel.Parameters["OverOuterEdge"].SetValue(1f / CoreEnergySettings.OuterEdge);
+        funnel.Parameters["OverThroatEdge"].SetValue(1f / CoreEnergySettings.ThroatEdge);
+        funnel.Parameters["OverSpan"].SetValue(
+            1f / (CoreEnergySettings.OuterEdge - CoreEnergySettings.ThroatEdge));
+
+        var over = new Rectangle(
+            CoreCentreX - CoreEnergySettings.FunnelSize / 2,
+            CoreCentreY - CoreEnergySettings.FunnelSize / 2,
+            CoreEnergySettings.FunnelSize,
+            CoreEnergySettings.FunnelSize);
+
+        _shapes.Begin(SpriteSortMode.Deferred, BlendState.Additive, null, null, null, funnel);
+        _shapes.FillRectangle(over, Color.White);
+        _shapes.End();
+    }
+
+    /// <summary>
+    ///     Electricity crawling between the elements set into the core, through the same burning
+    ///     shader the node and gate arcs use - it is the same electricity and should look it.
+    /// </summary>
+    private void DrawBeamsAcrossTheElements(Point core)
+    {
+        SpriteCollection arc = _resources.GetSpriteCollection(Assets.Graphics.ElectricityNodeElectricity1);
+
+        int frame = _coreFrame % CoreArcFrames;
+
+        arc.Begin(BlendState.Additive, null, ElectricSettings.PointAt(
+            _resources.GetEffect(Assets.Shaders.Electric),
+            arc.SpriteRectIn01(frame),
+            arc.SpriteWidth,
+            arc.SpriteHeight,
+            _coreFrame));
+
+        for (int beam = 0; beam < CoreEnergySettings.BeamCount; beam++)
+        {
+            (int from, int to) = CoreEnergySettings.BeamEndsAt(_coreFrame, beam);
+
+            Point start = CoreEnergySettings.ElementCentre(core, from);
+            Point end = CoreEnergySettings.ElementCentre(core, to);
+
+            var along = new Vector2(end.X - start.X, end.Y - start.Y);
+
+            arc.DrawSprite(
+                frame,
+                (start.X + end.X) / 2f - arc.SpriteWidth / 2f,
+                (start.Y + end.Y) / 2f - arc.SpriteHeight / 2f,
+                Color.White,
+                CoreEnergySettings.BeamScale,
+                (float)Math.Atan2(along.Y, along.X));
+        }
+
+        arc.End();
     }
 
 
@@ -257,11 +366,17 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
         _elements.Update(gameTime, _gameScreens.CorePosition);
 
+        // Thrown from a point going round the middle rather than from the middle itself, so they
+        // spiral the way the funnel over them turns instead of spraying evenly outward.
+        Point emitter = CoreEnergySettings.EmitterAt(_coreFrame, CoreCentreX, CoreCentreY);
+
         _coreSparks.Start();
-        _coreSparks.Update(CoreCentreX, CoreCentreY, gameTime);
+        _coreSparks.Update(emitter.X, emitter.Y, gameTime);
 
         _coreComputationEffect.Start();
-        _coreComputationEffect.Update(CoreCentreX, CoreCentreY, gameTime);
+        _coreComputationEffect.Update(emitter.X, emitter.Y, gameTime);
+
+        _coreFrame++;
     }
 
     /// <summary>

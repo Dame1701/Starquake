@@ -1316,6 +1316,12 @@
 /processorParam:DebugMode=Auto
 /build:Shaders/Overload.fx
 
+#begin Shaders/CoreFunnel.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/CoreFunnel.fx
+
 #begin Sounds/AccessFailed.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
