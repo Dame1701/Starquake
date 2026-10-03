@@ -24,18 +24,6 @@ internal sealed class CanvasViewOptions : ViewModelBase
 {
     private readonly Action _repaint;
 
-    private string _hoverStatus = string.Empty;
-
-    private double _paletteTileWidth = DefaultPaletteTileWidth;
-
-    private bool _showCollision;
-
-    private bool _showGrid = true;
-
-    private bool _showNeighbours = true;
-
-    private bool _showTileNumbers;
-
     public CanvasViewOptions(Action repaint) => _repaint = repaint;
 
     /// <summary>
@@ -51,43 +39,43 @@ internal sealed class CanvasViewOptions : ViewModelBase
 
     public bool ShowGrid
     {
-        get => _showGrid;
+        get;
         set
         {
-            SetField(ref _showGrid, value);
+            SetField(ref field, value);
             _repaint();
         }
-    }
+    } = true;
 
     public bool ShowCollision
     {
-        get => _showCollision;
+        get;
         set
         {
-            SetField(ref _showCollision, value);
+            SetField(ref field, value);
             _repaint();
         }
     }
 
     public bool ShowTileNumbers
     {
-        get => _showTileNumbers;
+        get;
         set
         {
-            SetField(ref _showTileNumbers, value);
+            SetField(ref field, value);
             _repaint();
         }
     }
 
     public bool ShowNeighbours
     {
-        get => _showNeighbours;
+        get;
         set
         {
-            SetField(ref _showNeighbours, value);
+            SetField(ref field, value);
             _repaint();
         }
-    }
+    } = true;
 
     /// <summary>
     ///     How wide to draw a tile in the palette. The sheet has over four hundred tiles in it, so
@@ -95,13 +83,13 @@ internal sealed class CanvasViewOptions : ViewModelBase
     /// </summary>
     public double PaletteTileWidth
     {
-        get => _paletteTileWidth;
+        get;
         set
         {
-            SetField(ref _paletteTileWidth, Math.Clamp(value, NarrowestPaletteTile, WidestPaletteTile));
+            SetField(ref field, Math.Clamp(value, NarrowestPaletteTile, WidestPaletteTile));
             _repaint();
         }
-    }
+    } = DefaultPaletteTileWidth;
 
     /// <summary>
     ///     What the status line says about whatever the pointer is over. Written by the surfaces as the
@@ -109,7 +97,7 @@ internal sealed class CanvasViewOptions : ViewModelBase
     /// </summary>
     public string HoverStatus
     {
-        get => _hoverStatus;
-        set => SetField(ref _hoverStatus, value);
-    }
+        get;
+        set => SetField(ref field, value);
+    } = string.Empty;
 }

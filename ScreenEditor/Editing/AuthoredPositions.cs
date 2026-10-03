@@ -3,7 +3,6 @@
 // ---------------------------------------------------------
 // -
 using Starquake.ScreenEditor.ViewModels;
-using Starquake.SharedLibs;
 using Starquake.Structure;
 
 namespace Starquake.ScreenEditor.Editing;
