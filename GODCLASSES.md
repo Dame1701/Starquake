@@ -901,7 +901,7 @@ survived measurement, and one turned into two findings rather than an extraction
 | `EditorSession` | 597 code / 19 mutable | **404 / 5** | three clusters out |
 | `MainGameScreen` | 424 code / 6 mutable | **392 / 3** | the tremor out |
 | `GameEngine` | 625 code / 24 mutable | **557 / 14** | the pulsing tiles out, then its two lives split |
-| `IntroSequence` | 334 code / 18 mutable | **319 / 8** | the ship's fall out; found by the tenth pass, not by this plan |
+| `IntroSequence` | 334 code / 18 mutable | **288 / 8** | the ship's fall out; found by the tenth pass, not by this plan |
 | Tests in the suite | 237 | **411** | |
 
 **`Blob` is no longer the god class this document was written about** - at 16 mutable fields it holds
