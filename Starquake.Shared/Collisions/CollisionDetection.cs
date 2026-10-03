@@ -56,6 +56,12 @@ internal static class CollisionDetection
             return 0;
         }
 
+        if (obj1Velocity > 0 &&
+            CannotMeet(stepX, stepY, obj1Velocity, obj1X, obj1Y, obj1W, obj1H, obj2X, obj2Y, obj2W, obj2H))
+        {
+            return obj1Velocity;
+        }
+
         int amountThatCanBeMoved = 0;
 
         // Count up in steps to the full velocity requested to see if any collision is taking place
@@ -70,6 +76,60 @@ internal static class CollisionDetection
         }
 
         return amountThatCanBeMoved;
+    }
+
+    /// <summary>
+    ///     Whether the two boxes stay apart for every step of the move, and so whether the walk below
+    ///     can be skipped. The walk tests one pixel at a time up to the velocity, so a screen's worth
+    ///     of cells costs cells times velocity - and nearly all of those cells are nowhere near the
+    ///     thing that is moving.
+    /// </summary>
+    /// <remarks>
+    ///     Exact rather than approximate, so skipping changes no answer. It asks the same question
+    ///     <see cref="Check(int,int,int,int,int,int,int,int)" /> asks - centres closer than the two
+    ///     half-widths - of the whole swept path at once:
+    ///     <list type="bullet">
+    ///         <item>
+    ///             Across the move, nothing changes as the step is taken, so one comparison settles
+    ///             every step of it.
+    ///         </item>
+    ///         <item>
+    ///             Along it, the centre sweeps between its first step and its last, and the nearest
+    ///             it ever comes to the other box is at one end of that run or inside it.
+    ///         </item>
+    ///     </list>
+    ///     The halves are integer divisions, written exactly as <c>Check</c> writes them, so the two
+    ///     agree on the boundary rather than drifting a pixel apart.
+    /// </remarks>
+    private static bool CannotMeet(int stepX, int stepY, int obj1Velocity,
+        int obj1X, int obj1Y, int obj1W, int obj1H,
+        int obj2X, int obj2Y, int obj2W, int obj2H)
+    {
+        bool movingSideways = stepX != 0;
+
+        int acrossTheMove = movingSideways
+            ? Math.Abs(obj1Y + (obj1H / 2) - (obj2Y + (obj2H / 2)))
+            : Math.Abs(obj1X + (obj1W / 2) - (obj2X + (obj2W / 2)));
+
+        int acrossReach = movingSideways
+            ? (obj1H / 2) + (obj2H / 2)
+            : (obj1W / 2) + (obj2W / 2);
+
+        if (acrossTheMove >= acrossReach)
+        {
+            return true;
+        }
+
+        int step = movingSideways ? stepX : stepY;
+        int centre = movingSideways ? obj1X + (obj1W / 2) : obj1Y + (obj1H / 2);
+        int other = movingSideways ? obj2X + (obj2W / 2) : obj2Y + (obj2H / 2);
+        int alongReach = movingSideways ? (obj1W / 2) + (obj2W / 2) : (obj1H / 2) + (obj2H / 2);
+
+        int firstStep = centre + step;
+        int lastStep = centre + (step * obj1Velocity);
+
+        return other <= Math.Min(firstStep, lastStep) - alongReach ||
+               other >= Math.Max(firstStep, lastStep) + alongReach;
     }
 
     /// <summary>
