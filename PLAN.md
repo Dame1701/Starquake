@@ -25,20 +25,13 @@ it was overturned for a reason worth not relearning.
 | — | The landing site and the markers out of the tile sheet: `MarkerTile` at 500+, `LandingSite`, and the shipped map migrated onto both | *uncommitted as this was written* |
 | — | Three drawing defects older than the repository: the background's alpha, the force field drawn on every screen, and the emitter names a deep copy threw away | *uncommitted as this was written* |
 | — | The collision map off a scanned list and onto a grid, the pixel-walk sweep solved, and the tile probe that hid the mouth Blob stood in - see below | `893d700` |
+| 6.2 | Hi-scores that survive the process. The eight names become the defaults a deleted file restores, and the game gets the one file of its own it has ever had | `24c0773` |
 
-**65 tests to 460.** 211 of those were phase 4's own measure of whether the splits earned anything
+**65 tests to 475.** 211 of those were phase 4's own measure of whether the splits earned anything
 - 159 of them its own, the rest coming with the work below - and the collision rework roughly
 doubled the count again, for the different reason given in its section.
 
 ## Still open
-
-### 6.2 — persist hi-scores
-
-*Deferred by decision, not difficulty.* The original game never remembered scores either, so this
-is a new feature rather than a defect. `HiScores` hardcodes eight names in its constructor,
-`AddScoreToTable` writes only to memory, and there is no read or write to disk anywhere in the
-solution. The name-entry screen is already fully built, so the work is a file format and two
-calls.
 
 ### `Blob` is the one god class still standing
 
