@@ -26,7 +26,6 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
     private readonly SpriteCollection _foregroundImage;
     private readonly GameScreenCollection _gameScreens;
     private readonly PlayerStats _stats;
-    private bool _fadeComplete;
     private TimeSpan _playTime;
 
     public GameOverScreen(
@@ -65,7 +64,6 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
         Resources.GetSoundFxEngine().DisablePeriodicBackgroundSounds(true);
         _playTime = ScreenDirectory.MainGame.GetPlayTime();
 
-        _fadeComplete = false;
         ScreenFade = 0;
         ScreenFadeSpeed = 5;
     }
@@ -92,14 +90,7 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
         ScreenEffects.SelectRenderViewPort(ViewPorts.EntireScreen);
         _backgroundImage.Begin(BlendState.AlphaBlend);
 
-        if (_fadeComplete)
-        {
-            _backgroundImage.DrawSprite(0, 0, 0, Color.White);
-        }
-        else
-        {
-            _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
-        }
+        _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
 
         _backgroundImage.End();
 
@@ -129,14 +120,7 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
 
         _foregroundImage.Begin(BlendState.AlphaBlend);
 
-        if (_fadeComplete)
-        {
-            _foregroundImage.DrawSprite(0, 230, 120, Color.White);
-        }
-        else
-        {
-            _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
-        }
+        _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
 
         _foregroundImage.End();
     }

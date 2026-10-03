@@ -23,7 +23,6 @@ internal class GameCompleteScreen : GameScreenBase, IGameScreen
     private readonly SpriteCollection _backgroundImage;
     private readonly CoreElements _elements;
     private readonly SpriteCollection _foregroundImage;
-    private bool _fadeComplete;
 
     public GameCompleteScreen(
         ResourceManager resources,
@@ -54,7 +53,6 @@ internal class GameCompleteScreen : GameScreenBase, IGameScreen
 
     public void PerformPostScreenChangeActions()
     {
-        _fadeComplete = false;
         ScreenFade = 0;
         ScreenFadeSpeed = 5;
     }
@@ -76,14 +74,7 @@ internal class GameCompleteScreen : GameScreenBase, IGameScreen
         ScreenEffects.SelectRenderViewPort(ViewPorts.EntireScreen);
         _backgroundImage.Begin(BlendState.AlphaBlend);
 
-        if (_fadeComplete)
-        {
-            _backgroundImage.DrawSprite(0, 0, 0, Color.White);
-        }
-        else
-        {
-            _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
-        }
+        _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
 
         _backgroundImage.End();
 
@@ -100,14 +91,7 @@ internal class GameCompleteScreen : GameScreenBase, IGameScreen
 
         _foregroundImage.Begin(BlendState.AlphaBlend);
 
-        if (_fadeComplete)
-        {
-            _foregroundImage.DrawSprite(0, 230, 120, Color.White);
-        }
-        else
-        {
-            _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
-        }
+        _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
 
         _foregroundImage.End();
     }
