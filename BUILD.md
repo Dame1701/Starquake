@@ -64,8 +64,32 @@ host under Rosetta.
 `Assets/` is the master art and sound, 197 files and 20 MB of it. It is not built by anything:
 `Content.mgcb` compiles `Starquake.Shared/Content/`, which holds its own copy of nearly all
 the same files. 175 of the two folders' files are byte-identical, 17 differ, and five exist
-only here - the three `Shaders/*.fx`, which nothing in the pipeline compiles today, and the two
+only here - the four `Shaders/*.fx`, which nothing in the pipeline compiles today, and the two
 font PNGs the `.spritefont` descriptions replaced.
+
+### Shaders need Wine, which is why none of them is built
+
+Adding one to `Content.mgcb` and building it on macOS fails with
+
+```
+System.PlatformNotSupportedException: Wine is not installed on this system.
+   at MonoGame.Effect.Compiler.WineHelper..cctor()
+```
+
+MonoGame 3.8 has no shader compiler of its own. `EffectProcessor` shells out to the DirectX
+HLSL compiler, which is a Windows executable, so on macOS and Linux it runs it under Wine and
+needs `MGFXC_WINE_PATH` pointing at a prefix that MonoGame's `mgfxc_wine_setup.sh` builds.
+Nothing here has one.
+
+It fails the whole content build rather than that one asset, so the first `.fx` added to the
+pipeline takes the game down with it until Wine is installed. It is also not a one-machine
+problem: CI builds on Ubuntu, macOS and Windows, and only the Windows runner would manage it
+without the workflow installing Wine first.
+
+`Desaturate.fx` is the shader this was found with - a working desaturation for the tunnel
+transition, `ps_2_0` so it fits the `Reach` profile with room to spare. It is kept here with
+the other three, unbuilt, because the obstacle is the toolchain rather than anything about the
+shader.
 
 It was called `Temp/` until a folder of that name proved to be one confident `rm -rf` away from
 gone. If you edit art, edit it here and copy the result into `Content/`; nothing automates that,
