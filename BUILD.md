@@ -67,6 +67,10 @@ the same files. 175 of the two folders' files are byte-identical, 17 differ, and
 only here - the four `Shaders/*.fx`, which nothing in the pipeline compiles today, and the two
 font PNGs the `.spritefont` descriptions replaced.
 
+It was called `Temp/` until a folder of that name proved to be one confident `rm -rf` away from
+gone. If you edit art, edit it here and copy the result into `Content/`; nothing automates that,
+which is why the two have drifted apart in 17 places.
+
 ### Shaders need Wine, which is why none of them is built
 
 Adding one to `Content.mgcb` and building it on macOS fails with
@@ -90,10 +94,6 @@ without the workflow installing Wine first.
 transition, `ps_2_0` so it fits the `Reach` profile with room to spare. It is kept here with
 the other three, unbuilt, because the obstacle is the toolchain rather than anything about the
 shader.
-
-It was called `Temp/` until a folder of that name proved to be one confident `rm -rf` away from
-gone. If you edit art, edit it here and copy the result into `Content/`; nothing automates that,
-which is why the two have drifted apart in 17 places.
 
 ## CI
 
