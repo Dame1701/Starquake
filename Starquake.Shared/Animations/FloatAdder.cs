@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Animations;
 
-internal class FloatAdder : AnimationTrigger
+internal class FloatAdder
 {
     private readonly float _finalValue;
     private readonly float _initialValue;
@@ -13,8 +13,7 @@ internal class FloatAdder : AnimationTrigger
     public FloatAdder(
         float initialValue,
         float finalValue,
-        float stepSize,
-        bool useTrigger) : base(useTrigger)
+        float stepSize)
     {
         _initialValue = initialValue;
         _finalValue = finalValue;
@@ -27,15 +26,9 @@ internal class FloatAdder : AnimationTrigger
     private void Reset()
     {
         Modifier = _initialValue;
-        Triggered = !UseTrigger;
     }
 
 
     public void Update()
-    {
-        if (Triggered)
-        {
-            Modifier = Ramp.Up(Modifier, _stepSize, _finalValue);
-        }
-    }
+        => Modifier = Ramp.Up(Modifier, _stepSize, _finalValue);
 }

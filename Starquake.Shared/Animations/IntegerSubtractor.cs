@@ -6,7 +6,7 @@ using Starquake.Constants;
 
 namespace Starquake.Animations;
 
-internal class IntegerSubtractor : AnimationTrigger
+internal class IntegerSubtractor
 {
     private readonly int _finalValue;
     private readonly int _initialValue;
@@ -15,8 +15,7 @@ internal class IntegerSubtractor : AnimationTrigger
     public IntegerSubtractor(
         int initialValue,
         int finalValue,
-        int stepSize,
-        bool useTrigger) : base(useTrigger)
+        int stepSize)
     {
         _initialValue = initialValue;
         _finalValue = finalValue;
@@ -46,15 +45,9 @@ internal class IntegerSubtractor : AnimationTrigger
     private void Reset()
     {
         Modifier = _initialValue;
-        Triggered = !UseTrigger;
     }
 
 
     public void Update()
-    {
-        if (Triggered)
-        {
-            Modifier = Ramp.Down(Modifier, _stepSize, _finalValue);
-        }
-    }
+        => Modifier = Ramp.Down(Modifier, _stepSize, _finalValue);
 }

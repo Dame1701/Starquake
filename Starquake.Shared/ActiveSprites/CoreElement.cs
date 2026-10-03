@@ -79,9 +79,9 @@ internal class CoreElement
         int finalElement,
         bool startFadeUp)
     {
-        _currentElementDownScaler = new FloatSubtractor(ElementShrinkFrom, ElementScaleTo, ElementShrinkStep, false);
-        _finalElementUpScaler = new FloatAdder(0, ElementScaleTo, ElementGrowStep, false);
-        _elementFader = new IntegerSubtractor(ColourLevels.Full, ColourLevels.None, ElementFadeStep, false);
+        _currentElementDownScaler = new FloatSubtractor(ElementShrinkFrom, ElementScaleTo, ElementShrinkStep);
+        _finalElementUpScaler = new FloatAdder(0, ElementScaleTo, ElementGrowStep);
+        _elementFader = new IntegerSubtractor(ColourLevels.Full, ColourLevels.None, ElementFadeStep);
 
         ElementState = CoreElementState.Missing;
         CurrentElement = currentElement;

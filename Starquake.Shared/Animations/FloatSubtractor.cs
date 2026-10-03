@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Animations;
 
-internal class FloatSubtractor : AnimationTrigger
+internal class FloatSubtractor
 {
     private readonly float _finalValue;
     private readonly float _initialValue;
@@ -13,8 +13,7 @@ internal class FloatSubtractor : AnimationTrigger
     public FloatSubtractor(
         float initialValue,
         float finalValue,
-        float stepSize,
-        bool useTrigger) : base(useTrigger)
+        float stepSize)
     {
         _initialValue = initialValue;
         _finalValue = finalValue;
@@ -27,15 +26,9 @@ internal class FloatSubtractor : AnimationTrigger
     private void Reset()
     {
         Modifier = _initialValue;
-        Triggered = !UseTrigger;
     }
 
 
     public void Update()
-    {
-        if (Triggered)
-        {
-            Modifier = Ramp.Down(Modifier, _stepSize, _finalValue);
-        }
-    }
+        => Modifier = Ramp.Down(Modifier, _stepSize, _finalValue);
 }
