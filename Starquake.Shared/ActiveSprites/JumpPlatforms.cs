@@ -4,6 +4,7 @@
 // -
 using Microsoft.Xna.Framework;
 using Starquake.Collisions;
+using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
@@ -116,8 +117,7 @@ internal class JumpPlatforms : IDynamicCollisionCells
         _gameScreens.Collisions.Add(newPlatform.LeftCollisionTile);
         _gameScreens.Collisions.Add(newPlatform.RightCollisionTile);
 
-        // Returns Blob's new YPosition
-        return newPlatform.YPos - 64;
+        return newPlatform.YPos - SpriteMetrics.SpriteHeight;
     }
 
     public void ResetPlatforms()
@@ -130,7 +130,6 @@ internal class JumpPlatforms : IDynamicCollisionCells
 
     public void Update()
     {
-        // Update jump platform lifetime
         if (_platforms.Count > 0)
         {
             foreach (JumpPlatform platform in _platforms)

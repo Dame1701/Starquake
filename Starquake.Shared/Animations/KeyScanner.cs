@@ -15,7 +15,20 @@ namespace Starquake.Animations;
 
 internal class KeyScanner
 {
+    /// <summary>
+    ///     Where the digit sits inside the slot it is drawn in, so it is centred on the artwork
+    ///     behind it rather than against its corner.
+    /// </summary>
+    private const int KeyXInset = 2;
 
+    /// <inheritdoc cref="KeyXInset" />
+    private const int KeyYInset = 6;
+
+    /// <summary>
+    ///     How far the scan line overhangs the digit each side, so it reads as sweeping across it
+    ///     rather than being contained by it.
+    /// </summary>
+    private const int ScanLineXOutset = 4;
     private readonly bool _flicker;
     private readonly GraphicsSet _graphicsSet;
     private readonly Random _randomNumberGenerator;
@@ -140,38 +153,61 @@ internal class KeyScanner
 
     public void Draw(int codeNumber, int xPos, int yPos)
     {
-        // Draw the code keys
-        SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
-        pickups.Begin(BlendState.AlphaBlend);
-        pickups.DrawSprite(codeNumber, xPos + 2, yPos + 6, ColourHelper.WhiteFadedTo((byte)_keyCodeFade));
-        pickups.End();
+        DrawCodeKey(codeNumber, xPos, yPos);
 
-        var height = _scanLineY > 64 ? 64 : _scanLineY;
-
-        // If scan started......
-        if (ScanStarted)
+        if (!ScanStarted)
         {
-            if (_matched)
-            {
-                SpriteCollection accessCodesPassed = _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesPassed);
-                accessCodesPassed.Begin(BlendState.AlphaBlend);
-                accessCodesPassed.DrawSpriteSubSection(codeNumber, xPos + 2, yPos + 6, new Rectangle(0, 0, 64, height), ColourHelper.WhiteFadedTo((byte)_keyCodeFade));
-                accessCodesPassed.End();
-
-            }
-            else
-            {
-                SpriteCollection accessCodesFailed = _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesFailed);
-                accessCodesFailed.Begin(BlendState.AlphaBlend);
-                accessCodesFailed.DrawSpriteSubSection(codeNumber, xPos + 2, yPos + 6, new Rectangle(0, 0, 64, height), ColourHelper.WhiteFadedTo((byte)_keyCodeFade));
-                accessCodesFailed.End();
-            }
-
-            // Draw the scanlines
-            SpriteCollection scanLine = _resources.GetSpriteCollection(Assets.Graphics.ScanLine);
-            scanLine.Begin(BlendState.Additive);
-            scanLine.DrawSprite(0, xPos - 4, _scanLineY + yPos, ColourHelper.WhiteFadedTo((byte)_scanLineFade));
-            scanLine.End();
+            return;
         }
+
+        DrawScanVerdict(codeNumber, xPos, yPos);
+        DrawScanLine(xPos, yPos);
+    }
+
+    /// <summary>
+    ///     The digit the door is asking for, drawn as the pick-up that answers it.
+    /// </summary>
+    private void DrawCodeKey(int codeNumber, int xPos, int yPos)
+    {
+        SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
+
+        pickups.Begin(BlendState.AlphaBlend);
+        pickups.DrawSprite(codeNumber, xPos + KeyXInset, yPos + KeyYInset,
+            ColourHelper.WhiteFadedTo((byte)_keyCodeFade));
+        pickups.End();
+    }
+
+    /// <summary>
+    ///     The digit again, in the colour that says whether Blob is carrying it, revealed down to
+    ///     wherever the scan line has reached - so the verdict is painted on as the line passes.
+    /// </summary>
+    private void DrawScanVerdict(int codeNumber, int xPos, int yPos)
+    {
+        string sheetName = _matched
+            ? _graphicsSet.Names.AccessCodesPassed
+            : _graphicsSet.Names.AccessCodesFailed;
+
+        int revealed = Math.Min(_scanLineY, SpriteMetrics.SpriteHeight);
+
+        SpriteCollection verdict = _resources.GetSpriteCollection(sheetName);
+
+        verdict.Begin(BlendState.AlphaBlend);
+        verdict.DrawSpriteSubSection(codeNumber, xPos + KeyXInset, yPos + KeyYInset,
+            new Rectangle(0, 0, SpriteMetrics.SpriteWidth, revealed),
+            ColourHelper.WhiteFadedTo((byte)_keyCodeFade));
+        verdict.End();
+    }
+
+    /// <summary>
+    ///     The line itself, running down the digit.
+    /// </summary>
+    private void DrawScanLine(int xPos, int yPos)
+    {
+        SpriteCollection scanLine = _resources.GetSpriteCollection(Assets.Graphics.ScanLine);
+
+        scanLine.Begin(BlendState.Additive);
+        scanLine.DrawSprite(0, xPos - ScanLineXOutset, _scanLineY + yPos,
+            ColourHelper.WhiteFadedTo((byte)_scanLineFade));
+        scanLine.End();
     }
 }

@@ -228,7 +228,6 @@ internal class ElectricityGatesAndNodesEngine
                         }
                     }
 
-                    // Update the nodes
                     ElectricityNodeControllers[electricityNodeCounter].Update();
 
                     electricityNodeCounter++;
@@ -255,9 +254,12 @@ internal class ElectricityGatesAndNodesEngine
         }
     }
 
+    /// <summary>
+    ///     Drops the controllers, so arriving on a screen builds a set for whatever nodes that screen
+    ///     has rather than carrying the last screen's over.
+    /// </summary>
     public void PerformPostChangeScreenActions()
     {
-        // Reset Electricity Node Controller list
         ElectricityNodeControllers = null;
     }
 
@@ -332,7 +334,6 @@ internal class ElectricityGatesAndNodesEngine
 
     public void DrawUpperLayer()
     {
-        // Draw electricity nodes etc bottom layer
         List<SecondLayerTile>? secondLayerTiles = _gameScreens.GetListOfSecondLayerTiles();
 
         if (secondLayerTiles != null && secondLayerTiles.Count > 0)

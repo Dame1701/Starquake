@@ -123,7 +123,6 @@ internal class CoreElement
 
     private void CoreReplacementEffect_ParticleEffectComplete()
     {
-        // We're all done
         if (OnCoreElementReplaced != null)
         {
             OnCoreElementReplaced();
@@ -150,7 +149,8 @@ internal class CoreElement
         {
             if (_elementReplacementStarted)
             {
-                // Scale current element down
+                // The one being given up shrinks away as the new one grows in, so the two run
+                // together rather than one after the other.
                 _currentElementDownScaler.Update();
                 _finalElementUpScaler.Update();
                 if (_finalElementUpScaler.Value > ElementGrownEnough)

@@ -46,7 +46,8 @@ internal static class CollisionDetection
 
         int amountThatCanBeMoved = 0;
 
-        // Count up in steps to the full velocity requested to see if any collision is taking place
+        // A pixel at a time, so the answer is how far it may travel rather than merely whether it
+        // can travel the whole way.
         for (int a = 1; a <= obj1Velocity; a++)
         {
             if (Check(obj1X + stepX * a, obj1Y + stepY * a, obj1W, obj1H, obj2X, obj2Y, obj2W, obj2H))
@@ -216,14 +217,12 @@ internal static class CollisionDetection
     public static bool Check(int obj1X, int obj1Y, int obj1W, int obj1H,
         int obj2X, int obj2Y, int obj2W, int obj2H)
     {
-        // Centre point of each object
         int obj1CenterX = obj1X + obj1W / 2;
         int obj1CenterY = obj1Y + obj1H / 2;
 
         int obj2CenterX = obj2X + obj2W / 2;
         int obj2CenterY = obj2Y + obj2H / 2;
 
-        // How far apart those centres are, on each axis
         int distanceX = Math.Abs(obj1CenterX - obj2CenterX);
         int distanceY = Math.Abs(obj1CenterY - obj2CenterY);
 

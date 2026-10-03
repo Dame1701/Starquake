@@ -204,7 +204,6 @@ internal class PlayerStats
 
         if (BlobLives < 0)
         {
-            // That's all folks
             BlobLives = 0;
 
             return true;
@@ -212,13 +211,21 @@ internal class PlayerStats
 
         EnergyLevel = MaxEnergyLevel;
 
-        // If he's out of platforms, give him some back
+        TopUpPlatforms();
+
+        return false;
+    }
+
+    /// <summary>
+    ///     Gives Blob enough platforms to carry on with, so a death with none left does not revive
+    ///     him somewhere he cannot climb out of. Only tops up - it never takes any away.
+    /// </summary>
+    private void TopUpPlatforms()
+    {
         if (Platforms <= PlatformsOnRevival)
         {
             Platforms = PlatformsOnRevival;
         }
-
-        return false;
     }
 
     private static double Clamp(double value, int maximum)

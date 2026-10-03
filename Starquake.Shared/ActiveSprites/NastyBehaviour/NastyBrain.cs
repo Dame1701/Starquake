@@ -294,10 +294,10 @@ internal class NastyBrain
                     _nastyStuckCounter = 0;
                 }
 
-                // Has nasty been stuck for 1/4 of a second...?
                 if (_nastyStuckCounter > StuckFrames)
                 {
-                    // Unattract Blob
+                    // It has been pinned against something for a while, so it gives up on Blob and
+                    // picks a direction of its own - otherwise it keeps walking into the same wall.
                     _state.AttractedToBlob = false;
                     _nastyStuckCounter = 0;
                 }
@@ -418,7 +418,8 @@ internal class NastyBrain
         }
 
         _state.MovementType = _state.AttractedToBlob
-            // just choose from the attraction modes....
+            // The first two move types are the ones that chase, so a nasty that is after Blob draws
+            // only from those.
             ? (MoveType)_randomNumberGenerator.Next(0, 2)
             : (MoveType)_randomNumberGenerator.Next(0, Enum.GetValues(typeof(MoveType)).Length - 1);
 
@@ -428,7 +429,8 @@ internal class NastyBrain
 
         if (_firstMovement)
         {
-            // Change move speed to 1 if this is the first movement - allows the nasties to appear moving slowly
+            // The first move after being born is always slow, so a nasty eases into motion rather
+            // than appearing already at speed.
             _state.MoveSpeed = FirstMovementSpeed;
             _state.MovementChangeCount = FirstMovementDuration;
             _firstMovement = false;

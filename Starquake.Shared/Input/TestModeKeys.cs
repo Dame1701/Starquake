@@ -63,7 +63,6 @@ internal class TestModeKeys(
             }
         }
 
-        // Give us some lives back (Testing)
         if (input.KeyboardState.IsKeyDown(Keys.F2))
         {
             stats.BlobLives = TestModeLivesRestored;

@@ -87,7 +87,8 @@ internal class Nasties
 
     public void LoadContent()
     {
-        // Create double the number needed for screen swap operations
+        // Twice as many as a screen holds, so the ones being left behind can stay as they are while
+        // the next screen's are set up.
         _nasties.Clear();
         for (int a = 0; a < _nastyCount * 2; a++)
         {
@@ -122,7 +123,8 @@ internal class Nasties
             return;
         }
 
-        // Cancel any nasty collision effect
+        // Cleared each frame and set again by whichever nasty is touching him, so letting go of Blob
+        // needs no event of its own.
         _blob.BlobTouchedByNasty = false;
 
         if (_input.KeyboardState.IsKeyDown(Keys.R))
@@ -145,7 +147,8 @@ internal class Nasties
                 nastySpawnedCounter++;
             }
 
-            // Setting the coordinates to a setting less than 0 will suspect all updates
+            // A nasty parked off the map has not been given a place on this screen, so there is
+            // nothing to update - see UnplacedNastyPosition.
             if (_nasties[a].XPos <= UnplacedNastyPosition ||
                 _nasties[a].YPos <= UnplacedNastyPosition)
             {
@@ -185,7 +188,6 @@ internal class Nasties
         {
             if (_nasties[a].NastyState == NastyState.Normal)
             {
-                // Raise the event
                 if (OnNastyInteractionWithBlob != null)
                 {
                     if (!nastyInteractingWithBlob)
@@ -195,7 +197,6 @@ internal class Nasties
                     }
                 }
 
-                // Trigger Blob animation
                 _blob.BlobTouchedByNasty = true;
             }
         }

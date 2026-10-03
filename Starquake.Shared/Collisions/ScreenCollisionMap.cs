@@ -401,7 +401,8 @@ internal class ScreenCollisionMap
         int tileX = x * TileMetrics.TileWidth;
         int tileY = y * TileMetrics.TileHeight;
 
-        // Cover the whole tile since it doesn't matter - nasties can't touch any of it anyway
+        // Every cell of the tile, not just the part the artwork fills: nothing may be born on a lift
+        // shaft at all, so there is no need to be exact about its shape.
         for (int cellDown = 0; cellDown < TileMetrics.CollisionCellsDownTile; cellDown++)
         {
             for (int cellAcross = 0; cellAcross < TileMetrics.CollisionCellsAcrossTile; cellAcross++)

@@ -279,7 +279,8 @@ internal class ScreenRenderer
             {
                 int tileImage = _screens[ScreenNumber].ScreenTiles[x, y].TileImage;
 
-                // Avoid the tunnel tiles
+                // The tunnel tiles and everything past them are drawn by their own engines, so the
+                // lower layer stops short of them.
                 if (IsDrawn(tileImage) && tileImage < (int)ActionTiles.AccessForceField)
                 {
                     tiles.DrawSprite(tileImage, x * TileMetrics.TileWidth, y * TileMetrics.TileHeight, colour);
@@ -557,7 +558,6 @@ internal class ScreenRenderer
     {
         if (_graphicsSet.IsRedrawn)
         {
-            // Status panel shadow
             SpriteCollection statusPanelShadow = _resources.GetSpriteCollection(Assets.Graphics.StatusPanelShadow);
             statusPanelShadow.Begin(BlendState.AlphaBlend);
             statusPanelShadow.DrawSprite(0, 0, 0, Color.White);

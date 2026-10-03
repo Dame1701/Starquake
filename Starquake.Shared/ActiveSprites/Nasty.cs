@@ -20,8 +20,38 @@ namespace Starquake.ActiveSprites;
 internal class Nasty
 {
 
-    // The number of frames for the birth to appear (60 frames = 1 second)
+    /// <summary>
+    ///     How long a nasty takes to be born, in logic frames.
+    /// </summary>
     private const int BirthPeriod = 60;
+
+    /// <summary>
+    ///     The sixteen draws a random nasty is picked from, in the order the chain of comparisons
+    ///     this replaced tested them in. Fifteen kinds walk the planet; Bird is at both ends of the
+    ///     table and Spiky takes the last draw, so those two come up twice as often as the others.
+    /// </summary>
+    private static readonly NastyType[] NastyTypeDraw =
+    [
+        NastyType.Bird,
+        NastyType.Helmet,
+        NastyType.FriedEgg,
+        NastyType.CurleyWurley,
+        NastyType.Shellfish,
+        NastyType.Cushion,
+        NastyType.Gonzo,
+        NastyType.Snail,
+        NastyType.Ghost,
+        NastyType.Centipede,
+        NastyType.Scorpion,
+        NastyType.DragonFly,
+        NastyType.Hippo,
+        NastyType.Helicopter,
+        NastyType.Bird,
+        NastyType.Spiky
+    ];
+
+    /// <inheritdoc cref="NastyTypeDraw" />
+    private const int NastyTypeDrawRange = 16;
 
     /// <summary>
     ///     The nasty's walk cycle. It plays back and forth rather than looping, which is what gives
@@ -321,7 +351,8 @@ internal class Nasty
         _conceptionWaitCounter = copySource._conceptionWaitCounter;
         _nastyDeadPauseCounter = copySource._nastyDeadPauseCounter;
 
-        // Ensure that we don't carry on generating after moving screens
+        // A nasty caught mid-birth arrives fully born, because the screen it was being born onto is
+        // not the screen it is now on.
         NastyState = copySource.NastyState == NastyState.Birth
             ? NastyState.Normal
             : copySource.NastyState;
@@ -337,7 +368,6 @@ internal class Nasty
     /// </remarks>
     private Point? GetNastySpawnLocation()
     {
-        // Get all locations where we can have nasties from the current game screen
         List<Point> potentialLocations = _gameScreens.GetNastyPotentialLocations();
 
         if (potentialLocations.Count == 0)
@@ -368,7 +398,6 @@ internal class Nasty
     {
         if (NastyState == NastyState.Dead)
         {
-            // Extend this to pause for random time before bringing a nasty back to life
             _nastyDeadPauseCounter = 0;
             NastyState = NastyState.PreConception;
             _conceptionWaitCounter = _randomNumberGenerator.Next(0, LongestConceptionWait);
@@ -376,76 +405,17 @@ internal class Nasty
     }
 
     /// <summary>
-    ///     Picks a nasty at random. The range runs one past the fifteen types so that Spiky, the
-    ///     last, comes up twice as often as the rest - Bird is also drawn twice, at 0 and at 14.
+    ///     Picks a nasty at random, from the fifteen kinds that walk about the planet. Bird appears
+    ///     twice in the table and Spiky takes the sixteenth draw, so each of those two comes up twice
+    ///     as often as the rest.
     /// </summary>
+    /// <remarks>
+    ///     This was a chain of fifteen comparisons against the draw, in an order that is not the
+    ///     enum's. The order is the point - it is what gives Bird its second entry - so it is a table
+    ///     now rather than a chain, and the duplicate is visible in it.
+    /// </remarks>
     public static NastyType GetRandomNastyType(Random randomNumberGenerator)
-    {
-        // Go to more than max nasty types to increase chance of four spiky nasties
-        int temp = randomNumberGenerator.Next(0, 16);
-
-        if (temp == 0)
-        {
-            return NastyType.Bird;
-        }
-        if (temp == 1)
-        {
-            return NastyType.Helmet;
-        }
-        if (temp == 2)
-        {
-            return NastyType.FriedEgg;
-        }
-        if (temp == 3)
-        {
-            return NastyType.CurleyWurley;
-        }
-        if (temp == 4)
-        {
-            return NastyType.Shellfish;
-        }
-        if (temp == 5)
-        {
-            return NastyType.Cushion;
-        }
-        if (temp == 6)
-        {
-            return NastyType.Gonzo;
-        }
-        if (temp == 7)
-        {
-            return NastyType.Snail;
-        }
-        if (temp == 8)
-        {
-            return NastyType.Ghost;
-        }
-        if (temp == 9)
-        {
-            return NastyType.Centipede;
-        }
-        if (temp == 10)
-        {
-            return NastyType.Scorpion;
-        }
-        if (temp == 11)
-        {
-            return NastyType.DragonFly;
-        }
-        if (temp == 12)
-        {
-            return NastyType.Hippo;
-        }
-        if (temp == 13)
-        {
-            return NastyType.Helicopter;
-        }
-        if (temp == 14)
-        {
-            return NastyType.Bird;
-        }
-        return NastyType.Spiky;
-    }
+        => NastyTypeDraw[randomNumberGenerator.Next(0, NastyTypeDrawRange)];
 
     public void Update(GameTime gameTime)
     {
@@ -564,7 +534,6 @@ internal class Nasty
         }
 
 
-        // Fade the nasty in
         if (_birthFadeLevel < ColourLevels.Full)
         {
             _birthFadeLevel += (int)(ColourLevels.Full /
@@ -573,7 +542,8 @@ internal class Nasty
         }
 
 
-        // Once we're halfway through fade in the colours
+        // The colour and the slowing of the spin both start half way through, so a nasty arrives
+        // grey and spinning and settles into its own colours.
         if (_birthTimer > BirthPeriod / BirthColourFadeHalf)
         {
             if (_birthColourLevel < ColourLevels.Full)
@@ -652,7 +622,6 @@ internal class Nasty
 
     private void UpdateDeath()
     {
-        // Fade the nasty out and shrink it as it explodes
         _deathFadeLevel = Ramp.Down(_deathFadeLevel, DeathFadeStep, ColourLevels.None);
         _deathScale = Ramp.Down(_deathScale, DeathShrinkStep, 0f);
 
@@ -673,12 +642,14 @@ internal class Nasty
         }
     }
 
+    /// <summary>
+    ///     Both death effects, whichever this nasty actually started - the explosion for a spiky or
+    ///     conveyor nasty, the splat for any of the others. Updating the idle one costs nothing and
+    ///     saves asking which is running.
+    /// </summary>
     private void UpdateDeathEffects(GameTime gameTime)
     {
-        // Update the explosion
         _nastyDies.Update(XPos + SpriteMetrics.HalfSpriteWidth, YPos + SpriteMetrics.HalfSpriteHeight, gameTime);
-
-        // Update the splat
         _nastyDiesType2.Update(XPos + SpriteMetrics.HalfSpriteWidth, YPos + SpriteMetrics.HalfSpriteHeight, gameTime);
     }
 
@@ -709,7 +680,8 @@ internal class Nasty
 
     public void PerformPostChangeScreenActions()
     {
-        // Stop the explosion effect leaking onto the next screen
+        // Stopped rather than left running, or the particles still in the air would be drawn over
+        // the screen Blob has just walked onto.
         _nastyDies.Stop();
         _nastyDiesType2.Stop();
 
@@ -788,7 +760,6 @@ internal class Nasty
     {
         _nastySprite.Begin(BlendState.Additive);
 
-        // Choose the image
         _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
             ColourHelper.WhiteFadedTo((byte)screenFade), 1.0f, MathHelper.ToRadians(_rotation));
         _nastySprite.End();
@@ -802,7 +773,6 @@ internal class Nasty
     {
         _nastySprite.Begin(BlendState.AlphaBlend);
 
-        // Choose the image
         _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
             ColourHelper.GetXna4Colour((byte)_birthColourLevel, (byte)_birthColourLevel, ColourLevels.Full,
                 (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), _birthScale,
@@ -810,9 +780,12 @@ internal class Nasty
         _nastySprite.End();
     }
 
+    /// <summary>
+    ///     A nasty going about its business. One that has been shot but not yet killed is smoking,
+    ///     which is drawn as the same frame three times over in additive red and green.
+    /// </summary>
     private void DrawLiveNasty(int nastyImage, int screenFade)
     {
-        // Choose the image
         if (Smoking)
         {
             _nastySprite.Begin(BlendState.Additive);
@@ -838,7 +811,6 @@ internal class Nasty
     /// </summary>
     private void DrawDeath(int nastyImage, int screenFade)
     {
-        // Draw the explosion and the splat
         _nastyDies.Draw();
         _nastyDiesType2.Draw();
 

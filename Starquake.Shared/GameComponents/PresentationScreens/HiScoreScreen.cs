@@ -74,7 +74,6 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
         ScreenFadeSpeed = 5;
         _playersHighScore = new HiScore();
 
-        // Lets see if we have a place in the high score table
         _gotHighScore = _hiScoreList.GotHighScore(_stats.PlayerScore);
 
         if (_gotHighScore)
@@ -83,9 +82,6 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
             _playersHighScore.Name = "";
 
             _hiScoreList.AddScoreToTable(_playersHighScore);
-
-            // Reset the flag so we can display the table
-            //gotHighScore = false;
         }
     }
 
@@ -149,10 +145,8 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
 
         _backgroundImage.End();
 
-        // Draw the high score entry bit if the player has got a high score
         if (_gotHighScore)
         {
-
             Font.Begin(BlendState.AlphaBlend);
             Font.WriteTextCentred(1280, 180, "ENCODE YOUR NAME", 2, ColourHelper.GetXna4Colour(9, 132, ColourLevels.Full), (byte)ScreenFade);
             Font.WriteTextCentred(1280, 240, "INTO THE CORE", 2, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full), (byte)ScreenFade);

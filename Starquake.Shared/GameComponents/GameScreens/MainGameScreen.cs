@@ -110,7 +110,6 @@ internal class MainGameScreen : IGameScreen
             _gameEngine.ElectricityNodeGateEngine.PerformPostChangeScreenActions();
             _gameEngine.ContentResourceManager.GetSoundFxEngine().KillSounds(false);
 
-            // Initialise the Tunnel lift animations
             _gameEngine.TunnelAnimations.PerformPostChangeScreenActions();
         }
 
@@ -120,19 +119,12 @@ internal class MainGameScreen : IGameScreen
             ScreenFadeSpeed = ScreenFadeUpSpeed;
         }
 
-        // Clear the viewport
         if (triggeringScreen == GameScreenType.MainGame)
         {
-            // Reset viewport back to game area
             _gameEngine.ScreenEffectEngine.SelectRenderViewPort(ViewPorts.GameArea);
         }
 
-        // Update score for each new screen visited
-        if (!_gameEngine.GameScreens.CurrentGameScreenData.ScreenVisited)
-        {
-            _gameEngine.GameScreens.CurrentGameScreenData.ScreenVisited = true;
-            _gameEngine.Stats.PlayerScore += ScoreForReachingCore;
-        }
+        ScoreFirstVisitToThisScreen();
 
         // Walking onto the screen that carries the core hands over to the core screen entirely. Which
         // screen that is comes off the map.
@@ -170,9 +162,22 @@ internal class MainGameScreen : IGameScreen
     public TimeSpan GetPlayTime()
         => TimeSpan.FromSeconds((double)_framesPlayed / LogicClock.FramesPerSecond);
 
+    /// <summary>
+    ///     Points for reaching a screen for the first time, once per screen for the whole game.
+    /// </summary>
+    private void ScoreFirstVisitToThisScreen()
+    {
+        if (_gameEngine.GameScreens.CurrentGameScreenData.ScreenVisited)
+        {
+            return;
+        }
+
+        _gameEngine.GameScreens.CurrentGameScreenData.ScreenVisited = true;
+        _gameEngine.Stats.PlayerScore += ScoreForReachingCore;
+    }
+
     public void SpritesChanged()
     {
-        // Initialise the Tunnel lift animations
         _gameEngine.TunnelAnimations.PerformPostChangeScreenActions();
 
         ScreenFade = 0;
@@ -306,32 +311,40 @@ internal class MainGameScreen : IGameScreen
             }
         }
 
-        // Test game complete screen
         if (_gameEngine.Input.GetPressedKey() == Keys.W)
         {
-            _gameEngine.ScreenDirectory.Current = GameScreenType.GameComplete;
-            _gameEngine.ScreenDirectory.GameComplete.PerformPostScreenChangeActions();
+            JumpToGameCompleteScreen();
         }
 
-        // Test completing core
         if (_gameEngine.Input.GetPressedKey() == Keys.C)
         {
-            foreach (CoreElement element in _gameEngine.Elements.Elements)
-            {
-                element.ElementState = CoreElementState.Replaced;
-            }
+            ReplaceEveryCoreElement();
         }
 
-        // Test intro sequence
         if (_gameEngine.Input.GetPressedKey() == Keys.I)
         {
             _gameEngine.IntroSequence.Reset();
         }
 
-        // Test Unstick routine
         if (_gameEngine.Input.GetPressedKey() == Keys.U)
         {
             _gameEngine.Player.UnstickBlobFromTiles();
+        }
+    }
+
+    /// <inheritdoc cref="HandleTestModeKeys" />
+    private void JumpToGameCompleteScreen()
+    {
+        _gameEngine.ScreenDirectory.Current = GameScreenType.GameComplete;
+        _gameEngine.ScreenDirectory.GameComplete.PerformPostScreenChangeActions();
+    }
+
+    /// <inheritdoc cref="HandleTestModeKeys" />
+    private void ReplaceEveryCoreElement()
+    {
+        foreach (CoreElement element in _gameEngine.Elements.Elements)
+        {
+            element.ElementState = CoreElementState.Replaced;
         }
     }
 
@@ -393,21 +406,20 @@ internal class MainGameScreen : IGameScreen
         _gameEngine.ConveyorNastiesInstance.Update(gameTime);
         _gameEngine.ElectricityNodeGateEngine.Update();
 
-        // Update breakable bridges
         _gameEngine.BreakableBridgesEngine.Update();
     }
 
     private void EndGameIfOutOfLives()
     {
-        if (_gameEngine.Player.BlobsState == BlobState.GameOver)
+        if (_gameEngine.Player.BlobsState != BlobState.GameOver)
         {
-            // Disable the periodic sound engine and kill all sounds immediately
-            _gameEngine.ContentResourceManager.GetSoundFxEngine().DisablePeriodicBackgroundSounds(true);
-
-            // Change to gameover screen
-            _gameEngine.ScreenDirectory.GameOver.PerformPostScreenChangeActions();
-            _gameEngine.ScreenDirectory.Current = GameScreenType.GameOver;
+            return;
         }
+
+        _gameEngine.ContentResourceManager.GetSoundFxEngine().DisablePeriodicBackgroundSounds(true);
+
+        _gameEngine.ScreenDirectory.GameOver.PerformPostScreenChangeActions();
+        _gameEngine.ScreenDirectory.Current = GameScreenType.GameOver;
     }
 
     /// <summary>
@@ -497,11 +509,11 @@ internal class MainGameScreen : IGameScreen
 
             if (GameIsInPlay)
             {
-                // Screen Exit shadows
                 _gameEngine.GameScreens.DrawShadowing();
             }
 
-            // Draw any sprites/effects that must go in front of shadows etc.
+            // Last, so Blob's sparks are in front of the shadows down the screen exits rather than
+            // under them.
             _gameEngine.Player.DrawUpper(ScreenFade);
         }
 

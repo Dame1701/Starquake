@@ -220,7 +220,8 @@ internal class CheopsScreen : IGameScreen
         {
             _itemsToSelect = new InteractiveItem[ElementsOnOffer];
 
-            // Get an element from the core if there is one, if there isn't we've completed the game and this should never happen....
+            // There is always one, because a core with nothing left to replace has already ended the
+            // game before the pyramid can be reached.
             List<CoreElement> activeElements = _elements.GetActiveElements();
             int coreElementSlot = -1;
             int coreElement = 0;
@@ -398,7 +399,6 @@ internal class CheopsScreen : IGameScreen
                 _accessCodes[a].Draw(_accessCode[a] + AccessCodeLock.FirstDigitPickup, 420 + a * 128, 260);
             }
 
-            // Draw the result
             if (_accessCodes[1].Scanned)
             {
                 if (_scan.Accepted)

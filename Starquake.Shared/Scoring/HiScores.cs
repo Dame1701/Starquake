@@ -91,17 +91,17 @@ internal class HiScores
         return false;
     }
 
-    // Insert a player into the table
+    /// <summary>
+    ///     Puts a score into the table, above the first one it beats, and drops whatever was last to
+    ///     keep the table the length it was. A score that beats nothing in the table is not added.
+    /// </summary>
     public void AddScoreToTable(HiScore scoreToAdd)
     {
         for (int a = 0; a < _scores.Count; a++)
         {
             if (scoreToAdd.Score > _scores[a].Score)
             {
-                // Insert the score above the one that's less than the new one
                 _scores.Insert(a, scoreToAdd);
-
-                // Remove the score at the bottom of the list
                 _scores.RemoveAt(_scores.Count - 1);
 
                 break;

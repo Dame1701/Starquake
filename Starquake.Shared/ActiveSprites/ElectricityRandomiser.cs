@@ -11,6 +11,26 @@ namespace Starquake.ActiveSprites;
 
 internal class ElectricityRandomiser
 {
+    /// <summary>
+    ///     How long the arcs hold their state for, in logic frames. Left as the frame counts they
+    ///     have always been rather than expressed in seconds: they were chosen when the loop ran at
+    ///     sixty frames a second, and <see cref="LogicClock.FramesPerSecond" /> is fifty now - so the
+    ///     comment that called 240 to 300 "four to five seconds" is out by a fifth, and rewriting
+    ///     them in terms of the clock would retime the hazard rather than describe it.
+    /// </summary>
+    private const int OnScreenEntryFrames = 60;
+
+    /// <inheritdoc cref="OnScreenEntryFrames" />
+    private const int AfterResetMinFrames = 240;
+
+    /// <inheritdoc cref="OnScreenEntryFrames" />
+    private const int AfterResetMaxFrames = 300;
+
+    /// <summary>
+    ///     How loud the arcs are. They run constantly wherever they are on a screen, so they sit
+    ///     below everything that happens once.
+    /// </summary>
+    private const float SoundVolume = 0.3f;
 
     private readonly Random _randomGenerator;
     private readonly ResourceManager _resources;
@@ -47,17 +67,19 @@ internal class ElectricityRandomiser
         _counter = 0;
         if (nodeReset)
         {
-            // Longer interval if we have reset, probably because Blob has died so give the player chance to respond
-            _counterTarget = _randomGenerator.Next(240, 300); // Random number between four seconds and a five seconds
+            // Longer after a reset, which usually means Blob has just died - so the player has a
+            // moment to get clear before the arcs start again.
+            _counterTarget = _randomGenerator.Next(AfterResetMinFrames, AfterResetMaxFrames);
         }
         else if (changedScreens)
         {
-            // Fix the electricity time for new screen entry
-            _counterTarget = 60;
+            // Always the same on arrival, so a screen's arcs are in a known state when Blob walks on
+            // rather than possibly flipping the instant he does.
+            _counterTarget = OnScreenEntryFrames;
         }
         else
         {
-            _counterTarget = _randomGenerator.Next(60, 300); // Random number between one second and five seconds
+            _counterTarget = _randomGenerator.Next(OnScreenEntryFrames, AfterResetMaxFrames);
         }
     }
 
@@ -67,36 +89,49 @@ internal class ElectricityRandomiser
         ElectricityOn = false;
     }
 
+    /// <summary>
+    ///     Starts the arcing sound if it is not already going. One instance for however many nodes
+    ///     are on the screen, which is why it is started from the flag rather than per node.
+    /// </summary>
+    private void StartElectricitySound()
+    {
+        if (_electricitySoundPlayed)
+        {
+            return;
+        }
+
+        _soundId = _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.ElectricityNodes, SoundVolume);
+        _electricitySoundPlayed = true;
+    }
+
+    /// <inheritdoc cref="StartElectricitySound" />
+    private void StopElectricitySound()
+    {
+        if (_soundId != Guid.Empty)
+        {
+            _resources.GetSoundFxEngine().StopSound(_soundId, SoundFade.None);
+        }
+
+        _electricitySoundPlayed = false;
+    }
+
     public void Update()
     {
         _counter++;
 
         if (_counter > _counterTarget)
         {
-            // flip the electricity
             ElectricityOn = !ElectricityOn;
             ResetCounter(false, false);
         }
 
         if (ElectricityOn)
         {
-            if (!_electricitySoundPlayed)
-            {
-                // Play sound
-                _soundId = _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.ElectricityNodes, 0.3F);
-
-                _electricitySoundPlayed = true;
-            }
+            StartElectricitySound();
         }
         else
         {
-            // Stop sound
-            if (_soundId != Guid.Empty)
-            {
-                _resources.GetSoundFxEngine().StopSound(_soundId, SoundFade.None);
-            }
-
-            _electricitySoundPlayed = false;
+            StopElectricitySound();
         }
     }
 }

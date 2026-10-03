@@ -53,7 +53,8 @@ internal class BreakableBridges
                 }
                 else
                 {
-                    // Update the collision map to remove the bridge collision once we've finished dissolving
+                    // Rebuilt without the bridge, which is what finally makes the gap walkable - the
+                    // tile went when it broke, but its collision cells are only dropped here.
                     _gameScreens.UpdateCollisionMap(false);
 
                     _bridges.Remove(_bridges[a]);

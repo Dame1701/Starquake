@@ -345,7 +345,6 @@ internal class ResourceManager : StartableGameComponentBase
             throw new InvalidOperationException($"Data resource '{name}' has not been registered.");
         }
 
-        // Ensure we don't return a sprite array by mistake!
         if (resource is SpriteCollection)
         {
             throw new InvalidOperationException($"Resource '{name}' is a sprite collection, not a data resource.");

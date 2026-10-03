@@ -81,7 +81,6 @@ internal class CoreElements
         {
             if (Elements[a].CurrentElement == elementNoToReplace)
             {
-                // You get a healthy 10,000 points for each element replaced!
                 _stats.PlayerScore += ScoreForCompletingCore;
 
                 Elements[a].ElementState = CoreElementState.Replacing;
@@ -105,13 +104,15 @@ internal class CoreElements
         return toReturn;
     }
 
-    // Resets the elements back to defaults
+    /// <summary>
+    ///     A fresh set of nine elements for the core to be missing, drawn without repeats so no two
+    ///     of them ask for the same thing.
+    /// </summary>
     public void Reset()
     {
         int counter = 0;
         bool fadeUp;
 
-        // ensure we don't choose the same element twice....
         var elementsToChoose = new List<int>();
         for (int a = 0; a < 28; a++)
         {

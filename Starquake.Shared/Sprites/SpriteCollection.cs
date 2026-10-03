@@ -51,7 +51,8 @@ internal class SpriteCollection
         int counter = 0;
         _fade = ColourLevels.Full;
 
-        // Generate Coordinates for the textures of the tiles found
+        // Where each frame sits in the sheet, worked out once here so drawing one is an index rather
+        // than a multiplication.
         for (int y = 0; y < noVerticalImages; y++)
         {
             for (int x = 0; x < noHorizontalImages; x++)

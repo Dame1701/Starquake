@@ -24,12 +24,14 @@ internal class TriggeredParticleEffect(GraphicsSet graphicsSet,
 
     public event RaiseEffectComplete? ParticleEffectComplete;
 
-    // Starts an effect that is not triggered
+    /// <summary>
+    ///     Starts the effect. One already playing is killed first, so a retrigger replaces it rather
+    ///     than running two at once.
+    /// </summary>
     public void Start()
     {
         if (EffectActive)
         {
-            // Kill the previous effect
             _mercury.Terminate();
             EffectActive = false;
             _triggered = false;
@@ -39,7 +41,9 @@ internal class TriggeredParticleEffect(GraphicsSet graphicsSet,
         EffectActive = true;
     }
 
-    // Stops an effect playing
+    /// <summary>
+    ///     Stops the effect at once, particles in the air included.
+    /// </summary>
     public void Stop()
     {
         _mercury.Terminate();

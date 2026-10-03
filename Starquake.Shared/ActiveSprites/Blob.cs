@@ -357,7 +357,10 @@ internal class Blob
         BlobsState = BlobState.Overloading;
     }
 
-    // Blob has hit something
+    /// <summary>
+    ///     Starts Blob dissolving into a teleport beam. The booth he walked into has already decided
+    ///     he is going somewhere; this is only how it looks.
+    /// </summary>
     public void TriggerBlobTeleportedAnimation()
     {
         _blobTeleporterBeam.Start();
@@ -388,7 +391,6 @@ internal class Blob
             }
         }
 
-        // Update the teleport beam effect - probably should have a boolean to stop drawing when not needed.....
         _blobTeleporterBeam.Update(_blobXPos + TeleportBeamXOffset, _blobYPos + TeleportBeamYOffset, gameTime);
         Weapon.UpdateEffects(gameTime);
 
@@ -613,13 +615,7 @@ internal class Blob
                 }
                 else // just jump aimlessly in the air
                 {
-                    // Check that we are on the ground first.... and above Blob's head
-                    if (_gameScreens.CheckCollision(Direction.Down, _blobXPos, _blobYPos,
-                            BlobWidth, BlobHeight, 1, true) == 0 &&
-                        _gameScreens.CheckCollision(Direction.Up, _blobXPos,
-                            _blobYPos - JumpHeightWithoutPlatforms,
-                            BlobWidth, BlobHeight, 1, true) != 0
-                       )
+                    if (CanJumpWithoutAPlatform())
                     {
                         _blobYPos -= JumpHeightWithoutPlatforms;
                         _resources.GetSoundFxEngine()
@@ -629,6 +625,22 @@ internal class Blob
             }
         }
     }
+
+    /// <summary>
+    ///     Whether Blob can manage the small jump he makes with no platform left to lay: he has to be
+    ///     standing on something, and there has to be room over his head to rise into.
+    /// </summary>
+    /// <remarks>
+    ///     Both probes ask how far he may travel, which is why they read as opposites. Nought going
+    ///     down means he cannot descend a pixel and so is on the ground; something going up from one
+    ///     jump above where he stands means that position still has slack over it.
+    /// </remarks>
+    private bool CanJumpWithoutAPlatform()
+        => _gameScreens.CheckCollision(Direction.Down, _blobXPos, _blobYPos,
+               BlobWidth, BlobHeight, 1, true) == 0 &&
+           _gameScreens.CheckCollision(Direction.Up, _blobXPos,
+               _blobYPos - JumpHeightWithoutPlatforms,
+               BlobWidth, BlobHeight, 1, true) != 0;
 
     private void AccessInventory()
     {
@@ -651,29 +663,17 @@ internal class Blob
             }
         }
 
-        // Ensure Blob isn't going through a force field
-        bool inAccessForceField = false;
-        TileDetected? forceFieldTile = _gameScreens.CheckTileByObject(Direction.None, _blobXPos,
-            _blobYPos, BlobWidth, BlobHeight, 0);
-
-        if (forceFieldTile is { TileNumber: (int)ActionTiles.AccessForceField })
-        {
-            inAccessForceField = true;
-        }
-
         if (BlobsControl.MovedUp() &&
             !BlobsControl.MovedLeft() &&
             !BlobsControl.MovedRight())
         {
             if (!_inventoryAccessed &&
                 !_lift.GoingUp &&
-                !inAccessForceField)
+                !InAnAccessForceField())
             {
                 if (accessingCheops)
                 {
-                    // Do something with the pyramid.....
-                    _screenDirectory.Cheops.Reset();
-                    _screenDirectory.Current = GameScreenType.Cheops;
+                    EnterCheops();
                 }
                 else
                 {
@@ -690,6 +690,23 @@ internal class Blob
                 }
             }
         }
+    }
+
+    /// <summary>
+    ///     Whether Blob is standing in an access tunnel's force field. He cannot reach his inventory
+    ///     through one, which is what stops him swapping an item while he is inside a door.
+    /// </summary>
+    private bool InAnAccessForceField()
+        => _gameScreens.CheckTileByObject(Direction.None, _blobXPos, _blobYPos, BlobWidth, BlobHeight, 0)
+            is { TileNumber: (int)ActionTiles.AccessForceField };
+
+    /// <summary>
+    ///     Hands over to the Cheops screen, where the pyramid offers Blob a swap.
+    /// </summary>
+    private void EnterCheops()
+    {
+        _screenDirectory.Cheops.Reset();
+        _screenDirectory.Current = GameScreenType.Cheops;
     }
 
     private void ReleaseHeldControls()
@@ -744,7 +761,6 @@ internal class Blob
                 .StopSound(_blobFallsSoundId, SoundFade.Fast);
         }
 
-        // Fall - arrrgh!!!
         _blobYPos += fall.Distance;
     }
 
@@ -986,6 +1002,11 @@ internal class Blob
         return changedScreens;
     }
 
+    /// <summary>
+    ///     Breaks the bridge Blob has landed on, if he came down hard enough for it to give way. The
+    ///     tile is taken off the map and handed to the bridges engine, which dissolves it where it
+    ///     stood; it is noted down as well, so that leaving the screen puts it back.
+    /// </summary>
     private void BreakBridgeUnderfoot(TileDetected? below)
     {
         if (below is not { TileNumber: (int)ActionTiles.BreakableBridges })
@@ -998,17 +1019,13 @@ internal class Blob
             return;
         }
 
-        // Play the sound
         _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BridgeBreak);
 
-        // Add the tile to the list of tiles to reset on screen change
         _tilesToReset.Add(new ResetTile(below, _gameScreens.ScreenNumber));
 
-        // Remove the tile
         _gameScreens.CurrentGameScreenData
             .ScreenTiles[below.MapXPosition, below.MapYPosition].TileImage = -1;
 
-        // Add the tile to the Breakable bridges engine
         _breakableBridges.AddBridge(
             _gameScreens.ConvertToScreenCoords(below.MapXPosition,
                 below.MapYPosition));
@@ -1164,7 +1181,6 @@ internal class Blob
 
         _blobJumpPlatformEngine.ResetPlatforms();
 
-        // Unstick Blob from the screenmap if he's got stuck due to a tile map change
         UnstickBlobFromTiles();
 
         if (_directionGoingThroughTunnel != Direction.None)
@@ -1264,7 +1280,6 @@ internal class Blob
     {
         if (BlobTouchedByNasty)
         {
-            // Reset the counter
             if (!_blobTouched)
             {
                 _blobEnergyDrainCounter = ColourLevels.Full;
@@ -1355,7 +1370,6 @@ internal class Blob
 
     private void DrawOverloadAlarmState(int screenFade)
     {
-        // Make Blob flicker
         if (_overload.Visible)
         {
             SpriteCollection blobSprites = _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites);
@@ -1397,29 +1411,35 @@ internal class Blob
         Weapon.DrawSparks(screenFade);
     }
 
+    /// <summary>
+    ///     Blob at the start of a new game: standing still, at full health, back on the square the
+    ///     ship came down on and off the shuttle.
+    /// </summary>
     public void Reset()
     {
-        // Reset Blob's energy drain counter
         _blobEnergyDrainCounter = 0;
-
-        // Reset Blob's animation frame
-        BlobFrame = 5;
-
-        // Reset Blob's state
+        BlobFrame = BlobRestingFrame;
         BlobsState = BlobState.Normal;
 
-        // Reset Blob's position. Where that is belongs to the map - the author marks the square the
-        // ship came down on - so it is asked for rather than written down here.
+        // Where he starts belongs to the map - the author marks the square the ship came down on -
+        // so it is asked for rather than written down here.
         Point start = _gameScreens.BlobStartPosition;
         _blobXPos = start.X;
         _blobYPos = start.Y;
 
-        // Remove Blob from shuttle pads
+        TakeBlobOffTheShuttle();
+
+        PerformPostChangeScreenActions();
+    }
+
+    /// <summary>
+    ///     Puts the shuttle back on its pad and the pad back on every screen, so a new game does not
+    ///     start with the shuttle wherever the last one left it.
+    /// </summary>
+    private void TakeBlobOffTheShuttle()
+    {
         _shuttle.Reset();
         _gameScreens.ChangeShuttlePlatformState(false);
-
-        // Clear up any rogue collision tiles etc.
-        PerformPostChangeScreenActions();
     }
 
     private void BlobTeleporterBeam_ParticleEffectComplete()

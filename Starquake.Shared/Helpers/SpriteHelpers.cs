@@ -38,6 +38,6 @@ internal static class SpriteHelpers
             _ => new Point(spriteWidth / 2, spriteHeight / 2)
         };
 
-        // no direction so return the centre of the sprite
+        // No direction asked for, so the middle of the sprite.
     }
 }

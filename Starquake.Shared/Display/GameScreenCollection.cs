@@ -266,7 +266,11 @@ internal class GameScreenCollection : IDynamicCollisionCells
 
         return (int)Math.Ceiling(screensVisited / (double)_gameScreens.Length * FullPercentage);
     }
-    // Scan the screen for collision tiles
+
+    /// <summary>
+    ///     Every empty tile on this screen that a nasty may be born on. A tile is offered if it is
+    ///     empty scenery and nothing in the collision map underneath it is closed to the nasties.
+    /// </summary>
     public List<Point> GetNastyPotentialLocations()
     {
         List<Point> potentialLocations = [];
@@ -275,42 +279,43 @@ internal class GameScreenCollection : IDynamicCollisionCells
         {
             for (int x = 0; x < TilesAcross; x++)
             {
-                if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == -1)
+                if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == -1 && NastiesMayStandOn(x, y))
                 {
-                    bool addLocation = true;
-
-                    // Now check the collision map for this tile
-                    for (int y1 = 0; y1 < TileMetrics.CollisionCellsDownTile; y1++)
-                    {
-                        for (int x1 = 0; x1 < TileMetrics.CollisionCellsAcrossTile; x1++)
-                        {
-                            foreach (CollisionTile collisionTile in _gameScreens[ScreenNumber].CollisionMap)
-                            {
-                                if (collisionTile.XPos ==
-                                    x * _tileWidth + x1 * CollAreaWidth &&
-                                    collisionTile.YPos ==
-                                    y * _tileHeight + y1 * CollAreaHeight)
-                                {
-                                    if (collisionTile.CollisionTileType ==
-                                        CollisionTileType.NotBlob)
-                                    {
-                                        addLocation = false;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (addLocation)
-                    {
-                        potentialLocations.Add(ConvertToScreenCoords(x, y));
-                    }
+                    potentialLocations.Add(ConvertToScreenCoords(x, y));
                 }
             }
         }
 
         return potentialLocations;
+    }
+
+    /// <summary>
+    ///     Whether the collision cells under one tile are all open to a nasty. A cell marked
+    ///     <see cref="CollisionTileType.NotBlob" /> is one the nasties are kept out of, so a tile
+    ///     with any of those under it is not offered as somewhere to be born.
+    /// </summary>
+    private bool NastiesMayStandOn(int tileX, int tileY)
+    {
+        for (int cellDown = 0; cellDown < TileMetrics.CollisionCellsDownTile; cellDown++)
+        {
+            for (int cellAcross = 0; cellAcross < TileMetrics.CollisionCellsAcrossTile; cellAcross++)
+            {
+                int cellX = tileX * _tileWidth + cellAcross * CollAreaWidth;
+                int cellY = tileY * _tileHeight + cellDown * CollAreaHeight;
+
+                foreach (CollisionTile collisionTile in _gameScreens[ScreenNumber].CollisionMap)
+                {
+                    if (collisionTile.XPos == cellX &&
+                        collisionTile.YPos == cellY &&
+                        collisionTile.CollisionTileType == CollisionTileType.NotBlob)
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
     /// <summary>

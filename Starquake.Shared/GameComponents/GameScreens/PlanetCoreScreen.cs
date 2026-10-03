@@ -180,24 +180,7 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
             EnterCore();
             _justEnteredCore = false;
 
-            _elementsToReplace.Clear();
-
-            // Check to see if Blob is carrying any elements to replace
-            List<CoreElement> activeElements = _elements.GetActiveElements();
-
-            for (int a = 0; a < _blob.BlobInventory.Length; a++)
-            {
-                foreach (CoreElement activeElement in activeElements)
-                {
-                    if ((int)_blob.BlobInventory[a] == activeElement.CurrentElement)
-                    {
-                        _blob.BlobInventory[a] = Collectables.None;
-                        _elementsToReplace.Enqueue(activeElement.CurrentElement);
-                        _replacingElements = true;
-
-                    }
-                }
-            }
+            TakeElementsTheCoreWants();
 
             if (!_replacingElements)
             {
@@ -214,27 +197,13 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
             _blankingTilesOpacity = Ramp.Down(_blankingTilesOpacity, BlankingTilesFadeStep, ColourLevels.None);
         }
 
-        // Leave the core room
         if (!_replacingElements && _entryTime > CoreVisitFrames)
         {
-            // The square the author marked, rather than the screen beside the core and hard against its
-            // right-hand wall. The Y is set now as well as the X: it used to be whatever height Blob
-            // happened to be at inside the core room, which on any other screen could be mid air.
-            Point exit = _gameScreens.CoreExitPosition;
-
-            _gameScreens.ScreenNumber = _gameScreens.CoreExit.ScreenNumber;
-            _screenDirectory.Current = GameScreenType.MainGame;
-            _blob.BlobXPos = exit.X;
-            _blob.BlobYPos = exit.Y;
-            _screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.PlanetCore, new ScreenChange.FadeIn());
-
-            _justEnteredCore = true;
+            LeaveTheCoreRoom();
         }
         else if (!_replacingElements && _elements.GetElementsReplacedCount() == CoreElementsToReplace)
         {
-            // Finished the game!
-            _screenDirectory.Current = GameScreenType.GameComplete;
-            _screenDirectory.GameComplete.PerformPostScreenChangeActions();
+            CompleteTheGame();
         }
         else
         {
@@ -242,6 +211,62 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
         }
 
         _entryTime++;
+    }
+
+    /// <summary>
+    ///     Takes off Blob anything the core is still missing, and queues it to be put in. Every slot
+    ///     is checked against every element the core wants, so one visit can hand over more than one.
+    /// </summary>
+    private void TakeElementsTheCoreWants()
+    {
+        _elementsToReplace.Clear();
+
+        List<CoreElement> activeElements = _elements.GetActiveElements();
+
+        for (int slot = 0; slot < _blob.BlobInventory.Length; slot++)
+        {
+            foreach (CoreElement activeElement in activeElements)
+            {
+                if ((int)_blob.BlobInventory[slot] != activeElement.CurrentElement)
+                {
+                    continue;
+                }
+
+                _blob.BlobInventory[slot] = Collectables.None;
+                _elementsToReplace.Enqueue(activeElement.CurrentElement);
+                _replacingElements = true;
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Puts Blob out of the core and back on the planet, on the square the author marked rather
+    ///     than beside the core and hard against its right-hand wall.
+    /// </summary>
+    /// <remarks>
+    ///     The Y is set as well as the X. It used to be left at whatever height Blob happened to be
+    ///     at inside the core room, which on any other screen could be mid air.
+    /// </remarks>
+    private void LeaveTheCoreRoom()
+    {
+        Point exit = _gameScreens.CoreExitPosition;
+
+        _gameScreens.ScreenNumber = _gameScreens.CoreExit.ScreenNumber;
+        _screenDirectory.Current = GameScreenType.MainGame;
+        _blob.BlobXPos = exit.X;
+        _blob.BlobYPos = exit.Y;
+        _screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.PlanetCore, new ScreenChange.FadeIn());
+
+        _justEnteredCore = true;
+    }
+
+    /// <summary>
+    ///     The core is whole again, which is the end of the game.
+    /// </summary>
+    private void CompleteTheGame()
+    {
+        _screenDirectory.Current = GameScreenType.GameComplete;
+        _screenDirectory.GameComplete.PerformPostScreenChangeActions();
     }
 
     public void Draw()
@@ -267,19 +292,27 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
         _gameScreens.Draw(Color.White);
 
-        // Draw the core aliens
         if (!_replacingElements)
         {
-            for (int a = 0; a < _coreAlienCount; a++)
-            {
-                _coreAliens[a].Draw((byte)(ColourLevels.Full - _blankingTilesOpacity));
-            }
+            DrawCoreGuardians();
         }
 
         // Where the core is comes off the map, so it is asked for rather than known here.
         Point core = _gameScreens.CorePosition;
 
         _elements.Draw(core.X, core.Y, _replacingElements);
+    }
+
+    /// <summary>
+    ///     The guardians circling inside the core room. They fade up with the room, so they are drawn
+    ///     against what is left of the blanking tiles rather than at full strength.
+    /// </summary>
+    private void DrawCoreGuardians()
+    {
+        for (int a = 0; a < _coreAlienCount; a++)
+        {
+            _coreAliens[a].Draw((byte)(ColourLevels.Full - _blankingTilesOpacity));
+        }
     }
 
     /// <summary>
@@ -342,7 +375,6 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
     private void CalculateCoreAlienCount()
     {
-        // Figure out how many core aliens to display
         int elementsLeftToReplace = _elements.GetActiveElements().Count;
         if (elementsLeftToReplace > OneAlienFrom)
         {

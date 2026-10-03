@@ -15,6 +15,19 @@ namespace Starquake.ActiveSprites;
 
 internal class JumpPlatform
 {
+    /// <summary>
+    ///     How long a platform lasts, counted down in logic frames, and the point in that life at
+    ///     which it starts coming apart - half way, so it stands whole long enough to be used.
+    /// </summary>
+    private const int PlatformLifetime = 100;
+
+    /// <inheritdoc cref="PlatformLifetime" />
+    private const int DissolveStartsAt = PlatformLifetime / 2;
+
+    /// <summary>
+    ///     How many pixels are rubbed out each frame once it starts going.
+    /// </summary>
+    private const int PixelsDissolvedPerFrame = 50;
 
     private readonly GraphicsDeviceManager _graphicsDeviceManager;
     private readonly GraphicsSet _graphicsSet;
@@ -100,17 +113,18 @@ internal class JumpPlatform
         _matrix = new SpritePixelMatrix(_jumpPlatform.SpriteWidth * _jumpPlatform.SpriteHeight, _randomNumberGenerator);
         PlatformActive = false;
         ReadyToAllocate = true;
-        _dissolveTime = 100;
+        _dissolveTime = PlatformLifetime;
     }
 
     public void Update()
     {
         if (PlatformActive)
         {
-            // Only disintegrate after a while
-            if (_dissolveTime < 50)
+            // It stands whole for the first half of its life and only then starts coming apart, so
+            // Blob has a moment to use it before it is visibly going.
+            if (_dissolveTime < DissolveStartsAt)
             {
-                for (int a = 0; a < 50; a++)
+                for (int a = 0; a < PixelsDissolvedPerFrame; a++)
                 {
                     _matrix.SetRandomPixel(Color.Transparent);
                 }

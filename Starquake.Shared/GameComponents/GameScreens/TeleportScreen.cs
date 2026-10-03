@@ -220,7 +220,8 @@ internal class TeleportScreen : IGameScreen
 
         _teleportCounter++;
 
-        // Only fade the screen out if the code is recognised
+        // An unrecognised code leaves the picture up, because Blob is not going anywhere - there is
+        // nothing to fade out to.
         if (_codeRecognised)
         {
             ScreenFade = Ramp.Down(ScreenFade, ScreenFadeOutStep, ColourLevels.None);
@@ -242,7 +243,8 @@ internal class TeleportScreen : IGameScreen
 
             _screenDirectory.MainGame.ScreenFade = 0;
 
-            // only do this if the teleport was successful
+            // A code that merely names the booth Blob is already standing in is not a journey, so
+            // the screen it arrived on is not told to set itself up again.
             if (_codeRecognised && _currentCode != _previousCode.ToUpper())
             {
                 _screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.Teleporter, new ScreenChange.FadeIn());
@@ -363,7 +365,6 @@ internal class TeleportScreen : IGameScreen
     {
         if (_codeRecognised)
         {
-            // Teleporting text - recognised code
             _shapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             _shapeDrawer.FillRectangle(new Rectangle(87, 440, 40, 40), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
             _shapeDrawer.FillRectangle(new Rectangle(135, 442, 36, 36), new Color(0, _teleportingMessageFader.FadeLevel, 0, ColourLevels.Full));
@@ -380,7 +381,6 @@ internal class TeleportScreen : IGameScreen
         }
         else
         {
-            // Teleporting text - unrecognised code
             _shapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             _shapeDrawer.FillRectangle(new Rectangle(100, 442, 36, 36), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));
             _shapeDrawer.FillRectangle(new Rectangle(144, 446, 28, 28), new Color(_teleportingMessageFader.FadeLevel, 0, 0, ColourLevels.Full));

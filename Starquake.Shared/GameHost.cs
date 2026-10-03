@@ -114,10 +114,10 @@ public class GameHost : Game
     /// </summary>
     protected override void Initialize()
     {
-        // The engine defines and initialises its own content as it is built
+        // The engine defines and initialises its own content as it is built; base.Initialize is what
+        // goes on to call LoadContent.
         _gameEngine = new GameEngine(_graphics, Content, _input, Window, Exit);
 
-        // This will eventually call LoadContent
         base.Initialize();
     }
 
@@ -129,14 +129,15 @@ public class GameHost : Game
     {
         _graphics.GraphicsDevice.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
 
-        // If the game has already started and we're reloading content then it sounds like the graphics device has lost its handle. Time to bail with an error
+        // Content being loaded a second time means the graphics device was lost and MonoGame is
+        // rebuilding it, which this game has no path through - so it says so rather than carrying on
+        // with half its content.
         if (_gameEngine is { Status: GameEngineStatus.Started })
         {
             throw new Exception(
                 "The graphics device was unable to reinitialise. This is usually caused by a faulty video driver or corrupted state. Try rebooting you machine or finding an updated driver.");
         }
 
-        // initialise game engine
         base.LoadContent();
     }
 
@@ -180,10 +181,9 @@ public class GameHost : Game
         // after the release, so polling it more often than the game reads it swallows keypresses.
         _input.Update();
 
-        // Switch to fullscreen if Ctrl and Enter touched
+        // Nothing is acted on until the engine is far enough along to have something to act on.
         if (_gameEngine?.Status is GameEngineStatus.StartingGraphicsLoaded or GameEngineStatus.Started or GameEngineStatus.ContentLoaded or GameEngineStatus.StartGame)
         {
-            // Allows the game to exit
             if (_input.GetPressedKey() == Keys.Escape)
             {
                 Exit();

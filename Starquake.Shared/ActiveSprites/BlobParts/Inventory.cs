@@ -82,7 +82,6 @@ internal class Inventory
 
         pickUpsOnScreen.Add(droppedItem);
 
-        // Nothing held here now
         Items[^1] = Collectables.None;
 
         return droppedItem;
@@ -108,7 +107,8 @@ internal class Inventory
                 continue;
             }
 
-            // Make sure it's not what we just dropped....
+            // The item just dropped is lying on this very square, so picking straight back up would
+            // undo the swap this is the second half of.
             if (itemDropped != null && itemDropped == pickUpsOnScreen[a])
             {
                 continue;

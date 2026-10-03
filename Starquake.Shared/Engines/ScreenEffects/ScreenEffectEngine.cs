@@ -33,7 +33,6 @@ internal class ScreenEffectEngine
         _renderViewPorts = new List<RenderViewPort>();
         _screenEffects = new List<ScreenEffectBase>();
 
-        // Add all of the screen effects we can find - do this eventually through reflection but for now - manually!
         // One snapshot between the two tunnel directions: only one effect is ever active, so they
         // cannot both be mid-transition and want a picture of their own.
         var outgoingScreen = new ScreenSnapshot(graphics);
@@ -116,7 +115,7 @@ internal class ScreenEffectEngine
 
     public void ExecuteScreenEffect(ScreenEffectType screenEffectToExecute, int effectSpeed, int effectDuration, bool haltBlobAndNasties)
     {
-        // Only allow one effect to execute at a time - may need to implement an override system....
+        // Only one effect runs at a time, so every other one is reset before this one is looked for.
         foreach (ScreenEffectBase screenEffect in _screenEffects)
         {
             screenEffect.Reset();
@@ -160,59 +159,55 @@ internal class ScreenEffectEngine
             return;
         }
 
-        // Select the back buffer
         _graphicsDeviceManager.GraphicsDevice.SetRenderTarget(null);
-
-        // Clear the screen
         _graphicsDeviceManager.GraphicsDevice.Clear(_presentation.ScreenClearColour);
 
         foreach (RenderViewPort renderViewPort in _renderViewPorts)
         {
-            if (renderViewPort.Active)
+            if (!renderViewPort.Active)
             {
-                // Only apply effects to the game area - might change this so we can apply different ones to different ports...
-                if (renderViewPort.Name.ToLower() == "gamearea")
-                {
-                    // Run the alternative renderer if we need to
-                    bool useDefaultRenderer = true;
-
-                    if (ActiveScreenEffect != null)
-                    {
-                        useDefaultRenderer = ActiveScreenEffect.Draw(_renderer, renderViewPort);
-                    }
-
-                    // We're using the default renderer so lets render
-                    if (useDefaultRenderer)
-                    {
-                        _renderer.Begin(SpriteSortMode.Deferred, BlendState.Opaque, null, null, null, null,
-                            _presentation.Transform);
-
-                        _renderer.Draw(renderViewPort.RenderTarget, new Rectangle(
-                            renderViewPort.XPos,
-                            renderViewPort.YPos,
-                            renderViewPort.Width,
-                            renderViewPort.Height), Color.White);
-
-                        _renderer.End();
-                    }
-                }
-                else
-                {
-                    _renderer.Begin(SpriteSortMode.Deferred, BlendState.Opaque, null, null, null, null,
-                        _presentation.Transform);
-
-                    _renderer.Draw(renderViewPort.RenderTarget, new Rectangle(
-                        renderViewPort.XPos,
-                        renderViewPort.YPos,
-                        renderViewPort.Width,
-                        renderViewPort.Height), Color.White);
-
-                    _renderer.End();
-                }
-
-                renderViewPort.Active = false;
+                continue;
             }
-        }
 
+            if (!IsTheGameArea(renderViewPort) || !ComposedByActiveEffect(renderViewPort))
+            {
+                DrawViewPortDirectly(renderViewPort);
+            }
+
+            renderViewPort.Active = false;
+        }
+    }
+
+    /// <summary>
+    ///     Whether this is the view port the screen effects apply to. Only the playfield gets them -
+    ///     the status panel and the full-screen pages are composed plainly.
+    /// </summary>
+    private static bool IsTheGameArea(RenderViewPort renderViewPort)
+        => renderViewPort.Name == ViewPorts.GameArea;
+
+    /// <summary>
+    ///     Lets the running effect compose the playfield instead, and says whether it did. An effect
+    ///     that draws both halves of a transition itself leaves nothing for the plain path to do; one
+    ///     that only tints what is there hands it back.
+    /// </summary>
+    private bool ComposedByActiveEffect(RenderViewPort renderViewPort)
+        => ActiveScreenEffect != null && !ActiveScreenEffect.Draw(_renderer, renderViewPort);
+
+    /// <summary>
+    ///     One view port's render target onto the back buffer, through the presentation transform so
+    ///     it lands where the composition says it should.
+    /// </summary>
+    private void DrawViewPortDirectly(RenderViewPort renderViewPort)
+    {
+        _renderer.Begin(SpriteSortMode.Deferred, BlendState.Opaque, null, null, null, null,
+            _presentation.Transform);
+
+        _renderer.Draw(renderViewPort.RenderTarget, new Rectangle(
+            renderViewPort.XPos,
+            renderViewPort.YPos,
+            renderViewPort.Width,
+            renderViewPort.Height), Color.White);
+
+        _renderer.End();
     }
 }

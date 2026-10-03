@@ -21,6 +21,46 @@ namespace Starquake.GameComponents.PresentationScreens;
 
 internal class GameOverScreen : GameScreenBase, IGameScreen
 {
+    /// <summary>
+    ///     Where each of the four figures sits, against the caption to its left.
+    /// </summary>
+    private const int ScoreXPos = 630;
+
+    /// <inheritdoc cref="ScoreXPos" />
+    private const int ScoreYPos = 260;
+
+    /// <inheritdoc cref="ScoreXPos" />
+    private const int AdventureScoreXPos = 814;
+
+    /// <inheritdoc cref="ScoreXPos" />
+    private const int AdventureScoreYPos = 320;
+
+    /// <inheritdoc cref="ScoreXPos" />
+    private const int TimeTakenXPos = 710;
+
+    /// <inheritdoc cref="ScoreXPos" />
+    private const int TimeTakenYPos = 380;
+
+    /// <inheritdoc cref="ScoreXPos" />
+    private const int ElementsReplacedXPos = 520;
+
+    /// <inheritdoc cref="ScoreXPos" />
+    private const int ElementsReplacedYPos = 560;
+
+    /// <summary>
+    ///     The grey the score and the time are written in, dimmer than their captions so the figure
+    ///     reads as the answer rather than competing with the label.
+    /// </summary>
+    private const int DimGrey = 150;
+
+    /// <summary>
+    ///     The purple the core element count is written in, matching its own caption.
+    /// </summary>
+    private const int CorePurpleRed = 134;
+
+    /// <inheritdoc cref="CorePurpleRed" />
+    private const int CorePurpleBlue = 134;
+
     private readonly SpriteCollection _backgroundImage;
     private readonly CoreElements _elements;
     private readonly SpriteCollection _foregroundImage;
@@ -103,20 +143,44 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
         Font.WriteText(460, 500, "REPLACED", 2, new Color(134, 0, 134), (byte)ScreenFade);
         Font.End();
 
-        // Player Score
-        ProportionalNumbers.Draw(630, 260, _stats.PlayerScore.ToString("000000"), Resources, ColourHelper.GetXna4Colour(150, 150, 150, (byte)ScreenFade));
-
-        // Adventure Score
-        ProportionalNumbers.Draw(814, 320, _gameScreens.GetPercentageOfScreensVisited() + "%", Resources, ColourHelper.WhiteFadedTo((byte)ScreenFade));
-
-        // Time Taken
-        ProportionalNumbers.Draw(710, 380, _playTime.Minutes + "." + _playTime.Seconds.ToString("00"), Resources, ColourHelper.GetXna4Colour(150, 150, 150, (byte)ScreenFade));
-
-        // _elements replaced
-        ProportionalNumbers.Draw(520, 560, _elements.GetElementsReplacedCount().ToString("00"), Resources, ColourHelper.GetXna4Colour(134, 0, 134, (byte)ScreenFade));
+        DrawPlayerScore();
+        DrawAdventureScore();
+        DrawTimeTaken();
+        DrawElementsReplaced();
 
         DrawCoreElements();
     }
+
+    /// <summary>
+    ///     What the player scored, against the SCORE caption.
+    /// </summary>
+    private void DrawPlayerScore()
+        => ProportionalNumbers.Draw(ScoreXPos, ScoreYPos, _stats.PlayerScore.ToString("000000"),
+            Resources, ColourHelper.GetXna4Colour(DimGrey, DimGrey, DimGrey, (byte)ScreenFade));
+
+    /// <summary>
+    ///     How much of the planet was walked, as a percentage of its screens.
+    /// </summary>
+    private void DrawAdventureScore()
+        => ProportionalNumbers.Draw(AdventureScoreXPos, AdventureScoreYPos,
+            _gameScreens.GetPercentageOfScreensVisited() + "%",
+            Resources, ColourHelper.WhiteFadedTo((byte)ScreenFade));
+
+    /// <summary>
+    ///     How long the game lasted, as minutes and seconds.
+    /// </summary>
+    private void DrawTimeTaken()
+        => ProportionalNumbers.Draw(TimeTakenXPos, TimeTakenYPos,
+            _playTime.Minutes + "." + _playTime.Seconds.ToString("00"),
+            Resources, ColourHelper.GetXna4Colour(DimGrey, DimGrey, DimGrey, (byte)ScreenFade));
+
+    /// <summary>
+    ///     How many of the nine core elements were put back.
+    /// </summary>
+    private void DrawElementsReplaced()
+        => ProportionalNumbers.Draw(ElementsReplacedXPos, ElementsReplacedYPos,
+            _elements.GetElementsReplacedCount().ToString("00"),
+            Resources, ColourHelper.GetXna4Colour(CorePurpleRed, 0, CorePurpleBlue, (byte)ScreenFade));
 
     private void DrawCoreElements()
     {

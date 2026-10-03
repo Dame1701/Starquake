@@ -288,7 +288,6 @@ internal class IntroSequence
 
             _screenEffects.MoveViewPort(ViewPorts.GameArea, xShakeOffset, yShakeOffset);
 
-            // Play rumble sound
             _rumbleSound = _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.Rumble, true);
         }
 
@@ -341,11 +340,9 @@ internal class IntroSequence
 
     public void Draw()
     {
-        // Draw spaceship
+        // The ship is not on screen for either caption, which bookend the sequence.
         if (SequenceStage != IntroSequenceStage.CaptionFadeUp && SequenceStage != IntroSequenceStage.CaptionFadeDown)
         {
-
-
             if (_graphicsSet.IsOriginal)
             {
                 SpriteCollection originalShip = _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip);

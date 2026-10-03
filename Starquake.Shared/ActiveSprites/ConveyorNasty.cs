@@ -124,7 +124,6 @@ internal class ConveyorNasty
 
     public void Update(GameTime gameTime)
     {
-        // Update the explosion
         _conveyorNastyDies.Update(XLocation + SpriteMetrics.HalfSpriteWidth, YLocation + SpriteMetrics.SpriteHeight, gameTime);
 
         if (NastyState == NastyState.Conception)
@@ -200,7 +199,6 @@ internal class ConveyorNasty
         }
         else if (NastyState == NastyState.Dead)
         {
-            // Draw the explosion
             _conveyorNastyDies.Draw();
 
             if (_deathFadeLevel > 0)

@@ -256,23 +256,28 @@ internal class WorldPopulator
 
         for (int a = 0; a < PickUpCount; a++)
         {
-            // Only place on screens where we can have more than 1 object
-            int screenChosen = -1;
-            while (screenChosen < 0)
-            {
-                int temp = _randomNumberGenerator.Next(0, WorldMap.LastScreenNumber);
-
-                // Ensure more than one location, and that we haven't chosen this screen already
-                if (GetPotentialLocations(temp).Count > 1 && !powerUpScreens.Contains(temp))
-                {
-                    screenChosen = temp;
-                }
-            }
-
-            powerUpScreens.Add(screenChosen);
+            powerUpScreens.Add(ChooseScreenWithRoomToShare(powerUpScreens));
         }
 
         return powerUpScreens;
+    }
+
+    /// <summary>
+    ///     Draws screens at random until one comes up that offers more than one place to stand
+    ///     something and has not already been drawn. A power-up has to share its screen with a
+    ///     pick-up, so one place is not enough.
+    /// </summary>
+    private int ChooseScreenWithRoomToShare(List<int> alreadyChosen)
+    {
+        while (true)
+        {
+            int screen = _randomNumberGenerator.Next(0, WorldMap.LastScreenNumber);
+
+            if (GetPotentialLocations(screen).Count > 1 && !alreadyChosen.Contains(screen))
+            {
+                return screen;
+            }
+        }
     }
 
     /// <summary>
@@ -323,7 +328,7 @@ internal class WorldPopulator
             potentialLocations[powerUpToSelect].YLocation,
             _randomNumberGenerator.Next(PowerUpTypeCount));
 
-        // Take the powerup location out of the list
+        // Taken out so the pick-up below cannot be put on the square the power-up just took.
         potentialLocations.Remove(potentialLocations[powerUpToSelect]);
 
         if (!placePickup)
@@ -331,7 +336,6 @@ internal class WorldPopulator
             return;
         }
 
-        // Now select another location for our pickup
         int pickUpToSelect = _randomNumberGenerator.Next(potentialLocations.Count);
 
         // A screen that names where a core element would best go gets it there instead
@@ -438,13 +442,13 @@ internal class WorldPopulator
                     continue;
                 }
 
-                // Anything above it....?
+                // Nothing may be put where there is scenery directly over it, or it would be
+                // standing inside the tile above.
                 if (_screens[screenNumber].ScreenTiles[x, y - 1].TileImage != -1)
                 {
                     continue;
                 }
 
-                // Only place on tiles with collision blocks below the powerup
                 if (!_collisions.CanStandOnTopOf(tileImage))
                 {
                     continue;
