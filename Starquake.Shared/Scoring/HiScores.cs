@@ -11,59 +11,57 @@ using Starquake.Helpers;
 
 namespace Starquake.Scoring;
 
+/// <summary>
+///     The table of eight best scores, loaded from <see cref="HiScoreStore" /> at construction and
+///     written back when a newly typed name completes an entry.
+/// </summary>
+/// <remarks>
+///     The original game never remembered scores and nor did this port: these eight names were a
+///     field initialiser, and a score beating them lasted until the process ended. They are now
+///     <see cref="HiScoreDefaults" />, and a missing file falls back to them *and writes itself
+///     out*, so deleting the file is how the table is reset rather than a state the game limps
+///     along in.
+/// </remarks>
 internal class HiScores
 {
-    private readonly List<HiScore> _scores =
-    [
-        new()
+    private readonly List<HiScore> _scores;
+
+    private readonly HiScoreStore _store;
+
+    public HiScores(HiScoreStore store)
+    {
+        _store = store;
+
+        List<HiScore>? saved = store.Read();
+
+        _scores = saved ?? HiScoreDefaults.Create();
+
+        // A first run, or a table the player has deleted. Putting the defaults straight back on
+        // disk is what makes the file's absence a reset rather than a thing to be rediscovered
+        // every launch, and it means the file the player goes looking for is always there.
+        if (saved is null)
         {
-            Name = "Damien",
-            Score = 55250,
-            AdventureScore = 36
-        },
-        new()
-        {
-            Name = "Jacqui",
-            Score = 40350,
-            AdventureScore = 30
-        },
-        new()
-        {
-            Name = "Chris",
-            Score = 27150,
-            AdventureScore = 26
-        },
-        new()
-        {
-            Name = "Rowan",
-            Score = 20750,
-            AdventureScore = 20
-        },
-        new()
-        {
-            Name = "Matt",
-            Score = 16500,
-            AdventureScore = 15
-        },
-        new()
-        {
-            Name = "Pete",
-            Score = 10250,
-            AdventureScore = 11
-        },
-        new()
-        {
-            Name = "Andy",
-            Score = 5250,
-            AdventureScore = 5
-        },
-        new()
-        {
-            Name = "Maui",
-            Score = 2150,
-            AdventureScore = 3
+            _store.Write(_scores);
         }
-    ];
+    }
+
+    /// <summary>
+    ///     The table, highest first. Read-only because a score goes in through
+    ///     <see cref="AddScoreToTable" />, which is what keeps the length and the order right.
+    /// </summary>
+    public IReadOnlyList<HiScore> Scores => _scores;
+
+    /// <summary>
+    ///     Writes the table out as it currently stands.
+    /// </summary>
+    /// <remarks>
+    ///     Separate from <see cref="AddScoreToTable" /> because the name is not known when the
+    ///     score goes in. The screen puts the entry into the table with an empty name, the player
+    ///     types into that same object letter by letter, and only pressing return says the entry is
+    ///     finished - so that is where the save belongs, and saving on insert would persist a row
+    ///     with no name against it.
+    /// </remarks>
+    public void Save() => _store.Write(_scores);
 
     /// <summary>
     ///     Checks to see if the player has achieved a score high enough for the table

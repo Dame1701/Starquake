@@ -53,7 +53,7 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
 
         _backgroundImage = Resources.GetSpriteCollection(Assets.Graphics.HiScoreScreenBackground);
         _foregroundImage = Resources.GetSpriteCollection(Assets.Graphics.HiScoreScreenForeground);
-        _hiScoreList = new HiScores();
+        _hiScoreList = new HiScores(new HiScoreStore());
     }
 
     public override void Update(GameTime gameTime)
@@ -89,7 +89,11 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
 
                 if (Input.GetPressedKey() == Keys.Enter)
                 {
+                    // The entry has been in the table since PerformPostScreenChangeActions and the
+                    // letters have been typed into it in place, so this is the first moment there
+                    // is a finished table worth keeping.
                     _gotHighScore = false;
+                    _hiScoreList.Save();
                 }
 
 
