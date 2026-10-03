@@ -1292,6 +1292,24 @@
 /processorParam:DebugMode=Auto
 /build:Shaders/Crt.fx
 
+#begin Shaders/Materialise.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/Materialise.fx
+
+#begin Shaders/Splat.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/Splat.fx
+
+#begin Shaders/Electric.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/Electric.fx
+
 #begin Sounds/AccessFailed.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor

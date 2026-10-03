@@ -140,6 +140,8 @@ internal class Nasty
     private readonly GraphicsSet _graphicsSet;
 
     private readonly Animation _nastyAnim;
+    private readonly IStandardParticleEffect _nastyArrives;
+
     private readonly IStandardParticleEffect _nastyDies;
 
     private readonly Animation _nastyDiesAnimation;
@@ -237,6 +239,12 @@ internal class Nasty
             (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.NastySplat,
                 ParticleEffectType.Triggered, null);
         _nastyDiesType2.ParticleEffectComplete += NastyDies_ParticleEffectComplete;
+
+        // The beam Blob teleports on, borrowed: a nasty arriving is the same idea, and reusing it
+        // costs no content at all.
+        _nastyArrives =
+            (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.BeamMeUpSmall,
+                ParticleEffectType.Triggered, null);
     }
 
     /// <summary>
@@ -505,6 +513,7 @@ internal class Nasty
             _birthScale = 0f;
             _birthColourLevel = 0;
             _birthRotateSpeed = BirthRespawnRotateSpeed;
+            _nastyArrives.Start();
             _birthTimer = 0;
 
             XPos = newPosition.Value.X;
@@ -583,13 +592,20 @@ internal class Nasty
         _birthTimer++;
     }
 
+    /// <summary>
+    ///     Whether this nasty is a machine rather than a creature. Machines explode and creatures
+    ///     come apart, and the two were decided separately until the death shader needed the same
+    ///     answer the particles were already taking - so it is one property now and the two cannot
+    ///     disagree about any nasty.
+    /// </summary>
+    private bool IsMechanical => _nastyType is NastyType.Spiky or NastyType.Conveyor;
+
     private void StartDying()
     {
         _deathFadeLevel = ColourLevels.Full;
         _deathScale = 1.0f;
 
-        if (_nastyType == NastyType.Spiky ||
-            _nastyType == NastyType.Conveyor)
+        if (IsMechanical)
         {
             _nastyDies.Start();
         }
@@ -642,6 +658,7 @@ internal class Nasty
     {
         _nastyDies.Update(XPos + SpriteMetrics.HalfSpriteWidth, YPos + SpriteMetrics.HalfSpriteHeight, gameTime);
         _nastyDiesType2.Update(XPos + SpriteMetrics.HalfSpriteWidth, YPos + SpriteMetrics.HalfSpriteHeight, gameTime);
+        _nastyArrives.Update(XPos + SpriteMetrics.HalfSpriteWidth, YPos + SpriteMetrics.HalfSpriteHeight, gameTime);
     }
 
     /// <summary>
@@ -675,6 +692,7 @@ internal class Nasty
         // the screen Blob has just walked onto.
         _nastyDies.Stop();
         _nastyDiesType2.Stop();
+        _nastyArrives.Stop();
 
         if (NastyState == NastyState.Disabled)
         {
@@ -757,14 +775,70 @@ internal class Nasty
     }
 
     /// <summary>
+    ///     The shader that eats an organic corpse away, pointed at this nasty: its own square of
+    ///     the sheet, how far gone it is, and the colour it splatters.
+    /// </summary>
+    private Effect ComeApartShader(int frame)
+    {
+        Effect splat = _resources.GetEffect(Assets.Shaders.Splat);
+
+        splat.Parameters["SpriteRect"].SetValue(_nastySprite.SpriteRectIn01(frame));
+        splat.Parameters["Decay"].SetValue(
+            SplatSettings.DecayFrom(_deathFadeLevel, ColourLevels.Full));
+        splat.Parameters["EdgeSoftness"].SetValue(SplatSettings.EdgeSoftness);
+        splat.Parameters["RimWidth"].SetValue(SplatSettings.RimWidth);
+        splat.Parameters["RimColour"].SetValue(NastyHelpers.SplatColourFor(_nastyType));
+        splat.Parameters["RimBrightness"].SetValue(SplatSettings.RimBrightness);
+        splat.Parameters["Lumpiness"].SetValue(SplatSettings.Lumpiness);
+
+        return splat;
+    }
+
+    /// <summary>
     ///     A nasty materialises spinning and part-coloured, so it is drawn at its own scale and rotation
     ///     rather than the walk cycle's.
     /// </summary>
+    /// <remarks>
+    ///     The spin, the growth and the blue it arrives on are all the tint and the transform, and
+    ///     are unchanged. What the shader adds is the two things a sprite batch cannot do by
+    ///     itself: a line sweeping down the sprite with the nasty left behind it, and the three
+    ///     colour channels pulled apart and converging. It is handed this sprite's own rectangle
+    ///     in the sheet, because everything it samples has to be kept inside it - the nasty's
+    ///     neighbours are the next frames along.
+    /// </remarks>
     private void DrawBirth(int nastyImage, int screenFade)
     {
-        _nastySprite.Begin(BlendState.AlphaBlend);
+        int frame = nastyImage + _nastyAnim.CurrentFrame;
 
-        _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
+        Vector4 spriteRect = _nastySprite.SpriteRectIn01(frame);
+
+        Effect materialise = _resources.GetEffect(Assets.Shaders.Materialise);
+
+        materialise.Parameters["SpriteRect"].SetValue(spriteRect);
+        materialise.Parameters["Progress"].SetValue(
+            MaterialiseSettings.ProgressThrough(_birthTimer, BirthPeriod));
+
+        // The spread is a fraction of the sprite and the shader samples in sheet coordinates, so
+        // it is handed over already scaled by how much of the sheet this sprite takes up.
+        materialise.Parameters["ChromaticSpread"].SetValue(
+            new Vector2(MaterialiseSettings.ChromaticSpread * spriteRect.Z, 0f));
+        materialise.Parameters["ScanSoftness"].SetValue(MaterialiseSettings.ScanSoftness);
+        materialise.Parameters["BandWidth"].SetValue(MaterialiseSettings.BandWidth);
+        materialise.Parameters["BandColour"].SetValue(MaterialiseSettings.BandColour);
+        materialise.Parameters["BandBrightness"].SetValue(MaterialiseSettings.BandBrightness);
+
+        // The sprite's own spin, handed over so the shader can take it back out and sweep down the
+        // screen rather than down the nasty.
+        float spin = MathHelper.ToRadians(_rotation);
+
+        materialise.Parameters["SpinSineCosine"].SetValue(
+            new Vector2((float)Math.Sin(spin), (float)Math.Cos(spin)));
+
+        _nastyArrives.Draw();
+
+        _nastySprite.Begin(BlendState.AlphaBlend, null, materialise);
+
+        _nastySprite.DrawSprite(frame, XPos, YPos,
             ColourHelper.GetXna4Colour((byte)_birthColourLevel, (byte)_birthColourLevel, ColourLevels.Full,
                 (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), _birthScale,
             MathHelper.ToRadians(_rotation));
@@ -807,9 +881,20 @@ internal class Nasty
 
         if (_deathFadeLevel > 0)
         {
-            _nastySprite.Begin(BlendState.AlphaBlend);
-            _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                ColourHelper.WhiteFadedTo((byte)(_deathFadeLevel * ((double)screenFade / ColourLevels.Full))), _deathScale,
+            int frame = nastyImage + _nastyAnim.CurrentFrame;
+
+            // A machine's corpse fades out whole, as it always has. A creature's is eaten away
+            // from its edges by the shader instead, so it is drawn at full strength and the
+            // dissolve does the disappearing - fading it as well would mute the one for the other.
+            Effect? splat = IsMechanical ? null : ComeApartShader(frame);
+
+            byte fade = splat is null
+                ? (byte)(_deathFadeLevel * ((double)screenFade / ColourLevels.Full))
+                : (byte)screenFade;
+
+            _nastySprite.Begin(BlendState.AlphaBlend, null, splat);
+            _nastySprite.DrawSprite(frame, XPos, YPos,
+                ColourHelper.WhiteFadedTo(fade), _deathScale,
                 MathHelper.ToRadians(_rotation));
             _nastySprite.End();
         }

@@ -114,10 +114,52 @@ internal class SpriteCollection
     ///     <c>Immediate</c>, which flushes a draw call per sprite. Neither was wanted, so neither can
     ///     be asked for.
     /// </remarks>
+    /// <param name="effect">
+    ///     A pixel shader to put every sprite in this batch through, or null for the ordinary
+    ///     path. <c>Nasty</c>'s birth is the only caller that passes one - see
+    ///     <c>Shaders/Materialise.fx</c> - and anything that does has to hand the shader
+    ///     <see cref="SpriteRectIn01" /> as well, because a sprite drawn from a sheet has its
+    ///     neighbours either side of it.
+    /// </param>
+    /// <inheritdoc cref="Begin(BlendState,Matrix?)" />
+    public void Begin(BlendState blendState, Matrix? transform, Effect? effect)
+    {
+        Sprites.Begin(SpriteSortMode.Deferred, blendState, null, null, null, effect, transform);
+    }
+
     public void Begin(BlendState blendState, Matrix? transform = null)
     {
         Sprites.Begin(SpriteSortMode.Deferred, blendState, null, null, null, null, transform);
     }
+
+    /// <summary>
+    ///     Where one sprite sits in its sheet, as a fraction of the sheet: xy the corner and zw the
+    ///     size. What a shader needs to know to keep its sampling inside the sprite it was given.
+    /// </summary>
+    public Vector4 SpriteRectIn01(int spriteNumber) => RectIn01(
+        _spriteImages.Width,
+        _spriteImages.Height,
+        _spriteTexturePosX[spriteNumber],
+        _spriteTexturePosY[spriteNumber],
+        SpriteWidth,
+        SpriteHeight);
+
+    /// <summary>
+    ///     The arithmetic of <see cref="SpriteRectIn01" />, which is a division and nothing else,
+    ///     kept apart from the sheet so it can be checked without loading one.
+    /// </summary>
+    public static Vector4 RectIn01(
+        int sheetWidth,
+        int sheetHeight,
+        int xPos,
+        int yPos,
+        int spriteWidth,
+        int spriteHeight)
+        => new(
+            xPos / (float)sheetWidth,
+            yPos / (float)sheetHeight,
+            spriteWidth / (float)sheetWidth,
+            spriteHeight / (float)sheetHeight);
 
     public void DrawSpriteUnscaled(int spriteNumber, int xPosition, int yPosition, int fade)
     {

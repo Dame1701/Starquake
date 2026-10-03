@@ -40,6 +40,16 @@ internal static class NastyHelpers
         [NastyType.Centipede] = new SplatColours(new Color(87, 165, 28), new Color(110, 6, 124), new Color(221, 134, 38))
     };
 
+    /// <summary>
+    ///     What the wet rim glows as an organic nasty comes apart - the same colour it throws from
+    ///     its left side, so the shader and the particles over it agree. White for anything not in
+    ///     the table, which is every mechanical nasty and so never asks.
+    /// </summary>
+    public static Vector3 SplatColourFor(NastyType nastyType)
+        => SplatColoursByNasty.TryGetValue(nastyType, out SplatColours colours)
+            ? colours.LeftSplat.ToVector3()
+            : White.ToVector3();
+
     public static void ApplyNastyColours(NastyType nastyType, ParticleEffect effect)
     {
         if (!SplatColoursByNasty.TryGetValue(nastyType, out SplatColours colours))

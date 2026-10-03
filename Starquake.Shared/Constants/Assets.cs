@@ -202,6 +202,24 @@ internal static class Assets
         ///     techniques. Replaced a 1280x800 overlay texture - see <c>CrtFilter</c>.
         /// </summary>
         public const string Crt = @"Shaders\Crt";
+
+        /// <summary>
+        ///     A nasty arriving: a line sweeping down it and the colour channels converging. See
+        ///     <c>MaterialiseSettings</c>.
+        /// </summary>
+        public const string Materialise = @"Shaders\Materialise";
+
+        /// <summary>
+        ///     An organic nasty coming apart: eaten away from its edges along a lumpy boundary with
+        ///     a wet rim. See <c>SplatSettings</c>.
+        /// </summary>
+        public const string Splat = @"Shaders\Splat";
+
+        /// <summary>
+        ///     The electricity arcs and the node and gate lights: a white-hot core, a halo and a
+        ///     flicker. See <c>ElectricSettings</c>.
+        /// </summary>
+        public const string Electric = @"Shaders\Electric";
     }
 
     /// <summary>

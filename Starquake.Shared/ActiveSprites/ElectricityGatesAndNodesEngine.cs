@@ -103,6 +103,13 @@ internal class ElectricityGatesAndNodesEngine
     private readonly Blob _blob;
 
     private readonly ConveyorNasties _conveyorNasties;
+    /// <summary>
+    ///     Logic frames since the engine was built, which is all the flicker needs to know. Counted
+    ///     here rather than in the draw because <c>GameHost</c> draws once per vertical retrace: a
+    ///     flicker counted in drawn frames would crackle faster on a better monitor.
+    /// </summary>
+    private int _flickerFrame;
+
     private readonly Animation _electricityAnimation;
     private readonly Animation _electricityAnimation2;
     private readonly Animation _electricityAnimationOriginal;
@@ -255,6 +262,43 @@ internal class ElectricityGatesAndNodesEngine
                 _electricityAnimation2.GetNextFrame();
             }
         }
+
+        _flickerFrame++;
+    }
+
+    /// <summary>
+    ///     The shader that burns a sprite of electricity, pointed at the frame about to be drawn.
+    ///     Null for the 1985 artwork, which keeps its own arc untouched - F8 is meant to show what
+    ///     the game looked like, not what it would look like with today's shaders on it.
+    /// </summary>
+    private Effect? BurningShaderFor(SpriteCollection sprites, int frame)
+    {
+        if (!_graphicsSet.IsRedrawn)
+        {
+            return null;
+        }
+
+        Effect electric = _resources.GetEffect(Assets.Shaders.Electric);
+
+        Vector4 spriteRect = sprites.SpriteRectIn01(frame);
+
+        electric.Parameters["SpriteRect"].SetValue(spriteRect);
+
+        // The reach is given in the sprite's own pixels and the shader samples the whole strip, so
+        // it is handed over already scaled into that.
+        electric.Parameters["GlowStep"].SetValue(new Vector2(
+            ElectricSettings.GlowRadius / sprites.SpriteWidth * spriteRect.Z,
+            ElectricSettings.GlowRadius / sprites.SpriteHeight * spriteRect.W));
+
+        electric.Parameters["GlowAmount"].SetValue(ElectricSettings.GlowAmount);
+        electric.Parameters["CoreColour"].SetValue(ElectricSettings.CoreColour);
+        electric.Parameters["HaloColour"].SetValue(ElectricSettings.HaloColour);
+        electric.Parameters["CoreThreshold"].SetValue(ElectricSettings.CoreThreshold);
+        electric.Parameters["CoreSharpness"].SetValue(ElectricSettings.CoreSharpness);
+        electric.Parameters["CoreBoost"].SetValue(ElectricSettings.CoreBoost);
+        electric.Parameters["Flicker"].SetValue(ElectricSettings.FlickerAt(_flickerFrame));
+
+        return electric;
     }
 
     /// <summary>
@@ -285,7 +329,8 @@ internal class ElectricityGatesAndNodesEngine
                                 if (_graphicsSet.IsRedrawn)
                                 {
                                     SpriteCollection electricityNodeElectricity1 = _resources.GetSpriteCollection(Assets.Graphics.ElectricityNodeElectricity1);
-                                    electricityNodeElectricity1.Begin(BlendState.Additive);
+                                    electricityNodeElectricity1.Begin(BlendState.Additive, null,
+                                        BurningShaderFor(electricityNodeElectricity1, _electricityAnimation.CurrentFrame));
                                     electricityNodeElectricity1.DrawSprite(_electricityAnimation.CurrentFrame, secondLayerTile.TileLocation.X + 28, secondLayerTile.TileLocation.Y - 18, Color.White);
                                     electricityNodeElectricity1.End();
                                 }
@@ -314,7 +359,8 @@ internal class ElectricityGatesAndNodesEngine
                                 if (_graphicsSet.IsRedrawn)
                                 {
                                     SpriteCollection electricityNodeElectricity1 = _resources.GetSpriteCollection(Assets.Graphics.ElectricityNodeElectricity1);
-                                    electricityNodeElectricity1.Begin(BlendState.Additive);
+                                    electricityNodeElectricity1.Begin(BlendState.Additive, null,
+                                        BurningShaderFor(electricityNodeElectricity1, _electricityAnimation.CurrentFrame));
                                     electricityNodeElectricity1.DrawSprite(_electricityAnimation.CurrentFrame, secondLayerTile.TileLocation.X + 28, secondLayerTile.TileLocation.Y + 14, Color.White);
                                     electricityNodeElectricity1.End();
                                 }
@@ -426,7 +472,8 @@ internal class ElectricityGatesAndNodesEngine
                 new Point(nasty.XLocation + ConveyorGateLightXOffset, nasty.YLocation + GateLightYOffset));
 
             SpriteCollection electricityNodeElectricity1 = _resources.GetSpriteCollection(Assets.Graphics.ElectricityNodeElectricity1);
-            electricityNodeElectricity1.Begin(BlendState.Additive);
+            electricityNodeElectricity1.Begin(BlendState.Additive, null,
+                BurningShaderFor(electricityNodeElectricity1, _electricityAnimation.CurrentFrame));
             electricityNodeElectricity1.DrawSprite(
                 _electricityAnimation.CurrentFrame,
                 nasty.XLocation,
@@ -446,7 +493,7 @@ internal class ElectricityGatesAndNodesEngine
     {
         SpriteCollection lights = _resources.GetSpriteCollection(spriteName);
 
-        lights.Begin(BlendState.Additive);
+        lights.Begin(BlendState.Additive, null, BurningShaderFor(lights, 0));
 
         foreach (Point at in new[]
                  {
@@ -465,7 +512,7 @@ internal class ElectricityGatesAndNodesEngine
     {
         SpriteCollection arc = _resources.GetSpriteCollection(spriteName);
 
-        arc.Begin(BlendState.Additive);
+        arc.Begin(BlendState.Additive, null, BurningShaderFor(arc, frame));
         arc.DrawSprite(frame, at.X, at.Y, Color.White);
         arc.End();
     }
