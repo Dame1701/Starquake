@@ -444,8 +444,123 @@ public class ScreenCollisionMapTests
         Assert.Empty(screen.CollisionMap);
     }
 
+    /// <summary>
+    ///     The jump platform the blob lays, the force field across a key-locked door and the elements
+    ///     in the core are cells no tile describes. A rebuild throws the map away, so it has to ask
+    ///     for them again - this is what the blob falling through a platform he had just laid was.
+    /// </summary>
+    [Fact]
+    public void Rebuild_ACellOwnedByADynamicSource_PutsItBackAfterwards()
+    {
+        // Arrange
+        GameScreenData screen = TestData.EmptyScreen();
+        ScreenCollisionMap map = MapOf(screen);
+        CollisionTile platform = TestData.PlatformCell(0, 0);
+
+        map.RegisterDynamicCells(new CellsOn(0, platform));
+
+        // Act
+        map.Rebuild(0);
+
+        // Assert
+        Assert.Same(platform, Assert.Single(screen.CollisionMap));
+    }
+
+    [Fact]
+    public void Rebuild_ACellOwnedOnAnotherScreen_LeavesItOutOfThisOne()
+    {
+        // Arrange
+        GameScreenData first = TestData.EmptyScreen();
+        GameScreenData second = TestData.EmptyScreen();
+
+        var map = new ScreenCollisionMap([first, second], TestData.TileCollisionData());
+        map.RegisterDynamicCells(new CellsOn(1, TestData.PlatformCell(0, 0)));
+
+        // Act
+        map.Rebuild(0);
+        map.Rebuild(1);
+
+        // Assert
+        Assert.Empty(first.CollisionMap);
+        Assert.NotEmpty(second.CollisionMap);
+    }
+
+    /// <summary>
+    ///     A platform counts from the frame it is laid, which is before any rebuild, so its cells go
+    ///     into the map as it stands as well as being reported by its source. The rebuild must not
+    ///     leave two of each.
+    /// </summary>
+    [Fact]
+    public void Rebuild_ACellBothAddedAndOwned_KeepsOneOfIt()
+    {
+        // Arrange
+        GameScreenData screen = TestData.EmptyScreen();
+        ScreenCollisionMap map = MapOf(screen);
+        CollisionTile platform = TestData.PlatformCell(0, 0);
+
+        map.RegisterDynamicCells(new CellsOn(0, platform));
+        map.Rebuild(0);
+        map.Add(platform);
+
+        // Act
+        map.Rebuild(0);
+
+        // Assert
+        Assert.Same(platform, Assert.Single(screen.CollisionMap));
+    }
+
+    [Fact]
+    public void Remove_ACellThatWasAdded_TakesItOutOfTheMap()
+    {
+        // Arrange
+        GameScreenData screen = TestData.EmptyScreen();
+        ScreenCollisionMap map = MapOf(screen);
+        CollisionTile platform = TestData.PlatformCell(0, 0);
+
+        map.Rebuild(0);
+        map.Add(platform);
+
+        // Act
+        map.Remove(platform);
+
+        // Assert
+        Assert.Empty(screen.CollisionMap);
+    }
+
+    /// <summary>
+    ///     The symptom, rather than the map's contents: a blob falling onto a platform is stopped by
+    ///     it even if something else on the screen has rebuilt the map since he laid it.
+    /// </summary>
+    [Fact]
+    public void CheckCollision_FallingOntoAPlatformCellAfterARebuild_StopsOnIt()
+    {
+        // Arrange - a platform cell one cell below the falling mover
+        GameScreenData screen = TestData.EmptyScreen();
+        ScreenCollisionMap map = MapOf(screen);
+
+        map.RegisterDynamicCells(new CellsOn(0, TestData.PlatformCell(0, TileMetrics.CollisionCellHeight)));
+        map.Rebuild(0);
+
+        // Act
+        int allowed = map.CheckCollision(
+            Direction.Down, 0, 0, TestData.MoverSize, TestData.MoverSize, TestData.Velocity, true);
+
+        // Assert
+        Assert.Equal(0, allowed);
+    }
+
     private static ScreenCollisionMap MapOf(GameScreenData screen)
         => new([screen], TestData.TileCollisionData());
+
+    /// <summary>
+    ///     A source of cells the tiles do not describe, standing in for the jump platforms, the
+    ///     key-locked doors and the core's elements.
+    /// </summary>
+    private sealed class CellsOn(int screenNumber, params CollisionTile[] cells) : IDynamicCollisionCells
+    {
+        public IEnumerable<CollisionTile> CellsOnScreen(int screen)
+            => screen == screenNumber ? cells : [];
+    }
 
     private static class TestData
     {
@@ -459,6 +574,10 @@ public class ScreenCollisionMapTests
         public const int HollowTile = 3;
 
         public const int MoverSize = 32;
+
+        /// <summary>A cell of the kind a jump platform owns: solid to everything, no tile behind it.</summary>
+        public static CollisionTile PlatformCell(int xPos, int yPos)
+            => new((int)CollisionObjectType.JumpPlatform, xPos, yPos, CollisionTileType.EveryoneHits);
 
         public const int Velocity = 8;
 

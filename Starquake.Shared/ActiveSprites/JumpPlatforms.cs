@@ -3,6 +3,7 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
+using Starquake.Collisions;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
@@ -10,7 +11,7 @@ using Starquake.SharedLibs;
 
 namespace Starquake.ActiveSprites;
 
-internal class JumpPlatforms
+internal class JumpPlatforms : IDynamicCollisionCells
 {
     /// <summary>
     ///     What <see cref="GetNewJumpPlatform" /> answers when there is no room for one. It has to be
@@ -42,6 +43,28 @@ internal class JumpPlatforms
         _randomNumberGenerator = randomNumberGenerator;
         _screenEffects = screenEffects;
         _platforms = new List<JumpPlatform>();
+
+        // The platforms' cells are not on the screen's tile map, so the collision map has to be able
+        // to ask for them again every time it is rebuilt - see IDynamicCollisionCells.
+        _gameScreens.Collisions.RegisterDynamicCells(this);
+    }
+
+    /// <summary>
+    ///     The cells of every platform still standing on one screen. A platform that has dissolved or
+    ///     has not been handed out is not active and owns nothing.
+    /// </summary>
+    public IEnumerable<CollisionTile> CellsOnScreen(int screenNumber)
+    {
+        foreach (JumpPlatform platform in _platforms)
+        {
+            if (!platform.PlatformActive || platform.ScreenNumber != screenNumber)
+            {
+                continue;
+            }
+
+            yield return platform.LeftCollisionTile;
+            yield return platform.RightCollisionTile;
+        }
     }
 
     public int GetNewJumpPlatform(int xPos, int yPos, int width, int height, bool checkCollision)
@@ -86,9 +109,12 @@ internal class JumpPlatforms
         newPlatform.RightCollisionTile = new CollisionTile((int)CollisionObjectType.JumpPlatform, newPlatform.XPos + 32, newPlatform.YPos, CollisionTileType.EveryoneHits);
         newPlatform.PlatformActive = true;
         newPlatform.ReadyToAllocate = false;
+        newPlatform.ScreenNumber = _gameScreens.ScreenNumber;
 
-        _gameScreens.CurrentGameScreenData.CollisionMap.Add(newPlatform.LeftCollisionTile);
-        _gameScreens.CurrentGameScreenData.CollisionMap.Add(newPlatform.RightCollisionTile);
+        // Into the map as it stands, so the blob can be put on the platform this same frame. A
+        // rebuild asks CellsOnScreen for them again rather than keeping these two.
+        _gameScreens.Collisions.Add(newPlatform.LeftCollisionTile);
+        _gameScreens.Collisions.Add(newPlatform.RightCollisionTile);
 
         // Returns blob's new YPosition
         return newPlatform.YPos - 64;
@@ -98,13 +124,11 @@ internal class JumpPlatforms
     {
         foreach (JumpPlatform platform in _platforms)
         {
-            _gameScreens.CurrentGameScreenData.CollisionMap.Remove(platform.LeftCollisionTile);
-            _gameScreens.CurrentGameScreenData.CollisionMap.Remove(platform.RightCollisionTile);
-            platform.Reset();
+            RetirePlatform(platform);
         }
     }
 
-    public void Update(GameScreenCollection gameScreensReference)
+    public void Update()
     {
         // Update jump platform lifetime
         if (_platforms.Count > 0)
@@ -113,9 +137,7 @@ internal class JumpPlatforms
             {
                 if (platform.Finished)
                 {
-                    gameScreensReference.CurrentGameScreenData.CollisionMap.Remove(platform.LeftCollisionTile);
-                    gameScreensReference.CurrentGameScreenData.CollisionMap.Remove(platform.RightCollisionTile);
-                    platform.Reset();
+                    RetirePlatform(platform);
                 }
                 else
                 {
@@ -131,5 +153,18 @@ internal class JumpPlatforms
         {
             platform.Draw();
         }
+    }
+
+    /// <summary>
+    ///     Takes a platform out of use and its cells out of the map. The removal only reaches the
+    ///     screen being shown, which is the only one being asked about collision; cells left behind on
+    ///     a screen the blob has since walked off go when that screen is next rebuilt, and
+    ///     <see cref="CellsOnScreen" /> stops reporting them the moment the platform is reset.
+    /// </summary>
+    private void RetirePlatform(JumpPlatform platform)
+    {
+        _gameScreens.Collisions.Remove(platform.LeftCollisionTile);
+        _gameScreens.Collisions.Remove(platform.RightCollisionTile);
+        platform.Reset();
     }
 }

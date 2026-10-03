@@ -5,16 +5,18 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.ActiveSprites;
+using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Helpers;
 using Starquake.Particles;
+using Starquake.SharedLibs;
 using Starquake.Structure;
 
 namespace Starquake.GameComponents.GameScreens;
 
-internal class PlanetCoreScreen : IGameScreen
+internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 {
 
 
@@ -114,6 +116,10 @@ internal class PlanetCoreScreen : IGameScreen
 
         _elements = elements;
         _elements.OnCoreElementReplaced += Elements_OnCoreElementReplaced;
+
+        // The elements standing in the core are collision the core screen's tiles say nothing about,
+        // so the collision map asks for them each time it is rebuilt - see IDynamicCollisionCells.
+        _gameScreens.Collisions.RegisterDynamicCells(this);
 
         _coreAliens = new List<Nasty>();
         for (int a = 0; a < _coreAlienCount; a++)
@@ -281,15 +287,32 @@ internal class PlanetCoreScreen : IGameScreen
     }
 
     /// <summary>
+    ///     The cells of the nine elements standing in the core room, which are there only while the
+    ///     core room is the screen being shown - the core sits on one of the planet's own screens, and
+    ///     the blob walks that screen normally once he has been put back outside.
+    /// </summary>
+    public IEnumerable<CollisionTile> CellsOnScreen(int screenNumber)
+    {
+        if (screenNumber != _gameScreens.CoreSite.ScreenNumber ||
+            _screenDirectory.Current != GameScreenType.PlanetCore)
+        {
+            return [];
+        }
+
+        Point core = _gameScreens.CorePosition;
+
+        return _elements.GetCollisionMap(core.X, core.Y);
+    }
+
+    /// <summary>
     ///     Puts the core screen and its guardians in place for a blob that has just arrived.
     /// </summary>
     private void EnterCore()
     {
+        // Setting the screen number rebuilds the collision map, and that rebuild is what puts the
+        // core's elements into it - see CellsOnScreen. They used to be added here instead, which left
+        // them out again the moment anything else on this screen rebuilt the map.
         _gameScreens.ScreenNumber = _gameScreens.CoreSite.ScreenNumber;
-
-        // Add the collision map for the core elements
-        Point core = _gameScreens.CorePosition;
-        _gameScreens.CurrentGameScreenData.CollisionMap.AddRange(_elements.GetCollisionMap(core.X, core.Y));
 
         List<Point> potentialLocations = _gameScreens.GetNastyPotentialLocations();
         if (potentialLocations.Count < _coreAlienCount)

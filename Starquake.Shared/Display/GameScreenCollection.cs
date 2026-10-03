@@ -15,7 +15,7 @@ using Starquake.WorldGeneration;
 
 namespace Starquake.Display;
 
-internal class GameScreenCollection
+internal class GameScreenCollection : IDynamicCollisionCells
 {
 
 
@@ -79,6 +79,10 @@ internal class GameScreenCollection
         Collisions = new ScreenCollisionMap(
             _gameScreens,
             (int[,,])_resources.GetDataResource(Assets.Data.ScreenCollisionData));
+
+        // The doors' force fields are cells the tile map does not describe, so the collision map has
+        // to be able to ask for them again every time it is rebuilt - see IDynamicCollisionCells.
+        Collisions.RegisterDynamicCells(this);
 
         _worldPopulator = new WorldPopulator(_gameScreens, Collisions, randomNumberGenerator);
 
@@ -420,6 +424,28 @@ internal class GameScreenCollection
         return returnedTiles.OrderByDescending(rt => rt.Y).ToArray();
     }
 
+    /// <summary>
+    ///     The cells of the key-locked doors found on the screen being shown. A door only hunts for
+    ///     its own cells when it has none - see <see cref="UpdateKeyLockDoor" /> - so without this a
+    ///     rebuild left the door holding cells that were no longer in the map, and its force field let
+    ///     the blob walk through for the rest of the visit.
+    /// </summary>
+    public IEnumerable<CollisionTile> CellsOnScreen(int screenNumber)
+    {
+        if (screenNumber != _screenNumber || _keyLockDoors == null)
+        {
+            yield break;
+        }
+
+        foreach (KeyLockDoor keyLockDoor in _keyLockDoors)
+        {
+            foreach (CollisionTile collisionTile in keyLockDoor.CollisionTiles)
+            {
+                yield return collisionTile;
+            }
+        }
+    }
+
     private List<KeyLockDoor> GetKeyLockDoors()
     {
         var returnedTiles = new List<KeyLockDoor>();
@@ -537,7 +563,7 @@ internal class GameScreenCollection
             keyLockDoor.CollisionTiles.Add(keyLockCollisionTile);
 
             // Add the tile to the collision map
-            _gameScreens[ScreenNumber].CollisionMap.Add(keyLockCollisionTile);
+            Collisions.Add(keyLockCollisionTile);
         }
     }
 

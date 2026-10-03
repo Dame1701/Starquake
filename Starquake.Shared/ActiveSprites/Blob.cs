@@ -444,7 +444,7 @@ internal class Blob
         CheckSpikes();
         CollectPowerUp();
 
-        _blobJumpPlatformEngine.Update(_gameScreens);
+        _blobJumpPlatformEngine.Update();
 
         FadeEnergyDrainTint();
         FadeInAfterTeleport();

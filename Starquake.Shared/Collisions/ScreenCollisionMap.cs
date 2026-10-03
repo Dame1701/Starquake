@@ -63,6 +63,13 @@ internal class ScreenCollisionMap
     /// <inheritdoc cref="TunnelMouthCellsDown" />
     private const int RightTunnelMouthInset = 96;
 
+    /// <summary>
+    ///     The sources of collision cells that are not read off a screen's tiles, asked to hand their
+    ///     cells over again at the end of every <see cref="Rebuild" />. See
+    ///     <see cref="IDynamicCollisionCells" /> for why they cannot simply be put into the map once.
+    /// </summary>
+    private readonly List<IDynamicCollisionCells> _dynamicCellSources = [];
+
     private readonly GameScreenData[] _screens;
 
     /// <summary>
@@ -123,14 +130,32 @@ internal class ScreenCollisionMap
         }
 
         AddScreenObjectCollisionTiles();
+        AddDynamicCollisionCells();
     }
 
     /// <summary>
+    ///     Registers something that owns cells of its own - see <see cref="IDynamicCollisionCells" />.
+    ///     A source stays registered for the life of the game and is asked about every screen.
+    /// </summary>
+    public void RegisterDynamicCells(IDynamicCollisionCells source)
+        => _dynamicCellSources.Add(source);
+
+    /// <summary>
     ///     Adds a cell to the map that is not read off the screen's tiles - a jump platform the blob has
-    ///     just laid, or the force field across a key-locked door.
+    ///     just laid, or the force field across a key-locked door. This is so the cell counts from this
+    ///     frame on; keeping it across a rebuild is the job of the
+    ///     <see cref="IDynamicCollisionCells" /> source that owns it.
     /// </summary>
     public void Add(CollisionTile cell)
         => Cells.Add(cell);
+
+    /// <summary>
+    ///     Takes a cell added by <see cref="Add" /> back out, for a platform that has dissolved. Does
+    ///     nothing if a rebuild has already been through, which is why the source stops reporting a
+    ///     cell rather than relying on this.
+    /// </summary>
+    public void Remove(CollisionTile cell)
+        => Cells.Remove(cell);
 
     /// <summary>
     ///     The image of the first tile a box overlaps, or -1 if it overlaps none. A
@@ -476,6 +501,21 @@ internal class ScreenCollisionMap
                 xPos,
                 yPos,
                 CollisionTileType.NotBlob));
+
+    /// <summary>
+    ///     The cells of everything that keeps its own - the jump platforms, the key-locked doors, the
+    ///     core's elements. Last, so that a source can see nothing of the rebuild it is part of.
+    /// </summary>
+    private void AddDynamicCollisionCells()
+    {
+        foreach (IDynamicCollisionCells source in _dynamicCellSources)
+        {
+            foreach (CollisionTile cell in source.CellsOnScreen(ScreenNumber))
+            {
+                Cells.Add(cell);
+            }
+        }
+    }
 
     /// <summary>
     ///     The power-up, the pick-ups and the pyramid lying on this screen.
