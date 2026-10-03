@@ -220,6 +220,12 @@ internal static class Assets
         ///     flicker. See <c>ElectricSettings</c>.
         /// </summary>
         public const string Electric = @"Shaders\Electric";
+
+        /// <summary>
+        ///     Blob overloading: the heat building in him and the shells he comes apart in. See
+        ///     <c>OverloadSettings</c>.
+        /// </summary>
+        public const string Overload = @"Shaders\Overload";
     }
 
     /// <summary>

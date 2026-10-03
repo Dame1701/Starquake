@@ -3,6 +3,7 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Starquake.Display;
 
@@ -52,6 +53,41 @@ internal static class ElectricSettings
     ///     more of the same light rather than a second one.
     /// </summary>
     public static Vector3 HaloColour => new(0.35f, 0.8f, 1f);
+
+    /// <summary>
+    ///     Points the burning shader at one sprite. Shared because the node and gate arcs are not
+    ///     the only electricity in the game any more - Blob throws beams of it as he comes apart,
+    ///     and the two should burn alike rather than each setting the parameters its own way.
+    /// </summary>
+    /// <remarks>
+    ///     <paramref name="logicFrame" /> drives the flicker and is a logic frame rather than a
+    ///     drawn one, for the reason <see cref="FlickerAt" /> gives.
+    /// </remarks>
+    public static Effect PointAt(
+        Effect electric,
+        Vector4 spriteRect,
+        int spriteWidth,
+        int spriteHeight,
+        int logicFrame)
+    {
+        electric.Parameters["SpriteRect"].SetValue(spriteRect);
+
+        // The reach is given in the sprite's own pixels and the shader samples the whole sheet, so
+        // it is handed over already scaled into that.
+        electric.Parameters["GlowStep"].SetValue(new Vector2(
+            GlowRadius / spriteWidth * spriteRect.Z,
+            GlowRadius / spriteHeight * spriteRect.W));
+
+        electric.Parameters["GlowAmount"].SetValue(GlowAmount);
+        electric.Parameters["CoreColour"].SetValue(CoreColour);
+        electric.Parameters["HaloColour"].SetValue(HaloColour);
+        electric.Parameters["CoreThreshold"].SetValue(CoreThreshold);
+        electric.Parameters["CoreSharpness"].SetValue(CoreSharpness);
+        electric.Parameters["CoreBoost"].SetValue(CoreBoost);
+        electric.Parameters["Flicker"].SetValue(FlickerAt(logicFrame));
+
+        return electric;
+    }
 
     /// <summary>How far either side of its usual brightness the arc wanders.</summary>
     private const double FlickerSwing = 0.3;

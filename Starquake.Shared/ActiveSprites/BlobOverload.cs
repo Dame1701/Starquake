@@ -1,4 +1,4 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
@@ -19,16 +19,9 @@ namespace Starquake.ActiveSprites;
 internal sealed class BlobOverload
 {
     /// <summary>
-    ///     How fast he swells and shrinks, and the two ends of it. Drawing at a negative scale is what
-    ///     turns him inside out, which is why the minimum is below zero rather than at it.
+    ///     How far the blast throws its shells each frame once he has come apart.
     /// </summary>
-    private const float ScaleStep = 0.30f;
-
-    /// <inheritdoc cref="ScaleStep" />
-    private const float MaxScale = 1.6f;
-
-    /// <inheritdoc cref="ScaleStep" />
-    private const float MinScale = -1f;
+    private const float DischargeStep = 0.55f;
 
     /// <summary>
     ///     How long the alarm sounds before he goes, in logic frames - a second at fifty hertz.
@@ -36,10 +29,28 @@ internal sealed class BlobOverload
     private const int AlarmFrames = 60;
 
     /// <summary>
+    ///     How long he takes to come apart, in logic frames. A quarter of a second: this is a
+    ///     charge letting go, and anything slower reads as him posing rather than failing.
+    /// </summary>
+    public const int CrackFrames = 12;
+
+    /// <summary>
+    ///     How big he is by the time he has come apart. He pulls himself open as he splits, so the
+    ///     cracks widen because the two halves are separating rather than beside it.
+    /// </summary>
+    private const float CrackScale = 1.75f;
+
+    /// <summary>
+    ///     How long the blast lasts, in logic frames. A tenth of a second - it is the flash at the
+    ///     end, not a stage in its own right.
+    /// </summary>
+    private const int DischargeFrames = 5;
+
+    /// <summary>
     ///     The flare drawn as he explodes: how many copies of him, how much smaller than he is the first
     ///     one starts, and how much bigger each one after it is.
     /// </summary>
-    private const int FlareCopies = 5;
+    public const int FlareCopies = 5;
 
     /// <inheritdoc cref="FlareCopies" />
     private const float FlareFirstScale = 0.4f;
@@ -49,13 +60,31 @@ internal sealed class BlobOverload
 
     private int _alarmFramesSounded;
 
+    private int _crackFramesDone;
+
+    private int _dischargeFramesDone;
+
     private OverloadStage _stage;
 
     /// <summary>
-    ///     How big he is drawn, which runs from one up to <see cref="MaxScale" /> and then down through
-    ///     zero to <see cref="MinScale" />.
+    ///     How big he is drawn. It only ever grows now: out to <see cref="CrackScale" /> as he
+    ///     comes apart, and on outward through the blast. It used to come back down through zero
+    ///     as well, which drew him inside out.
     /// </summary>
     public float Scale { get; private set; } = 1f;
+
+    /// <summary>
+    ///     Which part of coming apart he is in, so the draw can tell the cracking from the burst.
+    /// </summary>
+    public OverloadStage Stage => _stage;
+
+    /// <summary>
+    ///     How far open the cracks are, from nought to one. Nought once he is past that stage, so
+    ///     nothing has to ask whether it is still running.
+    /// </summary>
+    public float Split => _stage == OverloadStage.Cracking
+        ? Math.Clamp(_crackFramesDone / (float)CrackFrames, 0f, 1f)
+        : 0f;
 
     /// <summary>
     ///     Whether the alarm is still running. False from the start for a death that skips it, which is
@@ -91,8 +120,10 @@ internal sealed class BlobOverload
     /// </param>
     public void Begin(bool soundTheAlarmFirst)
     {
-        _stage = soundTheAlarmFirst ? OverloadStage.Swelling : OverloadStage.Exploded;
+        _stage = soundTheAlarmFirst ? OverloadStage.Cracking : OverloadStage.Exploded;
         _alarmFramesSounded = 0;
+        _crackFramesDone = 0;
+        _dischargeFramesDone = 0;
     }
 
     /// <summary>One more frame of the alarm.</summary>
@@ -104,23 +135,30 @@ internal sealed class BlobOverload
     /// </summary>
     public OverloadStage Swell()
     {
-        if (_stage == OverloadStage.Swelling)
+        if (_stage == OverloadStage.Cracking)
         {
-            Scale += ScaleStep;
+            _crackFramesDone++;
 
-            if (Scale > MaxScale)
+            // Growing as the cracks open, and the two are the same count so they cannot drift
+            // apart: by the time he is at his widest he is also at his most broken.
+            Scale = 1f + (CrackScale - 1f) * Split;
+
+            if (_crackFramesDone >= CrackFrames)
             {
-                _stage = OverloadStage.Shrinking;
-                Scale = MaxScale;
+                _stage = OverloadStage.Discharging;
+                Scale = CrackScale;
             }
-        }
-        else if (_stage == OverloadStage.Shrinking)
-        {
-            Scale -= ScaleStep;
 
-            if (Scale < MinScale)
+            return _stage;
+        }
+
+        if (_stage == OverloadStage.Discharging)
+        {
+            _dischargeFramesDone++;
+            Scale += DischargeStep;
+
+            if (_dischargeFramesDone >= DischargeFrames)
             {
-                Scale = MinScale;
                 _stage = OverloadStage.Exploded;
             }
         }
@@ -133,14 +171,17 @@ internal sealed class BlobOverload
     /// </summary>
     public void Reset()
     {
-        _stage = OverloadStage.Swelling;
+        _stage = OverloadStage.Cracking;
+        _crackFramesDone = 0;
+        _dischargeFramesDone = 0;
         Scale = 1f;
     }
 
     /// <summary>
     ///     The scales the flare is drawn at, smallest first - a stack of copies of him growing outward from
-    ///     whatever size he currently is. The ones that would come out inside out are left out rather than
-    ///     drawn, which is what the original's test against zero did.
+    ///     whatever size he currently is. The guard against a negative scale is kept though nothing can
+    ///     now reach one: he used to shrink back through zero to be drawn inside out, and a copy at a
+    ///     negative scale is a drawing mistake rather than a smaller one.
     /// </summary>
     public IEnumerable<float> FlareScales()
     {

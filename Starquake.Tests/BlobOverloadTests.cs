@@ -1,8 +1,9 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
 using Starquake.ActiveSprites;
+using Starquake.Constants;
 using Starquake.Structure;
 using Xunit;
 
@@ -146,8 +147,88 @@ public class BlobOverloadTests
         Assert.False(overload.ShowingTheAlarm);
     }
 
+    /// <summary>
+    ///     He swells as the cracks open, rather than being held still and then bursting. The two
+    ///     run off the same count, so by the time he is at his widest he is also at his most
+    ///     broken - which is what makes it read as one thing coming apart instead of two things
+    ///     one after the other.
+    /// </summary>
     [Fact]
-    public void Swell_FromTheStart_GrowsToItsLargestAndThenTurnsBack()
+    public void Swell_WhileTheCracksOpen_GrowsInStepWithThem()
+    {
+        // Arrange
+        var overload = new BlobOverload();
+        overload.Begin(true);
+
+        // Act
+        var splits = new List<float>();
+        var scales = new List<float>();
+
+        while (overload.Stage == OverloadStage.Cracking)
+        {
+            overload.Swell();
+            splits.Add(overload.Split);
+            scales.Add(overload.Scale);
+        }
+
+        // Assert - both climbed, neither went backwards, and he ends bigger than he started
+        Assert.True(scales[^1] > scales[0], "he did not grow while cracking");
+        Assert.True(scales[^1] > 1f, $"he ended the cracking at {scales[^1]}");
+
+        for (int frame = 1; frame < scales.Count - 1; frame++)
+        {
+            Assert.True(scales[frame] >= scales[frame - 1], $"he shrank at frame {frame}");
+            Assert.True(splits[frame] >= splits[frame - 1], $"the cracks closed at frame {frame}");
+        }
+    }
+
+    /// <summary>
+    ///     The cracking has to hand over to a burst that still has somewhere to go, or the swell
+    ///     would be over before it started.
+    /// </summary>
+    [Fact]
+    public void Swell_OnceTheCracksAreOpen_HandsOverToTheBlast()
+    {
+        // Arrange
+        var overload = new BlobOverload();
+        overload.Begin(true);
+
+        // Act
+        while (overload.Stage == OverloadStage.Cracking)
+        {
+            overload.Swell();
+        }
+
+        // Assert - come apart and bigger for it, with the blast still to come
+        Assert.Equal(OverloadStage.Discharging, overload.Stage);
+        Assert.True(overload.Scale > 1f, $"he came apart without growing: {overload.Scale}");
+    }
+
+    /// <summary>
+    ///     Only running out of energy cracks him open. Spikes, electricity, a nasty and the debug
+    ///     key all begin already exploded, and must still skip straight past it.
+    /// </summary>
+    [Fact]
+    public void Begin_WithoutTheAlarm_DoesNotCrackHimOpenEither()
+    {
+        // Arrange
+        var overload = new BlobOverload();
+
+        // Act
+        overload.Begin(false);
+
+        // Assert
+        Assert.Equal(OverloadStage.Exploded, overload.Stage);
+        Assert.Equal(0f, overload.Split);
+    }
+
+    /// <summary>
+    ///     He only ever gets bigger now. There used to be a swell to one and a half times his size
+    ///     and a shrink back through zero that drew him inside out, and the pair of them lasted
+    ///     eleven frames - a fifth of a second, too quick to be read as a shape at all.
+    /// </summary>
+    [Fact]
+    public void Swell_FromTheStart_OnlyEverGrows()
     {
         // Arrange
         var overload = new BlobOverload();
@@ -164,35 +245,32 @@ public class BlobOverloadTests
         } while (stage != OverloadStage.Exploded && scales.Count < TestData.LongerThanAnyDeath);
 
         // Assert
-        Assert.Equal(TestData.LargestScale, scales.Max());
-        Assert.Equal(TestData.SmallestScale, scales[^1]);
         Assert.Equal(OverloadStage.Exploded, stage);
+        Assert.Equal(scales.OrderBy(scale => scale), scales);
+        Assert.All(scales, scale => Assert.True(scale > 0f, $"drawn inside out at {scale}"));
     }
 
     /// <summary>
-    ///     He is drawn at a negative scale on the way out, which is what turns him inside out. A floor of
-    ///     zero would have him simply vanish.
+    ///     The whole death has to be quick - it is a charge letting go. Half a second from the
+    ///     alarm ending to the fragments, cracking and blast together.
     /// </summary>
     [Fact]
-    public void Swell_OnTheWayOut_PassesThroughZeroAndGoesNegative()
+    public void Swell_FromTheStartToTheFragments_IsOverInUnderHalfASecond()
     {
         // Arrange
         var overload = new BlobOverload();
         overload.Begin(true);
 
         // Act
-        var scales = new List<float>();
+        int frames = 0;
 
-        while (overload.Swell() != OverloadStage.Exploded && scales.Count < TestData.LongerThanAnyDeath)
+        while (overload.Swell() != OverloadStage.Exploded && frames < TestData.LongerThanAnyDeath)
         {
-            scales.Add(overload.Scale);
+            frames++;
         }
 
-        scales.Add(overload.Scale);
-
         // Assert
-        Assert.Contains(scales, scale => scale < 0f);
-        Assert.Equal(TestData.SmallestScale, scales[^1]);
+        Assert.InRange(frames, 1, LogicClock.Seconds(0.5));
     }
 
     [Fact]
@@ -250,35 +328,33 @@ public class BlobOverloadTests
         Assert.All(scales, scale => Assert.True(scale >= 0f));
     }
 
+    /// <summary>
+    ///     Nothing in the flare is ever drawn inside out. <c>FlareScales</c> keeps the guard that
+    ///     leaves a negative copy out, from when he shrank back through zero on his way out; this
+    ///     holds the thing that guard was there for, now that nothing can reach one.
+    /// </summary>
     [Fact]
-    public void FlareScales_OnceHeHasShrunkPastZero_AreLeftOutRatherThanDrawnInsideOut()
+    public void FlareScales_AtEveryPointOfTheDeath_AreNeverNegative()
     {
-        // Arrange - run the death down to its smallest
+        // Arrange
         var overload = new BlobOverload();
         overload.Begin(true);
 
-        while (overload.Swell() != OverloadStage.Exploded)
+        // Act / Assert
+        int frames = 0;
+
+        do
         {
-            // run the death out
-        }
+            Assert.All(overload.FlareScales(), scale => Assert.True(scale >= 0f));
 
-        // Act
-        float[] scales = overload.FlareScales().ToArray();
-
-        // Assert
-        Assert.Empty(scales);
+            frames++;
+        } while (overload.Swell() != OverloadStage.Exploded && frames < TestData.LongerThanAnyDeath);
     }
 
     private static class TestData
     {
         /// <summary>A second of alarm at fifty hertz, as <see cref="BlobOverload" /> sets it.</summary>
         public const int AlarmFrames = 60;
-
-        /// <summary>The two ends of the swell, as it sets those.</summary>
-        public const float LargestScale = 1.6f;
-
-        /// <inheritdoc cref="LargestScale" />
-        public const float SmallestScale = -1f;
 
         /// <summary>Bounds on the loops, so a test fails rather than hangs if a progression stops ending.</summary>
         public const int LongerThanAnyAlarm = 600;

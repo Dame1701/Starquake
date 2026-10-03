@@ -278,27 +278,12 @@ internal class ElectricityGatesAndNodesEngine
             return null;
         }
 
-        Effect electric = _resources.GetEffect(Assets.Shaders.Electric);
-
-        Vector4 spriteRect = sprites.SpriteRectIn01(frame);
-
-        electric.Parameters["SpriteRect"].SetValue(spriteRect);
-
-        // The reach is given in the sprite's own pixels and the shader samples the whole strip, so
-        // it is handed over already scaled into that.
-        electric.Parameters["GlowStep"].SetValue(new Vector2(
-            ElectricSettings.GlowRadius / sprites.SpriteWidth * spriteRect.Z,
-            ElectricSettings.GlowRadius / sprites.SpriteHeight * spriteRect.W));
-
-        electric.Parameters["GlowAmount"].SetValue(ElectricSettings.GlowAmount);
-        electric.Parameters["CoreColour"].SetValue(ElectricSettings.CoreColour);
-        electric.Parameters["HaloColour"].SetValue(ElectricSettings.HaloColour);
-        electric.Parameters["CoreThreshold"].SetValue(ElectricSettings.CoreThreshold);
-        electric.Parameters["CoreSharpness"].SetValue(ElectricSettings.CoreSharpness);
-        electric.Parameters["CoreBoost"].SetValue(ElectricSettings.CoreBoost);
-        electric.Parameters["Flicker"].SetValue(ElectricSettings.FlickerAt(_flickerFrame));
-
-        return electric;
+        return ElectricSettings.PointAt(
+            _resources.GetEffect(Assets.Shaders.Electric),
+            sprites.SpriteRectIn01(frame),
+            sprites.SpriteWidth,
+            sprites.SpriteHeight,
+            _flickerFrame);
     }
 
     /// <summary>

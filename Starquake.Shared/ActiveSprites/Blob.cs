@@ -1096,8 +1096,72 @@ internal class Blob
         _gameScreens.UpdateCollisionMap(false);
     }
 
+    /// <summary>
+    ///     Logic frames since the overload began, which is all the arcing on his skin needs to
+    ///     know. Counted on the update and never in the draw: <c>GameHost</c> draws once per
+    ///     vertical retrace, so a flicker counted in drawn frames crackles faster on a better
+    ///     monitor.
+    /// </summary>
+    private int _overloadFrame;
+
+    /// <summary>
+    ///     Which frame of the electricity artwork the beams are drawn from. Stepped every logic
+    ///     frame of the overload so the beams crawl as well as turn.
+    /// </summary>
+    private int _overloadArcFrame;
+
+    /// <summary>
+    ///     Logic frames since the game began, for the flicker on the drain. Counted on the update
+    ///     and never in the draw, for the reason <see cref="ElectricSettings.FlickerAt" /> gives.
+    /// </summary>
+    private int _drainFrame;
+
+    /// <summary>
+    ///     The shader Blob burns with, pointed at the pose about to be drawn. The flicker is
+    ///     <see cref="ElectricSettings.FlickerAt" />, shared with the node and gate arcs on
+    ///     purpose - this is an electrical overload, and the two should crackle alike.
+    /// </summary>
+    private Effect OverloadShader(SpriteCollection sprites, string technique)
+    {
+        Effect overload = _resources.GetEffect(Assets.Shaders.Overload);
+
+        Vector4 spriteRect = sprites.SpriteRectIn01(BlobFrame);
+
+        overload.Parameters["SpriteRect"].SetValue(spriteRect);
+        overload.Parameters["Charge"].SetValue(
+            OverloadSettings.ChargeFrom(_blobEnergyDrainCounter));
+        overload.Parameters["Flicker"].SetValue(ElectricSettings.FlickerAt(_overloadFrame));
+
+        overload.Parameters["EmberColour"].SetValue(OverloadSettings.EmberColour);
+        overload.Parameters["MidColour"].SetValue(OverloadSettings.MidColour);
+        overload.Parameters["HotColour"].SetValue(OverloadSettings.HotColour);
+
+        overload.Parameters["RimColour"].SetValue(OverloadSettings.RimColour);
+        overload.Parameters["RimAmount"].SetValue(OverloadSettings.RimAmount);
+        overload.Parameters["InteriorWash"].SetValue(OverloadSettings.InteriorWash);
+
+        overload.Parameters["Split"].SetValue(_overload.Split);
+        overload.Parameters["CrackColour"].SetValue(OverloadSettings.CrackColour);
+        overload.Parameters["CrackBrightness"].SetValue(OverloadSettings.CrackBrightness);
+        overload.Parameters["CrackWidth"].SetValue(OverloadSettings.CrackWidth);
+        overload.Parameters["CrackDensity"].SetValue(OverloadSettings.CrackDensity);
+
+        // The reach is given in the sprite's own pixels and the shader samples the whole strip, so
+        // it is handed over already scaled into that.
+        overload.Parameters["RimStep"].SetValue(new Vector2(
+            OverloadSettings.RimRadius / sprites.SpriteWidth * spriteRect.Z,
+            OverloadSettings.RimRadius / sprites.SpriteHeight * spriteRect.W));
+
+        overload.CurrentTechnique = overload.Techniques[technique];
+
+        return overload;
+    }
+
     private void UpdateOverloadingState()
     {
+        _overloadFrame++;
+        _overloadArcFrame = _overloadFrame % OverloadSettings.BeamArcFrames;
+
         if (_overload.AlarmJustStarted)
         {
             _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobOverloadAlarm, 1.0f, false);
@@ -1251,6 +1315,11 @@ internal class Blob
                 DrawOverloadAlarmState(screenFade);
                 break;
             }
+            case BlobState.Overloading when _overload.Stage == OverloadStage.Cracking:
+            {
+                DrawOverloadSplitting(screenFade);
+                break;
+            }
             case BlobState.Overloading:
             {
                 DrawOverloadFlare();
@@ -1278,6 +1347,8 @@ internal class Blob
     /// </summary>
     private void FadeEnergyDrainTint()
     {
+        _drainFrame++;
+
         if (BlobTouchedByNasty)
         {
             if (!_blobTouched)
@@ -1312,15 +1383,54 @@ internal class Blob
         }
     }
 
+    /// <summary>
+    ///     Blob as he walks about, reddening while a nasty has hold of his energy.
+    /// </summary>
+    /// <remarks>
+    ///     The tint is white now and the red is the shader's. It used to be done here, by holding
+    ///     red at full and bringing green and blue down together - which is a healthy light of a
+    ///     different colour rather than something being drained. The shader is skipped entirely
+    ///     when nothing is draining him, which is nearly all the time.
+    /// </remarks>
     private void DrawBlobSprite(int screenFade)
     {
         SpriteCollection blobSprites = _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites);
-        blobSprites.Begin(BlendState.AlphaBlend);
+
+        bool draining = EnergyDrainSettings.IsDraining(_blobEnergyDrainCounter);
+
+        blobSprites.Begin(BlendState.AlphaBlend, null, draining ? DrainShader(blobSprites) : null);
         blobSprites.DrawSprite(BlobFrame,
             _blobXPos, _blobYPos,
-            ColourHelper.GetXna4Colour(ColourLevels.Full, (byte)_blobEnergyDrainCounter, (byte)_blobEnergyDrainCounter,
+            ColourHelper.WhiteFadedTo(
                 (byte)(_teleportFadeLevel * ((double)screenFade / ColourLevels.Full))), 1f, 0f);
         blobSprites.End();
+    }
+
+    /// <summary>
+    ///     The shader that reddens him while he is being drained, pointed at the pose about to be
+    ///     drawn. The flicker is <see cref="ElectricSettings.FlickerAt" />, shared with the node
+    ///     arcs and with his overload - it is all the same electricity.
+    /// </summary>
+    private Effect DrainShader(SpriteCollection sprites)
+    {
+        Effect drain = _resources.GetEffect(Assets.Shaders.Overload);
+
+        Vector4 spriteRect = sprites.SpriteRectIn01(BlobFrame);
+
+        drain.Parameters["SpriteRect"].SetValue(spriteRect);
+        drain.Parameters["Drain"].SetValue(
+            EnergyDrainSettings.DrainFrom(_blobEnergyDrainCounter));
+        drain.Parameters["DrainColour"].SetValue(EnergyDrainSettings.DrainColour);
+        drain.Parameters["RimAmount"].SetValue(EnergyDrainSettings.CoronaAmount);
+        drain.Parameters["Flicker"].SetValue(ElectricSettings.FlickerAt(_drainFrame));
+
+        drain.Parameters["RimStep"].SetValue(new Vector2(
+            EnergyDrainSettings.CoronaRadius / sprites.SpriteWidth * spriteRect.Z,
+            EnergyDrainSettings.CoronaRadius / sprites.SpriteHeight * spriteRect.W));
+
+        drain.CurrentTechnique = drain.Techniques["Draining"];
+
+        return drain;
     }
 
     private void DrawShuttle(int screenFade)
@@ -1373,10 +1483,14 @@ internal class Blob
         if (_overload.Visible)
         {
             SpriteCollection blobSprites = _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites);
-            blobSprites.Begin(BlendState.AlphaBlend);
+
+            // White rather than the red this used to tint him: the heat is the shader's now, and a
+            // tint on top of it would only take the colour back out again.
+            blobSprites.Begin(BlendState.AlphaBlend, null,
+                OverloadShader(blobSprites, "Charging"));
             blobSprites.DrawSprite(
                 BlobFrame, _blobXPos, _blobYPos,
-                ColourHelper.GetXna4Colour(ColourLevels.Full, (byte)_blobEnergyDrainCounter, (byte)_blobEnergyDrainCounter,
+                ColourHelper.WhiteFadedTo(
                     (byte)(_teleportFadeLevel * ((double)screenFade / ColourLevels.Full))), 1f, 0f);
             blobSprites.End();
         }
@@ -1391,19 +1505,104 @@ internal class Blob
         }
     }
 
+    /// <summary>
+    ///     The beat before the burst: he swells and shakes while cracks open across him with light
+    ///     coming out of them. The swell and the shrink that follow last eleven logic frames
+    ///     between them, which is too quick to read as anything - this is the part there is time
+    ///     to see.
+    /// </summary>
+    /// <remarks>
+    ///     He is drawn at the overload's own scale, which grows over these frames in step with the
+    ///     cracks. Holding him still and then bursting read as two things one after the other; the
+    ///     cracks widening because he is pulling apart is what makes it one thing.
+    /// </remarks>
+    private void DrawOverloadSplitting(int screenFade)
+    {
+        SpriteCollection blobSprites = _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites);
+
+        Vector2 shake = OverloadSettings.ShakeAt(_overloadFrame, _overload.Split);
+
+        blobSprites.Begin(BlendState.AlphaBlend, null, OverloadShader(blobSprites, "Splitting"));
+        blobSprites.DrawSprite(
+            BlobFrame,
+            _blobXPos + (int)shake.X,
+            _blobYPos + (int)shake.Y,
+            ColourHelper.WhiteFadedTo((byte)screenFade), _overload.Scale, 0f);
+        blobSprites.End();
+
+        DrawOverloadBeams(screenFade, shake);
+    }
+
+    /// <summary>
+    ///     The beams of charge whipping around him while he comes apart, thrown further out as the
+    ///     cracks widen.
+    /// </summary>
+    /// <remarks>
+    ///     The node and gate arc artwork, turned about him - the game already has a drawing of
+    ///     electricity and this is electricity, so it would be odd to draw a second kind. They go
+    ///     through the same burning shader the nodes do, so they have the same white core and halo,
+    ///     and they are drawn additively over him rather than under, because a beam passing in
+    ///     front of him should light him rather than disappear behind him.
+    /// </remarks>
+    private void DrawOverloadBeams(int screenFade, Vector2 shake)
+    {
+        SpriteCollection arc = _resources.GetSpriteCollection(Assets.Graphics.ElectricityNodeElectricity1);
+
+        int centreX = _blobXPos + SpriteMetrics.HalfSpriteWidth + (int)shake.X;
+        int centreY = _blobYPos + SpriteMetrics.HalfSpriteHeight + (int)shake.Y;
+
+        arc.Begin(BlendState.Additive, null, ElectricSettings.PointAt(
+            _resources.GetEffect(Assets.Shaders.Electric),
+            arc.SpriteRectIn01(_overloadArcFrame),
+            arc.SpriteWidth,
+            arc.SpriteHeight,
+            _overloadFrame));
+
+        for (int beam = 0; beam < OverloadSettings.BeamCount; beam++)
+        {
+            (Vector2 offset, float angle) = OverloadSettings.BeamAt(
+                _overloadFrame, beam, _overload.Split);
+
+            arc.DrawSprite(
+                _overloadArcFrame,
+                centreX + offset.X - arc.SpriteWidth / 2f,
+                centreY + offset.Y - arc.SpriteHeight / 2f,
+                ColourHelper.WhiteFadedTo((byte)screenFade),
+                OverloadSettings.BeamScale,
+                angle);
+        }
+
+        arc.End();
+    }
+
+    /// <summary>
+    ///     The discharge. Five copies of him at rising scales, each drawn as a burning outline
+    ///     rather than a ghost of him, and coloured by how far out it is - white-hot at the middle,
+    ///     cooling to electric blue at the front. Five solid copies read as five Blobs; five
+    ///     outlines read as a blast.
+    /// </summary>
     private void DrawOverloadFlare()
     {
-        _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites)
-            .Begin(BlendState.Additive);
+        SpriteCollection blobSprites = _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites);
+
+        blobSprites.Begin(BlendState.Additive, null, OverloadShader(blobSprites, "Discharging"));
+
+        int copy = 0;
 
         foreach (float scale in _overload.FlareScales())
         {
-            _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites)
-                .DrawSprite(BlobFrame, _blobXPos, _blobYPos,
-                    ColourHelper.WhiteFadedTo(OverloadFlareAlpha), scale, 0f);
+            // The colour of each shell rides in on the tint, which is per draw - so all five stay
+            // in one batch rather than needing a shader setting apiece.
+            Vector3 shell = OverloadSettings.ShellColour(copy, BlobOverload.FlareCopies);
+
+            blobSprites.DrawSprite(BlobFrame, _blobXPos, _blobYPos,
+                new Color(shell.X, shell.Y, shell.Z, OverloadFlareAlpha / (float)ColourLevels.Full),
+                scale, 0f);
+
+            copy++;
         }
 
-        _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites).End();
+        blobSprites.End();
     }
 
     public void DrawUpper(int screenFade)
