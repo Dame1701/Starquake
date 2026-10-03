@@ -25,6 +25,7 @@ rule in *The rule each extraction is placed by* and discovering the codebase bro
 
 | Landed | What it did |
 | --- | --- |
+| **Tenth pass** | A duplication sweep, after the nine stages: one live draw-path defect, the script that should have caught it, and five pieces of repetition. See *The tenth pass* below. |
 | `cf95609` | Five fades off the draw path: Blob's energy-drain tint, his teleport fade-in, the glow on a shot, and the fade and shrink of a dead nasty and a dead conveyer nasty. `ConveyerNasty` had no `Dead` branch in `Update` at all. |
 | `32c0345` | `SpriteCollection` held one rotation angle and advanced it inside `End`. The angle moves to the nasty, Blob's shuttle flame and the intro's ship, one per logic frame. `GameSession` falls out of `Nasty`, `Nasties` and `PlanetCoreScreen` with the `paused` flag that existed to freeze the spin. |
 | **Stage 9** | `ScreenShake` out of `MainGameScreen`, with eight tests. `NastyLifecycle` recommended against, and a latent bug in `CopyFromSource` found while deciding that. The fade pair turns out to be duplicated with `GameScreenBase` rather than needing extraction. |
@@ -900,7 +901,8 @@ survived measurement, and one turned into two findings rather than an extraction
 | `EditorSession` | 597 code / 19 mutable | **404 / 5** | three clusters out |
 | `MainGameScreen` | 424 code / 6 mutable | **392 / 3** | the tremor out |
 | `GameEngine` | 625 code / 24 mutable | **557 / 14** | the pulsing tiles out, then its two lives split |
-| Tests in the suite | 237 | **307** | |
+| `IntroSequence` | 334 code / 18 mutable | **319 / 8** | the ship's fall out; found by the tenth pass, not by this plan |
+| Tests in the suite | 237 | **411** | |
 
 **`Blob` is no longer the god class this document was written about** - at 16 mutable fields it holds
 fewer than `GameEngine`'s 24 or what `EditorSession` held when this started. `GameEngine` is the one
@@ -908,6 +910,51 @@ left, and what it needs is not an extraction: fourteen of its 24 fields are the 
 the
 `NotBeforeContentLoads` guards. Those cannot be removed by building the engine later, because the engine
 is what drives the load - see *The engine's two lives* below.
+
+## The tenth pass
+
+The nine stages were all about who owns which fields. This pass asked a different question - what is
+written out more than once - and it found one thing the stages could not have: **`IntroSequence`,
+which never appeared in the table above.** The script that built the table filters at 350 code lines
+and the class is 334, so the worst class in the codebase by this document's own measurement was
+invisible to this document's own method. Eighteen mutable fields, against `Blob`'s sixteen.
+
+| Landed | What it did |
+| --- | --- |
+| `a8f30db` | `CheopsScreen` read the keyboard and handed the whole screen over from inside `Draw`, in five copies of the same seven lines. The last of the defect class `cf95609` and `07db88c` cleared ten of. |
+| `ebf21e0` | The appendix's draw-path script, which reported clean throughout. Two holes; see the appendix. |
+| `6b150a5` | "Step a value toward a limit and clamp" was written eight times. `ScreenFadeUp` had found half of it and named only the upward integer half; `Ramp` replaces it. |
+| `b6fa86a` | `AnimationTrigger` and its flag, dead: all three subclasses were constructed with `useTrigger: false` and nothing ever set `Triggered`. |
+| `7aeebee` | `FloatAdder`, `FloatSubtractor` and `IntegerSubtractor` become one `RampedValue`. The direction follows from the two ends rather than from the class. |
+| `22532b2` | `AccessCodeLock`. The booth door and the pyramid scanned Blob's inventory with thirty-four identical lines each. Fourteen tests, where neither screen could be built in one. |
+| `3475b04` | `TunnelTiles.IsLeftMouth` / `IsRightMouth`. The ten mouths of a direction were named out in full at four sites, beside the constants that describe the run as contiguous. |
+| `795535b` | Three screens' `_fadeComplete` was only ever set false - six branches that could not run. |
+| `f8be35c` | `ColourHelper.WhiteFadedTo`. Forty-seven sites passed the same three arguments and varied the fourth. |
+| `150ec34` | Five more ramps in `IntroSequence`, written as a nested look-ahead rather than step-then-clamp, which is why the sweep missed them. |
+| `b7c3d8e` | `ShipDescent`. Seven of `IntroSequence`'s eighteen fields and the only arithmetic in it. Eleven tests. |
+| `c1452a4` | Three of the intro's pause lengths were constants wearing a field's clothing, and `SequenceRunning` was a public mutable field. |
+
+**307 tests to 411, and nothing in the diff is a behaviour change** except the two stated in their
+own commits: a tumble speed that can no longer go negative, and the Cheops swap now happening once
+per logic frame instead of once per drawn frame.
+
+### What this pass taught
+
+**A verification script is not verification until something has tried to get past it.** The
+draw-path check had been green for every one of the nine stages and was being read as proof. It was
+blind to the two spellings that mattered - a side effect chained off a call, and a write through a
+collaborator - and the one real defect left in the codebase used both. The stages did not put that
+defect there; it predates them and the check never saw it.
+
+**A duplication is a measurement the field count cannot make.** `Ramp` is eight copies and
+`WhiteFadedTo` is forty-seven, and no single class was the worse for either - they are spread across
+seventeen files and would never show up in a table of who owns too much state. Three of the five
+repetitions found here were also hiding a second thing: a dead flag, a dead base class, or a
+condition that could not fire.
+
+**The measurement's own threshold hid the worst class.** Worth saying plainly, because the fix is
+not to lower the threshold - it is that a cut-off chosen to keep a table short is not a statement
+about what is in the codebase, and the table said it was.
 
 ### What the stages taught that the plan could not know
 
