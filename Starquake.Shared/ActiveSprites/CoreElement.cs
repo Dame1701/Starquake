@@ -54,14 +54,14 @@ internal class CoreElement
     private readonly IStandardParticleEffect _coreReplacementEffect;
 
 
-    private readonly FloatSubtractor _currentElementDownScaler;
-    private readonly IntegerSubtractor _elementFader;
+    private readonly RampedValue _currentElementDownScaler;
+    private readonly RampedValue _elementFader;
 
     private readonly ElementFader _fader1;
     private readonly ElementFader _fader2;
     private readonly ElementFader _fader3;
 
-    private readonly FloatAdder _finalElementUpScaler;
+    private readonly RampedValue _finalElementUpScaler;
 
     private readonly GraphicsSet _graphicsSet;
     private readonly ResourceManager _resources;
@@ -79,9 +79,9 @@ internal class CoreElement
         int finalElement,
         bool startFadeUp)
     {
-        _currentElementDownScaler = new FloatSubtractor(ElementShrinkFrom, ElementScaleTo, ElementShrinkStep);
-        _finalElementUpScaler = new FloatAdder(0, ElementScaleTo, ElementGrowStep);
-        _elementFader = new IntegerSubtractor(ColourLevels.Full, ColourLevels.None, ElementFadeStep);
+        _currentElementDownScaler = new RampedValue(ElementShrinkFrom, ElementScaleTo, ElementShrinkStep);
+        _finalElementUpScaler = new RampedValue(0, ElementScaleTo, ElementGrowStep);
+        _elementFader = new RampedValue(ColourLevels.Full, ColourLevels.None, ElementFadeStep);
 
         ElementState = CoreElementState.Missing;
         CurrentElement = currentElement;
@@ -153,7 +153,7 @@ internal class CoreElement
                 // Scale current element down
                 _currentElementDownScaler.Update();
                 _finalElementUpScaler.Update();
-                if (_finalElementUpScaler.Modifier > ElementGrownEnough)
+                if (_finalElementUpScaler.Value > ElementGrownEnough)
                 {
                     if (ElementState == CoreElementState.Replacing)
                     {
@@ -233,12 +233,12 @@ internal class CoreElement
         {
             SpriteCollection pickupsIlluminated = _resources.GetSpriteCollection(_graphicsSet.Names.PickupsIlluminated);
             pickupsIlluminated.Begin(BlendState.Additive);
-            pickupsIlluminated.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, _elementFader.ByteModifier), _currentElementDownScaler.Modifier, 0);
+            pickupsIlluminated.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, _elementFader.ColourLevel), _currentElementDownScaler.Value, 0);
             pickupsIlluminated.End();
 
             SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
             pickups.Begin(BlendState.Additive);
-            pickups.DrawSprite(FinalElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)(ColourLevels.Full - _elementFader.ByteModifier)), _finalElementUpScaler.Modifier, 0);
+            pickups.DrawSprite(FinalElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ColourLevels.Full - _elementFader.ColourLevel), _finalElementUpScaler.Value, 0);
             pickups.End();
         }
         else if (ElementState == CoreElementState.Replaced)
