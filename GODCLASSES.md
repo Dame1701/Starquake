@@ -1053,14 +1053,20 @@ count and `PLAN.md`'s 123 for `Blob`. Events are excluded because they are a sur
 be owned.
 
 Everything the draw path writes. This is the check *Verification* calls for, and the three commits
-under *What has landed already* are what it took to get its output down to the two lines below:
+under *What has landed already* plus `a8f30db` are what it took to get its output down to the three
+lines below - the last of which needed the script itself fixed before it could be seen at all. See
+*What this script missed for three commits*.
 
 ```sh
 python3 - <<'PY'
 import os, re
 
-MUTATION = re.compile(r'^\s+(?:this\.)?(?:_\w+|[A-Z]\w*)\s*(?:=[^=]|\+=|-=|\*=|/=|\+\+|--)')
-SIDE_EFFECT = re.compile(r'(?<![.\w])(?:\w+\.)?(?:GetNextFrame|PlaySound|Trigger|Launch)\s*\(')
+# a write to a field or property, including one reached through a collaborator or an index
+MUTATION = re.compile(r'^\s+(?:this\.)?([A-Za-z_]\w*)((?:\.\w+|\[[^\]]*\])*)\s*(?:=[^=]|\+=|-=|\*=|/=|\+\+|--)')
+# a known side effect, however it is reached - chained off a call included
+SIDE_EFFECT = re.compile(r'(?:^|[^\w.]|\.)(?:GetNextFrame|PlaySound|StopSound|Trigger|Launch)\s*\(')
+# drawing's own business, not a decision
+ALLOWED = re.compile(r'GraphicsDevice\.(?:Clear|SetRenderTarget)\(')
 SIGNATURE = re.compile(r'^\s{4,8}(?:\[[^\]]*\]\s*)?(?:public|private|protected|internal|static)'
                        r'[^;=]*?\b([A-Za-z_]\w*)\s*\(')
 CALL = re.compile(r'(?<![.\w])([A-Za-z_]\w*)\s*\(')
@@ -1080,7 +1086,6 @@ for root, _, names in os.walk('Starquake.Shared'):
         for (i, method), (j, _) in zip(marks, marks[1:] + [(len(src), '')]):
             bodies.setdefault(method, []).append((i, j))
 
-        # everything the draw path can reach, resolved within the class
         reached, pending = set(), [m for m in bodies if m.startswith('Draw') or m == 'End']
         while pending:
             method = pending.pop()
@@ -1091,32 +1096,60 @@ for root, _, names in os.walk('Starquake.Shared'):
                 pending += [c for c in set(CALL.findall('\n'.join(src[i:j]))) - KEYWORDS
                             if c in bodies and c not in reached]
 
-        constructor = name[:-3]
-        for method in sorted(reached - {constructor}):
+        for method in sorted(reached - {name[:-3]}):
             for i, j in bodies[method]:
                 for k in range(i, j):
                     line = src[k].strip()
-                    # a statement ends in a semicolon; an object initialiser's entries do not
-                    if line.startswith('//') or not line.endswith(';'):
+                    if line.startswith('//') or not line.endswith(';') or ALLOWED.search(line):
                         continue
-                    if MUTATION.match(src[k]) or SIDE_EFFECT.search(src[k]):
+                    hit = MUTATION.match(src[k])
+                    # a local is camelCase with no path; state is a field, a property, or
+                    # anything reached through one
+                    if hit and not (hit.group(2) or hit.group(1).startswith('_')
+                                    or hit.group(1)[0].isupper()):
+                        hit = None
+                    if hit or SIDE_EFFECT.search(src[k]):
                         print(f'{path}:{k + 1}  {method}  {line}')
 PY
 ```
 
 It walks out from every `Draw*` method and `End`, resolving calls within the class, and reports any
-assignment or known side effect it can reach. Two hits are expected and allowed:
+write to state or known side effect it can reach. Three hits are expected and allowed:
 
 ```
-Starquake.Shared/ActiveSprites/Nasty.cs:334  CheckSpritesInUse  _nastySprite = _nastySpriteOriginal;
-Starquake.Shared/ActiveSprites/Nasty.cs:338  CheckSpritesInUse  _nastySprite = _nastySpriteNew;
+Starquake.Shared/ActiveSprites/Nasty.cs:359  CheckSpritesInUse  _nastySprite = _nastySpriteOriginal;
+Starquake.Shared/ActiveSprites/Nasty.cs:363  CheckSpritesInUse  _nastySprite = _nastySpriteNew;
+Starquake.Shared/Engines/ScreenEffects/ScreenEffectEngine.cs:210  Draw  renderViewPort.Active = false;
 ```
 
-Those pick which of the two cloned sheets to draw from, by art set. They write the same value on
-every frame, so the refresh rate cannot change what they do - which is the test for whether a
-draw-path write matters. **Anything else in that output is a defect.** Resolution is within the class
-only, so a draw helper that mutates through a collaborator will not be caught; that is the known gap,
-and reading the collaborator's own `Draw*` closes it.
+The first two pick which of the two cloned sheets to draw from, by art set. The third clears a view
+port's flag once it has been composited into the back buffer, which is the compositing's own
+bookkeeping. All three write the same value on every frame, so the refresh rate cannot change what
+they do - which is the test for whether a draw-path write matters. **Anything else in that output is
+a defect.**
+
+### What this script missed for three commits
+
+It reported clean while `CheopsScreen.DrawElementSelection` was reading the keyboard and handing the
+whole screen over from inside a `Draw`. Two holes let it through, and both are fixed above:
+
+- **A side effect chained off a call was invisible.** `SIDE_EFFECT` was
+  `(?<![.\w])(?:\w+\.)?(?:…|PlaySound|…)\s*\(`, and in
+  `_resources.GetSoundFxEngine().PlaySound(…)` the `P` is preceded by a `.` that follows a `)`, so
+  neither the optional `\w+\.` nor the lookbehind can match. That spelling is how most of the
+  codebase plays a sound, so the check was blind to nearly every one of them.
+- **A write through a collaborator was a documented gap, and the gap was load-bearing.** `MUTATION`
+  matched a bare field or property only, so `_blob.BlobInventory[slot] = …` and
+  `_screenDirectory.Current = …` both passed. It now matches a member path from any root.
+
+Allowing a path from any root brings every local layout cursor with it - `currentYPos += 50` in a
+`Draw` is a loop variable, not state - so a write is reported only when its root is a field, a
+property, or `this`, or when it reaches through one of those. Locals here are camelCase without an
+underscore, which is what that test leans on.
+
+Resolution is still within the class only, so a draw helper that calls a *method* on a collaborator
+which mutates in turn will not be caught; that is the remaining known gap, and reading the
+collaborator's own `Draw*` closes it.
 
 The field-to-method matrix behind track A — which methods touch which fields, which is what the
 groups were cut along:
