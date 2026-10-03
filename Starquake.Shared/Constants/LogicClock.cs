@@ -28,6 +28,5 @@ internal static class LogicClock
     /// <summary>
     ///     How many frames a given number of seconds is.
     /// </summary>
-    public static int Seconds(double seconds)
-        => (int)(seconds * FramesPerSecond);
+    public static int Seconds(double seconds) => (int)(seconds * FramesPerSecond);
 }
