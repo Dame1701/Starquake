@@ -207,7 +207,7 @@ public class GameHost : Game
     {
         base.Draw(gameTime);
 
-        _gameEngine?.Draw();
+        _gameEngine?.Draw(gameTime.ElapsedGameTime);
     }
 
     /// <summary>

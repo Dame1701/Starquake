@@ -305,13 +305,19 @@ internal class MainGameScreen : IGameScreen
         _gameEngine.Stats.PlayerScore += ScoreForReachingCore;
     }
 
+    /// <summary>
+    ///     The artwork has been swapped under this screen, so anything holding a sprite from the
+    ///     set that has gone has to take one from the set that has arrived.
+    /// </summary>
+    /// <remarks>
+    ///     This used to set the screen fade to nought as well, which blacked the picture out and
+    ///     ramped it back up over about four tenths of a second - the swap was a blink. The
+    ///     transition is <c>ArtworkCrossfade</c>'s now, and it dissolves one set into the other,
+    ///     which needs the arriving picture at full strength rather than climbing out of black
+    ///     underneath the one being held.
+    /// </remarks>
     public void SpritesChanged()
-    {
-        _gameEngine.TunnelAnimations.PerformPostChangeScreenActions();
-
-        ScreenFade = 0;
-        ScreenFadeSpeed = 12;
-    }
+        => _gameEngine.TunnelAnimations.PerformPostChangeScreenActions();
 
     public void LoadContent() => _gameEngine.Nasties.LoadContent();
 
@@ -358,8 +364,8 @@ internal class MainGameScreen : IGameScreen
     ///     a branch that is never taken, so a release has no path to them at all.
     ///     <para>
     ///         The keys that are not debug keys are handled elsewhere and stay live in both: F8
-    ///         swaps the artwork, F9 the scanlines, F10 the backdrops, F12 fullscreen, and the
-    ///         player's own pause and quit keys.
+    ///         swaps the artwork, F9 steps the cathode ray tube on a notch, F10 the backdrops,
+    ///         F12 fullscreen, and the player's own pause and quit keys.
     ///     </para>
     /// </summary>
     [Conditional("DEBUG")]

@@ -109,13 +109,26 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     private LoadingScreen _loadingScreen;
 
+    /// <summary>
+    ///     The line in the bottom left naming what a hotkey has just switched to. Built here rather
+    ///     than in <c>Initialise</c> because it depends on nothing - see
+    ///     <c>order-before-machinery</c>: a thing that needs no collaborators cannot be built in
+    ///     the wrong phase.
+    /// </summary>
+    private readonly ModeAnnouncement _announcement = new();
+
+    /// <summary>
+    ///     Dissolves one set of artwork into the other when F8 switches between them.
+    /// </summary>
+    private ArtworkCrossfade _crossfade;
+
     private bool _particleTestTrigger;
 
     /// <summary>
-    ///     The CRT scanline overlay, drawn over the finished picture by
-    ///     <see cref="DrawScanlines" />.
+    ///     Catches the composed picture and hands it to the back buffer, through the cathode ray
+    ///     tube when one is asked for.
     /// </summary>
-    private SpriteCollection _scanlines;
+    private ScreenPresenter _presenter;
 
     private ScreenEffectEngine _screenEffectEngine;
 
@@ -346,6 +359,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             _graphicsDeviceMgr,
             _window,
             ContentResourceManager,
+            _announcement,
             ArtworkSwapped,
             _quitGame);
 
@@ -366,7 +380,8 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     ///     The naming is <see cref="ContentManifest" />, which is also where the note about keeping
     ///     the registration order exactly as it was found now lives.
     /// </remarks>
-    [MemberNotNull(nameof(_loadingScreen), nameof(_scanlines), nameof(Font1), nameof(Font2))]
+    [MemberNotNull(nameof(_loadingScreen), nameof(_presenter), nameof(_crossfade), nameof(Font1),
+        nameof(Font2))]
     private void DefineContent()
     {
         _loadingScreen = new LoadingScreen(_graphicsDeviceMgr, _contentMgr, Presentation, Input);
@@ -385,6 +400,8 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     private void ArtworkSwapped()
     {
+        _crossfade.Start();
+
         if (IntroSequence.SequenceStage is IntroSequenceStage.Finished or IntroSequenceStage.EndPause)
         {
             ScreenDirectory.MainGame.SpritesChanged();
@@ -392,15 +409,16 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     }
 
     /// <summary>
-    ///     The two things the engine draws itself: the fonts every screen writes with, and the CRT
-    ///     scanline overlay laid over the finished picture. The loading screen loads its own.
+    ///     The two things the engine draws itself: the fonts every screen writes with, and the
+    ///     cathode ray tube the finished picture goes through. The loading screen loads its own.
     /// </summary>
-    [MemberNotNull(nameof(Font1), nameof(Font2), nameof(_scanlines))]
+    [MemberNotNull(nameof(Font1), nameof(Font2), nameof(_presenter), nameof(_crossfade))]
     private void DefineFonts()
     {
         Font1 = new BitmapFont(_contentMgr.Load<SpriteFont>(Assets.Fonts.ElektoraSmall), new SpriteBatch(_graphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
         Font2 = new BitmapFont(_contentMgr.Load<SpriteFont>(Assets.Fonts.ElektoraMedium), new SpriteBatch(_graphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
-        _scanlines = new SpriteCollection(_graphicsDeviceMgr, _contentMgr, Assets.Startup.Scanlines, CompositionSize.Width, CompositionSize.Height);
+        _presenter = new ScreenPresenter(_graphicsDeviceMgr, ContentResourceManager, Presentation);
+        _crossfade = new ArtworkCrossfade(_graphicsDeviceMgr);
     }
 
     /// <summary>
@@ -731,8 +749,15 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
 
         if (Input.GetPressedKey() == Keys.F9)
         {
-            Presentation.ScanlinesEnabled = !Presentation.ScanlinesEnabled;
+            Presentation.CrtMode = CrtSettings.Next(Presentation.CrtMode);
+
+            _announcement.Show(CrtSettings.NameOf(Presentation.CrtMode));
         }
+
+        // Stepped here rather than in UpdateRunningGame, so the message fades on the menus too -
+        // F9 works everywhere and a message left frozen at full would never go.
+        _announcement.Update();
+        _crossfade.Update();
 
         if (Status == GameEngineStatus.StartingGraphicsLoaded)
         {
@@ -851,9 +876,20 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         Presentation.Recalculate(backBuffer.BackBufferWidth, backBuffer.BackBufferHeight);
     }
 
-    public void Draw()
+    /// <param name="sinceLastDraw">
+    ///     How long ago the last frame went out, which only the phosphor's decay reads. Real
+    ///     elapsed time rather than a logic frame - this is the one thing in the game that is
+    ///     properly a property of the display's rate and not the game's.
+    /// </param>
+    public void Draw(TimeSpan sinceLastDraw)
     {
         CalculatePresentationTransform();
+
+        // Before the clear, because what the crossfade wants is what is still in the frame: the
+        // last picture drawn with the artwork being left behind.
+        _crossfade.HoldThePictureBeingLeft(_presenter.EnsureFrame());
+
+        RenderTarget2D caughtFrame = _presenter.BeginFrame();
 
         if (Status == GameEngineStatus.StartGame)
         {
@@ -881,31 +917,16 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             _loadingScreen.Draw(PercentComplete, FullyLoadedPercent);
         }
 
-        _screenEffectEngine.Draw();
+        _screenEffectEngine.Draw(caughtFrame);
 
-        DrawScanlines();
+        // What is left of the artwork being left behind, over the artwork arriving.
+        _crossfade.Draw();
+
+        // Over the finished picture but before the tube, so the message is part of what the tube
+        // is showing rather than something laid on the glass.
+        _announcement.Draw(Font2, Presentation.Transform);
+
+        _presenter.Present(sinceLastDraw);
     }
 
-    /// <summary>
-    ///     The CRT scanline overlay, laid over the finished picture as the very last thing drawn.
-    ///     Scaled and centred with the composition rather than laid over the letterbox borders as
-    ///     well, which is why it draws through the presentation transform.
-    ///     <para>
-    ///         <c>GameHost</c> used to do this, reaching in for the sprites, the flag and the
-    ///         transform. It is the game's own overlay and the game draws it; the host's business is
-    ///         pacing frames, not deciding what the picture looks like.
-    ///     </para>
-    /// </summary>
-    private void DrawScanlines()
-    {
-        if (!Presentation.ScanlinesEnabled)
-        {
-            return;
-        }
-
-        _scanlines.Begin(BlendState.AlphaBlend, Presentation.Transform);
-        _scanlines.DrawSprite(0, 0, 0,
-            new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ColourLevels.Full));
-        _scanlines.End();
-    }
 }

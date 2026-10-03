@@ -15,7 +15,9 @@ namespace Starquake.Input;
 
 /// <summary>
 ///     The five keys that work anywhere in the game rather than belonging to a screen: pause,
-///     fullscreen, the backdrops, the artwork swap and quit.
+///     fullscreen, the backdrops, the artwork swap and quit. The two that change how the game
+///     looks say so through <see cref="ModeAnnouncement" />, because otherwise the only way to
+///     know which way a toggle has just gone is to recognise the result.
 /// </summary>
 /// <remarks>
 ///     These are not the composition root and they are not the frame loop, which is what
@@ -33,6 +35,7 @@ internal class GlobalHotkeys(
     GraphicsDeviceManager graphics,
     GameWindow window,
     ResourceManager resources,
+    ModeAnnouncement announce,
     Action artworkSwapped,
     Action quitGame)
 {
@@ -130,6 +133,8 @@ internal class GlobalHotkeys(
         if (input.GetPressedKey() == Keys.F10 && screenDirectory.Current == GameScreenType.MainGame)
         {
             presentation.DrawBackgrounds = !presentation.DrawBackgrounds;
+
+            announce.Show(presentation.DrawBackgrounds ? "BACKDROPS ON" : "BACKDROPS OFF");
         }
     }
 
@@ -144,6 +149,8 @@ internal class GlobalHotkeys(
 
         // The original graphics have no backdrops drawn for them.
         presentation.DrawBackgrounds = graphicsSet.IsRedrawn;
+
+        announce.Show(graphicsSet.IsRedrawn ? "ENHANCED GRAPHICS" : "ORIGINAL GRAPHICS");
 
         artworkSwapped();
 

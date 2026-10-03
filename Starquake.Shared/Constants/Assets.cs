@@ -196,6 +196,12 @@ internal static class Assets
     internal static class Shaders
     {
         public const string Desaturate = @"Shaders\Desaturate";
+
+        /// <summary>
+        ///     The cathode ray tube: scanlines, a phosphor grille, a glow and a curve, in three
+        ///     techniques. Replaced a 1280x800 overlay texture - see <c>CrtFilter</c>.
+        /// </summary>
+        public const string Crt = @"Shaders\Crt";
     }
 
     /// <summary>
@@ -226,15 +232,10 @@ internal static class Assets
     internal static class Startup
     {
         /// <summary>
-        ///     The CRT scanline overlay, drawn by the engine over the finished picture.
-        /// </summary>
-        public const string Scanlines = @"Graphics\Scanlines2";
-
-        /// <summary>
         ///     The boot screen and its progress bar, drawn by <c>LoadingScreen</c>. The 2 on the
         ///     backdrop is the file's own - it supersedes an earlier <c>BootScreen.png</c> rather
-        ///     than being a second layer drawn with it, and the same goes for
-        ///     <see cref="Scanlines" />.
+        ///     than being a second layer drawn with it. <c>Scanlines2.png</c> was the other half of
+        ///     that pair and is gone: the scanlines are computed by <c>Shaders/Crt.fx</c> now.
         /// </summary>
         public const string BootScreen = @"Graphics\BootScreen2";
 

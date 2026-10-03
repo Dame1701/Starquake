@@ -965,18 +965,6 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/ScanLine.png
 
-#begin Graphics/Scanlines2.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/Scanlines2.png
-
 #begin Graphics/StartilesNew.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -1297,6 +1285,12 @@
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:Shaders/Desaturate.fx
+
+#begin Shaders/Crt.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/Crt.fx
 
 #begin Sounds/AccessFailed.wav
 /importer:WavImporter

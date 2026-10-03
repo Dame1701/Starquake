@@ -1,9 +1,10 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
+using Starquake.Structure;
 
 namespace Starquake.Display;
 
@@ -42,9 +43,11 @@ internal sealed class PresentationSettings
     public bool DrawBackgrounds { get; set; } = true;
 
     /// <summary>
-    ///     Whether the CRT scanline overlay is drawn over the finished picture.
+    ///     How much of a cathode ray tube the finished picture is put through. Stepped by F9, and
+    ///     <see cref="CrtMode.Scanlines" /> to start with because that is what the game has always
+    ///     looked like.
     /// </summary>
-    public bool ScanlinesEnabled { get; set; } = true;
+    public CrtMode CrtMode { get; set; } = CrtMode.Scanlines;
 
     /// <summary>
     ///     Where the game's own screens are placed within the composition, which is not the whole

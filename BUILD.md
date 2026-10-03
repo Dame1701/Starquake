@@ -1,4 +1,4 @@
-# Building Starquake
+﻿# Building Starquake
 
 ## Layout
 
@@ -120,9 +120,13 @@ That target framework still compiles everywhere - `EnableWindowsTargeting` sees 
 just ships no content off a Mac, which costs nothing because the Windows head cannot run there.
 **Build the Windows head's content on Windows.** There it needs no Wine at all.
 
-`Desaturate.fx` is the first shader the game actually builds: a luminance desaturation for the
-tunnel transition, `ps_2_0` so it fits the `Reach` profile with room to spare. The other three
-in `Assets/Shaders/` are still unbuilt and unreferenced.
+Two shaders are built. `Desaturate.fx` is a luminance desaturation for the tunnel transition,
+and `Crt.fx` is the cathode ray tube F9 steps through - scanlines, a phosphor grille, a glow and
+a curve. Both are `ps_2_0`, because the profile is `Reach` and allows no higher, and that is why
+`Crt.fx` is three techniques rather than one shader with branches: `ps_2_0` has no dynamic
+branching and 64 arithmetic slots, so each mode is compiled as only the work it needs and the
+whole-tube pass is the one with no room to spare. The three in `Assets/Shaders/` that are not in
+`Content/Shaders/` remain unbuilt and unreferenced.
 
 If the toolchain ever becomes a liability - Rosetta is on notice, and this Wine is an x86_64
 binary running a x86_64 Windows compiler - MGCB's `/copy:` directive takes a prebuilt `.xnb`

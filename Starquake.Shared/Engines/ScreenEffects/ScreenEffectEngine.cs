@@ -147,7 +147,11 @@ internal class ScreenEffectEngine
         }
     }
 
-    public void Draw()
+    /// <param name="composeOnto">
+    ///     Where the finished picture goes: null for the back buffer, or the frame
+    ///     <c>CrtFilter</c> is catching when the tube is switched on.
+    /// </param>
+    public void Draw(RenderTarget2D? composeOnto = null)
     {
         // Nothing to compose until the view ports have been registered, and clearing the back
         // buffer to draw nothing over it would wipe out whatever did draw - the boot screen, which
@@ -159,7 +163,7 @@ internal class ScreenEffectEngine
             return;
         }
 
-        _graphicsDeviceManager.GraphicsDevice.SetRenderTarget(null);
+        _graphicsDeviceManager.GraphicsDevice.SetRenderTarget(composeOnto);
         _graphicsDeviceManager.GraphicsDevice.Clear(_presentation.ScreenClearColour);
 
         foreach (RenderViewPort renderViewPort in _renderViewPorts)

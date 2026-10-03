@@ -24,8 +24,8 @@ namespace Starquake.Input;
 ///     this at all.
 ///     <para>
 ///         The keys that are not debug keys are <see cref="GlobalHotkeys" />' and stay live in both:
-///         F8 swaps the artwork, F9 the scanlines, F10 the backdrops, F12 fullscreen, and the
-///         player's own pause and quit keys.
+///         F8 swaps the artwork, F9 steps the cathode ray tube on a notch, F10 the backdrops,
+///         F12 fullscreen, and the player's own pause and quit keys.
 ///     </para>
 /// </remarks>
 internal class TestModeKeys(
