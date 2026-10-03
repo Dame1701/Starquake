@@ -165,7 +165,7 @@ nothing sets is usually a member nothing reads, but not always.
 ## The one question left open
 
 `Blob.cs`, access booth detection, around line 1755. Each of the two branches detects the booth
-on one side of blob and then hands the booth screen the **map position of the tile on his other
+on one side of Blob and then hands the booth screen the **map position of the tile on his other
 side**:
 
 ```csharp
@@ -175,14 +175,14 @@ if (_tileLeftBlob is { TileNumber: (int)ActionTiles.AccessBoothRight })   // det
 
 The teleport booth immediately above it uses `_tileRightBlob` throughout, which is what makes the
 crossing look like a slip. The position is not discarded: `AccessBoothScreen.Reset` uses it to
-place blob when he leaves the booth, as `(int)temp[1] * 128` give or take a tile, so reading the
+place Blob when he leaves the booth, as `(int)temp[1] * 128` give or take a tile, so reading the
 wrong tile puts him in the wrong place.
 
 Left exactly as it was, because which tile the booth is meant to be told is a question about the
-game and walking blob into a booth is the only way to see which looks right. What did change is
+game and walking Blob into a booth is the only way to see which looks right. What did change is
 that both tiles must now be present for either branch to fire, since the branch reading the
 opposite tile never established it was there — previously that was a crash waiting for an empty
-tile beside blob. If the crossing is a bug, the fix is to read the detected tile's own
+tile beside Blob. If the crossing is a bug, the fix is to read the detected tile's own
 `MapXPosition` in both branches.
 
 ## Also worth knowing

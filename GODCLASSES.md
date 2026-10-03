@@ -25,8 +25,8 @@ rule in *The rule each extraction is placed by* and discovering the codebase bro
 
 | Landed | What it did |
 | --- | --- |
-| `cf95609` | Five fades off the draw path: the blob's energy-drain tint, his teleport fade-in, the glow on a shot, and the fade and shrink of a dead nasty and a dead conveyer nasty. `ConveyerNasty` had no `Dead` branch in `Update` at all. |
-| `32c0345` | `SpriteCollection` held one rotation angle and advanced it inside `End`. The angle moves to the nasty, the blob's shuttle flame and the intro's ship, one per logic frame. `GameSession` falls out of `Nasty`, `Nasties` and `PlanetCoreScreen` with the `paused` flag that existed to freeze the spin. |
+| `cf95609` | Five fades off the draw path: Blob's energy-drain tint, his teleport fade-in, the glow on a shot, and the fade and shrink of a dead nasty and a dead conveyer nasty. `ConveyerNasty` had no `Dead` branch in `Update` at all. |
+| `32c0345` | `SpriteCollection` held one rotation angle and advanced it inside `End`. The angle moves to the nasty, Blob's shuttle flame and the intro's ship, one per logic frame. `GameSession` falls out of `Nasty`, `Nasties` and `PlanetCoreScreen` with the `paused` flag that existed to freeze the spin. |
 | **Stage 9** | `ScreenShake` out of `MainGameScreen`, with eight tests. `NastyLifecycle` recommended against, and a latent bug in `CopyFromSource` found while deciding that. The fade pair turns out to be duplicated with `GameScreenBase` rather than needing extraction. |
 | **Stage 8** | `ColourAnimatedTiles` out of `GameEngine`, and **the rest of the stage recommended against** - measured, not guessed. See below. |
 | **Stage 7** | `CanvasViewOptions`, `AuthoredPositions` and `TilePaletteState` out of `EditorSession`. 19 mutable fields to 5; 597 code lines to 404. Two of the plan's five clusters are recommended against rather than done - see below. |
@@ -34,7 +34,7 @@ rule in *The rule each extraction is placed by* and discovering the codebase bro
 | **Stage 5** | `BlobOverload` and `BlobEntryPoint`. Six fields and the death's arithmetic out, plus ten constants. Twelve tests. **`Blob` is no longer the worst class in the codebase by mutable field count** - `GameEngine` is. |
 | **Stage 4** | `TunnelLift`. Three counters and the 83-line ride out, into 111 code lines. Nineteen tests - the plan said none were to be had here, and was wrong for the reason stage 3 found. The two tunnel-mouth detectors the plan grouped with it stay where they are. |
 | **Stage 3** | `BlobFall`. Four counters and the tunnel-mouth shuffle out, into 99 code lines that need a collision map and nothing else. Eleven tests, and this time the plan's promise held - see below for why, and for the one case left uncovered. |
-| **Stage 2** | `BlobWeapon`. Ten fields and seven methods out, 219 code lines, and the back-reference that made the blob hand out `this` mid-construction. Twelve tests - but only over the one rule in it that is pure, which is not what this plan promised. |
+| **Stage 2** | `BlobWeapon`. Ten fields and seven methods out, 219 code lines, and the back-reference that made Blob hand out `this` mid-construction. Twelve tests - but only over the one rule in it that is pure, which is not what this plan promised. |
 | **Stage 1** | `BlobSurroundings`. Four `TileDetected?` fields become one value, probed by a free function against a `ScreenCollisionMap` and handed to each of the eight readers as the tile it actually uses. Eight tests, where there could be none before. `Blob` 36 mutable fields to 33. |
 | `07db88c` | The two booth screens asked for their verdict sound while drawing - hence the latch stopping it playing sixty times a second - and started a logic-frame wait from a draw. Plus three idempotent draw-time writes that left logic waiting on a frame having been drawn. |
 
@@ -119,7 +119,7 @@ Three more rules this document's subject matter adds:
 **One owner per field.** Where a cluster of fields moves out, the fields move — they are not copied
 and they are not shadowed. `_blobXPos`/`_blobYPos` are the exception that proves it: they are read
 by nearly every method in `Blob`, so they stay where they are and every extracted piece is *handed*
-the position per frame. Two copies of where the blob is would be worse than the god class.
+the position per frame. Two copies of where Blob is would be worse than the god class.
 
 **The draw path is read-only, and every extraction has to keep it that way.** It was not when this
 document was written: ten places advanced frame-counted state while drawing, which is what the three
@@ -174,7 +174,7 @@ whatever. It is the single most testable thing left in the class, and it was mis
 was of clusters, not of fields.
 
 **On the weapon, phase 4 was half right.** The *effects* are what it says: sparks, a trail and a fade
-with nothing to assert about them. The *decisions* are not — which way a shot leaves when the blob is
+with nothing to assert about them. The *decisions* are not — which way a shot leaves when Blob is
 on the shuttle versus on foot, and `PointBlankReach`'s answer to a shot fired while standing on a
 collectable, which is live arithmetic that has already drifted once. `BlobFire` and
 `IFireSurroundings` got fourteen tests out of the half of the weapon that was extracted; this is the
@@ -205,7 +205,7 @@ are `AVLN####`, so a filter written for `CS` and `IDE` drops them - and the XAML
 to date on a second build even when the first one failed, which makes a repeated build on a broken file
 report success. Stage 7 met both. See it for the detail.
 
-Stages 1 to 5 change the blob, which no test covers end to end, so each also wants the game launched
+Stages 1 to 5 change Blob, which no test covers end to end, so each also wants the game launched
 and the touched behaviour exercised by hand: walking and falling, firing on foot and on the shuttle,
 a tunnel lift both ways, a death by spikes and a death by overload, and a screen change in each of
 the four directions. The three commits above were signed off that way, on all eight of the things
@@ -267,7 +267,7 @@ delegate to `ScreenCollisionMap.CheckTileByObject`, so `Around` takes the map an
 content pipeline, no graphics device. The tests pin the four directions against each other (a
 transposition in a four-line constructor is exactly the mistake this refactor could have made) and
 the separate downward reach, which is the one piece of real behaviour the probe encodes: riding the
-shuttle makes the blob taller, the extra height is shuttle rather than blob, so the ground has to be
+shuttle makes Blob taller, the extra height is shuttle rather than more of Blob, so the ground has to be
 looked for from his own feet or he reads the floor through the shuttle.
 
 One thing the tests pinned down on the way: the probe reports which tile *image* is in the way and
@@ -287,13 +287,13 @@ public surface.
 | Members | `BlobFireX`, `BlobFireY`, `BlobHasFired`, `RegisterFireHit` become `Weapon.X`, `.Y`, `.HasFired`, `.RegisterHit` |
 | Type | `FireSurroundings` |
 
-**The back-reference is gone, which was the point as much as the size.** `FireSurroundings` held the
-blob for one call - `ThrowSparks` - and that was the only reason `Blob`'s constructor handed out
+**The back-reference is gone, which was the point as much as the size.** `FireSurroundings` held Blob
+for one call - `ThrowSparks` - and that was the only reason `Blob`'s constructor handed out
 `this` before it had finished running. The weapon owns the sparks, so `FireSurroundings` takes the
-effect instead and the blob gives out nothing.
+effect instead and Blob gives out nothing.
 
 `PointBlankReach` took `CheckForBlobCollisionWithObject` and `GetCollisionObjects` with it: each had
-exactly one caller, all the way up the chain, so the whole question of what the blob is standing on
+exactly one caller, all the way up the chain, so the whole question of what Blob is standing on
 belonged to the shot and nothing else used it.
 
 **The plan was wrong about the tests, and this is the honest version.** It said the fire rules would
@@ -303,7 +303,7 @@ be built without the content pipeline. Extracting it did not make it testable.
 
 What *is* testable is the one rule in it that is pure, and it is the rule worth having: which way a
 shot leaves. On the shuttle he fires whichever way he is moving, including up and down; on foot a
-shot only ever goes left or right, so a blob standing still fires the way he last walked. That is now
+shot only ever goes left or right, so Blob standing still fires the way he last walked. That is now
 `static BlobWeapon.DirectionOfShot(directionBlobMoved, onShuttle, lastFired)` and has twelve tests,
 including the two cases that follow from carrying the last direction - getting off the shuttle still
 aimed upwards, and firing upwards until he walks again.
@@ -351,7 +351,7 @@ neither was luck:
 
 Eleven tests: the starting speed, standing on the ground, the step up in speed on the fourth frame of
 a drop, the terminal speed being reached and never exceeded, a short drop being silent, a long one
-becoming audible, landing clearing the fall height, and the shuffle not firing on a blob nobody is
+becoming audible, landing clearing the fall height, and the shuffle not firing on Blob when nobody is
 steering.
 
 **`StartFallingAgain` clears the speed and not the total, deliberately.** A drop through the bottom of
@@ -361,7 +361,7 @@ screen boundary, and a test pins it.
 **One case is left uncovered rather than approximated.** The shuffle *catching* the lip of an opening
 needs a fall fast enough to overshoot it and a ledge inside that overshoot, and the probe is a
 65-pixel box one blob width to the side - so the geometry takes several tiles of hand-built collision
-cells to construct. The first attempt at it put the blob inside its own ledge, which the test caught.
+cells to construct. The first attempt at it put Blob inside the ledge itself, which the test caught.
 The negative case is covered and the positive one is named in the test's remarks.
 
 Two things that are not identical, stated rather than smuggled:
@@ -387,7 +387,7 @@ They share nothing else: the lift is a vertical mode with three counters and one
 the detectors are a *screen change* - they touch `_gameScreens`, `_screenEffects`, `_resources` and the
 `OnScreenChanged` event to set one field, `_directionGoingThroughTunnel`, which only
 `PerformPostChangeScreenActions` reads. Four collaborators and an event for one field is not a cluster
-worth extracting; it is the blob changing screens, which is what the blob is for. They stay.
+worth extracting; it is Blob changing screens, which is what Blob is for. They stay.
 
 So the measured group was three fields and one method, not four and three.
 
@@ -400,7 +400,7 @@ stop. The tests count those callbacks, because *when* the sound starts is part o
 What they pin: getting on only under the middle of a shaft (walking past the edge of one must not grab
 him), all four shaft tiles carrying him, the three recognised tops ending the ride, the minimum ride
 before he may step off sideways, steering into a wall not counting as a way out, and the minimum ride
-counting afresh from each shaft - so a blob who has ridden once cannot step straight out of the next
+counting afresh from each shaft - so Blob, having ridden once, cannot step straight out of the next
 one he enters.
 
 ### A fourth lift top that the ride has never recognised
@@ -436,7 +436,7 @@ fields and ten constants, and lands at **16 mutable fields - fewer than `GameEng
 
 **`BlobOverload`** owns the shape of a death: the alarm counter, the stage, and the scale, with the
 swell-shrink-explode progression and the flare's geometry. 64 code lines, needs nothing at all to
-construct, and has twelve tests - the most thorough of the five pieces taken out of the blob.
+construct, and has twelve tests - the most thorough of the five pieces taken out of Blob.
 
 **`BlobEntryPoint`** collapses `_blobScreenEntryLocation`, `_blobFrameOnEntry` and
 `_blobOnShuttleOnEntry` into one named object. Worth checking before believing: arriving is written
@@ -469,8 +469,8 @@ The plan said two of the three `BlobState` cases would leave with this stage, an
 would drop to "one real case and two delegations". It has not, and should not. What moved is the
 arithmetic *inside* `UpdateOverloadingState` and `UpdateDyingState`; the methods themselves stay,
 because between them they touch the death animation, the weapon, the jump platforms, the planet, the
-`OnBlobDiedAndRespawned` event, the blob's position and his height. `UpdateDyingState` is almost
-entirely the business of putting a blob back together, which is the blob's own business.
+`OnBlobDiedAndRespawned` event, Blob's position and his height. `UpdateDyingState` is almost
+entirely the business of putting Blob back together, which is Blob's own business.
 
 That is the third stage in a row where the plan's prediction about *shape* was wrong while its
 prediction about *which fields cluster* was right. The fields were measured; the shapes were guessed.
@@ -480,24 +480,24 @@ prediction about *which fields cluster* was right. The fields were measured; the
 `FlareScales()` yields the sizes the explosion's copies are drawn at, so the stack geometry - five
 copies, growing outward, skipping any that would come out inside out - is testable and `Blob` keeps only
 the `foreach` and the alpha. That is a partial exception to *a cluster takes its `Draw` with it*: the
-drawing itself needs the blob's sprite sheet, position and frame, so moving it would mean handing over
-most of the blob, exactly as a `BlobRenderer` would. The geometry moved and the drawing stayed.
+drawing itself needs Blob's sprite sheet, position and frame, so moving it would mean handing over
+most of Blob, exactly as a `BlobRenderer` would. The geometry moved and the drawing stayed.
 
 ---
 
-# After the blob
+# After Blob
 
 Five stages in, `Blob` has gone from 1,492 code lines over 36 mutable fields to **1,081 over 16**, and
 from 237 tests in the suite to 299. Five of the eight field groups are gone.
 
-What is left in it is one subject: a blob that walks, falls, carries things, rides a shuttle, changes
+What is left in it is one subject: Blob, who walks, falls, carries things, rides a shuttle, changes
 screens and dies - holding a weapon, a fall, a lift, an overload and an entry point, each of which can
 be reasoned about and most of which can be tested. Two of the three groups left inside it, named in stage 5's
 original plan as deliberately-left, are still the right call: the teleport fade because it is three
 fields and thirty lines, and the position because everything is relative to it. The third — the
 shuttle — was left on a reason that turned out to be the wrong test, and stage 10 takes it.
 
-**Stages 6 to 9 are not about the blob**, and nothing in them depends on anything above.
+**Stages 6 to 9 are not about Blob**, and nothing in them depends on anything above.
 
 ---
 
@@ -517,7 +517,7 @@ _blobOnShuttle = true;
 
 `BlobHeight` and `_blobOnShuttle` were one fact kept in two fields, and the pair had to be written
 together in `HandleShuttlePad` twice, in `UpdateDyingState`, and in `Reset`. Either one without the
-other leaves the blob a shuttle's height into the floor or walking on air. `Shuttle` makes the height
+other leaves Blob a shuttle's height into the floor or walking on air. `Shuttle` makes the height
 derived — `Riding ? SpriteHeight + ShuttleHeight : SpriteHeight` — and there is no longer a sequence
 of calls that can put them out of step.
 
@@ -539,7 +539,7 @@ every screen and the collision map is rebuilt from it. `Step` returns a `Shuttle
 the frame came to and `Blob` does the rewriting, which is `BlobFall`'s split exactly.
 
 `ShuttleBoarding` has four cases where three would do, and the fourth is the point. The original
-rebuilt the collision map for a blob merely *standing* on a pad — not only for one boarding or
+rebuilt the collision map for Blob merely *standing* on a pad — not only for one boarding or
 stepping off — so `Standing` has to be distinguishable from `NotOnThePad` even though neither changes
 anything here. Folding them together would have been a behaviour change dressed as a simplification.
 
@@ -547,7 +547,7 @@ anything here. Folding them together would have been a behaviour change dressed 
 
 `DetectSurroundingTiles` probed downwards with `_blobOnShuttle ? BlobHeight - ShuttleHeight :
 BlobHeight`, the comment on `BlobSurroundings.heightBelow` explaining that the ground has to be
-looked for from the blob's own feet rather than the shuttle's. Both arms are
+looked for from Blob's own feet rather than the shuttle's. Both arms are
 `SpriteMetrics.SpriteHeight`: `BlobHeight` is `SpriteHeight + ShuttleHeight` exactly when he is
 aboard and `SpriteHeight` when he is not, so the subtraction always undoes the addition. The
 conditional is gone and the constant is passed. The comment it was carrying was right and is kept —
@@ -556,7 +556,7 @@ it says why the parameter exists, which is still worth knowing.
 ### Where the pad is
 
 `DetectShuttlePad` required `below is { XPosition: 32, YPosition: 0 }`, two bare numbers. They are
-the blob standing squarely on the pad: 32 is `(TileWidth - SpriteWidth) / 2`, a 64-wide blob centred
+Blob standing squarely on the pad: 32 is `(TileWidth - SpriteWidth) / 2`, Blob 64 wide and centred
 on a 128-wide tile, and 0 is his feet exactly on top of it rather than anywhere further down. Both
 are named and the X is derived, because what matters is the centring rather than the number.
 
@@ -576,7 +576,7 @@ What they cannot see is the caller acting on what `Step` returns, which is the s
 # Track B — the editor
 
 Independent of track A — different project, no shared code — so these can go in any order relative
-to the blob, and stage 6 is the cheapest thing in this document.
+to Blob, and stage 6 is the cheapest thing in this document.
 
 ## Stage 6 — `ScreenPainter` out of `ScreenCanvas` — **done**
 
@@ -625,7 +625,7 @@ artwork is read by four separate controls and is not the palette's to own; and `
 | Extracted | Fields | What it is |
 | --- | --- | --- |
 | `CanvasViewOptions` | 6 | The four overlay toggles, the palette's tile width and the hover status line. Preferences about looking, with nothing in them about the map |
-| `AuthoredPositions` | 4 | The blob's start, the crash site, the core exit and the core, with the landing-site verdict built on the first two |
+| `AuthoredPositions` | 4 | Blob's start, the crash site, the core exit and the core, with the landing-site verdict built on the first two |
 | `TilePaletteState` | 5 | The filter, the used-tiles-only switch, the visible list, the in-use cache and the recent row |
 
 ### Where the plan was wrong, and where this session's own work changed it
@@ -714,7 +714,7 @@ would leave `GameEngine` a frame loop and strip the twelve `NotBeforeContentLoad
 callers. Measured rather than assumed, neither half holds up.
 
 **The construction reads 42 members of the engine, and eleven of them are both its inputs and its
-outputs.** It is a chain: build the planet, build the blob from the planet, build the nasties from
+outputs.** It is a chain: build the planet, build Blob from the planet, build the nasties from
 both, and register the screens from all of it. `Elements`, `Stats`, `Session`, `ScreenEffectEngine`,
 `BlobStatusPanel`, `GameScreens`, `Player`, `BlobKiller`, `BreakableBridgesEngine`,
 `ConveyerNastiesInstance` and `ElectricityNodeGateEngine` are each written by one step and read by a
@@ -876,7 +876,7 @@ not an oversight.** Measured rather than assumed:
 | `PlanetCoreScreen` | two |
 
 `GameScreenBase` is for a full-screen page of text over a cleared screen that hands over on a key press,
-and its own doc says so. The five screens under `GameScreens` are places the blob has gone, which is a
+and its own doc says so. The five screens under `GameScreens` are places Blob has gone, which is a
 different thing. `MainGameScreen` is the only one of them that fades itself up, which is what made
 it look
 like a sixth page - and if it inherited, it would hold both the base's seven and the engine it needs
@@ -912,9 +912,9 @@ is what drives the load - see *The engine's two lives* below.
 ### What the stages taught that the plan could not know
 
 **Whether an extraction earns tests comes down to one thing: can the resource manager be left behind.**
-Not the size of the cluster. Stage 2 took ten fields and 219 lines out of the blob and could test
+Not the size of the cluster. Stage 2 took ten fields and 219 lines out of Blob and could test
 one static function, because `BlobWeapon`'s constructor pulls two particle effects and a sprite
-sheet. Stage 3 took four fields and got eleven tests, by leaving the falling *sound* with the blob
+sheet. Stage 3 took four fields and got eleven tests, by leaving the falling *sound* with Blob
 and returning a flag. Stages 4, 5 and 9 repeated that trade deliberately - callbacks for the lift's
 sound, nothing at all for the overload, a `Shake?` for the tremor - and each one earned its tests.
 The plan predicted no tests for three of those four.
@@ -966,11 +966,11 @@ and returns the `RunningGame`, which is what makes the fields unnecessary rather
 Verified: all nine constructions in the same order, the same `LoadContent` calls, and the same
 subscriptions.
 
-**One guard disappeared rather than moving.** `Session_OnPlayerKeysChanged` tested whether the blob
+**One guard disappeared rather than moving.** `Session_OnPlayerKeysChanged` tested whether Blob
 existed, because the options screen can change the controls before content has loaded. The
-subscription is made where the blob is built instead - `Session.OnPlayerKeysChanged += keys =>
+subscription is made where Blob is built instead - `Session.OnPlayerKeysChanged += keys =>
 player.BlobsControl.PlayerKeySet = keys` - so there is no window in which the keys can change and
-there is no blob to tell. The handler and its test are both gone.
+there is no Blob to tell. The handler and its test are both gone.
 
 And a dead branch went with the rest: `UpdateScreensLeftRunningOffScreen` tested the screen number
 against `CoreInventoryHandoverScreen` to run a body that is entirely commented out and refers to

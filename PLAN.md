@@ -91,7 +91,7 @@ have a local called `temp`.
 
 ## The key and the access card — how they ended up placed
 
-**Done.** One key and one access card are placed on every world, each on a random screen the blob
+**Done.** One key and one access card are placed on every world, each on a random screen Blob
 can reach without passing through the gate that item itself opens. The two lines in `Blob`'s
 constructor that handed the player both at startup are gone.
 
@@ -138,21 +138,21 @@ geometric adjacency:
   it is a grid, a row at a time. Neither is what a 2D bitmap of the planet would do.
 - **A door is not a sealed screen.** `AddKeyLockDoorCollisionTiles` puts three collision cells at
   `Location.X + 48` - one cell wide, the height of its tile. It blocks a path *through* a screen,
-  and it only blocks it at all because the blob is two cells wide.
+  and it only blocks it at all because Blob is two cells wide.
 
 ### What the model does, and what it deliberately does not
 
-`GateFreeScreens` floods the blob's 2x2 collision-cell footprint out from the landing site, using
-the blob's own rules for leaving a screen, with the gate of one kind sealed.
+`GateFreeScreens` floods Blob's 2x2 collision-cell footprint out from the landing site, using
+Blob's own rules for leaving a screen, with the gate of one kind sealed.
 
-**It is deliberately an under-estimate.** It moves the blob by walking, falling and climbing only,
+**It is deliberately an under-estimate.** It moves Blob by walking, falling and climbing only,
 and knows nothing of tunnel mouths, tunnel lifts, shuttles or teleporters. Every one of those can
-only ever *add* reachability, so a screen it returns is one the blob genuinely reaches without
+only ever *add* reachability, so a screen it returns is one Blob genuinely reaches without
 meeting a gate, and the ones it misses are candidates given up. That asymmetry is the whole design:
 over-estimating puts the key behind a door and makes the game unwinnable; under-estimating costs
 nothing but variety. On the shipped map it leaves 188 screens, 185 of them with somewhere to stand -
 a generous pool. It is also why the planet core is not in the result and does not need to be.
-Climbing is treated as free because it nearly is: walking off the top of a screen hands the blob a
+Climbing is treated as free because it nearly is: walking off the top of a screen hands Blob a
 fresh jump platform.
 
 ### Two things that had to be got right
@@ -173,16 +173,16 @@ element the core actually wants. Nothing checks that a required element is reach
 opposed to merely not gated - that is the same per-screen model again, pointed at a different
 question.
 
-And there is a failure mode now live that was harmless before. `CheopsScreen.ChooseItemToSwap`: a
-blob carrying nothing but the key and the card has to give up the key, or the card if it has no key.
+And there is a failure mode now live that was harmless before. `CheopsScreen.ChooseItemToSwap`: Blob
+carrying nothing but the key and the card has to give up the key, or the card if it has no key.
 A door is passable only while the key is *in the inventory*, so trading it away re-locks every door,
 and the player can no longer start a game holding one. Whether a pyramid should refuse both items is
 a design question, not a defect, and nothing has been changed about it.
 
 ## Still deliberately out of scope
 
-**Split `MainGameScreen`.** It uses every actor because it *is* the main game — it drives the
-blob, the nasties, the bridges, the lifts, the animations and the effects every frame. Its
+**Split `MainGameScreen`.** It uses every actor because it *is* the main game — it drives Blob,
+the nasties, the bridges, the lifts, the animations and the effects every frame. Its
 alternatives are an eighteen-parameter constructor or a bag object existing solely for it, and
 both are worse than holding the engine. If it should be smaller, that is splitting a 642-line
 class on size, which is a different task and should not be smuggled in here.

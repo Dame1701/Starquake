@@ -46,7 +46,7 @@ since the dependency arrives per call. Eight more take theirs at construction: `
 `BlobAccessBoothAnim`, `CoreElement`, `CoreElements`.
 
 **Construction order looked like the constraint on the remainder, and it was not one.** The engine's
-lazily-built members — the planet, the blob, the screen effect engine — throw if read before content
+lazily-built members — the planet, Blob, the screen effect engine — throw if read before content
 has loaded, so a class handed one at construction throws where holding the engine and reading it
 later did not. That is the bug that went in with the random number generator. Three classes appeared
 to be stopped by it: `TunnelLiftAnimationEngine` and `BlobDeathAnimation` wanted the planet and were
@@ -65,7 +65,7 @@ use is in `Update` or `Draw`), all three moved:
 | `BreakableBridges` | after `RegisterScreenEffectViewPorts` | those, plus a `GraphicsDeviceManager` and the `ScreenEffectEngine` |
 
 `TunnelAnimations` and `BlobKiller` come off their `MemberNotNull` contracts and go behind
-`NotBeforeContentLoads`, the pattern the engine already uses for the planet and the blob. That is
+`NotBeforeContentLoads`, the pattern the engine already uses for the planet and Blob. That is
 honest rather than a workaround — they genuinely do not exist until content loads, and now they say
 so instead of being non-null fields that happened to be assigned early.
 
@@ -91,11 +91,11 @@ entangled than the plan expected, and not by accident:
   is assigned during construction *before* `ContentResourceManager` exists, which is what the null
   check in the setter is really for.
 - `PlayerKeys` is not plain state either. Its setter pushes the key set into `Player.BlobsControl`
-  and decides keyboard against joypad — so it depends on the blob.
+  and decides keyboard against joypad — so it depends on Blob.
 
 `BlobStatusPanel` is the only one of the four that is simply a reference, and moving it into a
 `GameSession` would re-home it rather than narrow anything. So Session wants the sound engine and
-the blob, which means it is stage 6 work wearing a stage 5 label. Better done once the actor graph
+Blob, which means it is stage 6 work wearing a stage 5 label. Better done once the actor graph
 is decided than forced into a settings object now.
 
 The map is down to **50 coupled files from 60**, measured with the corrected script at both ends.
@@ -339,37 +339,37 @@ The plan said to decide the registry question here rather than in advance. With 
 Three findings, in order of how much they changed the picture.
 
 **The cycle the plan named was one expression.** "`Blob` reaching back through the engine to find
-itself" was `GameEngine.Player.BlobXPos` *inside* `Blob`. There is one blob, constructed once, and
+itself" was `GameEngine.Player.BlobXPos` *inside* `Blob`. There is one Blob, constructed once, and
 it is what `Player` returns — so that was `BlobXPos`. Gone in a line. `Player` being read by ten
-files was never a cycle; the other nine are other objects asking where the blob is.
+files was never a cycle; the other nine are other objects asking where Blob is.
 
 **Most of the rest was construction order again, not dependency.** `ConveyerNasties` and
-`ElectricityGatesAndNodesEngine` were built in `Initialise()`, before the blob and the planet
+`ElectricityGatesAndNodesEngine` were built in `Initialise()`, before Blob and the planet
 existed, which is the only reason they held the engine. Neither needs anything from the pre-content
-phase. Moved after the blob, both take what they use. `ConveyerNasty` needs no blob at all.
-`CustomControl` writes the blob's speed and wanted nothing else — and the blob constructs it, so
-the blob hands over itself.
+phase. Moved after Blob, both take what they use. `ConveyerNasty` needs no Blob at all.
+`CustomControl` writes Blob's speed and wanted nothing else — and Blob constructs it, so
+Blob hands over itself.
 
 **What was left was four true two-cycles, all through `Blob` or `GameScreens`** — and the important
-one broke by passing values instead of the object. The planet held the whole blob to answer three
-questions: does the blob carry a key (a door's force field turns green), and where is it (Olly's
-eyes follow it). Three values, two private methods, one caller. `Update` now takes them. That
-matters because the planet and the blob were mutually blocked — the blob built first so it could
-not be handed the planet, the planet needing the blob so it could not be built first either. With
-the planet no longer needing the blob, that ordering is free.
+one broke by passing values instead of the object. The planet held the whole of Blob to answer three
+questions: does Blob carry a key (a door's force field turns green), and where is he (Olly's
+eyes follow him). Three values, two private methods, one caller. `Update` now takes them. That
+matters because the planet and Blob were mutually blocked — Blob built first so it could
+not be handed the planet, the planet needing Blob so it could not be built first either. With
+the planet no longer needing Blob, that ordering is free.
 
 ### What remains
 
-`Blob` needs six things built after it. Three are **ordering only** — nothing needs the blob back,
+`Blob` needs six things built after it. Three are **ordering only** — nothing needs Blob back,
 so they are reorders or nothing: `BlobKiller`, `BreakableBridgesEngine`, `ScreenEffectEngine`. Two
-are **true cycles still**: `ElectricityNodeGateEngine` and `BlobStatusPanel` both need the blob.
+are **true cycles still**: `ElectricityNodeGateEngine` and `BlobStatusPanel` both need Blob.
 And `GameScreens` still needs `ColourAnimationEngine`, which needs `GameScreens` — the fourth
 cycle, and the one that has not been touched.
 
-So the remaining work is: build the planet before the blob and hand it over; decide the two-cycle
+So the remaining work is: build the planet before Blob and hand it over; decide the two-cycle
 with `StatusPanel` (which is also the Session cluster, so the two questions are one); and break or
 accept `GameScreens` ↔ `ColourAnimationEngine`, which is seven call sites in one direction and
-would go the same way the blob's did.
+would go the same way Blob's did.
 
 **Nothing here wants a registry.** The pattern that has worked five times running is: ask whether
 the order is load-bearing, and if the answer is a cycle, ask what the dependent side actually needs
@@ -380,7 +380,7 @@ the order is load-bearing, and if the answer is a cycle, ask what the dependent 
 Left until last because it is the real one. `GameEngine.Player` is read by 10 files, one of which
 is `Blob` reaching back through the engine to find itself (`Blob.cs:1592`). The actors
 (`Player`, `Nasties`, `Elements`, `BlobKiller`, and the five engines) are mutually referential by
-nature — nasties need the blob, the blob needs the bridges — and no amount of constructor
+nature — nasties need Blob, Blob needs the bridges — and no amount of constructor
 threading makes that graph acyclic on its own.
 
 This is where the honest answer may be "a registry the actors resolve each other through, set up
@@ -396,9 +396,9 @@ and each lands at four to nine constructor parameters.
 
 | Landed | What it did |
 | --- | --- |
-| — | `StatusPanel` was asking the engine for `GameEngine.BlobStatusPanel` to read an energy level it owns. Second self-reference of this shape, after the blob's. |
-| **`GameSession`** | `Paused` and `PlayerKeys`, the last real design question. Neither is plain state — one setter drives the background rumble, the other pushes into the blob's control — so the session holds the values and raises events, and the engine acts on them. Eight tests. `StatusPanel` deliberately *not* included: it needs the engine to construct, so holding it would have made the session untestable. |
-| — | `Nasty` and `Nasties`, unblocked by the session, and `Nasties` moved after the blob and the two engines it asks about hazards. `GetRandomNastyType`'s `bool` chose between two identical branches; deleted. |
+| — | `StatusPanel` was asking the engine for `GameEngine.BlobStatusPanel` to read an energy level it owns. Second self-reference of this shape, after Blob's. |
+| **`GameSession`** | `Paused` and `PlayerKeys`, the last real design question. Neither is plain state — one setter drives the background rumble, the other pushes into Blob's control — so the session holds the values and raises events, and the engine acts on them. Eight tests. `StatusPanel` deliberately *not* included: it needs the engine to construct, so holding it would have made the session untestable. |
+| — | `Nasty` and `Nasties`, unblocked by the session, and `Nasties` moved after Blob and the two engines it asks about hazards. `GetRandomNastyType`'s `bool` chose between two identical branches; deleted. |
 | — | Building `ScreenEffectEngine` split from registering its view ports — the engine needs a graphics device, the view ports need dimensions known only after content loads, and they were being built together to suit the later. That unblocked `JumpPlatform` and `JumpPlatforms`. |
 | **Presentation screens** | All five use *exactly* the same six members, so those six go on `GameScreenBase` — five of five consumers using six of six is a real cluster, as against the actors where fifteen classes each want two of eleven. The last conduit goes with it. |
 
@@ -409,22 +409,22 @@ and each lands at four to nine constructor parameters.
 | Landed | What it took |
 | --- | --- |
 | `TeleportScreen` (11), `CheopsScreen` (10), `AccessBoothScreen` (9), `PlanetCoreScreen` (9) | Nothing moved — all four are built in the last phase, so everything already existed. `PlanetCoreScreen` also had a `Random` assigned and never read, and took `CoreElements` while separately reading `GameEngine.Elements`, which is the same object. |
-| `StatusPanel` (4) | A true cycle with `Blob`: the blob reads its supplies off the panel, the panel drains its energy and revives it. The blob becomes a parameter of `Update` rather than a field, and the panel is told whether the intro allows energy to drain. |
+| `StatusPanel` (4) | A true cycle with `Blob`: Blob reads his supplies off the panel, the panel drains his energy and revives him. Blob becomes a parameter of `Update` rather than a field, and the panel is told whether the intro allows energy to drain. |
 | `IntroSequence` (9) | Wants the planet and the death animation, was built before both. Moved. |
 | `GameScreenCollection` (4) | The `ColourAnimationEngine` cycle the first pass left untouched. Broken by **ownership**: the colour animations are animations of this planet's tiles and the planet drives all nine call sites, so the planet builds one and hands itself to it. |
 | `Blob` (12) | Two of its three blockers were ordering only. The third was one line — it called `ElectricityNodeGateEngine.Reset()` on respawn, so it now raises `OnBlobDiedAndRespawned` and the engine subscribes the reset. `FireSurroundings`, the interface this plan held up as the model, was *still* taking a whole engine; it now takes the planet and a `Random`. |
 
 Every cycle in the graph is cut. The techniques, in the order they kept working: **check whether the
-order is load-bearing** (most cases); **pass values instead of the object** (the planet ← blob);
+order is load-bearing** (most cases); **pass values instead of the object** (the planet ← Blob);
 **own the thing you drive** (the planet → colour animations); **raise an event instead of calling**
-(the blob → electricity, the session → sound and blob).
+(Blob → electricity, the session → sound and Blob).
 
 ### What is left, and why
 
 Two files, and both are deliberate.
 
 **`MainGameScreen` (18 members) keeps the engine.** It uses every actor, because it *is* the main
-game — it drives the blob, the nasties, the bridges, the lifts, the animations and the effects every
+game — it drives Blob, the nasties, the bridges, the lifts, the animations and the effects every
 frame. Its alternatives are an eighteen-parameter constructor or a bag object existing solely for
 it, and both are worse than the reference. If it should be smaller, the job is splitting a 610-line
 class, which is a different task from decoupling and should not be smuggled into it.
@@ -485,7 +485,7 @@ only because its six presentation screens still read the inherited field. It goe
 | Class | Blocked on |
 | --- | --- |
 | `Nasty`, and `Nasties` which builds it | `Paused` — the Session cluster |
-| `JumpPlatform`, and `JumpPlatforms` which builds it | `ScreenEffectEngine`; the blob builds `JumpPlatforms` and the blob is built first |
+| `JumpPlatform`, and `JumpPlatforms` which builds it | `ScreenEffectEngine`; Blob builds `JumpPlatforms` and Blob is built first |
 
 `TestScreen` was a third of these and is now deleted: it was registered in the screen directory and
 nothing ever navigated to it, so it could not be reached. The F11 handler went with it — an empty
@@ -502,7 +502,7 @@ missing a spelling it claimed had been checked. `SpriteCollection` appeared on i
 
 **Half the "dependencies" were not dependencies.** Two identity functions that had returned their
 argument since the initial checkin. An engine parameter never read. A base class holding a
-reference it never used, for 22 subclasses. A duplicated condition in the joypad check. A blob
+reference it never used, for 22 subclasses. A duplicated condition in the joypad check. Blob
 asking the engine for itself. None of these were coupling to remove; they were nothing, wearing
 coupling's clothes.
 
@@ -512,7 +512,7 @@ a registry the actors resolve each other through; it needed no such thing. The q
 working: *is this order load-bearing, or just the order someone wrote it in?*
 
 **And when it was a real cycle, the dependent side wanted almost nothing.** The planet held the
-whole blob to ask three questions. Passing three values broke the hub cycle of the entire graph.
+whole of Blob to ask three questions. Passing three values broke the hub cycle of the entire graph.
 
 ## What this is not
 

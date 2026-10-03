@@ -134,7 +134,7 @@ for "not inside out yet". Neither has a constant and neither wants one.
 
 ### 1b. The two dead parameters are gone
 
-`Nasty.DiagonalBouncing` and `Nasty.DiagonalBouncingInSteps` no longer take the blob's position.
+`Nasty.DiagonalBouncing` and `Nasty.DiagonalBouncingInSteps` no longer take Blob's position.
 Four call sites in `Nasty.Update` updated.
 
 One of them collapsed. The `DiagonalBouncing` call site was an `if (GameEngine.Player != null)`
@@ -237,7 +237,7 @@ clear as it is going to get.
 - `UpdateFire` — 608. Stage 3.
 - `UnstickBlobFromTiles` — 97. Pre-existing and untouched; it belongs to stage 4's tail.
   *Since moved whole into `UnstickProbe` by `PLAN.md` 4.7, where it is a question - given where
-  the blob is, where should he be - and has tests.*
+  Blob is, where should he be - and has tests.*
 - `ChangeScreenIfOffEdge` — 88. Four sibling blocks, one per screen edge, with no comments left in
   it. Splitting it would produce four methods named after the four edges and read no better.
 
@@ -297,7 +297,7 @@ would have surfaced. The case for this stage was not hypothetical.
 Not every difference between the six branches was drift, and the collapse had to keep the two that
 were not.
 
-**The point-blank push-through** — which stops a shot dying on the spot when the blob is standing
+**The point-blank push-through** — which stops a shot dying on the spot when Blob is standing
 over a collectable — exists only for shots fired along the horizontal axis. Vertical shots from a
 shuttle never had it. That looks accidental rather than intended, but adding it to vertical shots
 changes what the game does, so `BlobFire` keeps the axis test and `Advance`'s documentation says
@@ -315,7 +315,7 @@ Two ways, because a build proves nothing here.
 
 25 tests in `Starquake.Tests/BlobFireTests.cs` pin the axes, the four straight screen edges, the
 eight deflected ones, the difference between deflecting off a shuttle and dying on foot, the
-push-through applying horizontally and not vertically, and what happens when the blob fires in a
+push-through applying horizontally and not vertically, and what happens when Blob fires in a
 direction nothing travels along. Two of them are the cases that would have caught the two drifts.
 
 Beyond that, the six old branches were ported mechanically into a throwaway harness — only the
@@ -379,15 +379,15 @@ data:
 - `BounceStraightBack` and `HeadTowardsBlob` — shared by `RandomMovement` and
   `RandomUpDownLeftRight`, which were near-identical for 75 lines.
 
-`SpikeyMovement` (241 to 73) was the same 55 lines once per quadrant the blob can be in, with the
+`SpikeyMovement` (241 to 73) was the same 55 lines once per quadrant Blob can be in, with the
 directions and subtractions swapped. `MoveNastyOneStep` (235 to 46) was eight blocks saying how to
 move and eight more saying what it hit, when every direction is a vertical component, a horizontal
 one, or both. Its two `ref` parameters were the same dead pair as stage 1b's and are gone.
 
 Two things were preserved rather than tidied, each with a `///` saying why. `RandomMovement` clears
-the direction before chasing and `RandomUpDownLeftRight` does not, so a nasty level with the blob
+the direction before chasing and `RandomUpDownLeftRight` does not, so a nasty level with Blob
 behaves differently in the two — that is load-bearing. And `SpikeyMovement`'s quadrant tests were
-an if/else chain with inclusive bounds on both sides, so a nasty exactly level with the blob fell
+an if/else chain with inclusive bounds on both sides, so a nasty exactly level with Blob fell
 into whichever arm matched first; that is an artefact of the order they were written in, and
 straightening it would change the game.
 
@@ -503,7 +503,7 @@ replaced with `ActionTiles.AccessForceField`; and five identical commented-out j
 
 Stage 4's record said `Blob.ChangeScreenIfOffEdge` was better left whole, on the grounds that four
 methods named after four edges would read no better. Doing it showed otherwise: the two vertical
-edges have to decide where blob lands, and that wants its own name and its own `///`. It is four
+edges have to decide where Blob lands, and that wants its own name and its own `///`. It is four
 methods now.
 
 The `Blob` constructor was revisited too, but only partly. Its five `Animation` initialisers were
