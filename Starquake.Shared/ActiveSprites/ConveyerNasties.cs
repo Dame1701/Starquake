@@ -3,7 +3,6 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.ContentManagement;
@@ -15,9 +14,7 @@ namespace Starquake.ActiveSprites;
 internal class ConveyerNasties
 {
     private readonly Blob _blob;
-    private readonly ContentManager _contentManager;
     private readonly GameScreenCollection _gameScreens;
-    private readonly GraphicsDeviceManager _graphicsDeviceManager;
     private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
 
@@ -35,23 +32,19 @@ internal class ConveyerNasties
 
     public ConveyerNasties(
         ResourceManager resources,
-        ContentManager content,
         GameScreenCollection gameScreens,
-        GraphicsDeviceManager graphics,
         Blob blob,
         Random randomNumberGenerator)
     {
         _resources = resources;
-        _contentManager = content;
         _gameScreens = gameScreens;
-        _graphicsDeviceManager = graphics;
         _blob = blob;
         _randomNumberGenerator = randomNumberGenerator;
 
         Nasties = new List<ConveyerNasty>();
     }
 
-    public void LoadContent(ContentList content)
+    public void LoadContent()
     {
         // Create 3 nasties that we will keep re-using
         Nasties.Clear();
@@ -59,15 +52,12 @@ internal class ConveyerNasties
         {
             Nasties.Add(
                 new ConveyerNasty(_resources,
-                    _contentManager,
                     _gameScreens,
-                    _graphicsDeviceManager,
                     _randomNumberGenerator,
                     0,
                     0,
                     0,
-                    false,
-                    content));
+                    false));
         }
     }
 

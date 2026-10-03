@@ -118,6 +118,7 @@ internal static class ContentManifest
         resources.AddSpriteResource(ResourceNames.Original.PowerUps, "Graphics\\PowerUpsOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
         resources.AddSpriteResource(ResourceNames.Redrawn.Pickups, "Graphics\\Pickups", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
         resources.AddSpriteResource(ResourceNames.Original.Pickups, "Graphics\\PickupsOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        resources.AddSpriteResource(Assets.Graphics.ConveyerNasty, "Graphics\\ConveyerNasty", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
 
         resources.AddSpriteResource(Assets.Graphics.Nasties, "Graphics\\Nasties", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
         resources.AddSpriteResource(Assets.Graphics.NastiesOriginal, "Graphics\\NastiesOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);

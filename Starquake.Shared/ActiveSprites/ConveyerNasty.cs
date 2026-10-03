@@ -3,7 +3,6 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Animations;
 using Starquake.Constants;
@@ -63,15 +62,12 @@ internal class ConveyerNasty
 
     public ConveyerNasty(
         ResourceManager resources,
-        ContentManager contentManager,
         GameScreenCollection gameScreens,
-        GraphicsDeviceManager graphics,
         Random randomNumberGenerator,
         int xposition,
         int yposition,
         int moveSpeed,
-        bool active,
-        ContentList content)
+        bool active)
     {
         _gameScreens = gameScreens;
         _randomNumberGenerator = randomNumberGenerator;
@@ -92,7 +88,7 @@ internal class ConveyerNasty
         _deathFadeLevel = ColourLevels.Full;
         _deathScale = 1f;
 
-        _nastySprite = new SpriteCollection(graphics, contentManager, content.GetContent("conveyerNasty"), SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        _nastySprite = resources.GetSpriteCollection(Assets.Graphics.ConveyerNasty);
         _conveyerNastyDies = (IStandardParticleEffect)resources.GetParticleEffectInstance(Assets.Effects.NastyDies, ParticleEffectType.Triggered, null);
         _conveyerNastyDies.ParticleEffectComplete += ConveyerNastyDies_ParticleEffectComplete;
     }
@@ -144,7 +140,7 @@ internal class ConveyerNasty
                 int amountToMove = _gameScreens.CheckCollision(Direction.Left, XLocation, YLocation + HangsBelowRailBy, SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight, MoveSpeed, false);
                 if (amountToMove > 0)
                 {
-                    XLocation = XLocation - amountToMove;
+                    XLocation -= amountToMove;
                 }
                 else
                 {
@@ -157,7 +153,7 @@ internal class ConveyerNasty
                 int amountToMove = _gameScreens.CheckCollision(Direction.Right, XLocation, YLocation + HangsBelowRailBy, SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight, MoveSpeed, false);
                 if (amountToMove > 0)
                 {
-                    XLocation = XLocation + amountToMove;
+                    XLocation += amountToMove;
                 }
                 else
                 {

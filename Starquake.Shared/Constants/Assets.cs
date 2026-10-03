@@ -67,6 +67,7 @@ internal static class Assets
         // Pick-ups and nasties
         public const string Nasties                        = "Nasties";
         public const string NastiesOriginal                = "NastiesOriginal";
+        public const string ConveyerNasty                  = "ConveyerNasty";
 
         // Access booths
         public const string ScanLine                       = "ScanLine";
@@ -195,6 +196,53 @@ internal static class Assets
     internal static class Shaders
     {
         public const string Desaturate = @"Shaders\Desaturate";
+    }
+
+    /// <summary>
+    ///     The sprite fonts, by the path each loads from. Paths rather than registered names for the
+    ///     same reason as <see cref="Shaders" />: a font is fetched straight off the content manager
+    ///     when the engine builds its two <c>BitmapFont</c>s, rather than being registered and loaded
+    ///     with everything else - see <c>GameEngine.DefineFonts</c>.
+    ///     <para>
+    ///         Both are built from <c>elektora.ttf</c> by MGCB's font description processor. The
+    ///         bitmap atlases under <c>Assets\Fonts</c> are what that superseded.
+    ///     </para>
+    /// </summary>
+    internal static class Fonts
+    {
+        public const string ElektoraSmall  = @"Fonts\elektoraSmall";
+        public const string ElektoraMedium = @"Fonts\elektoraMedium";
+    }
+
+    /// <summary>
+    ///     What is loaded straight off the content manager before the game exists, by path rather
+    ///     than by registered name. These cannot go through <c>ContentManifest</c>:
+    ///     <c>DefineContent</c> loads them before it calls <c>RegisterAll</c>, and the manifest's
+    ///     content then arrives on a background load - too late for anything drawn on the loading
+    ///     screen's own first frame. <c>LoadingScreen</c> loads its three the same way and for the
+    ///     same reason, so they are here too. <see cref="Fonts" /> is the rest of what the engine
+    ///     fetches this way.
+    /// </summary>
+    internal static class Startup
+    {
+        /// <summary>
+        ///     The CRT scanline overlay, drawn by the engine over the finished picture.
+        /// </summary>
+        public const string Scanlines            = @"Graphics\Scanlines2";
+
+        /// <summary>
+        ///     The boot screen and its progress bar, drawn by <c>LoadingScreen</c>. The 2 on the
+        ///     backdrop is the file's own - it supersedes an earlier <c>BootScreen.png</c> rather
+        ///     than being a second layer drawn with it, and the same goes for
+        ///     <see cref="Scanlines" />.
+        /// </summary>
+        public const string BootScreen           = @"Graphics\BootScreen2";
+
+        /// <inheritdoc cref="BootScreen" />
+        public const string BootProgress         = @"Graphics\BootProgress";
+
+        /// <inheritdoc cref="BootScreen" />
+        public const string ProgressBarBackground = @"Graphics\ProgressBarBackground";
     }
 
     /// <summary>

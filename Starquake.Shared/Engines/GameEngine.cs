@@ -311,7 +311,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             }
             else
             {
-                Stats.EnergyLevel = Stats.EnergyLevel - 1;
+                Stats.EnergyLevel -= 1;
             }
         }
     }
@@ -407,9 +407,9 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     [MemberNotNull(nameof(Font1), nameof(Font2), nameof(_scanlines))]
     private void DefineFonts()
     {
-        Font1 = new BitmapFont(ContentMgr.Load<SpriteFont>("Fonts\\elektoraSmall"), new SpriteBatch(_graphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
-        Font2 = new BitmapFont(ContentMgr.Load<SpriteFont>("Fonts\\elektoraMedium"), new SpriteBatch(_graphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
-        _scanlines = new SpriteCollection(_graphicsDeviceMgr, ContentMgr, @"Graphics\Scanlines2", CompositionSize.Width, CompositionSize.Height);
+        Font1 = new BitmapFont(ContentMgr.Load<SpriteFont>(Assets.Fonts.ElektoraSmall), new SpriteBatch(_graphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
+        Font2 = new BitmapFont(ContentMgr.Load<SpriteFont>(Assets.Fonts.ElektoraMedium), new SpriteBatch(_graphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
+        _scanlines = new SpriteCollection(_graphicsDeviceMgr, ContentMgr, Assets.Startup.Scanlines, CompositionSize.Width, CompositionSize.Height);
     }
 
     /// <summary>
@@ -523,16 +523,11 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         // both are built here rather than in Initialise, where neither existed yet.
         var conveyerNasties = new ConveyerNasties(
             ContentResourceManager,
-            ContentMgr,
             gameScreens,
-            _graphicsDeviceMgr,
             player,
             RandomNumberGenerator);
         conveyerNasties.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
-
-        var conveyerNastyGraphics = new ContentList();
-        conveyerNastyGraphics.AddContent("conveyerNasty", "Graphics\\ConveyerNasty");
-        conveyerNasties.LoadContent(conveyerNastyGraphics);
+        conveyerNasties.LoadContent();
 
         var electricityNodeGates = new ElectricityGatesAndNodesEngine(
             ContentResourceManager,

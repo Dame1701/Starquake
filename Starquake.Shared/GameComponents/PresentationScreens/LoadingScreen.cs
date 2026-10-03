@@ -27,7 +27,11 @@ namespace Starquake.GameComponents.PresentationScreens;
 ///         rather than a render view port - there is no screen effect engine yet to own one.
 ///     </para>
 /// </remarks>
-internal class LoadingScreen
+internal class LoadingScreen(
+    GraphicsDeviceManager graphics,
+    ContentManager content,
+    PresentationSettings presentation,
+    ToggleKeys input)
 {
     /// <summary>
     ///     How much of a colour channel the loading screen's fade moves by, each logic frame.
@@ -72,33 +76,15 @@ internal class LoadingScreen
     /// <inheritdoc cref="ProgressBackgroundWidth" />
     private const int ProgressSliceHeight = 24;
 
-    private readonly SpriteCollection _bootProgress;
-    private readonly SpriteCollection _bootProgressBackground;
-    private readonly SpriteCollection _bootScreen;
-    private readonly GraphicsDeviceManager _graphicsDeviceManager;
-    private readonly ToggleKeys _input;
-    private readonly PresentationSettings _presentation;
+    private readonly SpriteCollection _bootProgress = new(
+        graphics, content, Assets.Startup.BootProgress, ProgressSliceWidth, ProgressSliceHeight);
+    private readonly SpriteCollection _bootProgressBackground = new(
+        graphics, content, Assets.Startup.ProgressBarBackground, ProgressBackgroundWidth, ProgressBackgroundHeight);
+    private readonly SpriteCollection _bootScreen = new(
+        graphics, content, Assets.Startup.BootScreen, CompositionSize.Width, CompositionSize.Height);
 
     private int _bootProgressBackgroundFade = ColourLevels.Full;
     private int _loadingScreenFade;
-
-    public LoadingScreen(
-        GraphicsDeviceManager graphics,
-        ContentManager content,
-        PresentationSettings presentation,
-        ToggleKeys input)
-    {
-        _graphicsDeviceManager = graphics;
-        _presentation = presentation;
-        _input = input;
-
-        _bootScreen = new SpriteCollection(
-            graphics, content, @"Graphics\BootScreen2", CompositionSize.Width, CompositionSize.Height);
-        _bootProgressBackground = new SpriteCollection(
-            graphics, content, @"Graphics\ProgressBarBackground", ProgressBackgroundWidth, ProgressBackgroundHeight);
-        _bootProgress = new SpriteCollection(
-            graphics, content, @"Graphics\BootProgress", ProgressSliceWidth, ProgressSliceHeight);
-    }
 
     /// <summary>
     ///     Fades the boot screen up a step.
@@ -136,7 +122,7 @@ internal class LoadingScreen
             _bootProgressBackgroundFade = 0;
         }
 
-        return _input.GetPressedKey() != Keys.None;
+        return input.GetPressedKey() != Keys.None;
     }
 
     /// <summary>
@@ -150,27 +136,27 @@ internal class LoadingScreen
         // The viewport has to be the whole back buffer, not the composition size: the boot screen
         // is scaled up into it by Presentation.Transform like everything else, and a viewport any
         // smaller would just clip the result.
-        PresentationParameters backBuffer = _graphicsDeviceManager.GraphicsDevice.PresentationParameters;
+        PresentationParameters backBuffer = graphics.GraphicsDevice.PresentationParameters;
 
-        _graphicsDeviceManager.GraphicsDevice.Viewport = new Viewport
+        graphics.GraphicsDevice.Viewport = new Viewport
         {
             X = 0,
             Y = 0,
             Width = backBuffer.BackBufferWidth,
             Height = backBuffer.BackBufferHeight
         };
-        _graphicsDeviceManager.GraphicsDevice.Clear(_presentation.ScreenClearColour);
+        graphics.GraphicsDevice.Clear(presentation.ScreenClearColour);
 
-        _bootScreen.Begin(BlendState.Opaque, _presentation.Transform);
+        _bootScreen.Begin(BlendState.Opaque, presentation.Transform);
         _bootScreen.DrawSpriteUnscaled(0, 0, 0, _loadingScreenFade);
         _bootScreen.End();
 
-        _bootProgressBackground.Begin(BlendState.AlphaBlend, _presentation.Transform);
+        _bootProgressBackground.Begin(BlendState.AlphaBlend, presentation.Transform);
         _bootProgressBackground.DrawSpriteUnscaled(
             0, BootProgressBackgroundXPos, BootProgressBackgroundYPos, _bootProgressBackgroundFade);
         _bootProgressBackground.End();
 
-        _bootProgress.Begin(BlendState.AlphaBlend, _presentation.Transform);
+        _bootProgress.Begin(BlendState.AlphaBlend, presentation.Transform);
 
         int percentBarWidth = (int)(BootProgressBarSlices / (double)fullyLoadedPercent * percentComplete);
 
