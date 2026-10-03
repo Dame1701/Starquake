@@ -5,6 +5,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.ActiveSprites;
+using Starquake.Animations;
 using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.ContentManagement;
@@ -207,15 +208,7 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
         if (!_replacingElements)
         {
-            if (_blankingTilesOpacity > 0)
-            {
-                _blankingTilesOpacity = _blankingTilesOpacity - BlankingTilesFadeStep;
-            }
-
-            if (_blankingTilesOpacity < 0)
-            {
-                _blankingTilesOpacity = 0;
-            }
+            _blankingTilesOpacity = Ramp.Down(_blankingTilesOpacity, BlankingTilesFadeStep, ColourLevels.None);
         }
 
         // Leave the core room

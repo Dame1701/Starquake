@@ -190,25 +190,8 @@ internal class ConveyerNasty
     /// </summary>
     private void FadeAndShrinkTheCorpse()
     {
-        if (_deathFadeLevel > 0)
-        {
-            _deathFadeLevel = _deathFadeLevel - DeathFadeStep;
-        }
-
-        if (_deathFadeLevel < 0)
-        {
-            _deathFadeLevel = 0;
-        }
-
-        if (_deathScale > 0)
-        {
-            _deathScale = _deathScale - DeathShrinkStep;
-        }
-
-        if (_deathScale < 0)
-        {
-            _deathScale = 0;
-        }
+        _deathFadeLevel = Ramp.Down(_deathFadeLevel, DeathFadeStep, ColourLevels.None);
+        _deathScale = Ramp.Down(_deathScale, DeathShrinkStep, 0f);
     }
 
     public void Draw(int screenFade)

@@ -3,6 +3,8 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
+using Starquake.Animations;
+using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
@@ -72,5 +74,5 @@ internal class GameScreenBase
     public int ScreenFade { get; set; }
 
     public virtual void Update(GameTime gameTime)
-        => ScreenFade = ScreenFadeUp.Advanced(ScreenFade, ScreenFadeSpeed);
+        => ScreenFade = Ramp.Up(ScreenFade, ScreenFadeSpeed, ColourLevels.Full);
 }

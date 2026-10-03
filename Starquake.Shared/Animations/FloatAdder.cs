@@ -35,15 +35,7 @@ internal class FloatAdder : AnimationTrigger
     {
         if (Triggered)
         {
-            if (Modifier < _finalValue)
-            {
-                Modifier = Modifier + _stepSize;
-            }
-
-            if (Modifier >= _finalValue)
-            {
-                Modifier = _finalValue;
-            }
+            Modifier = Ramp.Up(Modifier, _stepSize, _finalValue);
         }
     }
 }

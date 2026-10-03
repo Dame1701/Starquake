@@ -656,27 +656,9 @@ internal class Nasty
 
     private void UpdateDeath()
     {
-        // Fade the nasty out as it explodes
-        if (_deathFadeLevel > 0)
-        {
-            _deathFadeLevel = _deathFadeLevel - DeathFadeStep;
-        }
-
-        if (_deathFadeLevel < 0)
-        {
-            _deathFadeLevel = 0;
-        }
-
-        // Shrink the nasty as it explodes
-        if (_deathScale > 0)
-        {
-            _deathScale = _deathScale - DeathShrinkStep;
-        }
-
-        if (_deathScale < 0)
-        {
-            _deathScale = 0;
-        }
+        // Fade the nasty out and shrink it as it explodes
+        _deathFadeLevel = Ramp.Down(_deathFadeLevel, DeathFadeStep, ColourLevels.None);
+        _deathScale = Ramp.Down(_deathScale, DeathShrinkStep, 0f);
 
         if (_graphicsSet.IsOriginal)
         {

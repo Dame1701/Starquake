@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Starquake.ActiveSprites;
+using Starquake.Animations;
 using Starquake.Constants;
 using Starquake.Display;
 using Starquake.Engines;
@@ -336,7 +337,7 @@ internal class MainGameScreen : IGameScreen
     }
 
     private void FadeScreenBackUp()
-        => ScreenFade = ScreenFadeUp.Advanced(ScreenFade, ScreenFadeSpeed);
+        => ScreenFade = Ramp.Up(ScreenFade, ScreenFadeSpeed, ColourLevels.Full);
 
     private void UpdateBlob(GameTime gameTime)
     {

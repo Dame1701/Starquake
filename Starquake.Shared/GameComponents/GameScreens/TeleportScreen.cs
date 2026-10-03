@@ -35,6 +35,12 @@ internal class TeleportScreen : IGameScreen
     /// </summary>
     private const string EmptyCode = "_____";
 
+    /// <summary>
+    ///     How fast the screen darkens once the code is recognised, in colour levels per logic
+    ///     frame. Slow enough that the booth is visibly left behind rather than cutting away.
+    /// </summary>
+    private const int ScreenFadeOutStep = 3;
+
     private string? _teleportCode;
     private string _currentCode = EmptyCode;
     private string _previousCode = string.Empty;
@@ -219,14 +225,7 @@ internal class TeleportScreen : IGameScreen
         // Only fade the screen out if the code is recognised
         if (_codeRecognised)
         {
-            if (ScreenFade > 0)
-            {
-                ScreenFade = ScreenFade - 3;
-            }
-            if (ScreenFade < 0)
-            {
-                ScreenFade = 0;
-            }
+            ScreenFade = Ramp.Down(ScreenFade, ScreenFadeOutStep, ColourLevels.None);
         }
 
         if (_teleportCounter > 58)
