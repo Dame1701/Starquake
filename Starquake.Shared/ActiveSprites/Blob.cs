@@ -34,15 +34,6 @@ internal class Blob
     private const int TunnelEntrySpeed = 64;
 
     /// <summary>
-    ///     The shuttle the blob rides sits directly beneath it and makes the pair this much taller,
-    ///     which is what the collision code has to allow for while the blob is aboard.
-    /// </summary>
-    private const int ShuttleHeight = 32;
-
-    /// <inheritdoc cref="ShuttleHeight" />
-    private const int BlobHeightOnShuttle = SpriteMetrics.SpriteHeight + ShuttleHeight;
-
-    /// <summary>
     ///     The frame the blob stands still on - the one it is drawn in on a fresh screen and after a
     ///     death - and the frames its walk cycles run between. Left and right are separate runs of
     ///     frames in the one sheet rather than one run flipped, so turning round means jumping
@@ -72,12 +63,8 @@ internal class Blob
     private const int BlobTurnToRightFrame = 4;
 
     /// <summary>
-    ///     The shuttle's own animation. Frames are advanced one per <see cref="AnimationDelay" />
-    ///     logic frames.
+    ///     How many logic frames each frame of a walk cycle is held for.
     /// </summary>
-    private const int ShuttleLastFrame = 3;
-
-    /// <inheritdoc cref="ShuttleLastFrame" />
     private const int AnimationDelay = 2;
 
     /// <summary>
@@ -175,8 +162,6 @@ internal class Blob
     private readonly JumpPlatforms _blobJumpPlatformEngine;
     private readonly BlobDeathAnimation _blobKiller;
 
-    private readonly Animation _blobShuttleAnim;
-
     private readonly IStandardParticleEffect _blobTeleporterBeam;
     private readonly BreakableBridges _breakableBridges;
     private readonly GameScreenCollection _gameScreens;
@@ -191,8 +176,6 @@ internal class Blob
     private int _blobEnergyDrainCounter;
 
     private Guid _blobFallsSoundId;
-    private bool _blobOnShuttle;
-    private bool _blobOnShuttlePad;
 
 
     private Direction _blobsLastAnimDirection = Direction.None;
@@ -208,6 +191,7 @@ internal class Blob
     private readonly BlobFall _fall = new();
     private readonly BlobEntryPoint _entryPoint = new();
     private readonly BlobOverload _overload = new();
+    private readonly Shuttle _shuttle = new();
     private readonly TunnelLift _lift;
     private readonly Inventory _inventory;
     private readonly UnstickProbe _unstickProbe;
@@ -283,7 +267,6 @@ internal class Blob
 
         // Both of these loop forward with no yoyo except the left walk, which runs backwards through the
         // right walk's frames
-        _blobShuttleAnim = Animation.Looping(0, ShuttleLastFrame, AnimationDelay, true);
         _blobAnimLeft = Animation.Looping(BlobWalkLeftFirstFrame, BlobWalkLeftLastFrame, AnimationDelay, false);
         _blobAnimRight = Animation.Looping(BlobWalkRightFirstFrame, BlobWalkRightLastFrame, AnimationDelay, true);
 
@@ -325,13 +308,17 @@ internal class Blob
 
     public int BlobWidth => SpriteMetrics.SpriteWidth;
 
-    public int BlobHeight { get; private set; } = SpriteMetrics.SpriteHeight;
+    /// <summary>
+    ///     How tall he is, shuttle included. Owned by <see cref="Shuttle" /> because the two facts
+    ///     are one: riding it is what makes him taller.
+    /// </summary>
+    public int BlobHeight => _shuttle.BlobHeight;
 
     public int BlobFrame { get; set; } = BlobRestingFrame;
 
-    public int BlobHSpeed { get; set; } = BlobWalkSpeed;
+    private int BlobHSpeed { get; set; } = BlobWalkSpeed;
 
-    public int BlobVSpeed { get; set; } = BlobWalkSpeed;
+    private int BlobVSpeed { get; set; } = BlobWalkSpeed;
 
     /// <summary>
     ///     The lazer. A nasty asks it whether a shot is in flight and where it is, and tells it when it
@@ -410,7 +397,7 @@ internal class Blob
             return;
         }
 
-        _entryPoint.Record(BlobXPos, BlobYPos, BlobFrame, _blobOnShuttle);
+        _entryPoint.Record(BlobXPos, BlobYPos, BlobFrame, _shuttle.Riding);
     }
 
     /// <summary>
@@ -419,14 +406,14 @@ internal class Blob
     /// </summary>
     private bool UpdateNormalState()
     {
-        // Deliberately last frame's reading. DetectShuttlePad set _blobOnShuttlePad from the same
-        // reading at the end of that frame, so the flag and the tile under it are a matched pair;
-        // probing again here would act on a flag that no longer describes the tile it is given.
+        // Deliberately last frame's reading. The shuttle noticed the pad from the same reading at
+        // the end of that frame, so its flag and the tile under it are a matched pair; probing again
+        // here would act on a flag that no longer describes the tile it is given.
         HandleShuttlePad(_surroundings.Below);
         WalkLeft();
         WalkRight();
 
-        if (_blobOnShuttle)
+        if (_shuttle.Riding)
         {
             MoveOnShuttle();
         }
@@ -442,12 +429,12 @@ internal class Blob
             BlobsControl.HasFired(),
             new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight),
             DirectionBlobMoved,
-            _blobOnShuttle);
+            _shuttle.Riding);
 
         bool changedScreens = ChangeScreenIfOffEdge();
 
         _surroundings = DetectSurroundingTiles();
-        DetectShuttlePad(_surroundings.Below);
+        _shuttle.NoticeThePadUnderfoot(_surroundings.Below);
         DetectTeleporter(_surroundings.Right);
         DetectAccessBooth(_surroundings.Left, _surroundings.Right);
         changedScreens |= DetectLeftHandTunnel(_surroundings.Left);
@@ -465,43 +452,32 @@ internal class Blob
         return changedScreens;
     }
 
+    /// <summary>
+    ///     Acts on the pad he is standing on. Taking the shuttle or putting it back changes the tile
+    ///     map on every screen, so the collision map is rebuilt afterwards - and it is rebuilt for a
+    ///     blob merely standing on a pad too, which is what the original did.
+    /// </summary>
     private void HandleShuttlePad(TileDetected? below)
     {
-        if (_blobOnShuttlePad)
+        switch (_shuttle.Step(below, BlobsControl.MovedUp(), BlobsControl.MovedLeft(), BlobsControl.MovedRight()))
         {
-            if (below != null)
+            case ShuttleBoarding.NotOnThePad:
             {
-                switch (below.TileNumber)
-                {
-                    // Change the map to reflect shuttle has been taken
-                    case (int)ActionTiles.ShuttlePlatform:
-                    {
-                        if (BlobsControl.MovedUp())
-                        {
-                            _gameScreens.ChangeShuttlePlatformState(true);
-                            BlobHeight = BlobHeightOnShuttle;
-                            _blobOnShuttle = true;
-                        }
-
-                        break;
-                    }
-                    case (int)ActionTiles.RemovedShuttlePlatform:
-                    {
-                        if (BlobsControl.MovedLeft() || BlobsControl.MovedRight())
-                        {
-                            _gameScreens.ChangeShuttlePlatformState(false);
-                            BlobHeight = SpriteMetrics.SpriteHeight;
-                            _blobOnShuttle = false;
-                        }
-
-                        break;
-                    }
-                }
-
-                // Update the collision map for the current screen
-                _gameScreens.UpdateCollisionMap(false);
+                return;
+            }
+            case ShuttleBoarding.Boarded:
+            {
+                _gameScreens.ChangeShuttlePlatformState(true);
+                break;
+            }
+            case ShuttleBoarding.SteppedOff:
+            {
+                _gameScreens.ChangeShuttlePlatformState(false);
+                break;
             }
         }
+
+        _gameScreens.UpdateCollisionMap(false);
     }
 
     private void WalkLeft()
@@ -522,9 +498,9 @@ internal class Blob
             if (amountToMove > 0)
             {
                 _blobXPos = _blobXPos - amountToMove;
-                if (_blobOnShuttle)
+                if (_shuttle.Riding)
                 {
-                    _blobShuttleAnim.GetNextFrame();
+                    _shuttle.Advance();
                 }
             }
 
@@ -532,7 +508,7 @@ internal class Blob
             DirectionBlobMoved = Direction.Left;
             _blobsLastAnimDirection = Direction.Left;
 
-            if (!_blobOnShuttle && _fall.Height == 0)
+            if (!_shuttle.Riding && _fall.Height == 0)
             {
                 _resources.GetSoundFxEngine()
                     .PlaySound(Assets.Sounds.BlobRun, true);
@@ -558,9 +534,9 @@ internal class Blob
             if (amountToMove > 0)
             {
                 _blobXPos = _blobXPos + amountToMove;
-                if (_blobOnShuttle)
+                if (_shuttle.Riding)
                 {
-                    _blobShuttleAnim.GetNextFrame();
+                    _shuttle.Advance();
                 }
             }
 
@@ -568,7 +544,7 @@ internal class Blob
             DirectionBlobMoved = Direction.Right;
             _blobsLastAnimDirection = Direction.Right;
 
-            if (!_blobOnShuttle && _fall.Height == 0)
+            if (!_shuttle.Riding && _fall.Height == 0)
             {
                 _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobRun, true);
             }
@@ -615,7 +591,7 @@ internal class Blob
 
                 if (_stats.Platforms > 0)
                 {
-                    if (!_blobOnShuttlePad)
+                    if (!_shuttle.OnThePad)
                     {
                         int newYPos = _blobJumpPlatformEngine.GetNewJumpPlatform(_blobXPos, _blobYPos,
                             BlobWidth,
@@ -716,17 +692,6 @@ internal class Blob
         }
     }
 
-    /// <summary>
-    ///     One of blob's animations: a run of frames played end to end and started over, which is what
-    ///     all five of his are.
-    /// </summary>
-    /// <param name="firstFrame">Also the frame it starts on.</param>
-    /// <param name="animateForwards">False to run the frames backwards, which is how the left walk works.</param>
-
-    /// <summary>
-    ///     Un-latches the up and down controls so that holding either only acts once, and puts the
-    ///     walk cycles back to looping after <see cref="MoveOnShuttle" /> has stopped them.
-    /// </summary>
     private void ReleaseHeldControls()
     {
         if (!BlobsControl.MovedUp())
@@ -756,29 +721,31 @@ internal class Blob
     /// </summary>
     private void ApplyGravity()
     {
-        if (!_lift.Riding) // Can't fall if we are in a tunnel lift
+        if (_lift.Riding) // Can't fall if we are in a tunnel lift
         {
-            Fall fall = _fall.Step(
-                _gameScreens.Collisions,
-                new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight),
-                BlobsControl.MovedLeft(),
-                BlobsControl.MovedRight());
-
-            if (fall.Audible)
-            {
-                _blobFallsSoundId = _resources.GetSoundFxEngine()
-                    .PlaySound(Assets.Sounds.BlobFalls, true);
-            }
-
-            if (fall.OnTheGround)
-            {
-                _resources.GetSoundFxEngine()
-                    .StopSound(_blobFallsSoundId, SoundFade.Fast);
-            }
-
-            // Fall - arrrgh!!!
-            _blobYPos = _blobYPos + fall.Distance;
+            return;
         }
+
+        var fall = _fall.Step(
+            _gameScreens.Collisions,
+            new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight),
+            BlobsControl.MovedLeft(),
+            BlobsControl.MovedRight());
+
+        if (fall.Audible)
+        {
+            _blobFallsSoundId = _resources.GetSoundFxEngine()
+                .PlaySound(Assets.Sounds.BlobFalls, true);
+        }
+
+        if (fall.OnTheGround)
+        {
+            _resources.GetSoundFxEngine()
+                .StopSound(_blobFallsSoundId, SoundFade.Fast);
+        }
+
+        // Fall - arrrgh!!!
+        _blobYPos = _blobYPos + fall.Distance;
     }
 
     /// <summary>
@@ -848,7 +815,7 @@ internal class Blob
 
         RaiseScreenChangedToMainGame();
 
-        if (_blobOnShuttle || _lift.Riding)
+        if (_shuttle.Riding || _lift.Riding)
         {
             _blobYPos = _gameScreens.ScreenHeight - BlobHeight;
         }
@@ -887,10 +854,7 @@ internal class Blob
 
     private void RaiseScreenChangedToMainGame()
     {
-        if (OnScreenChanged != null)
-        {
-            OnScreenChanged(GameScreenType.MainGame);
-        }
+        OnScreenChanged?.Invoke(GameScreenType.MainGame);
     }
 
     /// <summary>
@@ -904,46 +868,38 @@ internal class Blob
             _blobYPos,
             BlobWidth,
             BlobHeight,
-            _blobOnShuttle ? BlobHeight - ShuttleHeight : BlobHeight,
+            // The ground is looked for from his own feet rather than the shuttle's, and his own
+            // height is the sprite's whether he is aboard or not - the shuttle is all of the
+            // difference between the two.
+            SpriteMetrics.SpriteHeight,
             BlobHSpeed,
             BlobVSpeed);
 
-    private void DetectShuttlePad(TileDetected? below)
-    {
-        _blobOnShuttlePad = false;
-        if (below != null)
-        {
-            if ((ActionTiles)below.TileNumber == ActionTiles.ShuttlePlatform ||
-                (ActionTiles)below.TileNumber == ActionTiles.RemovedShuttlePlatform)
-            {
-                if (below.XPosition == 32 && below.YPosition == 0)
-                {
-                    _blobOnShuttlePad = true;
-                }
-            }
-        }
-    }
-
     private void DetectTeleporter(TileDetected? toTheRight)
     {
-        if (toTheRight != null && BlobsControl.MovedRight())
+        if (toTheRight == null || !BlobsControl.MovedRight())
         {
-            if (toTheRight.TileNumber == (int)ActionTiles.TeleportBooth)
-            {
-                // Far enough in to be in the doorway, and standing on the booth's floor rather than
-                // passing it in mid air. Only the X is set from here: the Y test is the arrival
-                // offset, so the blob is already standing exactly where a booth puts it.
-                if (toTheRight.XPosition >= TeleportBoothEntryReach &&
-                    toTheRight.YPosition == BoothMetrics.BlobYOffset)
-                {
-                    _screenDirectory.Current = GameScreenType.Teleporter;
-
-                    _screenDirectory.Teleporter.Reset();
-                    _blobXPos = toTheRight.MapXPosition * TileMetrics.TileWidth + BoothMetrics.BlobXOffset;
-                    BlobFrame = BlobWalkRightFirstFrame;
-                }
-            }
+            return;
         }
+
+        if (toTheRight.TileNumber != (int)ActionTiles.TeleportBooth)
+        {
+            return;
+        }
+
+        // Far enough in to be in the doorway, and standing on the booth's floor rather than
+        // passing it in mid air. Only the X is set from here: the Y test is the arrival
+        // offset, so the blob is already standing exactly where a booth puts it.
+        if (toTheRight.XPosition < TeleportBoothEntryReach ||
+            toTheRight.YPosition != BoothMetrics.BlobYOffset)
+        {
+            return;
+        }
+
+        _screenDirectory.Current = GameScreenType.Teleporter;
+        _screenDirectory.Teleporter.Reset();
+        _blobXPos = toTheRight.MapXPosition * TileMetrics.TileWidth + BoothMetrics.BlobXOffset;
+        BlobFrame = BlobWalkRightFirstFrame;
     }
 
     /// <summary>
@@ -952,27 +908,26 @@ internal class Blob
     /// </summary>
     private void DetectAccessBooth(TileDetected? toTheLeft, TileDetected? toTheRight)
     {
-        if (toTheLeft is { TileNumber: (int)ActionTiles.AccessBoothRight } &&
-            toTheRight != null)
+        if (toTheLeft is { TileNumber: (int)ActionTiles.AccessBoothRight } && toTheRight != null)
         {
-            if (toTheLeft.XPosition <= 46 &&
-                toTheLeft.YPosition == 32)
+            if (toTheLeft is { XPosition: <= 46, YPosition: 32 })
             {
                 _screenDirectory.AccessBooth.Reset(Direction.Left, toTheRight.MapXPosition);
                 _screenDirectory.Current = GameScreenType.AccessBooth;
             }
         }
 
-        if (toTheRight is { TileNumber: (int)ActionTiles.AccessBoothLeft } &&
-            toTheLeft != null)
+        if (toTheRight is not { TileNumber: (int)ActionTiles.AccessBoothLeft } || toTheLeft == null)
         {
-            if (toTheRight.XPosition >= 24 &&
-                toTheRight.YPosition == 32)
-            {
-                _screenDirectory.AccessBooth.Reset(Direction.Right, toTheLeft.MapXPosition);
-                _screenDirectory.Current = GameScreenType.AccessBooth;
-            }
+            return;
         }
+
+        if (toTheRight.XPosition < 24 || toTheRight.YPosition != 32)
+        {
+            return;
+        }
+        _screenDirectory.AccessBooth.Reset(Direction.Right, toTheLeft.MapXPosition);
+        _screenDirectory.Current = GameScreenType.AccessBooth;
     }
 
     private bool DetectLeftHandTunnel(TileDetected? toTheLeft)
@@ -980,33 +935,32 @@ internal class Blob
         bool changedScreens = false;
 
         if (toTheLeft?.TileNumber is
-            TunnelTiles.LeftMouth1 or
-            TunnelTiles.LeftMouth2 or
-            TunnelTiles.LeftMouth3 or
-            TunnelTiles.LeftMouth4 or
-            TunnelTiles.LeftMouth5 or
-            TunnelTiles.LeftMouth6 or
-            TunnelTiles.LeftMouth7 or
-            TunnelTiles.LeftMouth8 or
-            TunnelTiles.LeftMouth9 or
-            TunnelTiles.LeftMouth10)
+                not (TunnelTiles.LeftMouth1 or
+                TunnelTiles.LeftMouth2 or
+                TunnelTiles.LeftMouth3 or
+                TunnelTiles.LeftMouth4 or
+                TunnelTiles.LeftMouth5 or
+                TunnelTiles.LeftMouth6 or
+                TunnelTiles.LeftMouth7 or
+                TunnelTiles.LeftMouth8 or
+                TunnelTiles.LeftMouth9 or
+                TunnelTiles.LeftMouth10) || toTheLeft.XPosition > 32 || toTheLeft.YPosition != 32)
         {
-            if (toTheLeft.XPosition <= 32 && toTheLeft.YPosition == 32)
-            {
-                _gameScreens.ScreenNumber--;
-                _directionGoingThroughTunnel = Direction.Left;
-                changedScreens = true;
-
-                if (OnScreenChanged != null)
-                {
-                    _screenEffects.ExecuteScreenEffect(ScreenEffectType.LeftTunnelEntry, TunnelEntrySpeed,
-                        -1, true);
-                    _resources.GetSoundFxEngine()
-                        .PlaySound(Assets.Sounds.TunnelSwish1, 0.8f, false);
-                    OnScreenChanged(GameScreenType.None);
-                }
-            }
+            return changedScreens;
         }
+
+        _gameScreens.ScreenNumber--;
+        _directionGoingThroughTunnel = Direction.Left;
+        changedScreens = true;
+
+        if (OnScreenChanged == null)
+        {
+            return changedScreens;
+        }
+
+        _screenEffects.ExecuteScreenEffect(ScreenEffectType.LeftTunnelEntry, TunnelEntrySpeed, -1, true);
+        _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.TunnelSwish1, 0.8f, false);
+        OnScreenChanged(GameScreenType.None);
 
         return changedScreens;
     }
@@ -1016,59 +970,62 @@ internal class Blob
         bool changedScreens = false;
 
         if (toTheRight?.TileNumber is
-            TunnelTiles.RightMouth1 or
-            TunnelTiles.RightMouth2 or
-            TunnelTiles.RightMouth3 or
-            TunnelTiles.RightMouth4 or
-            TunnelTiles.RightMouth5 or
-            TunnelTiles.RightMouth6 or
-            TunnelTiles.RightMouth7 or
-            TunnelTiles.RightMouth8 or
-            TunnelTiles.RightMouth9 or
-            TunnelTiles.RightMouth10)
+                not (TunnelTiles.RightMouth1 or
+                TunnelTiles.RightMouth2 or
+                TunnelTiles.RightMouth3 or
+                TunnelTiles.RightMouth4 or
+                TunnelTiles.RightMouth5 or
+                TunnelTiles.RightMouth6 or
+                TunnelTiles.RightMouth7 or
+                TunnelTiles.RightMouth8 or
+                TunnelTiles.RightMouth9 or
+                TunnelTiles.RightMouth10) || toTheRight.XPosition < 32 || toTheRight.YPosition != 32)
         {
-            if (toTheRight.XPosition >= 32 && toTheRight.YPosition == 32)
-            {
-                _gameScreens.ScreenNumber++;
-                _directionGoingThroughTunnel = Direction.Right;
-                changedScreens = true;
-
-                if (OnScreenChanged != null)
-                {
-                    _screenEffects.ExecuteScreenEffect(ScreenEffectType.RightTunnelEntry,
-                        TunnelEntrySpeed, -1, true);
-                    _resources.GetSoundFxEngine()
-                        .PlaySound(Assets.Sounds.TunnelSwish2, 0.8f, false);
-                    OnScreenChanged(GameScreenType.None);
-                }
-            }
+            return changedScreens;
         }
+
+        _gameScreens.ScreenNumber++;
+        _directionGoingThroughTunnel = Direction.Right;
+        changedScreens = true;
+
+        if (OnScreenChanged == null)
+        {
+            return changedScreens;
+        }
+
+        _screenEffects.ExecuteScreenEffect(ScreenEffectType.RightTunnelEntry, TunnelEntrySpeed, -1, true);
+        _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.TunnelSwish2, 0.8f, false);
+        OnScreenChanged(GameScreenType.None);
 
         return changedScreens;
     }
 
     private void BreakBridgeUnderfoot(TileDetected? below)
     {
-        if (below is { TileNumber: (int)ActionTiles.BreakableBridges })
+        if (below is not { TileNumber: (int)ActionTiles.BreakableBridges })
         {
-            if (_fall.Height >= BridgeBreakingFallHeight)
-            {
-                // Play the sound
-                _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BridgeBreak);
-
-                // Add the tile to the list of tiles to reset on screen change
-                _tilesToReset.Add(new ResetTile(below, _gameScreens.ScreenNumber));
-
-                // Remove the tile
-                _gameScreens.CurrentGameScreenData
-                    .ScreenTiles[below.MapXPosition, below.MapYPosition].TileImage = -1;
-
-                // Add the tile to the Breakable bridges engine
-                _breakableBridges.AddBridge(
-                    _gameScreens.ConvertToScreenCoords(below.MapXPosition,
-                        below.MapYPosition));
-            }
+            return;
         }
+
+        if (_fall.Height < BridgeBreakingFallHeight)
+        {
+            return;
+        }
+
+        // Play the sound
+        _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BridgeBreak);
+
+        // Add the tile to the list of tiles to reset on screen change
+        _tilesToReset.Add(new ResetTile(below, _gameScreens.ScreenNumber));
+
+        // Remove the tile
+        _gameScreens.CurrentGameScreenData
+            .ScreenTiles[below.MapXPosition, below.MapYPosition].TileImage = -1;
+
+        // Add the tile to the Breakable bridges engine
+        _breakableBridges.AddBridge(
+            _gameScreens.ConvertToScreenCoords(below.MapXPosition,
+                below.MapYPosition));
     }
 
     private void RideTunnelLift(TileDetected? above)
@@ -1122,34 +1079,30 @@ internal class Blob
 
     private void CollectPowerUp()
     {
-        if (_gameScreens.CurrentGameScreenData.PowerUp != null)
+        if (_gameScreens.CurrentGameScreenData.PowerUp == null)
         {
-            if (CollisionDetection.Check(
-                    _blobXPos,
-                    BlobYPos,
-                    BlobWidth,
-                    BlobHeight,
-                    _gameScreens.CurrentGameScreenData.PowerUp.XLocation,
-                    _gameScreens.CurrentGameScreenData.PowerUp.YLocation,
-                    TileMetrics.CollisionCellWidth,
-                    TileMetrics.CollisionCellHeight))
-            {
-                if (OnBlobActionRaised != null)
-                {
-                    OnBlobActionRaised(BlobAction.GotPowerUp,
-                        _gameScreens.CurrentGameScreenData.PowerUp.Type);
-                }
-
-                _gameScreens.CurrentGameScreenData.PowerUp = null;
-                _gameScreens.UpdateCollisionMap(false);
-            }
+            return;
         }
+
+        if (!CollisionDetection.Check(
+                _blobXPos,
+                BlobYPos,
+                BlobWidth,
+                BlobHeight,
+                _gameScreens.CurrentGameScreenData.PowerUp.XLocation,
+                _gameScreens.CurrentGameScreenData.PowerUp.YLocation,
+                TileMetrics.CollisionCellWidth,
+                TileMetrics.CollisionCellHeight))
+        {
+            return;
+        }
+
+        OnBlobActionRaised?.Invoke(BlobAction.GotPowerUp, _gameScreens.CurrentGameScreenData.PowerUp.Type);
+
+        _gameScreens.CurrentGameScreenData.PowerUp = null;
+        _gameScreens.UpdateCollisionMap(false);
     }
 
-    /// <summary>
-    ///     The alarm sounds for <see cref="OverloadAlarmFrames" /> frames, then the swell and shrink
-    ///     sequence described on <see cref="OverloadSwelling" /> runs a step per frame until he blows.
-    /// </summary>
     private void UpdateOverloadingState()
     {
         if (_overload.AlarmJustStarted)
@@ -1163,54 +1116,51 @@ internal class Blob
         }
         else
         {
-            if (!_blobKiller.Triggered)
+            if (_blobKiller.Triggered)
             {
-                Weapon.Disarm();
-
-                _blobJumpPlatformEngine.ResetPlatforms();
-                OnBlobDiedAndRespawned?.Invoke();
-
-                if (_overload.Swell() == OverloadStage.Exploded)
-                {
-                    _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobExplodes, false);
-                    _blobKiller.Trigger(BlobXPos, BlobYPos, true);
-                    BlobsState = BlobState.Dying;
-                }
+                return;
             }
+            Weapon.Disarm();
+
+            _blobJumpPlatformEngine.ResetPlatforms();
+            OnBlobDiedAndRespawned?.Invoke();
+
+            if (_overload.Swell() != OverloadStage.Exploded)
+            {
+                return;
+            }
+
+            _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobExplodes, false);
+            _blobKiller.Trigger(BlobXPos, BlobYPos, true);
+            BlobsState = BlobState.Dying;
         }
     }
 
     private void UpdateDyingState()
     {
-        if (!_blobKiller.Triggered)
+        if (_blobKiller.Triggered)
         {
-            _overload.Reset();
-            // If Blob is killed by a spiky tile, we reset his position to when he entered
-            if (_resetBlobToScreenEntryPoint)
-            {
-                _blobYPos = _entryPoint.YPos;
-                _blobXPos = _entryPoint.XPos;
-                _blobOnShuttle = _entryPoint.OnShuttle;
-                _gameScreens.ChangeShuttlePlatformState(_blobOnShuttle);
-                _gameScreens.UpdateCollisionMap(false);
-                BlobFrame = _entryPoint.Frame;
-                _lift.LetGo();
-                _fall.StartFallingAgain();
-
-                if (_blobOnShuttle)
-                {
-                    BlobHeight = BlobHeightOnShuttle;
-                }
-                else
-                {
-                    BlobHeight = SpriteMetrics.SpriteHeight;
-                }
-            }
-
-            _resetBlobToScreenEntryPoint = false;
-            BlobsState = BlobState.Dead;
-            _blobKiller.Reset();
+            return;
         }
+
+        _overload.Reset();
+
+        // If Blob is killed by a spiky tile, we reset his position to when he entered
+        if (_resetBlobToScreenEntryPoint)
+        {
+            _blobYPos = _entryPoint.YPos;
+            _blobXPos = _entryPoint.XPos;
+            _shuttle.PutBack(_entryPoint.OnShuttle);
+            _gameScreens.ChangeShuttlePlatformState(_shuttle.Riding);
+            _gameScreens.UpdateCollisionMap(false);
+            BlobFrame = _entryPoint.Frame;
+            _lift.LetGo();
+            _fall.StartFallingAgain();
+        }
+
+        _resetBlobToScreenEntryPoint = false;
+        BlobsState = BlobState.Dead;
+        _blobKiller.Reset();
     }
 
     /// <summary>
@@ -1243,7 +1193,26 @@ internal class Blob
 
         if (_directionGoingThroughTunnel != Direction.None)
         {
-            if (_directionGoingThroughTunnel == Direction.Left)
+            if (_directionGoingThroughTunnel != Direction.Left)
+            {
+                if (_directionGoingThroughTunnel == Direction.Right)
+                {
+                    for (int a = TunnelTiles.FirstMouth; a <= TunnelTiles.LastMouth + 1; a += TunnelTiles.MouthStride)
+                    {
+                        List<Point> tiles = _gameScreens.GetCoordsOfTiles(a);
+
+                        if (tiles is not { Count: 1 })
+                        {
+                            continue;
+                        }
+
+                        _blobXPos = tiles[0].X + TunnelExitRightXOffset;
+                        _blobYPos = tiles[0].Y + TunnelExitYOffset;
+                        break;
+                    }
+                }
+            }
+            else
             {
                 for (int a = TunnelTiles.RightMouth1; a <= TunnelTiles.LastMouth; a += TunnelTiles.MouthStride)
                 {
@@ -1259,35 +1228,17 @@ internal class Blob
                     break;
                 }
             }
-            else if (_directionGoingThroughTunnel == Direction.Right)
-            {
-                for (int a = TunnelTiles.FirstMouth; a <= TunnelTiles.LastMouth + 1; a += TunnelTiles.MouthStride)
-                {
-                    List<Point> tiles = _gameScreens.GetCoordsOfTiles(a);
-
-                    if (tiles is not { Count: 1 })
-                    {
-                        continue;
-                    }
-
-                    _blobXPos = tiles[0].X + TunnelExitRightXOffset;
-                    _blobYPos = tiles[0].Y + TunnelExitYOffset;
-                    break;
-                }
-            }
 
             _directionGoingThroughTunnel = Direction.None;
         }
 
         foreach (ResetTile t in _tilesToReset)
         {
-            ScreenTile[,]? screenTiles = _gameScreens.GetGameScreen(t.ScreenNumber).ScreenTiles;
-            if (screenTiles != null)
-            {
-                screenTiles[
-                    t.TileToReset.MapXPosition,
-                    t.TileToReset.MapYPosition].TileImage = t.TileToReset.TileNumber;
-            }
+            ScreenTile[,] screenTiles = _gameScreens.GetGameScreen(t.ScreenNumber).ScreenTiles;
+
+            screenTiles[
+                t.TileToReset.MapXPosition,
+                t.TileToReset.MapYPosition].TileImage = t.TileToReset.TileNumber;
         }
 
         _tilesToReset.Clear();
@@ -1325,7 +1276,7 @@ internal class Blob
 
         _blobJumpPlatformEngine.Draw();
 
-        Weapon.Draw(screenFade, _blobOnShuttle);
+        Weapon.Draw(screenFade, _shuttle.Riding);
         DrawTeleportBeam();
     }
 
@@ -1383,14 +1334,14 @@ internal class Blob
 
     private void DrawShuttle(int screenFade)
     {
-        if (_blobOnShuttle)
+        if (_shuttle.Riding)
         {
             if (_graphicsSet.IsOriginal)
             {
                 SpriteCollection blobShuttleOriginal = _resources.GetSpriteCollection(Assets.Graphics.BlobShuttleOriginal);
                 blobShuttleOriginal.Begin(BlendState.AlphaBlend);
                 blobShuttleOriginal.DrawSprite(
-                    _blobShuttleAnim.CurrentFrame, _blobXPos, _blobYPos + SpriteMetrics.SpriteHeight,
+                    _shuttle.Frame, _blobXPos, _blobYPos + SpriteMetrics.SpriteHeight,
                     ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
                 blobShuttleOriginal.End();
             }
@@ -1440,7 +1391,7 @@ internal class Blob
             blobSprites.End();
         }
 
-        if (_blobOnShuttle)
+        if (_shuttle.Riding)
         {
             SpriteCollection blobShuttle = _resources.GetSpriteCollection(Assets.Graphics.BlobShuttle);
             blobShuttle.Begin(BlendState.AlphaBlend);
@@ -1488,8 +1439,7 @@ internal class Blob
         _blobYPos = start.Y;
 
         // Remove Blob from shuttle pads
-        _blobOnShuttle = false;
-        BlobHeight = SpriteMetrics.SpriteHeight;
+        _shuttle.Reset();
         _gameScreens.ChangeShuttlePlatformState(false);
 
         // Clear up any rogue collision tiles etc.
@@ -1500,5 +1450,4 @@ internal class Blob
     {
         _startBlobTeleporting = false;
     }
-
 }

@@ -87,6 +87,7 @@ commits above - an angle that now belongs to them, and a `GameSession` that neve
 | ~~7~~ | Editor | three clusters out of `EditorSession` | 14 of 19 fields | **done** |
 | ~~8~~ | Engine | `ColourAnimatedTiles` only | 55 lines of `GameEngine` | **done, reduced** |
 | ~~9~~ | — | `ScreenShake` | 3 fields, 63 lines | **done** - 8 tests |
+| ~~10~~ | `Blob` | `Shuttle` | 3 fields, 2 methods, 4 constants | **done** - 22 tests |
 
 Stages 1 to 5 are in order and each assumes the one before. Tracks B and C are independent of track A
 and of each other. Stage 6 is the cheapest thing here and needs nothing to have happened first.
@@ -491,12 +492,84 @@ from 237 tests in the suite to 299. Five of the eight field groups are gone.
 
 What is left in it is one subject: a blob that walks, falls, carries things, rides a shuttle, changes
 screens and dies - holding a weapon, a fall, a lift, an overload and an entry point, each of which can
-be reasoned about and most of which can be tested. The three groups left inside it, named in stage 5's
-original plan as deliberately-left, are still the right call: the shuttle because `_blobOnShuttle` is a
-mode fourteen methods are aware of, the teleport fade because it is three fields and thirty lines, and
-the position because everything is relative to it.
+be reasoned about and most of which can be tested. Two of the three groups left inside it, named in stage 5's
+original plan as deliberately-left, are still the right call: the teleport fade because it is three
+fields and thirty lines, and the position because everything is relative to it. The third — the
+shuttle — was left on a reason that turned out to be the wrong test, and stage 10 takes it.
 
-**The remaining four stages are not about the blob**, and nothing in them depends on anything above.
+**Stages 6 to 9 are not about the blob**, and nothing in them depends on anything above.
+
+---
+
+## Stage 10 — `Shuttle`, against stage 5's verdict — **done**
+
+Stage 5 left the shuttle alone "because `_blobOnShuttle` is a mode fourteen methods are aware of".
+That is true and it is the wrong test. How many methods *read* a flag is not what makes it a god
+object's field — reading is what a mode is for, and all fourteen still read it, as
+`_shuttle.Riding`. What made it one was how many methods **wrote** it, and that was four, each
+writing a second field in the same breath:
+
+```csharp
+_gameScreens.ChangeShuttlePlatformState(true);
+BlobHeight = BlobHeightOnShuttle;   // 96
+_blobOnShuttle = true;
+```
+
+`BlobHeight` and `_blobOnShuttle` were one fact kept in two fields, and the pair had to be written
+together in `HandleShuttlePad` twice, in `UpdateDyingState`, and in `Reset`. Either one without the
+other leaves the blob a shuttle's height into the floor or walking on air. `Shuttle` makes the height
+derived — `Riding ? SpriteHeight + ShuttleHeight : SpriteHeight` — and there is no longer a sequence
+of calls that can put them out of step.
+
+| | |
+| --- | --- |
+| Fields | `_blobOnShuttle`, `_blobOnShuttlePad`, `_blobShuttleAnim`, and `BlobHeight`'s backing field |
+| Methods | `DetectShuttlePad`, `HandleShuttlePad`'s decision half |
+| Constants | `ShuttleHeight`, `BlobHeightOnShuttle`, `ShuttleLastFrame`, and the shuttle's share of `AnimationDelay` |
+
+`Blob` drops 46 code lines and two mutable fields, to **1,035 over 14**. It is in
+`ActiveSprites/BlobParts` rather than beside `BlobFall`, following `Inventory` and `UnstickProbe`
+rather than the four extractions before them, and it drops the `Blob` prefix for the same reason they
+did — the namespace already says it.
+
+### What stayed, and the one line it reported instead
+
+`HandleShuttlePad` kept the half that needs the planet: taking the shuttle rewrites the tile map on
+every screen and the collision map is rebuilt from it. `Step` returns a `ShuttleBoarding` saying what
+the frame came to and `Blob` does the rewriting, which is `BlobFall`'s split exactly.
+
+`ShuttleBoarding` has four cases where three would do, and the fourth is the point. The original
+rebuilt the collision map for a blob merely *standing* on a pad — not only for one boarding or
+stepping off — so `Standing` has to be distinguishable from `NotOnThePad` even though neither changes
+anything here. Folding them together would have been a behaviour change dressed as a simplification.
+
+### The reach test, which was two names for one number
+
+`DetectSurroundingTiles` probed downwards with `_blobOnShuttle ? BlobHeight - ShuttleHeight :
+BlobHeight`, the comment on `BlobSurroundings.heightBelow` explaining that the ground has to be
+looked for from the blob's own feet rather than the shuttle's. Both arms are
+`SpriteMetrics.SpriteHeight`: `BlobHeight` is `SpriteHeight + ShuttleHeight` exactly when he is
+aboard and `SpriteHeight` when he is not, so the subtraction always undoes the addition. The
+conditional is gone and the constant is passed. The comment it was carrying was right and is kept —
+it says why the parameter exists, which is still worth knowing.
+
+### Where the pad is
+
+`DetectShuttlePad` required `below is { XPosition: 32, YPosition: 0 }`, two bare numbers. They are
+the blob standing squarely on the pad: 32 is `(TileWidth - SpriteWidth) / 2`, a 64-wide blob centred
+on a 128-wide tile, and 0 is his feet exactly on top of it rather than anywhere further down. Both
+are named and the X is derived, because what matters is the centring rather than the number.
+
+### Tests
+
+Twenty-two, needing nothing to construct. The height-follows-the-flag invariant is asserted on every
+path that can change it — boarding, stepping off, being put back after a death by spikes, and a
+reset — which is the thing four call sites used to be responsible for by hand. The rest cover what
+counts as being on a pad (either state of it, and only when squarely on), that pressing up on a pad
+whose shuttle is already gone does nothing, and that he only gets off over the gap it came from.
+
+What they cannot see is the caller acting on what `Step` returns, which is the same gap
+`BlobFall`'s tests have and for the same reason.
 
 ---
 
