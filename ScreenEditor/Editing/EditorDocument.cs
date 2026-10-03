@@ -69,6 +69,11 @@ internal sealed class EditorDocument
     private int CollisionTileCount => CollisionMasks.GetLength(0);
 
     /// <summary>
+    ///     How many screens carry a core, which should only ever be nought or one.
+    /// </summary>
+    public int CoreCount => CoreSite.CountOn(Screens);
+
+    /// <summary>
     ///     Raised whenever a single tile on a screen changes, so that views holding a rendered copy of
     ///     the map can patch just the part that moved instead of redrawing everything.
     /// </summary>
@@ -167,11 +172,6 @@ internal sealed class EditorDocument
         IsDirty = true;
         CoreChanged?.Invoke();
     }
-
-    /// <summary>
-    ///     How many screens carry a core, which should only ever be nought or one.
-    /// </summary>
-    public int CoreCount => CoreSite.CountOn(Screens);
 
     /// <summary>
     ///     The destination code that reaches a screen's teleport booth, or null for a screen that has
@@ -373,5 +373,4 @@ internal sealed class EditorDocument
             }
         }
     }
-
 }

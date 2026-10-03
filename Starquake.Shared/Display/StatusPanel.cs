@@ -112,10 +112,6 @@ internal class StatusPanel
     private Collectables[]? _blobsInventory;
     private int _slotToScan = -1;
 
-    public int Width => _resources.GetSpriteCollection(Assets.Graphics.StatusPanelGraphic).SpriteWidth;
-
-    public int Height => _resources.GetSpriteCollection(Assets.Graphics.StatusPanelGraphic).SpriteHeight;
-
     public StatusPanel(
         ResourceManager resources,
         GraphicsSet graphicsSet,
@@ -130,6 +126,10 @@ internal class StatusPanel
 
         _inventoryScanner = new KeyScanner(resources, graphicsSet, randomNumberGenerator, false);
     }
+
+    public int Width => _resources.GetSpriteCollection(Assets.Graphics.StatusPanelGraphic).SpriteWidth;
+
+    public int Height => _resources.GetSpriteCollection(Assets.Graphics.StatusPanelGraphic).SpriteHeight;
 
     /// <summary>
     ///     Steps the panel. Takes Blob rather than holding him, and is told whether the intro is
@@ -284,5 +284,4 @@ internal class StatusPanel
             InventorySlotSpacing * _slotToScan + InventoryScannerXPos,
             InventoryScannerYPos);
     }
-
 }

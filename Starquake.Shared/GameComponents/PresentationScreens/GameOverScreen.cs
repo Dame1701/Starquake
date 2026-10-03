@@ -99,15 +99,6 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
         _foregroundImage = Resources.GetSpriteCollection(Assets.Graphics.GameOverScreenForeground);
     }
 
-    public void PerformPostScreenChangeActions()
-    {
-        Resources.GetSoundFxEngine().DisablePeriodicBackgroundSounds(true);
-        _playTime = ScreenDirectory.MainGame.GetPlayTime();
-
-        ScreenFade = 0;
-        ScreenFadeSpeed = 5;
-    }
-
     public override void Update(GameTime gameTime)
     {
         if (Input.GetPressedKey() != Keys.None)
@@ -149,6 +140,15 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
         DrawElementsReplaced();
 
         DrawCoreElements();
+    }
+
+    public void PerformPostScreenChangeActions()
+    {
+        Resources.GetSoundFxEngine().DisablePeriodicBackgroundSounds(true);
+        _playTime = ScreenDirectory.MainGame.GetPlayTime();
+
+        ScreenFade = 0;
+        ScreenFadeSpeed = 5;
     }
 
     /// <summary>

@@ -79,6 +79,21 @@ internal class SpriteCollection
         get;
     }
 
+
+    /// <summary>
+    ///     The batch this collection draws through, built on first use rather than on construction.
+    ///     <para>
+    ///         Content is loaded on a background thread, and MonoGame marshals texture creation to
+    ///         the main thread for us - <c>Texture2D</c> does its GL work through
+    ///         <c>Threading.BlockOnUIThread</c>. <c>SpriteBatch</c> does not: its constructor builds
+    ///         a <c>SpriteEffect</c> and a <c>SpriteBatcher</c> directly, so constructing one off the
+    ///         main thread touches the graphics context from the wrong thread. Every draw call is on
+    ///         the main thread, so deferring it to the first one puts it where it belongs.
+    ///     </para>
+    /// </summary>
+    private SpriteBatch Sprites
+        => _sprites ??= new SpriteBatch(_graphicsDeviceManager.GraphicsDevice);
+
     /// <param name="blendState">
     ///     Blend State for the device
     /// </param>
@@ -296,21 +311,6 @@ internal class SpriteCollection
     }
 
     public void End() => Sprites.End();
-
-
-    /// <summary>
-    ///     The batch this collection draws through, built on first use rather than on construction.
-    ///     <para>
-    ///         Content is loaded on a background thread, and MonoGame marshals texture creation to
-    ///         the main thread for us - <c>Texture2D</c> does its GL work through
-    ///         <c>Threading.BlockOnUIThread</c>. <c>SpriteBatch</c> does not: its constructor builds
-    ///         a <c>SpriteEffect</c> and a <c>SpriteBatcher</c> directly, so constructing one off the
-    ///         main thread touches the graphics context from the wrong thread. Every draw call is on
-    ///         the main thread, so deferring it to the first one puts it where it belongs.
-    ///     </para>
-    /// </summary>
-    private SpriteBatch Sprites
-        => _sprites ??= new SpriteBatch(_graphicsDeviceManager.GraphicsDevice);
 
     /// <summary>
     ///     A second collection over the same sheet, carrying this one's fade, rotation and spin.

@@ -88,10 +88,10 @@ internal class PlayerStats
     private readonly SoundEffectEngine _sounds;
 
     private int _energyDrainCounter;
+    private bool _energyDrainStarted;
     private double _energyLevel;
     private double _firePower;
     private double _platforms;
-    private bool _energyDrainStarted;
 
     public PlayerStats(SoundEffectEngine sounds)
     {

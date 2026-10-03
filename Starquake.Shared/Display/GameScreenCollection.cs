@@ -46,13 +46,13 @@ internal class GameScreenCollection : IDynamicCollisionCells
 
     private readonly GameScreenData[] _gameScreens;
     private readonly GraphicsSet _graphicsSet;
-
-    private readonly WorldPopulator _worldPopulator;
     private readonly ResourceManager _resources;
 
     private readonly int _tileHeight;
 
     private readonly int _tileWidth;
+
+    private readonly WorldPopulator _worldPopulator;
 
     private List<KeyLockDoor>? _keyLockDoors;
 
@@ -177,13 +177,6 @@ internal class GameScreenCollection : IDynamicCollisionCells
     public Point CoreExitPosition => StandingIn(CoreExit.TileX, CoreExit.TileY);
 
     /// <summary>
-    ///     Blob standing in a marked square: centred across it, with his feet on the bottom of it.
-    /// </summary>
-    private static Point StandingIn(int tileX, int tileY) => new(
-        tileX * TileMetrics.TileWidth + (TileMetrics.TileWidth - SpriteMetrics.SpriteWidth) / 2,
-        tileY * TileMetrics.TileHeight + TileMetrics.TileHeight - SpriteMetrics.SpriteHeight);
-
-    /// <summary>
     ///     The middle of the square the ship comes to rest in. The ship is drawn from its top left and
     ///     the two graphics sets draw it at different sizes, so the square gives the centre and the
     ///     caller takes half its own sprite off that.
@@ -224,6 +217,35 @@ internal class GameScreenCollection : IDynamicCollisionCells
     public int CollAreaWidth { get; }
 
     public int CollAreaHeight { get; }
+
+    /// <summary>
+    ///     The cells of the key-locked doors found on the screen being shown. A door only hunts for
+    ///     its own cells when it has none - see <see cref="UpdateKeyLockDoor" /> - so without this a
+    ///     rebuild left the door holding cells that were no longer in the map, and its force field let
+    ///     Blob walk through for the rest of the visit.
+    /// </summary>
+    public IEnumerable<CollisionTile> CellsOnScreen(int screenNumber)
+    {
+        if (screenNumber != _screenNumber || _keyLockDoors == null)
+        {
+            yield break;
+        }
+
+        foreach (KeyLockDoor keyLockDoor in _keyLockDoors)
+        {
+            foreach (CollisionTile collisionTile in keyLockDoor.CollisionTiles)
+            {
+                yield return collisionTile;
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Blob standing in a marked square: centred across it, with his feet on the bottom of it.
+    /// </summary>
+    private static Point StandingIn(int tileX, int tileY) => new(
+        tileX * TileMetrics.TileWidth + (TileMetrics.TileWidth - SpriteMetrics.SpriteWidth) / 2,
+        tileY * TileMetrics.TileHeight + TileMetrics.TileHeight - SpriteMetrics.SpriteHeight);
 
     public GameScreenData GetGameScreen(int number)
         => _gameScreens[number];
@@ -439,28 +461,6 @@ internal class GameScreenCollection : IDynamicCollisionCells
         }
 
         return returnedTiles.OrderByDescending(rt => rt.Y).ToArray();
-    }
-
-    /// <summary>
-    ///     The cells of the key-locked doors found on the screen being shown. A door only hunts for
-    ///     its own cells when it has none - see <see cref="UpdateKeyLockDoor" /> - so without this a
-    ///     rebuild left the door holding cells that were no longer in the map, and its force field let
-    ///     Blob walk through for the rest of the visit.
-    /// </summary>
-    public IEnumerable<CollisionTile> CellsOnScreen(int screenNumber)
-    {
-        if (screenNumber != _screenNumber || _keyLockDoors == null)
-        {
-            yield break;
-        }
-
-        foreach (KeyLockDoor keyLockDoor in _keyLockDoors)
-        {
-            foreach (CollisionTile collisionTile in keyLockDoor.CollisionTiles)
-            {
-                yield return collisionTile;
-            }
-        }
     }
 
     private List<KeyLockDoor> GetKeyLockDoors()

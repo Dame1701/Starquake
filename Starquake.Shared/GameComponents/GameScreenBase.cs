@@ -40,16 +40,16 @@ internal class GameScreenBase
 {
     protected readonly BitmapFont Font;
     protected readonly GraphicsDeviceManager GraphicsDeviceManager;
-    protected readonly PresentationSettings Presentation;
-    protected readonly ResourceManager Resources;
-    protected readonly ScreenDirectory ScreenDirectory;
-    protected readonly ScreenEffectEngine ScreenEffects;
 
     /// <summary>
     ///     The frame's input, read once by <c>GameHost</c>. Every page acts on a key press, so this
     ///     is the seventh thing all of them need.
     /// </summary>
     protected readonly ToggleKeys Input;
+    protected readonly PresentationSettings Presentation;
+    protected readonly ResourceManager Resources;
+    protected readonly ScreenDirectory ScreenDirectory;
+    protected readonly ScreenEffectEngine ScreenEffects;
 
     protected int ScreenFadeSpeed;
 

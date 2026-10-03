@@ -16,7 +16,7 @@ internal static class TextHelper
         }
 
         Encoding ascii = Encoding.ASCII;
-        var encodedBytes = ascii.GetBytes(character);
+        byte[] encodedBytes = ascii.GetBytes(character);
         return encodedBytes[0];
     }
 }

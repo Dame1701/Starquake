@@ -134,13 +134,6 @@ internal class NastyBrain
     private readonly Random _randomNumberGenerator;
 
     /// <summary>
-    ///     Everything a nasty carries across a screen swap. Held as one struct so that copying it
-    ///     copies all of it: <c>CopyFromSource</c> used to assign seventeen fields by hand, two of
-    ///     them twice, and silently dropped whatever had been added since it was written.
-    /// </summary>
-    private NastyMovementState _state;
-
-    /// <summary>
     ///     State the nasty on the far side of a screen swap starts fresh with, which is why it is
     ///     outside <see cref="NastyMovementState" />. That was the old behaviour and it is kept:
     ///     whether each omission was deliberate cannot be told from the code, so the distinction is
@@ -159,6 +152,13 @@ internal class NastyBrain
 
     /// <inheritdoc cref="_firstMovement" />
     private bool _spikeyPause;
+
+    /// <summary>
+    ///     Everything a nasty carries across a screen swap. Held as one struct so that copying it
+    ///     copies all of it: <c>CopyFromSource</c> used to assign seventeen fields by hand, two of
+    ///     them twice, and silently dropped whatever had been added since it was written.
+    /// </summary>
+    private NastyMovementState _state;
 
     public NastyBrain(ScreenCollisionMap collisions, Random randomNumberGenerator, int moveSpeed)
     {

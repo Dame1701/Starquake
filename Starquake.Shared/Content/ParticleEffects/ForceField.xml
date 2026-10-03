@@ -82,7 +82,7 @@
                     <InitialColour>0 0 1</InitialColour>
                     <UltimateColour>1 1 1</UltimateColour>
                 </Item>
-                <Item Type="ProjectMercury.Modifiers.OpacityFastFadeModifier" />
+                <Item Type="ProjectMercury.Modifiers.OpacityFastFadeModifier"/>
             </Modifiers>
             <BlendMode>Add</BlendMode>
             <TriggerOffset>0 0</TriggerOffset>
@@ -93,7 +93,7 @@
             <EmitBothWays>false</EmitBothWays>
         </Item>
         <Name>Particle Effect</Name>
-        <Author />
-        <Description />
+        <Author/>
+        <Description/>
     </Asset>
 </XnaContent>

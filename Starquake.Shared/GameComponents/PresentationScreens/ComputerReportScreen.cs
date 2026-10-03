@@ -19,10 +19,10 @@ namespace Starquake.GameComponents.PresentationScreens;
 
 internal class ComputerReportScreen : GameScreenBase, IGameScreen
 {
-    private readonly Random _randomNumberGenerator;
 
     private readonly SpriteCollection _backgroundImage;
     private readonly SpriteCollection _foregroundImage;
+    private readonly Random _randomNumberGenerator;
     private bool _fadeComplete;
 
     public ComputerReportScreen(

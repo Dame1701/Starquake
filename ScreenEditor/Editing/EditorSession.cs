@@ -310,6 +310,23 @@ internal sealed class EditorSession : ViewModelBase
     }
 
     /// <summary>
+    ///     What goes back in hand when the brush is picked up with nothing in it: the last ordinary tile
+    ///     the author had, or the first of the sheet if they have not reached for one yet - which is also
+    ///     what a session opens with.
+    /// </summary>
+    /// <remarks>
+    ///     The palette's recent row never holds a marker or an empty tile, so its head is an ordinary
+    ///     tile by construction - see <see cref="TilePaletteState.Remember" />.
+    /// </remarks>
+    private int LastOrdinaryTile => Palette.RecentTiles.Count > 0 ? Palette.RecentTiles[0] : 0;
+
+
+    /// <summary>
+    ///     What the pointer is currently over, for the status bar.
+    /// </summary>
+    public bool CanPaste => _clipboard is not null;
+
+    /// <summary>
     ///     What should be in hand for a given tool. The swatch lit in the palette and the marker button
     ///     lit on the toolbar both mean "this is what would be laid down", so a tool that lays nothing
     ///     down must leave them dark, and a tool that lays something down must have something to lay.
@@ -332,23 +349,6 @@ internal sealed class EditorSession : ViewModelBase
 
             _ => _selectedTile
         };
-
-    /// <summary>
-    ///     What goes back in hand when the brush is picked up with nothing in it: the last ordinary tile
-    ///     the author had, or the first of the sheet if they have not reached for one yet - which is also
-    ///     what a session opens with.
-    /// </summary>
-    /// <remarks>
-    ///     The palette's recent row never holds a marker or an empty tile, so its head is an ordinary
-    ///     tile by construction - see <see cref="TilePaletteState.Remember" />.
-    /// </remarks>
-    private int LastOrdinaryTile => Palette.RecentTiles.Count > 0 ? Palette.RecentTiles[0] : 0;
-
-
-    /// <summary>
-    ///     What the pointer is currently over, for the status bar.
-    /// </summary>
-    public bool CanPaste => _clipboard is not null;
 
     /// <summary>
     ///     Raised when a view's picture of the map is no longer accurate and needs drawing again.
@@ -468,7 +468,7 @@ internal sealed class EditorSession : ViewModelBase
         }
 
         if (Document.FindMarker((MarkerTile)tileImage) is not { } placed ||
-            (placed.ScreenNumber == _currentScreen && placed.TileX == x && placed.TileY == y))
+            placed.ScreenNumber == _currentScreen && placed.TileX == x && placed.TileY == y)
         {
             return;
         }
@@ -774,6 +774,4 @@ internal sealed class EditorSession : ViewModelBase
 
         RaisePropertyChanged(nameof(ScreenDescription));
     }
-
-
 }

@@ -32,7 +32,10 @@ internal class UnstickProbe
 
     private readonly ScreenCollisionMap _collisions;
 
-    public UnstickProbe(ScreenCollisionMap collisions) => _collisions = collisions;
+    public UnstickProbe(ScreenCollisionMap collisions)
+    {
+        _collisions = collisions;
+    }
 
     /// <summary>
     ///     Where Blob should be, given where he is. The same position back if he is not stuck.

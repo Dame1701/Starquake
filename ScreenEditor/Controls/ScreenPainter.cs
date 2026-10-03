@@ -45,6 +45,20 @@ internal static class ScreenPainter
     /// <inheritdoc cref="ChequerSquaresPerCell" />
     private const int ChequerSquaresDownTile = TileMetrics.CollisionCellsDownTile * ChequerSquaresPerCell;
 
+    /// <summary>
+    ///     Where a signpost's code sits on the tile it is painted on, as a fraction of it: the middle
+    ///     of the board across, and the foot of the lettering down. The game writes the code into a
+    ///     box measured off that board - see <see cref="Signposts" /> - and lines it up by the foot
+    ///     of its capitals, so lining this up the same way is what keeps the canvas showing where the
+    ///     letters will actually land.
+    /// </summary>
+    private const double BoardCentreX =
+        (Signposts.TextLeft + Signposts.TextWidth / 2.0) / TileMetrics.TileWidth;
+
+    /// <inheritdoc cref="BoardCentreX" />
+    private const double BoardBaselineY =
+        (Signposts.TextTop + Signposts.TextHeight) / (double)TileMetrics.TileHeight;
+
     private static readonly Typeface LabelTypeface = new(FontFamily.Default);
 
     /// <summary>
@@ -60,20 +74,6 @@ internal static class ScreenPainter
 
     /// <inheritdoc cref="CoreFillBrush" />
     private static readonly IPen CoreElementPen = new Pen(new SolidColorBrush(EditorColours.Accent, 0.5));
-
-    /// <summary>
-    ///     Where a signpost's code sits on the tile it is painted on, as a fraction of it: the middle
-    ///     of the board across, and the foot of the lettering down. The game writes the code into a
-    ///     box measured off that board - see <see cref="Signposts" /> - and lines it up by the foot
-    ///     of its capitals, so lining this up the same way is what keeps the canvas showing where the
-    ///     letters will actually land.
-    /// </summary>
-    private const double BoardCentreX =
-        (Signposts.TextLeft + Signposts.TextWidth / 2.0) / TileMetrics.TileWidth;
-
-    /// <inheritdoc cref="BoardCentreX" />
-    private const double BoardBaselineY =
-        (Signposts.TextTop + Signposts.TextHeight) / (double)TileMetrics.TileHeight;
 
     /// <summary>
     ///     How solid a signpost's code is drawn, matching the ink the game writes it in - the board

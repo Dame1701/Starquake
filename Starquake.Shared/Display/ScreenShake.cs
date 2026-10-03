@@ -47,11 +47,11 @@ internal sealed class ScreenShake
     /// </summary>
     private const int LargestOffset = 5;
 
-    private bool _shaking;
-
     private int _framesShaken;
 
     private int _framesToShake;
+
+    private bool _shaking;
 
     /// <summary>
     ///     One logic frame of the ground moving.

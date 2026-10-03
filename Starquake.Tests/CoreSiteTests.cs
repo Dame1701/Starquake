@@ -226,7 +226,7 @@ public class CoreSiteTests
         };
 
         // Act
-        GameScreenData restored = MessagePackSerializer.Deserialize<GameScreenData>(
+        var restored = MessagePackSerializer.Deserialize<GameScreenData>(
             MessagePackSerializer.Serialize(screen));
 
         // Assert
@@ -240,7 +240,7 @@ public class CoreSiteTests
         var screen = new GameScreenData(1, 1);
 
         // Act
-        GameScreenData restored = MessagePackSerializer.Deserialize<GameScreenData>(
+        var restored = MessagePackSerializer.Deserialize<GameScreenData>(
             MessagePackSerializer.Serialize(screen));
 
         // Assert

@@ -20,15 +20,7 @@ namespace Starquake.ScreenEditor.Editing;
 /// </remarks>
 internal sealed class AuthoredPositions : ViewModelBase
 {
-    private MarkerPlacement? _blobStart;
-
-    private CoreSite _core = CoreSite.Original;
-
-    private MarkerPlacement? _coreExit;
-
     private EditorDocument _document;
-
-    private MarkerPlacement? _shipCrashSite;
 
     public AuthoredPositions(EditorDocument document)
     {
@@ -40,21 +32,21 @@ internal sealed class AuthoredPositions : ViewModelBase
     ///     Where Blob is put down at the start of a game, or null if no screen says. The screen this
     ///     is on is the screen the game opens on.
     /// </summary>
-    public MarkerPlacement? BlobStart => _blobStart;
+    public MarkerPlacement? BlobStart { get; private set; }
 
     /// <inheritdoc cref="BlobStart" />
-    public MarkerPlacement? ShipCrashSite => _shipCrashSite;
+    public MarkerPlacement? ShipCrashSite { get; private set; }
 
     /// <summary>
     ///     Where Blob arrives having been thrown out of the planet core, or null if no screen says.
     /// </summary>
-    public MarkerPlacement? CoreExit => _coreExit;
+    public MarkerPlacement? CoreExit { get; private set; }
 
     /// <summary>
     ///     Where the planet core sits. Always answers somewhere - the original game's position stands in
     ///     for a map that has not placed one - so <see cref="CoreIsPlaced" /> says whether the map means it.
     /// </summary>
-    public CoreSite Core => _core;
+    public CoreSite Core { get; private set; } = CoreSite.Original;
 
     /// <summary>
     ///     Whether the map places the core itself, as opposed to reading back the fallback.
@@ -70,14 +62,14 @@ internal sealed class AuthoredPositions : ViewModelBase
     {
         get
         {
-            if (_blobStart is not { } start)
+            if (BlobStart is not { } start)
             {
-                return _shipCrashSite is null
+                return ShipCrashSite is null
                     ? "No start position has been placed. Blob has nowhere to begin."
                     : "No start position has been placed, so the crash site is on its own.";
             }
 
-            if (_shipCrashSite is not { } crash)
+            if (ShipCrashSite is not { } crash)
             {
                 return "No crash site has been placed. There would be no wreck to climb out of.";
             }
@@ -97,13 +89,13 @@ internal sealed class AuthoredPositions : ViewModelBase
     {
         get
         {
-            if (_blobStart is not { } start)
+            if (BlobStart is not { } start)
             {
                 return "NOT SET";
             }
 
             return "Screen " + start.ScreenNumber + "  ·  start " + Square(start) +
-                   "  ·  crash " + (_shipCrashSite is { } crash ? Square(crash) : "not set");
+                   "  ·  crash " + (ShipCrashSite is { } crash ? Square(crash) : "not set");
         }
     }
 
@@ -122,10 +114,10 @@ internal sealed class AuthoredPositions : ViewModelBase
     {
         _document = document;
 
-        _blobStart = document.FindMarker(MarkerTile.BlobStartPosition);
-        _shipCrashSite = document.FindMarker(MarkerTile.ShipCrashSite);
-        _coreExit = document.FindMarker(MarkerTile.CoreExitPosition);
-        _core = document.FindCore();
+        BlobStart = document.FindMarker(MarkerTile.BlobStartPosition);
+        ShipCrashSite = document.FindMarker(MarkerTile.ShipCrashSite);
+        CoreExit = document.FindMarker(MarkerTile.CoreExitPosition);
+        Core = document.FindCore();
 
         RaisePropertyChanged(nameof(BlobStart));
         RaisePropertyChanged(nameof(ShipCrashSite));

@@ -180,8 +180,8 @@ internal sealed class TunnelLift
         // Either way out will do. The original tested left and then right in an else-if, so holding both
         // with a wall to the left still steps him off to the right; keeping that rather than returning on
         // the first direction asked about.
-        return (movedLeft && RoomToWalk(collisions, blob, Direction.Left, horizontalSpeed))
-               || (movedRight && RoomToWalk(collisions, blob, Direction.Right, horizontalSpeed));
+        return movedLeft && RoomToWalk(collisions, blob, Direction.Left, horizontalSpeed)
+               || movedRight && RoomToWalk(collisions, blob, Direction.Right, horizontalSpeed);
     }
 
     private static bool RoomToWalk(

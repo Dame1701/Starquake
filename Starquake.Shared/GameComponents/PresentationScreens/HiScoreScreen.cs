@@ -56,35 +56,6 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
         _hiScoreList = new HiScores();
     }
 
-    /// <summary>
-    ///     Called once this screen has been handed control, with the score it needs.
-    ///     <para>
-    ///         This took a <c>ScreenChange</c> and threw an <see cref="ArgumentException" /> for any
-    ///         case but <c>FinalScore</c>, because the signature had to suit all nine other screens
-    ///         too. The game over screen is the only way onto this one and always had a score to
-    ///         pass, so the throw stood for a mistake nobody could make; it now cannot be written.
-    ///     </para>
-    /// </summary>
-    /// <param name="playersScore">
-    ///     The score the player has just finished with, for a name to be typed against it.
-    /// </param>
-    public void PerformPostScreenChangeActions(HiScore playersScore)
-    {
-        ScreenFade = 0;
-        ScreenFadeSpeed = 5;
-        _playersHighScore = new HiScore();
-
-        _gotHighScore = _hiScoreList.GotHighScore(_stats.PlayerScore);
-
-        if (_gotHighScore)
-        {
-            _playersHighScore = playersScore;
-            _playersHighScore.Name = string.Empty;
-
-            _hiScoreList.AddScoreToTable(_playersHighScore);
-        }
-    }
-
     public override void Update(GameTime gameTime)
     {
         if (!_gotHighScore)
@@ -170,5 +141,34 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
         _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.WhiteFadedTo((byte)ScreenFade));
 
         _foregroundImage.End();
+    }
+
+    /// <summary>
+    ///     Called once this screen has been handed control, with the score it needs.
+    ///     <para>
+    ///         This took a <c>ScreenChange</c> and threw an <see cref="ArgumentException" /> for any
+    ///         case but <c>FinalScore</c>, because the signature had to suit all nine other screens
+    ///         too. The game over screen is the only way onto this one and always had a score to
+    ///         pass, so the throw stood for a mistake nobody could make; it now cannot be written.
+    ///     </para>
+    /// </summary>
+    /// <param name="playersScore">
+    ///     The score the player has just finished with, for a name to be typed against it.
+    /// </param>
+    public void PerformPostScreenChangeActions(HiScore playersScore)
+    {
+        ScreenFade = 0;
+        ScreenFadeSpeed = 5;
+        _playersHighScore = new HiScore();
+
+        _gotHighScore = _hiScoreList.GotHighScore(_stats.PlayerScore);
+
+        if (_gotHighScore)
+        {
+            _playersHighScore = playersScore;
+            _playersHighScore.Name = string.Empty;
+
+            _hiScoreList.AddScoreToTable(_playersHighScore);
+        }
     }
 }

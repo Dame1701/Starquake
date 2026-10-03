@@ -44,7 +44,7 @@
         <Compile Remove="Program.cs"/>
         <None Include="Program.cs"/>
         <!-- No code lives under Content; this keeps it that way if any ever appears. -->
-        <Compile Remove="Content\**" />
+        <Compile Remove="Content\**"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -55,7 +55,7 @@
           detection, the nasty brain, the world populator - is the inside of the game, and making
           it public would be describing it as an API that nothing outside this solution consumes.
         -->
-        <InternalsVisibleTo Include="Starquake.Tests" />
+        <InternalsVisibleTo Include="Starquake.Tests"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -70,17 +70,17 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\ProjectMercury\ProjectMercury.csproj" />
-        <ProjectReference Include="..\SharedLibs\SharedLibs.csproj" />
+        <ProjectReference Include="..\ProjectMercury\ProjectMercury.csproj"/>
+        <ProjectReference Include="..\SharedLibs\SharedLibs.csproj"/>
         <!--
           The Project Mercury MGCB extension. It is a build-time tool, not a dependency:
           this reference exists so `dotnet build` on a head restores and builds it, and
           every asset of it is kept out of the output. BuildContentPipelineExtension below
           is what actually gets it built early enough for the content build to use.
         -->
-        <ProjectReference Include="..\ProjectMercury.ContentPipeline\ProjectMercury.ContentPipeline.csproj" ReferenceOutputAssembly="false" Private="false" ExcludeAssets="all" />
-        <PackageReference Include="MessagePack" />
-        <PackageReference Include="MonoGame.Content.Builder.Task" />
+        <ProjectReference Include="..\ProjectMercury.ContentPipeline\ProjectMercury.ContentPipeline.csproj" ReferenceOutputAssembly="false" Private="false" ExcludeAssets="all"/>
+        <PackageReference Include="MessagePack"/>
+        <PackageReference Include="MonoGame.Content.Builder.Task"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -104,11 +104,11 @@
           nothing because the Windows head cannot run on a Mac anyway. See BUILD.md.
         -->
         <MonoGameContentReference Include="Content\Content.mgcb"
-                                  Condition="'$(TargetFramework)' != 'net9.0-windows' or '$(OS)' == 'Windows_NT'" />
+                                  Condition="'$(TargetFramework)' != 'net9.0-windows' or '$(OS)' == 'Windows_NT'"/>
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
-        <PackageReference Include="MonoGame.Framework.DesktopGL" />
+        <PackageReference Include="MonoGame.Framework.DesktopGL"/>
     </ItemGroup>
 
     <!--
@@ -122,11 +122,11 @@
     </PropertyGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net9.0-windows'">
-        <PackageReference Include="MonoGame.Framework.WindowsDX" />
+        <PackageReference Include="MonoGame.Framework.WindowsDX"/>
     </ItemGroup>
 
     <ItemGroup>
-      <EmbeddedResource Remove="Content\**" />
+        <EmbeddedResource Remove="Content\**"/>
     </ItemGroup>
 
     <Target Name="RestoreDotnetTools" BeforeTargets="Restore">

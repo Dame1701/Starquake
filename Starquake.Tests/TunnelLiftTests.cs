@@ -186,7 +186,7 @@ public class TunnelLiftTests
         var sounds = new SoundLog();
         TunnelLift lift = sounds.Lift();
         ScreenCollisionMap map = MapOf(TestData.EmptyScreen());
-        TestData.GoUpFor(lift, map, frames: 3);
+        TestData.GoUpFor(lift, map, 3);
 
         // Act
         int risen = lift.Step(map, TestData.BlobAt(TestData.MidScreenX, 200), TestData.AtASidePassage(),
@@ -215,7 +215,7 @@ public class TunnelLiftTests
         var sounds = new SoundLog();
         TunnelLift lift = sounds.Lift();
         ScreenCollisionMap map = MapOf(screen);
-        TestData.GoUpFor(lift, map, frames: 3, xPos: TileMetrics.TileWidth);
+        TestData.GoUpFor(lift, map, 3, TileMetrics.TileWidth);
 
         // Act
         int risen = lift.Step(map, TestData.BlobAt(TileMetrics.TileWidth, 200), TestData.AtASidePassage(),
@@ -238,7 +238,7 @@ public class TunnelLiftTests
         var sounds = new SoundLog();
         TunnelLift lift = sounds.Lift();
         ScreenCollisionMap map = MapOf(TestData.EmptyScreen());
-        TestData.GoUpFor(lift, map, frames: 4);
+        TestData.GoUpFor(lift, map, 4);
 
         lift.Step(map, TestData.BlobAt(TestData.MidScreenX, 200),
             TestData.Overhead(ActionTiles.TunnelLiftTop1, 0, TestData.ShaftTop), false, false,
@@ -341,7 +341,7 @@ public class TunnelLiftTests
 
         public static int[,,] TileCollisionData()
         {
-            var data = new int[
+            int[,,] data = new int[
                 SolidTile + 1,
                 TileMetrics.CollisionCellsAcrossTile,
                 TileMetrics.CollisionCellsDownTile];

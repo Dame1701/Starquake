@@ -68,7 +68,7 @@ public class BlobFallTests
         ScreenCollisionMap map = MapOf(TestData.EmptyScreen());
 
         // Act
-        int[] distances = TestData.DropFor(fall, map, frames: 4);
+        int[] distances = TestData.DropFor(fall, map, 4);
 
         // Assert
         Assert.Equal(
@@ -90,7 +90,7 @@ public class BlobFallTests
         ScreenCollisionMap map = MapOf(TestData.EmptyScreen());
 
         // Act. Far further than any screen is tall, so the speed has every chance to run away.
-        int[] distances = TestData.DropFor(fall, map, frames: 200);
+        int[] distances = TestData.DropFor(fall, map, 200);
 
         // Assert
         Assert.Equal(TestData.TerminalFallSpeed, distances.Max());
@@ -155,7 +155,7 @@ public class BlobFallTests
         // Arrange - fall far enough to be heard
         var fall = new BlobFall();
         ScreenCollisionMap map = MapOf(TestData.EmptyScreen());
-        TestData.DropFor(fall, map, frames: 30);
+        TestData.DropFor(fall, map, 30);
 
         // Act
         fall.StartFallingAgain();
@@ -264,7 +264,7 @@ public class BlobFallTests
         /// </summary>
         public static int[] DropFor(BlobFall fall, ScreenCollisionMap map, int frames)
         {
-            var distances = new int[frames];
+            int[] distances = new int[frames];
             int yPos = 0;
 
             for (int frame = 0; frame < frames; frame++)
@@ -281,7 +281,7 @@ public class BlobFallTests
         /// </summary>
         public static int[,,] TileCollisionData()
         {
-            var data = new int[
+            int[,,] data = new int[
                 SolidTile + 1,
                 TileMetrics.CollisionCellsAcrossTile,
                 TileMetrics.CollisionCellsDownTile];

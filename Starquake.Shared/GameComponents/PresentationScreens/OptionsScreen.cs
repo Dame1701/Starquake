@@ -19,13 +19,30 @@ namespace Starquake.GameComponents.PresentationScreens;
 
 internal class OptionsScreen : GameScreenBase, IGameScreen
 {
+
+    /// <summary>
+    ///     The four presets the player chooses between, which are the first four entries of
+    ///     <see cref="_options" />. The entries after them - define keys, start, quit - are not
+    ///     presets and are handled separately.
+    /// </summary>
+    private const int SelectableOptionCount = 4;
+
+    /// <summary>
+    ///     The joypad preset, which is the only one whose availability depends on the hardware.
+    /// </summary>
+    private const int JoyPadOption = 0;
+
+    /// <summary>
+    ///     The preset to fall back on when the pad is pulled out - the cursor keys.
+    /// </summary>
+    private const int DefaultOption = 1;
+    private readonly SpriteCollection _backgroundImage;
+    private readonly SpriteCollection _foregroundImage;
+    private readonly KeyDefiner _keyDefiner;
+    private readonly List<Option> _options;
     private readonly GameSession _session;
 
     private bool _definingKeys;
-    private readonly SpriteCollection _backgroundImage;
-    private readonly SpriteCollection _foregroundImage;
-    private readonly List<Option> _options;
-    private readonly KeyDefiner _keyDefiner;
 
 
     public OptionsScreen(
@@ -69,38 +86,6 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
         ];
     }
 
-    private void KeyDefiner_KeyDefinitionComplete(object? sender, EventArgs e)
-    {
-        _options[3] = new Option("4", "UDK Keyboard . . " + _keyDefiner.GetKeys(), false, Color.White);
-
-        ClearSelectedOptions();
-        _options[3].Selected = true;
-
-        _definingKeys = false;
-    }
-
-    public void LoadContent()
-    {
-        Font.Flash = true;
-    }
-
-    /// <summary>
-    ///     The four presets the player chooses between, which are the first four entries of
-    ///     <see cref="_options" />. The entries after them - define keys, start, quit - are not
-    ///     presets and are handled separately.
-    /// </summary>
-    private const int SelectableOptionCount = 4;
-
-    /// <summary>
-    ///     The joypad preset, which is the only one whose availability depends on the hardware.
-    /// </summary>
-    private const int JoyPadOption = 0;
-
-    /// <summary>
-    ///     The preset to fall back on when the pad is pulled out - the cursor keys.
-    /// </summary>
-    private const int DefaultOption = 1;
-
     public override void Update(GameTime gameTime)
     {
         if (_definingKeys)
@@ -117,9 +102,77 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
         base.Update(gameTime);
     }
 
+    public void Draw()
+    {
+        ScreenEffects.SelectRenderViewPort(ViewPorts.EntireScreen);
+
+        _backgroundImage.Begin(BlendState.AlphaBlend);
+        _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.WhiteFadedTo((byte)ScreenFade));
+        _backgroundImage.End();
+
+        Font.Begin(BlendState.AlphaBlend);
+        if (!_definingKeys)
+        {
+            int optionXPos = 320;
+            int optionYPos = 260;
+
+            foreach (Option opt in _options)
+            {
+                if (opt.Unavailable)
+                {
+                    Font.WriteText(optionXPos, optionYPos, opt.ActivationKey + ".", 2, ColourHelper.GetXna4Colour(100, 0, 0), (byte)ScreenFade);
+                    Font.WriteText(optionXPos + 50, optionYPos, opt.OptionText + " (not connected)", 2, ColourHelper.GetXna4Colour(100, 0, 0), (byte)ScreenFade);
+                }
+                else
+                {
+                    if (opt.Selected)
+                    {
+                        Font.WriteText(optionXPos, optionYPos, opt.ActivationKey + ".", 2, (byte)ScreenFade);
+                        Font.WriteText(optionXPos + 50, optionYPos, opt.OptionText, 2, (byte)ScreenFade);
+                    }
+                    else
+                    {
+                        Font.WriteText(optionXPos, optionYPos, opt.ActivationKey + ".", 2, opt.Colour, (byte)ScreenFade);
+                        Font.WriteText(optionXPos + 50, optionYPos, opt.OptionText, 2, opt.Colour, (byte)ScreenFade);
+                    }
+                }
+
+                optionYPos += 50;
+            }
+        }
+        else
+        {
+            _keyDefiner.Draw(ScreenFade);
+        }
+
+        Font.WriteText(555, 640, "2017", 2, new Color(112, 155, 155), (byte)ScreenFade);
+
+        Font.End();
+
+        _foregroundImage.Begin(BlendState.AlphaBlend);
+        _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.WhiteFadedTo((byte)ScreenFade));
+        _foregroundImage.End();
+    }
+
+    private void KeyDefiner_KeyDefinitionComplete(object? sender, EventArgs e)
+    {
+        _options[3] = new Option("4", "UDK Keyboard . . " + _keyDefiner.GetKeys(), false, Color.White);
+
+        ClearSelectedOptions();
+        _options[3].Selected = true;
+
+        _definingKeys = false;
+    }
+
+    public void LoadContent()
+    {
+        Font.Flash = true;
+    }
+
     /// <summary>
     ///     A pad can be plugged in or pulled out while this screen is up, so the preset that needs one
-    ///     says every frame whether it is there, from the same snapshot everything else reads. Pulling the pad out while its preset is selected moves
+    ///     says every frame whether it is there, from the same snapshot everything else reads. Pulling the pad out while its
+    ///     preset is selected moves
     ///     the selection back to the keyboard, because confirming it would otherwise leave the player
     ///     with nothing bound at all.
     /// </summary>
@@ -255,58 +308,6 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
         {
             opt.Selected = false;
         }
-    }
-
-    public void Draw()
-    {
-        ScreenEffects.SelectRenderViewPort(ViewPorts.EntireScreen);
-
-        _backgroundImage.Begin(BlendState.AlphaBlend);
-        _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.WhiteFadedTo((byte)ScreenFade));
-        _backgroundImage.End();
-
-        Font.Begin(BlendState.AlphaBlend);
-        if (!_definingKeys)
-        {
-            int optionXPos = 320;
-            int optionYPos = 260;
-
-            foreach (Option opt in _options)
-            {
-                if (opt.Unavailable)
-                {
-                    Font.WriteText(optionXPos, optionYPos, opt.ActivationKey + ".", 2, ColourHelper.GetXna4Colour(100, 0, 0), (byte)ScreenFade);
-                    Font.WriteText(optionXPos + 50, optionYPos, opt.OptionText + " (not connected)", 2, ColourHelper.GetXna4Colour(100, 0, 0), (byte)ScreenFade);
-                }
-                else
-                {
-                    if (opt.Selected)
-                    {
-                        Font.WriteText(optionXPos, optionYPos, opt.ActivationKey + ".", 2, (byte)ScreenFade);
-                        Font.WriteText(optionXPos + 50, optionYPos, opt.OptionText, 2, (byte)ScreenFade);
-                    }
-                    else
-                    {
-                        Font.WriteText(optionXPos, optionYPos, opt.ActivationKey + ".", 2, opt.Colour, (byte)ScreenFade);
-                        Font.WriteText(optionXPos + 50, optionYPos, opt.OptionText, 2, opt.Colour, (byte)ScreenFade);
-                    }
-                }
-
-                optionYPos += 50;
-            }
-        }
-        else
-        {
-            _keyDefiner.Draw(ScreenFade);
-        }
-
-        Font.WriteText(555, 640, "2017", 2, new Color(112, 155, 155), (byte)ScreenFade);
-
-        Font.End();
-
-        _foregroundImage.Begin(BlendState.AlphaBlend);
-        _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.WhiteFadedTo((byte)ScreenFade));
-        _foregroundImage.End();
     }
 
     public void PerformPostScreenChangeActions()

@@ -112,9 +112,6 @@ internal class ElectricityGatesAndNodesEngine
     private readonly ResourceManager _resources;
 
     private List<SecondLayerTile>? _secondLayerTiles;
-    public ElectricityRandomiser[]? ElectricityNodeControllers { get; private set; }
-
-    public event EventHandler? OnBlobStruckByElectricity;
 
     public ElectricityGatesAndNodesEngine(
         ResourceManager resources,
@@ -157,6 +154,9 @@ internal class ElectricityGatesAndNodesEngine
         _electricityAnimation2.Delay = 2;
         _electricityAnimation2.AnimateForwards = false;
     }
+    public ElectricityRandomiser[]? ElectricityNodeControllers { get; private set; }
+
+    public event EventHandler? OnBlobStruckByElectricity;
 
     /// <summary>
     ///     Turns the electricity off on every node and gate, and starts their timers again from the
@@ -484,5 +484,4 @@ internal class ElectricityGatesAndNodesEngine
 
         return controllers;
     }
-
 }

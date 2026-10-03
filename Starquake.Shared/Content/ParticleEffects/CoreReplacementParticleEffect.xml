@@ -456,6 +456,6 @@
         </Item>
         <Name>Particle Effect</Name>
         <Author>Damien Green</Author>
-        <Description />
+        <Description/>
     </Asset>
 </XnaContent>

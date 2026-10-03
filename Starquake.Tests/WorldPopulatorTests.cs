@@ -28,8 +28,8 @@ public class WorldPopulatorTests
         GameScreenData[] second = TestData.World();
 
         // Act
-        Populate(first, seed: 12345);
-        Populate(second, seed: 12345);
+        Populate(first, 12345);
+        Populate(second, 12345);
 
         // Assert
         Assert.Equal(TestData.Describe(first), TestData.Describe(second));
@@ -43,8 +43,8 @@ public class WorldPopulatorTests
         GameScreenData[] second = TestData.World();
 
         // Act
-        Populate(first, seed: 12345);
-        Populate(second, seed: 54321);
+        Populate(first, 12345);
+        Populate(second, 54321);
 
         // Assert
         Assert.NotEqual(TestData.Describe(first), TestData.Describe(second));
@@ -404,15 +404,6 @@ public class WorldPopulatorTests
     {
         public const int MaxCheops = 40;
 
-        /// <summary>
-        ///     Whether a pick-up is one the scatter placed. The key and the access card are put on
-        ///     deliberately once the scatter has finished, so a test about scattering should not count
-        ///     them - and before they were placed at all, every pick-up was a scattered one.
-        /// </summary>
-        public static bool IsScattered(InteractiveItem pickUp)
-            => pickUp.Type != (int)Collectables.Key &&
-               pickUp.Type != (int)Collectables.AccessCard;
-
         public const int MaxCoreElements = 18;
 
         public const int PowerUpTypeCount = 8;
@@ -421,6 +412,15 @@ public class WorldPopulatorTests
         public const int PlatformTile = 2;
 
         public static readonly int[] CoreElementsWanted = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+        /// <summary>
+        ///     Whether a pick-up is one the scatter placed. The key and the access card are put on
+        ///     deliberately once the scatter has finished, so a test about scattering should not count
+        ///     them - and before they were placed at all, every pick-up was a scattered one.
+        /// </summary>
+        public static bool IsScattered(InteractiveItem pickUp)
+            => pickUp.Type != (int)Collectables.Key &&
+               pickUp.Type != (int)Collectables.AccessCard;
 
         /// <summary>
         ///     A whole world of identical screens, each with a row of platforms across the middle and
@@ -451,7 +451,7 @@ public class WorldPopulatorTests
 
         public static int[,,] TileCollisionData()
         {
-            var data = new int[
+            int[,,] data = new int[
                 512,
                 TileMetrics.CollisionCellsAcrossTile,
                 TileMetrics.CollisionCellsDownTile];

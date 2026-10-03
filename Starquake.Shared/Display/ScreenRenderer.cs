@@ -108,18 +108,6 @@ internal class ScreenRenderer
     private const int BrightFieldQuantity = 10;
 
     /// <summary>
-    ///     The two emitters that make up a key door's force field, and the two quantities it is run at:
-    ///     a dim alpha-blended pass for the body of the field and a bright additive one over the middle.
-    /// </summary>
-    private static readonly string[] ForceFieldEmitterNames = ["Emitter01", "Emitter05"];
-
-    /// <summary>
-    ///     The colour a signpost's code is written in. The board the artwork draws is gold, and black
-    ///     on it is what reads from across a room.
-    /// </summary>
-    private static readonly Color SignpostInk = Color.Black;
-
-    /// <summary>
     ///     How solid that ink is. Short of opaque, because the letters the sign used to carry were
     ///     painted thinly enough to let the board show through them, and ink that covers it
     ///     completely reads as a label stuck on the sign rather than as part of it.
@@ -132,6 +120,18 @@ internal class ScreenRenderer
     ///     it stands in for; a pass offset by a pixel is the cheapest way to put the weight back.
     /// </summary>
     private const int SignpostStrokeWidening = 1;
+
+    /// <summary>
+    ///     The two emitters that make up a key door's force field, and the two quantities it is run at:
+    ///     a dim alpha-blended pass for the body of the field and a bright additive one over the middle.
+    /// </summary>
+    private static readonly string[] ForceFieldEmitterNames = ["Emitter01", "Emitter05"];
+
+    /// <summary>
+    ///     The colour a signpost's code is written in. The board the artwork draws is gold, and black
+    ///     on it is what reads from across a room.
+    /// </summary>
+    private static readonly Color SignpostInk = Color.Black;
 
 
     private readonly ColourAnimationEngine _colourAnimations;
@@ -371,7 +371,7 @@ internal class ScreenRenderer
 
         // The screen's own fade carries the ink's, so that a sign dims with the room it stands in
         // rather than staying put while everything around it goes dark.
-        var ink = (byte)(colour.A * SignpostInkLevel / ColourLevels.Full);
+        byte ink = (byte)(colour.A * SignpostInkLevel / ColourLevels.Full);
 
         _signpostFont.Begin(BlendState.AlphaBlend);
 
@@ -645,5 +645,4 @@ internal class ScreenRenderer
             statusPanelShadow.End();
         }
     }
-
 }

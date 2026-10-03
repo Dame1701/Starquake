@@ -80,13 +80,6 @@ internal static class MarkerCatalogue
     };
 
     /// <summary>
-    ///     How to show a tile the game does not draw, or null for anything it does.
-    /// </summary>
-    public static MarkerFace? Face(int tileImage) => Faces.GetValueOrDefault(tileImage);
-
-    public static bool IsDrawnAsAMarker(int tileImage) => Faces.ContainsKey(tileImage);
-
-    /// <summary>
     ///     The markers that can be painted, in the order the toolbar offers them. Read off
     ///     <see cref="MarkerTiles.All" /> rather than this table, so a marker added to the game cannot
     ///     quietly fail to appear here - it throws instead.
@@ -95,6 +88,13 @@ internal static class MarkerCatalogue
         MarkerTiles.All
             .Select(marker => (marker, Faces[(int)marker]))
             .ToArray();
+
+    /// <summary>
+    ///     How to show a tile the game does not draw, or null for anything it does.
+    /// </summary>
+    public static MarkerFace? Face(int tileImage) => Faces.GetValueOrDefault(tileImage);
+
+    public static bool IsDrawnAsAMarker(int tileImage) => Faces.ContainsKey(tileImage);
 }
 
 /// <summary>

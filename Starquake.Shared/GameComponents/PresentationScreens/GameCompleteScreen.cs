@@ -51,12 +51,6 @@ internal class GameCompleteScreen : GameScreenBase, IGameScreen
         _foregroundImage = Resources.GetSpriteCollection(Assets.Graphics.GameCompleteScreenForeground);
     }
 
-    public void PerformPostScreenChangeActions()
-    {
-        ScreenFade = 0;
-        ScreenFadeSpeed = 5;
-    }
-
     public override void Update(GameTime gameTime)
     {
         if (Input.GetPressedKey() != Keys.None)
@@ -86,6 +80,12 @@ internal class GameCompleteScreen : GameScreenBase, IGameScreen
         Font.End();
 
         DrawCoreElements();
+    }
+
+    public void PerformPostScreenChangeActions()
+    {
+        ScreenFade = 0;
+        ScreenFadeSpeed = 5;
     }
 
     private void DrawCoreElements()

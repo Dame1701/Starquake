@@ -36,8 +36,6 @@ internal sealed class ScreenCanvas : Control
 
     private int _hoverY = -1;
 
-    private EditorTool _strokeTool;
-
     private bool _placingCore;
 
     /// <summary>
@@ -45,6 +43,8 @@ internal sealed class ScreenCanvas : Control
     ///     the pointer is over is not enough for the core, which is placed between tiles.
     /// </summary>
     private Point? _pointerOnScreen;
+
+    private EditorTool _strokeTool;
 
     private bool _stroking;
 
@@ -181,7 +181,7 @@ internal sealed class ScreenCanvas : Control
         Point? previous = _pointerOnScreen;
         _pointerOnScreen = inside ? ScreenPixel(session, position) : null;
 
-        if (moved || (session.Tool == EditorTool.Core && _pointerOnScreen != previous))
+        if (moved || session.Tool == EditorTool.Core && _pointerOnScreen != previous)
         {
             ReportHover(session);
             InvalidateVisual();
@@ -394,5 +394,4 @@ internal sealed class ScreenCanvas : Control
             (position.X - layout.Screen.X) / scale,
             (position.Y - layout.Screen.Y) / scale);
     }
-
 }

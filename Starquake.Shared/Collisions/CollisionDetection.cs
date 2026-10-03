@@ -91,12 +91,12 @@ internal static class CollisionDetection
         bool movingSideways = stepX != 0;
 
         int acrossTheMove = movingSideways
-            ? Math.Abs(obj1Y + (obj1H / 2) - (obj2Y + (obj2H / 2)))
-            : Math.Abs(obj1X + (obj1W / 2) - (obj2X + (obj2W / 2)));
+            ? Math.Abs(obj1Y + obj1H / 2 - (obj2Y + obj2H / 2))
+            : Math.Abs(obj1X + obj1W / 2 - (obj2X + obj2W / 2));
 
         int acrossReach = movingSideways
-            ? (obj1H / 2) + (obj2H / 2)
-            : (obj1W / 2) + (obj2W / 2);
+            ? obj1H / 2 + obj2H / 2
+            : obj1W / 2 + obj2W / 2;
 
         if (acrossTheMove >= acrossReach)
         {
@@ -104,12 +104,12 @@ internal static class CollisionDetection
         }
 
         int step = movingSideways ? stepX : stepY;
-        int centre = movingSideways ? obj1X + (obj1W / 2) : obj1Y + (obj1H / 2);
-        int other = movingSideways ? obj2X + (obj2W / 2) : obj2Y + (obj2H / 2);
-        int alongReach = movingSideways ? (obj1W / 2) + (obj2W / 2) : (obj1H / 2) + (obj2H / 2);
+        int centre = movingSideways ? obj1X + obj1W / 2 : obj1Y + obj1H / 2;
+        int other = movingSideways ? obj2X + obj2W / 2 : obj2Y + obj2H / 2;
+        int alongReach = movingSideways ? obj1W / 2 + obj2W / 2 : obj1H / 2 + obj2H / 2;
 
         int firstStep = centre + step;
-        int lastStep = centre + (step * obj1Velocity);
+        int lastStep = centre + step * obj1Velocity;
 
         return other <= Math.Min(firstStep, lastStep) - alongReach ||
                other >= Math.Max(firstStep, lastStep) + alongReach;
@@ -208,7 +208,6 @@ internal static class CollisionDetection
     ///     locals - the method is pure given its arguments, and they were only ever written and read
     ///     within one call, so two threads calling this at once silently read each other's
     ///     arithmetic. That is why test parallelisation was switched off.
-    ///
     ///     <para>
     ///         The halves are integer division on purpose, so this is not Rectangle.Intersects and a
     ///         rewrite that reaches for the framework method changes how odd-width sprites collide.

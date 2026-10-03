@@ -158,13 +158,13 @@ internal abstract class TunnelEntryEffect(
         // Kept in terms of the speed the callers ask for, so the pace is still theirs to set: the
         // leaving half takes as long as it would have at that many pixels a frame, and the arriving
         // half is the slower one.
-        var leavingFrames = Math.Max(1, effectSurface.MasterWidth / Math.Max(1, EffectSpeed));
-        var arrivingFrames = Math.Max(1, (int)(leavingFrames * ArriveSlowdown));
+        int leavingFrames = Math.Max(1, effectSurface.MasterWidth / Math.Max(1, EffectSpeed));
+        int arrivingFrames = Math.Max(1, (int)(leavingFrames * ArriveSlowdown));
 
         _transitionFrames = leavingFrames + arrivingFrames;
         _seamReachesTheMiddle = leavingFrames / (double)_transitionFrames;
         _releaseFrame = (int)(_transitionFrames *
-                              (_seamReachesTheMiddle + ((1 - _seamReachesTheMiddle) * HeldThroughArrival)));
+                              (_seamReachesTheMiddle + (1 - _seamReachesTheMiddle) * HeldThroughArrival));
         _frame = 0;
 
         _outgoingWidth = effectSurface.MasterWidth;
@@ -180,7 +180,7 @@ internal abstract class TunnelEntryEffect(
 
         _frame++;
 
-        var master = EffectSurface.MasterWidth;
+        int master = EffectSurface.MasterWidth;
 
         if (_frame >= _transitionFrames)
         {
@@ -198,7 +198,7 @@ internal abstract class TunnelEntryEffect(
         // One clock, two complementary widths: whatever the screen being left gives up, the one
         // arriving takes. There is no frame in which neither is moving, which is what makes the
         // transition read as a single move rather than as two halves with a wait between them.
-        var crossedOver = SeamCrossing(_frame / (double)_transitionFrames);
+        double crossedOver = SeamCrossing(_frame / (double)_transitionFrames);
 
         _outgoingWidth = Math.Max(0, (int)(master * (1 - crossedOver)));
         _incomingWidth = Math.Max(0, (int)(master * crossedOver));
@@ -217,15 +217,15 @@ internal abstract class TunnelEntryEffect(
     /// </summary>
     public override bool Draw(SpriteBatch renderer, RenderViewPort renderViewPortToUse)
     {
-        var bleed = BleedNow(renderViewPortToUse.MasterWidth);
+        int bleed = BleedNow(renderViewPortToUse.MasterWidth);
 
         // One shader over the whole batch, so both screens drain together and the seam between
         // them does not have a colour or a brightness boundary running down it.
-        var drained = DrainedBy();
+        double drained = DrainedBy();
 
         Effect desaturate = resources.GetEffect(Assets.Shaders.Desaturate);
-        desaturate.Parameters["Saturation"].SetValue((float)(1 - (ColourDrain * drained)));
-        desaturate.Parameters["Brightness"].SetValue((float)(1 - (LightDrain * drained)));
+        desaturate.Parameters["Saturation"].SetValue((float)(1 - ColourDrain * drained));
+        desaturate.Parameters["Brightness"].SetValue((float)(1 - LightDrain * drained));
 
         renderer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, desaturate,
             presentation.Transform);
@@ -273,8 +273,8 @@ internal abstract class TunnelEntryEffect(
     private double SeamCrossing(double throughTheTransition)
         => throughTheTransition < _seamReachesTheMiddle
             ? 0.5 * StretchedIn(throughTheTransition / _seamReachesTheMiddle)
-            : 0.5 + (0.5 * StretchedOut((throughTheTransition - _seamReachesTheMiddle) /
-                                        (1 - _seamReachesTheMiddle)));
+            : 0.5 + 0.5 * StretchedOut((throughTheTransition - _seamReachesTheMiddle) /
+                                       (1 - _seamReachesTheMiddle));
 
     /// <summary>
     ///     How far into the tunnel the picture is, from nought at both ends of the transition to
@@ -294,13 +294,13 @@ internal abstract class TunnelEntryEffect(
             return 0;
         }
 
-        var through = Math.Clamp(_frame / (double)_transitionFrames, 0, 1);
+        double through = Math.Clamp(_frame / (double)_transitionFrames, 0, 1);
 
         // A raised cosine rather than a parabola. Both peak in the middle, but a parabola leaves
         // nought at a slope - at 38 frames its first frame is already a third drained, which is a
         // jump rather than a fade - while this one leaves and arrives flat, so the drain starts
         // and finishes without a step.
-        var raisedCosine = (1 - Math.Cos(2 * Math.PI * through)) / 2;
+        double raisedCosine = (1 - Math.Cos(2 * Math.PI * through)) / 2;
 
         return Math.Pow(raisedCosine, DrainSpread);
     }
@@ -336,7 +336,7 @@ internal abstract class TunnelEntryEffect(
     {
         bleed = Math.Min(bleed, area.Width);
 
-        var solid = area.Width - bleed;
+        int solid = area.Width - bleed;
 
         DrawSlice(renderer, picture, area, pinnedToTheLeftEdge ? area.Left : area.Left + bleed, solid,
             ColourLevels.Full);
@@ -346,18 +346,18 @@ internal abstract class TunnelEntryEffect(
             return;
         }
 
-        var strip = Math.Max(1, bleed / BleedStrips);
+        int strip = Math.Max(1, bleed / BleedStrips);
 
         for (int step = 0; step * strip < bleed; step++)
         {
-            var into = step * strip;
+            int into = step * strip;
 
-            var x = pinnedToTheLeftEdge
+            int x = pinnedToTheLeftEdge
                 ? area.Right - bleed + into
                 : area.Left + bleed - into - strip;
 
             // Falls off across the band, so the edge itself is all but gone.
-            var fade = (int)(ColourLevels.Full * (1 - ((into + (strip / 2.0)) / bleed)));
+            int fade = (int)(ColourLevels.Full * (1 - (into + strip / 2.0) / bleed));
 
             DrawSlice(renderer, picture, area, x, strip, fade);
         }
@@ -375,9 +375,9 @@ internal abstract class TunnelEntryEffect(
             return;
         }
 
-        var sourceX = Math.Clamp((int)((x - across.X) / (double)across.Width * picture.Width), 0,
+        int sourceX = Math.Clamp((int)((x - across.X) / (double)across.Width * picture.Width), 0,
             picture.Width - 1);
-        var sourceWidth = (int)(width / (double)across.Width * picture.Width);
+        int sourceWidth = (int)(width / (double)across.Width * picture.Width);
 
         var source = new Rectangle(sourceX, 0, Math.Clamp(sourceWidth, 1, picture.Width - sourceX),
             picture.Height);
@@ -399,7 +399,7 @@ internal abstract class TunnelEntryEffect(
     ///     accelerates to exactly 1.
     /// </summary>
     private static double StretchedIn(double travelled)
-        => ((Stretch + 1) * travelled * travelled * travelled) - (Stretch * travelled * travelled);
+        => (Stretch + 1) * travelled * travelled * travelled - Stretch * travelled * travelled;
 
     /// <summary>
     ///     Arriving. The mirror of <see cref="StretchedIn" />: exactly 0 at the start, rises past 1
@@ -407,8 +407,8 @@ internal abstract class TunnelEntryEffect(
     /// </summary>
     private static double StretchedOut(double travelled)
     {
-        var overshot = travelled - 1;
+        double overshot = travelled - 1;
 
-        return 1 + ((Stretch + 1) * overshot * overshot * overshot) + (Stretch * overshot * overshot);
+        return 1 + (Stretch + 1) * overshot * overshot * overshot + Stretch * overshot * overshot;
     }
 }

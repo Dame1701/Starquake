@@ -107,7 +107,7 @@ internal static class TileRenderer
             return cached;
         }
 
-        var parsed = Geometry.Parse(MaterialIconDataProvider.GetData(icon));
+        Geometry parsed = Geometry.Parse(MaterialIconDataProvider.GetData(icon));
         IconGeometries[icon] = parsed;
 
         return parsed;

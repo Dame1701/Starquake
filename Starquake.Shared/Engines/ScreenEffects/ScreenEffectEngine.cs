@@ -19,6 +19,7 @@ internal class ScreenEffectEngine
     private readonly SpriteBatch _renderer;
     private readonly List<RenderViewPort> _renderViewPorts;
     private readonly List<ScreenEffectBase> _screenEffects;
+    private bool _haltBlobAndNastiesRequested;
 
 
     public ScreenEffectEngine(
@@ -44,7 +45,6 @@ internal class ScreenEffectEngine
         _renderer = new SpriteBatch(_graphicsDeviceManager.GraphicsDevice);
         _haltBlobAndNastiesRequested = false;
     }
-    private bool _haltBlobAndNastiesRequested;
 
     /// <summary>
     ///     Whether Blob and the nasties are being held still. Both that the caller asked for a

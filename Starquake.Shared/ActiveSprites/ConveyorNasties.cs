@@ -45,11 +45,11 @@ internal class ConveyorNasties(ResourceManager resources,
     /// <inheritdoc cref="SlowestMoveSpeed" />
     private const int FastestMoveSpeedExclusive = 3;
 
-    public event RaiseInteractionWithBlob? OnNastyInteractionWithBlob;
-
     public List<ConveyorNasty> Nasties { get; } = [];
 
     public int NastiesActive => gameScreens.GetCoordsOfTiles((int)MarkerTile.ConveyorNasty).Count;
+
+    public event RaiseInteractionWithBlob? OnNastyInteractionWithBlob;
 
     public void LoadContent()
     {
@@ -214,5 +214,4 @@ internal class ConveyorNasties(ResourceManager resources,
             }
         }
     }
-
 }

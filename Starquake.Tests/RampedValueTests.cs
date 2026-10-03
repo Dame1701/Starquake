@@ -83,7 +83,7 @@ public class RampedValueTests
         fading.Update();
 
         // Assert
-        Assert.Equal(ColourLevels.Full - (2 * TestData.FadeStep), fading.ColourLevel);
+        Assert.Equal(ColourLevels.Full - 2 * TestData.FadeStep, fading.ColourLevel);
     }
 
     [Fact]

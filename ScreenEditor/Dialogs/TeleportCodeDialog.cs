@@ -30,13 +30,13 @@ internal sealed record TeleportCodeChoice(string? Code);
 internal sealed class TeleportCodeDialog : Window
 {
 
+    private readonly Func<string, string?> _describeProblem;
+
     private readonly TextBox _entry;
 
     private readonly TextBlock _problem;
 
     private readonly Button _set;
-
-    private readonly Func<string, string?> _describeProblem;
 
     private TeleportCodeDialog(int screen, string? existing, Func<string, string?> describeProblem)
     {

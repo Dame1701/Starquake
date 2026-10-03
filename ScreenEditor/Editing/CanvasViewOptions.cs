@@ -22,9 +22,6 @@ namespace Starquake.ScreenEditor.Editing;
 /// </remarks>
 internal sealed class CanvasViewOptions : ViewModelBase
 {
-    private readonly Action _repaint;
-
-    public CanvasViewOptions(Action repaint) => _repaint = repaint;
 
     /// <summary>
     ///     The narrowest and widest a palette tile may be drawn, and the width a session opens at.
@@ -36,6 +33,12 @@ internal sealed class CanvasViewOptions : ViewModelBase
 
     /// <inheritdoc cref="NarrowestPaletteTile" />
     private const double DefaultPaletteTileWidth = 64;
+    private readonly Action _repaint;
+
+    public CanvasViewOptions(Action repaint)
+    {
+        _repaint = repaint;
+    }
 
     public bool ShowGrid
     {

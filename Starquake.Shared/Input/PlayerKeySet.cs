@@ -8,12 +8,12 @@ namespace Starquake.Input;
 
 internal class PlayerKeySet
 {
-    public Keys Up;
     public Keys Down;
-    public Keys Left;
-    public Keys Right;
     public Keys Fire;
+    public Keys Left;
 
     public Keys Pause;
     public Keys Quit;
+    public Keys Right;
+    public Keys Up;
 }

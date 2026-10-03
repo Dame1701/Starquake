@@ -6,6 +6,10 @@ namespace Starquake.Structure;
 
 internal class StartableGameComponentBase
 {
+
+    private volatile int _percentComplete;
+
+    private volatile GameEngineStatus _status;
     protected StartableGameComponentBase()
     {
         Status = GameEngineStatus.NotStarted;
@@ -31,10 +35,6 @@ internal class StartableGameComponentBase
     }
 
     public event RaiseEngineComponentStatusChanged? OnGameComponentStatusChanged;
-
-    private volatile int _percentComplete;
-
-    private volatile GameEngineStatus _status;
 
     protected void UpdateStatus(string statusMessage, int percentComplete, GameEngineStatus status)
     {

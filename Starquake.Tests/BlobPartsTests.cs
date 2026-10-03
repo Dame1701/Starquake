@@ -133,7 +133,7 @@ public class UnstickProbeTests
 
         public static int[,,] TileCollisionData()
         {
-            var data = new int[
+            int[,,] data = new int[
                 512,
                 TileMetrics.CollisionCellsAcrossTile,
                 TileMetrics.CollisionCellsDownTile];

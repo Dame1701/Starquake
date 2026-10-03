@@ -91,11 +91,140 @@ internal class MainGameScreen : IGameScreen
 
     private Guid _shakeRumbleSoundId = Guid.Empty;
 
+    private Guid _testRumbleSoundId;
+
+    public MainGameScreen(GameEngine gameEngineReference)
+    {
+        _gameEngine = gameEngineReference;
+
+        ScreenFade = ColourLevels.Full;
+    }
+
 
     private int ScreenFadeSpeed { get; set; }
 
 
     public int ScreenFade { get; set; }
+
+    /// <summary>
+    ///     Whether Blob is under the player's control. The intro sequence flies over the same
+    ///     screen before handing it over, and four separate blocks of this update used to spell that
+    ///     test out.
+    /// </summary>
+    private bool GameIsInPlay =>
+        !_gameEngine.IntroSequence.SequenceRunning ||
+        _gameEngine.IntroSequence.SequenceStage == IntroSequenceStage.EndPause;
+
+    /// <summary>
+    ///     Whether Blob's death is still playing out. Blob is revived the frame after he reaches
+    ///     <see cref="BlobState.Dead" />, so the animation's own state has to keep the routine alive
+    ///     while the explosion fades out - which is why this asks it as well as asking Blob.
+    /// </summary>
+    private bool DeathRoutineRunning
+        => _gameEngine.Player.BlobsState is BlobState.Dead or BlobState.Dying or BlobState.Overloading ||
+           _gameEngine.BlobKiller.Active;
+
+    /// <summary>
+    ///     Whether the world is on screen at all. It is hidden while the intro sequence's caption
+    ///     fades in and out over it.
+    /// </summary>
+    private bool WorldIsVisible =>
+        _gameEngine.IntroSequence.SequenceStage != IntroSequenceStage.CaptionFadeUp &&
+        _gameEngine.IntroSequence.SequenceStage != IntroSequenceStage.CaptionFadeDown;
+
+    public void Update(GameTime gameTime)
+    {
+        _framesPlayed++;
+
+        QuitToGameOverIfAsked();
+
+        HandleTestModeKeys();
+
+        if (GameIsInPlay)
+        {
+            FadeScreenBackUp();
+        }
+
+        _gameEngine.ScreenEffectEngine.Update();
+        _gameEngine.GameScreens.Update(
+            gameTime,
+            _gameEngine.Player.BlobXPos,
+            _gameEngine.Player.BlobYPos,
+            _gameEngine.Player.BlobInventory.Contains(Collectables.Key));
+
+        if (GameIsInPlay)
+        {
+            UpdateBlob(gameTime);
+        }
+
+        UpdateShipSmoke(gameTime);
+
+        if (GameIsInPlay)
+        {
+            UpdateWorld(gameTime);
+            EndGameIfOutOfLives();
+            ShakeScreen();
+        }
+
+        if (_gameEngine.IntroSequence.SequenceRunning ||
+            _gameEngine.IntroSequence.SequenceStage == IntroSequenceStage.Finished)
+        {
+            _gameEngine.IntroSequence.Update(gameTime);
+        }
+    }
+
+    public void Draw()
+    {
+        if (WorldIsVisible)
+        {
+            DrawBackground();
+
+            _gameEngine.ElectricityNodeGateEngine.Draw();
+
+            _gameEngine.GameScreens.Draw(
+                ColourHelper.WhiteFadedTo((byte)ScreenFade),
+                _gameEngine.IntroSequence.SequenceRunning, _gameEngine.IntroSequence.SequenceStage);
+
+
+            _gameEngine.BreakableBridgesEngine.Draw();
+
+            if (GameIsInPlay)
+            {
+                _gameEngine.Player.Draw(ScreenFade);
+            }
+
+            if (!_gameEngine.IntroSequence.SequenceRunning)
+            {
+                DrawBlobDeath();
+                DrawNasties();
+            }
+
+            DrawUpperGraphics();
+
+            _gameEngine.TunnelAnimations.Draw((byte)ScreenFade);
+
+            DrawShipSmoke1();
+
+            if (GameIsInPlay)
+            {
+                _gameEngine.GameScreens.DrawShadowing();
+            }
+
+            // Last, so Blob's sparks are in front of the shadows down the screen exits rather than
+            // under them.
+            _gameEngine.Player.DrawUpper(ScreenFade);
+        }
+
+        if (_gameEngine.GameScreens.ScreenNumber == _gameEngine.GameScreens.LandingSite.ScreenNumber)
+        {
+            _gameEngine.IntroSequence.Draw();
+        }
+
+        if (WorldIsVisible)
+        {
+            DrawShipSmoke2();
+        }
+    }
 
     public void PerformPostScreenChangeActions(GameScreenType triggeringScreen, ScreenChange change)
     {
@@ -184,13 +313,6 @@ internal class MainGameScreen : IGameScreen
         ScreenFadeSpeed = 12;
     }
 
-    public MainGameScreen(GameEngine gameEngineReference)
-    {
-        _gameEngine = gameEngineReference;
-
-        ScreenFade = ColourLevels.Full;
-    }
-
     public void LoadContent() => _gameEngine.Nasties.LoadContent();
 
     /// <summary>
@@ -210,58 +332,6 @@ internal class MainGameScreen : IGameScreen
 
         PerformPostScreenChangeActions(GameScreenType.None, new ScreenChange.KeepPicture());
     }
-
-    private Guid _testRumbleSoundId;
-
-    public void Update(GameTime gameTime)
-    {
-        _framesPlayed++;
-
-        QuitToGameOverIfAsked();
-
-        HandleTestModeKeys();
-
-        if (GameIsInPlay)
-        {
-            FadeScreenBackUp();
-        }
-
-        _gameEngine.ScreenEffectEngine.Update();
-        _gameEngine.GameScreens.Update(
-            gameTime,
-            _gameEngine.Player.BlobXPos,
-            _gameEngine.Player.BlobYPos,
-            _gameEngine.Player.BlobInventory.Contains(Collectables.Key));
-
-        if (GameIsInPlay)
-        {
-            UpdateBlob(gameTime);
-        }
-
-        UpdateShipSmoke(gameTime);
-
-        if (GameIsInPlay)
-        {
-            UpdateWorld(gameTime);
-            EndGameIfOutOfLives();
-            ShakeScreen();
-        }
-
-        if (_gameEngine.IntroSequence.SequenceRunning ||
-            _gameEngine.IntroSequence.SequenceStage == IntroSequenceStage.Finished)
-        {
-            _gameEngine.IntroSequence.Update(gameTime);
-        }
-    }
-
-    /// <summary>
-    ///     Whether Blob is under the player's control. The intro sequence flies over the same
-    ///     screen before handing it over, and four separate blocks of this update used to spell that
-    ///     test out.
-    /// </summary>
-    private bool GameIsInPlay =>
-        !_gameEngine.IntroSequence.SequenceRunning ||
-        _gameEngine.IntroSequence.SequenceStage == IntroSequenceStage.EndPause;
 
     /// <summary>
     ///     The player's quit key gives up the current game and goes to the game over screen. It
@@ -368,15 +438,6 @@ internal class MainGameScreen : IGameScreen
     }
 
     /// <summary>
-    ///     Whether Blob's death is still playing out. Blob is revived the frame after he reaches
-    ///     <see cref="BlobState.Dead" />, so the animation's own state has to keep the routine alive
-    ///     while the explosion fades out - which is why this asks it as well as asking Blob.
-    /// </summary>
-    private bool DeathRoutineRunning
-        => _gameEngine.Player.BlobsState is BlobState.Dead or BlobState.Dying or BlobState.Overloading ||
-           _gameEngine.BlobKiller.Active;
-
-    /// <summary>
     ///     The smoke from the wreck of Blob's ship, which only exists on the screen it crashed on.
     /// </summary>
     private void UpdateShipSmoke(GameTime gameTime)
@@ -471,67 +532,6 @@ internal class MainGameScreen : IGameScreen
     }
 
     /// <summary>
-    ///     Whether the world is on screen at all. It is hidden while the intro sequence's caption
-    ///     fades in and out over it.
-    /// </summary>
-    private bool WorldIsVisible =>
-        _gameEngine.IntroSequence.SequenceStage != IntroSequenceStage.CaptionFadeUp &&
-        _gameEngine.IntroSequence.SequenceStage != IntroSequenceStage.CaptionFadeDown;
-
-    public void Draw()
-    {
-        if (WorldIsVisible)
-        {
-            DrawBackground();
-
-            _gameEngine.ElectricityNodeGateEngine.Draw();
-
-            _gameEngine.GameScreens.Draw(
-                ColourHelper.WhiteFadedTo((byte)ScreenFade),
-                _gameEngine.IntroSequence.SequenceRunning, _gameEngine.IntroSequence.SequenceStage);
-
-
-            _gameEngine.BreakableBridgesEngine.Draw();
-
-            if (GameIsInPlay)
-            {
-                _gameEngine.Player.Draw(ScreenFade);
-            }
-
-            if (!_gameEngine.IntroSequence.SequenceRunning)
-            {
-                DrawBlobDeath();
-                DrawNasties();
-            }
-
-            DrawUpperGraphics();
-
-            _gameEngine.TunnelAnimations.Draw((byte)ScreenFade);
-
-            DrawShipSmoke1();
-
-            if (GameIsInPlay)
-            {
-                _gameEngine.GameScreens.DrawShadowing();
-            }
-
-            // Last, so Blob's sparks are in front of the shadows down the screen exits rather than
-            // under them.
-            _gameEngine.Player.DrawUpper(ScreenFade);
-        }
-
-        if (_gameEngine.GameScreens.ScreenNumber == _gameEngine.GameScreens.LandingSite.ScreenNumber)
-        {
-            _gameEngine.IntroSequence.Draw();
-        }
-
-        if (WorldIsVisible)
-        {
-            DrawShipSmoke2();
-        }
-    }
-
-    /// <summary>
     ///     The planet behind the scenery, in two layers shifted sideways by different amounts per
     ///     screen so that walking along a row reads as travelling across it. Both move with the column
     ///     only, which is deliberate: going up or down a row leaves them where they were.
@@ -545,8 +545,12 @@ internal class MainGameScreen : IGameScreen
     ///         exposes an edge. That inset is what sets the ceiling on the step.
     ///     </para>
     ///     <para>
-    ///         The fades are worked out in floating point. Written as <c>BackgroundOpacity /
-    ///         ColourLevels.Full * ScreenFade</c> it was an integer division of 150 by 255, which is 0 -
+    ///         The fades are worked out in floating point. Written as
+    ///         <c>
+    ///             BackgroundOpacity /
+    ///             ColourLevels.Full * ScreenFade
+    ///         </c>
+    ///         it was an integer division of 150 by 255, which is 0 -
     ///         so the planet was drawn on every frame at an alpha of nothing, and had been since the
     ///         first commit in the repository. <see cref="ColourHelper.GetXna4Colour(int,int,int,int)" /> had the right
     ///         of it all along.

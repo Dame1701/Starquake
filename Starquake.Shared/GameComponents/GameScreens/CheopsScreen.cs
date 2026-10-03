@@ -34,23 +34,6 @@ internal class CheopsScreen : IGameScreen
     private const int ElementsOnOffer = 5;
 
     /// <summary>
-    ///     The key that takes each offered element, in the order they are drawn.
-    /// </summary>
-    private static readonly Keys[] SelectionKeys = [Keys.D1, Keys.D2, Keys.D3, Keys.D4, Keys.D5];
-
-    private readonly Blob _blob;
-    private readonly CoreElements _elements;
-    private readonly BitmapFont _font;
-    private readonly GameScreenCollection _gameScreens;
-    private readonly GraphicsSet _graphicsSet;
-    private readonly Random _randomNumberGenerator;
-    private readonly ResourceManager _resources;
-    private readonly ScreenDirectory _screenDirectory;
-    private readonly Shapes _shapeDrawer;
-    private readonly ToggleKeys _input;
-    private readonly StatusPanel _statusPanel;
-
-    /// <summary>
     ///     How long the result is left on screen before the game moves on, in logic frames - one
     ///     second. It was a DateTime compared against DateTime.Now, which is local time: a DST step
     ///     or an NTP correction landing in that second turned the pause into an hour.
@@ -69,20 +52,37 @@ internal class CheopsScreen : IGameScreen
     private const int DigitsInCode = 2;
 
     /// <summary>
+    ///     The key that takes each offered element, in the order they are drawn.
+    /// </summary>
+    private static readonly Keys[] SelectionKeys = [Keys.D1, Keys.D2, Keys.D3, Keys.D4, Keys.D5];
+    private readonly KeyScanner[] _accessCodes;
+
+    private readonly Blob _blob;
+    private readonly CoreElements _elements;
+    private readonly BitmapFont _font;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly ToggleKeys _input;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
+    private readonly ScreenDirectory _screenDirectory;
+    private readonly Shapes _shapeDrawer;
+    private readonly StatusPanel _statusPanel;
+    private int[] _accessCode = [];
+    private bool _elementSelectionMode;
+
+    private InteractiveItem[] _itemsToSelect = [];
+    private int _itemToSwap;
+
+    private int _resultMessageFade;
+
+    /// <summary>
     ///     Which slot each scanner reads, and whether the pyramid is satisfied. Replaced whole by
     ///     <see cref="CheckInventoryAgainstCode" /> rather than written into a digit at a time.
     /// </summary>
     private AccessCodeScan _scan = new([], false);
-
-    private int _resultMessageFade;
-    private int[] _accessCode = [];
-    private readonly KeyScanner[] _accessCodes;
     private int _screenReadWaitFrames = ScreenReadNotWaiting;
-    private bool _elementSelectionMode;
     private bool _soundPlayed;
-
-    private InteractiveItem[] _itemsToSelect = [];
-    private int _itemToSwap;
 
 
     public CheopsScreen(
@@ -118,6 +118,62 @@ internal class CheopsScreen : IGameScreen
         }
 
         Reset();
+    }
+
+
+    public void Update(GameTime gameTime)
+    {
+        _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.MachineryBackground, 0.5f, true);
+
+        if (!_elementSelectionMode)
+        {
+            KeyScanner.ScanCodeInTurn(_accessCodes, _scan, _statusPanel);
+
+            _resultMessageFade = _randomNumberGenerator.Next(200, 256);
+        }
+
+        if (_screenReadWaitFrames >= 0)
+        {
+            _screenReadWaitFrames++;
+
+            if (_screenReadWaitFrames > ScreenReadWaitFrames)
+            {
+                if (_scan.Accepted) // move into selection mode
+                {
+                    _elementSelectionMode = true;
+                }
+                else // Kick you out
+                {
+                    _screenDirectory.MainGame.ScreenFade = 40;
+                    _screenDirectory.Current = GameScreenType.MainGame;
+                }
+            }
+        }
+
+        AnnounceScanResult();
+
+        if (_elementSelectionMode)
+        {
+            TakeChosenElement();
+        }
+    }
+
+    public void Draw()
+    {
+        _font.Begin(BlendState.AlphaBlend);
+        _font.WriteText(298, 100, "CHEOPS PYRAMID", 2, Color.White, ColourLevels.Full);
+        _font.End();
+
+        DrawPyramid();
+
+        if (_elementSelectionMode)
+        {
+            DrawElementSelection();
+        }
+        else
+        {
+            DrawElementsOnOffer();
+        }
     }
 
     public void Reset()
@@ -253,44 +309,6 @@ internal class CheopsScreen : IGameScreen
         }
     }
 
-
-    public void Update(GameTime gameTime)
-    {
-        _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.MachineryBackground, 0.5f, true);
-
-        if (!_elementSelectionMode)
-        {
-            KeyScanner.ScanCodeInTurn(_accessCodes, _scan, _statusPanel);
-
-            _resultMessageFade = _randomNumberGenerator.Next(200, 256);
-        }
-
-        if (_screenReadWaitFrames >= 0)
-        {
-            _screenReadWaitFrames++;
-
-            if (_screenReadWaitFrames > ScreenReadWaitFrames)
-            {
-                if (_scan.Accepted) // move into selection mode
-                {
-                    _elementSelectionMode = true;
-                }
-                else // Kick you out
-                {
-                    _screenDirectory.MainGame.ScreenFade = 40;
-                    _screenDirectory.Current = GameScreenType.MainGame;
-                }
-            }
-        }
-
-        AnnounceScanResult();
-
-        if (_elementSelectionMode)
-        {
-            TakeChosenElement();
-        }
-    }
-
     /// <summary>
     ///     The swap itself, once the player has pressed one of the five number keys: the chosen
     ///     element replaces what Blob was giving up, the pyramid is spent, and the game resumes.
@@ -346,24 +364,6 @@ internal class CheopsScreen : IGameScreen
 
         _soundPlayed = true;
         _screenReadWaitFrames = 0;
-    }
-
-    public void Draw()
-    {
-        _font.Begin(BlendState.AlphaBlend);
-        _font.WriteText(298, 100, "CHEOPS PYRAMID", 2, Color.White, ColourLevels.Full);
-        _font.End();
-
-        DrawPyramid();
-
-        if (_elementSelectionMode)
-        {
-            DrawElementSelection();
-        }
-        else
-        {
-            DrawElementsOnOffer();
-        }
     }
 
     private void DrawPyramid()

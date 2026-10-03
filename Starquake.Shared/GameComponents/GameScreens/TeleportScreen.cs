@@ -19,15 +19,6 @@ namespace Starquake.GameComponents.GameScreens;
 
 internal class TeleportScreen : IGameScreen
 {
-    private readonly Blob _blob;
-    private readonly BitmapFont _font;
-    private readonly GameScreenCollection _gameScreens;
-    private readonly GraphicsSet _graphicsSet;
-    private readonly PresentationSettings _presentation;
-    private readonly ResourceManager _resources;
-    private readonly ScreenDirectory _screenDirectory;
-    private readonly Shapes _shapeDrawer;
-    private readonly ToggleKeys _input;
 
     /// <summary>
     ///     The destination code as typed so far, one underscore per letter still to be entered.
@@ -40,23 +31,54 @@ internal class TeleportScreen : IGameScreen
     /// </summary>
     private const int ScreenFadeOutStep = 3;
 
-    private string? _teleportCode;
-    private string _currentCode = EmptyCode;
-    private string _previousCode = string.Empty;
-    private bool _keyPressed;
-    private int _keyIdPressed;
-    private bool _attemptingTeleport;
-    private bool _codeRecognised;
-    private int _teleportCounter;
-    private int _oldOffsetX;
-    private int _oldOffsetY;
+    /// <summary>
+    ///     Where each key of the teleporter's keypad sits on the screen, indexed by the same number as
+    ///     its overlay sprite. Three rows with gaps in them, so a list rather than a grid.
+    /// </summary>
+    private static readonly Point[] KeyHighlightPositions =
+    [
+        new(778, 426),
+        new(809, 426),
+        new(838, 426),
+        new(888, 426),
+        new(920, 426),
+        new(950, 426),
+        new(766, 452),
+        new(796, 452),
+        new(826, 452),
+        new(903, 452),
+        new(934, 452),
+        new(964, 452),
+        new(780, 480),
+        new(811, 480),
+        new(919, 480),
+        new(951, 480)
+    ];
+    private readonly Blob _blob;
+    private readonly BitmapFont _font;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly ToggleKeys _input;
 
     private readonly FaderAnimation[] _keyFades;
     private readonly FaderAnimation _powerSupplyFader;
+    private readonly PresentationSettings _presentation;
+    private readonly ResourceManager _resources;
+    private readonly ScreenDirectory _screenDirectory;
+    private readonly Shapes _shapeDrawer;
 
     private readonly FaderAnimation _teleportingMessageFader;
+    private bool _attemptingTeleport;
+    private bool _codeRecognised;
+    private string _currentCode = EmptyCode;
+    private int _keyIdPressed;
+    private bool _keyPressed;
+    private int _oldOffsetX;
+    private int _oldOffsetY;
+    private string _previousCode = string.Empty;
 
-    public int ScreenFade { get; set; }
+    private string? _teleportCode;
+    private int _teleportCounter;
 
     public TeleportScreen(
         ResourceManager resources,
@@ -90,20 +112,7 @@ internal class TeleportScreen : IGameScreen
         }
     }
 
-    public void Reset()
-    {
-        _currentCode = EmptyCode;
-
-        _keyPressed = false;
-        _keyIdPressed = 0;
-        _attemptingTeleport = false;
-        _codeRecognised = false;
-        _teleportCounter = 0;
-        ScreenFade = ColourLevels.Full;
-
-        _oldOffsetX = _presentation.ScreenXOffset;
-        _oldOffsetY = _presentation.ScreenYOffset;
-    }
+    public int ScreenFade { get; set; }
 
     public void Update(GameTime gameTime)
     {
@@ -142,6 +151,31 @@ internal class TeleportScreen : IGameScreen
         {
             _previousCode = _teleportCode ?? string.Empty;
         }
+    }
+
+    public void Draw()
+    {
+        DrawInteriorLowerLayer();
+        DrawTeleportPad();
+        DrawConsoleText();
+        DrawInteriorUpperLayer();
+        DrawKeyHighlights();
+        DrawPowerSupply();
+    }
+
+    public void Reset()
+    {
+        _currentCode = EmptyCode;
+
+        _keyPressed = false;
+        _keyIdPressed = 0;
+        _attemptingTeleport = false;
+        _codeRecognised = false;
+        _teleportCounter = 0;
+        ScreenFade = ColourLevels.Full;
+
+        _oldOffsetX = _presentation.ScreenXOffset;
+        _oldOffsetY = _presentation.ScreenYOffset;
     }
 
     /// <summary>
@@ -272,40 +306,6 @@ internal class TeleportScreen : IGameScreen
 
         _blob.BlobXPos = booths[0].X + BoothMetrics.BlobXOffset;
         _blob.BlobYPos = booths[0].Y + BoothMetrics.BlobYOffset;
-    }
-
-    /// <summary>
-    ///     Where each key of the teleporter's keypad sits on the screen, indexed by the same number as
-    ///     its overlay sprite. Three rows with gaps in them, so a list rather than a grid.
-    /// </summary>
-    private static readonly Point[] KeyHighlightPositions =
-    [
-        new(778, 426),
-        new(809, 426),
-        new(838, 426),
-        new(888, 426),
-        new(920, 426),
-        new(950, 426),
-        new(766, 452),
-        new(796, 452),
-        new(826, 452),
-        new(903, 452),
-        new(934, 452),
-        new(964, 452),
-        new(780, 480),
-        new(811, 480),
-        new(919, 480),
-        new(951, 480)
-    ];
-
-    public void Draw()
-    {
-        DrawInteriorLowerLayer();
-        DrawTeleportPad();
-        DrawConsoleText();
-        DrawInteriorUpperLayer();
-        DrawKeyHighlights();
-        DrawPowerSupply();
     }
 
     private void DrawInteriorLowerLayer()
@@ -451,5 +451,4 @@ internal class TeleportScreen : IGameScreen
         teleporterPowerSupply.DrawSprite(0, 754, 6, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (int)(_powerSupplyFader.FadeLevel * ((double)ScreenFade / ColourLevels.Full))));
         teleporterPowerSupply.End();
     }
-
 }

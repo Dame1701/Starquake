@@ -53,15 +53,15 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     private const int NastiesPerScreen = 4;
     private readonly ContentManager _contentMgr;
-    public readonly ResourceManager ContentResourceManager;
 
     private readonly GraphicsDeviceManager _graphicsDeviceMgr;
 
     /// <summary>
-    ///     The host's window. Held only to hand to <see cref="GlobalHotkeys" />, which has to drop
-    ///     the window's border when it goes fullscreen; nothing else in the engine touches it.
+    ///     Which of the two sets of artwork the game is drawn with, and the sheet names that go
+    ///     with it. Switched by <c>GlobalHotkeys.SwitchGraphicsSetIfAsked</c>; read live by
+    ///     everything that draws.
     /// </summary>
-    private readonly GameWindow _window;
+    private readonly GraphicsSet _graphicsSet = new();
 
     /// <summary>
     ///     Closes the game. The host's <c>Exit</c>, held only to hand to
@@ -71,11 +71,11 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     private readonly Action _quitGame;
 
     /// <summary>
-    ///     Which of the two sets of artwork the game is drawn with, and the sheet names that go
-    ///     with it. Switched by <c>GlobalHotkeys.SwitchGraphicsSetIfAsked</c>; read live by
-    ///     everything that draws.
+    ///     The host's window. Held only to hand to <see cref="GlobalHotkeys" />, which has to drop
+    ///     the window's border when it goes fullscreen; nothing else in the engine touches it.
     /// </summary>
-    private readonly GraphicsSet _graphicsSet = new();
+    private readonly GameWindow _window;
+    public readonly ResourceManager ContentResourceManager;
 
     /// <summary>
     ///     How the composed picture is put on the screen - the transform onto the back buffer, the
@@ -90,16 +90,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     public readonly ScreenDirectory ScreenDirectory = new();
 
-    /// <summary>
-    ///     The boot screen. Built before anything else, because it is what is on screen while
-    ///     everything else is being loaded.
-    /// </summary>
-    private LoadingScreen _loadingScreen;
-
-    /// <summary>
-    ///     The four keys that work anywhere. Built once the game can act on them.
-    /// </summary>
-    private GlobalHotkeys _hotkeys;
+    private bool _disposed;
 
     /// <summary>
     ///     The game itself, once content has loaded. Null until then, which is what
@@ -108,11 +99,15 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     private RunningGame? _game;
 
     /// <summary>
-    ///     The debug keys, in a debug build. Null in a release one, which never builds it.
+    ///     The four keys that work anywhere. Built once the game can act on them.
     /// </summary>
-    private TestModeKeys? _testModeKeys;
+    private GlobalHotkeys _hotkeys;
 
-    private bool _disposed;
+    /// <summary>
+    ///     The boot screen. Built before anything else, because it is what is on screen while
+    ///     everything else is being loaded.
+    /// </summary>
+    private LoadingScreen _loadingScreen;
 
     private bool _particleTestTrigger;
 
@@ -125,17 +120,15 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     private ScreenEffectEngine _screenEffectEngine;
 
     /// <summary>
+    ///     The debug keys, in a debug build. Null in a release one, which never builds it.
+    /// </summary>
+    private TestModeKeys? _testModeKeys;
+
+    /// <summary>
     ///     The panel above the playfield. Drawn and updated only while
     ///     <see cref="ScreenDirectory.InPlay" />.
     /// </summary>
     public StatusPanel BlobStatusPanel;
-
-    /// <summary>
-    ///     The player's score, lives and supplies. Held here beside the panel that draws them rather
-    ///     than inside it, because most of the game reads and writes these and only one class draws
-    ///     them.
-    /// </summary>
-    public PlayerStats Stats;
 
     /// <summary>
     ///     The nine elements the core is missing, and what Blob has done about them.
@@ -155,6 +148,13 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     ///     colour rather than a sprite.
     /// </summary>
     public Shapes ShapeDrawer;
+
+    /// <summary>
+    ///     The player's score, lives and supplies. Held here beside the panel that draws them rather
+    ///     than inside it, because most of the game reads and writes these and only one class draws
+    ///     them.
+    /// </summary>
+    public PlayerStats Stats;
 
     public GameEngine(
         GraphicsDeviceManager graphics,

@@ -17,22 +17,6 @@ namespace Starquake.GameComponents.GameScreens;
 
 internal class AccessBoothScreen : IGameScreen
 {
-    private int[] _accessCode = [];
-
-    private readonly KeyScanner[] _accessCodes;
-    private readonly Blob _blob;
-
-    private readonly BlobAccessBoothAnim _blobAnim1;
-    private readonly BlobAccessBoothAnim _blobAnim2;
-    private readonly BitmapFont _font;
-    private readonly GameScreenCollection _gameScreens;
-    private readonly GraphicsSet _graphicsSet;
-    private readonly Random _randomNumberGenerator;
-    private readonly ResourceManager _resources;
-    private readonly ScreenDirectory _screenDirectory;
-    private readonly Shapes _shapeDrawer;
-    private readonly StatusPanel _statusPanel;
-
     /// <summary>
     ///     How long the result is left on screen before the game moves on, in logic frames - one
     ///     second. It was a DateTime compared against DateTime.Now, which is local time: a DST step
@@ -51,7 +35,28 @@ internal class AccessBoothScreen : IGameScreen
     /// </summary>
     private const int DigitsInCode = 3;
 
+    private readonly KeyScanner[] _accessCodes;
+    private readonly Blob _blob;
+
+    private readonly BlobAccessBoothAnim _blobAnim1;
+    private readonly BlobAccessBoothAnim _blobAnim2;
+    private readonly BitmapFont _font;
+    private readonly GameScreenCollection _gameScreens;
+    private readonly GraphicsSet _graphicsSet;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
+    private readonly ScreenDirectory _screenDirectory;
+    private readonly Shapes _shapeDrawer;
+    private readonly StatusPanel _statusPanel;
+    private int[] _accessCode = [];
+
     private int _resultMessageFade;
+
+    /// <summary>
+    ///     Which slot each scanner reads, and whether the booth is satisfied. Replaced whole by
+    ///     <see cref="CheckInventoryAgainstCode" /> rather than written into a digit at a time.
+    /// </summary>
+    private AccessCodeScan _scan = new([], false);
     private int _screenReadWaitFrames = ScreenReadNotWaiting;
     private bool _soundPlayed;
 
@@ -97,12 +102,6 @@ internal class AccessBoothScreen : IGameScreen
     /// </summary>
     private bool Success => _scan.Accepted;
 
-    /// <summary>
-    ///     Which slot each scanner reads, and whether the booth is satisfied. Replaced whole by
-    ///     <see cref="CheckInventoryAgainstCode" /> rather than written into a digit at a time.
-    /// </summary>
-    private AccessCodeScan _scan = new([], false);
-
     public void Update(GameTime gameTime)
     {
         _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.MachineryBackground, 0.5f, true);
@@ -130,31 +129,6 @@ internal class AccessBoothScreen : IGameScreen
         AnnounceScanResult();
     }
 
-    /// <summary>
-    ///     The booth's verdict, once all three scanners have read: the sound, and the start of the
-    ///     wait that sends Blob back to the game. Done last so the wait is a whole
-    ///     <see cref="ScreenReadWaitFrames" /> long rather than one frame short of it.
-    /// </summary>
-    /// <remarks>
-    ///     This was <see cref="DrawScanResult" />'s job, which meant the sound was asked for once per
-    ///     drawn frame and needed a latch to stop it playing sixty times a second. Both belong on the
-    ///     logic clock: the wait is counted in logic frames, so starting it from a draw tied the
-    ///     length of the pause to the display's refresh rate.
-    /// </remarks>
-    private void AnnounceScanResult()
-    {
-        if (!_accessCodes[2].Scanned || _soundPlayed)
-        {
-            return;
-        }
-
-        _resources.GetSoundFxEngine()
-            .PlaySound(Success ? Assets.Sounds.AccessSuccess : Assets.Sounds.AccessFailed, 1f, false);
-
-        _soundPlayed = true;
-        _screenReadWaitFrames = 0;
-    }
-
     public void Draw()
     {
         _font.Begin(BlendState.AlphaBlend);
@@ -178,6 +152,31 @@ internal class AccessBoothScreen : IGameScreen
         {
             DrawScanResult();
         }
+    }
+
+    /// <summary>
+    ///     The booth's verdict, once all three scanners have read: the sound, and the start of the
+    ///     wait that sends Blob back to the game. Done last so the wait is a whole
+    ///     <see cref="ScreenReadWaitFrames" /> long rather than one frame short of it.
+    /// </summary>
+    /// <remarks>
+    ///     This was <see cref="DrawScanResult" />'s job, which meant the sound was asked for once per
+    ///     drawn frame and needed a latch to stop it playing sixty times a second. Both belong on the
+    ///     logic clock: the wait is counted in logic frames, so starting it from a draw tied the
+    ///     length of the pause to the display's refresh rate.
+    /// </remarks>
+    private void AnnounceScanResult()
+    {
+        if (!_accessCodes[2].Scanned || _soundPlayed)
+        {
+            return;
+        }
+
+        _resources.GetSoundFxEngine()
+            .PlaySound(Success ? Assets.Sounds.AccessSuccess : Assets.Sounds.AccessFailed, 1f, false);
+
+        _soundPlayed = true;
+        _screenReadWaitFrames = 0;
     }
 
     private void DrawBoothDoors()

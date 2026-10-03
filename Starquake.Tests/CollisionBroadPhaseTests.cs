@@ -49,7 +49,7 @@ public class CollisionBroadPhaseTests
 
         for (int step = 1; step <= velocity; step++)
         {
-            if (CollisionDetection.Check(obj1X + (stepX * step), obj1Y + (stepY * step), obj1W, obj1H,
+            if (CollisionDetection.Check(obj1X + stepX * step, obj1Y + stepY * step, obj1W, obj1H,
                     obj2X, obj2Y, obj2W, obj2H))
             {
                 break;

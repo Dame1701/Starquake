@@ -124,7 +124,7 @@ internal class ResourceManager : StartableGameComponentBase
     /// </summary>
     public void ThrowIfLoadFailed()
     {
-        var failure = _loadFailure;
+        Exception? failure = _loadFailure;
 
         if (failure != null)
         {

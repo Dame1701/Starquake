@@ -77,9 +77,9 @@ public readonly record struct MarkerPlacement(int ScreenNumber, int TileX, int T
 public static class MarkerTiles
 {
 
-    public static IReadOnlyList<MarkerTile> All { get; } = Enum.GetValues<MarkerTile>();
-
     private static readonly HashSet<int> Numbers = BuildNumbers();
+
+    public static IReadOnlyList<MarkerTile> All { get; } = Enum.GetValues<MarkerTile>();
 
     /// <summary>
     ///     Whether there is meant to be exactly one of a marker on the whole planet. The landing site

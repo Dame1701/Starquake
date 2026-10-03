@@ -22,11 +22,11 @@ internal class BlobDeathAnimation
     private static readonly int[] FragmentSpriteNumbers = [0, 1, 1, 2, 3, 5];
 
     private readonly Animation _blobDeathParticlesOriginal;
+    private readonly List<BouncingParticle> _bouncingParticles;
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsSet _graphicsSet;
     private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
-    private readonly List<BouncingParticle> _bouncingParticles;
 
     private IPositionalTriggerParticleEffect? _blobFragmentBounceSparks;
     private bool _drawBlobParts;

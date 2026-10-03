@@ -42,6 +42,11 @@ internal class Nasties
 
     /// <inheritdoc cref="ElectricityArcWidth" />
     private const int ElectricityArcHeight = TileMetrics.CollisionCellHeight;
+
+    /// <summary>
+    ///     One screen in this many is populated with a single kind of nasty instead of a mixture.
+    /// </summary>
+    private const int SameNastyScreenOdds = 4;
     private readonly Blob _blob;
     private readonly ConveyorNasties _conveyorNasties;
     private readonly ElectricityGatesAndNodesEngine _electricityNodeGates;
@@ -302,11 +307,6 @@ internal class Nasties
     }
 
     /// <summary>
-    ///     One screen in this many is populated with a single kind of nasty instead of a mixture.
-    /// </summary>
-    private const int SameNastyScreenOdds = 4;
-
-    /// <summary>
     ///     Hands the screen's nasties over on a screen change. Walking back the way you came gets the
     ///     same nasties you left, kept in the second half of the array; going anywhere else gets a
     ///     fresh batch and puts the ones you left behind into that half.
@@ -413,5 +413,4 @@ internal class Nasties
             _nastySmokes.Draw(screenFade);
         }
     }
-
 }

@@ -59,7 +59,7 @@ public class GateFreeScreensTests
     public void Find_ADoorSealingTheOnlyWayThrough_StrandsWhatIsBehindIt()
     {
         // Arrange - a corridor of screens, with a door shutting the one on the far side off
-        GameScreenData[] world = TestData.CorridorWorld(gateScreen: 9, gate: ActionTiles.AccessForceField);
+        GameScreenData[] world = TestData.CorridorWorld(9, ActionTiles.AccessForceField);
 
         // Act
         HashSet<int> reached = GateFreeScreens.Find(world, TestData.MapFor(world), Gate.KeyDoor);
@@ -75,7 +75,7 @@ public class GateFreeScreensTests
     public void Find_AnAccessBoothSealingTheOnlyWayThrough_StrandsWhatIsBehindIt()
     {
         // Arrange
-        GameScreenData[] world = TestData.CorridorWorld(gateScreen: 9, gate: ActionTiles.AccessBoothLeft);
+        GameScreenData[] world = TestData.CorridorWorld(9, ActionTiles.AccessBoothLeft);
 
         // Act
         HashSet<int> reached = GateFreeScreens.Find(world, TestData.MapFor(world), Gate.AccessBooth);
@@ -93,7 +93,7 @@ public class GateFreeScreensTests
     public void Find_ADoor_DoesNotStandInTheWayOfTheAccessCard()
     {
         // Arrange
-        GameScreenData[] world = TestData.CorridorWorld(gateScreen: 9, gate: ActionTiles.AccessForceField);
+        GameScreenData[] world = TestData.CorridorWorld(9, ActionTiles.AccessForceField);
 
         // Act
         HashSet<int> reached = GateFreeScreens.Find(world, TestData.MapFor(world), Gate.AccessBooth);
@@ -107,7 +107,7 @@ public class GateFreeScreensTests
     public void Find_AnAccessBooth_DoesNotStandInTheWayOfTheKey()
     {
         // Arrange
-        GameScreenData[] world = TestData.CorridorWorld(gateScreen: 9, gate: ActionTiles.AccessBoothLeft);
+        GameScreenData[] world = TestData.CorridorWorld(9, ActionTiles.AccessBoothLeft);
 
         // Act
         HashSet<int> reached = GateFreeScreens.Find(world, TestData.MapFor(world), Gate.KeyDoor);
@@ -125,7 +125,7 @@ public class GateFreeScreensTests
     public void Find_AScreenWithADoorOnIt_IsItselfStillReachable()
     {
         // Arrange
-        GameScreenData[] world = TestData.CorridorWorld(gateScreen: 9, gate: ActionTiles.AccessForceField);
+        GameScreenData[] world = TestData.CorridorWorld(9, ActionTiles.AccessForceField);
 
         // Act
         HashSet<int> reached = GateFreeScreens.Find(world, TestData.MapFor(world), Gate.KeyDoor);
@@ -169,8 +169,8 @@ public class GateFreeScreensTests
         // Arrange - a door on the screen that follows the end of a row, which a grid model would place
         // at the far side of the map rather than next door
         GameScreenData[] world = TestData.CorridorWorld(
-            gateScreen: WorldMap.ScreensAcross,
-            gate: ActionTiles.AccessForceField);
+            WorldMap.ScreensAcross,
+            ActionTiles.AccessForceField);
 
         // Act
         HashSet<int> reached = GateFreeScreens.Find(world, TestData.MapFor(world), Gate.KeyDoor);
@@ -276,7 +276,7 @@ public class GateFreeScreensTests
         /// </summary>
         private static int[,,] CollisionData()
         {
-            var data = new int[
+            int[,,] data = new int[
                 512,
                 TileMetrics.CollisionCellsAcrossTile,
                 TileMetrics.CollisionCellsDownTile];

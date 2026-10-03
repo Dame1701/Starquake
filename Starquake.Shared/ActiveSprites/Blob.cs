@@ -164,13 +164,20 @@ internal class Blob
 
     private readonly IStandardParticleEffect _blobTeleporterBeam;
     private readonly BreakableBridges _breakableBridges;
+    private readonly BlobEntryPoint _entryPoint = new();
+    private readonly BlobFall _fall = new();
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsSet _graphicsSet;
+    private readonly Inventory _inventory;
+    private readonly TunnelLift _lift;
+    private readonly BlobOverload _overload = new();
     private readonly ResourceManager _resources;
     private readonly ScreenDirectory _screenDirectory;
     private readonly ScreenEffectEngine _screenEffects;
+    private readonly Shuttle _shuttle = new();
     private readonly PlayerStats _stats;
     private readonly List<ResetTile> _tilesToReset = [];
+    private readonly UnstickProbe _unstickProbe;
 
 
     private int _blobEnergyDrainCounter;
@@ -188,13 +195,6 @@ internal class Blob
     private int _blobYPos;
 
     private Direction _directionGoingThroughTunnel = Direction.None;
-    private readonly BlobFall _fall = new();
-    private readonly BlobEntryPoint _entryPoint = new();
-    private readonly BlobOverload _overload = new();
-    private readonly Shuttle _shuttle = new();
-    private readonly TunnelLift _lift;
-    private readonly Inventory _inventory;
-    private readonly UnstickProbe _unstickProbe;
 
     private bool _inventoryAccessed;
 
@@ -202,14 +202,14 @@ internal class Blob
     private bool _resetBlobToScreenEntryPoint;
     private bool _startBlobTeleporting;
 
-    private int _teleportFadeLevel;
-
     /// <summary>
     ///     The last reading of what is around him. A field rather than a local because the shuttle pad
     ///     is acted on at the start of the frame after the one that detected it - see
     ///     <see cref="UpdateNormalState" />.
     /// </summary>
     private BlobSurroundings _surroundings;
+
+    private int _teleportFadeLevel;
 
     public Blob(
         ResourceManager resources,
@@ -316,9 +316,9 @@ internal class Blob
 
     public int BlobFrame { get; set; } = BlobRestingFrame;
 
-    private int BlobHSpeed { get; set; } = BlobWalkSpeed;
+    private int BlobHSpeed { get; } = BlobWalkSpeed;
 
-    private int BlobVSpeed { get; set; } = BlobWalkSpeed;
+    private int BlobVSpeed { get; } = BlobWalkSpeed;
 
     /// <summary>
     ///     The lazer. A nasty asks it whether a shot is in flight and where it is, and tells it when it
@@ -743,7 +743,7 @@ internal class Blob
             return;
         }
 
-        var fall = _fall.Step(
+        Fall fall = _fall.Step(
             _gameScreens.Collisions,
             new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight),
             BlobsControl.MovedLeft(),

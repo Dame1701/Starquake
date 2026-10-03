@@ -77,6 +77,12 @@ internal class IntroSequence
     private readonly ResourceManager _resources;
     private readonly ScreenDirectory _screenDirectory;
     private readonly ScreenEffectEngine _screenEffects;
+
+    /// <summary>
+    ///     The ship's fall, replaced whole at the start of each sequence. Where it comes in, where
+    ///     it is going and how fast it is dropping are all its own.
+    /// </summary>
+    private ShipDescent _descent = new(Point.Zero);
     private int _endPauseFrameCounter;
 
     private int _preFadeOutPauseCounter;
@@ -86,8 +92,6 @@ internal class IntroSequence
 
     private Guid _shipExplosionSound = Guid.Empty;
 
-    private float _shipRotationSpeed;
-
     /// <summary>
     ///     Which way round the ship is drawn, in degrees. Held here and handed to all four sheets the
     ///     ship is composed from, so they turn together: each sheet used to keep its own angle and
@@ -96,19 +100,9 @@ internal class IntroSequence
     /// </summary>
     private float _shipRotation;
 
+    private float _shipRotationSpeed;
+
     private int _startPauseCounter;
-
-    /// <summary>
-    ///     Whether the crash is still playing. The game reads it to know whether to let Blob move,
-    ///     and the sequence is the only thing that sets it.
-    /// </summary>
-    public bool SequenceRunning { get; private set; }
-
-    /// <summary>
-    ///     The ship's fall, replaced whole at the start of each sequence. Where it comes in, where
-    ///     it is going and how fast it is dropping are all its own.
-    /// </summary>
-    private ShipDescent _descent = new(Point.Zero);
 
     public IntroSequence(
         ResourceManager resources,
@@ -134,6 +128,12 @@ internal class IntroSequence
         _blobShipHazardLightFlash = new FaderAnimation(10);
         _blobShipHeadLightFlash = new RandomFaderAnimation(4, _randomNumberGenerator, 100);
     }
+
+    /// <summary>
+    ///     Whether the crash is still playing. The game reads it to know whether to let Blob move,
+    ///     and the sequence is the only thing that sets it.
+    /// </summary>
+    public bool SequenceRunning { get; private set; }
 
     public int BlobSpaceShipXPos => (int)_descent.Position.X + _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).SpriteWidth / 2;
 

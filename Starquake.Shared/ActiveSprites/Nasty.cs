@@ -25,31 +25,6 @@ internal class Nasty
     /// </summary>
     private const int BirthPeriod = 60;
 
-    /// <summary>
-    ///     The sixteen draws a random nasty is picked from, in the order the chain of comparisons
-    ///     this replaced tested them in. Fifteen kinds walk the planet; Bird is at both ends of the
-    ///     table and Spiky takes the last draw, so those two come up twice as often as the others.
-    /// </summary>
-    private static readonly NastyType[] NastyTypeDraw =
-    [
-        NastyType.Bird,
-        NastyType.Helmet,
-        NastyType.FriedEgg,
-        NastyType.CurleyWurley,
-        NastyType.Shellfish,
-        NastyType.Cushion,
-        NastyType.Gonzo,
-        NastyType.Snail,
-        NastyType.Ghost,
-        NastyType.Centipede,
-        NastyType.Scorpion,
-        NastyType.DragonFly,
-        NastyType.Hippo,
-        NastyType.Helicopter,
-        NastyType.Bird,
-        NastyType.Spiky
-    ];
-
     /// <inheritdoc cref="NastyTypeDraw" />
     private const int NastyTypeDrawRange = 16;
 
@@ -135,6 +110,31 @@ internal class Nasty
 
     /// <inheritdoc cref="ShotNastyGrey" />
     private const int ConveyorNastyGreen = 100;
+
+    /// <summary>
+    ///     The sixteen draws a random nasty is picked from, in the order the chain of comparisons
+    ///     this replaced tested them in. Fifteen kinds walk the planet; Bird is at both ends of the
+    ///     table and Spiky takes the last draw, so those two come up twice as often as the others.
+    /// </summary>
+    private static readonly NastyType[] NastyTypeDraw =
+    [
+        NastyType.Bird,
+        NastyType.Helmet,
+        NastyType.FriedEgg,
+        NastyType.CurleyWurley,
+        NastyType.Shellfish,
+        NastyType.Cushion,
+        NastyType.Gonzo,
+        NastyType.Snail,
+        NastyType.Ghost,
+        NastyType.Centipede,
+        NastyType.Scorpion,
+        NastyType.DragonFly,
+        NastyType.Hippo,
+        NastyType.Helicopter,
+        NastyType.Bird,
+        NastyType.Spiky
+    ];
     private readonly Blob _blob;
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsSet _graphicsSet;
@@ -824,5 +824,4 @@ internal class Nasty
             blobFire2Original.End();
         }
     }
-
 }

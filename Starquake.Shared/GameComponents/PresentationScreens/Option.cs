@@ -18,5 +18,4 @@ internal class Option(string activationKey, string optionText, bool selected, Co
     ///     it changes whenever a pad is plugged in or pulled out while the screen is up.
     /// </summary>
     public bool Unavailable = unavailable;
-
 }

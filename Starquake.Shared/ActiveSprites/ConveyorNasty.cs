@@ -34,29 +34,14 @@ internal class ConveyorNasty
 
 
     private readonly Animation _anim;
+    private readonly IStandardParticleEffect _conveyorNastyDies;
     private readonly GameScreenCollection _gameScreens;
+
+    private readonly SpriteCollection _nastySprite;
     private readonly Random _randomNumberGenerator;
 
     private int _deathFadeLevel = ColourLevels.Full;
     private float _deathScale = 1f;
-
-    public int XLocation { get; set; }
-
-    public NastyState NastyState { get; set; }
-
-    public int YLocation { get; set; }
-
-    public int MoveSpeed { get; set; }
-
-    public bool NastyActive { get; set; }
-
-    public int AnimationDelay
-    {
-        set => _anim.Delay = value;
-    }
-
-    private readonly SpriteCollection _nastySprite;
-    private readonly IStandardParticleEffect _conveyorNastyDies;
 
     private Direction _nastyDirection;
 
@@ -91,6 +76,21 @@ internal class ConveyorNasty
         _nastySprite = resources.GetSpriteCollection(Assets.Graphics.ConveyorNasty);
         _conveyorNastyDies = (IStandardParticleEffect)resources.GetParticleEffectInstance(Assets.Effects.NastyDies, ParticleEffectType.Triggered, null);
         _conveyorNastyDies.ParticleEffectComplete += ConveyorNastyDies_ParticleEffectComplete;
+    }
+
+    public int XLocation { get; set; }
+
+    public NastyState NastyState { get; set; }
+
+    public int YLocation { get; set; }
+
+    public int MoveSpeed { get; set; }
+
+    public bool NastyActive { get; set; }
+
+    public int AnimationDelay
+    {
+        set => _anim.Delay = value;
     }
 
     private void ConveyorNastyDies_ParticleEffectComplete()
@@ -209,5 +209,4 @@ internal class ConveyorNasty
             }
         }
     }
-
 }

@@ -263,5 +263,4 @@ internal sealed class CollisionMaskEditor : Control
 
         return true;
     }
-
 }

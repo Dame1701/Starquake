@@ -575,11 +575,17 @@ public class ScreenCollisionMapTests
 
         public const int MoverSize = 32;
 
+        public const int Velocity = 8;
+
+        /// <summary>
+        ///     Big enough to index every action tile the tests place, since the map reads the collision
+        ///     data by tile image and the spikes and booths are numbered in the four hundreds.
+        /// </summary>
+        private const int TestTileImageCount = 512;
+
         /// <summary>A cell of the kind a jump platform owns: solid to everything, no tile behind it.</summary>
         public static CollisionTile PlatformCell(int xPos, int yPos)
             => new((int)CollisionObjectType.JumpPlatform, xPos, yPos, CollisionTileType.EveryoneHits);
-
-        public const int Velocity = 8;
 
         /// <summary>
         ///     A screen of nothing. The map builds into the screen record rather than owning a list
@@ -594,7 +600,7 @@ public class ScreenCollisionMapTests
         /// </summary>
         public static int[,,] TileCollisionData()
         {
-            var data = new int[
+            int[,,] data = new int[
                 TestTileImageCount,
                 TileMetrics.CollisionCellsAcrossTile,
                 TileMetrics.CollisionCellsDownTile];
@@ -622,11 +628,5 @@ public class ScreenCollisionMapTests
                 TunnelTiles.LastMouth + 1,
                 TileMetrics.CollisionCellsAcrossTile,
                 TileMetrics.CollisionCellsDownTile];
-
-        /// <summary>
-        ///     Big enough to index every action tile the tests place, since the map reads the collision
-        ///     data by tile image and the spikes and booths are numbered in the four hundreds.
-        /// </summary>
-        private const int TestTileImageCount = 512;
     }
 }

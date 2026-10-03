@@ -23,6 +23,11 @@ public class LandingSiteTests
 {
 
     /// <summary>
+    ///     What <see cref="MarkerTiles.Contains" /> is asked about a square nothing has been painted on.
+    /// </summary>
+    private const int EmptySquare = -1;
+
+    /// <summary>
     ///     The point of the numbering: a marker is not on either tile sheet, so nothing can draw one by
     ///     indexing a sheet with it and nothing can read a collision mask for one.
     /// </summary>
@@ -191,11 +196,6 @@ public class LandingSiteTests
     [Fact]
     public void IsOnePerMap_TheCoreDoorstep_IsOnePerMap()
         => Assert.True(MarkerTiles.IsOnePerMap(MarkerTile.CoreExitPosition));
-
-    /// <summary>
-    ///     What <see cref="MarkerTiles.Contains" /> is asked about a square nothing has been painted on.
-    /// </summary>
-    private const int EmptySquare = -1;
 
     private static class TestData
     {

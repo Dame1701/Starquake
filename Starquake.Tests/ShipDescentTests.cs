@@ -200,6 +200,10 @@ public class ShipDescentTests
 
     private static class TestData
     {
+
+        public const int MoreFramesThanTheFallNeeds = 1000;
+
+        public const int Tolerance = 4;
         /// <summary>
         ///     A plausible crash site: well down the screen and well to the right of where the ship
         ///     comes in.
@@ -207,10 +211,6 @@ public class ShipDescentTests
         public static readonly Point CrashSite = new(900, 500);
 
         public static readonly Point CrashSiteToTheLeftOfEntry = new(40, 500);
-
-        public const int MoreFramesThanTheFallNeeds = 1000;
-
-        public const int Tolerance = 4;
 
         /// <summary>
         ///     Steps until the ship is down, and says how many frames that took. Gives up at

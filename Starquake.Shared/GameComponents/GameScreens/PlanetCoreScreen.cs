@@ -142,27 +142,22 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
         _coreSparks = (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.CoreSparks, ParticleEffectType.Continual, null);
     }
 
-
     /// <summary>
-    ///     Keeps the core room's events moving while Blob is away from it. The engine calls
-    ///     this directly rather than through <see cref="IGameScreen" />, which the frame loop's two
-    ///     members are all of - the core is the only screen that carries on off screen, so an
-    ///     interface for it described one class.
+    ///     The cells of the nine elements standing in the core room, which are there only while the
+    ///     core room is the screen being shown - the core sits on one of the planet's own screens, and
+    ///     Blob walks that screen normally once he has been put back outside.
     /// </summary>
-    public void UpdateOffScreen(GameTime gameTime)
+    public IEnumerable<CollisionTile> CellsOnScreen(int screenNumber)
     {
-        for (int a = 0; a < _coreAlienCount; a++)
+        if (screenNumber != _gameScreens.CoreSite.ScreenNumber ||
+            _screenDirectory.Current != GameScreenType.PlanetCore)
         {
-            _coreAliens[a].Update(gameTime);
+            return [];
         }
 
-        _elements.Update(gameTime, _gameScreens.CorePosition);
+        Point core = _gameScreens.CorePosition;
 
-        _coreSparks.Start();
-        _coreSparks.Update(CoreCentreX, CoreCentreY, gameTime);
-
-        _coreComputationEffect.Start();
-        _coreComputationEffect.Update(CoreCentreX, CoreCentreY, gameTime);
+        return _elements.GetCollisionMap(core.X, core.Y);
     }
 
     public void Update(GameTime gameTime)
@@ -210,6 +205,63 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
         }
 
         _entryTime++;
+    }
+
+    public void Draw()
+    {
+        if (!_replacingElements)
+        {
+            _coreComputationEffect.Draw();
+            _coreSparks.Draw();
+        }
+
+        if (!_replacingElements)
+        {
+            _resources.GetSpriteCollection(Assets.Graphics.BlankingTile).Begin(BlendState.AlphaBlend);
+            for (int a = 0; a < BlankingTilesDown; a++)
+            {
+                for (int b = 0; b < BlankingTilesAcross; b++)
+                {
+                    _resources.GetSpriteCollection(Assets.Graphics.BlankingTile).DrawSprite(0, b * TileMetrics.TileWidth + BlankingTilesFirstColumn, a * TileMetrics.TileHeight, ColourHelper.WhiteFadedTo((byte)_blankingTilesOpacity));
+                }
+            }
+            _resources.GetSpriteCollection(Assets.Graphics.BlankingTile).End();
+        }
+
+        _gameScreens.Draw(Color.White);
+
+        if (!_replacingElements)
+        {
+            DrawCoreGuardians();
+        }
+
+        // Where the core is comes off the map, so it is asked for rather than known here.
+        Point core = _gameScreens.CorePosition;
+
+        _elements.Draw(core.X, core.Y, _replacingElements);
+    }
+
+
+    /// <summary>
+    ///     Keeps the core room's events moving while Blob is away from it. The engine calls
+    ///     this directly rather than through <see cref="IGameScreen" />, which the frame loop's two
+    ///     members are all of - the core is the only screen that carries on off screen, so an
+    ///     interface for it described one class.
+    /// </summary>
+    public void UpdateOffScreen(GameTime gameTime)
+    {
+        for (int a = 0; a < _coreAlienCount; a++)
+        {
+            _coreAliens[a].Update(gameTime);
+        }
+
+        _elements.Update(gameTime, _gameScreens.CorePosition);
+
+        _coreSparks.Start();
+        _coreSparks.Update(CoreCentreX, CoreCentreY, gameTime);
+
+        _coreComputationEffect.Start();
+        _coreComputationEffect.Update(CoreCentreX, CoreCentreY, gameTime);
     }
 
     /// <summary>
@@ -268,40 +320,6 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
         _screenDirectory.GameComplete.PerformPostScreenChangeActions();
     }
 
-    public void Draw()
-    {
-        if (!_replacingElements)
-        {
-            _coreComputationEffect.Draw();
-            _coreSparks.Draw();
-        }
-
-        if (!_replacingElements)
-        {
-            _resources.GetSpriteCollection(Assets.Graphics.BlankingTile).Begin(BlendState.AlphaBlend);
-            for (int a = 0; a < BlankingTilesDown; a++)
-            {
-                for (int b = 0; b < BlankingTilesAcross; b++)
-                {
-                    _resources.GetSpriteCollection(Assets.Graphics.BlankingTile).DrawSprite(0, b * TileMetrics.TileWidth + BlankingTilesFirstColumn, a * TileMetrics.TileHeight, ColourHelper.WhiteFadedTo((byte)_blankingTilesOpacity));
-                }
-            }
-            _resources.GetSpriteCollection(Assets.Graphics.BlankingTile).End();
-        }
-
-        _gameScreens.Draw(Color.White);
-
-        if (!_replacingElements)
-        {
-            DrawCoreGuardians();
-        }
-
-        // Where the core is comes off the map, so it is asked for rather than known here.
-        Point core = _gameScreens.CorePosition;
-
-        _elements.Draw(core.X, core.Y, _replacingElements);
-    }
-
     /// <summary>
     ///     The guardians circling inside the core room. They fade up with the room, so they are drawn
     ///     against what is left of the blanking tiles rather than at full strength.
@@ -312,24 +330,6 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
         {
             _coreAliens[a].Draw((byte)(ColourLevels.Full - _blankingTilesOpacity));
         }
-    }
-
-    /// <summary>
-    ///     The cells of the nine elements standing in the core room, which are there only while the
-    ///     core room is the screen being shown - the core sits on one of the planet's own screens, and
-    ///     Blob walks that screen normally once he has been put back outside.
-    /// </summary>
-    public IEnumerable<CollisionTile> CellsOnScreen(int screenNumber)
-    {
-        if (screenNumber != _gameScreens.CoreSite.ScreenNumber ||
-            _screenDirectory.Current != GameScreenType.PlanetCore)
-        {
-            return [];
-        }
-
-        Point core = _gameScreens.CorePosition;
-
-        return _elements.GetCollisionMap(core.X, core.Y);
     }
 
     /// <summary>

@@ -128,6 +128,15 @@ internal sealed class BlobWeapon
         _animFire2 = Animation.Looping(0, ShuttleFireAnimLastFrame, ShuttleFireAnimationDelay, true);
     }
 
+    /// <summary>Whether a shot is in flight, which is what a nasty checks before testing for a hit.</summary>
+    public bool HasFired { get; private set; }
+
+    /// <inheritdoc cref="BlobFire.X" />
+    public int X => _fire.X;
+
+    /// <inheritdoc cref="BlobFire.Y" />
+    public int Y => _fire.Y;
+
     /// <summary>
     ///     Which way a shot leaves. Riding the shuttle he fires whichever way he is moving, including up
     ///     and down; on foot a shot only ever goes left or right, so standing still - or having last
@@ -148,15 +157,6 @@ internal sealed class BlobWeapon
             ? directionBlobMoved
             : lastFired;
     }
-
-    /// <summary>Whether a shot is in flight, which is what a nasty checks before testing for a hit.</summary>
-    public bool HasFired { get; private set; }
-
-    /// <inheritdoc cref="BlobFire.X" />
-    public int X => _fire.X;
-
-    /// <inheritdoc cref="BlobFire.Y" />
-    public int Y => _fire.Y;
 
     /// <summary>
     ///     The shot hit something. Called by whatever was hit, which is why it does not decide anything

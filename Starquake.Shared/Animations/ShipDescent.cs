@@ -89,7 +89,7 @@ internal class ShipDescent
     {
         Position = new Vector2(
             Position.X + _acrossPerFrame,
-            Position.Y + (_downPerFrame * _acceleration));
+            Position.Y + _downPerFrame * _acceleration);
 
         _acceleration = Position.Y + FinalApproachHeight > Rest.Y
             ? FullSpeed
