@@ -440,7 +440,7 @@ internal class Blob
         changedScreens |= DetectLeftHandTunnel(_surroundings.Left);
         changedScreens |= DetectRightHandTunnel(_surroundings.Right);
         BreakBridgeUnderfoot(_surroundings.Below);
-        RideTunnelLift(_surroundings.Above);
+        GoUpTheShaft(_surroundings.Above);
         CheckSpikes();
         CollectPowerUp();
 
@@ -666,7 +666,7 @@ internal class Blob
             !BlobsControl.MovedRight())
         {
             if (!_inventoryAccessed &&
-                !_lift.Riding &&
+                !_lift.GoingUp &&
                 !inAccessForceField)
             {
                 if (accessingCheops)
@@ -721,7 +721,7 @@ internal class Blob
     /// </summary>
     private void ApplyGravity()
     {
-        if (_lift.Riding) // Can't fall if we are in a tunnel lift
+        if (_lift.GoingUp) // Can't fall if we are in a tunnel lift
         {
             return;
         }
@@ -815,7 +815,7 @@ internal class Blob
 
         RaiseScreenChangedToMainGame();
 
-        if (_shuttle.Riding || _lift.Riding)
+        if (_shuttle.Riding || _lift.GoingUp)
         {
             _blobYPos = _gameScreens.ScreenHeight - BlobHeight;
         }
@@ -1028,7 +1028,7 @@ internal class Blob
                 below.MapYPosition));
     }
 
-    private void RideTunnelLift(TileDetected? above)
+    private void GoUpTheShaft(TileDetected? above)
         => _blobYPos -= _lift.Step(
             _gameScreens.Collisions,
             new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight),

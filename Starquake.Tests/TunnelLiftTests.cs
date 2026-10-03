@@ -1,4 +1,4 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
@@ -14,7 +14,7 @@ namespace Starquake.Tests;
 
 /// <summary>
 ///     The lift that carries the blob up a shaft: when he is on one, how far it takes him, and when he is
-///     allowed to step off sideways. All of it was inside <c>Blob.RideTunnelLift</c>, which needed a blob,
+///     allowed to step off sideways. All of it was inside <c>Blob.GoUpTheShaft</c>, which needed a blob,
 ///     and a blob needs the content pipeline and a graphics device.
 /// </summary>
 /// <remarks>
@@ -38,7 +38,7 @@ public class TunnelLiftTests
 
         // Assert
         Assert.Equal(0, risen);
-        Assert.False(lift.Riding);
+        Assert.False(lift.GoingUp);
         Assert.Equal(0, sounds.Started);
     }
 
@@ -56,7 +56,7 @@ public class TunnelLiftTests
 
         // Assert
         Assert.Equal(TestData.LiftSpeed, risen);
-        Assert.True(lift.Riding);
+        Assert.True(lift.GoingUp);
         Assert.Equal(1, sounds.Started);
     }
 
@@ -80,7 +80,7 @@ public class TunnelLiftTests
 
         // Assert
         Assert.Equal(0, risen);
-        Assert.False(lift.Riding);
+        Assert.False(lift.GoingUp);
     }
 
     [Theory]
@@ -106,9 +106,9 @@ public class TunnelLiftTests
     [InlineData(ActionTiles.TunnelLiftTop1)]
     [InlineData(ActionTiles.TunnelLiftTop2)]
     [InlineData(ActionTiles.TunnelLiftTop3)]
-    internal void Step_ReachingTheTopOfTheShaft_EndsTheRide(ActionTiles top)
+    internal void Step_ReachingTheTopOfTheShaft_StopsHimGoingUp(ActionTiles top)
     {
-        // Arrange - already riding
+        // Arrange - already going up
         var sounds = new SoundLog();
         TunnelLift lift = sounds.Lift();
         ScreenCollisionMap map = MapOf(TestData.EmptyScreen());
@@ -120,25 +120,25 @@ public class TunnelLiftTests
 
         // Assert
         Assert.Equal(0, risen);
-        Assert.False(lift.Riding);
+        Assert.False(lift.GoingUp);
     }
 
     /// <summary>
     ///     <see cref="ActionTiles.TunnelLiftTopAlternate" /> is documented as a fourth lift top, and both
-    ///     the renderer and the animation engine treat it as one - but the ride never has, and this pins
+    ///     the renderer and the animation engine treat it as one - but the way up never has, and this pins
     ///     that as it was found rather than quietly changing it.
     /// </summary>
     /// <remarks>
     ///     It cannot bite on the shipped map: tile 396 is placed fifteen times across nine screens and is
     ///     never directly above a shaft tile, so it never caps one. Were it ever authored as the top of a
-    ///     shaft, the ride would carry on past it. Left alone because a move is the wrong commit to change
+    ///     shaft, he would carry on past it. Left alone because a move is the wrong commit to change
     ///     behaviour in, and because the screen editor could make it reachable tomorrow - see
     ///     <c>GODCLASSES.md</c>.
     /// </remarks>
     [Fact]
-    public void Step_ReachingTheAlternateTop_DoesNotEndTheRide_AsItNeverDid()
+    public void Step_ReachingTheAlternateTop_DoesNotStopHimGoingUp_AsItNeverDid()
     {
-        // Arrange - already riding
+        // Arrange - already going up
         var sounds = new SoundLog();
         TunnelLift lift = sounds.Lift();
         ScreenCollisionMap map = MapOf(TestData.EmptyScreen());
@@ -151,17 +151,17 @@ public class TunnelLiftTests
 
         // Assert
         Assert.Equal(TestData.LiftSpeed, risen);
-        Assert.True(lift.Riding);
+        Assert.True(lift.GoingUp);
     }
 
     /// <summary>
-    ///     He may not step off into the passage he arrived through, which is what the minimum ride is for -
+    ///     He may not step off into the passage he arrived through, which is what the minimum distance is for -
     ///     one frame's travel is not enough.
     /// </summary>
     [Fact]
     public void Step_SteeredOutOfTheShaftTooSoon_KeepsCarryingHim()
     {
-        // Arrange - a passage to his left, and only one frame of ride behind him
+        // Arrange - a passage to his left, and only one frame of travel behind him
         var sounds = new SoundLog();
         TunnelLift lift = sounds.Lift();
         ScreenCollisionMap map = MapOf(TestData.EmptyScreen());
@@ -174,19 +174,19 @@ public class TunnelLiftTests
 
         // Assert
         Assert.Equal(TestData.LiftSpeed, risen);
-        Assert.True(lift.Riding);
+        Assert.True(lift.GoingUp);
     }
 
     [Theory]
     [InlineData(true, false)]
     [InlineData(false, true)]
-    public void Step_SteeredOutOfTheShaftAfterARide_StepsHimOffAndStopsTheSound(bool left, bool right)
+    public void Step_SteeredOutOfTheShaftAfterGoingUpFarEnough_StepsHimOffAndStopsTheSound(bool left, bool right)
     {
-        // Arrange - ride long enough to clear the minimum
+        // Arrange - far enough up to clear the minimum
         var sounds = new SoundLog();
         TunnelLift lift = sounds.Lift();
         ScreenCollisionMap map = MapOf(TestData.EmptyScreen());
-        TestData.RideFor(lift, map, frames: 3);
+        TestData.GoUpFor(lift, map, frames: 3);
 
         // Act
         int risen = lift.Step(map, TestData.BlobAt(TestData.MidScreenX, 200), TestData.AtASidePassage(),
@@ -194,7 +194,7 @@ public class TunnelLiftTests
 
         // Assert
         Assert.Equal(0, risen);
-        Assert.False(lift.Riding);
+        Assert.False(lift.GoingUp);
         Assert.Equal(1, sounds.Stopped);
     }
 
@@ -202,7 +202,7 @@ public class TunnelLiftTests
     ///     Steering into a wall is not a way off: the passage has to be somewhere he could actually walk.
     /// </summary>
     [Fact]
-    public void Step_SteeredIntoAWallAfterARide_KeepsCarryingHim()
+    public void Step_SteeredIntoAWallAfterGoingUpFarEnough_KeepsCarryingHim()
     {
         // Arrange - a solid column to his left, so there is no room that way
         GameScreenData screen = TestData.EmptyScreen();
@@ -215,7 +215,7 @@ public class TunnelLiftTests
         var sounds = new SoundLog();
         TunnelLift lift = sounds.Lift();
         ScreenCollisionMap map = MapOf(screen);
-        TestData.RideFor(lift, map, frames: 3, xPos: TileMetrics.TileWidth);
+        TestData.GoUpFor(lift, map, frames: 3, xPos: TileMetrics.TileWidth);
 
         // Act
         int risen = lift.Step(map, TestData.BlobAt(TileMetrics.TileWidth, 200), TestData.AtASidePassage(),
@@ -223,26 +223,26 @@ public class TunnelLiftTests
 
         // Assert
         Assert.Equal(TestData.LiftSpeed, risen);
-        Assert.True(lift.Riding);
+        Assert.True(lift.GoingUp);
     }
 
     /// <summary>
-    ///     The minimum ride counts from getting on, so a second ride starts the count again. Without this,
-    ///     a blob who had ridden once could step straight out of the next shaft he entered.
+    ///     The minimum distance counts from getting on, so a second shaft starts the count again. Without this,
+    ///     a blob who had gone up once could step straight out of the next shaft he entered.
     /// </summary>
     [Fact]
-    public void Step_GettingOnASecondShaft_CountsTheRideFromScratch()
+    public void Step_GettingOnASecondShaft_CountsTheDistanceFromScratch()
     {
-        // Arrange - a long ride, off the top, then back onto another shaft
+        // Arrange - a long way up, off the top, then back onto another shaft
         var sounds = new SoundLog();
         TunnelLift lift = sounds.Lift();
         ScreenCollisionMap map = MapOf(TestData.EmptyScreen());
-        TestData.RideFor(lift, map, frames: 4);
+        TestData.GoUpFor(lift, map, frames: 4);
 
         lift.Step(map, TestData.BlobAt(TestData.MidScreenX, 200),
             TestData.Overhead(ActionTiles.TunnelLiftTop1, 0, TestData.ShaftTop), false, false,
             TestData.WalkSpeed);
-        Assert.False(lift.Riding);
+        Assert.False(lift.GoingUp);
 
         lift.Step(map, TestData.BlobAt(TestData.MidScreenX, 200), TestData.InsideAShaft(), false, false,
             TestData.WalkSpeed);
@@ -253,11 +253,11 @@ public class TunnelLiftTests
 
         // Assert
         Assert.Equal(TestData.LiftSpeed, risen);
-        Assert.True(lift.Riding);
+        Assert.True(lift.GoingUp);
     }
 
     [Fact]
-    public void LetGo_WhileRiding_TakesHimOffWithoutStepping()
+    public void LetGo_WhileGoingUp_TakesHimOffWithoutStepping()
     {
         // Arrange
         var sounds = new SoundLog();
@@ -269,7 +269,7 @@ public class TunnelLiftTests
         lift.LetGo();
 
         // Assert
-        Assert.False(lift.Riding);
+        Assert.False(lift.GoingUp);
         Assert.Equal(1, sounds.Started);
         Assert.Equal(0, sounds.Stopped);
     }
@@ -328,7 +328,7 @@ public class TunnelLiftTests
         public static TileDetected AtASidePassage()
             => Overhead(ActionTiles.TunnelLiftShaft1, ShaftCentre, ShaftTop);
 
-        public static void RideFor(TunnelLift lift, ScreenCollisionMap map, int frames, int xPos = MidScreenX)
+        public static void GoUpFor(TunnelLift lift, ScreenCollisionMap map, int frames, int xPos = MidScreenX)
         {
             int yPos = 300;
 
