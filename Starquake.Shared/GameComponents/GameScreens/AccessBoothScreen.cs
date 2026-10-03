@@ -17,8 +17,6 @@ namespace Starquake.GameComponents.GameScreens;
 
 internal class AccessBoothScreen : IGameScreen
 {
-
-
     private int[] _accessCode = [];
 
     private readonly KeyScanner[] _accessCodes;
@@ -269,7 +267,7 @@ internal class AccessBoothScreen : IGameScreen
     ///     where it is. This is the form the constructor uses, before there is a door to arrive
     ///     through.
     /// </summary>
-    public void Reset()
+    private void Reset()
     {
         _soundPlayed = false;
         _blobAnim1.Reset(Direction.Left);
@@ -324,19 +322,20 @@ internal class AccessBoothScreen : IGameScreen
     /// </summary>
     private void MoveBlobToTheBoothDoor(Direction approachedFrom, int doorMapXPosition)
     {
-        if (approachedFrom == Direction.Left)
+        switch (approachedFrom)
         {
-            _blob.BlobXPos = Success
-                ? (doorMapXPosition - 1) * 128 + 16
-                : doorMapXPosition * 128 + 48;
-            _blob.BlobFrame = 0;
-        }
-        else if (approachedFrom == Direction.Right)
-        {
-            _blob.BlobXPos = Success
-                ? (doorMapXPosition + 1) * 128 + 48
-                : doorMapXPosition * 128 + 16;
-            _blob.BlobFrame = 10;
+            case Direction.Left:
+                _blob.BlobXPos = Success
+                    ? (doorMapXPosition - 1) * 128 + 16
+                    : doorMapXPosition * 128 + 48;
+                _blob.BlobFrame = 0;
+                break;
+            case Direction.Right:
+                _blob.BlobXPos = Success
+                    ? (doorMapXPosition + 1) * 128 + 48
+                    : doorMapXPosition * 128 + 16;
+                _blob.BlobFrame = 10;
+                break;
         }
     }
 }

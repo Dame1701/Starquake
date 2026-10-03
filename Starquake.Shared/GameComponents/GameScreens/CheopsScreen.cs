@@ -20,8 +20,6 @@ namespace Starquake.GameComponents.GameScreens;
 
 internal class CheopsScreen : IGameScreen
 {
-
-
     /// <summary>
     ///     The value <see cref="_itemToSwap" /> holds while no inventory slot has been picked yet. It
     ///     is a slot index everywhere else, and no inventory is anywhere near this long.
@@ -51,9 +49,6 @@ internal class CheopsScreen : IGameScreen
     private readonly Shapes _shapeDrawer;
     private readonly ToggleKeys _input;
     private readonly StatusPanel _statusPanel;
-
-
-    #region IGameScreen Members
 
     /// <summary>
     ///     How long the result is left on screen before the game moves on, in logic frames - one
@@ -482,7 +477,4 @@ internal class CheopsScreen : IGameScreen
 
         pickups.End();
     }
-
-    #endregion
-
 }

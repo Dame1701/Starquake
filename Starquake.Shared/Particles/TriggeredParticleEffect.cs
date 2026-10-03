@@ -10,19 +10,13 @@ using Starquake.Structure;
 
 namespace Starquake.Particles;
 
-internal class TriggeredParticleEffect : IStandardParticleEffect
+internal class TriggeredParticleEffect(GraphicsSet graphicsSet,
+    ParticleEffect mercuryParticleEffect,
+    SpriteBatchRenderer renderer) : IStandardParticleEffect
 {
-    private readonly MercuryEffect _mercury;
+    private readonly MercuryEffect _mercury = new(graphicsSet, mercuryParticleEffect, renderer);
 
     private bool _triggered;
-
-    public TriggeredParticleEffect(GraphicsSet graphicsSet, ParticleEffect mercuryParticleEffect,
-        SpriteBatchRenderer renderer)
-    {
-        _mercury = new MercuryEffect(graphicsSet, mercuryParticleEffect, renderer);
-        EffectActive = false;
-        _triggered = false;
-    }
 
     public bool EffectActive { get; private set; }
 
@@ -82,10 +76,7 @@ internal class TriggeredParticleEffect : IStandardParticleEffect
                     EffectActive = false;
                     _mercury.Terminate();
 
-                    if (ParticleEffectComplete != null)
-                    {
-                        ParticleEffectComplete();
-                    }
+                    ParticleEffectComplete?.Invoke();
                 }
             }
         }
@@ -93,9 +84,7 @@ internal class TriggeredParticleEffect : IStandardParticleEffect
         _mercury.Advance(gameTime);
     }
 
-    public void Draw()
-        => _mercury.Render();
+    public void Draw() => _mercury.Render();
 
-    public void Draw(int screenFade)
-        => _mercury.Render(screenFade);
+    public void Draw(int screenFade) => _mercury.Render(screenFade);
 }

@@ -10,15 +10,12 @@ using Starquake.Structure;
 
 namespace Starquake.Particles;
 
-internal class MultiTriggerTimeBasedParticleEffect : IPositionalTriggerParticleEffect
+internal class MultiTriggerTimeBasedParticleEffect(
+    GraphicsSet graphicsSet,
+    ParticleEffect mercuryParticleEffect,
+    SpriteBatchRenderer renderer) : IPositionalTriggerParticleEffect
 {
-    private readonly MercuryEffect _mercury;
-
-    public MultiTriggerTimeBasedParticleEffect(GraphicsSet graphicsSet,
-        ParticleEffect mercuryParticleEffect, SpriteBatchRenderer renderer)
-    {
-        _mercury = new MercuryEffect(graphicsSet, mercuryParticleEffect, renderer);
-    }
+    private readonly MercuryEffect _mercury = new(graphicsSet, mercuryParticleEffect, renderer);
 
     public event RaiseEffectComplete? ParticleEffectComplete;
 
@@ -31,8 +28,7 @@ internal class MultiTriggerTimeBasedParticleEffect : IPositionalTriggerParticleE
     /// </summary>
     public bool EffectActive => _mercury.ActiveParticles > 0;
 
-    public void Start(int xPos, int yPos)
-        => _mercury.Trigger(xPos, yPos);
+    public void Start(int xPos, int yPos) => _mercury.Trigger(xPos, yPos);
 
     public void Update(GameTime gameTime)
     {
@@ -44,11 +40,9 @@ internal class MultiTriggerTimeBasedParticleEffect : IPositionalTriggerParticleE
         }
     }
 
-    public void Stop()
-        => _mercury.Terminate();
+    public void Stop() => _mercury.Terminate();
 
-    public void Reset()
-        => _mercury.Terminate();
+    public void Reset() => _mercury.Terminate();
 
     /// <remarks>
     ///     Unlike the other two this skips the draw entirely when nothing is in flight, rather than

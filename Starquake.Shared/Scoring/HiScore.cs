@@ -15,12 +15,10 @@ internal class HiScore
         get
         {
             string temp = AdventureScore.ToString();
-
             if (temp.Length == 1)
             {
                 temp = " " + temp;
             }
-
             return temp;
         }
     }

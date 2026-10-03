@@ -63,7 +63,7 @@ internal class KeyScanner
         {
             if (_scanLineFadeDirection == Direction.Down)
             {
-                _scanLineFade = _scanLineFade - 16;
+                _scanLineFade -= 16;
 
                 if (_scanLineFade < 0)
                 {
@@ -73,7 +73,7 @@ internal class KeyScanner
             }
             else if (_scanLineFadeDirection == Direction.Up)
             {
-                _scanLineFade = _scanLineFade + 16;
+                _scanLineFade += 16;
 
                 if (_scanLineFade > ColourLevels.Full)
                 {
@@ -84,7 +84,7 @@ internal class KeyScanner
 
             if (_scanLineY < 68)
             {
-                _scanLineY = _scanLineY + 4;
+                _scanLineY += 4;
             }
             else
             {

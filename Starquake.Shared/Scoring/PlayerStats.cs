@@ -96,7 +96,6 @@ internal class PlayerStats
     public PlayerStats(SoundEffectEngine sounds)
     {
         _sounds = sounds;
-
         Reset();
     }
 
@@ -140,13 +139,11 @@ internal class PlayerStats
             case BlobAction.FiredLazer:
             {
                 FirePower--;
-
                 break;
             }
             case BlobAction.LaidPlatform:
             {
                 Platforms--;
-
                 break;
             }
             case BlobAction.GotPowerUp:
@@ -157,9 +154,7 @@ internal class PlayerStats
                     throw new ArgumentException(
                         "A power up action needs the type of power up collected.", nameof(data));
                 }
-
                 CollectPowerUp(powerUpType);
-
                 break;
             }
         }
@@ -192,7 +187,7 @@ internal class PlayerStats
             if (_energyDrainCounter > EnergyDrainFrames)
             {
                 _energyDrainStarted = false;
-                _energyLevel = _energyLevel - 1;
+                _energyLevel -= 1;
             }
         }
 

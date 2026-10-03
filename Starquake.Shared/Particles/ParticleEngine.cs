@@ -58,17 +58,17 @@ internal class ParticleEngine
     ///     Single trigger how long until we signal the effect is complete, for non single trigger, how long
     ///     we want to play the routine
     /// </param>
-    public ContinuousParticleEffect CreateContinualEffectInstance(string effectName, TimeSpan? duration)
-        => new(_graphicsSet, CopyEffect(effectName), _particleRenderer)
+    public ContinuousParticleEffect CreateContinualEffectInstance(string effectName, TimeSpan? duration) =>
+        new(_graphicsSet, CopyEffect(effectName), _particleRenderer)
         {
             EffectDuration = duration
         };
 
-    public MultiTriggerTimeBasedParticleEffect CreateMultiTriggeredTimeBasedEffectInstance(string effectName)
-        => new(_graphicsSet, CopyEffect(effectName), _particleRenderer);
+    public MultiTriggerTimeBasedParticleEffect CreateMultiTriggeredTimeBasedEffectInstance(string effectName) =>
+        new(_graphicsSet, CopyEffect(effectName), _particleRenderer);
 
-    public TriggeredParticleEffect CreateSingleTriggerEffectInstance(string effectName)
-        => new(_graphicsSet, CopyEffect(effectName), _particleRenderer);
+    public TriggeredParticleEffect CreateSingleTriggerEffectInstance(string effectName) =>
+        new(_graphicsSet, CopyEffect(effectName), _particleRenderer);
 
     /// <summary>
     ///     Each instance needs its own copy of the effect, otherwise callers sharing an effect name emit into,

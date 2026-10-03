@@ -8,12 +8,7 @@ namespace Starquake.Sprites;
 
 internal class SpritePixel
 {
-    public SpritePixel()
-    {
-        IsOn = true;
-        Colour = Color.White;
-    }
-    public bool IsOn { get; set; }
+    public bool IsOn { get; set; } = true;
 
-    public Color Colour { get; set; }
+    public Color Colour { get; set; } = Color.White;
 }

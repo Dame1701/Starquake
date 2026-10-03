@@ -292,7 +292,7 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
                     }
                 }
 
-                optionYPos = optionYPos + 50;
+                optionYPos += 50;
             }
         }
         else

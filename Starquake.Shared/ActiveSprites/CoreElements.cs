@@ -82,7 +82,7 @@ internal class CoreElements
             if (Elements[a].CurrentElement == elementNoToReplace)
             {
                 // You get a healthy 10,000 points for each element replaced!
-                _stats.PlayerScore = _stats.PlayerScore + ScoreForCompletingCore;
+                _stats.PlayerScore += ScoreForCompletingCore;
 
                 Elements[a].ElementState = CoreElementState.Replacing;
                 break;

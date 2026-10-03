@@ -11,20 +11,14 @@ using Starquake.Structure;
 
 namespace Starquake.Particles;
 
-internal class ContinuousParticleEffect : IStandardParticleEffect
+internal class ContinuousParticleEffect(GraphicsSet graphicsSet, ParticleEffect mercuryParticleEffect, SpriteBatchRenderer renderer) : IStandardParticleEffect
 {
-    private readonly MercuryEffect _mercury;
+    private readonly MercuryEffect _mercury = new(graphicsSet, mercuryParticleEffect, renderer);
 
     /// <summary>
     ///     How many more logic frames the effect emits for, when it has a duration at all.
     /// </summary>
     private int _framesLeftToEmit;
-
-    public ContinuousParticleEffect(GraphicsSet graphicsSet, ParticleEffect mercuryParticleEffect, SpriteBatchRenderer renderer)
-    {
-        _mercury = new MercuryEffect(graphicsSet, mercuryParticleEffect, renderer);
-        EffectActive = false;
-    }
 
     /// <summary>
     ///     How long the effect emits for, or null to emit until something stops it. Counted off in

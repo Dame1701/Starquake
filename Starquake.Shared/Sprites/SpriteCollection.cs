@@ -276,8 +276,8 @@ internal class SpriteCollection
 
 
     /// <inheritdoc cref="DrawSprite(int,int,Microsoft.Xna.Framework.Color,float,float)" />
-    public void DrawSprite(int spriteNumber, float xPosition, float yPosition, Color spriteColour, float scale,
-        float rotation)
+    public void DrawSprite(
+        int spriteNumber, float xPosition, float yPosition, Color spriteColour, float scale, float rotation)
     {
         const float hScaling = 1f;
         const float vScaling = 1f;

@@ -137,7 +137,7 @@ internal class BitmapFont
     private Vector2 MeasureString(string text, int leading)
     {
         Vector2 temp = _font.MeasureString(text);
-        temp.X = temp.X + (float)text.Length * leading;
+        temp.X += (float)text.Length * leading;
 
         return temp;
     }

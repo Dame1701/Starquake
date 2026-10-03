@@ -23,7 +23,7 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
     private readonly SpriteCollection _backgroundImage;
     private readonly SpriteCollection _foregroundImage;
 
-    private readonly HiScores _hiscoreList;
+    private readonly HiScores _hiScoreList;
     private readonly PlayerStats _stats;
     private bool _gotHighScore;
     private HiScore _playersHighScore = new();
@@ -53,7 +53,7 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
 
         _backgroundImage = Resources.GetSpriteCollection(Assets.Graphics.HiScoreScreenBackground);
         _foregroundImage = Resources.GetSpriteCollection(Assets.Graphics.HiScoreScreenForeground);
-        _hiscoreList = new HiScores();
+        _hiScoreList = new HiScores();
     }
 
     /// <summary>
@@ -75,14 +75,14 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
         _playersHighScore = new HiScore();
 
         // Lets see if we have a place in the high score table
-        _gotHighScore = _hiscoreList.GotHighScore(_stats.PlayerScore);
+        _gotHighScore = _hiScoreList.GotHighScore(_stats.PlayerScore);
 
         if (_gotHighScore)
         {
             _playersHighScore = playersScore;
             _playersHighScore.Name = "";
 
-            _hiscoreList.AddScoreToTable(_playersHighScore);
+            _hiScoreList.AddScoreToTable(_playersHighScore);
 
             // Reset the flag so we can display the table
             //gotHighScore = false;
@@ -109,15 +109,14 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
 
                 if (_playersHighScore.Name.Length < 6)
                 {
-                    if (keyPressed > 64 &&
-                        keyPressed < 91)
+                    if (keyPressed is > 64 and < 91)
                     {
-                        _playersHighScore.Name = _playersHighScore.Name + keyPressedString;
+                        _playersHighScore.Name += keyPressedString;
                     }
 
                     if (Input.GetPressedKey() == Keys.Space)
                     {
-                        _playersHighScore.Name = _playersHighScore.Name + " ";
+                        _playersHighScore.Name += " ";
                     }
                 }
 
@@ -169,7 +168,7 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
             Font.WriteTextCentred(1280, 180, "CORE OF HEROES", 2, ColourHelper.GetXna4Colour(9, 132, ColourLevels.Full), (byte)ScreenFade);
             Font.End();
 
-            _hiscoreList.Draw(Resources, Font, 380, 250, ScreenFade);
+            _hiScoreList.Draw(Resources, Font, 380, 250, ScreenFade);
         }
 
         _foregroundImage.Begin(BlendState.AlphaBlend);

@@ -9,11 +9,9 @@ namespace Starquake.Helpers;
 
 internal static class ColourHelper
 {
-    public static Color GetXna4Colour(int r, int g, int b, int a)
-        => new Color(r, g, b) * (1f / 255f * a);
+    public static Color GetXna4Colour(int r, int g, int b, int a) => new Color(r, g, b) * (1f / 255f * a);
 
-    public static Color GetXna4Colour(int r, int g, int b)
-        => new Color(r, g, b) * 1;
+    public static Color GetXna4Colour(int r, int g, int b) => new Color(r, g, b) * 1;
 
     /// <summary>
     ///     White, dimmed to <paramref name="fade" />. Nearly every fade in the game is a sprite or a
@@ -25,6 +23,5 @@ internal static class ColourHelper
     ///     screens' worth of the same three arguments. Nothing else in the codebase passes all three
     ///     channels full and varies only the fourth.
     /// </remarks>
-    public static Color WhiteFadedTo(int fade)
-        => GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, fade);
+    public static Color WhiteFadedTo(int fade) => GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, fade);
 }

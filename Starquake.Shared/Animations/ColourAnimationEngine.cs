@@ -106,7 +106,7 @@ internal class ColourAnimationEngine
                     if (colourAnimation.TransitionColour.A < ColourLevels.Full)
                     {
                         int value = colourAnimation.TransitionColour.A;
-                        value = value + colourAnimation.Speed;
+                        value += colourAnimation.Speed;
 
                         if (value > ColourLevels.Full)
                         {
@@ -125,7 +125,7 @@ internal class ColourAnimationEngine
                     if (colourAnimation.TransitionColour.A > 0)
                     {
                         int value = colourAnimation.TransitionColour.A;
-                        value = value - colourAnimation.Speed;
+                        value -= colourAnimation.Speed;
 
                         if (value < 0)
                         {

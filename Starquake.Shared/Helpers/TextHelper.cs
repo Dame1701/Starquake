@@ -10,13 +10,13 @@ internal static class TextHelper
 {
     public static int GetAsciiCode(string character)
     {
-        if (character.Length == 1)
+        if (character.Length != 1)
         {
-            Encoding ascii = Encoding.ASCII;
-            var encodedBytes = ascii.GetBytes(character);
-            return encodedBytes[0];
+            return -1;
         }
 
-        return -1;
+        Encoding ascii = Encoding.ASCII;
+        var encodedBytes = ascii.GetBytes(character);
+        return encodedBytes[0];
     }
 }

@@ -31,11 +31,11 @@ internal class ElementFader
     {
         if (_fadeDirection == Direction.Up)
         {
-            FadeLevel = FadeLevel + _fadeSpeed;
+            FadeLevel += _fadeSpeed;
         }
         else if (_fadeDirection == Direction.Down)
         {
-            FadeLevel = FadeLevel - _fadeSpeed;
+            FadeLevel -= _fadeSpeed;
         }
 
         if (FadeLevel > ColourLevels.Full)

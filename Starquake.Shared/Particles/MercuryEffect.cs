@@ -32,8 +32,8 @@ internal sealed class MercuryEffect(GraphicsSet graphicsSet, ParticleEffect effe
     ///     still have to travel and die, and an effect that stops being stepped freezes them on
     ///     screen rather than clearing them.
     /// </summary>
-    public void Advance(GameTime gameTime)
-        => Effect.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+    public void Advance(GameTime gameTime) =>
+        Effect.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
 
     /// <summary>
     ///     Starts particles at a point.
@@ -45,8 +45,7 @@ internal sealed class MercuryEffect(GraphicsSet graphicsSet, ParticleEffect effe
         Effect.Trigger(ref position);
     }
 
-    public void Terminate()
-        => Effect.Terminate();
+    public void Terminate() => Effect.Terminate();
 
     /// <summary>
     ///     Draws whatever is in flight - but only for the redrawn artwork. The original 1985

@@ -28,7 +28,13 @@ namespace Starquake.Input;
 ///         player's own pause and quit keys.
 ///     </para>
 /// </remarks>
-internal class TestModeKeys
+internal class TestModeKeys(
+    ToggleKeys input,
+    Blob player,
+    PlayerStats stats,
+    ScreenEffectEngine screenEffects,
+    ScreenDirectory screenDirectory,
+    GameScreenCollection gameScreens)
 {
     /// <summary>
     ///     Test-mode cheats: how many lives F2 hands back, and how long the screen-stepping keys wait
@@ -39,52 +45,29 @@ internal class TestModeKeys
     /// <inheritdoc cref="TestModeLivesRestored" />
     private const int TestModeScreenStepDelayMs = 100;
 
-    private readonly GameScreenCollection _gameScreens;
-    private readonly ToggleKeys _input;
-    private readonly Blob _player;
-    private readonly ScreenDirectory _screenDirectory;
-    private readonly ScreenEffectEngine _screenEffects;
-    private readonly PlayerStats _stats;
-
-    public TestModeKeys(
-        ToggleKeys input,
-        Blob player,
-        PlayerStats stats,
-        ScreenEffectEngine screenEffects,
-        ScreenDirectory screenDirectory,
-        GameScreenCollection gameScreens)
-    {
-        _input = input;
-        _player = player;
-        _stats = stats;
-        _screenEffects = screenEffects;
-        _screenDirectory = screenDirectory;
-        _gameScreens = gameScreens;
-    }
-
     public void Update()
     {
-        if (_input.KeyboardState.IsKeyDown(Keys.F1))
+        if (input.KeyboardState.IsKeyDown(Keys.F1))
         {
-            if (_player.BlobsState == BlobState.Normal)
+            if (player.BlobsState == BlobState.Normal)
             {
-                _player.KillBlob(false, false);
+                player.KillBlob(false, false);
             }
         }
 
         // Give us some lives back (Testing)
-        if (_input.KeyboardState.IsKeyDown(Keys.F2))
+        if (input.KeyboardState.IsKeyDown(Keys.F2))
         {
-            _stats.BlobLives = TestModeLivesRestored;
-            _player.BlobsState = BlobState.Dead;
+            stats.BlobLives = TestModeLivesRestored;
+            player.BlobsState = BlobState.Dead;
         }
 
-        if (_input.GetPressedKey() == Keys.F3)
+        if (input.GetPressedKey() == Keys.F3)
         {
-            _screenEffects.ExecuteScreenEffect(ScreenEffectType.AdditiveFade, -1, 50, false);
+            screenEffects.ExecuteScreenEffect(ScreenEffectType.AdditiveFade, -1, 50, false);
         }
 
-        if (_screenDirectory.Current == GameScreenType.MainGame)
+        if (screenDirectory.Current == GameScreenType.MainGame)
         {
             StepBetweenScreens();
         }
@@ -92,44 +75,48 @@ internal class TestModeKeys
 
     private void StepBetweenScreens()
     {
-        if (_input.KeyboardState.IsKeyDown(Keys.NumPad4))
+        if (input.KeyboardState.IsKeyDown(Keys.NumPad4))
         {
-            if (_gameScreens.ScreenNumber > 0)
+            if (gameScreens.ScreenNumber > 0)
             {
-                _gameScreens.ScreenNumber--;
-                _screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.KeepPicture());
+                gameScreens.ScreenNumber--;
+                screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.KeepPicture());
                 Thread.Sleep(TestModeScreenStepDelayMs);
             }
         }
 
-        if (_input.KeyboardState.IsKeyDown(Keys.NumPad6))
+        if (input.KeyboardState.IsKeyDown(Keys.NumPad6))
         {
-            if (_gameScreens.ScreenNumber < WorldMap.LastScreenNumber)
+            if (gameScreens.ScreenNumber < WorldMap.LastScreenNumber)
             {
-                _gameScreens.ScreenNumber++;
-                _screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.KeepPicture());
+                gameScreens.ScreenNumber++;
+                screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.KeepPicture());
                 Thread.Sleep(TestModeScreenStepDelayMs);
             }
         }
 
-        if (_input.KeyboardState.IsKeyDown(Keys.NumPad8))
+        if (input.KeyboardState.IsKeyDown(Keys.NumPad8))
         {
-            if (_gameScreens.ScreenNumber - WorldMap.ScreensAcross >= 0)
+            if (gameScreens.ScreenNumber - WorldMap.ScreensAcross >= 0)
             {
-                _gameScreens.ScreenNumber -= WorldMap.ScreensAcross;
-                _screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.KeepPicture());
+                gameScreens.ScreenNumber -= WorldMap.ScreensAcross;
+                screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.KeepPicture());
                 Thread.Sleep(TestModeScreenStepDelayMs);
             }
         }
 
-        if (_input.KeyboardState.IsKeyDown(Keys.NumPad2))
+        if (!input.KeyboardState.IsKeyDown(Keys.NumPad2))
         {
-            if (_gameScreens.ScreenNumber + WorldMap.ScreensAcross <= WorldMap.LastScreenNumber)
-            {
-                _gameScreens.ScreenNumber += WorldMap.ScreensAcross;
-                _screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.KeepPicture());
-                Thread.Sleep(TestModeScreenStepDelayMs);
-            }
+            return;
         }
+
+        if (gameScreens.ScreenNumber + WorldMap.ScreensAcross > WorldMap.LastScreenNumber)
+        {
+            return;
+        }
+
+        gameScreens.ScreenNumber += WorldMap.ScreensAcross;
+        screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.KeepPicture());
+        Thread.Sleep(TestModeScreenStepDelayMs);
     }
 }

@@ -40,8 +40,7 @@ internal class ToggleKeys
     /// <summary>
     ///     The key released this frame, if exactly one was down and has just come up.
     /// </summary>
-    public Keys GetPressedKey()
-        => _toggledKey;
+    public Keys GetPressedKey() => _toggledKey;
 
     public void Update()
     {
@@ -76,8 +75,7 @@ internal class ToggleKeys
     ///     Right and Enter, BS for both browser Search and Stop, CL for CapsLock and OemClear, and a
     ///     full stop for Decimal and OemPeriod.
     /// </remarks>
-    public static string GetFriendlyName(Keys key)
-        => key switch
+    public static string GetFriendlyName(Keys key) => key switch
         {
             Keys.NumPad0 => "N0",
             Keys.NumPad1 => "N1",

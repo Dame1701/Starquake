@@ -24,7 +24,17 @@ namespace Starquake.Input;
 ///     underneath them have changed, and it does that through a callback the engine supplies
 ///     rather than by holding the engine.
 /// </remarks>
-internal class GlobalHotkeys
+internal class GlobalHotkeys(
+    ToggleKeys input,
+    ScreenDirectory screenDirectory,
+    GameSession session,
+    PresentationSettings presentation,
+    GraphicsSet graphicsSet,
+    GraphicsDeviceManager graphics,
+    GameWindow window,
+    ResourceManager resources,
+    Action artworkSwapped,
+    Action quitGame)
 {
     /// <summary>
     ///     The screens the player is considered to be in play on. Pause and fullscreen only mean
@@ -38,41 +48,6 @@ internal class GlobalHotkeys
         GameScreenType.Teleporter,
         GameScreenType.AccessBooth
     ];
-
-    private readonly Action _artworkSwapped;
-    private readonly Action _quitGame;
-    private readonly GraphicsDeviceManager _graphicsDeviceManager;
-    private readonly GraphicsSet _graphicsSet;
-    private readonly ToggleKeys _input;
-    private readonly PresentationSettings _presentation;
-    private readonly ResourceManager _resources;
-    private readonly ScreenDirectory _screenDirectory;
-    private readonly GameSession _session;
-    private readonly GameWindow _window;
-
-    public GlobalHotkeys(
-        ToggleKeys input,
-        ScreenDirectory screenDirectory,
-        GameSession session,
-        PresentationSettings presentation,
-        GraphicsSet graphicsSet,
-        GraphicsDeviceManager graphics,
-        GameWindow window,
-        ResourceManager resources,
-        Action artworkSwapped,
-        Action quitGame)
-    {
-        _input = input;
-        _screenDirectory = screenDirectory;
-        _session = session;
-        _presentation = presentation;
-        _graphicsSet = graphicsSet;
-        _graphicsDeviceManager = graphics;
-        _window = window;
-        _resources = resources;
-        _artworkSwapped = artworkSwapped;
-        _quitGame = quitGame;
-    }
 
     public void Update()
     {
@@ -102,14 +77,14 @@ internal class GlobalHotkeys
     /// </remarks>
     private void QuitIfAsked()
     {
-        if (!_session.Paused)
+        if (!session.Paused)
         {
             return;
         }
 
-        if (_input.GetPressedKey() == Keys.Q)
+        if (input.GetPressedKey() == Keys.Q)
         {
-            _quitGame();
+            quitGame();
         }
     }
 
@@ -119,21 +94,21 @@ internal class GlobalHotkeys
     /// </summary>
     private void TogglePauseIfAsked()
     {
-        if (!InPlay() || _screenDirectory.Current == GameScreenType.Teleporter)
+        if (!InPlay() || screenDirectory.Current == GameScreenType.Teleporter)
         {
             return;
         }
 
-        if (_input.GetPressedKey() != _session.PlayerKeys.Pause)
+        if (input.GetPressedKey() != session.PlayerKeys.Pause)
         {
             return;
         }
 
-        _session.Paused = !_session.Paused;
+        session.Paused = !session.Paused;
 
-        if (_session.Paused)
+        if (session.Paused)
         {
-            _resources.GetSoundFxEngine().KillSounds(true);
+            resources.GetSoundFxEngine().KillSounds(true);
         }
     }
 
@@ -144,16 +119,16 @@ internal class GlobalHotkeys
     /// </remarks>
     private void ToggleFullScreenIfAsked()
     {
-        if (_input.GetPressedKey() != Keys.F12)
+        if (input.GetPressedKey() != Keys.F12)
         {
             return;
         }
 
-        if (InPlay() && _screenDirectory.Current != GameScreenType.Teleporter)
+        if (InPlay() && screenDirectory.Current != GameScreenType.Teleporter)
         {
             // Automatically pause the game after switching to or from fullscreen so the player
             // doesn't die unexpectedly
-            _session.Paused = true;
+            session.Paused = true;
         }
 
         try
@@ -165,31 +140,31 @@ internal class GlobalHotkeys
 
     private void ToggleBackgroundsIfAsked()
     {
-        if (_input.GetPressedKey() == Keys.F10 && _screenDirectory.Current == GameScreenType.MainGame)
+        if (input.GetPressedKey() == Keys.F10 && screenDirectory.Current == GameScreenType.MainGame)
         {
-            _presentation.DrawBackgrounds = !_presentation.DrawBackgrounds;
+            presentation.DrawBackgrounds = !presentation.DrawBackgrounds;
         }
     }
 
     private void SwitchGraphicsSetIfAsked()
     {
-        if (_input.GetPressedKey() != Keys.F8)
+        if (input.GetPressedKey() != Keys.F8)
         {
             return;
         }
 
-        _graphicsSet.Switch();
+        graphicsSet.Switch();
 
         // The original graphics have no backdrops drawn for them.
-        _presentation.DrawBackgrounds = _graphicsSet.IsRedrawn;
+        presentation.DrawBackgrounds = graphicsSet.IsRedrawn;
 
-        _artworkSwapped();
+        artworkSwapped();
 
-        _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.AccessSuccess, 1f, false);
+        resources.GetSoundFxEngine().PlaySound(Assets.Sounds.AccessSuccess, 1f, false);
     }
 
     private bool InPlay()
-        => Array.IndexOf(InPlayScreens, _screenDirectory.Current) >= 0;
+        => Array.IndexOf(InPlayScreens, screenDirectory.Current) >= 0;
 
     /// <summary>
     ///     Go fullscreen at the resolution the desktop is already running at, so the picture is
@@ -215,29 +190,29 @@ internal class GlobalHotkeys
     /// </summary>
     private void ToggleFullScreen()
     {
-        _graphicsDeviceManager.HardwareModeSwitch = false;
+        graphics.HardwareModeSwitch = false;
 
-        bool goingFullScreen = !_graphicsDeviceManager.IsFullScreen;
+        bool goingFullScreen = !graphics.IsFullScreen;
 
         if (goingFullScreen)
         {
             // Before the switch, not after: SDL ignores a border change on a window that is
             // already fullscreen, so asking for it afterwards does nothing at all.
-            _window.IsBorderless = true;
+            window.IsBorderless = true;
 
             DisplayMode desktop = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
 
-            _graphicsDeviceManager.PreferredBackBufferWidth = desktop.Width;
-            _graphicsDeviceManager.PreferredBackBufferHeight = desktop.Height;
+            graphics.PreferredBackBufferWidth = desktop.Width;
+            graphics.PreferredBackBufferHeight = desktop.Height;
         }
         else
         {
-            _graphicsDeviceManager.PreferredBackBufferWidth = CompositionSize.Width;
-            _graphicsDeviceManager.PreferredBackBufferHeight = CompositionSize.Height;
+            graphics.PreferredBackBufferWidth = CompositionSize.Width;
+            graphics.PreferredBackBufferHeight = CompositionSize.Height;
         }
 
-        _graphicsDeviceManager.IsFullScreen = goingFullScreen;
-        _graphicsDeviceManager.ApplyChanges();
+        graphics.IsFullScreen = goingFullScreen;
+        graphics.ApplyChanges();
 
         if (!goingFullScreen)
         {
@@ -245,7 +220,7 @@ internal class GlobalHotkeys
             // this is not one assignment either side of ApplyChanges. Asking for the border while
             // the window was still fullscreen left it borderless in a window, with no title bar
             // and so no way to close the game with the mouse.
-            _window.IsBorderless = false;
+            window.IsBorderless = false;
         }
     }
 }

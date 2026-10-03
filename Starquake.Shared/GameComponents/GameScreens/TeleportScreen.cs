@@ -29,7 +29,6 @@ internal class TeleportScreen : IGameScreen
     private readonly Shapes _shapeDrawer;
     private readonly ToggleKeys _input;
 
-
     /// <summary>
     ///     The destination code as typed so far, one underscore per letter still to be entered.
     /// </summary>
@@ -58,7 +57,6 @@ internal class TeleportScreen : IGameScreen
     private readonly FaderAnimation _teleportingMessageFader;
 
     public int ScreenFade { get; set; }
-
 
     public TeleportScreen(
         ResourceManager resources,

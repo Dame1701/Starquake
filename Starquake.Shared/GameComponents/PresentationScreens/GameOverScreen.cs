@@ -115,13 +115,14 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
         // _elements replaced
         ProportionalNumbers.Draw(520, 560, _elements.GetElementsReplacedCount().ToString("00"), Resources, ColourHelper.GetXna4Colour(134, 0, 134, (byte)ScreenFade));
 
-        // Core elements
+        DrawCoreElements();
+    }
+
+    private void DrawCoreElements()
+    {
         _elements.Draw(820, 446, ScreenFade);
-
         _foregroundImage.Begin(BlendState.AlphaBlend);
-
         _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.WhiteFadedTo((byte)ScreenFade));
-
         _foregroundImage.End();
     }
 }

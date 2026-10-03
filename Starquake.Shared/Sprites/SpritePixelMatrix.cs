@@ -44,17 +44,19 @@ internal class SpritePixelMatrix
 
     public void SetRandomPixel(Color colour)
     {
-        if (!Finished)
+        if (Finished)
         {
-            SpritePixel p;
-
-            do
-            {
-                p = Matrix[_randomNumberGenerator.Next(0, Matrix.Length)];
-            } while (p.Colour != Color.White);
-
-            p.Colour = colour;
-            p.IsOn = false;
+            return;
         }
+
+        SpritePixel p;
+
+        do
+        {
+            p = Matrix[_randomNumberGenerator.Next(0, Matrix.Length)];
+        } while (p.Colour != Color.White);
+
+        p.Colour = colour;
+        p.IsOn = false;
     }
 }

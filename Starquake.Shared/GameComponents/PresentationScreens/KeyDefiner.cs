@@ -12,11 +12,8 @@ using Starquake.Input;
 
 namespace Starquake.GameComponents.PresentationScreens;
 
-internal class KeyDefiner
+internal class KeyDefiner(ResourceManager resources, BitmapFont font, ToggleKeys input)
 {
-
-    private readonly BitmapFont _font;
-    private readonly ToggleKeys _input;
     private readonly string[] _keysToDefine =
     [
         "UP",
@@ -28,27 +25,19 @@ internal class KeyDefiner
         "QUIT"
     ];
 
-    private readonly ResourceManager _resources;
     private bool _allDone;
     private int _definedKeyIndex;
 
-    public KeyDefiner(ResourceManager resources, BitmapFont font, ToggleKeys input)
-    {
-        _resources = resources;
-        _font = font;
-        _input = input;
-        DefinedKeys =
-        [
-            Keys.O,
-            Keys.P,
-            Keys.A,
-            Keys.Q,
-            Keys.Space,
-            Keys.H,
-            Keys.Escape
-        ];
-    }
-    public Keys[] DefinedKeys { get; }
+    public Keys[] DefinedKeys { get; } =
+    [
+        Keys.O,
+        Keys.P,
+        Keys.A,
+        Keys.Q,
+        Keys.Space,
+        Keys.H,
+        Keys.Escape
+    ];
 
     public event EventHandler? KeyDefinitionComplete;
 
@@ -86,7 +75,7 @@ internal class KeyDefiner
 
     public void Update()
     {
-        Keys pressedKey = _input.GetPressedKey();
+        Keys pressedKey = input.GetPressedKey();
 
         if (!_allDone)
         {
@@ -94,7 +83,7 @@ internal class KeyDefiner
             {
                 if (pressedKey != Keys.None && !KeyAlreadyUsed(pressedKey))
                 {
-                    _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPickUp, 0.5f, false);
+                    resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPickUp, 0.5f, false);
                     DefinedKeys[_definedKeyIndex] = pressedKey;
                     _definedKeyIndex++;
                 }
@@ -123,12 +112,12 @@ internal class KeyDefiner
 
     public void Draw(int screenFade)
     {
-        _font.WriteText(480, 236, "Press a key for:", 2, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
+        font.WriteText(480, 236, "Press a key for:", 2, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
 
         int keyDefineYPos = 290;
         foreach (string keysToDefine in _keysToDefine)
         {
-            _font.WriteText(500, keyDefineYPos, keysToDefine + ":", 2, Color.White, (byte)screenFade);
+            font.WriteText(500, keyDefineYPos, keysToDefine + ":", 2, Color.White, (byte)screenFade);
             keyDefineYPos += 40;
         }
 
@@ -137,7 +126,7 @@ internal class KeyDefiner
         {
             if (definedKey != Keys.None)
             {
-                _font.WriteText(660, keyDefineYPos, ToggleKeys.GetFriendlyName(definedKey), 2, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
+                font.WriteText(660, keyDefineYPos, ToggleKeys.GetFriendlyName(definedKey), 2, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
             }
 
             keyDefineYPos += 40;
@@ -145,7 +134,7 @@ internal class KeyDefiner
 
         if (_allDone)
         {
-            _font.WriteText(540, 590, "OK ?  (Y / N )", ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
+            font.WriteText(540, 590, "OK ?  (Y / N )", ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
         }
     }
 }

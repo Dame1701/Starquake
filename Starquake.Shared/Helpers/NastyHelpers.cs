@@ -11,9 +11,7 @@ namespace Starquake.Helpers;
 
 internal static class NastyHelpers
 {
-
-    private static readonly Color White =
-        new(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full);
+    private static readonly Color White = new(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full);
 
     /// <summary>
     ///     What each kind of nasty splatters. Half of them throw white splodges and half throw a colour

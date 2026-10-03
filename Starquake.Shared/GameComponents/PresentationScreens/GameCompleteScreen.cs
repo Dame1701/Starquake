@@ -72,10 +72,9 @@ internal class GameCompleteScreen : GameScreenBase, IGameScreen
     public void Draw()
     {
         ScreenEffects.SelectRenderViewPort(ViewPorts.EntireScreen);
+
         _backgroundImage.Begin(BlendState.AlphaBlend);
-
         _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.WhiteFadedTo((byte)ScreenFade));
-
         _backgroundImage.End();
 
         Font.Begin(BlendState.AlphaBlend);
@@ -86,13 +85,14 @@ internal class GameCompleteScreen : GameScreenBase, IGameScreen
         Font.WriteTextCentred(1280, 390, "THIS FAR OUT IN THE GALAXY", 2, new Color((byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ScreenFade), (byte)ScreenFade);
         Font.End();
 
-        // Core elements
+        DrawCoreElements();
+    }
+
+    private void DrawCoreElements()
+    {
         _elements.Draw(540, 450, ScreenFade);
-
         _foregroundImage.Begin(BlendState.AlphaBlend);
-
         _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.WhiteFadedTo((byte)ScreenFade));
-
         _foregroundImage.End();
     }
 }

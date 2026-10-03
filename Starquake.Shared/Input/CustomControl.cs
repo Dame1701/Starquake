@@ -21,7 +21,7 @@ namespace Starquake.Input;
 ///         the five methods cannot disagree with each other or with ToggleKeys inside a frame.
 ///     </para>
 /// </remarks>
-internal class CustomControl
+internal class CustomControl(PlayerKeySet playerKeys, ToggleKeys input)
 {
     /// <summary>
     ///     How far the stick has to be pushed before it counts as a direction. Blob's movement is
@@ -30,53 +30,45 @@ internal class CustomControl
     /// </summary>
     private const float StickThreshold = 0.5f;
 
-    private readonly ToggleKeys _input;
+    public PlayerKeySet PlayerKeySet { get; set; } = playerKeys;
 
-    public CustomControl(PlayerKeySet playerKeys, ToggleKeys input)
-    {
-        PlayerKeySet = playerKeys;
-        _input = input;
-    }
-
-    public PlayerKeySet PlayerKeySet { get; set; }
-
-    public bool MovedUp()
-        => _input.KeyboardState.IsKeyDown(PlayerKeySet.Up) ||
-           PushedUp(_input.GamePadState);
+    public bool MovedUp() =>
+        input.KeyboardState.IsKeyDown(PlayerKeySet.Up) ||
+        PushedUp(input.GamePadState);
 
     public bool MovedDown() =>
-        _input.KeyboardState.IsKeyDown(PlayerKeySet.Down) ||
-        PushedDown(_input.GamePadState);
+        input.KeyboardState.IsKeyDown(PlayerKeySet.Down) ||
+        PushedDown(input.GamePadState);
 
     public bool MovedLeft() =>
-        _input.KeyboardState.IsKeyDown(PlayerKeySet.Left) ||
-        PushedLeft(_input.GamePadState);
+        input.KeyboardState.IsKeyDown(PlayerKeySet.Left) ||
+        PushedLeft(input.GamePadState);
 
     public bool MovedRight() =>
-        _input.KeyboardState.IsKeyDown(PlayerKeySet.Right) ||
-        PushedRight(_input.GamePadState);
+        input.KeyboardState.IsKeyDown(PlayerKeySet.Right) ||
+        PushedRight(input.GamePadState);
 
     public bool HasFired() =>
-        _input.KeyboardState.IsKeyDown(PlayerKeySet.Fire) ||
-        _input.GamePadState.Buttons.A == ButtonState.Pressed;
+        input.KeyboardState.IsKeyDown(PlayerKeySet.Fire) ||
+        input.GamePadState.Buttons.A == ButtonState.Pressed;
 
     /// <summary>
     ///     The d-pad and the left stick both count, so a pad can be held either way round. A pad that is
     ///     not plugged in reports every button released and both sticks centred, so these answer false
     ///     without needing to be asked whether one is there.
     /// </summary>
-    private static bool PushedUp(GamePadState pad)
-        => pad.DPad.Up == ButtonState.Pressed || pad.ThumbSticks.Left.Y > StickThreshold;
+    private static bool PushedUp(GamePadState pad) =>
+        pad.DPad.Up == ButtonState.Pressed || pad.ThumbSticks.Left.Y > StickThreshold;
 
     /// <inheritdoc cref="PushedUp" />
-    private static bool PushedDown(GamePadState pad)
-        => pad.DPad.Down == ButtonState.Pressed || pad.ThumbSticks.Left.Y < -StickThreshold;
+    private static bool PushedDown(GamePadState pad) =>
+        pad.DPad.Down == ButtonState.Pressed || pad.ThumbSticks.Left.Y < -StickThreshold;
 
     /// <inheritdoc cref="PushedUp" />
-    private static bool PushedLeft(GamePadState pad)
-        => pad.DPad.Left == ButtonState.Pressed || pad.ThumbSticks.Left.X < -StickThreshold;
+    private static bool PushedLeft(GamePadState pad) =>
+        pad.DPad.Left == ButtonState.Pressed || pad.ThumbSticks.Left.X < -StickThreshold;
 
     /// <inheritdoc cref="PushedUp" />
-    private static bool PushedRight(GamePadState pad)
-        => pad.DPad.Right == ButtonState.Pressed || pad.ThumbSticks.Left.X > StickThreshold;
+    private static bool PushedRight(GamePadState pad) =>
+        pad.DPad.Right == ButtonState.Pressed || pad.ThumbSticks.Left.X > StickThreshold;
 }

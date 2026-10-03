@@ -555,7 +555,7 @@ internal class Nasty
     {
         if (_birthScale < 1.0f)
         {
-            _birthScale = _birthScale + 1f / BirthPeriod;
+            _birthScale += 1f / BirthPeriod;
         }
 
         if (_birthScale > 1.0f)
@@ -567,11 +567,9 @@ internal class Nasty
         // Fade the nasty in
         if (_birthFadeLevel < ColourLevels.Full)
         {
-            _birthFadeLevel =
-                _birthFadeLevel +
-                (int)(ColourLevels.Full /
-                      ((double)BirthPeriod /
-                       BirthColourFadeHalf)); // We only have half the time to do the colour fade in 
+            _birthFadeLevel += (int)(ColourLevels.Full /
+                                     ((double)BirthPeriod /
+                                      BirthColourFadeHalf)); // We only have half the time to do the colour fade in 
         }
 
 
@@ -580,16 +578,14 @@ internal class Nasty
         {
             if (_birthColourLevel < ColourLevels.Full)
             {
-                _birthColourLevel =
-                    _birthColourLevel +
-                    (int)(ColourLevels.Full /
-                          ((double)BirthPeriod /
-                           BirthColourFadeHalf)); // We only have half the time to do the colour fade in 
+                _birthColourLevel += (int)(ColourLevels.Full /
+                                           ((double)BirthPeriod /
+                                            BirthColourFadeHalf)); // We only have half the time to do the colour fade in 
             }
 
             if (_birthRotateSpeed > BirthEndRotateSpeed)
             {
-                _birthRotateSpeed = _birthRotateSpeed - BirthEndRotateSpeed / ((float)BirthPeriod / BirthColourFadeHalf);
+                _birthRotateSpeed -= BirthEndRotateSpeed / ((float)BirthPeriod / BirthColourFadeHalf);
             }
         }
 

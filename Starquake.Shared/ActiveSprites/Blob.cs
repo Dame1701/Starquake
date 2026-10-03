@@ -497,7 +497,7 @@ internal class Blob
                 BlobWidth, BlobHeight, BlobHSpeed, true);
             if (amountToMove > 0)
             {
-                _blobXPos = _blobXPos - amountToMove;
+                _blobXPos -= amountToMove;
                 if (_shuttle.Riding)
                 {
                     _shuttle.Advance();
@@ -533,7 +533,7 @@ internal class Blob
                 BlobWidth, BlobHeight, BlobHSpeed, true);
             if (amountToMove > 0)
             {
-                _blobXPos = _blobXPos + amountToMove;
+                _blobXPos += amountToMove;
                 if (_shuttle.Riding)
                 {
                     _shuttle.Advance();
@@ -565,7 +565,7 @@ internal class Blob
 
         if (BlobsControl.MovedUp())
         {
-            _blobYPos = _blobYPos - _gameScreens.CheckCollision(Direction.Up, _blobXPos,
+            _blobYPos -= _gameScreens.CheckCollision(Direction.Up, _blobXPos,
                 _blobYPos,
                 BlobWidth, BlobHeight, BlobVSpeed, true);
             DirectionBlobMoved = Direction.Up;
@@ -573,7 +573,7 @@ internal class Blob
 
         if (BlobsControl.MovedDown())
         {
-            _blobYPos = _blobYPos + _gameScreens.CheckCollision(Direction.Down, _blobXPos,
+            _blobYPos += _gameScreens.CheckCollision(Direction.Down, _blobXPos,
                 _blobYPos, BlobWidth, BlobHeight, BlobVSpeed, true);
             DirectionBlobMoved = Direction.Down;
         }
@@ -621,7 +621,7 @@ internal class Blob
                             BlobWidth, BlobHeight, 1, true) != 0
                        )
                     {
-                        _blobYPos = _blobYPos - JumpHeightWithoutPlatforms;
+                        _blobYPos -= JumpHeightWithoutPlatforms;
                         _resources.GetSoundFxEngine()
                             .PlaySound(Assets.Sounds.BlobJumpsNoPlatforms, 1f, false);
                     }
@@ -745,7 +745,7 @@ internal class Blob
         }
 
         // Fall - arrrgh!!!
-        _blobYPos = _blobYPos + fall.Distance;
+        _blobYPos += fall.Distance;
     }
 
     /// <summary>
