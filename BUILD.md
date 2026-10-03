@@ -120,7 +120,7 @@ That target framework still compiles everywhere - `EnableWindowsTargeting` sees 
 just ships no content off a Mac, which costs nothing because the Windows head cannot run there.
 **Build the Windows head's content on Windows.** There it needs no Wine at all.
 
-Seven shaders are built, all of them `ps_2_0` because the profile is `Reach` and allows no higher:
+Eight shaders are built, all of them `ps_2_0` because the profile is `Reach` and allows no higher:
 
 | Shader | What it does |
 | --- | --- |
@@ -131,6 +131,7 @@ Seven shaders are built, all of them `ps_2_0` because the profile is `Reach` and
 | `Electric.fx` | The node and gate arcs: a white core on the filaments, a halo, a flicker |
 | `Overload.fx` | Blob's energy failing: drained by a nasty, the charge building, the cracking, the blast |
 | `CoreFunnel.fx` | The funnel of energy turning about the planet's core |
+| `TeleportArrival.fx` | The room settling after Blob arrives somewhere by teleport |
 
 **`ps_2_0` has no dynamic branching and 64 arithmetic slots**, and that is a real ceiling rather
 than a theoretical one. It is why `Crt.fx` is three techniques rather than one shader with
