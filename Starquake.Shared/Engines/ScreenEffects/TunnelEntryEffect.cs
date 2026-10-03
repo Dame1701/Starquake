@@ -4,7 +4,9 @@
 // -
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Starquake.Constants;
 using Starquake.Display;
+using Starquake.Helpers;
 
 namespace Starquake.Engines.ScreenEffects;
 
@@ -64,14 +66,34 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
     ///         pictures rather than as one passage.
     ///     </para>
     /// </summary>
-    private const double OverlapOfTheSqueeze = 0.2;
+    private const double OverlapOfTheSqueeze = 0.35;
 
     /// <summary>
     ///     How wide the arriving screen sits while the tunnel is being crossed, as a fraction of the
     ///     play area - the light at the end of it. A true black here would be a cut; a sliver of the
     ///     place being arrived at is what gives the beat somewhere to go.
     /// </summary>
-    private const double SliverOfLight = 0.06;
+    private const double SliverOfLight = 0.12;
+
+    /// <summary>
+    ///     How far each picture's inner edge fades out over, as a fraction of the play area, and so
+    ///     also how far it is drawn past where it ends. It does both jobs because they are the same
+    ///     job: the band that fades is the band that reaches across, so where the two are close
+    ///     enough their fades sit on top of each other and one dissolves into the other, and where
+    ///     they are not they melt into the dark of the tunnel instead of stopping at a hard line.
+    ///     <para>
+    ///         A hard edge is what made the two read as two pictures. Raising this makes them bleed
+    ///         into each other for longer; lowering it back towards nothing puts the cut back.
+    ///     </para>
+    /// </summary>
+    private const double BleedOfTheSeam = 0.16;
+
+    /// <summary>
+    ///     How many strips the fading band is drawn in. <c>SpriteBatch</c> tints a whole quad at
+    ///     once, so a gradient has to be several quads; eight is enough that the steps are not
+    ///     visible at this width and few enough to be free.
+    /// </summary>
+    private const int BleedStrips = 8;
 
     /// <summary>
     ///     How hard the picture stretches before it is pulled through and after it lands, as a
@@ -176,19 +198,23 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
     /// </summary>
     public override bool Draw(SpriteBatch renderer, RenderViewPort renderViewPortToUse)
     {
-        renderer.Begin(SpriteSortMode.Deferred, BlendState.Opaque, null, null, null, null,
+        var bleed = (int)(renderViewPortToUse.MasterWidth * BleedOfTheSeam);
+
+        renderer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null,
             presentation.Transform);
 
         if (outgoingScreen.Picture is { } leaving && _outgoingWidth > 0)
         {
-            renderer.Draw(leaving, PlacedAgainst(renderViewPortToUse, _outgoingWidth, SqueezesTowardsTheLeftEdge),
-                Color.White);
+            DrawBleedingInwards(renderer, leaving,
+                PlacedAgainst(renderViewPortToUse, _outgoingWidth, SqueezesTowardsTheLeftEdge),
+                bleed, SqueezesTowardsTheLeftEdge);
         }
 
         if (_incomingWidth > 0)
         {
-            renderer.Draw(renderViewPortToUse.RenderTarget,
-                PlacedAgainst(renderViewPortToUse, _incomingWidth, !SqueezesTowardsTheLeftEdge), Color.White);
+            DrawBleedingInwards(renderer, renderViewPortToUse.RenderTarget,
+                PlacedAgainst(renderViewPortToUse, _incomingWidth, !SqueezesTowardsTheLeftEdge),
+                bleed, !SqueezesTowardsTheLeftEdge);
         }
 
         renderer.End();
@@ -240,6 +266,73 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
         var travelled = (_frame - _emergeStart) / (double)_emergeFrames;
 
         return Math.Max(sliver, (int)(master * StretchedOut(travelled)));
+    }
+
+    /// <summary>
+    ///     Draws <paramref name="picture" /> across <paramref name="area" />, reaching
+    ///     <paramref name="bleed" /> pixels further towards the middle of the screen than the
+    ///     picture is wide and fading away across that reach.
+    /// </summary>
+    /// <remarks>
+    ///     The reach is more of the picture rather than its edge column smeared outwards, so the
+    ///     band that fades is real content and the two screens dissolve into one another where
+    ///     their bands meet.
+    /// </remarks>
+    /// <param name="pinnedToTheLeftEdge">
+    ///     Which edge the picture is held against, and so which of its edges is the one facing in.
+    /// </param>
+    private static void DrawBleedingInwards(SpriteBatch renderer, Texture2D picture, Rectangle area, int bleed,
+        bool pinnedToTheLeftEdge)
+    {
+        var reached = pinnedToTheLeftEdge
+            ? area with { Width = area.Width + bleed }
+            : area with { X = area.X - bleed, Width = area.Width + bleed };
+
+        var solid = reached.Width - bleed;
+
+        DrawSlice(renderer, picture, reached, pinnedToTheLeftEdge ? reached.Left : reached.Left + bleed, solid,
+            ColourLevels.Full);
+
+        var strip = Math.Max(1, bleed / BleedStrips);
+
+        for (int step = 0; step < BleedStrips; step++)
+        {
+            var into = step * strip;
+
+            var x = pinnedToTheLeftEdge
+                ? reached.Right - bleed + into
+                : reached.Left + bleed - into - strip;
+
+            // Falls off across the band, so the far end of it is all but gone.
+            var fade = (int)(ColourLevels.Full * (1 - ((into + (strip / 2.0)) / bleed)));
+
+            DrawSlice(renderer, picture, reached, x, strip, fade);
+        }
+    }
+
+    /// <summary>
+    ///     One vertical slice of a picture, taking the part of the picture that belongs where the
+    ///     slice lands so the slices line up into the whole.
+    /// </summary>
+    private static void DrawSlice(SpriteBatch renderer, Texture2D picture, Rectangle across, int x, int width,
+        int fade)
+    {
+        if (width <= 0)
+        {
+            return;
+        }
+
+        var sourceX = (int)((x - across.X) / (double)across.Width * picture.Width);
+        var sourceWidth = (int)(width / (double)across.Width * picture.Width);
+
+        var source = new Rectangle(
+            Math.Clamp(sourceX, 0, picture.Width - 1),
+            0,
+            Math.Clamp(sourceWidth, 1, picture.Width - Math.Clamp(sourceX, 0, picture.Width - 1)),
+            picture.Height);
+
+        renderer.Draw(picture, new Rectangle(x, across.Y, width, across.Height), source,
+            ColourHelper.WhiteFadedTo(fade));
     }
 
     private static Rectangle PlacedAgainst(RenderViewPort viewPort, int width, bool theLeftEdge)
