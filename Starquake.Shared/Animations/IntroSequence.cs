@@ -49,6 +49,21 @@ internal class IntroSequence
     /// <inheritdoc cref="RumbleFrom" />
     private const float RumbleFadeStep = 0.5f;
 
+    /// <summary>
+    ///     How long the screen holds still before the ship comes into view, and how long it holds
+    ///     on the wreck before the caption, in logic frames. A second each.
+    /// </summary>
+    private const int StartPauseFrames = LogicClock.FramesPerSecond;
+
+    /// <inheritdoc cref="StartPauseFrames" />
+    private const int PreFadeOutPauseFrames = LogicClock.FramesPerSecond;
+
+    /// <summary>
+    ///     How long the wreck is left on screen after the caption has gone before the game takes
+    ///     over, in logic frames. Four seconds, which is the rumble dying out.
+    /// </summary>
+    private const int EndPauseFrames = LogicClock.FramesPerSecond * 4;
+
     private readonly BlobDeathAnimation _blobKiller;
 
 
@@ -62,10 +77,8 @@ internal class IntroSequence
     private readonly ResourceManager _resources;
     private readonly ScreenDirectory _screenDirectory;
     private readonly ScreenEffectEngine _screenEffects;
-    private int _endPauseFrameCount;
     private int _endPauseFrameCounter;
 
-    private int _preFadeOutPause = 50;
     private int _preFadeOutPauseCounter;
 
     private float _rumbleAmount = RumbleFrom;
@@ -85,8 +98,11 @@ internal class IntroSequence
 
     private int _startPauseCounter;
 
-    private int _startPauseFrameCount;
-    public bool SequenceRunning;
+    /// <summary>
+    ///     Whether the crash is still playing. The game reads it to know whether to let Blob move,
+    ///     and the sequence is the only thing that sets it.
+    /// </summary>
+    public bool SequenceRunning { get; private set; }
 
     /// <summary>
     ///     The ship's fall, replaced whole at the start of each sequence. Where it comes in, where
@@ -136,13 +152,8 @@ internal class IntroSequence
 
         _rumbleAmount = RumbleFrom;
 
-        _preFadeOutPause = 50;
         _preFadeOutPauseCounter = 0;
-
-        _startPauseFrameCount = 50;
         _startPauseCounter = 0;
-
-        _endPauseFrameCount = 200;
         _endPauseFrameCounter = 0;
 
         SequenceStage = IntroSequenceStage.InitialPause;
@@ -210,7 +221,7 @@ internal class IntroSequence
 
     private void UpdateInitialPause()
     {
-        if (_startPauseCounter < _startPauseFrameCount)
+        if (_startPauseCounter < StartPauseFrames)
         {
             if (_startPauseCounter == 0)
             {
@@ -250,7 +261,7 @@ internal class IntroSequence
         _presentation.ScreenClearColour = Color.Black;
         _shipRotationSpeed = Ramp.Down(_shipRotationSpeed, TumbleSlowingStep, 0f);
 
-        if (_preFadeOutPauseCounter >= _preFadeOutPause)
+        if (_preFadeOutPauseCounter >= PreFadeOutPauseFrames)
         {
             if (MainScreen.ScreenFade > ColourLevels.None)
             {
@@ -312,7 +323,7 @@ internal class IntroSequence
     {
         if (SequenceStage == IntroSequenceStage.EndPause)
         {
-            if (_endPauseFrameCounter < _endPauseFrameCount)
+            if (_endPauseFrameCounter < EndPauseFrames)
             {
                 _endPauseFrameCounter++;
             }
