@@ -7,9 +7,9 @@ using Starquake.Collisions;
 namespace Starquake.Structure;
 
 /// <summary>
-///     What the blob can reach in each of the four directions this frame: the tile it would meet if it
-///     carried on that way, or <c>null</c> for open space. Nearly everything the blob does about the
-///     world it is standing in is decided from these four readings - the shuttle pad, the teleporter,
+///     What Blob can reach in each of the four directions this frame: the tile he would meet if he
+///     carried on that way, or <c>null</c> for open space. Nearly everything Blob does about the
+///     world he is standing in is decided from these four readings - the shuttle pad, the teleporter,
 ///     the access booths, both tunnel mouths, a bridge underfoot and the lift shaft overhead.
 /// </summary>
 /// <remarks>
@@ -28,8 +28,8 @@ internal readonly record struct BlobSurroundings(
     ///     Probes the four directions around something of this size at this position.
     /// </summary>
     /// <param name="heightBelow">
-    ///     The height to probe downwards with, which is not always <paramref name="height" />: the blob
-    ///     riding the shuttle is taller than the blob, and the shuttle is underneath him, so the ground
+    ///     The height to probe downwards with, which is not always <paramref name="height" />: Blob
+    ///     riding the shuttle is taller than Blob, and the shuttle is underneath him, so the ground
     ///     has to be looked for from his own feet rather than the shuttle's. The caller subtracts,
     ///     because the shuttle's height is the caller's business.
     /// </param>

@@ -161,8 +161,8 @@ internal class WorldPopulator
     }
 
     /// <summary>
-    ///     Puts one item on a random screen that the blob can reach without passing the gate the item
-    ///     itself opens, so that it can never be the thing standing between the blob and itself.
+    ///     Puts one item on a random screen that Blob can reach without passing the gate the item
+    ///     itself opens, so that it can never be the thing standing between Blob and itself.
     /// </summary>
     /// <remarks>
     ///     Screens are tried in a random order and the first with somewhere free to stand wins, rather

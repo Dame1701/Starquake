@@ -34,8 +34,8 @@ namespace Starquake.Display;
 internal class ScreenRenderer
 {
     /// <summary>
-    ///     Anything numbered above this is scenery drawn on the upper layer rather than a tile the
-    ///     blob can stand on, so the collision map skips it.
+    ///     Anything numbered above this is scenery drawn on the upper layer rather than a tile Blob
+    ///     can stand on, so the collision map skips it.
     /// </summary>
     private const int LastCollidableTile = (int)ActionTiles.ShuttleTag2;
 
@@ -80,8 +80,8 @@ internal class ScreenRenderer
     private const int RightTunnelMouthSprite = 12;
 
     /// <summary>
-    ///     Olly, the eye that watches the blob from the wall of one particular screen, and the screen
-    ///     it lives on. Its pupil tracks the blob across the room at a fraction of the blob's speed.
+    ///     Olly, the eye that watches Blob from the wall of one particular screen, and the screen
+    ///     it lives on. Its pupil tracks Blob across the room at a fraction of Blob's speed.
     /// </summary>
     private const int OllyScreenNumber = 477;
 
@@ -156,7 +156,7 @@ internal class ScreenRenderer
     /// <summary>
     ///     Runs one frame of the force field across a key-locked door. Drawn twice: a dim grey pass
     ///     for the body of it, then a bright additive pass over the middle, which is what gives it
-    ///     its core. It turns green when the blob is carrying the key that opens the door.
+    ///     its core. It turns green when Blob is carrying the key that opens the door.
     /// </summary>
     public void AnimateForceField(KeyLockDoor keyLockDoor, GameTime gameTime, bool blobHasKey)
     {
@@ -221,7 +221,7 @@ internal class ScreenRenderer
     }
 
     /// <summary>
-    ///     Olly's eyes follow the blob about, damped so they drift rather than snap.
+    ///     Olly's eyes follow Blob about, damped so they drift rather than snap.
     /// </summary>
     public void TrackBlobWithOllysEyes(int blobXPos, int blobYPos)
     {
@@ -505,7 +505,7 @@ internal class ScreenRenderer
     }
 
     /// <summary>
-    ///     The tunnel mouths, which are lower-layer tiles numbered above everything the blob can stand
+    ///     The tunnel mouths, which are lower-layer tiles numbered above everything Blob can stand
     ///     on and so are drawn over the upper layer rather than under it. A marker is numbered above
     ///     them again and is not a tile at all, which is why being past <see cref="LastCollidableTile" />
     ///     is no longer enough on its own.

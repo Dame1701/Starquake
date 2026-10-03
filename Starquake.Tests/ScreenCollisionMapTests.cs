@@ -11,7 +11,7 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     The map the blob and the nasties are stepped against. This is the thing most likely to break
+///     The map Blob and the nasties are stepped against. This is the thing most likely to break
 ///     when level data changes, and until <see cref="ScreenCollisionMap" /> came out of
 ///     <c>GameScreenCollection</c> none of it could be reached without loading the game's content.
 /// </summary>
@@ -104,7 +104,7 @@ public class ScreenCollisionMapTests
         // Act
         map.Rebuild(0);
 
-        // Assert - the four middle cells, none of which stops the blob
+        // Assert - the four middle cells, none of which stops Blob
         Assert.Equal(4, screen.CollisionMap.Count);
         Assert.All(screen.CollisionMap, cell => Assert.Equal(CollisionTileType.NotBlob, cell.CollisionTileType));
     }
@@ -264,8 +264,8 @@ public class ScreenCollisionMapTests
     }
 
     /// <summary>
-    ///     A nasty is held inside the screen and the blob is not, because walking off an edge is how
-    ///     the blob changes screens.
+    ///     A nasty is held inside the screen and Blob is not, because walking off an edge is how
+    ///     Blob changes screens.
     /// </summary>
     [Fact]
     public void CheckCollision_AtTheLeftEdge_ClampsANastyAndLetsTheBlobLeave()
@@ -445,9 +445,9 @@ public class ScreenCollisionMapTests
     }
 
     /// <summary>
-    ///     The jump platform the blob lays, the force field across a key-locked door and the elements
+    ///     The jump platform Blob lays, the force field across a key-locked door and the elements
     ///     in the core are cells no tile describes. A rebuild throws the map away, so it has to ask
-    ///     for them again - this is what the blob falling through a platform he had just laid was.
+    ///     for them again - this is what Blob falling through a platform he had just laid was.
     /// </summary>
     [Fact]
     public void Rebuild_ACellOwnedByADynamicSource_PutsItBackAfterwards()
@@ -528,7 +528,7 @@ public class ScreenCollisionMapTests
     }
 
     /// <summary>
-    ///     The symptom, rather than the map's contents: a blob falling onto a platform is stopped by
+    ///     The symptom, rather than the map's contents: Blob falling onto a platform is stopped by
     ///     it even if something else on the screen has rebuilt the map since he laid it.
     /// </summary>
     [Fact]
@@ -567,7 +567,7 @@ public class ScreenCollisionMapTests
         /// <summary>A tile image solid in every cell.</summary>
         public const int SolidTile = 1;
 
-        /// <summary>A tile image solid along its top row only - what the blob walks on.</summary>
+        /// <summary>A tile image solid along its top row only - what Blob walks on.</summary>
         public const int PlatformTile = 2;
 
         /// <summary>A tile image with no solid cell at all - drawn, but walked through.</summary>

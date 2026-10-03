@@ -73,7 +73,7 @@ internal class JumpPlatform
 
     /// <summary>
     ///     Which screen this platform was laid on. Its cells belong to that screen's collision map
-    ///     and no other, so it has to be remembered rather than taken as wherever the blob is now -
+    ///     and no other, so it has to be remembered rather than taken as wherever Blob is now -
     ///     he can have crossed to the next screen while the platform is still dissolving.
     /// </summary>
     public int ScreenNumber { get; set; }

@@ -8,13 +8,13 @@ using Starquake.Structure;
 namespace Starquake.ScreenEditor.Editing;
 
 /// <summary>
-///     The handful of positions the author marks once for the whole planet - where the blob starts, where
+///     The handful of positions the author marks once for the whole planet - where Blob starts, where
 ///     his ship came down, where the core's exit is, and where the core itself sits - and what is wrong
 ///     with them.
 /// </summary>
 /// <remarks>
 ///     All four are looked up out of the map rather than held by it: a marker is a tile number painted on
-///     a screen, so finding the blob's start means searching 512 screens for one. They are cached here
+///     a screen, so finding Blob's start means searching 512 screens for one. They are cached here
 ///     because the panel that shows them redraws far more often than the map changes, and
 ///     <see cref="Refresh" /> is what keeps the cache honest.
 /// </remarks>
@@ -37,7 +37,7 @@ internal sealed class AuthoredPositions : ViewModelBase
     }
 
     /// <summary>
-    ///     Where the blob is put down at the start of a game, or null if no screen says. The screen this
+    ///     Where Blob is put down at the start of a game, or null if no screen says. The screen this
     ///     is on is the screen the game opens on.
     /// </summary>
     public MarkerPlacement? BlobStart => _blobStart;
@@ -46,7 +46,7 @@ internal sealed class AuthoredPositions : ViewModelBase
     public MarkerPlacement? ShipCrashSite => _shipCrashSite;
 
     /// <summary>
-    ///     Where the blob arrives having been thrown out of the planet core, or null if no screen says.
+    ///     Where Blob arrives having been thrown out of the planet core, or null if no screen says.
     /// </summary>
     public MarkerPlacement? CoreExit => _coreExit;
 

@@ -125,7 +125,7 @@ internal class GameScreenCollection : IDynamicCollisionCells
     public GameScreenData CurrentGameScreenData => _gameScreens[ScreenNumber];
 
     /// <summary>
-    ///     Where the blob's ship came down, read off the map rather than written into the game. Looked
+    ///     Where Blob's ship came down, read off the map rather than written into the game. Looked
     ///     up once: the map does not change while a game is running, and every frame of the wreck's
     ///     smoke would otherwise walk all 512 screens looking for the marker again.
     /// </summary>
@@ -148,19 +148,19 @@ internal class GameScreenCollection : IDynamicCollisionCells
     public Point CorePosition => new(CoreSite.XPos, CoreSite.YPos);
 
     /// <summary>
-    ///     Where the blob stands at the start of a game: centred across the square the author marked,
+    ///     Where Blob stands at the start of a game: centred across the square the author marked,
     ///     with its feet on the bottom of it.
     /// </summary>
     public Point BlobStartPosition => StandingIn(LandingSite.BlobStartTileX, LandingSite.BlobStartTileY);
 
     /// <summary>
-    ///     Where the blob stands on leaving the core: the square the author marked, the same way round
+    ///     Where Blob stands on leaving the core: the square the author marked, the same way round
     ///     as <see cref="BlobStartPosition" />.
     /// </summary>
     public Point CoreExitPosition => StandingIn(CoreExit.TileX, CoreExit.TileY);
 
     /// <summary>
-    ///     The blob standing in a marked square: centred across it, with its feet on the bottom of it.
+    ///     Blob standing in a marked square: centred across it, with his feet on the bottom of it.
     /// </summary>
     private static Point StandingIn(int tileX, int tileY) => new(
         tileX * TileMetrics.TileWidth + (TileMetrics.TileWidth - SpriteMetrics.SpriteWidth) / 2,
@@ -428,7 +428,7 @@ internal class GameScreenCollection : IDynamicCollisionCells
     ///     The cells of the key-locked doors found on the screen being shown. A door only hunts for
     ///     its own cells when it has none - see <see cref="UpdateKeyLockDoor" /> - so without this a
     ///     rebuild left the door holding cells that were no longer in the map, and its force field let
-    ///     the blob walk through for the rest of the visit.
+    ///     Blob walk through for the rest of the visit.
     /// </summary>
     public IEnumerable<CollisionTile> CellsOnScreen(int screenNumber)
     {
@@ -483,14 +483,14 @@ internal class GameScreenCollection : IDynamicCollisionCells
             directionToCheck, playerXPos, playerYPos, playerWidth, playerHeight, velocity);
 
     /// <summary>
-    ///     Stepped with where the blob is and whether it is carrying a key, rather than holding
-    ///     the blob and asking. Two things on the planet follow the blob - the force field on a
-    ///     key-locked door, which turns green when the blob can open it, and Olly's eyes, which
-    ///     drift after it - and neither needs the blob itself, only three values it can be told.
+    ///     Stepped with where Blob is and whether he is carrying a key, rather than holding
+    ///     Blob and asking. Two things on the planet follow Blob - the force field on a
+    ///     key-locked door, which turns green when Blob can open it, and Olly's eyes, which
+    ///     drift after it - and neither needs Blob himself, only three values it can be told.
     ///     <para>
     ///         The planet is only ever stepped by name from <c>MainGameScreen</c>, never
     ///         polymorphically, which is what lets this take arguments at all. Being told instead
-    ///         of asking is in turn what lets the planet be built before the blob rather than
+    ///         of asking is in turn what lets the planet be built before Blob rather than
     ///         after it, which is the whole of the cycle between them.
     ///     </para>
     /// </summary>
@@ -526,7 +526,7 @@ internal class GameScreenCollection : IDynamicCollisionCells
     }
 
     /// <summary>
-    ///     One key-locked door: whether it lets blob through, and the force field that says so.
+    ///     One key-locked door: whether it lets Blob through, and the force field that says so.
     ///     Passable to him if he is carrying the key, solid if not - and solid to nasties either
     ///     way, which is why the tiles flip between <see cref="CollisionTileType.NotBlob" /> and
     ///     <see cref="CollisionTileType.EveryoneHits" /> rather than being removed.
@@ -602,7 +602,7 @@ internal class GameScreenCollection : IDynamicCollisionCells
     }
 
     /// <summary>
-    ///     Starts a new game on this planet: the blob back at the wreck, and the whole map scattered
+    ///     Starts a new game on this planet: Blob back at the wreck, and the whole map scattered
     ///     with things to find.
     /// </summary>
     public void Reset()

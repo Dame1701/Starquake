@@ -18,7 +18,7 @@ internal class ElectricityGatesAndNodesEngine
 
     /// <summary>
     ///     The live part of an electricity node, as an inset from the tile it is drawn on. The arc
-    ///     hangs below the node itself and does not reach the tile's edges, so the blob can pass under
+    ///     hangs below the node itself and does not reach the tile's edges, so Blob can pass under
     ///     one corner of the tile without being struck.
     /// </summary>
     private const int NodeArcLeft = 40;

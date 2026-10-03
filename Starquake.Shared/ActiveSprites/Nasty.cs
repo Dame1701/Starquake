@@ -265,7 +265,7 @@ internal class Nasty
 
     /// <summary>
     ///     Takes a snapshot of another nasty, which is how leaving a screen works: twice the number of
-    ///     nasties needed are kept, and the set being left is copied into the spare half in case the blob
+    ///     nasties needed are kept, and the set being left is copied into the spare half in case Blob
     ///     comes back to it.
     /// </summary>
     /// <remarks>

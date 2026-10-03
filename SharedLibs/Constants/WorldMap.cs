@@ -13,8 +13,8 @@ namespace Starquake.Constants;
 public static class WorldMap
 {
     /// <summary>
-    ///     How many screens make up one row of the map. Adding or subtracting this is what moves the
-    ///     blob a screen down or up, and a screen number modulo this is its column.
+    ///     How many screens make up one row of the map. Adding or subtracting this is what moves Blob
+    ///     a screen down or up, and a screen number modulo this is its column.
     /// </summary>
     public const int ScreensAcross = 16;
 
@@ -36,12 +36,12 @@ public static class WorldMap
     /// <summary>
     ///     The planet core room. It is a screen like any other as far as the map is concerned, but
     ///     the game has to recognise it by number: it is seeded differently from the rest, and it
-    ///     keeps running while the blob is elsewhere.
+    ///     keeps running while Blob is elsewhere.
     /// </summary>
     public const int CoreScreenNumber = 199;
 
     /// <summary>
-    ///     The room next to the core, which is where the blob is put down on leaving it.
+    ///     The room next to the core, which is where Blob is put down on leaving it.
     /// </summary>
     public const int CoreApproachScreenNumber = 198;
 }

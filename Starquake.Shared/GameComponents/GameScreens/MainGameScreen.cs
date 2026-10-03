@@ -18,8 +18,8 @@ using Starquake.Structure;
 namespace Starquake.GameComponents.GameScreens;
 
 /// <summary>
-///     The game being played: the planet drawn, the blob and everything chasing him stepped, and the
-///     score kept. Every other screen is somewhere the blob has gone, and this is where he comes back to.
+///     The game being played: the planet drawn, Blob and everything chasing him stepped, and the
+///     score kept. Every other screen is somewhere Blob has gone, and this is where he comes back to.
 /// </summary>
 /// <remarks>
 ///     Not a <c>GameScreenBase</c>, which is for the five full-screen pages of text. This is the only
@@ -30,7 +30,7 @@ internal class MainGameScreen : IGameScreen
 {
 
     /// <summary>
-    ///     How fast a screen fades up when the blob walks onto it, in colour channel levels a frame.
+    ///     How fast a screen fades up when Blob walks onto it, in colour channel levels a frame.
     /// </summary>
     private const int ScreenFadeUpSpeed = 32;
 
@@ -71,7 +71,7 @@ internal class MainGameScreen : IGameScreen
 
     /// <summary>
     ///     The colour animations the access booth tiles are given, and how long each runs for. Green
-    ///     for a booth the blob has the code for, red for one it has not.
+    ///     for a booth Blob has the code for, red for one he has not.
     /// </summary>
     private const int TeleporterAnimationLoops = 1;
 
@@ -247,7 +247,7 @@ internal class MainGameScreen : IGameScreen
     }
 
     /// <summary>
-    ///     Whether the blob is under the player's control. The intro sequence flies over the same
+    ///     Whether Blob is under the player's control. The intro sequence flies over the same
     ///     screen before handing it over, and four separate blocks of this update used to spell that
     ///     test out.
     /// </summary>
@@ -345,7 +345,7 @@ internal class MainGameScreen : IGameScreen
             GameEngine.Player.Update(gameTime);
         }
 
-        // Update blob's death routine. Blob is revived the frame after he reaches Dead, so
+        // Update Blob's death routine. Blob is revived the frame after he reaches Dead, so
         // the animation's own state has to keep it alive while the explosion fades out
         if (GameEngine.Player.BlobsState == BlobState.Dead ||
             GameEngine.Player.BlobsState == BlobState.Dying ||
@@ -357,7 +357,7 @@ internal class MainGameScreen : IGameScreen
     }
 
     /// <summary>
-    ///     The smoke from the wreck of the blob's ship, which only exists on the screen it crashed on.
+    ///     The smoke from the wreck of Blob's ship, which only exists on the screen it crashed on.
     /// </summary>
     private void UpdateShipSmoke(GameTime gameTime)
     {
@@ -578,7 +578,7 @@ internal class MainGameScreen : IGameScreen
     /// </summary>
     private void DrawBlobDeath()
     {
-        // Draw blob's death routine
+        // Draw Blob's death routine
         if (GameEngine.Player.BlobsState is BlobState.Dead or BlobState.Dying or BlobState.Overloading ||
             GameEngine.BlobKiller.Active)
         {

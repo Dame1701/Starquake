@@ -27,7 +27,7 @@ internal class Nasties
     private const int UnplacedNastyPosition = -1000;
 
     /// <summary>
-    ///     The size of the blob's shot, for testing it against a nasty.
+    ///     The size of Blob's shot, for testing it against a nasty.
     /// </summary>
     private const int FireWidth = TileMetrics.CollisionCellWidth;
 
@@ -133,7 +133,7 @@ internal class Nasties
             }
         }
 
-        // Only the first nasty touching blob drains his energy - all of them at once is too quick
+        // Only the first nasty touching Blob drains his energy - all of them at once is too quick
         // and unfair
         bool nastyInteractingWithBlob = false;
         int nastySpawnedCounter = 0;
@@ -168,7 +168,7 @@ internal class Nasties
     }
 
     /// <summary>
-    ///     The blob's box is pulled in by eight pixels all round so that a near miss is not counted as a
+    ///     Blob's box is pulled in by eight pixels all round so that a near miss is not counted as a
     ///     touch. Only the first nasty to make contact in a frame raises the event.
     /// </summary>
     private void TouchBlob(int a, ref bool nastyInteractingWithBlob)
@@ -195,7 +195,7 @@ internal class Nasties
                     }
                 }
 
-                // Trigger the blob animation
+                // Trigger Blob animation
                 _blob.BlobTouchedByNasty = true;
             }
         }
@@ -341,7 +341,7 @@ internal class Nasties
 
     /// <summary>
     ///     Saves the nasties of the screen being left into the second half of the array, where they
-    ///     wait in case the blob comes straight back. Any that were dead are revived first, so a screen
+    ///     wait in case Blob comes straight back. Any that were dead are revived first, so a screen
     ///     is never returned to empty.
     /// </summary>
     private void StoreNastiesFromScreenWeLeft()

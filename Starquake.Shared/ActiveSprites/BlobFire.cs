@@ -74,15 +74,15 @@ internal sealed class BlobFire(IFireSurroundings surroundings)
 
     /// <summary>
     ///     Moves the shot on one frame. Returns false once it has come to an end, at which point
-    ///     the blob may fire again.
+    ///     Blob may fire again.
     /// </summary>
-    /// <param name="firedIn">The direction the blob was facing when it fired.</param>
+    /// <param name="firedIn">The direction Blob was facing when he fired.</param>
     /// <param name="firedFromShuttle">
     ///     Whether the shot left a shuttle. Only a shot fired from a shuttle deflects; one fired on
     ///     foot stops at the first thing it meets.
     /// </param>
     /// <param name="pointBlankReach">
-    ///     Set when the blob is standing on something a shot would otherwise be stopped by, to how
+    ///     Set when Blob is standing on something a shot would otherwise be stopped by, to how
     ///     far the shot has to get before that thing counts. Null when he is standing on nothing.
     ///     It applies to shots fired along the horizontal axis only, which is where it was
     ///     inherited from and is worth revisiting on its own.
@@ -94,7 +94,7 @@ internal sealed class BlobFire(IFireSurroundings surroundings)
         if (firedAlong is null)
         {
             // Nothing steps along this direction. On foot the shot is dropped, which is what
-            // happens when the blob walks off a shuttle pad mid-shot; from a shuttle it is left
+            // happens when Blob walks off a shuttle pad mid-shot; from a shuttle it is left
             // where it is.
             return firedFromShuttle;
         }

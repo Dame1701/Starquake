@@ -17,7 +17,7 @@ namespace Starquake.ActiveSprites;
 internal class CoreElement
 {
     /// <summary>
-    ///     How an element being put back is animated: the one the blob is carrying shrinks from three
+    ///     How an element being put back is animated: the one Blob is carrying shrinks from three
     ///     times size down to normal while the replacement grows up to it, and the swap is treated as
     ///     finished once the incoming one is all but full size.
     /// </summary>

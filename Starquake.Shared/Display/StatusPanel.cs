@@ -123,9 +123,9 @@ internal class StatusPanel
     }
 
     /// <summary>
-    ///     Steps the panel. Takes the blob rather than holding it, and is told whether the intro is
+    ///     Steps the panel. Takes Blob rather than holding him, and is told whether the intro is
     ///     at a point where energy should drain, because the panel is built before either exists -
-    ///     the blob needs the panel to read its supplies from, and the panel needs the blob to drain
+    ///     Blob needs the panel to read his supplies from, and the panel needs Blob to drain
     ///     and revive. Handing it over per call is what makes that pair acyclic.
     /// </summary>
     public void Update(Collectables[] blobsInventory, Blob blob, bool energyMayDrain)
@@ -134,9 +134,9 @@ internal class StatusPanel
         {
             _blobsInventory = blobsInventory;
 
-            // The blob is only drained while he is walking the planet - a teleporter, a booth or a
+            // Blob is only drained while he is walking the planet - a teleporter, a booth or a
             // pyramid is a safe place to stand. PlayerStats decides whether that has killed him;
-            // applying the answer to the blob is this class's job because it is the one holding one.
+            // applying the answer to Blob is this class's job because it is the one holding one.
             if (_stats.DrainEnergy(energyMayDrain && _screenDirectory.Current == GameScreenType.MainGame))
             {
                 blob.KillBlob(false, true);

@@ -10,7 +10,7 @@ using Starquake.Structure;
 namespace Starquake.Collisions;
 
 /// <summary>
-///     What the blob and the nasties can walk into on one screen, and how far they are allowed to
+///     What Blob and the nasties can walk into on one screen, and how far they are allowed to
 ///     move before they do. Built from the screen's tiles and the collision data that ships beside
 ///     them, then asked, many times a frame.
 /// </summary>
@@ -141,7 +141,7 @@ internal class ScreenCollisionMap
         => _dynamicCellSources.Add(source);
 
     /// <summary>
-    ///     Adds a cell to the map that is not read off the screen's tiles - a jump platform the blob has
+    ///     Adds a cell to the map that is not read off the screen's tiles - a jump platform Blob has
     ///     just laid, or the force field across a key-locked door. This is so the cell counts from this
     ///     frame on; keeping it across a rebuild is the job of the
     ///     <see cref="IDynamicCollisionCells" /> source that owns it.
@@ -159,8 +159,8 @@ internal class ScreenCollisionMap
 
     /// <summary>
     ///     The image of the first tile a box overlaps, or -1 if it overlaps none. A
-    ///     <see cref="CollisionTileType.NotBlob" /> cell is there for the nasties to walk on, so the
-    ///     blob passes through it and the search carries on looking for something it does hit.
+    ///     <see cref="CollisionTileType.NotBlob" /> cell is there for the nasties to walk on, so Blob
+    ///     passes through it and the search carries on looking for something he does hit.
     /// </summary>
     public int CheckRectangles(
         int playerXPos,
@@ -188,7 +188,7 @@ internal class ScreenCollisionMap
 
     /// <summary>
     ///     How far the mover may travel in a direction before something stops it - its full velocity if
-    ///     nothing does. Nasties are additionally held inside the screen; the blob is not, because
+    ///     nothing does. Nasties are additionally held inside the screen; Blob is not, because
     ///     walking off an edge is how he changes screens.
     /// </summary>
     public int CheckCollision(
@@ -237,7 +237,7 @@ internal class ScreenCollisionMap
     /// <summary>
     ///     The tile an object is about to move into, and where within that tile the object meets it.
     ///     Unlike <see cref="CheckCollision" /> this is about the tile the level author placed rather
-    ///     than the cells of it that are solid - it is how the blob finds a tunnel mouth, a lift shaft
+    ///     than the cells of it that are solid - it is how Blob finds a tunnel mouth, a lift shaft
     ///     or a booth to step into.
     /// </summary>
     public TileDetected? CheckTileByObject(
@@ -315,7 +315,7 @@ internal class ScreenCollisionMap
         };
 
     /// <summary>
-    ///     An item sitting on a screen occupies two cells each way, and nothing but blob collides
+    ///     An item sitting on a screen occupies two cells each way, and nothing but Blob collides
     ///     with one.
     /// </summary>
     private static void AddObjectCollisionTiles(List<CollisionTile> collisionMap, InteractiveItem item)
@@ -414,7 +414,7 @@ internal class ScreenCollisionMap
     }
 
     /// <summary>
-    ///     Central spikes and broken bottles. Only the four middle cells, and only against nasties - blob
+    ///     Central spikes and broken bottles. Only the four middle cells, and only against nasties - Blob
     ///     is meant to be able to walk onto them and die.
     /// </summary>
     private void AddCentralSpikeCollisionCells(int x, int y)
@@ -491,7 +491,7 @@ internal class ScreenCollisionMap
     }
 
     /// <summary>
-    ///     A cell the nasties collide with and the blob walks through. Its image number is meaningless -
+    ///     A cell the nasties collide with and Blob walks through. Its image number is meaningless -
     ///     nothing reads it back - which is what the six callers' repeated comment said.
     /// </summary>
     private void AddNastyOnlyCell(int xPos, int yPos)
@@ -542,7 +542,7 @@ internal class ScreenCollisionMap
 
     /// <summary>
     ///     How far one collision tile allows the mover to travel. Two kinds of tile let it pass
-    ///     regardless: those marked <see cref="CollisionTileType.NotBlob" /> when the mover is blob,
+    ///     regardless: those marked <see cref="CollisionTileType.NotBlob" /> when the mover is Blob,
     ///     and a game object a nasty has ended up embedded inside, which is released rather than
     ///     trapped.
     /// </summary>
@@ -587,7 +587,7 @@ internal class ScreenCollisionMap
     }
 
     /// <summary>
-    ///     Stops a mover at the edge of the screen. Only nasties are clamped: blob walking off an edge
+    ///     Stops a mover at the edge of the screen. Only nasties are clamped: Blob walking off an edge
     ///     is how he changes screens.
     /// </summary>
     /// <remarks>

@@ -11,19 +11,19 @@ using Starquake.Structure;
 namespace Starquake.ActiveSprites.BlobParts;
 
 /// <summary>
-///     The four things the blob can carry, and the one move he can make with them: press down on a
+///     The four things Blob can carry, and the one move he can make with them: press down on a
 ///     pick-up and the back of the queue is dropped on the floor, everything shuffles along, and
 ///     whatever he is standing on goes in at the front.
 /// </summary>
 /// <remarks>
 ///     A queue rather than a set of slots, which is what makes the game's puzzles what they are: to
-///     get at an item three places back, the blob has to cycle everything in front of it out onto
+///     get at an item three places back, Blob has to cycle everything in front of it out onto
 ///     the floor and pick it all up again.
 /// </remarks>
 internal class Inventory
 {
     /// <summary>
-    ///     How many things the blob can carry. Picking something up pushes the whole inventory along
+    ///     How many things Blob can carry. Picking something up pushes the whole inventory along
     ///     one and drops whatever falls off the end.
     /// </summary>
     public const int Capacity = 4;
@@ -44,7 +44,7 @@ internal class Inventory
     public Collectables[] Items { get; }
 
     /// <summary>
-    ///     Drops the back of the queue, shuffles along, and picks up whatever the blob is standing
+    ///     Drops the back of the queue, shuffles along, and picks up whatever Blob is standing
     ///     on - which is never the item just dropped, even though it lands under his feet.
     /// </summary>
     public void SwapWithFloor(Rectangle blob, List<InteractiveItem> pickUpsOnScreen)

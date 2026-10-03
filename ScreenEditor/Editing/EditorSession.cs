@@ -292,7 +292,7 @@ internal sealed class EditorSession : ViewModelBase
             EditorTool.Paint when _selectedTile == EditorDocument.EmptyTile => LastOrdinaryTile,
 
             // Something, and never a marker: a marker is a position the author marks, so flooding a
-            // screen with "this is where the blob starts" is not a thing anyone wants.
+            // screen with "this is where Blob starts" is not a thing anyone wants.
             EditorTool.Fill when _selectedTile == EditorDocument.EmptyTile || SelectedMarker is not null
                 => LastOrdinaryTile,
 

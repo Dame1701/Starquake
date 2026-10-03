@@ -9,7 +9,7 @@ using Starquake.Structure;
 namespace Starquake.ActiveSprites;
 
 /// <summary>
-///     The lift that carries the blob up a shaft. He gets on by walking under one, goes up until the
+///     The lift that carries Blob up a shaft. He gets on by walking under one, goes up until the
 ///     shaft runs out, and can step off into a side passage once he has gone far enough up to have
 ///     cleared the one he got on at.
 /// </summary>
@@ -64,7 +64,7 @@ internal sealed class TunnelLift
     public bool GoingUp { get; private set; }
 
     /// <summary>
-    ///     Puts him off the lift without stepping it, for a blob who has just died on one.
+    ///     Puts him off the lift without stepping it, for when he has just died on one.
     /// </summary>
     public void LetGo() => GoingUp = false;
 

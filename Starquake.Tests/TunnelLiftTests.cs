@@ -13,9 +13,9 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     The lift that carries the blob up a shaft: when he is on one, how far it takes him, and when he is
-///     allowed to step off sideways. All of it was inside <c>Blob.GoUpTheShaft</c>, which needed a blob,
-///     and a blob needs the content pipeline and a graphics device.
+///     The lift that carries Blob up a shaft: when he is on one, how far it takes him, and when he is
+///     allowed to step off sideways. All of it was inside <c>Blob.GoUpTheShaft</c>, which needed Blob,
+///     and Blob needs the content pipeline and a graphics device.
 /// </summary>
 /// <remarks>
 ///     <see cref="TunnelLift" /> takes its sound as two callbacks rather than a sound engine, which is
@@ -227,8 +227,9 @@ public class TunnelLiftTests
     }
 
     /// <summary>
-    ///     The minimum distance counts from getting on, so a second shaft starts the count again. Without this,
-    ///     a blob who had gone up once could step straight out of the next shaft he entered.
+    ///     The minimum distance counts from getting on, so a second shaft starts the count again.
+    ///     Without this, having gone up one shaft, Blob could step straight out of the next one he
+    ///     entered.
     /// </summary>
     [Fact]
     public void Step_GettingOnASecondShaft_CountsTheDistanceFromScratch()

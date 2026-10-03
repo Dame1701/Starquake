@@ -32,7 +32,7 @@ internal static class ShippedMap
     }
 
     /// <summary>
-    ///     One length-prefixed MessagePack blob, which is the shape of the file - see
+    ///     One length-prefixed MessagePack Blob, which is the shape of the file - see
     ///     <c>ScreenDataFile</c> in the screen editor, which is the thing that writes it.
     /// </summary>
     private static byte[] ReadBlob(Stream stream)

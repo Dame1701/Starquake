@@ -13,7 +13,7 @@ namespace Starquake.Structure;
 /// <remarks>
 ///     <para>
 ///         A screen is stored as a grid of tile numbers, so the only way to say "a floor nasty walks
-///         here" or "this is where the blob's ship comes down" is to paint a number that means it.
+///         here" or "this is where Blob's ship comes down" is to paint a number that means it.
 ///         These are those numbers, and the game draws none of them: there is no artwork for any of
 ///         them on either tile sheet, and the screen editor draws a labelled box of its own wherever
 ///         one has been placed.
@@ -30,7 +30,7 @@ public enum MarkerTile
 
     /// <summary>
     ///     A gap that should stay a gap. Nothing is drawn and nothing is placed here, which is what
-    ///     reserves the square for the blob to move through.
+    ///     reserves the square for Blob to move through.
     /// </summary>
     Spacer = 500,
 
@@ -46,20 +46,20 @@ public enum MarkerTile
     PreferredCoreLocation = 502,
 
     /// <summary>
-    ///     Where the blob is put down at the start of a game. The screen this is on is the screen the
+    ///     Where Blob is put down at the start of a game. The screen this is on is the screen the
     ///     game opens on, so there is one of these on the whole planet.
     /// </summary>
     BlobStartPosition = 503,
 
     /// <summary>
-    ///     Where the blob's ship comes to rest. The intro sequence flies the ship into this square and
+    ///     Where Blob's ship comes to rest. The intro sequence flies the ship into this square and
     ///     the wreck smokes here for the rest of the game, so it belongs on the same screen as
-    ///     <see cref="BlobStartPosition" /> - the blob climbs out of the wreck it arrived in.
+    ///     <see cref="BlobStartPosition" /> - Blob climbs out of the wreck he arrived in.
     /// </summary>
     ShipCrashSite = 504,
 
     /// <summary>
-    ///     Where the blob is put down on leaving the planet core. The screen this is on is the one the
+    ///     Where Blob is put down on leaving the planet core. The screen this is on is the one the
     ///     core keeps running for and the one nasties are disabled on, so it is the core's doorstep
     ///     rather than merely a position - see <see cref="CoreExit" />.
     /// </summary>

@@ -16,7 +16,7 @@ namespace Starquake.Scoring;
 /// <remarks>
 ///     All of this was on <c>StatusPanel</c>, a class named for the strip of HUD that displays it.
 ///     That is why <c>Blob</c> read his own supplies off a widget, and it is the reason the panel had
-///     to be handed the blob per call rather than holding one - the cycle <c>DECOUPLING.md</c> broke
+///     to be handed Blob per call rather than holding one - the cycle <c>DECOUPLING.md</c> broke
 ///     without being able to remove.
 ///     <para>
 ///         Nothing here draws, so nothing here needs a graphics device, which is the point: the
@@ -25,20 +25,20 @@ namespace Starquake.Scoring;
 ///         a sound it has never been given.
 ///     </para>
 ///     <para>
-///         The two methods that decide the blob's fate - <see cref="DrainEnergy" /> and
-///         <see cref="TakeALife" /> - return what they decided rather than acting on a blob, so this
-///         class does not need to know what a blob is.
+///         The two methods that decide Blob's fate - <see cref="DrainEnergy" /> and
+///         <see cref="TakeALife" /> - return what they decided rather than acting on Blob, so this
+///         class does not need to know what Blob is.
 ///     </para>
 /// </remarks>
 internal class PlayerStats
 {
     /// <summary>
-    ///     How long the blob goes between losing a bar of energy, in logic frames - four seconds.
+    ///     How long Blob goes between losing a bar of energy, in logic frames - four seconds.
     /// </summary>
     private const int EnergyDrainFrames = 4 * LogicClock.FramesPerSecond;
 
     /// <summary>
-    ///     How much of each supply the blob can hold, and how much he starts a life with. The bars on
+    ///     How much of each supply Blob can hold, and how much he starts a life with. The bars on
     ///     the panel are drawn full at these, so a pick-up that would take a supply over its ceiling
     ///     is simply capped.
     /// </summary>
@@ -59,7 +59,7 @@ internal class PlayerStats
     private const int StartingLives = 4;
 
     /// <summary>
-    ///     The platforms a revived blob is given if he died with fewer, so that losing a life never
+    ///     The platforms Blob is given when he comes back, if he died with fewer, so that losing a life never
     ///     strands him somewhere he cannot climb out of.
     /// </summary>
     private const int PlatformsOnRevival = 8;
@@ -166,13 +166,13 @@ internal class PlayerStats
     }
 
     /// <summary>
-    ///     One frame of the slow energy drain, and whether it has just run the blob out.
+    ///     One frame of the slow energy drain, and whether it has just run Blob out.
     /// </summary>
     /// <param name="draining">
-    ///     Whether the blob is somewhere that drains him. He is safe inside a teleporter and on every
+    ///     Whether Blob is somewhere that drains him. He is safe inside a teleporter and on every
     ///     screen but the main game.
     /// </param>
-    /// <returns>True if the energy has run out and the blob should be killed.</returns>
+    /// <returns>True if the energy has run out and Blob should be killed.</returns>
     public bool DrainEnergy(bool draining)
     {
         if (!draining)
@@ -200,7 +200,7 @@ internal class PlayerStats
     }
 
     /// <summary>
-    ///     Takes a life, and either revives the blob or ends the game.
+    ///     Takes a life, and either revives Blob or ends the game.
     /// </summary>
     /// <returns>True if that was the last life.</returns>
     public bool TakeALife()
@@ -261,7 +261,7 @@ internal class PlayerStats
     }
 
     /// <summary>
-    ///     The wildcard power up. A life if the blob has none left, otherwise whichever of his three
+    ///     The wildcard power up. A life if Blob has none left, otherwise whichever of his three
     ///     supplies he is shortest of - and platforms are compared at their energy cost rather than
     ///     their count, since one platform is worth several units of anything else.
     /// </summary>

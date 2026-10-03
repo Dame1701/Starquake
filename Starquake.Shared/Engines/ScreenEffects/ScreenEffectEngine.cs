@@ -44,9 +44,9 @@ internal class ScreenEffectEngine
     private bool _haltBlobAndNastiesRequested;
 
     /// <summary>
-    ///     Whether the blob and the nasties are being held still. Both that the caller asked for a
+    ///     Whether Blob and the nasties are being held still. Both that the caller asked for a
     ///     halt and that the running effect still wants one - the tunnel transition lets go before
-    ///     it has finished, so the last of it settles while the blob is already walking.
+    ///     it has finished, so the last of it settles while Blob is already walking.
     /// </summary>
     public bool HaltBlobAndNasties
         => _haltBlobAndNastiesRequested && ActiveScreenEffect is { HoldsGameplay: true };

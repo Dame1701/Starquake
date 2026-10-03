@@ -6,7 +6,7 @@ namespace Starquake.Structure;
 
 /// <summary>
 ///     Tiles the game has to recognise by number rather than just draw. A screen is stored as a grid
-///     of indices into the tile sheet, so anything the blob can interact with - a platform that can
+///     of indices into the tile sheet, so anything Blob can interact with - a platform that can
 ///     be taken away, a spike that kills, a tunnel mouth that leads to the next screen - is only
 ///     distinguishable by the index that was painted there.
 ///     <para>
@@ -35,7 +35,7 @@ public enum ActionTiles
     TeleportBooth = 397,
 
     /// <summary>
-    ///     The two halves of an access booth. Which one the blob walks into decides which side of the
+    ///     The two halves of an access booth. Which one Blob walks into decides which side of the
     ///     booth it appears on, so they are distinct tiles rather than one tile tested twice.
     /// </summary>
     AccessBoothLeft = 399,
@@ -45,14 +45,14 @@ public enum ActionTiles
 
     /// <summary>
     ///     The foot of a tunnel lift, and the one tile on the sheet with nothing drawn on it. It is
-    ///     solid on every cell, so it reads as a wall the blob cannot see - which is the whole trick
+    ///     solid on every cell, so it reads as a wall Blob cannot see - which is the whole trick
     ///     of a lift shaft. Not a <see cref="MarkerTile" /> for exactly that reason: a marker is
     ///     passable as well as invisible.
     /// </summary>
     TunnelLiftTile = 408,
 
     /// <summary>
-    ///     The body of a tunnel lift - the tiles that carry the blob upwards while it stands under
+    ///     The body of a tunnel lift - the tiles that carry Blob upwards while he stands under
     ///     them. <see cref="TunnelLiftTile" /> is one of these too.
     /// </summary>
     TunnelLiftShaft1 = 409,
@@ -80,7 +80,7 @@ public enum ActionTiles
     TunnelLiftTop3 = 415,
 
     /// <summary>
-    ///     The force field across an access booth. The blob can walk through it but cannot use its
+    ///     The force field across an access booth. Blob can walk through it but cannot use its
     ///     inventory while standing in one, which is what stops a key being produced from inside the
     ///     booth it is meant to open.
     /// </summary>

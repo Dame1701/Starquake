@@ -6,7 +6,7 @@ namespace Starquake.Constants;
 
 /// <summary>
 ///     The shape of a game screen. Starquake's world is a grid of fixed-size screens rather than a
-///     scrolling map: the blob walks off one edge and the next screen replaces it whole, so every
+///     scrolling map: Blob walks off one edge and the next screen replaces it whole, so every
 ///     screen is laid out to exactly these dimensions and nothing in the game ever sees a partial
 ///     one.
 /// </summary>

@@ -18,7 +18,7 @@ internal abstract class ScreenEffectBase
     public bool EffectFinished { get; protected set; } = true;
 
     /// <summary>
-    ///     Whether the blob and the nasties should still be held still. An effect that says nothing
+    ///     Whether Blob and the nasties should still be held still. An effect that says nothing
     ///     holds them for as long as it runs, which is what they all used to do; one that can afford
     ///     to give control back before it has finished drawing says so by overriding this.
     /// </summary>

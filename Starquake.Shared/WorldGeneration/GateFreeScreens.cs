@@ -10,7 +10,7 @@ using Starquake.Structure;
 namespace Starquake.WorldGeneration;
 
 /// <summary>
-///     The thing that can stand between the blob and a screen: a door the key opens, or an access
+///     The thing that can stand between Blob and a screen: a door the key opens, or an access
 ///     booth the card gets through.
 /// </summary>
 internal enum Gate
@@ -18,7 +18,7 @@ internal enum Gate
 
     /// <summary>
     ///     A key-locked door. Each <see cref="ActionTiles.AccessForceField" /> tile is one, and it is
-    ///     solid to the blob until it is carrying the key - see <c>GameScreenCollection.UpdateKeyLockDoor</c>.
+    ///     solid to Blob until he is carrying the key - see <c>GameScreenCollection.UpdateKeyLockDoor</c>.
     /// </summary>
     KeyDoor,
 
@@ -30,7 +30,7 @@ internal enum Gate
 }
 
 /// <summary>
-///     Which screens the blob can reach from where its ship came down without going through a gate.
+///     Which screens Blob can reach from where his ship came down without going through a gate.
 /// </summary>
 /// <remarks>
 ///     <para>
@@ -41,10 +41,10 @@ internal enum Gate
 ///         tracing a route per candidate.
 ///     </para>
 ///     <para>
-///         <b>The model is deliberately an under-estimate.</b> It moves the blob by walking, falling
+///         <b>The model is deliberately an under-estimate.</b> It moves Blob by walking, falling
 ///         and climbing only, and knows nothing of tunnel mouths, tunnel lifts, shuttles or
 ///         teleporters. Every one of those can only ever <i>add</i> reachability, so a screen this
-///         returns is one the blob genuinely reaches without meeting a gate, and the ones it misses
+///         returns is one Blob genuinely reaches without meeting a gate, and the ones it misses
 ///         are merely candidates given up. That asymmetry is the whole point: over-estimating would
 ///         put the key behind a door and make the game unwinnable, while under-estimating costs
 ///         nothing but variety, and there are still some 185 screens to choose from on the shipped
@@ -52,7 +52,7 @@ internal enum Gate
 ///     </para>
 ///     <para>
 ///         Climbing is treated as free because it very nearly is: walking off the top of a screen
-///         hands the blob a fresh jump platform to stand on (<c>Blob.ChangeScreenOffTopEdge</c>), so
+///         hands Blob a fresh jump platform to stand on (<c>Blob.ChangeScreenOffTopEdge</c>), so
 ///         height is not what limits it.
 ///     </para>
 /// </remarks>
@@ -69,7 +69,7 @@ internal static class GateFreeScreens
     private const int CellsDown = TileMetrics.TilesDown * TileMetrics.CollisionCellsDownTile;
 
     /// <summary>
-    ///     How many cells of the grid the blob fills, each way. It is as wide as two cells and as tall
+    ///     How many cells of the grid Blob fills, each way. It is as wide as two cells and as tall
     ///     as two, so a one cell gap is not a way through - which is exactly what a door is.
     /// </summary>
     private const int BlobCellsAcross = SpriteMetrics.SpriteWidth / TileMetrics.CollisionCellWidth;
@@ -85,7 +85,7 @@ internal static class GateFreeScreens
     private const int DoorBarrierCell = 48 / TileMetrics.CollisionCellWidth;
 
     /// <summary>
-    ///     How far the search will look for somewhere the blob fits, if the landing site itself is
+    ///     How far the search will look for somewhere Blob fits, if the landing site itself is
     ///     inside scenery. A badly marked start should still seed the flood rather than report that
     ///     the planet is empty.
     /// </summary>
@@ -135,7 +135,7 @@ internal static class GateFreeScreens
     }
 
     /// <summary>
-    ///     Where the blob can stand, as one cell per position of its top left corner. Built for the
+    ///     Where Blob can stand, as one cell per position of his top left corner. Built for the
     ///     whole planet at once because the flood crosses screens.
     /// </summary>
     private static bool[] BuildBlockedCells(
@@ -172,7 +172,7 @@ internal static class GateFreeScreens
 
     /// <summary>
     ///     Shuts a gate, if this tile is one of the kind being sealed. A door is a single cell column
-    ///     the height of its tile; an access booth is sealed whole, because the blob cannot get past
+    ///     the height of its tile; an access booth is sealed whole, because Blob cannot get past
     ///     one without the card even though it can stand in the mouth of it.
     /// </summary>
     private static void BlockGate(
@@ -244,7 +244,7 @@ internal static class GateFreeScreens
         => (screen * CellsAcross + cellX) * CellsDown + cellY;
 
     /// <summary>
-    ///     Whether the blob fits with its top left corner at a position, which means every cell of its
+    ///     Whether Blob fits with his top left corner at a position, which means every cell of his
     ///     footprint being clear.
     /// </summary>
     private static bool Fits(bool[] blocked, int position)
@@ -274,7 +274,7 @@ internal static class GateFreeScreens
     }
 
     /// <summary>
-    ///     Where the blob starts the flood from: the square the landing site marks, or the nearest
+    ///     Where Blob starts the flood from: the square the landing site marks, or the nearest
     ///     place to it that it actually fits.
     /// </summary>
     private static int? FindFoothold(bool[] blocked, int screenCount, LandingSite site)
@@ -315,7 +315,7 @@ internal static class GateFreeScreens
     }
 
     /// <summary>
-    ///     The four places the blob could move to from a position, following its own rules for leaving
+    ///     The four places Blob could move to from a position, following his own rules for leaving
     ///     a screen.
     /// </summary>
     /// <remarks>

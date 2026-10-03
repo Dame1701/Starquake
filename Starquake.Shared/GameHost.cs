@@ -17,7 +17,7 @@ public class GameHost : Game
     /// <summary>
     ///     How many times a second the game thinks. This is the speed of the game: the engine moves
     ///     everything by a fixed amount per logic frame and scales nothing by elapsed time, exactly as
-    ///     the original did, so this number is the only thing deciding how fast the blob runs.
+    ///     the original did, so this number is the only thing deciding how fast Blob runs.
     ///     50 matches the PAL original. 60 is the NTSC speed and is 20% faster. Anything is allowed -
     ///     it does not have to divide into the monitor's refresh rate, and the game runs at this speed
     ///     on every machine regardless of what the display is doing.

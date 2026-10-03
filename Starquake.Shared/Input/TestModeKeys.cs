@@ -14,7 +14,7 @@ using Starquake.Structure;
 namespace Starquake.Input;
 
 /// <summary>
-///     The debug keys: F1 kills the blob, F2 refills its lives, F3 runs the fade effect, and the
+///     The debug keys: F1 kills Blob, F2 refills his lives, F3 runs the fade effect, and the
 ///     numeric keypad steps between screens.
 /// </summary>
 /// <remarks>

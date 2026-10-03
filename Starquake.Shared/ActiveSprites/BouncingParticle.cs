@@ -48,7 +48,7 @@ internal class BouncingParticle
     /// <summary>
     ///     How hard a part is thrown upward, and the gravity that brings it back down. The throw used to
     ///     be <em>downward</em> at one to nineteen pixels a frame, so the parts dribbled off the bottom of
-    ///     the blob instead of bursting out of him.
+    ///     Blob instead of bursting out of him.
     /// </summary>
     private const int SlowestUpward = 10;
 

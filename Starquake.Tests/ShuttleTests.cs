@@ -11,8 +11,8 @@ namespace Starquake.Tests;
 
 /// <summary>
 ///     Taking the shuttle and stepping off it. All of this was inside <c>Blob</c>, where boarding
-///     meant writing a flag and a height in the same breath - four separate places did it, and a
-///     blob with one without the other stands half inside the floor.
+///     meant writing a flag and a height in the same breath - four separate places did it, and one
+///     without the other leaves Blob standing half inside the floor.
 /// </summary>
 /// <remarks>
 ///     Nothing here needs a screen, a sound or a graphics device. What stayed behind is the world's
@@ -23,7 +23,7 @@ namespace Starquake.Tests;
 public class ShuttleTests
 {
     /// <summary>
-    ///     Squarely on the pad: 32 pixels in, which is a 64-wide blob centred on a 128-wide tile, and
+    ///     Squarely on the pad: 32 pixels in, which is a 64-wide Blob centred on a 128-wide tile, and
     ///     with his feet exactly on top of it.
     /// </summary>
     private const int SquarelyOn = 32;
@@ -167,8 +167,8 @@ public class ShuttleTests
     }
 
     /// <summary>
-    ///     The pad is acted on from the previous frame's reading, so a blob the flag says is not on
-    ///     one does nothing even when handed a pad tile.
+    ///     The pad is acted on from the previous frame's reading, so Blob does nothing when the flag
+    ///     says he is not on one, even when handed a pad tile.
     /// </summary>
     [Fact]
     public void Step_NotNoticedOnAPad_DoesNothingEvenWithAPadUnderfoot()

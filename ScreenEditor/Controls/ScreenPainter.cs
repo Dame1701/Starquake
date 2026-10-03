@@ -19,7 +19,7 @@ namespace Starquake.ScreenEditor.Controls;
 ///     and whichever overlays are switched on over the top.
 /// </summary>
 /// <remarks>
-///     Starquake's world does not scroll - the blob walks off one edge and the next screen replaces it
+///     Starquake's world does not scroll - Blob walks off one edge and the next screen replaces it
 ///     whole - so a screen has to be built to line up with its neighbours without ever being seen
 ///     alongside them in the game. That is what the border of neighbouring tiles is for: a platform that
 ///     stops a tile short of the edge, or a tunnel mouth with nothing on the other side of it, is

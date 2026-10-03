@@ -13,9 +13,9 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     Fall damage arithmetic: how fast the blob falls, how far he has come, and when the fall is worth
+///     Fall damage arithmetic: how fast Blob falls, how far he has come, and when the fall is worth
 ///     hearing. None of it could be reached before - it was four counters inside <c>Blob.ApplyGravity</c>,
-///     and a blob needs the content pipeline and a graphics device.
+///     and Blob needs the content pipeline and a graphics device.
 /// </summary>
 /// <remarks>
 ///     <see cref="BlobFall" /> needs a <see cref="ScreenCollisionMap" /> and nothing else, which is what
@@ -180,7 +180,7 @@ public class BlobFallTests
     }
 
     /// <summary>
-    ///     The shuffle only ever acts on a blob being steered: falling straight down past an opening is
+    ///     The shuffle only ever acts on Blob being steered: falling straight down past an opening is
     ///     how he is supposed to miss it.
     /// </summary>
     /// <remarks>
@@ -195,7 +195,7 @@ public class BlobFallTests
     [InlineData(192, 150)]
     public void Step_NotBeingSteered_FallsTheFullDistanceWhateverIsBesideHim(int xPos, int yPos)
     {
-        // Arrange - ledges away to his right and below him, which a steered blob could be caught by. He
+        // Arrange - ledges away to his right and below him, which a steered Blob could be caught by. He
         // is never inside one: these are tile columns 3 and 5 of row 3, and he starts above and left of
         // both.
         GameScreenData screen = TestData.EmptyScreen();
@@ -231,7 +231,7 @@ public class BlobFallTests
         public const int TerminalFallSpeed = 12;
 
         /// <summary>
-        ///     The y at which a blob's feet rest exactly on top of a floor in tile row 1.
+        ///     The y at which Blob's feet rest exactly on top of a floor in tile row 1.
         /// </summary>
         public const int StandingOnRow1Y = TileMetrics.TileHeight - SpriteMetrics.SpriteHeight;
 

@@ -11,12 +11,12 @@ namespace Starquake.Tests;
 
 /// <summary>
 ///     <see cref="GameSession" /> holds the pause and the key bindings, which were two properties on
-///     <c>GameEngine</c> whose setters reached out to the sound engine and to the blob. Neither could
+///     <c>GameEngine</c> whose setters reached out to the sound engine and to Blob. Neither could
 ///     be exercised without standing up the whole engine, so neither ever was - and one of them had
 ///     a bug in it for the life of the repo.
 ///     <para>
 ///         What these pin is that setting either one announces it, because the engine's reaction is
-///         hung off that announcement: the background rumble follows the pause, and the blob's
+///         hung off that announcement: the background rumble follows the pause, and Blob's
 ///         control follows the key set. A set that stopped raising would fail silently in play.
 ///     </para>
 /// </summary>
@@ -104,7 +104,7 @@ public class GameSessionTests
         session.PlayerKeys = spectrumLayout;
 
         // Assert
-        // The engine answers this by handing the set to the blob's control.
+        // The engine answers this by handing the set to Blob's control.
         Assert.Same(spectrumLayout, announced);
     }
 
@@ -112,7 +112,7 @@ public class GameSessionTests
     public void PlayerKeys_WhenSet_IsWhatIsReadBackAfterwards()
     {
         // Arrange
-        // The blob is built after the options screen can be used, and reads the set off the session
+        // Blob is built after the options screen can be used, and reads the set off the session
         // when it is built, so what is stored has to be the set that was last assigned.
         var session = new GameSession();
         var joystick = new PlayerKeySet

@@ -142,12 +142,12 @@ internal class ConveyerNasties
                             OnNastyInteractionWithBlob(NastyInteractionType.HitBlob, NastyType.Conveyer);
                         }
 
-                        // Trigger the blob animation
+                        // Trigger Blob animation
                         _blob.BlobTouchedByNasty = true;
                     }
                 }
 
-                // Has blob shot a nasty
+                // Has Blob shot a nasty
                 if (_blob.Weapon.HasFired)
                 {
                     if (CollisionDetection.Check(

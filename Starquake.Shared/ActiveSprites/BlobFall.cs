@@ -10,7 +10,7 @@ using Starquake.Structure;
 namespace Starquake.ActiveSprites;
 
 /// <summary>
-///     How the blob falls: how fast, how far it has come, and how far it is allowed to drop this frame.
+///     How Blob falls: how fast, how far he has come, and how far he is allowed to drop this frame.
 ///     Not real physics - he falls at a fixed speed that steps up the longer the drop goes on, exactly as
 ///     the original did.
 /// </summary>
@@ -53,7 +53,7 @@ internal sealed class BlobFall
     public int Height { get; private set; }
 
     /// <summary>
-    ///     Back to the speed a fall starts at, for a blob who has just arrived somewhere - over the bottom
+    ///     Back to the speed a fall starts at, for when he has just arrived somewhere - over the bottom
     ///     edge of a screen, or back at his entry point after dying. The total is deliberately not
     ///     cleared: a drop through two screens is one fall, and he lands at the bottom of it just as hard.
     /// </summary>
@@ -111,7 +111,7 @@ internal sealed class BlobFall
         => collisions.CheckCollision(Direction.Down, blob.X, blob.Y, blob.Width, blob.Height, _speed, true);
 
     /// <summary>
-    ///     A blob falling past the mouth of a tunnel or a booth, with the player steering him into it, is
+    ///     Blob falling past the mouth of a tunnel or a booth, with the player steering him into it, is
     ///     shuffled sideways rather than dropping past it. Without this the opening is almost impossible
     ///     to hit, because a fall covers more than its height in a frame.
     /// </summary>

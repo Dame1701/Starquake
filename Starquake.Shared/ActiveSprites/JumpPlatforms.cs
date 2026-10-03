@@ -16,7 +16,7 @@ internal class JumpPlatforms : IDynamicCollisionCells
     /// <summary>
     ///     What <see cref="GetNewJumpPlatform" /> answers when there is no room for one. It has to be
     ///     well below any real answer rather than -1, because the position it normally returns can
-    ///     itself be negative while the blob is crossing between screens.
+    ///     itself be negative while Blob is crossing between screens.
     /// </summary>
     public const int NoRoomForPlatform = -1000;
 
@@ -111,12 +111,12 @@ internal class JumpPlatforms : IDynamicCollisionCells
         newPlatform.ReadyToAllocate = false;
         newPlatform.ScreenNumber = _gameScreens.ScreenNumber;
 
-        // Into the map as it stands, so the blob can be put on the platform this same frame. A
+        // Into the map as it stands, so Blob can be put on the platform this same frame. A
         // rebuild asks CellsOnScreen for them again rather than keeping these two.
         _gameScreens.Collisions.Add(newPlatform.LeftCollisionTile);
         _gameScreens.Collisions.Add(newPlatform.RightCollisionTile);
 
-        // Returns blob's new YPosition
+        // Returns Blob's new YPosition
         return newPlatform.YPos - 64;
     }
 
@@ -158,7 +158,7 @@ internal class JumpPlatforms : IDynamicCollisionCells
     /// <summary>
     ///     Takes a platform out of use and its cells out of the map. The removal only reaches the
     ///     screen being shown, which is the only one being asked about collision; cells left behind on
-    ///     a screen the blob has since walked off go when that screen is next rebuilt, and
+    ///     a screen Blob has since walked off go when that screen is next rebuilt, and
     ///     <see cref="CellsOnScreen" /> stops reporting them the moment the platform is reset.
     /// </summary>
     private void RetirePlatform(JumpPlatform platform)

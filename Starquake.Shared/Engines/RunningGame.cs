@@ -9,7 +9,7 @@ using Starquake.Display;
 namespace Starquake.Engines;
 
 /// <summary>
-///     Everything that cannot exist until the game's content has loaded: the planet, the blob, and the
+///     Everything that cannot exist until the game's content has loaded: the planet, Blob, and the
 ///     seven things that chase him around it or come apart with him.
 /// </summary>
 /// <remarks>
@@ -28,7 +28,7 @@ internal sealed class RunningGame
     /// <summary>The planet: its screens, their collision maps and everything drawn on them.</summary>
     public required GameScreenCollection GameScreens { get; init; }
 
-    /// <summary>The blob.</summary>
+    /// <summary>Blob.</summary>
     public required Blob Player { get; init; }
 
     /// <summary>The bridges that give way under him.</summary>

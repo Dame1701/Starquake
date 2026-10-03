@@ -34,7 +34,7 @@ internal class Blob
     private const int TunnelEntrySpeed = 64;
 
     /// <summary>
-    ///     The frame the blob stands still on - the one it is drawn in on a fresh screen and after a
+    ///     The frame Blob stands still on - the one he is drawn in on a fresh screen and after a
     ///     death - and the frames its walk cycles run between. Left and right are separate runs of
     ///     frames in the one sheet rather than one run flipped, so turning round means jumping
     ///     between them.
@@ -54,7 +54,7 @@ internal class Blob
     private const int BlobWalkRightLastFrame = 10;
 
     /// <summary>
-    ///     Where a walk cycle is picked up when the blob turns round mid-stride, so the new direction
+    ///     Where a walk cycle is picked up when Blob turns round mid-stride, so the new direction
     ///     starts from a matching pose instead of snapping back to the first frame.
     /// </summary>
     private const int BlobTurnToLeftFrame = 6;
@@ -68,25 +68,25 @@ internal class Blob
     private const int AnimationDelay = 2;
 
     /// <summary>
-    ///     How far the blob has to land from to break a breakable bridge. Anything shorter and the
+    ///     How far Blob has to land from to break a breakable bridge. Anything shorter and the
     ///     bridge holds.
     /// </summary>
     private const int BridgeBreakingFallHeight = 128;
 
     /// <summary>
-    ///     How high the blob hops when it has no platforms left to lay. One collision cell, which is
+    ///     How high Blob hops when he has no platforms left to lay. One collision cell, which is
     ///     just enough to clear a single step.
     /// </summary>
     private const int JumpHeightWithoutPlatforms = TileMetrics.CollisionCellHeight;
 
     /// <summary>
-    ///     The alpha each copy of the blob is drawn at during the explosion flare. The sizes and how many
+    ///     The alpha each copy of Blob is drawn at during the explosion flare. The sizes and how many
     ///     there are belong to <see cref="BlobOverload" />; this is a drawing colour, so it stays here.
     /// </summary>
     private const int OverloadFlareAlpha = 150;
 
     /// <summary>
-    ///     How fast the blob reddens when a nasty is touching it and recovers when one is not, and
+    ///     How fast Blob reddens when a nasty is touching him and recovers when one is not, and
     ///     how fast it fades back in after a teleport. Both are counted in colour channel levels a
     ///     frame.
     /// </summary>
@@ -96,16 +96,16 @@ internal class Blob
     private const int TeleportFadeStep = 8;
 
     /// <summary>
-    ///     How fast the blob walks, in pixels a logic frame, horizontally and vertically.
+    ///     How fast Blob walks, in pixels a logic frame, horizontally and vertically.
     /// </summary>
     private const int BlobWalkSpeed = 8;
 
     /// <summary>
-    ///     How far inside a spiked tile the blob has to be before the spikes get it. The three spike
+    ///     How far inside a spiked tile Blob has to be before the spikes get him. The three spike
     ///     tiles are drawn differently - one standing in the middle of its tile, one mounted on the
     ///     right hand wall, one a field of broken glass on the floor - so each is given the reach its
-    ///     artwork suggests rather than the whole tile. The numbers are the blob's position relative
-    ///     to the tile, so a negative one means the tile starts before the blob does.
+    ///     artwork suggests rather than the whole tile. The numbers are Blob's position relative
+    ///     to the tile, so a negative one means the tile starts before Blob does.
     /// </summary>
     private const int SpikeReachLeft = -16;
 
@@ -129,7 +129,7 @@ internal class Blob
 
     /// <summary>
     ///     Where the teleport beam and the shot's smoke trail are emitted from, measured in from the
-    ///     top left of the blob and of the shot respectively.
+    ///     top left of Blob and of the shot respectively.
     /// </summary>
     private const int TeleportBeamXOffset = 30;
 
@@ -137,14 +137,14 @@ internal class Blob
     private const int TeleportBeamYOffset = 50;
 
     /// <summary>
-    ///     How far into a booth's tile the blob has to have walked for it to count as having stepped in.
-    ///     A little past <see cref="BoothMetrics.BlobXOffset" />, so the blob settles back onto the
+    ///     How far into a booth's tile Blob has to have walked for it to count as having stepped in.
+    ///     A little past <see cref="BoothMetrics.BlobXOffset" />, so Blob settles back onto the
     ///     doorway as the booth takes over rather than having to be walked into exactly.
     /// </summary>
     private const int TeleportBoothEntryReach = 24;
 
     /// <summary>
-    ///     Where the blob is put down after coming through a tunnel - just far enough inside the
+    ///     Where Blob is put down after coming through a tunnel - just far enough inside the
     ///     mouth on the far side that it is not standing in the tunnel it just left.
     /// </summary>
     private const int TunnelExitLeftXOffset = 24;
@@ -261,7 +261,7 @@ internal class Blob
             () => _resources.GetSoundFxEngine()
                 .StopSound(_blobTunnelLiftSoundId, SoundFade.None));
 
-        // The shot starts where the blob is, which at this point is the origin - he is put onto a screen
+        // The shot starts where Blob is, which at this point is the origin - he is put onto a screen
         // afterwards, and that goes through PerformPostChangeScreenActions.
         Weapon.ResetTo(_blobXPos, _blobYPos);
 
@@ -275,7 +275,7 @@ internal class Blob
     }
 
     /// <summary>
-    ///     What the blob is carrying. The queue itself is <see cref="Inventory" />'s; this is what
+    ///     What Blob is carrying. The queue itself is <see cref="Inventory" />'s; this is what
     ///     the status panel draws and the access booths read.
     /// </summary>
     public Collectables[] BlobInventory => _inventory.Items;
@@ -333,10 +333,10 @@ internal class Blob
     public event RaiseBlobAction? OnBlobActionRaised;
 
     /// <summary>
-    ///     Raised as the blob is put back together after a death, so anything holding hazard state
+    ///     Raised as Blob is put back together after a death, so anything holding hazard state
     ///     can clear it. The engine answers it by resetting the electricity nodes and gates.
     ///     <para>
-    ///         An event rather than a call, because the electricity engine needs the blob to know
+    ///         An event rather than a call, because the electricity engine needs Blob to know
     ///         where it is standing and so cannot be built before it. That was the last cycle in the
     ///         graph, and it was this one line.
     ///     </para>
@@ -401,7 +401,7 @@ internal class Blob
     }
 
     /// <summary>
-    ///     One frame of blob being alive and in control. Returns true if the frame took him onto a
+    ///     One frame of Blob being alive and in control. Returns true if the frame took him onto a
     ///     different screen, which is what tells <see cref="Update" /> to record a new entry point.
     /// </summary>
     private bool UpdateNormalState()
@@ -454,8 +454,8 @@ internal class Blob
 
     /// <summary>
     ///     Acts on the pad he is standing on. Taking the shuttle or putting it back changes the tile
-    ///     map on every screen, so the collision map is rebuilt afterwards - and it is rebuilt for a
-    ///     blob merely standing on a pad too, which is what the original did.
+    ///     map on every screen, so the collision map is rebuilt afterwards - and it is rebuilt when he
+    ///     is merely standing on a pad too, which is what the original did.
     /// </summary>
     private void HandleShuttlePad(TileDetected? below)
     {
@@ -613,7 +613,7 @@ internal class Blob
                 }
                 else // just jump aimlessly in the air
                 {
-                    // Check that we are on the ground first.... and above blob's head
+                    // Check that we are on the ground first.... and above Blob's head
                     if (_gameScreens.CheckCollision(Direction.Down, _blobXPos, _blobYPos,
                             BlobWidth, BlobHeight, 1, true) == 0 &&
                         _gameScreens.CheckCollision(Direction.Up, _blobXPos,
@@ -749,7 +749,7 @@ internal class Blob
     }
 
     /// <summary>
-    ///     Moves blob onto the next screen when he walks off an edge of this one, and says whether it
+    ///     Moves Blob onto the next screen when he walks off an edge of this one, and says whether it
     ///     happened. Each edge is different enough to be its own method: the two vertical ones have to
     ///     decide where he lands.
     /// </summary>
@@ -800,7 +800,7 @@ internal class Blob
     }
 
     /// <summary>
-    ///     Going up, blob has to be put down on something. On a shuttle he lands at the foot of the new
+    ///     Going up, Blob has to be put down on something. On a shuttle he lands at the foot of the new
     ///     screen; on foot he is given a fresh jump platform to stand on, unless a tunnel lift is
     ///     carrying him, in which case it keeps carrying him.
     /// </summary>
@@ -859,7 +859,7 @@ internal class Blob
 
     /// <summary>
     ///     Looks around him. Riding the shuttle makes him taller, and the extra height is the shuttle
-    ///     underneath him rather than more blob, so the ground is looked for from his own feet.
+    ///     underneath him rather than more of Blob, so the ground is looked for from his own feet.
     /// </summary>
     private BlobSurroundings DetectSurroundingTiles()
         => BlobSurroundings.Around(
@@ -889,7 +889,7 @@ internal class Blob
 
         // Far enough in to be in the doorway, and standing on the booth's floor rather than
         // passing it in mid air. Only the X is set from here: the Y test is the arrival
-        // offset, so the blob is already standing exactly where a booth puts it.
+        // offset, so Blob is already standing exactly where a booth puts him.
         if (toTheRight.XPosition < TeleportBoothEntryReach ||
             toTheRight.YPosition != BoothMetrics.BlobYOffset)
         {
@@ -903,7 +903,7 @@ internal class Blob
     }
 
     /// <summary>
-    ///     Each side detects the booth on one side of blob and then reports the map position of the
+    ///     Each side detects the booth on one side of Blob and then reports the map position of the
     ///     tile on his other side, which is why both tiles have to be there for either to trigger.
     /// </summary>
     private void DetectAccessBooth(TileDetected? toTheLeft, TileDetected? toTheRight)
@@ -1164,7 +1164,7 @@ internal class Blob
     }
 
     /// <summary>
-    ///     Pushes blob out of any scenery he has ended up inside, which happens when a tile appears
+    ///     Pushes Blob out of any scenery he has ended up inside, which happens when a tile appears
     ///     under him - a shuttle platform being taken, a screen changing beneath his feet.
     /// </summary>
     /// <remarks>
@@ -1379,7 +1379,7 @@ internal class Blob
 
     private void DrawOverloadAlarmState(int screenFade)
     {
-        // Make blob flicker
+        // Make Blob flicker
         if (_overload.Visible)
         {
             SpriteCollection blobSprites = _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites);
@@ -1423,7 +1423,7 @@ internal class Blob
 
     public void Reset()
     {
-        // Reset blob's energy drain counter
+        // Reset Blob's energy drain counter
         _blobEnergyDrainCounter = 0;
 
         // Reset Blob's animation frame

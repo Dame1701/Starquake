@@ -131,7 +131,7 @@ internal class TeleportScreen : IGameScreen
 
         _teleportCode = _gameScreens.CurrentGameScreenData.TeleportCode;
 
-        // The code of the booth blob walked into, held across the teleport so RunTeleportAttempt can
+        // The code of the booth Blob walked into, held across the teleport so RunTeleportAttempt can
         // tell an arrival on a new screen from one that went nowhere. Drawing used to latch this,
         // which left a logic decision depending on a frame having been drawn.
         if (!_attemptingTeleport)
@@ -201,7 +201,7 @@ internal class TeleportScreen : IGameScreen
 
     /// <summary>
     ///     Counts out the message, fades the screen if the code was good, and hands back to the main game
-    ///     once the animation has run. An unrecognised code plays out the same way but does not move blob.
+    ///     once the animation has run. An unrecognised code plays out the same way but does not move Blob.
     /// </summary>
     private void RunTeleportAttempt()
     {
@@ -234,7 +234,7 @@ internal class TeleportScreen : IGameScreen
             _presentation.ScreenXOffset = _oldOffsetX;
             _presentation.ScreenYOffset = _oldOffsetY;
 
-            // A recognised code moved the screen the moment it was typed, so this puts the blob into a
+            // A recognised code moved the screen the moment it was typed, so this puts Blob into a
             // booth on the screen it has arrived at. A code that was not recognised leaves it in the
             // booth it walked into, which is where it already is - moving it then would have carried
             // it across to some other booth on the same screen.
@@ -256,13 +256,13 @@ internal class TeleportScreen : IGameScreen
     }
 
     /// <summary>
-    ///     Steps the blob out of a booth on the screen it has just arrived at.
+    ///     Steps Blob out of a booth on the screen he has just arrived at.
     /// </summary>
     /// <remarks>
-    ///     A screen may have any number of booths on it and the blob arrives in the first, because a
+    ///     A screen may have any number of booths on it and Blob arrives in the first, because a
     ///     code belongs to the screen it reaches rather than to any one booth standing on it. A screen
-    ///     with none is left alone rather than guessed at: there is nowhere on it a booth would put the
-    ///     blob, and dropping it into the scenery would be worse than leaving it where it was.
+    ///     with none is left alone rather than guessed at: there is nowhere on it a booth would put
+    ///     Blob, and dropping him into the scenery would be worse than leaving him where he was.
     /// </remarks>
     private void ArriveInABooth()
     {

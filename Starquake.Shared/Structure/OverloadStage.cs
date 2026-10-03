@@ -5,7 +5,7 @@
 namespace Starquake.Structure;
 
 /// <summary>
-///     How far through coming apart the blob is.
+///     How far through coming apart Blob is.
 /// </summary>
 /// <remarks>
 ///     These were three <c>int</c> constants on <c>Blob</c> numbered 0, 1 and 3 - the gap at 2 was there

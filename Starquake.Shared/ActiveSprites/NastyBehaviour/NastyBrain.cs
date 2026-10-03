@@ -14,7 +14,7 @@ namespace Starquake.ActiveSprites.NastyBehaviour;
 /// </summary>
 /// <remarks>
 ///     A nasty keeps to one frame of mind for a few hundred frames at a time: whether it is chasing
-///     the blob or wandering, which of the six movement types it is using, which way it set off and
+///     Blob or wandering, which of the six movement types it is using, which way it set off and
 ///     how fast. <see cref="Step" /> is one frame of that - reconsider, then move.
 ///     <para>
 ///         This was 630 lines of <c>Nasty</c>, which is also a lifecycle state machine and draws
@@ -32,7 +32,7 @@ internal class NastyBrain
     private const int StuckFrames = 15;
 
     /// <summary>
-    ///     How long a nasty keeps to one frame of mind before picking another. It chases the blob for
+    ///     How long a nasty keeps to one frame of mind before picking another. It chases Blob for
     ///     longer than it wanders, so the two ranges are different.
     /// </summary>
     private const int WanderingShortest = 200;
@@ -125,7 +125,7 @@ internal class NastyBrain
     private const int LongestScuttle = 4;
 
     /// <summary>
-    ///     Added to the run a spiky nasty sets itself so that it goes a little past the blob. Without
+    ///     Added to the run a spiky nasty sets itself so that it goes a little past Blob. Without
     ///     it they get stuck on the scenery.
     /// </summary>
     private const int SpikeyOvershoot = 10;
@@ -275,7 +275,7 @@ internal class NastyBrain
     }
 
     /// <summary>
-    ///     A nasty chasing the blob with something in the way cannot move at all, so it gives up on the
+    ///     A nasty chasing Blob with something in the way cannot move at all, so it gives up on the
     ///     chase after a while rather than grinding against the scenery for ever.
     /// </summary>
     private void ReleaseAttractionIfStuck()
@@ -297,7 +297,7 @@ internal class NastyBrain
                 // Has nasty been stuck for 1/4 of a second...?
                 if (_nastyStuckCounter > StuckFrames)
                 {
-                    // Unattract blob
+                    // Unattract Blob
                     _state.AttractedToBlob = false;
                     _nastyStuckCounter = 0;
                 }
@@ -374,7 +374,7 @@ internal class NastyBrain
 
     /// <summary>
     ///     How long a nasty keeps to one frame of mind before picking another, and what it picks: whether
-    ///     it chases the blob or wanders, how it moves, which way it sets off and how fast.
+    ///     it chases Blob or wanders, how it moves, which way it sets off and how fast.
     /// </summary>
     private void UpdateFrameOfMind()
     {
@@ -469,7 +469,7 @@ internal class NastyBrain
     /// <summary>
     ///     How fast a nasty moves, given what it has just decided to do. A chasing nasty is faster than
     ///     a wandering one at everything except the two random walks, where it is slower - it is picking
-    ///     its way towards the blob rather than striding about.
+    ///     its way towards Blob rather than striding about.
     /// </summary>
     /// <remarks>
     ///     This was two blocks of four arms in which the last arm repeated the first, so each block is
@@ -575,7 +575,7 @@ internal class NastyBrain
     /// <summary>
     ///     The same as <see cref="RandomUpDownLeftRight" /> but in much shorter runs, and it forgets
     ///     which way it was going before it starts chasing. That second difference matters: with no
-    ///     direction to carry in, a nasty level with the blob heads straight at him rather than
+    ///     direction to carry in, a nasty level with Blob heads straight at him rather than
     ///     turning the vertical move into a diagonal.
     /// </summary>
     private void RandomMovement(int blobsXPosition, int blobsYPosition)
@@ -611,7 +611,7 @@ internal class NastyBrain
         };
 
     /// <summary>
-    ///     Points a nasty at the blob - diagonally when he is off in both axes - while refusing to
+    ///     Points a nasty at Blob - diagonally when he is off in both axes - while refusing to
     ///     turn into whatever it has just walked into.
     /// </summary>
     private void HeadTowardsBlob(int blobsXPosition, int blobsYPosition)
@@ -697,9 +697,9 @@ internal class NastyBrain
         };
 
     /// <summary>
-    ///     The three ways towards the blob from whichever quadrant he is in: straight across,
+    ///     The three ways towards Blob from whichever quadrant he is in: straight across,
     ///     straight up or down, and the diagonal between them. The tests are deliberately inclusive
-    ///     on both sides so that a nasty level with the blob in one axis still has a quadrant, which
+    ///     on both sides so that a nasty level with Blob in one axis still has a quadrant, which
     ///     is why this never has to answer "nowhere".
     /// </summary>
     private Direction[] WaysTowardsBlob(int blobsXPosition, int blobsYPosition)
@@ -732,13 +732,13 @@ internal class NastyBrain
     private Direction RandomAnyDirection() => (Direction)_randomNumberGenerator.Next(0, 8);
 
     /// <summary>
-    ///     A spiky nasty goes at the blob along whichever axis he is further away on, sometimes cuts
+    ///     A spiky nasty goes at Blob along whichever axis he is further away on, sometimes cuts
     ///     the corner diagonally instead, and if it has just walked into something it takes the other
     ///     axis. Then it rests for a while, which is the other half of the
     ///     <see cref="_spikeyPause" /> cycle and the reason it is beatable.
     /// </summary>
     /// <remarks>
-    ///     This was four blocks of the same 55 lines, one per quadrant the blob can be in, with the
+    ///     This was four blocks of the same 55 lines, one per quadrant Blob can be in, with the
     ///     directions and the subtractions swapped round. What is left is the two directions that
     ///     point at him and the diagonal between them.
     /// </remarks>
@@ -817,11 +817,11 @@ internal class NastyBrain
     }
 
     /// <summary>
-    ///     Which of up and down points at the blob.
+    ///     Which of up and down points at Blob.
     /// </summary>
     /// <remarks>
     ///     The four quadrant tests this replaced were an if/else chain with inclusive bounds on both
-    ///     sides, so a nasty exactly level with the blob fell into whichever arm matched first: down
+    ///     sides, so a nasty exactly level with Blob fell into whichever arm matched first: down
     ///     if it was to his left, up if it was to his right. That is an artefact of the order they
     ///     were written in rather than anything intended, but tidying it changes what the game does,
     ///     so it is reproduced here instead.

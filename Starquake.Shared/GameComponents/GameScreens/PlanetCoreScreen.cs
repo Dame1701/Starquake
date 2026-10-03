@@ -21,7 +21,7 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
 
     /// <summary>
-    ///     The most aliens the core room ever holds, which is also how many it holds once the blob
+    ///     The most aliens the core room ever holds, which is also how many it holds once Blob
     ///     has nearly finished repairing it - the fuller the core, the busier its guards.
     /// </summary>
     private const int MaxCoreAliens = 4;
@@ -48,7 +48,7 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     private const int FourAliensFrom = 2;
 
     /// <summary>
-    ///     How long the blob is held in the core room before being put back outside, in logic frames.
+    ///     How long Blob is held in the core room before being put back outside, in logic frames.
     /// </summary>
     private const int CoreVisitFrames = 240;
 
@@ -144,7 +144,7 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
 
     /// <summary>
-    ///     Keeps the core room's events moving while the blob is away from it. The engine calls
+    ///     Keeps the core room's events moving while Blob is away from it. The engine calls
     ///     this directly rather than through <see cref="IGameScreen" />, which the frame loop's two
     ///     members are all of - the core is the only screen that carries on off screen, so an
     ///     interface for it described one class.
@@ -178,7 +178,7 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
             _elementsToReplace.Clear();
 
-            // Check to see if blob is carrying any elements to replace
+            // Check to see if Blob is carrying any elements to replace
             List<CoreElement> activeElements = _elements.GetActiveElements();
 
             for (int a = 0; a < _blob.BlobInventory.Length; a++)
@@ -222,7 +222,7 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
         if (!_replacingElements && _entryTime > CoreVisitFrames)
         {
             // The square the author marked, rather than the screen beside the core and hard against its
-            // right-hand wall. The Y is set now as well as the X: it used to be whatever height the blob
+            // right-hand wall. The Y is set now as well as the X: it used to be whatever height Blob
             // happened to be at inside the core room, which on any other screen could be mid air.
             Point exit = _gameScreens.CoreExitPosition;
 
@@ -289,7 +289,7 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     /// <summary>
     ///     The cells of the nine elements standing in the core room, which are there only while the
     ///     core room is the screen being shown - the core sits on one of the planet's own screens, and
-    ///     the blob walks that screen normally once he has been put back outside.
+    ///     Blob walks that screen normally once he has been put back outside.
     /// </summary>
     public IEnumerable<CollisionTile> CellsOnScreen(int screenNumber)
     {
@@ -305,7 +305,7 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     }
 
     /// <summary>
-    ///     Puts the core screen and its guardians in place for a blob that has just arrived.
+    ///     Puts the core screen and its guardians in place for when he has just arrived.
     /// </summary>
     private void EnterCore()
     {

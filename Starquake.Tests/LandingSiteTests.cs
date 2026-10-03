@@ -10,11 +10,11 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     The markers, and the one of them the game cannot start without: where the blob's ship came
+///     The markers, and the one of them the game cannot start without: where Blob's ship came
 ///     down.
 /// </summary>
 /// <remarks>
-///     The screen a game opens on, the square the blob is put down on and the square the wreck rests
+///     The screen a game opens on, the square Blob is put down on and the square the wreck rests
 ///     in used to be three numbers written into three different files. They are painted on the map
 ///     now, so a typo in the screen editor is the only thing between an authored landing site and a
 ///     game that opens somewhere nobody meant - which is what these are here to catch.
@@ -108,7 +108,7 @@ public class LandingSiteTests
     /// <summary>
     ///     A map saved before the markers existed, which is every map in the world until one is saved
     ///     from the editor again. The site the game used to have written into it is a better answer
-    ///     than starting the blob at the top left of screen zero.
+    ///     than starting Blob at the top left of screen zero.
     /// </summary>
     [Fact]
     public void FindIn_AMapWithNeitherMarker_FallsBackToTheSiteTheGameShippedWith()
@@ -143,7 +143,7 @@ public class LandingSiteTests
 
     /// <summary>
     ///     The game opens on one screen, so a wreck on another one could never be seen. Taking the
-    ///     start position and ignoring the crash site would put the blob on a screen with no wreck to
+    ///     start position and ignoring the crash site would put Blob on a screen with no wreck to
     ///     have climbed out of, which is worse than not believing the map at all.
     /// </summary>
     [Fact]
@@ -173,7 +173,7 @@ public class LandingSiteTests
     }
 
     /// <summary>
-    ///     A map saved before the marker existed still has to put the blob somewhere it can stand on
+    ///     A map saved before the marker existed still has to put Blob somewhere he can stand on
     ///     leaving the core, so the doorstep the game shipped with is the fallback.
     /// </summary>
     [Fact]

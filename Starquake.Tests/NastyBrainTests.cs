@@ -42,14 +42,14 @@ public class NastyBrainTests
     }
 
     /// <summary>
-    ///     A nasty attracted to the blob but unable to reach him would otherwise press against the
+    ///     A nasty attracted to Blob but unable to reach him would otherwise press against the
     ///     scenery for ever. After a quarter of a second of not moving it stops chasing, so that its
     ///     next frame of mind can take it somewhere else.
     /// </summary>
     [Fact]
     public void Step_AChasingNastyWalledIn_GivesUpChasing()
     {
-        // Arrange - a nasty boxed in by solid tiles on every side, told the blob is beyond them
+        // Arrange - a nasty boxed in by solid tiles on every side, told Blob is beyond them
         GameScreenData screen = TestData.BoxedInScreen();
         NastyBrain brain = BrainOn(screen, NastyType.Bird);
         brain.XPos = TestData.BoxedInX;
@@ -319,7 +319,7 @@ public class NastyBrainTests
         /// <summary>Somewhere in the middle of an empty screen, clear of every edge.</summary>
         public const int Middle = 300;
 
-        /// <summary>Where the blob is told to be - far away, so a chasing nasty has somewhere to go.</summary>
+        /// <summary>Where Blob is told to be - far away, so a chasing nasty has somewhere to go.</summary>
         public const int BlobX = 900;
 
         /// <inheritdoc cref="BlobX" />

@@ -7,13 +7,13 @@ using Starquake.SharedLibs;
 namespace Starquake.Structure;
 
 /// <summary>
-///     Where the blob's ship came down: the screen a new game opens on, the square the blob is put
+///     Where Blob's ship came down: the screen a new game opens on, the square Blob is put
 ///     down on, and the square the wreck rests in.
 /// </summary>
 /// <remarks>
 ///     <para>
 ///         All three used to be numbers written into the game - a screen number in the world
-///         constants, a start position in the blob, a crash position in the intro sequence - which
+///         constants, a start position in Blob, a crash position in the intro sequence - which
 ///         meant the one screen the game always begins on could not be moved without editing three
 ///         files. They are part of the map now, marked with <see cref="MarkerTile.BlobStartPosition" />
 ///         and <see cref="MarkerTile.ShipCrashSite" />, and this is what reads them back.
@@ -34,7 +34,7 @@ public sealed record LandingSite(
 
     /// <summary>
     ///     The site the game had written into it before it was part of the map, used for a map saved
-    ///     before the two markers existed. Without it such a map would start the blob nowhere, so
+    ///     before the two markers existed. Without it such a map would start Blob nowhere, so
     ///     this is the same courtesy <see cref="TeleportCodes.Original" /> does for the codes.
     /// </summary>
     public static LandingSite Original { get; } = new(8, 3, 4, 5, 3);
@@ -55,7 +55,7 @@ public sealed record LandingSite(
         }
 
         // The game can only open on one screen, so a crash site on another one cannot be honoured.
-        // The start position decides, because that is where the blob has to be put down.
+        // The start position decides, because that is where Blob has to be put down.
         return crashSquare.ScreenNumber != startSquare.ScreenNumber
             ? Original
             : new LandingSite(

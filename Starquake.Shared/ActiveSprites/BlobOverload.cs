@@ -7,13 +7,13 @@ using Starquake.Structure;
 namespace Starquake.ActiveSprites;
 
 /// <summary>
-///     How the blob comes apart. Running out of energy sounds an alarm for a second first; everything else
+///     How Blob comes apart. Running out of energy sounds an alarm for a second first; everything else
 ///     that kills him - spikes, electricity, a nasty, the debug key - skips straight to the explosion.
 ///     Then he swells, shrinks through zero to inside out, and goes.
 /// </summary>
 /// <remarks>
 ///     The shape of the death only, which is the part of it that is arithmetic. The explosion's sound, the
-///     fragments and putting the blob back where he came from are all <see cref="Blob" />'s, because each
+///     fragments and putting Blob back where he came from are all <see cref="Blob" />'s, because each
 ///     needs something the overload has no business holding.
 /// </remarks>
 internal sealed class BlobOverload
@@ -70,13 +70,13 @@ internal sealed class BlobOverload
     public bool AlarmJustStarted => _alarmFramesSounded == 1;
 
     /// <summary>
-    ///     Whether the blob is drawn at all this frame. He flickers through the alarm, on every other
+    ///     Whether Blob is drawn at all this frame. He flickers through the alarm, on every other
     ///     frame of it.
     /// </summary>
     public bool Visible => _alarmFramesSounded % 2 == 0;
 
     /// <summary>
-    ///     Whether what is drawn is the flickering blob or the flare. The flare takes over when the alarm
+    ///     Whether what is drawn is the flickering Blob or the flare. The flare takes over when the alarm
     ///     has run its course, whether or not there was one.
     /// </summary>
     public bool ShowingTheAlarm => _alarmFramesSounded < AlarmFrames;
@@ -99,8 +99,8 @@ internal sealed class BlobOverload
     public void CountAnAlarmFrame() => _alarmFramesSounded++;
 
     /// <summary>
-    ///     One frame of coming apart, and what stage that leaves him at. A blob who began already exploded
-    ///     stays there, which is what makes the explosion immediate.
+    ///     One frame of coming apart, and what stage that leaves him at. If he began already exploded
+    ///     he stays there, which is what makes the explosion immediate.
     /// </summary>
     public OverloadStage Swell()
     {

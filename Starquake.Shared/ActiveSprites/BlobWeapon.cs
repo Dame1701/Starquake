@@ -19,7 +19,7 @@ using Starquake.Structure;
 namespace Starquake.ActiveSprites;
 
 /// <summary>
-///     The blob's lazer: what decides a shot is fired, which way it leaves, and everything that is
+///     Blob's lazer: what decides a shot is fired, which way it leaves, and everything that is
 ///     drawn because one is in flight. <see cref="BlobFire" /> is the shot itself and knows nothing but
 ///     its own position; this is the end that holds the trigger.
 /// </summary>
@@ -28,12 +28,12 @@ namespace Starquake.ActiveSprites;
 ///     <see cref="IFireSurroundings" /> is the five questions it has to ask of the world - which is what
 ///     let its stepping rules be tested with no screen and no graphics device. This half stayed on
 ///     <see cref="Blob" />, as nine fields and seven methods among fifty others, so the rule deciding
-///     which way a shot leaves the shuttle could not be reached without a whole blob.
+///     which way a shot leaves the shuttle could not be reached without a whole Blob.
 /// </remarks>
 internal sealed class BlobWeapon
 {
     /// <summary>
-    ///     Where the shot starts relative to the blob's corner, and where the trail is emitted from
+    ///     Where the shot starts relative to Blob's corner, and where the trail is emitted from
     ///     relative to the shot's. Both are about a quarter of a sprite in.
     /// </summary>
     private const int FireOffset = 16;
@@ -93,8 +93,8 @@ internal sealed class BlobWeapon
     private int _fade;
 
     /// <summary>
-    ///     Whether the blob was on the shuttle as the shot left. Latched while nothing is in flight, so
-    ///     a shot keeps flying the way the shuttle fires even if the blob gets off behind it.
+    ///     Whether Blob was on the shuttle as the shot left. Latched while nothing is in flight, so
+    ///     a shot keeps flying the way the shuttle fires even if Blob gets off behind it.
     /// </summary>
     private bool _onShuttleWhenFired;
 
@@ -120,8 +120,8 @@ internal sealed class BlobWeapon
         _sparks = (IPositionalTriggerParticleEffect)_resources.GetParticleEffectInstance(
             Assets.Effects.FireSparks, ParticleEffectType.TriggeredMultiLocationTimed, null);
 
-        // The sparks rather than the blob, which is what FireSurroundings used to be handed for this one
-        // call - and the only reason the blob had to give out a reference to itself mid-construction.
+        // The sparks rather than Blob, which is what FireSurroundings used to be handed for this one
+        // call - and the only reason Blob had to give out a reference to itself mid-construction.
         _fire = new BlobFire(new FireSurroundings(gameScreens, randomNumberGenerator, _sparks));
 
         _animFire1 = Animation.Looping(0, FireAnimLastFrame, AnimationDelay, true);
@@ -130,8 +130,8 @@ internal sealed class BlobWeapon
 
     /// <summary>
     ///     Which way a shot leaves. Riding the shuttle he fires whichever way he is moving, including up
-    ///     and down; on foot a shot only ever goes left or right, so a blob standing still - or one that
-    ///     last moved up or down a lift - fires the way he last walked.
+    ///     and down; on foot a shot only ever goes left or right, so standing still - or having last
+    ///     moved up or down a lift - he fires the way he last walked.
     /// </summary>
     /// <remarks>
     ///     Static and pure, which is the only part of the weapon that can be: the rest of it needs two
@@ -173,7 +173,7 @@ internal sealed class BlobWeapon
     ///     settle the effects once nothing is flying.
     /// </summary>
     /// <param name="firePressed">Whether the fire control is down this frame.</param>
-    /// <param name="blob">Where the blob is and how big it is, which is where a shot starts from.</param>
+    /// <param name="blob">Where Blob is and how big he is, which is where a shot starts from.</param>
     /// <param name="directionBlobMoved">The way he last moved, which is the way a shot goes.</param>
     /// <param name="onShuttle">Whether he is riding the shuttle, which fires in all four directions.</param>
     public void Step(bool firePressed, Rectangle blob, Direction directionBlobMoved, bool onShuttle)
@@ -194,14 +194,14 @@ internal sealed class BlobWeapon
     }
 
     /// <summary>
-    ///     The shot's trail, drawn under the blob rather than over it - which is why it is not part of
+    ///     The shot's trail, drawn under Blob rather than over him - which is why it is not part of
     ///     <see cref="Draw" />.
     /// </summary>
     public void DrawTrail() => _trail.Draw();
 
     /// <summary>
     ///     The flame at the head of the shot. Only the redrawn artwork draws one on foot; the original
-    ///     draws nothing unless the blob is on the shuttle.
+    ///     draws nothing unless Blob is on the shuttle.
     /// </summary>
     public void Draw(int screenFade, bool onShuttle)
     {
@@ -237,7 +237,7 @@ internal sealed class BlobWeapon
     public void DrawSparks(int screenFade) => _sparks.Draw(screenFade);
 
     /// <summary>
-    ///     Puts the weapon away with nothing in flight and the trail stopped, for a blob that is in the
+    ///     Puts the weapon away with nothing in flight and the trail stopped, for Blob that is in the
     ///     middle of dying.
     /// </summary>
     public void Disarm()
@@ -248,7 +248,7 @@ internal sealed class BlobWeapon
     }
 
     /// <summary>
-    ///     Ready to fire again from where the blob now is. A shot does not carry across a screen change -
+    ///     Ready to fire again from where Blob now is. A shot does not carry across a screen change -
     ///     it would arrive mid-flight on a screen it was never fired on.
     /// </summary>
     public void ResetTo(int blobXPos, int blobYPos)
@@ -261,7 +261,7 @@ internal sealed class BlobWeapon
     }
 
     /// <summary>
-    ///     Clears the particles still in the air. Separate from <see cref="ResetTo" /> because the blob
+    ///     Clears the particles still in the air. Separate from <see cref="ResetTo" /> because Blob
     ///     moves between the two - it is put through the tunnel it walked into first.
     /// </summary>
     public void ResetEffects()
@@ -366,7 +366,7 @@ internal sealed class BlobWeapon
     }
 
     /// <summary>
-    ///     How far a shot has to travel before the thing the blob is standing on is allowed to stop it,
+    ///     How far a shot has to travel before the thing Blob is standing on is allowed to stop it,
     ///     or null if he is standing on nothing. Without this a shot fired while stood over a collectable
     ///     dies on the spot.
     /// </summary>
@@ -450,7 +450,7 @@ internal sealed class BlobWeapon
 
         /// <inheritdoc />
         /// <remarks>
-        ///     The shot is not the blob, so it gets none of the leniency the collision map gives him.
+        ///     The shot is not Blob, so it gets none of the leniency the collision map gives him.
         /// </remarks>
         public int DistanceClear(Direction direction, int x, int y, int width, int height, int distance)
             => gameScreens.CheckCollision(direction, x, y, width, height, distance, false);

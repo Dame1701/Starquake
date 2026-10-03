@@ -9,7 +9,7 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     Which way the blob's shot leaves him. <see cref="BlobFire" /> and <see cref="IFireSurroundings" />
+///     Which way Blob's shot leaves him. <see cref="BlobFire" /> and <see cref="IFireSurroundings" />
 ///     already cover where a shot goes once it is flying; this is the decision taken as it is launched,
 ///     and it was unreachable while it sat inside <c>Blob.StartFiring</c>.
 /// </summary>
@@ -52,7 +52,7 @@ public class BlobWeaponTests
     }
 
     /// <summary>
-    ///     The reason the last direction is carried rather than recomputed: a blob standing still has no
+    ///     The reason the last direction is carried rather than recomputed: Blob standing still has no
     ///     direction of travel, and he has to fire somewhere.
     /// </summary>
     [Theory]
@@ -70,7 +70,7 @@ public class BlobWeaponTests
 
     /// <summary>
     ///     Worth pinning because it looks like an oversight and is not reachable in play: the shuttle arm
-    ///     takes the direction of travel whatever it is, and a blob on a shuttle that is not moving has
+    ///     takes the direction of travel whatever it is, and Blob on a shuttle that is not moving has
     ///     already been given a direction by the frame he got on.
     /// </summary>
     [Fact]

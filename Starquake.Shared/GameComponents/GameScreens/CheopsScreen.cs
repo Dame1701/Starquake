@@ -140,7 +140,7 @@ internal class CheopsScreen : IGameScreen
     }
 
     /// <summary>
-    ///     Scan blob's inventory to see if he is carrying the right stuff.
+    ///     Scan Blob's inventory to see if he is carrying the right stuff.
     /// </summary>
     private void CheckInventoryAgainstCode()
     {
@@ -181,7 +181,7 @@ internal class CheopsScreen : IGameScreen
     }
 
     /// <summary>
-    ///     Picks at random from whatever blob is carrying that is not his access card or key. If that is
+    ///     Picks at random from whatever Blob is carrying that is not his access card or key. If that is
     ///     nothing at all he has to give up the key, or the card if he has no key.
     /// </summary>
     private void ChooseItemToSwap()
@@ -230,7 +230,7 @@ internal class CheopsScreen : IGameScreen
     }
 
     /// <summary>
-    ///     Five to choose from: one the pyramid actually wants, and the item blob would be giving up.
+    ///     Five to choose from: one the pyramid actually wants, and the item Blob would be giving up.
     /// </summary>
     private void ChooseElementsOnOffer()
     {

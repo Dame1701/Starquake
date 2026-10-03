@@ -5,9 +5,9 @@
 namespace Starquake.Engines.ScreenEffects;
 
 /// <summary>
-///     The blob squeezing through a tunnel into the next screen. The picture is squashed
+///     Blob squeezing through a tunnel into the next screen. The picture is squashed
 ///     horizontally until it is a slit and nothing is left, and then squashed back out from the
-///     edge the blob arrives at on the other side - so it reads as being pulled through a gap
+///     edge Blob arrives at on the other side - so it reads as being pulled through a gap
 ///     rather than as a wipe across it.
 ///     <para>
 ///         Which edge the picture collapses towards is the only difference between going left and
@@ -52,7 +52,7 @@ internal abstract class TunnelEntryEffect : ScreenEffectBase
     private const double Stretch = 1.70158;
 
     /// <summary>
-    ///     How far into the arrival the blob gets control back, as a fraction of it. He is let go
+    ///     How far into the arrival Blob gets control back, as a fraction of it. He is let go
     ///     before the transition has finished, so the last of the overshoot settles while he is
     ///     already walking - but not while the picture is still narrow, because the play area is
     ///     drawn into a rectangle of the current width and his movement would be squashed along with
@@ -70,7 +70,7 @@ internal abstract class TunnelEntryEffect : ScreenEffectBase
     public override bool HoldsGameplay => !EffectFinished && _frame < _releaseFrame;
 
     /// <summary>
-    ///     Whether the picture collapses towards the left edge as the blob leaves, and so expands
+    ///     Whether the picture collapses towards the left edge as Blob leaves, and so expands
     ///     from the right edge as it arrives. The other direction is the mirror of it.
     /// </summary>
     protected abstract bool SqueezesTowardsTheLeftEdge { get; }

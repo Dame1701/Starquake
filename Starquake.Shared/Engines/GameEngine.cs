@@ -362,7 +362,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         ShapeDrawer = new Shapes(_graphicsDeviceMgr.GraphicsDevice);
 
         // Built here rather than with its view ports, so that anything constructed from here on -
-        // the blob's jump platforms, for one - can be handed it instead of reaching for it later.
+        // Blob's jump platforms, for one - can be handed it instead of reaching for it later.
         _screenEffectEngine = new ScreenEffectEngine(_graphicsDeviceMgr, Presentation);
     }
 
@@ -440,7 +440,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
 
     /// <summary>
     ///     Builds the nine things that need loaded content, in the order they need each other: the planet
-    ///     first, then what reads it, then the blob, then what chases him. Each is a local until the last
+    ///     first, then what reads it, then Blob, then what chases him. Each is a local until the last
     ///     is built, because the engine's own accessors for them answer "not yet" until <see cref="_game" />
     ///     is assigned - which is the point of doing it this way rather than nine fields filled one at a
     ///     time.
@@ -462,14 +462,14 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         // Tunnel lift animations. After the planet, which it reads the lift shafts from.
         var tunnelAnimations = new TunnelLiftAnimationEngine(ContentResourceManager, gameScreens, _graphicsSet);
 
-        // The blob's death throes. After the planet, which each thrown-off fragment bounces around.
+        // Blob's death throes. After the planet, which each thrown-off fragment bounces around.
         var blobKiller = new BlobDeathAnimation(ContentResourceManager, gameScreens, _graphicsSet, RandomNumberGenerator);
 
         // Its fragments each take a particle effect instance, so this cannot run until the resources are
         // loaded - which is now, not when the load was started.
         blobKiller.LoadContent();
 
-        // The breakable bridges, before the blob that breaks them. Each bridge composes itself into a
+        // The breakable bridges, before Blob, who breaks them. Each bridge composes itself into a
         // render target and then asks the screen effect engine for a view port to draw through, but only
         // when it draws - so it needs the engine to exist, not its view ports.
         var breakableBridges = new BreakableBridges(
@@ -480,8 +480,8 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             RandomNumberGenerator,
             ScreenEffectEngine);
 
-        // The blob. After the planet it walks around and the death animation it triggers, neither of which
-        // needs the blob back.
+        // Blob. After the planet he walks around and the death animation he triggers, neither of which
+        // needs Blob back.
         var player = new Blob(
             ContentResourceManager,
             gameScreens,
@@ -499,11 +499,11 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         player.OnBlobActionRaised += Player_OnBlobActionRaised;
 
         // Subscribed here rather than with the session's other event in Initialise, so that there is no
-        // window in which the keys can change and there is no blob to tell. The options screen can be used
-        // before content has loaded, and the blob reads the current set off the session as it is built.
+        // window in which the keys can change and there is no Blob to tell. The options screen can be used
+        // before content has loaded, and Blob reads the current set off the session as he is built.
         Session.OnPlayerKeysChanged += keys => player.BlobsControl.PlayerKeySet = keys;
 
-        // The intro sequence flies the blob's ship in over the planet and blows it up, so it comes after
+        // The intro sequence flies Blob's ship in over the planet and blows it up, so it comes after
         // both the planet and the death animation.
         var introSequence = new IntroSequence(
             ContentResourceManager,
@@ -519,7 +519,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         Presentation.ScreenXOffset = (_graphicsDeviceMgr.PreferredBackBufferWidth - gameScreens.ScreenWidth) / 2;
         Presentation.ScreenYOffset = 10;
 
-        // The conveyer nasties and the electricity engine. Both chase the blob and read the planet, so
+        // The conveyer nasties and the electricity engine. Both chase Blob and read the planet, so
         // both are built here rather than in Initialise, where neither existed yet.
         var conveyerNasties = new ConveyerNasties(
             ContentResourceManager,
@@ -544,7 +544,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         electricityNodeGates.OnBlobStruckByElectricity += ElectricityNodeGateEngine_OnBlobStruckByElectricity;
         player.OnBlobDiedAndRespawned += electricityNodeGates.Reset;
 
-        // The nasties last of the three: they chase the blob, read the planet, and ask the other two where
+        // The nasties last of the three: they chase Blob, read the planet, and ask the other two where
         // the conveyers and the electricity are.
         var nasties = new Nasties(
             ContentResourceManager,
@@ -836,7 +836,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     }
 
     /// <summary>
-    ///     The planet core keeps its guardians and particle effects moving while the blob is away
+    ///     The planet core keeps its guardians and particle effects moving while Blob is away
     ///     from it, as long as he is on the screen that approaches it.
     ///     <para>
     ///         This walked all ten screens testing each for an <c>IRealTimeGameScreen</c> the core
@@ -851,7 +851,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             return;
         }
 
-        // The core's doorstep, so the core is still working when the blob walks back into it. Read off
+        // The core's doorstep, so the core is still working when Blob walks back into it. Read off
         // the map rather than written down, because the author chooses where the core is.
         if (GameScreens.ScreenNumber == GameScreens.CoreExit.ScreenNumber)
         {

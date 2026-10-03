@@ -149,7 +149,7 @@ internal class AccessBoothScreen : IGameScreen
 
     /// <summary>
     ///     The booth's verdict, once all three scanners have read: the sound, and the start of the
-    ///     wait that sends blob back to the game. Done last so the wait is a whole
+    ///     wait that sends Blob back to the game. Done last so the wait is a whole
     ///     <see cref="ScreenReadWaitFrames" /> long rather than one frame short of it.
     /// </summary>
     /// <remarks>
@@ -218,7 +218,7 @@ internal class AccessBoothScreen : IGameScreen
 
     /// <summary>
     ///     What the booth says once all three scanners have read. The sound and the wait that sends
-    ///     blob back to the game are <see cref="AnnounceScanResult" />'s, so this only draws.
+    ///     Blob back to the game are <see cref="AnnounceScanResult" />'s, so this only draws.
     /// </summary>
     private void DrawScanResult()
     {
@@ -261,7 +261,7 @@ internal class AccessBoothScreen : IGameScreen
     }
 
     /// <summary>
-    ///     Reads the booth's code and checks the blob's inventory against it, leaving the blob
+    ///     Reads the booth's code and checks Blob's inventory against it, leaving Blob
     ///     where it is. This is the form the constructor uses, before there is a door to arrive
     ///     through.
     /// </summary>
@@ -280,7 +280,7 @@ internal class AccessBoothScreen : IGameScreen
     }
 
     /// <inheritdoc cref="Reset()" />
-    /// <param name="approachedFrom">Which side of the booth door the blob walked in from.</param>
+    /// <param name="approachedFrom">Which side of the booth door Blob walked in from.</param>
     /// <param name="doorMapXPosition">The map column the booth door stands in.</param>
     public void Reset(Direction approachedFrom, int doorMapXPosition)
     {
@@ -304,7 +304,7 @@ internal class AccessBoothScreen : IGameScreen
     }
 
     /// <summary>
-    ///     Scan blob's inventory to see if he is carrying the right stuff.
+    ///     Scan Blob's inventory to see if he is carrying the right stuff.
     /// </summary>
     private void CheckInventoryAgainstCode()
     {
@@ -345,7 +345,7 @@ internal class AccessBoothScreen : IGameScreen
     }
 
     /// <summary>
-    ///     Puts blob on the far side of the door he walked into, which is why the caller passes which side
+    ///     Puts Blob on the far side of the door he walked into, which is why the caller passes which side
     ///     he came from.
     ///     <para>
     ///         The two arguments used to arrive as an <c>object[]</c> unboxed by index - a

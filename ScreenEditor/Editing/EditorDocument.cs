@@ -21,7 +21,7 @@ namespace Starquake.ScreenEditor.Editing;
 ///     </para>
 ///     <para>
 ///         Each screen also carries a <see cref="GameScreenData.CollisionMap" />, but the game throws
-///         that away and rebuilds it from the masks the moment the blob walks onto the screen. The
+///         that away and rebuilds it from the masks the moment Blob walks onto the screen. The
 ///         editor therefore leaves whatever was in the file untouched rather than trying to keep
 ///         derived data in step with edits that will never be read.
 ///     </para>

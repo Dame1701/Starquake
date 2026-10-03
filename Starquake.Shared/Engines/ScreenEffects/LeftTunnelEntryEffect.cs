@@ -16,7 +16,7 @@ internal class LeftTunnelEntryEffect : TunnelEntryEffect
 
     /// <summary>
     ///     Leaving to the left, so the picture collapses that way and the next screen expands from
-    ///     its right edge - which is the side the blob walks in on.
+    ///     its right edge - which is the side Blob walks in on.
     /// </summary>
     protected override bool SqueezesTowardsTheLeftEdge => true;
 }

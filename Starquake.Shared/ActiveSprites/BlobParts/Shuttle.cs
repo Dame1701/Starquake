@@ -10,12 +10,12 @@ using Starquake.Structure;
 namespace Starquake.ActiveSprites.BlobParts;
 
 /// <summary>
-///     The shuttle the blob rides, and the pad he takes it from. Press up while standing squarely on
+///     The shuttle Blob rides, and the pad he takes it from. Press up while standing squarely on
 ///     an intact pad and it is his; steer left or right while on it and he steps off, wherever he
 ///     happens to be, and the pad he took it from comes back.
 /// </summary>
 /// <remarks>
-///     Riding the shuttle makes the blob taller, and the two facts were separate fields that had to
+///     Riding the shuttle makes Blob taller, and the two facts were separate fields that had to
 ///     be written together - four places in <see cref="Blob" /> set a flag and a height in the same
 ///     breath, and getting one without the other would have put him half inside the floor. Here the
 ///     height is <em>derived</em> from the flag and there is nothing left to keep in step.
@@ -28,7 +28,7 @@ namespace Starquake.ActiveSprites.BlobParts;
 internal sealed class Shuttle
 {
     /// <summary>
-    ///     How much taller the pair is than the blob alone. The shuttle sits directly beneath him, so
+    ///     How much taller the pair is than Blob alone. The shuttle sits directly beneath him, so
     ///     this is what the collision code has to allow for while he is aboard.
     /// </summary>
     private const int ShuttleHeight = 32;
@@ -55,7 +55,7 @@ internal sealed class Shuttle
 
     private readonly Animation _animation = Animation.Looping(0, LastFrame, AnimationDelay, true);
 
-    /// <summary>Whether the blob is riding the shuttle.</summary>
+    /// <summary>Whether Blob is riding the shuttle.</summary>
     public bool Riding { get; private set; }
 
     /// <summary>
@@ -66,7 +66,7 @@ internal sealed class Shuttle
     public bool OnThePad { get; private set; }
 
     /// <summary>
-    ///     How tall the blob is, shuttle included. Derived rather than stored, so it cannot drift from
+    ///     How tall Blob is, shuttle included. Derived rather than stored, so it cannot drift from
     ///     <see cref="Riding" />.
     /// </summary>
     public int BlobHeight => Riding ? SpriteMetrics.SpriteHeight + ShuttleHeight : SpriteMetrics.SpriteHeight;
@@ -116,15 +116,15 @@ internal sealed class Shuttle
         }
     }
 
-    /// <summary>One frame of the shuttle's animation, for a blob being steered on it.</summary>
+    /// <summary>One frame of the shuttle's animation, for Blob being steered on it.</summary>
     public void Advance() => _animation.GetNextFrame();
 
     /// <summary>
-    ///     Puts him back on or off the shuttle, for a blob returned to where he arrived on the screen
+    ///     Puts him back on or off the shuttle, for Blob returned to where he arrived on the screen
     ///     after a death by spikes.
     /// </summary>
     public void PutBack(bool riding) => Riding = riding;
 
-    /// <summary>Off the shuttle, for a blob starting a life.</summary>
+    /// <summary>Off the shuttle, for Blob starting a life.</summary>
     public void Reset() => Riding = false;
 }

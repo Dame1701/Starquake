@@ -18,8 +18,8 @@ namespace Starquake.ScreenEditor.Controls;
 ///     The selected tile shown large, with its collision cells marked and clickable.
 /// </summary>
 /// <remarks>
-///     Collision belongs to a tile <i>image</i>, not to a position on a screen: the game tests the
-///     blob against a mask attached to the tile number, so making the top of a platform solid here
+///     Collision belongs to a tile <i>image</i>, not to a position on a screen: the game tests Blob
+///     against a mask attached to the tile number, so making the top of a platform solid here
 ///     makes it solid everywhere that platform has ever been painted. That is worth knowing before
 ///     clicking, which is why the panel says so rather than leaving it to be discovered.
 /// </remarks>

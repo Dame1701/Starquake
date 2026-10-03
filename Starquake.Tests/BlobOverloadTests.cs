@@ -9,13 +9,13 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     How the blob comes apart: the alarm that sounds when he runs out of energy, the swell and shrink,
+///     How Blob comes apart: the alarm that sounds when he runs out of energy, the swell and shrink,
 ///     and the flare drawn over it. All of it was inside <c>Blob</c>, so none of it could be reached - the
 ///     only way to see a death was to play one.
 /// </summary>
 /// <remarks>
 ///     This needs nothing at all to construct, which is why it is the most thoroughly covered of the five
-///     pieces taken out of the blob. The explosion's sound, its fragments and putting the blob back where
+///     pieces taken out of Blob. The explosion's sound, its fragments and putting Blob back where
 ///     he came from stayed behind, and each of those is the reason: all three need something the shape of
 ///     a death has no business holding.
 /// </remarks>

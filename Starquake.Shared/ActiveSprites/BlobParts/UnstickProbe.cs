@@ -9,23 +9,23 @@ using Starquake.Structure;
 namespace Starquake.ActiveSprites.BlobParts;
 
 /// <summary>
-///     Works out where a blob buried in scenery has to be moved to get free. That happens when a
-///     tile appears underneath him - a shuttle platform being taken, a screen changing beneath his
-///     feet.
+///     Works out where Blob has to be moved to get free when he is buried in scenery. That happens
+///     when a tile appears underneath him - a shuttle platform being taken, a screen changing
+///     beneath his feet.
 /// </summary>
 /// <remarks>
 ///     The plan called this the place to start on <c>Blob</c> because it was already the one part of
 ///     that class testable today: four of its five methods were static or took only a rectangle, and
-///     the only thing it wants besides the blob's own box is the collision map.
+///     the only thing it wants besides Blob's own box is the collision map.
 ///     <para>
-///         It is a question rather than a command - given where the blob is, where should he be -
-///         so the blob does the moving and this does the arithmetic.
+///         It is a question rather than a command - given where Blob is, where should he be -
+///         so Blob does the moving and this does the arithmetic.
 ///     </para>
 /// </remarks>
 internal class UnstickProbe
 {
     /// <summary>
-    ///     How thick a slice is tested when working out which way a stuck blob has to be nudged to
+    ///     How thick a slice is tested when working out which way a stuck Blob has to be nudged to
     ///     get free after a tile map change.
     /// </summary>
     private const int UnstickProbeThickness = 8;
@@ -35,7 +35,7 @@ internal class UnstickProbe
     public UnstickProbe(ScreenCollisionMap collisions) => _collisions = collisions;
 
     /// <summary>
-    ///     Where the blob should be, given where he is. The same position back if he is not stuck.
+    ///     Where Blob should be, given where he is. The same position back if he is not stuck.
     /// </summary>
     /// <remarks>
     ///     Each edge is tried in turn, and only if he is caught on that edge and free at the opposite
@@ -54,7 +54,7 @@ internal class UnstickProbe
     }
 
     /// <summary>
-    ///     Which way blob has to move to get off an edge he is caught on.
+    ///     Which way Blob has to move to get off an edge he is caught on.
     /// </summary>
     private static Point PushAwayFrom(Direction edge) => edge switch
     {
@@ -73,7 +73,7 @@ internal class UnstickProbe
     };
 
     /// <summary>
-    ///     The thin strip along one edge of blob that is tested for being buried in scenery.
+    ///     The thin strip along one edge of Blob that is tested for being buried in scenery.
     /// </summary>
     private static Rectangle EdgeProbe(Rectangle blob, Direction edge) => edge switch
     {

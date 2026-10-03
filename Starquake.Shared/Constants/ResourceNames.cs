@@ -68,17 +68,17 @@ internal sealed class ResourceNames
     public string UpperScreenTiles { get; private init; } = string.Empty;
 
     /// <summary>
-    ///     The blob, in every frame of every direction it can face.
+    ///     Blob, in every frame of every direction he can face.
     /// </summary>
     public string BlobSprites { get; private init; } = string.Empty;
 
     /// <summary>
-    ///     The power-ups the blob can be carrying.
+    ///     The power-ups Blob can be carrying.
     /// </summary>
     public string PowerUps { get; private init; } = string.Empty;
 
     /// <summary>
-    ///     The ship the blob arrives in, which only the intro sequence draws.
+    ///     The ship Blob arrives in, which only the intro sequence draws.
     /// </summary>
     public string BlobsShip { get; private init; } = string.Empty;
 
@@ -99,7 +99,7 @@ internal sealed class ResourceNames
     public string PickupsIlluminated { get; private init; } = string.Empty;
 
     /// <summary>
-    ///     Everything the blob can pick up and carry.
+    ///     Everything Blob can pick up and carry.
     /// </summary>
     public string Pickups { get; private init; } = string.Empty;
 }

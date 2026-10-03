@@ -11,8 +11,8 @@ namespace Starquake.Structure;
 ///     How the game is being played: whether it is paused, and the keys it is played with.
 ///     <para>
 ///         Neither is plain state. Setting the pause has to start and stop the background rumble,
-///         and setting the keys has to hand them to the blob's control and choose keyboard against
-///         joypad - and neither the sound engine nor the blob exists when a session is first made.
+///         and setting the keys has to hand them to Blob's control and choose keyboard against
+///         joypad - and neither the sound engine nor Blob exists when a session is first made.
 ///         So the session holds the state and raises <see cref="OnPausedChanged" /> and
 ///         <see cref="OnPlayerKeysChanged" />, and the engine, the one thing that knows about both,
 ///         acts on them. That is the shape the nasties and the electricity engine already use to
@@ -43,7 +43,7 @@ internal sealed class GameSession
     };
 
     /// <summary>
-    ///     Whether play is suspended. The blob and the nasties stop stepping, and the paused banner
+    ///     Whether play is suspended. Blob and the nasties stop stepping, and the paused banner
     ///     is drawn over the game.
     /// </summary>
     public bool Paused
@@ -78,7 +78,7 @@ internal sealed class GameSession
 
     /// <summary>
     ///     Raised whenever <see cref="PlayerKeys" /> is set, with the new set. The engine answers it
-    ///     by handing the set to the blob's control and deciding keyboard against joypad.
+    ///     by handing the set to Blob's control and deciding keyboard against joypad.
     /// </summary>
     public event Action<PlayerKeySet>? OnPlayerKeysChanged;
 }

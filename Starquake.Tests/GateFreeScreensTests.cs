@@ -12,7 +12,7 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     Which screens the blob can reach without going through a gate, which is what decides where the
+///     Which screens Blob can reach without going through a gate, which is what decides where the
 ///     key and the access card may be put.
 /// </summary>
 /// <remarks>
@@ -209,14 +209,14 @@ public class GateFreeScreensTests
         /// <summary>A tile image solid in every cell - a wall.</summary>
         public const int WallTile = 1;
 
-        /// <summary>A tile image with no solid cell at all, so the blob walks through it.</summary>
+        /// <summary>A tile image with no solid cell at all, so Blob walks through it.</summary>
         public const int AirTile = 3;
 
         public static ScreenCollisionMap MapFor(GameScreenData[] world)
             => new(world, CollisionData());
 
         /// <summary>
-        ///     A planet of empty screens. Empty means passable, so the blob can walk anywhere and the
+        ///     A planet of empty screens. Empty means passable, so Blob can walk anywhere and the
         ///     only thing that can stop it is a gate a test puts in the way.
         /// </summary>
         public static GameScreenData[] OpenWorld()

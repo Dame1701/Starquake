@@ -5,7 +5,7 @@
 namespace Starquake.ActiveSprites;
 
 /// <summary>
-///     Where the blob arrived on the screen he is on, and how he looked arriving. A death by spikes puts
+///     Where Blob arrived on the screen he is on, and how he looked arriving. A death by spikes puts
 ///     him back here rather than costing him the screen, so the spikes are survivable without being free.
 /// </summary>
 /// <remarks>
@@ -22,7 +22,7 @@ internal sealed class BlobEntryPoint
     public int YPos { get; set; }
 
     /// <summary>
-    ///     The walk-cycle frame he was on, so a blob put back does not also snap to a standing pose.
+    ///     The walk-cycle frame he was on, so Blob put back does not also snap to a standing pose.
     /// </summary>
     public int Frame { get; set; }
 
@@ -33,7 +33,7 @@ internal sealed class BlobEntryPoint
     public bool OnShuttle { get; set; }
 
     /// <summary>
-    ///     Records a whole arrival, for a blob who has just walked or fallen onto a screen.
+    ///     Records a whole arrival, for when he has just walked or fallen onto a screen.
     /// </summary>
     public void Record(int xPos, int yPos, int frame, bool onShuttle)
     {

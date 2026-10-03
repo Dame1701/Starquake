@@ -27,7 +27,7 @@ internal record struct NastyMovementState
     /// <summary>Which of the six ways of moving this nasty is currently using.</summary>
     public MoveType MovementType { get; set; }
 
-    /// <summary>Whether it is going after the blob or wandering about.</summary>
+    /// <summary>Whether it is going after Blob or wandering about.</summary>
     public bool AttractedToBlob { get; set; }
 
     /// <summary>Which way it is facing, and going.</summary>

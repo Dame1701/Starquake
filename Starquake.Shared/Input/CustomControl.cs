@@ -24,7 +24,7 @@ namespace Starquake.Input;
 internal class CustomControl
 {
     /// <summary>
-    ///     How far the stick has to be pushed before it counts as a direction. The blob's movement is
+    ///     How far the stick has to be pushed before it counts as a direction. Blob's movement is
     ///     digital - he is walking or he is not - so the stick is read as a fourth d-pad rather than as
     ///     an analogue axis, and this is the point at which a lean becomes a step.
     /// </summary>

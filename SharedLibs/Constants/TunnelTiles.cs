@@ -34,7 +34,7 @@ public static class TunnelTiles
     public const int MouthStride = 2;
 
     /// <summary>
-    ///     The ten left-hand tunnel mouths. Walking into one of these moves the blob to the previous
+    ///     The ten left-hand tunnel mouths. Walking into one of these moves Blob to the previous
     ///     screen.
     /// </summary>
     public const int LeftMouth1 = 420;
@@ -67,7 +67,7 @@ public static class TunnelTiles
     public const int LeftMouth10 = 438;
 
     /// <summary>
-    ///     The ten right-hand tunnel mouths. Walking into one of these moves the blob to the next
+    ///     The ten right-hand tunnel mouths. Walking into one of these moves Blob to the next
     ///     screen.
     /// </summary>
     public const int RightMouth1 = 421;

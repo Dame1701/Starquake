@@ -13,7 +13,7 @@ namespace Starquake.GameComponents;
 ///     <para>
 ///         "Screen" means two unrelated things in this game and they used to sit side by side on
 ///         the engine under near-identical names. <c>GameScreens</c> is the planet - two hundred
-///         and fifty-six screens of tiles the blob walks around. This is the other one: the mode
+///         and fifty-six screens of tiles Blob walks around. This is the other one: the mode
 ///         the game is in, one of <see cref="GameScreenType" />, and the component that draws it.
 ///         Eleven classes want the planet, five want this, and eight want both, which is why they
 ///         are two objects rather than the one the plan expected.
@@ -28,7 +28,7 @@ namespace Starquake.GameComponents;
 ///         The ten properties below are the other half of the job, and they are typed. A screen
 ///         handing over always names the one screen it is handing to, and what it then says to it is
 ///         particular to that screen - the main game screen's fade level, the high score screen's
-///         score to type a name against, the access booth's door to put the blob through. A single
+///         score to type a name against, the access booth's door to put Blob through. A single
 ///         <c>Get</c> returning <see cref="IGameScreen" /> made all of that have to fit one
 ///         interface, which is how eleven empty and throwing members ended up on screens that have
 ///         no such thing. There is no cast anywhere now; the screens arrive typed and leave typed.

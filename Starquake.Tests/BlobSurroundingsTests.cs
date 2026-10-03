@@ -11,9 +11,9 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     The four readings the blob decides almost everything about its surroundings from. These were
+///     The four readings Blob decides almost everything about his surroundings from. These were
 ///     four fields on <c>Blob</c> written by one method and read by eight, so none of it could be
-///     reached without a blob, and a blob needs the content pipeline and a graphics device.
+///     reached without Blob, and Blob needs the content pipeline and a graphics device.
 /// </summary>
 /// <remarks>
 ///     The probe reports which tile <em>image</em> is in the way, not whether it is solid - the
@@ -63,7 +63,7 @@ public class BlobSurroundingsTests
     }
 
     /// <summary>
-    ///     The reason <c>Around</c> takes a separate height to probe downwards with. The blob riding the
+    ///     The reason <c>Around</c> takes a separate height to probe downwards with. Blob riding the
     ///     shuttle is a shuttle's height taller, and that height is underneath him, so the ground has to
     ///     be looked for from his own feet - otherwise he reads the floor through the shuttle.
     /// </summary>
@@ -145,14 +145,14 @@ public class BlobSurroundingsTests
         /// <summary>
         ///     How far each probe looks. A probe reaches exactly this far past the mover, so reaching a
         ///     neighbouring tile from the middle of your own takes a reach of half a tile - the real
-        ///     blob is nearly a tile wide and needs only its walking speed.
+        ///     Blob is nearly a tile wide and needs only his walking speed.
         /// </summary>
         public const int Reach = 64;
 
         /// <inheritdoc cref="Reach" />
         public const int ShortReach = 8;
 
-        /// <summary>How much taller the blob is while riding the shuttle.</summary>
+        /// <summary>How much taller Blob is while riding the shuttle.</summary>
         public const int ShuttleHeight = 32;
 
         /// <summary>

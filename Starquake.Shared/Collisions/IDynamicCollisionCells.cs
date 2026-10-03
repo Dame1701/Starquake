@@ -8,13 +8,13 @@ namespace Starquake.Collisions;
 
 /// <summary>
 ///     Something that puts collision cells on a screen that the screen's own tiles know nothing
-///     about - a jump platform the blob has laid, a key-locked door's force field, the elements in
+///     about - a jump platform Blob has laid, a key-locked door's force field, the elements in
 ///     the planet core.
 /// </summary>
 /// <remarks>
 ///     <see cref="ScreenCollisionMap.Rebuild" /> throws a screen's whole map away and builds it
 ///     again from the tiles and the items lying on them, so anything dynamic has to be able to say
-///     what it owns and have it put back. Pushing cells straight into the map was why the blob fell
+///     what it owns and have it put back. Pushing cells straight into the map was why Blob fell
 ///     through a platform he had just laid: the next thing to change on the screen - a pick-up
 ///     taken, a shuttle pad boarded, a breakable bridge finishing its dissolve - rebuilt the map and
 ///     the platform's two cells went with it, while the platform itself was still being drawn.

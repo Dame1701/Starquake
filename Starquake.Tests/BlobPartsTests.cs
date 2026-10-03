@@ -35,7 +35,7 @@ public class UnstickProbeTests
     [Fact]
     public void FreePositionFor_HisFeetBuriedInATile_PushesHimUpOutOfIt()
     {
-        // Arrange - a solid tile filling row 2, with the blob's feet a few pixels into it
+        // Arrange - a solid tile filling row 2, with Blob's feet a few pixels into it
         GameScreenData screen = TestData.EmptyScreen();
         TestData.FillRow(screen, 2);
 
@@ -59,7 +59,7 @@ public class UnstickProbeTests
     [Fact]
     public void FreePositionFor_HisHeadBuriedInATile_PushesHimDownOutOfIt()
     {
-        // Arrange - a ceiling in row 1, with the blob's head a few pixels into it
+        // Arrange - a ceiling in row 1, with Blob's head a few pixels into it
         GameScreenData screen = TestData.EmptyScreen();
         TestData.FillRow(screen, 1);
 
@@ -152,7 +152,7 @@ public class UnstickProbeTests
 }
 
 /// <summary>
-///     The four things the blob carries. A queue rather than a set of slots, which is what makes
+///     The four things Blob carries. A queue rather than a set of slots, which is what makes
 ///     the game's puzzles what they are: to get at something three places back he has to cycle
 ///     everything in front of it out onto the floor.
 /// </summary>
@@ -230,7 +230,7 @@ public class InventoryTests
     }
 
     /// <summary>
-    ///     The dropped item lands under the blob's feet, so without this the swap would hand it
+    ///     The dropped item lands under Blob's feet, so without this the swap would hand it
     ///     straight back and nothing would ever cycle.
     /// </summary>
     [Fact]
@@ -302,7 +302,7 @@ public class InventoryTests
             => new(x, y, UnstickProbeTests.TestData.BlobSize, UnstickProbeTests.TestData.BlobSize);
 
         /// <summary>
-        ///     An item placed where the blob standing at <paramref name="blob" /> is touching it.
+        ///     An item placed where Blob standing at <paramref name="blob" /> is touching it.
         ///     The pick-up test offsets the item's box, so this undoes that offset.
         /// </summary>
         public static InteractiveItem ItemUnder(Rectangle blob, int type)
