@@ -8,5 +8,10 @@ internal enum ScreenEffectType
 {
     AdditiveFade,
     LeftTunnelEntry,
-    RightTunnelEntry
+    RightTunnelEntry,
+
+    /// <summary>
+    ///     The room settling after Blob has arrived somewhere by teleport.
+    /// </summary>
+    TeleportArrival
 }

@@ -266,6 +266,11 @@ internal class MainGameScreen : IGameScreen
         {
             ScreenFadeSpeed = 16;
             _gameEngine.Player.TriggerBlobTeleportedAnimation();
+
+            // The room arrives unsettled and shivers itself straight. Blob is not held still for
+            // it - he has just got here and should be able to walk.
+            _gameEngine.ScreenEffectEngine.ExecuteScreenEffect(
+                ScreenEffectType.TeleportArrival, -1, TeleportArrivalSettings.Frames, false);
             _gameEngine.GameScreens.ColourAnimations.Start((int)ActionTiles.TeleportBooth, TeleporterAnimationLoops); // Animate the teleporter colour
         }
 

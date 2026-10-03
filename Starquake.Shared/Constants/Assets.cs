@@ -232,6 +232,11 @@ internal static class Assets
         ///     <c>CoreEnergySettings</c>.
         /// </summary>
         public const string CoreFunnel = @"Shaders\CoreFunnel";
+
+        /// <summary>
+        ///     The room settling after a teleport arrival. See <c>TeleportArrivalSettings</c>.
+        /// </summary>
+        public const string TeleportArrival = @"Shaders\TeleportArrival";
     }
 
     /// <summary>

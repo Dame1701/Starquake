@@ -1322,6 +1322,12 @@
 /processorParam:DebugMode=Auto
 /build:Shaders/CoreFunnel.fx
 
+#begin Shaders/TeleportArrival.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/TeleportArrival.fx
+
 #begin Sounds/AccessFailed.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor

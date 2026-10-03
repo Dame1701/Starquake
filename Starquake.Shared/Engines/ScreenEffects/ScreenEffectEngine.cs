@@ -41,6 +41,7 @@ internal class ScreenEffectEngine
         _screenEffects.Add(new LeftTunnelEntryEffect(outgoingScreen, presentation, resources));
         _screenEffects.Add(new RightTunnelEntryEffect(outgoingScreen, presentation, resources));
         _screenEffects.Add(new AdditiveFade(presentation));
+        _screenEffects.Add(new TeleportArrivalEffect(presentation, resources));
 
         _renderer = new SpriteBatch(_graphicsDeviceManager.GraphicsDevice);
         _haltBlobAndNastiesRequested = false;
