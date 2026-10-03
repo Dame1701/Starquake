@@ -326,10 +326,11 @@ internal abstract class TunnelEntryEffect(
     /// <remarks>
     ///     The picture maps onto <paramref name="area" /> exactly, so it is never stretched - the
     ///     fade is taken out of the picture's own width rather than added beyond it.
+    ///     <para>
+    ///         <paramref name="pinnedToTheLeftEdge" /> is which edge the picture is held against, and
+    ///         so which of its edges is the one facing in.
+    ///     </para>
     /// </remarks>
-    /// <param name="pinnedToTheLeftEdge">
-    ///     Which edge the picture is held against, and so which of its edges is the one facing in.
-    /// </param>
     private static void DrawFadingInwards(SpriteBatch renderer, Texture2D picture, Rectangle area, int bleed,
         bool pinnedToTheLeftEdge)
     {

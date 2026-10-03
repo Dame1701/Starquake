@@ -73,7 +73,7 @@ namespace ProjectMercury.Modifiers
         /// Processes the particles.
         /// </summary>
         /// <param name="elapsedSeconds">Elapsed time in whole and fractional seconds.</param>
-        /// <param name="particleArray">A pointer to an array of particles.</param>
+        /// <param name="particle">A pointer to an array of particles.</param>
         /// <param name="count">The number of particles which need to be processed.</param>
         protected internal override unsafe void Process(float elapsedSeconds, Particle* particle, int count)
         {

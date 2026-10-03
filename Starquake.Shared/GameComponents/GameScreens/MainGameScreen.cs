@@ -25,7 +25,7 @@ namespace Starquake.GameComponents.GameScreens;
 /// <remarks>
 ///     Not a <c>GameScreenBase</c>, which is for the five full-screen pages of text. This is the only
 ///     other screen that fades itself up, which makes it look like a sixth of those - see that class for
-///     why it is not, and <see cref="ScreenFadeUp" /> for the four lines the two genuinely shared.
+///     why it is not, and <see cref="Ramp.Up(int,int,int)" /> for the four lines the two genuinely shared.
 /// </remarks>
 internal class MainGameScreen : IGameScreen
 {
@@ -529,7 +529,7 @@ internal class MainGameScreen : IGameScreen
     ///         The fades are worked out in floating point. Written as <c>BackgroundOpacity /
     ///         ColourLevels.Full * ScreenFade</c> it was an integer division of 150 by 255, which is 0 -
     ///         so the planet was drawn on every frame at an alpha of nothing, and had been since the
-    ///         first commit in the repository. <see cref="ColourHelper.GetXna4Colour" /> had the right
+    ///         first commit in the repository. <see cref="ColourHelper.GetXna4Colour(int,int,int,int)" /> had the right
     ///         of it all along.
     ///     </para>
     /// </remarks>

@@ -150,10 +150,6 @@ internal class ScreenRenderer
     public List<KeyLockDoor>? KeyLockDoors { get; set; }
 
     /// <summary>
-    ///     The force field is two emitters that are always set together, so this sets both.
-    ///     <paramref name="colour" /> is null to leave the colour as it is.
-    /// </summary>
-    /// <summary>
     ///     Runs one frame of the force field across a key-locked door. Drawn twice: a dim grey pass
     ///     for the body of it, then a bright additive pass over the middle, which is what gives it
     ///     its core. It turns green when Blob is carrying the key that opens the door.
@@ -195,6 +191,10 @@ internal class ScreenRenderer
     public void ClearForceField()
         => _keyDoorForceFieldNoAccess.Reset();
 
+    /// <summary>
+    ///     The force field is two emitters that are always set together, so this sets both.
+    ///     <paramref name="colour" /> is null to leave the colour as it is.
+    /// </summary>
     private void SetForceFieldEmitters(Color? colour, int quantity, EmitterBlendMode blendMode)
     {
         foreach (string name in ForceFieldEmitterNames)

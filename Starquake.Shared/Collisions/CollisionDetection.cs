@@ -9,14 +9,7 @@ namespace Starquake.Collisions;
 
 internal static class CollisionDetection
 {
-    /// <summary>
-    ///     Checks for a collision between two objects and returns the amount of distance that it is legal to travel
-    /// </summary>
-    /// <param name="direction"></param>
-    /// <param name="boundingBox1Velocity"></param>
-    /// <param name="boundingBox1"></param>
-    /// <param name="boundingBox2"></param>
-    /// <returns></returns>
+    /// <inheritdoc cref="CheckDirection(Direction,int,int,int,int,int,int,int,int,int)" />
     private static int CheckDirection(Direction direction, int boundingBox1Velocity,
         Rectangle boundingBox1, Rectangle boundingBox2)
         => CheckDirection(
@@ -34,17 +27,6 @@ internal static class CollisionDetection
     /// <summary>
     ///     Checks for a collision between two objects and returns the amount of distance that it is legal to travel
     /// </summary>
-    /// <param name="direction"></param>
-    /// <param name="Object1Velocity"></param>
-    /// <param name="obj1X"></param>
-    /// <param name="obj1Y"></param>
-    /// <param name="obj1W"></param>
-    /// <param name="obj1H"></param>
-    /// <param name="obj2X"></param>
-    /// <param name="obj2Y"></param>
-    /// <param name="obj2W"></param>
-    /// <param name="obj2H"></param>
-    /// <returns></returns>
     public static int CheckDirection(Direction direction, int obj1Velocity,
         int obj1X, int obj1Y, int obj1W, int obj1H,
         int obj2X, int obj2Y, int obj2W, int obj2H)
@@ -148,19 +130,11 @@ internal static class CollisionDetection
         };
 
     /// <summary>
-    ///     Checks for a collision and if it has taken place return the direction it occurred in
+    ///     Which way a collision happened, or <see cref="Direction.None" /> if the first object can
+    ///     travel its full velocity in every direction. A direction is blocked when no distance at
+    ///     all is legal in it, and a blocked straight direction that is also blocked on one of the
+    ///     two axes beside it reads as the diagonal between them.
     /// </summary>
-    /// <param name="Direction"></param>
-    /// <param name="Object1Velocity"></param>
-    /// <param name="obj1X"></param>
-    /// <param name="obj1Y"></param>
-    /// <param name="obj1W"></param>
-    /// <param name="obj1H"></param>
-    /// <param name="obj2X"></param>
-    /// <param name="obj2Y"></param>
-    /// <param name="obj2W"></param>
-    /// <param name="obj2H"></param>
-    /// <returns></returns>
     public static Direction CheckCollisionDirection(int obj1Velocity,
         int obj1X, int obj1Y, int obj1W, int obj1H,
         int obj2X, int obj2Y, int obj2W, int obj2H)

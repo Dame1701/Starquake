@@ -86,7 +86,10 @@ internal sealed class Shuttle
     ///     One frame of standing on a pad, and what it came to. Changing the world's record of which
     ///     pads have been taken is the caller's job, because only the caller has the screens.
     /// </summary>
-    /// <param name="below">The tile under him, from the same reading <see cref="NoticeThePadUnderfoot" /> was given.</param>
+    /// <remarks>
+    ///     <paramref name="below" /> is the tile under him, from the same reading
+    ///     <see cref="NoticeThePadUnderfoot" /> was given.
+    /// </remarks>
     public ShuttleBoarding Step(TileDetected? below, bool movedUp, bool movedLeft, bool movedRight)
     {
         if (!OnThePad || below == null)

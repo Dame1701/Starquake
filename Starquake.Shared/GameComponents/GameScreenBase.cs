@@ -34,7 +34,7 @@ namespace Starquake.GameComponents;
 ///     engine - so it would hold both this and the engine, which is worse than holding one. The others take
 ///     between two and five of the seven, and a base class that fits none of its five subclasses exactly
 ///     is a worse answer than five constructors that each name what they use. The fade is the one thing
-///     two of them really did share, and that is <see cref="Starquake.Display.ScreenFadeUp" /> now.
+///     two of them really did share, and that is <see cref="Ramp.Up(int,int,int)" /> now.
 /// </remarks>
 internal class GameScreenBase
 {

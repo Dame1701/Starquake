@@ -73,8 +73,8 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
 
     /// <summary>
     ///     Which of the two sets of artwork the game is drawn with, and the sheet names that go
-    ///     with it. Switched by <see cref="SwitchGraphicsSetIfAsked" />; read live by everything
-    ///     that draws.
+    ///     with it. Switched by <c>GlobalHotkeys.SwitchGraphicsSetIfAsked</c>; read live by
+    ///     everything that draws.
     /// </summary>
     private readonly GraphicsSet _graphicsSet = new();
 
@@ -366,8 +366,8 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     ///     to exist before any of it arrives.
     /// </summary>
     /// <remarks>
-    ///     The registration order is kept exactly as it was found. <see cref="DefineScreenData" /> is the
-    ///     one place it is known to matter, and the rest was not worth risking to tidy.
+    ///     The naming is <see cref="ContentManifest" />, which is also where the note about keeping
+    ///     the registration order exactly as it was found now lives.
     /// </remarks>
     [MemberNotNull(nameof(_loadingScreen), nameof(_scanlines), nameof(Font1), nameof(Font2))]
     private void DefineContent()

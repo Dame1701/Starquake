@@ -58,10 +58,9 @@ internal class ScreenEffectEngine
     public ScreenEffectBase? ActiveScreenEffect { get; private set; }
 
     /// <summary>
-    ///     Rather than adding a viewport this sets up a new Render2D target at the size of the viewport we want, we also store
-    ///     the location so we can draw correctly
+    ///     Sets up a named <c>RenderTarget2D</c> at the size wanted, rather than a viewport on the
+    ///     back buffer, and remembers where on the screen it is to be drawn.
     /// </summary>
-    /// <param name="?"></param>
     public void RegisterViewPort(string name,
         int xPosition,
         int yPosition,

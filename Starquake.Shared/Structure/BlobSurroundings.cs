@@ -27,12 +27,12 @@ internal readonly record struct BlobSurroundings(
     /// <summary>
     ///     Probes the four directions around something of this size at this position.
     /// </summary>
-    /// <param name="heightBelow">
-    ///     The height to probe downwards with, which is not always <paramref name="height" />: Blob
-    ///     riding the shuttle is taller than Blob, and the shuttle is underneath him, so the ground
-    ///     has to be looked for from his own feet rather than the shuttle's. The caller subtracts,
-    ///     because the shuttle's height is the caller's business.
-    /// </param>
+    /// <remarks>
+    ///     <paramref name="heightBelow" /> is the height to probe downwards with, which is not always
+    ///     <paramref name="height" />: Blob riding the shuttle is taller than Blob, and the shuttle is
+    ///     underneath him, so the ground has to be looked for from his own feet rather than the
+    ///     shuttle's. The caller subtracts, because the shuttle's height is the caller's business.
+    /// </remarks>
     public static BlobSurroundings Around(
         ScreenCollisionMap collisions,
         int xPos,

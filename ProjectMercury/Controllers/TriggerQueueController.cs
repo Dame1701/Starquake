@@ -15,7 +15,7 @@
         public Queue<Vector2> QueuedTriggers { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="QueueController"/> class.
+        /// Initializes a new instance of the <see cref="TriggerQueueController"/> class.
         /// </summary>
         public TriggerQueueController()
         {
