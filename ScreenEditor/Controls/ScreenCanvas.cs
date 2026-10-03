@@ -31,7 +31,7 @@ internal sealed class ScreenCanvas : Control
     public static readonly StyledProperty<EditorSession?> SessionProperty =
         AvaloniaProperty.Register<ScreenCanvas, EditorSession?>(nameof(Session));
 
-    private EditorSession? _attached;
+    private readonly SessionSubscription _session;
 
     private int _hoverX = -1;
 
@@ -51,6 +51,8 @@ internal sealed class ScreenCanvas : Control
 
     public ScreenCanvas()
     {
+        _session = new SessionSubscription(InvalidateVisual);
+
         Focusable = true;
 
         // The artwork is pixel art and the overlays are hairlines; both want to land on whole
@@ -88,7 +90,7 @@ internal sealed class ScreenCanvas : Control
 
         if (change.Property == SessionProperty)
         {
-            Reattach(change.GetNewValue<EditorSession?>());
+            _session.Attach(change.GetNewValue<EditorSession?>());
         }
     }
 
@@ -303,24 +305,6 @@ internal sealed class ScreenCanvas : Control
             (int)pixel.Y - CoreSite.AreaHeight / 2);
     }
 
-    private void Reattach(EditorSession? session)
-    {
-        if (_attached is not null)
-        {
-            _attached.Invalidated -= OnSessionInvalidated;
-        }
-
-        _attached = session;
-
-        if (_attached is not null)
-        {
-            _attached.Invalidated += OnSessionInvalidated;
-        }
-
-        InvalidateVisual();
-    }
-
-    private void OnSessionInvalidated(object? sender, EventArgs e) => InvalidateVisual();
 
     private bool TryHitTest(Point position, out int x, out int y)
     {

@@ -38,7 +38,7 @@ internal sealed class CollisionMaskEditor : Control
 
     private static readonly IPen CellPen = new Pen(new SolidColorBrush(Colors.White, 0.22));
 
-    private EditorSession? _attached;
+    private readonly SessionSubscription _session;
 
     private int _hoverCellX = -1;
 
@@ -46,6 +46,8 @@ internal sealed class CollisionMaskEditor : Control
 
     public CollisionMaskEditor()
     {
+        _session = new SessionSubscription(InvalidateVisual);
+
         RenderOptions.SetBitmapInterpolationMode(this, BitmapInterpolationMode.None);
         RenderOptions.SetEdgeMode(this, EdgeMode.Aliased);
     }
@@ -127,7 +129,7 @@ internal sealed class CollisionMaskEditor : Control
 
         if (change.Property == SessionProperty)
         {
-            Reattach(change.GetNewValue<EditorSession?>());
+            _session.Attach(change.GetNewValue<EditorSession?>());
         }
     }
 
@@ -262,22 +264,4 @@ internal sealed class CollisionMaskEditor : Control
         return true;
     }
 
-    private void Reattach(EditorSession? session)
-    {
-        if (_attached is not null)
-        {
-            _attached.Invalidated -= OnSessionInvalidated;
-        }
-
-        _attached = session;
-
-        if (_attached is not null)
-        {
-            _attached.Invalidated += OnSessionInvalidated;
-        }
-
-        InvalidateVisual();
-    }
-
-    private void OnSessionInvalidated(object? sender, EventArgs e) => InvalidateVisual();
 }
