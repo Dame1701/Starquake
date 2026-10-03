@@ -53,9 +53,10 @@ internal sealed class BlobFire(IFireSurroundings surroundings)
     public int Y { get; private set; }
 
     /// <summary>
-    ///     How far along the horizontal axis the shot has come. Only the point-blank check reads
-    ///     it, which is why it counts horizontal movement alone - see
-    ///     <see cref="Advance" />'s <c>pointBlankReach</c>.
+    ///     How far along the axis it was fired on the shot has come. Only the point-blank check
+    ///     reads it, and that check is measured along the same axis - see <see cref="Advance" />'s
+    ///     <c>pointBlankReach</c>. A deflected shot moves on both axes and still counts only the
+    ///     one it was fired along, because that is the axis it has to clear the item along.
     /// </summary>
     public int DistanceTravelled { get; private set; }
 
@@ -84,8 +85,14 @@ internal sealed class BlobFire(IFireSurroundings surroundings)
     /// <param name="pointBlankReach">
     ///     Set when Blob is standing on something a shot would otherwise be stopped by, to how
     ///     far the shot has to get before that thing counts. Null when he is standing on nothing.
-    ///     It applies to shots fired along the horizontal axis only, which is where it was
-    ///     inherited from and is worth revisiting on its own.
+    ///     Measured along the axis the shot was fired on, and <c>BlobWeapon.PointBlankReach</c> is
+    ///     what measures it.
+    ///     <para>
+    ///         This used to apply to horizontal shots alone, so a shot fired up or down from a
+    ///         shuttle while Blob stood over a collectable died where it was born. The asymmetry
+    ///         was inherited rather than intended - nothing about a vertical shot makes the item
+    ///         underneath him more of an obstacle.
+    ///     </para>
     /// </param>
     public bool Advance(Direction firedIn, bool firedFromShuttle, int? pointBlankReach)
     {
@@ -120,7 +127,7 @@ internal sealed class BlobFire(IFireSurroundings surroundings)
     {
         int step = surroundings.DistanceClear(travellingIn, X, Y, Width, Length, Speed);
 
-        if (along == Axis.Horizontal && WithinPointBlankReach(pointBlankReach))
+        if (WithinPointBlankReach(pointBlankReach))
         {
             step = Speed;
         }
@@ -139,11 +146,7 @@ internal sealed class BlobFire(IFireSurroundings surroundings)
         if (step > 0 && !atScreenEdge)
         {
             Move(along, sign * step);
-
-            if (along == Axis.Horizontal)
-            {
-                DistanceTravelled += step;
-            }
+            DistanceTravelled += step;
 
             return true;
         }
@@ -162,7 +165,7 @@ internal sealed class BlobFire(IFireSurroundings surroundings)
         int stepX = surroundings.DistanceClear(DirectionAlong(Axis.Horizontal, signX), X, Y, Width, Length, Speed);
         int stepY = surroundings.DistanceClear(DirectionAlong(Axis.Vertical, signY), X, Y, Width, Length, Speed);
 
-        if (firedAlong == Axis.Horizontal && WithinPointBlankReach(pointBlankReach))
+        if (WithinPointBlankReach(pointBlankReach))
         {
             stepX = Speed;
             stepY = Speed;
@@ -174,7 +177,8 @@ internal sealed class BlobFire(IFireSurroundings surroundings)
         {
             X += signX * stepX;
             Y += signY * stepY;
-            DistanceTravelled += stepX;
+            DistanceTravelled += firedAlong == Axis.Horizontal ? stepX : stepY;
+
             return true;
         }
 

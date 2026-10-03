@@ -1,4 +1,4 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
@@ -308,7 +308,7 @@ internal sealed class BlobWeapon
 
         _trail.Start();
 
-        if (!_fire.Advance(_directionFired, _onShuttleWhenFired, PointBlankReach(blob)))
+        if (!_fire.Advance(_directionFired, _onShuttleWhenFired, PointBlankReachForShot(blob)))
         {
             HasFired = false;
             _canFire = true;
@@ -365,34 +365,47 @@ internal sealed class BlobWeapon
     }
 
     /// <summary>
-    ///     How far a shot has to travel before the thing Blob is standing on is allowed to stop it,
-    ///     or null if he is standing on nothing. Without this a shot fired while stood over a collectable
-    ///     dies on the spot.
+    ///     How far a shot has to travel along the axis it was fired on before the item Blob is
+    ///     standing over is allowed to stop it. Without this a shot fired while stood over a
+    ///     collectable dies on the spot, because the item's cells stop a shot the same way they
+    ///     stop a nasty and the shot is born inside them.
     /// </summary>
-    private int? PointBlankReach(Rectangle blob)
-        => StandingOnSomething(blob, out int offset)
-            ? offset + blob.Width / 2
+    /// <remarks>
+    ///     Measured along the fired axis because that is the axis the shot has to clear the item
+    ///     along. It used to measure the horizontal gap whatever the direction, and
+    ///     <see cref="BlobFire.Advance" /> then applied it to horizontal shots only - so firing up
+    ///     or down from a shuttle over a collectable killed the shot on the spot. Half of Blob is
+    ///     added because the shot is launched from inside him rather than from his edge.
+    /// </remarks>
+    public static int PointBlankReach(Rectangle blob, Rectangle item, Direction firedIn)
+        => firedIn is Direction.Up or Direction.Down
+            ? Math.Abs(blob.Y - item.Y) + blob.Height / 2
+            : Math.Abs(blob.X - item.X) + blob.Width / 2;
+
+    /// <summary>
+    ///     The reach for the item Blob is standing over right now, or null if he is standing on
+    ///     nothing.
+    /// </summary>
+    private int? PointBlankReachForShot(Rectangle blob)
+        => StandingOnSomething(blob, out Rectangle item)
+            ? PointBlankReach(blob, item, _directionFired)
             : null;
 
-    private bool StandingOnSomething(Rectangle blob, out int offset)
+    private bool StandingOnSomething(Rectangle blob, out Rectangle standingOn)
     {
-        offset = 0;
+        standingOn = Rectangle.Empty;
 
         foreach (InteractiveItem item in CollidableItemsOnThisScreen())
         {
-            if (!CollisionDetection.Check(
-                    blob,
-                    new Rectangle(item.XLocation, item.YLocation, SpriteMetrics.SpriteWidth,
-                        SpriteMetrics.SpriteHeight)))
+            var itemBounds = new Rectangle(
+                item.XLocation, item.YLocation, SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+
+            if (!CollisionDetection.Check(blob, itemBounds))
             {
                 continue;
             }
 
-            offset = blob.X - item.XLocation;
-            if (offset < 0)
-            {
-                offset = -offset;
-            }
+            standingOn = itemBounds;
 
             return true;
         }

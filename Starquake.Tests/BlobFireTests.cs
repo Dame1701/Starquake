@@ -25,7 +25,7 @@ public class BlobFireTests
     [Theory]
     [InlineData(Direction.Up, 100, 84)]
     [InlineData(Direction.Down, 100, 116)]
-    internal void Advance_FiredAlongTheVerticalAxis_MovesThatWayAndRecordsNoDistance(
+    internal void Advance_FiredAlongTheVerticalAxis_MovesThatWayAndRecordsTheDistance(
         Direction firedIn,
         int startY,
         int expectedY)
@@ -42,7 +42,10 @@ public class BlobFireTests
         Assert.True(inFlight);
         Assert.Equal(TestData.MidScreenX, shot.X);
         Assert.Equal(expectedY, shot.Y);
-        Assert.Equal(0, shot.DistanceTravelled);
+
+        // It used to record nothing here: the distance counted the horizontal axis whichever way
+        // the shot went, which is what left the point-blank check unable to apply to this one.
+        Assert.Equal(TestData.Speed, shot.DistanceTravelled);
     }
 
     [Theory]
@@ -238,10 +241,53 @@ public class BlobFireTests
         Assert.Empty(surroundings.Sparks);
     }
 
-    [Fact]
-    public void Advance_FiredVerticallyFromPointBlank_IsStoppedAnyway()
+    /// <summary>
+    ///     The push-through used to be horizontal-only, so this shot deflected off the thing Blob
+    ///     was standing on and threw sparks instead of leaving. Nothing about firing upwards makes
+    ///     the item underneath him more of an obstacle, which is why the axis test went.
+    /// </summary>
+    [Theory]
+    [InlineData(Direction.Up, 100, 84)]
+    [InlineData(Direction.Down, 100, 116)]
+    internal void Advance_FiredVerticallyFromPointBlank_PushesThroughWhatWouldHaveStoppedIt(
+        Direction firedIn,
+        int startY,
+        int expectedY)
     {
         // Arrange
+        var surroundings = new Surroundings
+        {
+            Blocked = [firedIn]
+        };
+        var shot = new BlobFire(surroundings);
+        shot.Launch(TestData.MidScreenX, startY);
+
+        // Act
+        bool inFlight = shot.Advance(firedIn, TestData.FromShuttle, TestData.PointBlankReach);
+
+        // Assert
+        Assert.True(inFlight);
+        Assert.Equal(expectedY, shot.Y);
+        Assert.Equal(FireDeflection.None, shot.Deflection);
+        Assert.Empty(surroundings.Sparks);
+    }
+
+    /// <summary>
+    ///     The reach is a distance and not a licence: once the shot has gone further than the item
+    ///     it was born inside, what is in its way counts again. Pinned on the vertical axis,
+    ///     because that is the one that could not reach this code at all before.
+    /// </summary>
+    /// <remarks>
+    ///     A blocked shot from a shuttle deflects rather than dying, and deflecting costs it a
+    ///     frame in which it does not move - so the evidence that the obstacle is being felt again
+    ///     is the deflection, the sparks, and the shot having stayed exactly where the first step
+    ///     left it. On foot there is nothing to compare against: a vertical shot never leaves
+    ///     Blob's hand at all.
+    /// </remarks>
+    [Fact]
+    public void Advance_FiredVerticallyPastThePointBlankReach_FeelsWhatIsInItsWayAgain()
+    {
+        // Arrange - a reach of one step, so the second step is already beyond it
         var surroundings = new Surroundings
         {
             Blocked = [Direction.Up]
@@ -249,10 +295,16 @@ public class BlobFireTests
         var shot = new BlobFire(surroundings);
         shot.Launch(TestData.MidScreenX, TestData.MidScreenY);
 
-        // Act
-        shot.Advance(Direction.Up, TestData.FromShuttle, TestData.PointBlankReach);
+        // Act - the first step is point blank and pushes through
+        shot.Advance(Direction.Up, TestData.FromShuttle, TestData.Speed);
+
+        int afterThePushThrough = shot.Y;
+
+        shot.Advance(Direction.Up, TestData.FromShuttle, TestData.Speed);
 
         // Assert
+        Assert.Equal(TestData.MidScreenY - TestData.Speed, afterThePushThrough);
+        Assert.Equal(afterThePushThrough, shot.Y);
         Assert.Equal(FireDeflection.Left, shot.Deflection);
         Assert.Single(surroundings.Sparks);
     }

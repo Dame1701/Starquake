@@ -1,7 +1,8 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+using Microsoft.Xna.Framework;
 using Starquake.ActiveSprites;
 using Starquake.Structure;
 using Xunit;
@@ -9,15 +10,16 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     Which way Blob's shot leaves him. <see cref="BlobFire" /> and <see cref="IFireSurroundings" />
-///     already cover where a shot goes once it is flying; this is the decision taken as it is launched,
-///     and it was unreachable while it sat inside <c>Blob.StartFiring</c>.
+///     The two decisions taken as Blob's shot is launched: which way it leaves him, and how far it
+///     has to get before the thing he is standing on counts. <see cref="BlobFire" /> and
+///     <see cref="IFireSurroundings" /> cover where it goes once it is flying.
 /// </summary>
 /// <remarks>
-///     Only this rule is covered, and that is the honest limit of the extraction: the rest of
-///     <see cref="BlobWeapon" /> pulls two particle effects and a sprite sheet out of the resource
-///     manager before it exists, so the class cannot be constructed without the content pipeline. The
-///     plan for this stage claimed otherwise - see <c>GODCLASSES.md</c>.
+///     Only the rules that are pure arithmetic are covered, and that is the honest limit of the
+///     extraction: the rest of <see cref="BlobWeapon" /> pulls two particle effects and a sprite
+///     sheet out of the resource manager before it exists, so the class cannot be constructed
+///     without the content pipeline. The plan for this stage claimed otherwise - see
+///     <c>GODCLASSES.md</c>.
 /// </remarks>
 public class BlobWeaponTests
 {
@@ -109,5 +111,69 @@ public class BlobWeaponTests
 
         // Assert
         Assert.Equal(Direction.Up, onFoot);
+    }
+
+    /// <summary>
+    ///     A shot fired sideways has to clear the item across, and one fired up or down has to
+    ///     clear it down - so the gap that counts is the one along the axis it was fired on. This
+    ///     measured the horizontal gap whichever way the shot went, which is half of why firing up
+    ///     over a collectable killed the shot on the spot.
+    /// </summary>
+    [Theory]
+    [InlineData(Direction.Left)]
+    [InlineData(Direction.Right)]
+    internal void PointBlankReach_FiredSideways_MeasuresAcrossAndNotDown(Direction firedIn)
+    {
+        // Arrange - an item well below Blob and barely to the side of him
+        var blob = new Rectangle(100, 100, 64, 64);
+        var item = new Rectangle(110, 300, 64, 64);
+
+        // Act
+        int reach = BlobWeapon.PointBlankReach(blob, item, firedIn);
+
+        // Assert - ten across plus half of Blob, and nothing of the two hundred below
+        Assert.Equal(42, reach);
+    }
+
+    /// <inheritdoc cref="PointBlankReach_FiredSideways_MeasuresAcrossAndNotDown" />
+    [Theory]
+    [InlineData(Direction.Up)]
+    [InlineData(Direction.Down)]
+    internal void PointBlankReach_FiredVertically_MeasuresDownAndNotAcross(Direction firedIn)
+    {
+        // Arrange - the same two boxes, so only the axis can account for the difference
+        var blob = new Rectangle(100, 100, 64, 64);
+        var item = new Rectangle(110, 300, 64, 64);
+
+        // Act
+        int reach = BlobWeapon.PointBlankReach(blob, item, firedIn);
+
+        // Assert - two hundred down plus half of Blob
+        Assert.Equal(232, reach);
+    }
+
+    /// <summary>
+    ///     The gap is a distance and so has no sign: the item may be either side of Blob, or either
+    ///     side of him vertically, and the shot still has as far to go.
+    /// </summary>
+    [Theory]
+    [InlineData(Direction.Left, 60, 100, 72)]
+    [InlineData(Direction.Right, 140, 100, 72)]
+    [InlineData(Direction.Up, 100, 60, 72)]
+    [InlineData(Direction.Down, 100, 140, 72)]
+    internal void PointBlankReach_WhicheverSideTheItemIsOn_IsTheSameDistance(
+        Direction firedIn,
+        int itemX,
+        int itemY,
+        int expected)
+    {
+        // Arrange
+        var blob = new Rectangle(100, 100, 64, 64);
+
+        // Act
+        int reach = BlobWeapon.PointBlankReach(blob, new Rectangle(itemX, itemY, 64, 64), firedIn);
+
+        // Assert
+        Assert.Equal(expected, reach);
     }
 }
