@@ -11,7 +11,7 @@ namespace Starquake.Animations;
 /// </summary>
 /// <remarks>
 ///     Eight copies, in two directions and two types: <c>ScreenFadeUp.Advanced</c> for the pages and
-///     the game, the fade and the shrink in both <c>Nasty</c> and <c>ConveyerNasty</c>,
+///     the game, the fade and the shrink in both <c>Nasty</c> and <c>ConveyorNasty</c>,
 ///     <c>TeleportScreen</c>'s fade out, <c>PlanetCoreScreen</c>'s blanking tiles, and the whole
 ///     bodies of <c>FloatAdder</c>, <c>FloatSubtractor</c> and <c>IntegerSubtractor</c>.
 ///     <para>

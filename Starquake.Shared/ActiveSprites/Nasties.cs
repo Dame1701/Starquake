@@ -43,7 +43,7 @@ internal class Nasties
     /// <inheritdoc cref="ElectricityArcWidth" />
     private const int ElectricityArcHeight = TileMetrics.CollisionCellHeight;
     private readonly Blob _blob;
-    private readonly ConveyerNasties _conveyerNasties;
+    private readonly ConveyorNasties _conveyorNasties;
     private readonly ElectricityGatesAndNodesEngine _electricityNodeGates;
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsSet _graphicsSet;
@@ -62,7 +62,7 @@ internal class Nasties
         GraphicsSet graphicsSet,
         Blob blob,
         Random randomNumberGenerator,
-        ConveyerNasties conveyerNasties,
+        ConveyorNasties conveyorNasties,
         ElectricityGatesAndNodesEngine electricityNodeGates,
         int nastyCount,
         ToggleKeys input)
@@ -72,7 +72,7 @@ internal class Nasties
         _graphicsSet = graphicsSet;
         _blob = blob;
         _randomNumberGenerator = randomNumberGenerator;
-        _conveyerNasties = conveyerNasties;
+        _conveyorNasties = conveyorNasties;
         _electricityNodeGates = electricityNodeGates;
         _input = input;
 
@@ -332,7 +332,7 @@ internal class Nasties
             _nasties[a].PerformPostChangeScreenActions();
         }
 
-        DisableNastiesDisplacedByConveyerNasties();
+        DisableNastiesDisplacedByConveyorNasties();
 
         _nastySmokes.Reset();
 
@@ -385,12 +385,12 @@ internal class Nasties
     }
 
     /// <summary>
-    ///     A conveyer nasty takes the place of an ordinary one rather than adding to the count, so the
+    ///     A conveyor nasty takes the place of an ordinary one rather than adding to the count, so the
     ///     first few are switched off.
     /// </summary>
-    private void DisableNastiesDisplacedByConveyerNasties()
+    private void DisableNastiesDisplacedByConveyorNasties()
     {
-        for (int a = 0; a < _conveyerNasties.NastiesActive; a++)
+        for (int a = 0; a < _conveyorNasties.NastiesActive; a++)
         {
             _nasties[a].NastyState = NastyState.Disabled;
         }

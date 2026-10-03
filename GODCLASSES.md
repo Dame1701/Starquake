@@ -26,7 +26,7 @@ rule in *The rule each extraction is placed by* and discovering the codebase bro
 | Landed | What it did |
 | --- | --- |
 | **Tenth pass** | A duplication sweep, after the nine stages: one live draw-path defect, the script that should have caught it, and five pieces of repetition. See *The tenth pass* below. |
-| `cf95609` | Five fades off the draw path: Blob's energy-drain tint, his teleport fade-in, the glow on a shot, and the fade and shrink of a dead nasty and a dead conveyer nasty. `ConveyerNasty` had no `Dead` branch in `Update` at all. |
+| `cf95609` | Five fades off the draw path: Blob's energy-drain tint, his teleport fade-in, the glow on a shot, and the fade and shrink of a dead nasty and a dead conveyor nasty. `ConveyorNasty` had no `Dead` branch in `Update` at all. |
 | `32c0345` | `SpriteCollection` held one rotation angle and advanced it inside `End`. The angle moves to the nasty, Blob's shuttle flame and the intro's ship, one per logic frame. `GameSession` falls out of `Nasty`, `Nasties` and `PlanetCoreScreen` with the `paused` flag that existed to freeze the spin. |
 | **Stage 9** | `ScreenShake` out of `MainGameScreen`, with eight tests. `NastyLifecycle` recommended against, and a latent bug in `CopyFromSource` found while deciding that. The fade pair turns out to be duplicated with `GameScreenBase` rather than needing extraction. |
 | **Stage 8** | `ColourAnimatedTiles` out of `GameEngine`, and **the rest of the stage recommended against** - measured, not guessed. See below. |
@@ -718,7 +718,7 @@ callers. Measured rather than assumed, neither half holds up.
 outputs.** It is a chain: build the planet, build Blob from the planet, build the nasties from
 both, and register the screens from all of it. `Elements`, `Stats`, `Session`, `ScreenEffectEngine`,
 `BlobStatusPanel`, `GameScreens`, `Player`, `BlobKiller`, `BreakableBridgesEngine`,
-`ConveyerNastiesInstance` and `ElectricityNodeGateEngine` are each written by one step and read by a
+`ConveyorNastiesInstance` and `ElectricityNodeGateEngine` are each written by one step and read by a
 later one. A `GameComposition` cannot take inputs and hand back outputs, because the intermediate
 values
 *are* both - so it would have to own the whole actor graph, about twenty fields, and `GameEngine` would

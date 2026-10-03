@@ -34,7 +34,7 @@ internal static class ScreenDataFile
     private static readonly Dictionary<int, int> RenumberedMarkers = new()
     {
         [390] = (int)MarkerTile.Spacer,
-        [391] = (int)MarkerTile.ConveyerNasty,
+        [391] = (int)MarkerTile.ConveyorNasty,
         [392] = (int)MarkerTile.PreferredCoreLocation
     };
 

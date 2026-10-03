@@ -68,7 +68,7 @@ public class LandingSiteTests
 
     [Theory]
     [InlineData(MarkerTile.Spacer)]
-    [InlineData(MarkerTile.ConveyerNasty)]
+    [InlineData(MarkerTile.ConveyorNasty)]
     [InlineData(MarkerTile.PreferredCoreLocation)]
     public void IsOnePerMap_AMarkerThatMayBePaintedAnywhere_IsNot(MarkerTile marker)
         => Assert.False(MarkerTiles.IsOnePerMap(marker));

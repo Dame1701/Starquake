@@ -15,17 +15,17 @@ using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
 
-internal class ConveyerNasty
+internal class ConveyorNasty
 {
 
     /// <summary>
-    ///     A conveyer nasty hangs from the rail it runs along, so it is drawn and tested a collision
+    ///     A conveyor nasty hangs from the rail it runs along, so it is drawn and tested a collision
     ///     cell below the position it is tracked at.
     /// </summary>
     private const int HangsBelowRailBy = TileMetrics.CollisionCellHeight;
 
     /// <summary>
-    ///     How quickly a shot conveyer nasty shrinks away.
+    ///     How quickly a shot conveyor nasty shrinks away.
     /// </summary>
     private const float DeathShrinkStep = 0.01f;
 
@@ -56,11 +56,11 @@ internal class ConveyerNasty
     }
 
     private readonly SpriteCollection _nastySprite;
-    private readonly IStandardParticleEffect _conveyerNastyDies;
+    private readonly IStandardParticleEffect _conveyorNastyDies;
 
     private Direction _nastyDirection;
 
-    public ConveyerNasty(
+    public ConveyorNasty(
         ResourceManager resources,
         GameScreenCollection gameScreens,
         Random randomNumberGenerator,
@@ -88,12 +88,12 @@ internal class ConveyerNasty
         _deathFadeLevel = ColourLevels.Full;
         _deathScale = 1f;
 
-        _nastySprite = resources.GetSpriteCollection(Assets.Graphics.ConveyerNasty);
-        _conveyerNastyDies = (IStandardParticleEffect)resources.GetParticleEffectInstance(Assets.Effects.NastyDies, ParticleEffectType.Triggered, null);
-        _conveyerNastyDies.ParticleEffectComplete += ConveyerNastyDies_ParticleEffectComplete;
+        _nastySprite = resources.GetSpriteCollection(Assets.Graphics.ConveyorNasty);
+        _conveyorNastyDies = (IStandardParticleEffect)resources.GetParticleEffectInstance(Assets.Effects.NastyDies, ParticleEffectType.Triggered, null);
+        _conveyorNastyDies.ParticleEffectComplete += ConveyorNastyDies_ParticleEffectComplete;
     }
 
-    private void ConveyerNastyDies_ParticleEffectComplete()
+    private void ConveyorNastyDies_ParticleEffectComplete()
     {
         NastyActive = false;
     }
@@ -117,7 +117,7 @@ internal class ConveyerNasty
 
     public void PerformPostChangeScreenActions()
     {
-        _conveyerNastyDies.Stop();
+        _conveyorNastyDies.Stop();
 
         NastyActive = false;
     }
@@ -125,7 +125,7 @@ internal class ConveyerNasty
     public void Update(GameTime gameTime)
     {
         // Update the explosion
-        _conveyerNastyDies.Update(XLocation + SpriteMetrics.HalfSpriteWidth, YLocation + SpriteMetrics.SpriteHeight, gameTime);
+        _conveyorNastyDies.Update(XLocation + SpriteMetrics.HalfSpriteWidth, YLocation + SpriteMetrics.SpriteHeight, gameTime);
 
         if (NastyState == NastyState.Conception)
         {
@@ -168,7 +168,7 @@ internal class ConveyerNasty
             _deathFadeLevel = ColourLevels.Full;
             _deathScale = 1.0f;
 
-            _conveyerNastyDies.Start();
+            _conveyorNastyDies.Start();
 
             NastyState = NastyState.Dead;
             NastyActive = false;
@@ -201,7 +201,7 @@ internal class ConveyerNasty
         else if (NastyState == NastyState.Dead)
         {
             // Draw the explosion
-            _conveyerNastyDies.Draw();
+            _conveyorNastyDies.Draw();
 
             if (_deathFadeLevel > 0)
             {

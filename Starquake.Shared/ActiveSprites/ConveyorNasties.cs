@@ -11,38 +11,16 @@ using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
 
-internal class ConveyerNasties
+internal class ConveyorNasties(ResourceManager resources,
+    GameScreenCollection gameScreens,
+    Blob blob,
+    Random randomNumberGenerator)
 {
-    private readonly Blob _blob;
-    private readonly GameScreenCollection _gameScreens;
-    private readonly Random _randomNumberGenerator;
-    private readonly ResourceManager _resources;
-
     public event RaiseInteractionWithBlob? OnNastyInteractionWithBlob;
 
-    public List<ConveyerNasty> Nasties { get; }
+    public List<ConveyorNasty> Nasties { get; } = [];
 
-    public int NastiesActive
-    {
-        get
-        {
-            return _gameScreens.GetCoordsOfTiles((int)MarkerTile.ConveyerNasty).Count;
-        }
-    }
-
-    public ConveyerNasties(
-        ResourceManager resources,
-        GameScreenCollection gameScreens,
-        Blob blob,
-        Random randomNumberGenerator)
-    {
-        _resources = resources;
-        _gameScreens = gameScreens;
-        _blob = blob;
-        _randomNumberGenerator = randomNumberGenerator;
-
-        Nasties = new List<ConveyerNasty>();
-    }
+    public int NastiesActive => gameScreens.GetCoordsOfTiles((int)MarkerTile.ConveyorNasty).Count;
 
     public void LoadContent()
     {
@@ -51,9 +29,9 @@ internal class ConveyerNasties
         for (int a = 0; a < 3; a++)
         {
             Nasties.Add(
-                new ConveyerNasty(_resources,
-                    _gameScreens,
-                    _randomNumberGenerator,
+                new ConveyorNasty(resources,
+                    gameScreens,
+                    randomNumberGenerator,
                     0,
                     0,
                     0,
@@ -63,18 +41,14 @@ internal class ConveyerNasties
 
     public void PerformPostChangeScreenActions()
     {
-        // See if we need to create some nasties and get on with it
-
         // Deactivate all nasties first
-        foreach (ConveyerNasty nasty in Nasties)
+        foreach (ConveyorNasty nasty in Nasties)
         {
             nasty.PerformPostChangeScreenActions();
         }
 
-        List<Point>? nastiesToGenerate = _gameScreens.GetCoordsOfTiles((int)MarkerTile.ConveyerNasty);
-
-
-        if (nastiesToGenerate != null && nastiesToGenerate.Count > 0)
+        var nastiesToGenerate = gameScreens.GetCoordsOfTiles((int)MarkerTile.ConveyorNasty);
+        if (nastiesToGenerate.Count > 0)
         {
             // We have some..... So reactivate a few or all...
             for (int a = 0; a < nastiesToGenerate.Count; a++)
@@ -82,7 +56,7 @@ internal class ConveyerNasties
                 Nasties[a].NastyActive = true;
                 Nasties[a].XLocation = nastiesToGenerate[a].X;
                 Nasties[a].YLocation = nastiesToGenerate[a].Y;
-                Nasties[a].MoveSpeed = _randomNumberGenerator.Next(1, 3);
+                Nasties[a].MoveSpeed = randomNumberGenerator.Next(1, 3);
 
                 if (Nasties[a].MoveSpeed == 1)
                 {
@@ -104,62 +78,62 @@ internal class ConveyerNasties
 
     public void Update(GameTime gameTime)
     {
-        for (int a = 0; a < Nasties.Count; a++)
+        foreach (var nasty in Nasties)
         {
-            Nasties[a].Update(gameTime);
+            nasty.Update(gameTime);
 
             // Check for a collision between a nasty and Blob and raise an event
             // Since we have a reference to Blob directly, we can send the call to animate contact directly
             // We raise the event to affect the status panel
             // Going to move the offsets etc. in a bit so it's not too precise and unfair!
-            if (Nasties[a].NastyState == NastyState.Normal)
+            if (nasty.NastyState == NastyState.Normal)
             {
                 if (CollisionDetection.Check(
-                        _blob.BlobXPos + 8,
-                        _blob.BlobYPos - 32,
-                        _blob.BlobWidth - 16,
+                        blob.BlobXPos + 8,
+                        blob.BlobYPos - 32,
+                        blob.BlobWidth - 16,
                         64,
-                        Nasties[a].XLocation,
-                        Nasties[a].YLocation,
+                        nasty.XLocation,
+                        nasty.YLocation,
                         64,
                         64))
                 {
                     // Raise the event
-                    if (Nasties[a].NastyActive)
+                    if (nasty.NastyActive)
                     {
                         if (OnNastyInteractionWithBlob != null)
                         {
-                            OnNastyInteractionWithBlob(NastyInteractionType.HitBlob, NastyType.Conveyer);
+                            OnNastyInteractionWithBlob(NastyInteractionType.HitBlob, NastyType.Conveyor);
                         }
 
                         // Trigger Blob animation
-                        _blob.BlobTouchedByNasty = true;
+                        blob.BlobTouchedByNasty = true;
                     }
                 }
 
                 // Has Blob shot a nasty
-                if (_blob.Weapon.HasFired)
+                if (blob.Weapon.HasFired)
                 {
                     if (CollisionDetection.Check(
-                            _blob.Weapon.X,
-                            _blob.Weapon.Y,
+                            blob.Weapon.X,
+                            blob.Weapon.Y,
                             32,
                             32,
-                            Nasties[a].XLocation,
-                            Nasties[a].YLocation,
+                            nasty.XLocation,
+                            nasty.YLocation,
                             64,
                             64))
                     {
-                        if (Nasties[a].NastyActive)
+                        if (nasty.NastyActive)
                         {
-                            _blob.Weapon.RegisterHit();
-                            Nasties[a].NastyState = NastyState.Shot;
+                            blob.Weapon.RegisterHit();
+                            nasty.NastyState = NastyState.Shot;
 
-                            _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobExplodes);
+                            resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobExplodes);
 
                             if (OnNastyInteractionWithBlob != null)
                             {
-                                OnNastyInteractionWithBlob(NastyInteractionType.BlobShot, NastyType.Conveyer);
+                                OnNastyInteractionWithBlob(NastyInteractionType.BlobShot, NastyType.Conveyor);
                             }
                         }
                     }
@@ -170,7 +144,7 @@ internal class ConveyerNasties
 
     public void Draw(int screenFade)
     {
-        foreach (ConveyerNasty nasty in Nasties)
+        foreach (ConveyorNasty nasty in Nasties)
         {
             if (nasty.NastyActive || nasty.NastyState == NastyState.Dead)
             {

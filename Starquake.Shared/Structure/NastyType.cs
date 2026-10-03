@@ -22,5 +22,5 @@ internal enum NastyType
     Centipede,
     Bird,
     CoreGuardian,
-    Conveyer
+    Conveyor
 }

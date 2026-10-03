@@ -99,12 +99,12 @@ internal class Nasty
 
     /// <summary>
     ///     The colours the different nasties are tinted: grey for one that has been shot, red for a
-    ///     spiky one, green for a conveyer one.
+    ///     spiky one, green for a conveyor one.
     /// </summary>
     private const int ShotNastyGrey = 50;
 
     /// <inheritdoc cref="ShotNastyGrey" />
-    private const int ConveyerNastyGreen = 100;
+    private const int ConveyorNastyGreen = 100;
     private readonly Blob _blob;
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsSet _graphicsSet;
@@ -628,7 +628,7 @@ internal class Nasty
         _deathScale = 1.0f;
 
         if (_nastyType == NastyType.Spiky ||
-            _nastyType == NastyType.Conveyer)
+            _nastyType == NastyType.Conveyor)
         {
             _nastyDies.Start();
         }
@@ -821,7 +821,7 @@ internal class Nasty
             _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
                 ColourHelper.GetXna4Colour(ColourLevels.Full, 0, 0, (byte)screenFade));
             _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                ColourHelper.GetXna4Colour(0, ConveyerNastyGreen, 0, (byte)screenFade));
+                ColourHelper.GetXna4Colour(0, ConveyorNastyGreen, 0, (byte)screenFade));
         }
         else
         {

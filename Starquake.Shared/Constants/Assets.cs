@@ -67,7 +67,7 @@ internal static class Assets
         // Pick-ups and nasties
         public const string Nasties = "Nasties";
         public const string NastiesOriginal = "NastiesOriginal";
-        public const string ConveyerNasty = "ConveyerNasty";
+        public const string ConveyorNasty = "ConveyorNasty";
 
         // Access booths
         public const string ScanLine = "ScanLine";

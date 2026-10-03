@@ -37,10 +37,10 @@ internal static class MarkerCatalogue
             "Spacer",
             "A gap that stays a gap. No nasties spawn here and no pickups will appear."),
 
-        [(int)MarkerTile.ConveyerNasty] = new MarkerFace(
+        [(int)MarkerTile.ConveyorNasty] = new MarkerFace(
             MaterialIconKind.Bug,
-            "CONVEYER NASTY",
-            "Conveyer nasty",
+            "CONVEYOR NASTY",
+            "Conveyor nasty",
             "Where a floor nasty walks. One is created for each of these on the screen."),
 
         [(int)MarkerTile.PreferredCoreLocation] = new MarkerFace(

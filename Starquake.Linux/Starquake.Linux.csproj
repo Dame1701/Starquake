@@ -10,4 +10,13 @@
     <ItemGroup>
         <PackageReference Include="MonoGame.Framework.DesktopGL"/>
     </ItemGroup>
+
+    <ItemGroup>
+        <!--
+          The window icon. MonoGame's SdlGameWindow looks for an embedded "Icon.bmp" in the
+          entry assembly and falls back to its own MonoGame logo when there isn't one. This is
+          the square master; only macOS wants the art inset into a rounded body.
+        -->
+        <EmbeddedResource Include="Icon.bmp" LogicalName="Icon.bmp"/>
+    </ItemGroup>
 </Project>

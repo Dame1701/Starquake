@@ -214,8 +214,8 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     /// <inheritdoc cref="RunningGame.BlobKiller" />
     public BlobDeathAnimation BlobKiller => Game.BlobKiller;
 
-    /// <inheritdoc cref="RunningGame.ConveyerNasties" />
-    public ConveyerNasties ConveyerNastiesInstance => Game.ConveyerNasties;
+    /// <inheritdoc cref="RunningGame.ConveyorNasties" />
+    public ConveyorNasties ConveyorNastiesInstance => Game.ConveyorNasties;
 
     /// <inheritdoc cref="RunningGame.ElectricityNodeGates" />
     public ElectricityGatesAndNodesEngine ElectricityNodeGateEngine => Game.ElectricityNodeGates;
@@ -301,7 +301,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             {
                 Player.KillBlob(false, false);
             }
-            else if (nastyType == NastyType.Conveyer)
+            else if (nastyType == NastyType.Conveyor)
             {
                 Player.KillBlob(true, false);
             }
@@ -515,15 +515,15 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         Presentation.ScreenXOffset = (_graphicsDeviceMgr.PreferredBackBufferWidth - gameScreens.ScreenWidth) / 2;
         Presentation.ScreenYOffset = 10;
 
-        // The conveyer nasties and the electricity engine. Both chase Blob and read the planet, so
+        // The conveyor nasties and the electricity engine. Both chase Blob and read the planet, so
         // both are built here rather than in Initialise, where neither existed yet.
-        var conveyerNasties = new ConveyerNasties(
+        var conveyorNasties = new ConveyorNasties(
             ContentResourceManager,
             gameScreens,
             player,
             RandomNumberGenerator);
-        conveyerNasties.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
-        conveyerNasties.LoadContent();
+        conveyorNasties.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
+        conveyorNasties.LoadContent();
 
         var electricityNodeGates = new ElectricityGatesAndNodesEngine(
             ContentResourceManager,
@@ -531,19 +531,19 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             _graphicsSet,
             player,
             RandomNumberGenerator,
-            conveyerNasties);
+            conveyorNasties);
         electricityNodeGates.OnBlobStruckByElectricity += ElectricityNodeGateEngine_OnBlobStruckByElectricity;
         player.OnBlobDiedAndRespawned += electricityNodeGates.Reset;
 
         // The nasties last of the three: they chase Blob, read the planet, and ask the other two where
-        // the conveyers and the electricity are.
+        // the conveyors and the electricity are.
         var nasties = new Nasties(
             ContentResourceManager,
             gameScreens,
             _graphicsSet,
             player,
             RandomNumberGenerator,
-            conveyerNasties,
+            conveyorNasties,
             electricityNodeGates,
             NastiesPerScreen,
             Input);
@@ -558,7 +558,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             IntroSequence = introSequence,
             Nasties = nasties,
             BlobKiller = blobKiller,
-            ConveyerNasties = conveyerNasties,
+            ConveyorNasties = conveyorNasties,
             ElectricityNodeGates = electricityNodeGates
         };
     }

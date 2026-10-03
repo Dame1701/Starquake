@@ -110,7 +110,7 @@
 - Fixed: Electricity gates and nodes engine now updates correctly
 - Changed: Various tweaks and improvements to the death animation
 - Changed: Moved blob's death animation into a separate file
-- Fixed: Conveyer nasties no longer appear on screens they shouldn't
+- Fixed: Conveyor nasties no longer appear on screens they shouldn't
 
 02/12/2012
 - Changed: Blob death animation refactored into an object

@@ -104,7 +104,7 @@ internal class MainGameScreen : IGameScreen
         if (triggeringScreen != GameScreenType.AccessBooth && triggeringScreen != GameScreenType.Cheops)
         {
             _gameEngine.Player.PerformPostChangeScreenActions();
-            _gameEngine.ConveyerNastiesInstance.PerformPostChangeScreenActions();
+            _gameEngine.ConveyorNastiesInstance.PerformPostChangeScreenActions();
             _gameEngine.Nasties.PerformPostChangeScreenActions();
 
             _gameEngine.ElectricityNodeGateEngine.PerformPostChangeScreenActions();
@@ -386,7 +386,7 @@ internal class MainGameScreen : IGameScreen
         }
 
         _gameEngine.TunnelAnimations.Update();
-        _gameEngine.ConveyerNastiesInstance.Update(gameTime);
+        _gameEngine.ConveyorNastiesInstance.Update(gameTime);
         _gameEngine.ElectricityNodeGateEngine.Update();
 
         // Update breakable bridges
@@ -585,7 +585,7 @@ internal class MainGameScreen : IGameScreen
     private void DrawNasties()
     {
         _gameEngine.Nasties.Draw(ScreenFade);
-        _gameEngine.ConveyerNastiesInstance.Draw(ScreenFade);
+        _gameEngine.ConveyorNastiesInstance.Draw(ScreenFade);
     }
 
     private void DrawUpperGraphics()

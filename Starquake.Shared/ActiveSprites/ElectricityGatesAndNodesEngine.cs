@@ -61,7 +61,7 @@ internal class ElectricityGatesAndNodesEngine
     private const int OriginalGateArcYOffset = 16;
 
     /// <summary>
-    ///     Where the indicator lamps sit on a node, on a gate, and on a conveyer nasty's gate.
+    ///     Where the indicator lamps sit on a node, on a gate, and on a conveyor nasty's gate.
     /// </summary>
     private const int NodeLightXOffset = 75;
 
@@ -75,7 +75,7 @@ internal class ElectricityGatesAndNodesEngine
     private const int GateLightYOffset = 27;
 
     /// <inheritdoc cref="NodeLightXOffset" />
-    private const int ConveyerGateLightXOffset = 33;
+    private const int ConveyorGateLightXOffset = 33;
 
     /// <summary>
     ///     The near light of each pair, which sits to the left of the tile's own position rather than
@@ -87,22 +87,22 @@ internal class ElectricityGatesAndNodesEngine
     private const int GateLightNearXOffset = 8;
 
     /// <inheritdoc cref="NodeLightNearXOffset" />
-    private const int ConveyerGateLightNearXOffset = 6;
+    private const int ConveyorGateLightNearXOffset = 6;
 
     /// <inheritdoc cref="NodeLightNearXOffset" />
     private const int ArcXOffset = 28;
 
     /// <summary>
-    ///     How the arc that plays over a conveyer nasty is drawn: dropped a little so it meets the
+    ///     How the arc that plays over a conveyor nasty is drawn: dropped a little so it meets the
     ///     nasty, and at half size.
     /// </summary>
-    private const int ConveyerArcYOffset = 10;
+    private const int ConveyorArcYOffset = 10;
 
-    /// <inheritdoc cref="ConveyerArcYOffset" />
-    private const float ConveyerArcScale = 0.5f;
+    /// <inheritdoc cref="ConveyorArcYOffset" />
+    private const float ConveyorArcScale = 0.5f;
     private readonly Blob _blob;
 
-    private readonly ConveyerNasties _conveyerNasties;
+    private readonly ConveyorNasties _conveyorNasties;
     private readonly Animation _electricityAnimation;
     private readonly Animation _electricityAnimation2;
     private readonly Animation _electricityAnimationOriginal;
@@ -122,7 +122,7 @@ internal class ElectricityGatesAndNodesEngine
         GraphicsSet graphicsSet,
         Blob blob,
         Random randomNumberGenerator,
-        ConveyerNasties conveyerNasties)
+        ConveyorNasties conveyorNasties)
     {
         _resources = resources;
         _gameScreens = gameScreens;
@@ -130,7 +130,7 @@ internal class ElectricityGatesAndNodesEngine
         _blob = blob;
         _randomNumberGenerator = randomNumberGenerator;
 
-        _conveyerNasties = conveyerNasties;
+        _conveyorNasties = conveyorNasties;
 
         _electricityAnimationOriginal = new Animation();
         _electricityAnimationOriginal.FirstFrame = 0;
@@ -364,7 +364,7 @@ internal class ElectricityGatesAndNodesEngine
             ElectricityNodeControllers ??= CreateNodeControllers(electricityNodeCounter, secondLayerTiles);
         }
 
-        DrawConveyerNastyArcs();
+        DrawConveyorNastyArcs();
     }
 
     /// <summary>
@@ -407,9 +407,9 @@ internal class ElectricityGatesAndNodesEngine
             new Point(tileLocation.X + GateLightXOffset, tileLocation.Y + GateLightYOffset));
     }
 
-    private void DrawConveyerNastyArcs()
+    private void DrawConveyorNastyArcs()
     {
-        foreach (ConveyerNasty nasty in _conveyerNasties.Nasties)
+        foreach (ConveyorNasty nasty in _conveyorNasties.Nasties)
         {
             if (!nasty.NastyActive)
             {
@@ -418,17 +418,17 @@ internal class ElectricityGatesAndNodesEngine
 
             DrawLightPair(
                 "GateLights",
-                new Point(nasty.XLocation - ConveyerGateLightNearXOffset, nasty.YLocation + GateLightYOffset),
-                new Point(nasty.XLocation + ConveyerGateLightXOffset, nasty.YLocation + GateLightYOffset));
+                new Point(nasty.XLocation - ConveyorGateLightNearXOffset, nasty.YLocation + GateLightYOffset),
+                new Point(nasty.XLocation + ConveyorGateLightXOffset, nasty.YLocation + GateLightYOffset));
 
             SpriteCollection electricityNodeElectricity1 = _resources.GetSpriteCollection(Assets.Graphics.ElectricityNodeElectricity1);
             electricityNodeElectricity1.Begin(BlendState.Additive);
             electricityNodeElectricity1.DrawSprite(
                 _electricityAnimation.CurrentFrame,
                 nasty.XLocation,
-                nasty.YLocation + ConveyerArcYOffset,
+                nasty.YLocation + ConveyorArcYOffset,
                 Color.White,
-                ConveyerArcScale,
+                ConveyorArcScale,
                 0);
             electricityNodeElectricity1.End();
         }

@@ -12,6 +12,17 @@
         <PackageReference Include="MonoGame.Framework.DesktopGL"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <!--
+          The Dock icon while the game is running. MonoGame's SdlGameWindow looks for an
+          embedded "Icon.bmp" in the entry assembly and falls back to its own MonoGame logo
+          when there isn't one. SDL's macOS backend sets NSApplication's icon from it, which
+          overrides Starquake.icns the moment the window opens - so this has to carry the same
+          rounded shape as the bundle icon, not the square master the other heads use.
+        -->
+        <EmbeddedResource Include="Icon.bmp" LogicalName="Icon.bmp"/>
+    </ItemGroup>
+
     <!--
       Wrap the build output in a Starquake.app bundle so the game launches from Finder with
       the right icon and menu bar name. The plain executable is still produced alongside it.

@@ -533,7 +533,7 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/ComputerReportScreenForeground.png
 
-#begin Graphics/ConveyerNasty.png
+#begin Graphics/ConveyorNasty.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -543,7 +543,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/ConveyerNasty.png
+/build:Graphics/ConveyorNasty.png
 
 #begin Graphics/ElectricityAnim.png
 /importer:TextureImporter

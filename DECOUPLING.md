@@ -151,7 +151,7 @@ twenty classes use three or fewer. Six classes account for nearly all the breadt
 | World | `GameScreens`, `GetGameScreen`, `CurrentGameScreen` | 25 |
 | Presentation | `GraphicsDeviceMgr`, `PresentationTransform`, `ScreenClearColour`, `ScreenXOffset`, `ScreenYOffset`, `ScanlinesEnabled`, `BackgroundColour`, `DrawBackgrounds`, `Scanlines` | 14 |
 | Session | `BlobStatusPanel`, `Paused`, `PlayerKeys`, `InTestMode`, `IntroSequence` | 12 |
-| Actors | `Player`, `Nasties`, `Elements`, `BlobKiller`, `ConveyerNastiesInstance`, `ElectricityNodeGateEngine`, `BreakableBridgesEngine`, `TunnelAnimations`, `ColourAnimationEngine`, `ScreenEffectEngine` | 20 |
+| Actors | `Player`, `Nasties`, `Elements`, `BlobKiller`, `ConveyorNastiesInstance`, `ElectricityNodeGateEngine`, `BreakableBridgesEngine`, `TunnelAnimations`, `ColourAnimationEngine`, `ScreenEffectEngine` | 20 |
 
 The six broad consumers, which stage 5 is entirely about:
 
@@ -343,10 +343,10 @@ itself" was `GameEngine.Player.BlobXPos` *inside* `Blob`. There is one Blob, con
 it is what `Player` returns — so that was `BlobXPos`. Gone in a line. `Player` being read by ten
 files was never a cycle; the other nine are other objects asking where Blob is.
 
-**Most of the rest was construction order again, not dependency.** `ConveyerNasties` and
+**Most of the rest was construction order again, not dependency.** `ConveyorNasties` and
 `ElectricityGatesAndNodesEngine` were built in `Initialise()`, before Blob and the planet
 existed, which is the only reason they held the engine. Neither needs anything from the pre-content
-phase. Moved after Blob, both take what they use. `ConveyerNasty` needs no Blob at all.
+phase. Moved after Blob, both take what they use. `ConveyorNasty` needs no Blob at all.
 `CustomControl` writes Blob's speed and wanted nothing else — and Blob constructs it, so
 Blob hands over itself.
 
@@ -575,7 +575,7 @@ The baseline, before stage 1. Sorted by how much each file wants.
 
 | File | Members used |
 | --- | --- |
-| `GameComponents/GameScreens/MainGameScreen.cs` | BlobKiller BlobStatusPanel BreakableBridgesEngine ColourAnimationEngine ContentMgr ContentResourceManager ConveyerNastiesInstance CurrentGameScreen DrawBackgrounds ElectricityNodeGateEngine Elements GameScreens GetGameScreen InTestMode IntroSequence Nasties Paused Player PlayerKeys RandomNumberGenerator ScreenEffectEngine TunnelAnimations |
+| `GameComponents/GameScreens/MainGameScreen.cs` | BlobKiller BlobStatusPanel BreakableBridgesEngine ColourAnimationEngine ContentMgr ContentResourceManager ConveyorNastiesInstance CurrentGameScreen DrawBackgrounds ElectricityNodeGateEngine Elements GameScreens GetGameScreen InTestMode IntroSequence Nasties Paused Player PlayerKeys RandomNumberGenerator ScreenEffectEngine TunnelAnimations |
 | `ActiveSprites/Blob.cs` | BlobKiller BlobSpritesName BlobStatusPanel BreakableBridgesEngine ContentResourceManager CurrentGameScreen ElectricityNodeGateEngine GameScreens GetGameScreen Paused Player PlayerKeys ScreenEffectEngine UsingOldGraphics |
 | `GameComponents/GameScreens/TeleportScreen.cs` | ContentMgr ContentResourceManager CurrentGameScreen Font2 GameScreens GetGameScreen LowerScreenTilesName Player RandomNumberGenerator ScreenXOffset ScreenYOffset ShapeDrawer UpperScreenTilesName |
 | `GameComponents/GameScreens/CheopsScreen.cs` | BlobStatusPanel ContentResourceManager CurrentGameScreen Elements Font2 GameScreens GetGameScreen PickupsName Player RandomNumberGenerator ShapeDrawer UsingOldGraphics |
@@ -589,14 +589,14 @@ The baseline, before stage 1. Sorted by how much each file wants.
 | `GameComponents/PresentationScreens/GameCompleteScreen.cs` | ContentResourceManager CurrentGameScreen Elements Font2 GetGameScreen GraphicsDeviceMgr ScreenClearColour ScreenEffectEngine |
 | `GameComponents/GameScreens/PlanetCoreScreen.cs` | BackgroundColour ContentResourceManager CurrentGameScreen Elements GameScreens GetGameScreen Player |
 | `ActiveSprites/CoreElement.cs` | AccessCodesFailedName AccessCodesPassedName BackgroundColour ContentResourceManager PickupsIlluminatedName PickupsName |
-| `ActiveSprites/Nasties.cs` | ContentResourceManager ConveyerNastiesInstance ElectricityNodeGateEngine GameScreens Player RandomNumberGenerator |
+| `ActiveSprites/Nasties.cs` | ContentResourceManager ConveyorNastiesInstance ElectricityNodeGateEngine GameScreens Player RandomNumberGenerator |
 | `ActiveSprites/Nasty.cs` | ContentResourceManager GameScreens Paused Player RandomNumberGenerator UsingOldGraphics |
 | `Display/StatusPanel.cs` | BlobStatusPanel ContentResourceManager CurrentGameScreen IntroSequence PickupsName Player |
 | `Animations/KeyScanner.cs` | AccessCodesFailedName AccessCodesPassedName ContentResourceManager PickupsName RandomNumberGenerator |
 | `ActiveSprites/BreakableBridge.cs` | ContentResourceManager GetInstance GraphicsDeviceMgr ScreenEffectEngine UsingOldGraphics |
 | `ActiveSprites/JumpPlatform.cs` | ContentResourceManager GetInstance GraphicsDeviceMgr ScreenEffectEngine UsingOldGraphics |
-| `ActiveSprites/ConveyerNasties.cs` | ContentResourceManager GameScreens Player RandomNumberGenerator |
-| `ActiveSprites/ConveyerNasty.cs` | ContentMgr ContentResourceManager GameScreens RandomNumberGenerator |
+| `ActiveSprites/ConveyorNasties.cs` | ContentResourceManager GameScreens Player RandomNumberGenerator |
+| `ActiveSprites/ConveyorNasty.cs` | ContentMgr ContentResourceManager GameScreens RandomNumberGenerator |
 | `ActiveSprites/ElectricityGatesAndNodesEngine.cs` | ContentResourceManager GameScreens Player UsingOldGraphics |
 | `Animations/ColourAnimationEngine.cs` | ContentResourceManager GameScreens LowerScreenTilesName UpperScreenTilesName |
 | `Animations/TunnelLiftAnimationEngine.cs` | ContentResourceManager GameScreens UpperScreenTilesName UsingOldGraphics |

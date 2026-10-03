@@ -35,9 +35,9 @@ public enum MarkerTile
     Spacer = 500,
 
     /// <summary>
-    ///     Where a conveyer nasty walks. One is created per marker on the screen.
+    ///     Where a conveyor nasty walks. One is created per marker on the screen.
     /// </summary>
-    ConveyerNasty = 501,
+    ConveyorNasty = 501,
 
     /// <summary>
     ///     Where a core element would best be seeded, for a screen that would otherwise scatter one

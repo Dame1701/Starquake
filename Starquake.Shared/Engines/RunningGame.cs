@@ -46,8 +46,8 @@ internal sealed class RunningGame
     /// <summary>How he comes apart when one of them gets him.</summary>
     public required BlobDeathAnimation BlobKiller { get; init; }
 
-    /// <summary>The nasties that run along conveyer rails.</summary>
-    public required ConveyerNasties ConveyerNasties { get; init; }
+    /// <summary>The nasties that run along conveyor rails.</summary>
+    public required ConveyorNasties ConveyorNasties { get; init; }
 
     /// <summary>The electricity gates and the nodes that feed them.</summary>
     public required ElectricityGatesAndNodesEngine ElectricityNodeGates { get; init; }
