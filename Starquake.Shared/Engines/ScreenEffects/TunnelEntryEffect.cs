@@ -56,11 +56,19 @@ internal abstract class TunnelEntryEffect(
     private const double ColourDrain = 1.0;
 
     /// <summary>
-    ///     How much the drain lingers at its deepest, as the power its curve is raised to. One is
-    ///     the bare parabola, which touches black and white for an instant; below one flattens the
-    ///     top so the picture stays drained across the middle of the crossing.
+    ///     How far the light goes with the colour, where one would be pitch black and nought
+    ///     leaves the grey as bright as the picture was. Draining the colour alone gives a flat
+    ///     mid grey that reads as a photograph rather than as a dark place; taking most of the
+    ///     light with it is what makes it read as a tunnel.
     /// </summary>
-    private const double DrainSpread = 0.5;
+    private const double LightDrain = 0.78;
+
+    /// <summary>
+    ///     How much the drain lingers at its deepest, as the power its curve is raised to. One
+    ///     leaves the curve as it is; below one flattens the top so the picture stays down across
+    ///     the middle of the crossing rather than touching bottom and turning straight round.
+    /// </summary>
+    private const double DrainSpread = 0.75;
 
     /// <summary>
     ///     How much longer arriving takes than leaving. Equal halves feel mechanical; coming in
@@ -212,9 +220,12 @@ internal abstract class TunnelEntryEffect(
         var bleed = (int)(renderViewPortToUse.MasterWidth * BleedOfTheSeam);
 
         // One shader over the whole batch, so both screens drain together and the seam between
-        // them does not have a colour boundary running down it.
+        // them does not have a colour or a brightness boundary running down it.
+        var drained = DrainedBy();
+
         Effect desaturate = resources.GetEffect(Assets.Shaders.Desaturate);
-        desaturate.Parameters["Saturation"].SetValue((float)SaturationNow());
+        desaturate.Parameters["Saturation"].SetValue((float)(1 - (ColourDrain * drained)));
+        desaturate.Parameters["Brightness"].SetValue((float)(1 - (LightDrain * drained)));
 
         renderer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, desaturate,
             presentation.Transform);
@@ -266,26 +277,32 @@ internal abstract class TunnelEntryEffect(
                                         (1 - _seamReachesTheMiddle)));
 
     /// <summary>
-    ///     How much colour the picture has this frame: all of it as the crossing starts, least as
-    ///     the seam passes the middle, all of it again by the time the new screen has settled.
+    ///     How far into the tunnel the picture is, from nought at both ends of the transition to
+    ///     one in the middle of it. Both the colour and the light are taken down by this.
     /// </summary>
     /// <remarks>
-    ///     Driven off the seam rather than off the frame count, so it follows the same eased clock
-    ///     everything else here does - the colour drains fastest at the moment the picture is
-    ///     moving fastest. Clamped because <see cref="SeamCrossing" /> deliberately leaves the
-    ///     nought-to-one range at both ends to stretch and overshoot, and there is no tunnel out
-    ///     there.
+    ///     Driven off plain frame count rather than off <see cref="SeamCrossing" />. The seam's
+    ///     ease is heavily back-loaded by design - it sits near the edge for the first third and
+    ///     then whips across - so a drain following it was full colour for ten frames and then
+    ///     grey four frames later, which read as a flicker rather than as going somewhere. Against
+    ///     the frame count it drains and recovers over the whole crossing instead.
     /// </remarks>
-    private double SaturationNow()
+    private double DrainedBy()
     {
         if (EffectSurface == null || EffectFinished)
         {
-            return 1;
+            return 0;
         }
 
-        var crossing = Math.Clamp(SeamCrossing(_frame / (double)_transitionFrames), 0, 1);
+        var through = Math.Clamp(_frame / (double)_transitionFrames, 0, 1);
 
-        return 1 - (ColourDrain * Math.Pow(4 * crossing * (1 - crossing), DrainSpread));
+        // A raised cosine rather than a parabola. Both peak in the middle, but a parabola leaves
+        // nought at a slope - at 38 frames its first frame is already a third drained, which is a
+        // jump rather than a fade - while this one leaves and arrives flat, so the drain starts
+        // and finishes without a step.
+        var raisedCosine = (1 - Math.Cos(2 * Math.PI * through)) / 2;
+
+        return Math.Pow(raisedCosine, DrainSpread);
     }
 
     /// <summary>
