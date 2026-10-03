@@ -52,9 +52,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     ///     How many nasties can be on a screen at once.
     /// </summary>
     private const int NastiesPerScreen = 4;
-
-    public readonly ContentManager ContentMgr;
-
+    private readonly ContentManager _contentMgr;
     public readonly ResourceManager ContentResourceManager;
 
     //public MercuryParticleEngine ParticleEngine;
@@ -160,7 +158,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         Input = input;
         // Setup graphics device and content management
         _graphicsDeviceMgr = graphics;
-        ContentMgr = content;
+        _contentMgr = content;
         _window = window;
         _quitGame = quitGame;
 
@@ -374,7 +372,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     [MemberNotNull(nameof(_loadingScreen), nameof(_scanlines), nameof(Font1), nameof(Font2))]
     private void DefineContent()
     {
-        _loadingScreen = new LoadingScreen(_graphicsDeviceMgr, ContentMgr, Presentation, Input);
+        _loadingScreen = new LoadingScreen(_graphicsDeviceMgr, _contentMgr, Presentation, Input);
 
         Status = GameEngineStatus.StartingGraphicsLoaded;
 
@@ -403,9 +401,9 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     [MemberNotNull(nameof(Font1), nameof(Font2), nameof(_scanlines))]
     private void DefineFonts()
     {
-        Font1 = new BitmapFont(ContentMgr.Load<SpriteFont>(Assets.Fonts.ElektoraSmall), new SpriteBatch(_graphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
-        Font2 = new BitmapFont(ContentMgr.Load<SpriteFont>(Assets.Fonts.ElektoraMedium), new SpriteBatch(_graphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
-        _scanlines = new SpriteCollection(_graphicsDeviceMgr, ContentMgr, Assets.Startup.Scanlines, CompositionSize.Width, CompositionSize.Height);
+        Font1 = new BitmapFont(_contentMgr.Load<SpriteFont>(Assets.Fonts.ElektoraSmall), new SpriteBatch(_graphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
+        Font2 = new BitmapFont(_contentMgr.Load<SpriteFont>(Assets.Fonts.ElektoraMedium), new SpriteBatch(_graphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
+        _scanlines = new SpriteCollection(_graphicsDeviceMgr, _contentMgr, Assets.Startup.Scanlines, CompositionSize.Width, CompositionSize.Height);
     }
 
     /// <summary>
