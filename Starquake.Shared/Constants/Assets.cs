@@ -187,6 +187,17 @@ internal static class Assets
     }
 
     /// <summary>
+    ///     The pixel shaders, by the path each loads from. These are paths rather than registered
+    ///     names, because a shader is fetched straight off the content manager the first time it is
+    ///     drawn with rather than being registered and loaded with everything else - see
+    ///     <c>ResourceManager.GetEffect</c>.
+    /// </summary>
+    internal static class Shaders
+    {
+        public const string Desaturate = @"Shaders\Desaturate";
+    }
+
+    /// <summary>
     ///     The screen data resources. Both read the same file, in the order the manifest names them.
     /// </summary>
     internal static class Data

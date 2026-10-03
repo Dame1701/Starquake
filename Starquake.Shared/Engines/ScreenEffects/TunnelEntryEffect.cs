@@ -5,6 +5,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
+using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Helpers;
 
@@ -36,9 +37,31 @@ namespace Starquake.Engines.ScreenEffects;
 ///     effect. Before the snapshot existed the squeeze was showing the destination being snatched
 ///     away, so the same screen arrived twice.
 /// </remarks>
-internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, PresentationSettings presentation)
+internal abstract class TunnelEntryEffect(
+    ScreenSnapshot outgoingScreen,
+    PresentationSettings presentation,
+    ResourceManager resources)
     : ScreenEffectBase
 {
+    /// <summary>
+    ///     How far the colour drains out as Blob crosses, where one is all of it and nought is
+    ///     none. A tunnel is a dark place to be inside and there is nothing to light it, so the
+    ///     picture loses its colour on the way through and gets it back on the other side.
+    /// </summary>
+    /// <remarks>
+    ///     This is what the dark gap between the two screens was trying to be and was not. A gap
+    ///     reads as a hole punched between two pictures; draining them reads as the pictures
+    ///     themselves being somewhere darker, which is the thing Blob is actually doing.
+    /// </remarks>
+    private const double ColourDrain = 1.0;
+
+    /// <summary>
+    ///     How much the drain lingers at its deepest, as the power its curve is raised to. One is
+    ///     the bare parabola, which touches black and white for an instant; below one flattens the
+    ///     top so the picture stays drained across the middle of the crossing.
+    /// </summary>
+    private const double DrainSpread = 0.5;
+
     /// <summary>
     ///     How much longer arriving takes than leaving. Equal halves feel mechanical; coming in
     ///     more slowly than you went out reads as settling into the new screen.
@@ -188,7 +211,12 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
     {
         var bleed = (int)(renderViewPortToUse.MasterWidth * BleedOfTheSeam);
 
-        renderer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null,
+        // One shader over the whole batch, so both screens drain together and the seam between
+        // them does not have a colour boundary running down it.
+        Effect desaturate = resources.GetEffect(Assets.Shaders.Desaturate);
+        desaturate.Parameters["Saturation"].SetValue((float)SaturationNow());
+
+        renderer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, desaturate,
             presentation.Transform);
 
         if (outgoingScreen.Picture is { } leaving && _outgoingWidth > 0)
@@ -236,6 +264,29 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
             ? 0.5 * StretchedIn(throughTheTransition / _seamReachesTheMiddle)
             : 0.5 + (0.5 * StretchedOut((throughTheTransition - _seamReachesTheMiddle) /
                                         (1 - _seamReachesTheMiddle)));
+
+    /// <summary>
+    ///     How much colour the picture has this frame: all of it as the crossing starts, least as
+    ///     the seam passes the middle, all of it again by the time the new screen has settled.
+    /// </summary>
+    /// <remarks>
+    ///     Driven off the seam rather than off the frame count, so it follows the same eased clock
+    ///     everything else here does - the colour drains fastest at the moment the picture is
+    ///     moving fastest. Clamped because <see cref="SeamCrossing" /> deliberately leaves the
+    ///     nought-to-one range at both ends to stretch and overshoot, and there is no tunnel out
+    ///     there.
+    /// </remarks>
+    private double SaturationNow()
+    {
+        if (EffectSurface == null || EffectFinished)
+        {
+            return 1;
+        }
+
+        var crossing = Math.Clamp(SeamCrossing(_frame / (double)_transitionFrames), 0, 1);
+
+        return 1 - (ColourDrain * Math.Pow(4 * crossing * (1 - crossing), DrainSpread));
+    }
 
     /// <summary>
     ///     Draws <paramref name="picture" /> across <paramref name="area" />, reaching

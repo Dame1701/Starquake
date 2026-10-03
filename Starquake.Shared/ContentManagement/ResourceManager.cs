@@ -5,6 +5,7 @@
 using MessagePack;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.Animations;
 using Starquake.Particles;
 using Starquake.SharedLibs;
@@ -286,6 +287,30 @@ internal class ResourceManager : StartableGameComponentBase
         }
 
         return (SpriteCollection)resource;
+    }
+
+    /// <summary>
+    ///     A pixel shader, loaded the first time it is asked for and kept thereafter.
+    /// </summary>
+    /// <remarks>
+    ///     Loaded on demand rather than registered with everything else, for two reasons. Building
+    ///     an <see cref="Effect" /> compiles and links on the GPU, and <c>LoadEverything</c> runs on
+    ///     a background thread where only some graphics calls are marshalled back - the same
+    ///     hazard <c>SpriteCollection.Sprites</c> defers around. And a shader is wanted by the
+    ///     thing drawing with it rather than by the game as a whole, so the first draw is both a
+    ///     safe moment and an honest one.
+    /// </remarks>
+    public Effect GetEffect(string path)
+    {
+        if (_resources.TryGetValue(path, out object? loaded))
+        {
+            return (Effect)loaded;
+        }
+
+        var effect = _contentManagerInstance.Load<Effect>(path);
+        _resources[path] = effect;
+
+        return effect;
     }
 
     public IParticleEffect GetParticleEffectInstance(string effectName, ParticleEffectType effectType, TimeSpan? duration)

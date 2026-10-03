@@ -5,6 +5,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
+using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Structure;
 
@@ -24,7 +25,8 @@ internal class ScreenEffectEngine
 
     public ScreenEffectEngine(
         GraphicsDeviceManager graphics,
-        PresentationSettings presentation)
+        PresentationSettings presentation,
+        ResourceManager resources)
     {
         _graphicsDeviceManager = graphics;
         _presentation = presentation;
@@ -38,8 +40,8 @@ internal class ScreenEffectEngine
         // cannot both be mid-transition and want a picture of their own.
         var outgoingScreen = new ScreenSnapshot(graphics);
 
-        _screenEffects.Add(new LeftTunnelEntryEffect(outgoingScreen, presentation));
-        _screenEffects.Add(new RightTunnelEntryEffect(outgoingScreen, presentation));
+        _screenEffects.Add(new LeftTunnelEntryEffect(outgoingScreen, presentation, resources));
+        _screenEffects.Add(new RightTunnelEntryEffect(outgoingScreen, presentation, resources));
         _screenEffects.Add(new AdditiveFade(presentation));
 
         _renderer = new SpriteBatch(_graphicsDeviceManager.GraphicsDevice);

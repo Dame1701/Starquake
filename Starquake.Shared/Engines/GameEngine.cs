@@ -363,7 +363,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
 
         // Built here rather than with its view ports, so that anything constructed from here on -
         // Blob's jump platforms, for one - can be handed it instead of reaching for it later.
-        _screenEffectEngine = new ScreenEffectEngine(_graphicsDeviceMgr, Presentation);
+        _screenEffectEngine = new ScreenEffectEngine(_graphicsDeviceMgr, Presentation, ContentResourceManager);
     }
 
     /// <summary>
