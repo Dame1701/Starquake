@@ -292,22 +292,29 @@ Cosmetic, and invisible unless you line all eight up.
 That makes three defects in six copies of one behaviour, none of which a build or a play-test
 would have surfaced. The case for this stage was not hypothetical.
 
-### Two asymmetries that were real, and stayed
+### Two asymmetries that were real, and stayed — one has since gone
 
 Not every difference between the six branches was drift, and the collapse had to keep the two that
-were not.
+were not. **The first of them has since been taken as the follow-up this section offered** — see
+below — and the second went with it, because the two were the same asymmetry seen twice.
 
 **The point-blank push-through** — which stops a shot dying on the spot when Blob is standing
-over a collectable — exists only for shots fired along the horizontal axis. Vertical shots from a
-shuttle never had it. That looks accidental rather than intended, but adding it to vertical shots
-changes what the game does, so `BlobFire` keeps the axis test and `Advance`'s documentation says
-why. A follow-up, if anyone wants it.
+over a collectable — existed only for shots fired along the horizontal axis. Vertical shots from a
+shuttle never had it. That looked accidental rather than intended, but adding it to vertical shots
+changed what the game does, so this refactor kept the axis test and offered it as a follow-up.
+**Taken in `3144531`:** the axis test is gone, and nothing about firing upwards makes the item
+underneath Blob more of an obstacle.
 
-**The distance a shot has travelled** counts horizontal movement only. Four of the six branches
+**The distance a shot has travelled** counted horizontal movement only. Four of the six branches
 add `amountToMoveX` to it and the two vertical ones add nothing — but their `amountToMoveX` is
-always nought, so the two are the same rule written twice, and the unified `DistanceTravelled +=
-stepX` reproduces all six. The only thing that reads it is the push-through check, so counting one
-axis is all it needs.
+always nought, so the two were the same rule written twice, and the unified `DistanceTravelled +=
+stepX` reproduced all six. The only thing that reads it is the push-through check, which is
+exactly why counting one axis was enough: the check could not fire on a vertical shot anyway.
+**That is the half of the defect this section did not see.** Making the push-through axis-neutral
+without also counting the axis travelled would have left the reach compared against a distance
+that never moved, so a vertical shot would have pushed through everything, for ever. Both halves
+changed together, and the reach is now measured along the fired axis too — it was the horizontal
+gap between Blob and the item whichever way he fired.
 
 ### How the collapse was verified
 
@@ -315,8 +322,10 @@ Two ways, because a build proves nothing here.
 
 25 tests in `Starquake.Tests/BlobFireTests.cs` pin the axes, the four straight screen edges, the
 eight deflected ones, the difference between deflecting off a shuttle and dying on foot, the
-push-through applying horizontally and not vertically, and what happens when Blob fires in a
-direction nothing travels along. Two of them are the cases that would have caught the two drifts.
+push-through, and what happens when Blob fires in a direction nothing travels along. Two of them
+are the cases that would have caught the two drifts. The three that pinned the push-through as
+horizontal-only were rewritten when that was fixed, which is what a test pinning a known
+asymmetry is for.
 
 Beyond that, the six old branches were ported mechanically into a throwaway harness — only the
 dependency calls rewritten — and run against `BlobFire` over every firing direction, every
@@ -517,12 +526,10 @@ seven assignments each and are now five calls to one factory; the rest stands, f
 
 Eleven were listed here. Seven have since been taken, by the work `PLAN.md` describes, and are
 struck from this list rather than left to be re-found; the commit each landed in is named in case
-the reasoning is wanted. **Four are still open.**
+the reasoning is wanted. **Three are still open.**
 
 ### Still open
 
-- **The point-blank push-through applies only to horizontally fired shots** (stage 3). It looks
-  accidental; fixing it changes the game, which is why it is still here.
 - **`Blob` is the one god class left standing.** It had ~60 fields when this was written and has
   123 now that the reads are visible. `PLAN.md` phase 4 took the two parts of it that were
   arithmetic rather than drawing - the unstick probe and the inventory - and stopped there, because

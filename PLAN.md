@@ -79,10 +79,10 @@ copy step and found the real cause.
 
 ### Carried over from `REFACTORING.md`
 
-Four of its eleven follow-ups are still open and are listed there: the point-blank push-through
-applying only to horizontal shots, `Blob`'s field count, the guards that sit one level deeper than
-they need to, and `Scorpian` and `Helicopter` sharing splatter colours. Three methods also still
-have a local called `temp`.
+Three of its eleven follow-ups are still open and are listed there: `Blob`'s field count, the
+guards that sit one level deeper than they need to, and `Scorpian` and `Helicopter` sharing
+splatter colours. The point-blank push-through was the fourth and is done - `3144531`, which found
+it was three things rather than one. Three methods also still have a local called `temp`.
 
 ## The key and the access card — how they ended up placed
 
