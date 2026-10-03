@@ -24,6 +24,23 @@ internal class GameScreenCollection : IDynamicCollisionCells
     /// </summary>
     private const int FullPercentage = 100;
 
+    /// <summary>
+    ///     What <c>ColourAnimationEngine.Start</c> is given for an animation that should pulse until
+    ///     it is stopped rather than for a set number of loops.
+    /// </summary>
+    private const int LoopForever = -1;
+
+    /// <summary>
+    ///     The three tiles that mark a shuttle pad, in the order they were always started in. Their
+    ///     colours are <c>ColourAnimatedTiles</c>'s; this is only which three they are.
+    /// </summary>
+    private static readonly ActionTiles[] ShuttleTags =
+    [
+        ActionTiles.ShuttleTag1,
+        ActionTiles.ShuttleTag3,
+        ActionTiles.ShuttleTag2
+    ];
+
     private readonly CoreElements _elements;
 
     private readonly GameScreenData[] _gameScreens;
@@ -328,10 +345,7 @@ internal class GameScreenCollection : IDynamicCollisionCells
                         {
                             gameScreen.ScreenTiles[x, y].TileImage = (int)ActionTiles.RemovedShuttlePlatform;
 
-                            // Trigger Colour animation
-                            ColourAnimations.Start((int)ActionTiles.ShuttleTag1, -1);
-                            ColourAnimations.Start((int)ActionTiles.ShuttleTag3, -1);
-                            ColourAnimations.Start((int)ActionTiles.ShuttleTag2, -1);
+                            StartShuttleTagAnimations();
                         }
                     }
                     else
@@ -340,10 +354,7 @@ internal class GameScreenCollection : IDynamicCollisionCells
                         {
                             gameScreen.ScreenTiles[x, y].TileImage = (int)ActionTiles.ShuttlePlatform;
 
-                            // Cancel Colour animation
-                            ColourAnimations.Stop((int)ActionTiles.ShuttleTag1);
-                            ColourAnimations.Stop((int)ActionTiles.ShuttleTag3);
-                            ColourAnimations.Stop((int)ActionTiles.ShuttleTag2);
+                            StopShuttleTagAnimations();
                         }
                     }
                 }
@@ -547,6 +558,28 @@ internal class GameScreenCollection : IDynamicCollisionCells
         Renderer.AnimateForceField(keyLockDoor, gameTime, blobHasKey);
     }
 
+    /// <summary>
+    ///     Pulses the three tags that mark where the shuttle pad used to be, so that a pad Blob has
+    ///     taken the shuttle off still says where it was. Indefinitely - the tags pulse until the
+    ///     shuttle is put back.
+    /// </summary>
+    private void StartShuttleTagAnimations()
+    {
+        foreach (ActionTiles tag in ShuttleTags)
+        {
+            ColourAnimations.Start((int)tag, LoopForever);
+        }
+    }
+
+    /// <inheritdoc cref="StartShuttleTagAnimations" />
+    private void StopShuttleTagAnimations()
+    {
+        foreach (ActionTiles tag in ShuttleTags)
+        {
+            ColourAnimations.Stop((int)tag);
+        }
+    }
+
     private void AddKeyLockDoorCollisionTiles(KeyLockDoor keyLockDoor)
     {
         for (int c = 0; c < 3; c++)
@@ -558,10 +591,9 @@ internal class GameScreenCollection : IDynamicCollisionCells
                     keyLockDoor.Location.Y + c * 32,
                     CollisionTileType.None);
 
-            // Add the tile to the keylock door so we can remove it later
+            // The door keeps its own tiles so it can take them out again, and the collision map is
+            // what anything walking into the door actually tests against.
             keyLockDoor.CollisionTiles.Add(keyLockCollisionTile);
-
-            // Add the tile to the collision map
             Collisions.Add(keyLockCollisionTile);
         }
     }

@@ -16,6 +16,35 @@ internal class ConveyorNasties(ResourceManager resources,
     Blob blob,
     Random randomNumberGenerator)
 {
+    /// <summary>
+    ///     How far Blob's box is pulled in each side before a touch counts, so that passing close by a
+    ///     nasty is not the same as walking into one.
+    /// </summary>
+    private const int BlobBoxInset = 8;
+
+    /// <summary>
+    ///     The size of Blob's shot, for testing it against a nasty.
+    /// </summary>
+    private const int FireWidth = TileMetrics.CollisionCellWidth;
+
+    /// <inheritdoc cref="FireWidth" />
+    private const int FireHeight = TileMetrics.CollisionCellHeight;
+
+    /// <summary>
+    ///     How many conveyor nasties exist at once. Three is the most any screen asks for, and they
+    ///     are re-used from screen to screen rather than built again.
+    /// </summary>
+    private const int ConveyorNastyCount = 3;
+
+    /// <summary>
+    ///     How fast a nasty may be set running, in pixels a frame. The upper bound is exclusive, as
+    ///     <see cref="Random.Next(int,int)" /> takes it, so a nasty runs at one or at two.
+    /// </summary>
+    private const int SlowestMoveSpeed = 1;
+
+    /// <inheritdoc cref="SlowestMoveSpeed" />
+    private const int FastestMoveSpeedExclusive = 3;
+
     public event RaiseInteractionWithBlob? OnNastyInteractionWithBlob;
 
     public List<ConveyorNasty> Nasties { get; } = [];
@@ -24,9 +53,8 @@ internal class ConveyorNasties(ResourceManager resources,
 
     public void LoadContent()
     {
-        // Create 3 nasties that we will keep re-using
         Nasties.Clear();
-        for (int a = 0; a < 3; a++)
+        for (int a = 0; a < ConveyorNastyCount; a++)
         {
             Nasties.Add(
                 new ConveyorNasty(resources,
@@ -39,106 +67,140 @@ internal class ConveyorNasties(ResourceManager resources,
         }
     }
 
+    /// <summary>
+    ///     Puts the three nasties where the new screen's markers ask for them. Every one is switched
+    ///     off first, so a screen that asks for fewer than the last one leaves the rest idle rather
+    ///     than running where they were.
+    /// </summary>
     public void PerformPostChangeScreenActions()
     {
-        // Deactivate all nasties first
         foreach (ConveyorNasty nasty in Nasties)
         {
             nasty.PerformPostChangeScreenActions();
         }
 
-        var nastiesToGenerate = gameScreens.GetCoordsOfTiles((int)MarkerTile.ConveyorNasty);
-        if (nastiesToGenerate.Count > 0)
+        List<Point> nastiesToGenerate = gameScreens.GetCoordsOfTiles((int)MarkerTile.ConveyorNasty);
+
+        for (int a = 0; a < nastiesToGenerate.Count; a++)
         {
-            // We have some..... So reactivate a few or all...
-            for (int a = 0; a < nastiesToGenerate.Count; a++)
-            {
-                Nasties[a].NastyActive = true;
-                Nasties[a].XLocation = nastiesToGenerate[a].X;
-                Nasties[a].YLocation = nastiesToGenerate[a].Y;
-                Nasties[a].MoveSpeed = randomNumberGenerator.Next(1, 3);
-
-                if (Nasties[a].MoveSpeed == 1)
-                {
-                    Nasties[a].AnimationDelay = 6;
-                }
-                else if (Nasties[a].MoveSpeed == 2)
-                {
-                    Nasties[a].AnimationDelay = 4;
-                }
-                else if (Nasties[a].MoveSpeed == 3)
-                {
-                    Nasties[a].AnimationDelay = 2;
-                }
-
-                Nasties[a].Initialise();
-            }
+            PlaceOnRail(Nasties[a], nastiesToGenerate[a]);
         }
     }
 
+    /// <summary>
+    ///     Starts one nasty running along the rail it has been marked onto, at a speed drawn at
+    ///     random. The faster it runs the sooner its legs come round, so the animation delay is read
+    ///     off the speed rather than drawn separately.
+    /// </summary>
+    private void PlaceOnRail(ConveyorNasty nasty, Point rail)
+    {
+        nasty.NastyActive = true;
+        nasty.XLocation = rail.X;
+        nasty.YLocation = rail.Y;
+        nasty.MoveSpeed = randomNumberGenerator.Next(SlowestMoveSpeed, FastestMoveSpeedExclusive);
+        nasty.AnimationDelay = AnimationDelayFor(nasty.MoveSpeed);
+
+        nasty.Initialise();
+    }
+
+    /// <summary>
+    ///     How long each frame of the walk is held for at a given speed.
+    /// </summary>
+    /// <remarks>
+    ///     Only one and two are ever drawn, so the third rung is unreachable - it was in the chain of
+    ///     comparisons this replaced too, and is kept so the ladder still reads as a ladder.
+    /// </remarks>
+    private static int AnimationDelayFor(int moveSpeed)
+        => moveSpeed switch
+        {
+            1 => 6,
+            2 => 4,
+            _ => 2
+        };
+
     public void Update(GameTime gameTime)
     {
-        foreach (var nasty in Nasties)
+        foreach (ConveyorNasty nasty in Nasties)
         {
             nasty.Update(gameTime);
 
-            // Check for a collision between a nasty and Blob and raise an event
-            // Since we have a reference to Blob directly, we can send the call to animate contact directly
-            // We raise the event to affect the status panel
-            // Going to move the offsets etc. in a bit so it's not too precise and unfair!
-            if (nasty.NastyState == NastyState.Normal)
+            if (nasty.NastyState != NastyState.Normal)
             {
-                if (CollisionDetection.Check(
-                        blob.BlobXPos + 8,
-                        blob.BlobYPos - 32,
-                        blob.BlobWidth - 16,
-                        64,
-                        nasty.XLocation,
-                        nasty.YLocation,
-                        64,
-                        64))
-                {
-                    // Raise the event
-                    if (nasty.NastyActive)
-                    {
-                        if (OnNastyInteractionWithBlob != null)
-                        {
-                            OnNastyInteractionWithBlob(NastyInteractionType.HitBlob, NastyType.Conveyor);
-                        }
-
-                        // Trigger Blob animation
-                        blob.BlobTouchedByNasty = true;
-                    }
-                }
-
-                // Has Blob shot a nasty
-                if (blob.Weapon.HasFired)
-                {
-                    if (CollisionDetection.Check(
-                            blob.Weapon.X,
-                            blob.Weapon.Y,
-                            32,
-                            32,
-                            nasty.XLocation,
-                            nasty.YLocation,
-                            64,
-                            64))
-                    {
-                        if (nasty.NastyActive)
-                        {
-                            blob.Weapon.RegisterHit();
-                            nasty.NastyState = NastyState.Shot;
-
-                            resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobExplodes);
-
-                            if (OnNastyInteractionWithBlob != null)
-                            {
-                                OnNastyInteractionWithBlob(NastyInteractionType.BlobShot, NastyType.Conveyor);
-                            }
-                        }
-                    }
-                }
+                continue;
             }
+
+            TouchBlob(nasty);
+            TakeAnyFireHit(nasty);
+        }
+    }
+
+    /// <summary>
+    ///     Blob's box is pulled in by eight pixels each side and lifted onto the rail the nasties run
+    ///     along, so that walking under one is not counted as being hit by it. Blob is held directly
+    ///     rather than reached for, so the touch animation is a call; the event is what tells the
+    ///     status panel.
+    /// </summary>
+    private void TouchBlob(ConveyorNasty nasty)
+    {
+        if (!CollisionDetection.Check(
+                blob.BlobXPos + BlobBoxInset,
+                blob.BlobYPos - SpriteMetrics.SpriteHeight / 2,
+                blob.BlobWidth - BlobBoxInset * 2,
+                SpriteMetrics.SpriteHeight,
+                nasty.XLocation,
+                nasty.YLocation,
+                SpriteMetrics.SpriteWidth,
+                SpriteMetrics.SpriteHeight))
+        {
+            return;
+        }
+
+        if (!nasty.NastyActive)
+        {
+            return;
+        }
+
+        if (OnNastyInteractionWithBlob != null)
+        {
+            OnNastyInteractionWithBlob(NastyInteractionType.HitBlob, NastyType.Conveyor);
+        }
+
+        blob.BlobTouchedByNasty = true;
+    }
+
+    private void TakeAnyFireHit(ConveyorNasty nasty)
+    {
+        if (!blob.Weapon.HasFired)
+        {
+            return;
+        }
+
+        if (!CollisionDetection.Check(
+                blob.Weapon.X,
+                blob.Weapon.Y,
+                FireWidth,
+                FireHeight,
+                nasty.XLocation,
+                nasty.YLocation,
+                SpriteMetrics.SpriteWidth,
+                SpriteMetrics.SpriteHeight))
+        {
+            return;
+        }
+
+        if (!nasty.NastyActive)
+        {
+            return;
+        }
+
+        blob.Weapon.RegisterHit();
+        nasty.NastyState = NastyState.Shot;
+
+        resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobExplodes);
+
+        if (OnNastyInteractionWithBlob != null)
+        {
+            OnNastyInteractionWithBlob(NastyInteractionType.BlobShot, NastyType.Conveyor);
         }
     }
 

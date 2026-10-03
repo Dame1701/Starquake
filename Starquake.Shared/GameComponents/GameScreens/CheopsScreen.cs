@@ -177,32 +177,39 @@ internal class CheopsScreen : IGameScreen
 
         }
 
-        if (slotsToSelectFrom.Count == 0)
-        {
-            for (int a = 0; a < _blob.BlobInventory.Length; a++)
-            {
-                if (_blob.BlobInventory[a] == Collectables.Key)
-                {
-                    _itemToSwap = a;
-                }
-            }
-
-            // No key so use the access card
-            if (_itemToSwap == NoItemSelected)
-            {
-                for (int a = 0; a < _blob.BlobInventory.Length; a++)
-                {
-                    if (_blob.BlobInventory[a] == Collectables.AccessCard)
-                    {
-                        _itemToSwap = a;
-                    }
-                }
-            }
-        }
-        else
+        if (slotsToSelectFrom.Count > 0)
         {
             _itemToSwap = slotsToSelectFrom[_randomNumberGenerator.Next(0, slotsToSelectFrom.Count)];
+
+            return;
         }
+
+        _itemToSwap = LastSlotHolding(Collectables.Key);
+
+        if (_itemToSwap == NoItemSelected)
+        {
+            _itemToSwap = LastSlotHolding(Collectables.AccessCard);
+        }
+    }
+
+    /// <summary>
+    ///     Which slot Blob is carrying one particular thing in, or <see cref="NoItemSelected" /> if he
+    ///     is not carrying it. The last such slot rather than the first, as the two loops this
+    ///     replaced both were - they kept overwriting their answer rather than stopping.
+    /// </summary>
+    private int LastSlotHolding(Collectables item)
+    {
+        int slot = NoItemSelected;
+
+        for (int a = 0; a < _blob.BlobInventory.Length; a++)
+        {
+            if (_blob.BlobInventory[a] == item)
+            {
+                slot = a;
+            }
+        }
+
+        return slot;
     }
 
     /// <summary>
@@ -252,26 +259,7 @@ internal class CheopsScreen : IGameScreen
 
         if (!_elementSelectionMode)
         {
-            // Start first scan off....
-            if (!_accessCodes[0].Scanned)
-            {
-                _accessCodes[0].StartScan();
-                _statusPanel.ScanSlot(_scan.SlotToScan[0]);
-            }
-
-            // Follow with the subsequent ones...
-            for (int a = 0; a < _accessCodes.Length; a++)
-            {
-                if (_accessCodes[a].Scanned)
-                {
-                    if (a < DigitsInCode - 1 && !_accessCodes[a + 1].Scanned)
-                    {
-                        _accessCodes[a + 1].StartScan();
-                        _statusPanel.ScanSlot(_scan.SlotToScan[a + 1]);
-                    }
-                }
-                _accessCodes[a].Update();
-            }
+            KeyScanner.ScanCodeInTurn(_accessCodes, _scan, _statusPanel);
 
             _resultMessageFade = _randomNumberGenerator.Next(200, 256);
         }

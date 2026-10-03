@@ -36,6 +36,19 @@ namespace Starquake.GameComponents;
 /// </summary>
 internal sealed class ScreenDirectory
 {
+    /// <summary>
+    ///     The screens Blob is on the planet for. Everything else - the options, the high scores,
+    ///     the game over screen - is the game talking about itself rather than being played.
+    /// </summary>
+    private static readonly GameScreenType[] InPlayScreens =
+    [
+        GameScreenType.Cheops,
+        GameScreenType.MainGame,
+        GameScreenType.PlanetCore,
+        GameScreenType.Teleporter,
+        GameScreenType.AccessBooth
+    ];
+
     private readonly Dictionary<GameScreenType, IGameScreen> _screens = new();
 
     private AccessBoothScreen? _accessBooth;
@@ -62,6 +75,13 @@ internal sealed class ScreenDirectory
     ///     always simply skipped a screen they could not find.
     /// </summary>
     public IGameScreen? CurrentScreen => _screens.GetValueOrDefault(Current);
+
+    /// <summary>
+    ///     Whether the game is being played rather than talking about itself. The status panel is
+    ///     drawn and updated while it is, the global hotkeys act only while it is, and the drain on
+    ///     Blob's energy runs only while it is.
+    /// </summary>
+    public bool InPlay => Array.IndexOf(InPlayScreens, Current) >= 0;
 
     public AccessBoothScreen AccessBooth => Registered(_accessBooth, GameScreenType.AccessBooth);
 

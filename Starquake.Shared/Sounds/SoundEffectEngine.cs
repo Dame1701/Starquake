@@ -186,58 +186,35 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
     }
 
     /// <summary>
-    ///     Kills all sounds currently playing
+    ///     Stops what is playing. Pausing takes everything down; a screen change takes down only the
+    ///     sounds that said they belong to the screen they were started on, so a sound meant to carry
+    ///     across one - the machinery hum, the background rumble - keeps playing.
     /// </summary>
     public void KillSounds(bool paused)
     {
-        if (!paused)
+        StopPlayingInstances(_singleInstanceSoundEffectInstances, paused);
+        StopPlayingInstances(_multiInstanceSoundEffectInstances, paused);
+    }
+
+    /// <summary>
+    ///     Stops every instance in one of the two lists, or only the ones that do not survive a screen
+    ///     change. Both lists hold the same record type and are stopped the same way, so the two of
+    ///     them times the two reasons used to be four copies of this loop.
+    /// </summary>
+    private static void StopPlayingInstances(
+        IEnumerable<SoundEffectInstanceRecord> instances,
+        bool includingSoundsThatSurviveAScreenChange)
+    {
+        foreach (SoundEffectInstanceRecord instance in instances)
         {
-            // kill single instance sounds
-            foreach (SoundEffectInstanceRecord soundEffectInstanceRecord in _singleInstanceSoundEffectInstances)
+            if (!includingSoundsThatSurviveAScreenChange && !instance.KillOnScreenChange)
             {
-                if (!soundEffectInstanceRecord.KillOnScreenChange)
-                {
-                    continue;
-                }
-
-                if (soundEffectInstanceRecord.SoundInstance.State != SoundState.Stopped)
-                {
-                    soundEffectInstanceRecord.SoundInstance.Stop();
-                }
+                continue;
             }
 
-            // kill multi instance sounds
-            foreach (SoundEffectInstanceRecord soundEffectInstanceRecord in _multiInstanceSoundEffectInstances)
+            if (instance.SoundInstance.State != SoundState.Stopped)
             {
-                if (!soundEffectInstanceRecord.KillOnScreenChange)
-                {
-                    continue;
-                }
-
-                if (soundEffectInstanceRecord.SoundInstance.State != SoundState.Stopped)
-                {
-                    soundEffectInstanceRecord.SoundInstance.Stop();
-                }
-            }
-        }
-        else
-        {
-            // kill single instance sounds
-            foreach (SoundEffectInstanceRecord soundEffectInstanceRecord in _singleInstanceSoundEffectInstances)
-            {
-                if (soundEffectInstanceRecord.SoundInstance.State != SoundState.Stopped)
-                {
-                    soundEffectInstanceRecord.SoundInstance.Stop();
-                }
-            }
-
-            // kill multi instance sounds
-            foreach (SoundEffectInstanceRecord soundEffectInstanceRecord in _multiInstanceSoundEffectInstances)
-            {
-                if (soundEffectInstanceRecord.SoundInstance.State != SoundState.Stopped)
-                {
-                    soundEffectInstanceRecord.SoundInstance.Stop();
-                }
+                instance.SoundInstance.Stop();
             }
         }
     }

@@ -211,22 +211,8 @@ internal class ResourceManager : StartableGameComponentBase
     {
         using var fs = new FileStream(_dataDescriptions[0].FilePath, FileMode.Open, FileAccess.Read);
 
-        // Read the length of the first array
-        byte[] lengthBuffer = new byte[sizeof(int)];
-        fs.ReadExactly(lengthBuffer, 0, sizeof(int));
-        int gameScreensArraySize = BitConverter.ToInt32(lengthBuffer, 0);
-
-        // Read the first array
-        byte[] gameScreensData = new byte[gameScreensArraySize];
-        fs.ReadExactly(gameScreensData, 0, gameScreensArraySize);
-
-        // Read the length of the second array
-        fs.ReadExactly(lengthBuffer, 0, sizeof(int));
-        int collisionTilesArraySize = BitConverter.ToInt32(lengthBuffer, 0);
-
-        // Read the second array
-        byte[] collisionTilesData = new byte[collisionTilesArraySize];
-        fs.ReadExactly(collisionTilesData, 0, collisionTilesArraySize);
+        byte[] gameScreensData = ReadLengthPrefixedBlock(fs);
+        byte[] collisionTilesData = ReadLengthPrefixedBlock(fs);
 
         _resources.Add(
             _dataDescriptions[0].ResourceName,
@@ -234,6 +220,21 @@ internal class ResourceManager : StartableGameComponentBase
         _resources.Add(
             _dataDescriptions[1].ResourceName,
             MessagePackSerializer.Deserialize<int[,,]>(collisionTilesData));
+    }
+
+    /// <summary>
+    ///     One block of the data file: a four byte length, then that many bytes. Reads from wherever the
+    ///     stream is, so calling it twice walks the two arrays in the order they were written.
+    /// </summary>
+    private static byte[] ReadLengthPrefixedBlock(FileStream fs)
+    {
+        byte[] lengthBuffer = new byte[sizeof(int)];
+        fs.ReadExactly(lengthBuffer, 0, sizeof(int));
+
+        byte[] block = new byte[BitConverter.ToInt32(lengthBuffer, 0)];
+        fs.ReadExactly(block, 0, block.Length);
+
+        return block;
     }
 
     /// <summary>

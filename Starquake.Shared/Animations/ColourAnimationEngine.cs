@@ -41,15 +41,7 @@ internal class ColourAnimationEngine
             {
                 if (!colourAnimation.Running)
                 {
-                    // Make colour initially invisible
-                    colourAnimation.TransitionColour.A = 0;
-                    colourAnimation.Running = true;
-                    colourAnimation.Direction = ColourAnimationDirection.FadeUp;
-                    colourAnimation.Stopping = false;
-                    colourAnimation.LoopCount = loopCount;
-
-                    // Reset the loop counter
-                    colourAnimation.LoopCounter = 0;
+                    Begin(colourAnimation, loopCount);
                 }
             }
         }
@@ -63,20 +55,28 @@ internal class ColourAnimationEngine
             {
                 if (!colourAnimation.Running)
                 {
-                    // Make colour initially invisible
                     colourAnimation.TransitionColour = transitionColour;
-                    colourAnimation.TransitionColour.A = 0;
                     colourAnimation.Intensity = intensity;
-                    colourAnimation.Running = true;
-                    colourAnimation.Direction = ColourAnimationDirection.FadeUp;
-                    colourAnimation.Stopping = false;
-                    colourAnimation.LoopCount = loopCount;
 
-                    // Reset the loop counter
-                    colourAnimation.LoopCounter = 0;
+                    Begin(colourAnimation, loopCount);
                 }
             }
         }
+    }
+
+    /// <summary>
+    ///     Starts one registered animation from the top: invisible, fading up, with its loop count
+    ///     reset. The transition colour's alpha is zeroed here rather than by the caller, so an
+    ///     animation always begins invisible whichever overload asked for it.
+    /// </summary>
+    private static void Begin(ColourFaderAnimation colourAnimation, int loopCount)
+    {
+        colourAnimation.TransitionColour.A = 0;
+        colourAnimation.Running = true;
+        colourAnimation.Direction = ColourAnimationDirection.FadeUp;
+        colourAnimation.Stopping = false;
+        colourAnimation.LoopCount = loopCount;
+        colourAnimation.LoopCounter = 0;
     }
 
     public void Stop(int tileNo)
@@ -88,7 +88,6 @@ internal class ColourAnimationEngine
                 if (_colourAnimationsRegistered[a].Running &&
                     !_colourAnimationsRegistered[a].Stopping)
                 {
-                    // Schedule a stop
                     _colourAnimationsRegistered[a].Stopping = true;
                 }
             }
@@ -165,11 +164,21 @@ internal class ColourAnimationEngine
         }
     }
 
-    public void Draw()
-    {
-        SpriteCollection lowerTiles = _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles);
+    public void Draw() => DrawLayer(_graphicsSet.Names.LowerScreenTiles, false);
 
-        lowerTiles.Begin(BlendState.Additive);
+    public void DrawUpperLayer() => DrawLayer(_graphicsSet.Names.UpperScreenTiles, true);
+
+    /// <summary>
+    ///     Draws every pulsing tile on the screen, from one sheet, as one batch. The lower layer
+    ///     repaints the tile that is already there; the upper one lays a second tile over it, and a
+    ///     pulse that has no second tile is skipped - which is the only difference between the two
+    ///     passes, and the whole of why they were written out twice.
+    /// </summary>
+    private void DrawLayer(string sheetName, bool upperLayer)
+    {
+        SpriteCollection tiles = _resources.GetSpriteCollection(sheetName);
+
+        tiles.Begin(BlendState.Additive);
 
         for (int y = 0; y < _gameScreens.TilesDown; y++)
         {
@@ -177,58 +186,49 @@ internal class ColourAnimationEngine
             {
                 foreach (ColourFaderAnimation colourAnimation in _colourAnimationsRegistered)
                 {
-                    if (colourAnimation.Running)
+                    if (!colourAnimation.Running)
                     {
-                        if (_gameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage == colourAnimation.TileNo) // Teleport booths
-                        {
-                            // Layer up the tiles to make the intensity deeper
-                            for (int b = 0; b < colourAnimation.Intensity; b++)
-                            {
-                                lowerTiles.DrawSprite(
-                                    colourAnimation.TileNo,
-                                    x * TileMetrics.TileWidth,
-                                    y * TileMetrics.TileHeight,
-                                    colourAnimation.TransitionColour);
-                            }
-                        }
+                        continue;
                     }
+
+                    int tileToDraw = upperLayer ? colourAnimation.UpperTileToDraw : colourAnimation.TileNo;
+
+                    if (upperLayer && tileToDraw < 0)
+                    {
+                        continue;
+                    }
+
+                    if (_gameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage != colourAnimation.TileNo)
+                    {
+                        continue;
+                    }
+
+                    DrawLayeredUp(tiles, tileToDraw, x, y, colourAnimation);
                 }
             }
         }
-        lowerTiles.End();
+
+        tiles.End();
     }
 
-    public void DrawUpperLayer()
+    /// <summary>
+    ///     One pulsing tile, drawn over itself as many times as its intensity asks for. The blend is
+    ///     additive, so each pass deepens the shade rather than replacing it.
+    /// </summary>
+    private static void DrawLayeredUp(
+        SpriteCollection tiles,
+        int tileToDraw,
+        int x,
+        int y,
+        ColourFaderAnimation colourAnimation)
     {
-        SpriteCollection upperTiles = _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles);
-
-        upperTiles.Begin(BlendState.Additive);
-
-        for (int y = 0; y < _gameScreens.TilesDown; y++)
+        for (int layer = 0; layer < colourAnimation.Intensity; layer++)
         {
-            for (int x = 0; x < _gameScreens.TilesAcross; x++)
-            {
-                foreach (ColourFaderAnimation colourAnimation in _colourAnimationsRegistered)
-                {
-                    if (colourAnimation.Running &&
-                        colourAnimation.UpperTileToDraw >= 0)
-                    {
-                        if (_gameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage == colourAnimation.TileNo) // Teleport booths
-                        {
-                            // Layer up the tiles to make the intensity deeper
-                            for (int b = 0; b < colourAnimation.Intensity; b++)
-                            {
-                                upperTiles.DrawSprite(
-                                    colourAnimation.UpperTileToDraw,
-                                    x * TileMetrics.TileWidth,
-                                    y * TileMetrics.TileHeight,
-                                    colourAnimation.TransitionColour);
-                            }
-                        }
-                    }
-                }
-            }
+            tiles.DrawSprite(
+                tileToDraw,
+                x * TileMetrics.TileWidth,
+                y * TileMetrics.TileHeight,
+                colourAnimation.TransitionColour);
         }
-        upperTiles.End();
     }
 }

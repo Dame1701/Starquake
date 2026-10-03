@@ -125,46 +125,57 @@ internal class JumpPlatform
 
     public void Draw()
     {
-        if (PlatformActive)
+        if (!PlatformActive)
         {
-            // The render target is a texture that we draw directly to
-            _graphicsDeviceManager.GraphicsDevice.SetRenderTarget(_renderTarget);
-            _graphicsDeviceManager.GraphicsDevice.Clear(Color.Transparent);
-
-            if (_graphicsSet.IsOriginal)
-            {
-                _jumpPlatformOriginal.Begin(BlendState.AlphaBlend);
-                _jumpPlatformOriginal.DrawSprite(0, 0, 0, _matrix.Matrix);
-                _jumpPlatformOriginal.End();
-            }
-            else
-            {
-                _jumpPlatform.Begin(BlendState.AlphaBlend);
-                _jumpPlatform.DrawSprite(0, 0, 0, _matrix.Matrix);
-                _jumpPlatform.End();
-            }
-
-
-            // Set the render targer back to the screen
-            _screenEffects.SelectRenderViewPort(ViewPorts.GameArea, false);
-
-            if (_dissolveTime > 0)
-            {
-                _textureDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-
-                _textureDrawer.Draw(
-                    _renderTarget,
-                    new Rectangle(XPos + _jumpPlatformOriginal.SpriteWidth / 2, YPos + _jumpPlatformOriginal.SpriteHeight / 2,
-                        _jumpPlatformOriginal.SpriteWidth,
-                        _jumpPlatformOriginal.SpriteHeight),
-                    null,
-                    Color.White,
-                    0,
-                    new Vector2(_jumpPlatformOriginal.SpriteWidth / 2, _jumpPlatformOriginal.SpriteHeight / 2),
-                    SpriteEffects.None, 0);
-
-                _textureDrawer.End();
-            }
+            return;
         }
+
+        ComposeDissolvingPlatform();
+
+        _screenEffects.SelectRenderViewPort(ViewPorts.GameArea, false);
+
+        if (_dissolveTime > 0)
+        {
+            DrawComposedPlatform();
+        }
+    }
+
+    /// <summary>
+    ///     Draws the platform into a render target of its own, with the pixels the dissolve has eaten
+    ///     left transparent. A render target is a texture rather than a place on the screen, so the
+    ///     sprite goes down at the origin and is put in position when the texture itself is drawn.
+    /// </summary>
+    private void ComposeDissolvingPlatform()
+    {
+        _graphicsDeviceManager.GraphicsDevice.SetRenderTarget(_renderTarget);
+        _graphicsDeviceManager.GraphicsDevice.Clear(Color.Transparent);
+
+        SpriteCollection platform = _graphicsSet.IsOriginal ? _jumpPlatformOriginal : _jumpPlatform;
+
+        platform.Begin(BlendState.AlphaBlend);
+        platform.DrawSprite(0, 0, 0, _matrix.Matrix);
+        platform.End();
+    }
+
+    /// <summary>
+    ///     Puts the composed texture on the screen, rotated about its own centre - which is why the
+    ///     position is offset by half the sprite as well as the origin being set to it.
+    /// </summary>
+    private void DrawComposedPlatform()
+    {
+        _textureDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+
+        _textureDrawer.Draw(
+            _renderTarget,
+            new Rectangle(XPos + _jumpPlatformOriginal.SpriteWidth / 2, YPos + _jumpPlatformOriginal.SpriteHeight / 2,
+                _jumpPlatformOriginal.SpriteWidth,
+                _jumpPlatformOriginal.SpriteHeight),
+            null,
+            Color.White,
+            0,
+            new Vector2(_jumpPlatformOriginal.SpriteWidth / 2, _jumpPlatformOriginal.SpriteHeight / 2),
+            SpriteEffects.None, 0);
+
+        _textureDrawer.End();
     }
 }

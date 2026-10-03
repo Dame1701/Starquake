@@ -91,6 +91,15 @@ internal class StatusPanel
 
     /// <inheritdoc cref="ScoreXPos" />
     private const int LivesYPos = 113;
+
+    /// <summary>
+    ///     Where the overlay sits. The only panel graphic not drawn at the origin.
+    /// </summary>
+    private const int OverlayXPos = 22;
+
+    /// <inheritdoc cref="OverlayXPos" />
+    private const int OverlayYPos = 26;
+
     private readonly GraphicsSet _graphicsSet;
 
 
@@ -178,68 +187,102 @@ internal class StatusPanel
 
     public void Draw()
     {
-        SpriteCollection statusPanelGraphic = _resources.GetSpriteCollection(Assets.Graphics.StatusPanelGraphic);
-        statusPanelGraphic.Begin(BlendState.AlphaBlend);
-        statusPanelGraphic.DrawSprite(0, 0, 0, Color.White);
-        statusPanelGraphic.End();
+        DrawPanelGraphic(Assets.Graphics.StatusPanelGraphic);
 
-        // Draw inventory
-        if (_blobsInventory != null)
-        {
-            // Draw items
-            _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).Begin(BlendState.AlphaBlend);
-            for (int a = 0; a < _blobsInventory.Length; a++)
-            {
-                // Draw numbers above object
-                if (_blobsInventory[a] == Collectables.None)
-                {
-                    PanelNumbers.Draw(InventorySlotSpacing * a + InventoryNumberXPos, InventoryNumberYPos, (a + 1).ToString(), _resources, Color.White);
-                }
-                else
-                {
-                    PanelNumbers.Draw(InventorySlotSpacing * a + InventoryNumberXPos, InventoryNumberYPos, (a + 1).ToString(), _resources, Color.OrangeRed);
+        DrawInventory();
+        DrawInventoryScanner();
 
-                    if (_slotToScan != a) // Don't draw the slot being scanned
-                    {
-                        _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).DrawSprite((int)_blobsInventory[a], InventorySlotSpacing * a + InventoryItemXPos, InventoryItemYPos, Color.White);
-                    }
-                }
-            }
-            _resources.GetSpriteCollection(_graphicsSet.Names.Pickups).End();
-        }
+        DrawBar(Assets.Graphics.EnergyBar, EnergyBarYPos, _stats.EnergyLevel * EnergyBarScale);
+        DrawBar(Assets.Graphics.JumpBar, JumpBarYPos, _stats.Platforms * JumpBarScale);
+        DrawBar(Assets.Graphics.AmmoBar, AmmoBarYPos, _stats.FirePower * AmmoBarScale);
 
-        if (_slotToScan >= 0 && _blobsInventory != null)
-        {
-            _inventoryScanner.Draw((int)_blobsInventory[_slotToScan], InventorySlotSpacing * _slotToScan + InventoryScannerXPos, InventoryScannerYPos);
-        }
-
-        // Draw the energy bar
-        SpriteCollection energyBar = _resources.GetSpriteCollection(Assets.Graphics.EnergyBar);
-        energyBar.Begin(BlendState.AlphaBlend);
-        energyBar.DrawSprite(0, BarXPos, EnergyBarYPos, (int)(_stats.EnergyLevel * EnergyBarScale), BarHeight, Color.White);
-        energyBar.End();
-
-        SpriteCollection jumpBar = _resources.GetSpriteCollection(Assets.Graphics.JumpBar);
-        jumpBar.Begin(BlendState.AlphaBlend);
-        jumpBar.DrawSprite(0, BarXPos, JumpBarYPos, (int)(_stats.Platforms * JumpBarScale), BarHeight, Color.White);
-        jumpBar.End();
-
-        SpriteCollection ammoBar = _resources.GetSpriteCollection(Assets.Graphics.AmmoBar);
-        ammoBar.Begin(BlendState.AlphaBlend);
-        ammoBar.DrawSprite(0, BarXPos, AmmoBarYPos, (int)(_stats.FirePower * AmmoBarScale), BarHeight, Color.White);
-        ammoBar.End();
-
-        // Draw score
         PanelNumbers.Draw(ScoreXPos, ScoreYPos, _stats.PlayerScore.ToString("000000"), _resources, Color.White);
-
-        // Draw remaining lives
         PanelNumbers.Draw(LivesXPos, LivesYPos, _stats.BlobLives.ToString("00"), _resources, Color.White);
 
-        // draw overlay
-        SpriteCollection statusPanelOverlay = _resources.GetSpriteCollection(Assets.Graphics.StatusPanelOverlay);
-        statusPanelOverlay.Begin(BlendState.AlphaBlend);
-        statusPanelOverlay.DrawSprite(0, 22, 26, Color.White);
-        statusPanelOverlay.End();
+        DrawPanelGraphic(Assets.Graphics.StatusPanelOverlay, OverlayXPos, OverlayYPos);
+    }
+
+    /// <summary>
+    ///     The panel's own artwork: the backdrop everything else is drawn on, and the overlay that
+    ///     goes over the finished panel.
+    /// </summary>
+    private void DrawPanelGraphic(string assetName, int xPos = 0, int yPos = 0)
+    {
+        SpriteCollection graphic = _resources.GetSpriteCollection(assetName);
+
+        graphic.Begin(BlendState.AlphaBlend);
+        graphic.DrawSprite(0, xPos, yPos, Color.White);
+        graphic.End();
+    }
+
+    /// <summary>
+    ///     One of the three bars down the middle of the panel. Each is a single sprite stretched to
+    ///     the level it is showing, so all that differs between them is the artwork, the row it sits
+    ///     on, and how many pixels one unit of it is worth.
+    /// </summary>
+    private void DrawBar(string assetName, int yPos, double level)
+    {
+        SpriteCollection bar = _resources.GetSpriteCollection(assetName);
+
+        bar.Begin(BlendState.AlphaBlend);
+        bar.DrawSprite(0, BarXPos, yPos, (int)level, BarHeight, Color.White);
+        bar.End();
+    }
+
+    /// <summary>
+    ///     The inventory slots, each numbered above. A slot with something in it has its number in
+    ///     orange and the item drawn below it; an empty one has a white number and nothing else. The
+    ///     slot being scanned is left out, because <see cref="DrawInventoryScanner" /> draws that one.
+    /// </summary>
+    private void DrawInventory()
+    {
+        if (_blobsInventory == null)
+        {
+            return;
+        }
+
+        SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
+
+        pickups.Begin(BlendState.AlphaBlend);
+
+        for (int slot = 0; slot < _blobsInventory.Length; slot++)
+        {
+            bool holdingSomething = _blobsInventory[slot] != Collectables.None;
+
+            PanelNumbers.Draw(
+                InventorySlotSpacing * slot + InventoryNumberXPos,
+                InventoryNumberYPos,
+                (slot + 1).ToString(),
+                _resources,
+                holdingSomething ? Color.OrangeRed : Color.White);
+
+            if (holdingSomething && _slotToScan != slot)
+            {
+                pickups.DrawSprite(
+                    (int)_blobsInventory[slot],
+                    InventorySlotSpacing * slot + InventoryItemXPos,
+                    InventoryItemYPos,
+                    Color.White);
+            }
+        }
+
+        pickups.End();
+    }
+
+    /// <summary>
+    ///     The scan line running down the one slot a door is reading, drawn in place of the item.
+    /// </summary>
+    private void DrawInventoryScanner()
+    {
+        if (_slotToScan < 0 || _blobsInventory == null)
+        {
+            return;
+        }
+
+        _inventoryScanner.Draw(
+            (int)_blobsInventory[_slotToScan],
+            InventorySlotSpacing * _slotToScan + InventoryScannerXPos,
+            InventoryScannerYPos);
     }
 
 }

@@ -74,7 +74,7 @@ internal class Blob
     private const int BridgeBreakingFallHeight = 128;
 
     /// <summary>
-    ///     How high Blob hops when he has no platforms left to lay. One collision cell, which is
+    ///     How high Blob jumps when he has no platforms left to lay. One collision cell, which is
     ///     just enough to clear a single step.
     /// </summary>
     private const int JumpHeightWithoutPlatforms = TileMetrics.CollisionCellHeight;
@@ -1029,39 +1029,29 @@ internal class Blob
             _gameScreens.CheckTileByObject(Direction.None, _blobXPos, _blobYPos, BlobWidth,
                 BlobHeight, 0);
 
-        if (tileIntersectingBlob != null)
+        if (tileIntersectingBlob != null && SpikesHaveGotHim(tileIntersectingBlob))
         {
-            // Central spiky tiles
-            if (tileIntersectingBlob.TileNumber == (int)ActionTiles.Spike2)
-            {
-                if (tileIntersectingBlob.XPosition is > SpikeReachLeft and < SpikeReachRight &&
-                    tileIntersectingBlob.YPosition > CentralSpikeReachUp)
-                {
-                    KillBlob(true, false);
-                }
-            }
-
-            // Right side mounted spikey tiles
-            if (tileIntersectingBlob.TileNumber == (int)ActionTiles.Spike1)
-            {
-                if (tileIntersectingBlob.YPosition is < WallSpikeReachDown and > WallSpikeReachUp &&
-                    tileIntersectingBlob.XPosition > WallSpikeReachIn)
-                {
-                    KillBlob(true, false);
-                }
-            }
-
-            // Broken bottle spiky tiles
-            if (tileIntersectingBlob.TileNumber == (int)ActionTiles.Spike3)
-            {
-                if (tileIntersectingBlob.XPosition is > SpikeReachLeft and < SpikeReachRight &&
-                    tileIntersectingBlob.YPosition > BrokenGlassReachUp)
-                {
-                    KillBlob(true, false);
-                }
-            }
+            KillBlob(true, false);
         }
     }
+
+    /// <summary>
+    ///     Whether Blob is far enough into a spiked tile for its spikes to reach him. Each of the
+    ///     three is given the reach its own artwork suggests rather than the whole tile - see
+    ///     <see cref="SpikeReachLeft" /> - so the three cases here are the three reaches, not three
+    ///     copies of one test.
+    /// </summary>
+    private static bool SpikesHaveGotHim(TileDetected tile)
+        => tile.TileNumber switch
+        {
+            (int)ActionTiles.Spike2 => tile.XPosition is > SpikeReachLeft and < SpikeReachRight &&
+                                       tile.YPosition > CentralSpikeReachUp,
+            (int)ActionTiles.Spike1 => tile.YPosition is < WallSpikeReachDown and > WallSpikeReachUp &&
+                                       tile.XPosition > WallSpikeReachIn,
+            (int)ActionTiles.Spike3 => tile.XPosition is > SpikeReachLeft and < SpikeReachRight &&
+                                       tile.YPosition > BrokenGlassReachUp,
+            _ => false
+        };
 
     private void CollectPowerUp()
     {

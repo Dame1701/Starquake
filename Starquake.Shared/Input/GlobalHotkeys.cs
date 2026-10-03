@@ -36,19 +36,6 @@ internal class GlobalHotkeys(
     Action artworkSwapped,
     Action quitGame)
 {
-    /// <summary>
-    ///     The screens the player is considered to be in play on. Pause and fullscreen only mean
-    ///     something on these.
-    /// </summary>
-    private static readonly GameScreenType[] InPlayScreens =
-    [
-        GameScreenType.Cheops,
-        GameScreenType.MainGame,
-        GameScreenType.PlanetCore,
-        GameScreenType.Teleporter,
-        GameScreenType.AccessBooth
-    ];
-
     public void Update()
     {
         TogglePauseIfAsked();
@@ -94,7 +81,7 @@ internal class GlobalHotkeys(
     /// </summary>
     private void TogglePauseIfAsked()
     {
-        if (!InPlay() || screenDirectory.Current == GameScreenType.Teleporter)
+        if (!screenDirectory.InPlay || screenDirectory.Current == GameScreenType.Teleporter)
         {
             return;
         }
@@ -124,7 +111,7 @@ internal class GlobalHotkeys(
             return;
         }
 
-        if (InPlay() && screenDirectory.Current != GameScreenType.Teleporter)
+        if (screenDirectory.InPlay && screenDirectory.Current != GameScreenType.Teleporter)
         {
             // Automatically pause the game after switching to or from fullscreen so the player
             // doesn't die unexpectedly
@@ -162,9 +149,6 @@ internal class GlobalHotkeys(
 
         resources.GetSoundFxEngine().PlaySound(Assets.Sounds.AccessSuccess, 1f, false);
     }
-
-    private bool InPlay()
-        => Array.IndexOf(InPlayScreens, screenDirectory.Current) >= 0;
 
     /// <summary>
     ///     Go fullscreen at the resolution the desktop is already running at, so the picture is

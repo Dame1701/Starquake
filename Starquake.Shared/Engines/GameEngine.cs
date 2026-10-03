@@ -810,12 +810,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
 
     private void UpdateStatusPanel()
     {
-        if (ScreenDirectory.Current is
-            GameScreenType.Cheops or
-            GameScreenType.MainGame or
-            GameScreenType.PlanetCore or
-            GameScreenType.Teleporter or
-            GameScreenType.AccessBooth)
+        if (ScreenDirectory.InPlay)
         {
             BlobStatusPanel.Update(
                 Player.BlobInventory,
@@ -864,12 +859,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
 
         if (Status == GameEngineStatus.StartGame)
         {
-            // Status panel
-            if (ScreenDirectory.Current == GameScreenType.Cheops ||
-                ScreenDirectory.Current == GameScreenType.MainGame ||
-                ScreenDirectory.Current == GameScreenType.PlanetCore ||
-                ScreenDirectory.Current == GameScreenType.Teleporter ||
-                ScreenDirectory.Current == GameScreenType.AccessBooth)
+            if (ScreenDirectory.InPlay)
             {
                 ScreenEffectEngine.SelectRenderViewPort(ViewPorts.StatusArea);
                 BlobStatusPanel.Draw();

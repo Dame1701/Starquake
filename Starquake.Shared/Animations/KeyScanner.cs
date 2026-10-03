@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Display;
 using Starquake.Helpers;
 using Starquake.Sprites;
 using Starquake.Structure;
@@ -46,6 +47,40 @@ internal class KeyScanner
         _matched = match;
         Scanned = false;
         ScanStarted = false;
+    }
+
+    /// <summary>
+    ///     Runs a row of scanners through a code, one digit at a time: the first starts itself, and
+    ///     each one that finishes starts the next. The slot each digit is read from comes off the
+    ///     scan, so the status panel lights up the inventory slot being looked at.
+    /// </summary>
+    /// <remarks>
+    ///     The access booths ask for three digits and the Cheops pyramid for two, and this was
+    ///     written out twice - once per screen - differing in nothing but that count, which it now
+    ///     takes from the array it is given. <see cref="Starquake.Structure.AccessCodeLock" /> is the
+    ///     same split: the part that needs no graphics device went there, and this is the animation
+    ///     the digits are shown through, which does.
+    /// </remarks>
+    public static void ScanCodeInTurn(KeyScanner[] scanners, AccessCodeScan scan, StatusPanel statusPanel)
+    {
+        if (!scanners[0].Scanned)
+        {
+            scanners[0].StartScan();
+            statusPanel.ScanSlot(scan.SlotToScan[0]);
+        }
+
+        for (int digit = 0; digit < scanners.Length; digit++)
+        {
+            if (scanners[digit].Scanned &&
+                digit < scanners.Length - 1 &&
+                !scanners[digit + 1].Scanned)
+            {
+                scanners[digit + 1].StartScan();
+                statusPanel.ScanSlot(scan.SlotToScan[digit + 1]);
+            }
+
+            scanners[digit].Update();
+        }
     }
 
     public void StartScan()

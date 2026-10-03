@@ -110,26 +110,7 @@ internal class AccessBoothScreen : IGameScreen
         _blobAnim1.Update();
         _blobAnim2.Update();
 
-        // Start first scan off....
-        if (!_accessCodes[0].Scanned)
-        {
-            _accessCodes[0].StartScan();
-            _statusPanel.ScanSlot(_scan.SlotToScan[0]);
-        }
-
-        // Follow with the subsequent ones...
-        for (int a = 0; a < _accessCodes.Length; a++)
-        {
-            if (_accessCodes[a].Scanned)
-            {
-                if (a < DigitsInCode - 1 && !_accessCodes[a + 1].Scanned)
-                {
-                    _accessCodes[a + 1].StartScan();
-                    _statusPanel.ScanSlot(_scan.SlotToScan[a + 1]);
-                }
-            }
-            _accessCodes[a].Update();
-        }
+        KeyScanner.ScanCodeInTurn(_accessCodes, _scan, _statusPanel);
 
         _resultMessageFade = _randomNumberGenerator.Next(200, 256);
 

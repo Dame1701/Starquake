@@ -62,41 +62,53 @@ internal class BreakableBridge
 
     public void Draw()
     {
-        if (!Finished)
+        if (Finished)
         {
-            // The render target is a texture that we draw directly to
-            _graphicsDeviceManager.GraphicsDevice.SetRenderTarget(_renderTarget);
-            _graphicsDeviceManager.GraphicsDevice.Clear(Color.Transparent);
-
-            if (_graphicsSet.IsOriginal)
-            {
-                _breakableBridgeOriginal.Begin(BlendState.AlphaBlend);
-                _breakableBridgeOriginal.DrawSprite(0, 0, 0, _matrix.Matrix);
-                _breakableBridgeOriginal.End();
-            }
-            else
-            {
-                _breakableBridge.Begin(BlendState.AlphaBlend);
-                _breakableBridge.DrawSprite(0, 0, 0, _matrix.Matrix);
-                _breakableBridge.End();
-            }
-
-            // Set the render targer back to the screen
-            _screenEffects.SelectRenderViewPort(ViewPorts.GameArea, false);
-
-            _textureDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-            _textureDrawer.Draw(
-                _renderTarget,
-                new Rectangle(_xPos + _breakableBridge.SpriteWidth / 2, _yPos + _breakableBridge.SpriteHeight / 2,
-                    _breakableBridge.SpriteWidth,
-                    _breakableBridge.SpriteHeight),
-                null,
-                Color.White,
-                0,
-                new Vector2(_breakableBridge.SpriteWidth / 2, _breakableBridge.SpriteHeight / 2),
-                SpriteEffects.None, 0);
-
-            _textureDrawer.End();
+            return;
         }
+
+        ComposeDissolvingBridge();
+
+        _screenEffects.SelectRenderViewPort(ViewPorts.GameArea, false);
+
+        DrawComposedBridge();
+    }
+
+    /// <summary>
+    ///     Draws the bridge into a render target of its own, with the pixels the dissolve has eaten
+    ///     left transparent. A render target is a texture rather than a place on the screen, so the
+    ///     sprite goes down at the origin and is put in position when the texture itself is drawn.
+    /// </summary>
+    private void ComposeDissolvingBridge()
+    {
+        _graphicsDeviceManager.GraphicsDevice.SetRenderTarget(_renderTarget);
+        _graphicsDeviceManager.GraphicsDevice.Clear(Color.Transparent);
+
+        SpriteCollection bridge = _graphicsSet.IsOriginal ? _breakableBridgeOriginal : _breakableBridge;
+
+        bridge.Begin(BlendState.AlphaBlend);
+        bridge.DrawSprite(0, 0, 0, _matrix.Matrix);
+        bridge.End();
+    }
+
+    /// <summary>
+    ///     Puts the composed texture on the screen, rotated about its own centre - which is why the
+    ///     position is offset by half the sprite as well as the origin being set to it.
+    /// </summary>
+    private void DrawComposedBridge()
+    {
+        _textureDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+        _textureDrawer.Draw(
+            _renderTarget,
+            new Rectangle(_xPos + _breakableBridge.SpriteWidth / 2, _yPos + _breakableBridge.SpriteHeight / 2,
+                _breakableBridge.SpriteWidth,
+                _breakableBridge.SpriteHeight),
+            null,
+            Color.White,
+            0,
+            new Vector2(_breakableBridge.SpriteWidth / 2, _breakableBridge.SpriteHeight / 2),
+            SpriteEffects.None, 0);
+
+        _textureDrawer.End();
     }
 }

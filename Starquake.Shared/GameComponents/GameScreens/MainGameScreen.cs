@@ -345,16 +345,20 @@ internal class MainGameScreen : IGameScreen
             _gameEngine.Player.Update(gameTime);
         }
 
-        // Update Blob's death routine. Blob is revived the frame after he reaches Dead, so
-        // the animation's own state has to keep it alive while the explosion fades out
-        if (_gameEngine.Player.BlobsState == BlobState.Dead ||
-            _gameEngine.Player.BlobsState == BlobState.Dying ||
-            _gameEngine.Player.BlobsState == BlobState.Overloading ||
-            _gameEngine.BlobKiller.Active)
+        if (DeathRoutineRunning)
         {
             _gameEngine.BlobKiller.Update(gameTime);
         }
     }
+
+    /// <summary>
+    ///     Whether Blob's death is still playing out. Blob is revived the frame after he reaches
+    ///     <see cref="BlobState.Dead" />, so the animation's own state has to keep the routine alive
+    ///     while the explosion fades out - which is why this asks it as well as asking Blob.
+    /// </summary>
+    private bool DeathRoutineRunning
+        => _gameEngine.Player.BlobsState is BlobState.Dead or BlobState.Dying or BlobState.Overloading ||
+           _gameEngine.BlobKiller.Active;
 
     /// <summary>
     ///     The smoke from the wreck of Blob's ship, which only exists on the screen it crashed on.
@@ -568,15 +572,9 @@ internal class MainGameScreen : IGameScreen
         layer.End();
     }
 
-    /// <summary>
-    ///     Blob is revived the frame after he reaches Dead, so the animation's own state has to keep it
-    ///     drawing while the explosion fades out.
-    /// </summary>
     private void DrawBlobDeath()
     {
-        // Draw Blob's death routine
-        if (_gameEngine.Player.BlobsState is BlobState.Dead or BlobState.Dying or BlobState.Overloading ||
-            _gameEngine.BlobKiller.Active)
+        if (DeathRoutineRunning)
         {
             _gameEngine.BlobKiller.Draw(ScreenFade);
         }
