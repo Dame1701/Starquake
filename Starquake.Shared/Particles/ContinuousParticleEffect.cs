@@ -13,9 +13,7 @@ namespace Starquake.Particles;
 
 internal class ContinuousParticleEffect : IStandardParticleEffect
 {
-    private readonly GraphicsSet _graphicsSet;
-    private readonly ParticleEffect _mercuryParticleEffect;
-    private readonly SpriteBatchRenderer _renderer;
+    private readonly MercuryEffect _mercury;
 
     /// <summary>
     ///     How many more logic frames the effect emits for, when it has a duration at all.
@@ -24,9 +22,7 @@ internal class ContinuousParticleEffect : IStandardParticleEffect
 
     public ContinuousParticleEffect(GraphicsSet graphicsSet, ParticleEffect mercuryParticleEffect, SpriteBatchRenderer renderer)
     {
-        _graphicsSet = graphicsSet;
-        _mercuryParticleEffect = mercuryParticleEffect;
-        _renderer = renderer;
+        _mercury = new MercuryEffect(graphicsSet, mercuryParticleEffect, renderer);
         EffectActive = false;
     }
 
@@ -38,7 +34,7 @@ internal class ContinuousParticleEffect : IStandardParticleEffect
     /// </summary>
     public TimeSpan? EffectDuration { get; init; }
 
-    public ParticleEffect Effect => _mercuryParticleEffect;
+    public ParticleEffect Effect => _mercury.Effect;
     public bool EffectActive { get; private set; }
 
     public event RaiseEffectComplete? ParticleEffectComplete;
@@ -66,7 +62,7 @@ internal class ContinuousParticleEffect : IStandardParticleEffect
     public void Reset()
     {
         EffectActive = false;
-        _mercuryParticleEffect.Terminate();
+        _mercury.Terminate();
     }
 
     public void Update(int xPos, int yPos, GameTime gameTime)
@@ -75,14 +71,14 @@ internal class ContinuousParticleEffect : IStandardParticleEffect
         {
             if (EffectDuration == null)
             {
-                _mercuryParticleEffect.Trigger(new Vector2(xPos, yPos));
+                _mercury.Trigger(xPos, yPos);
             }
             else if (_framesLeftToEmit > 0)
             {
                 _framesLeftToEmit--;
-                _mercuryParticleEffect.Trigger(new Vector2(xPos, yPos));
+                _mercury.Trigger(xPos, yPos);
             }
-            else if (_mercuryParticleEffect.ActiveParticlesCount == 0)
+            else if (_mercury.ActiveParticles == 0)
             {
                 // The emitting is over, but the particles already in flight have to be allowed to
                 // finish before the effect says it is done
@@ -91,25 +87,12 @@ internal class ContinuousParticleEffect : IStandardParticleEffect
             }
         }
 
-        // Mercury must always be updated
-        float deltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
-        _mercuryParticleEffect.Update(deltaSeconds);
+        _mercury.Advance(gameTime);
     }
 
     public void Draw()
-    {
-        // We must always call this!
-        if (_graphicsSet.IsRedrawn)
-        {
-            _renderer.RenderEffect(_mercuryParticleEffect);
-        }
-    }
+        => _mercury.Render();
 
     public void Draw(int screenFade)
-    {
-        if (_graphicsSet.IsRedrawn)
-        {
-            _renderer.RenderEffect(_mercuryParticleEffect, screenFade);
-        }
-    }
+        => _mercury.Render(screenFade);
 }

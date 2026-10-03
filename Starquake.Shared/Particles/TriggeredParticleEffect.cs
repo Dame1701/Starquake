@@ -12,25 +12,21 @@ namespace Starquake.Particles;
 
 internal class TriggeredParticleEffect : IStandardParticleEffect
 {
-    private readonly GraphicsSet _graphicsSet;
-
-    private readonly ParticleEffect _mercuryParticleEffect;
-    private readonly SpriteBatchRenderer _renderer;
+    private readonly MercuryEffect _mercury;
 
     private bool _triggered;
 
     public TriggeredParticleEffect(GraphicsSet graphicsSet, ParticleEffect mercuryParticleEffect,
         SpriteBatchRenderer renderer)
     {
-        _graphicsSet = graphicsSet;
-        _mercuryParticleEffect = mercuryParticleEffect;
-        _renderer = renderer;
+        _mercury = new MercuryEffect(graphicsSet, mercuryParticleEffect, renderer);
         EffectActive = false;
         _triggered = false;
     }
+
     public bool EffectActive { get; private set; }
 
-    public ParticleEffect Effect => _mercuryParticleEffect;
+    public ParticleEffect Effect => _mercury.Effect;
 
     public event RaiseEffectComplete? ParticleEffectComplete;
 
@@ -40,7 +36,7 @@ internal class TriggeredParticleEffect : IStandardParticleEffect
         if (EffectActive)
         {
             // Kill the previous effect
-            _mercuryParticleEffect.Terminate();
+            _mercury.Terminate();
             EffectActive = false;
             _triggered = false;
         }
@@ -52,7 +48,7 @@ internal class TriggeredParticleEffect : IStandardParticleEffect
     // Stops an effect playing
     public void Stop()
     {
-        _mercuryParticleEffect.Terminate();
+        _mercury.Terminate();
         EffectActive = false;
         _triggered = false;
     }
@@ -60,7 +56,7 @@ internal class TriggeredParticleEffect : IStandardParticleEffect
     public void Reset()
     {
         EffectActive = false;
-        _mercuryParticleEffect.Terminate();
+        _mercury.Terminate();
     }
 
     public void Update(int xPos, int yPos, GameTime gameTime)
@@ -69,23 +65,22 @@ internal class TriggeredParticleEffect : IStandardParticleEffect
         {
             if (!_triggered)
             {
-                var position = new Vector2(xPos, yPos);
-                _mercuryParticleEffect.Trigger(ref position);
+                _mercury.Trigger(xPos, yPos);
 
                 // Workaround for a bizarre bug that seems to stop the particle from working
                 // unless we trigger until we get an active particle count.....
-                if (_mercuryParticleEffect.ActiveParticlesCount > 0)
+                if (_mercury.ActiveParticles > 0)
                 {
                     _triggered = true;
                 }
             }
             else
             {
-                if (_mercuryParticleEffect.ActiveParticlesCount == 0)
+                if (_mercury.ActiveParticles == 0)
                 {
                     _triggered = false;
                     EffectActive = false;
-                    _mercuryParticleEffect.Terminate();
+                    _mercury.Terminate();
 
                     if (ParticleEffectComplete != null)
                     {
@@ -93,28 +88,14 @@ internal class TriggeredParticleEffect : IStandardParticleEffect
                     }
                 }
             }
-
         }
 
-        // Mercury must always be updated
-        float deltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
-        _mercuryParticleEffect.Update(deltaSeconds);
+        _mercury.Advance(gameTime);
     }
 
     public void Draw()
-    {
-        if (_graphicsSet.IsRedrawn)
-        {
-            // We must always call this!
-            _renderer.RenderEffect(_mercuryParticleEffect);
-        }
-    }
+        => _mercury.Render();
 
     public void Draw(int screenFade)
-    {
-        if (_graphicsSet.IsRedrawn)
-        {
-            _renderer.RenderEffect(_mercuryParticleEffect, screenFade);
-        }
-    }
+        => _mercury.Render(screenFade);
 }

@@ -12,85 +12,62 @@ namespace Starquake.Particles;
 
 internal class MultiTriggerTimeBasedParticleEffect : IPositionalTriggerParticleEffect
 {
-    private readonly GraphicsSet _graphicsSet;
-    private readonly ParticleEffect _mercuryParticleEffect;
-    private readonly SpriteBatchRenderer _renderer;
+    private readonly MercuryEffect _mercury;
 
     public MultiTriggerTimeBasedParticleEffect(GraphicsSet graphicsSet,
         ParticleEffect mercuryParticleEffect, SpriteBatchRenderer renderer)
     {
-        _graphicsSet = graphicsSet;
-        _mercuryParticleEffect = mercuryParticleEffect;
-        _renderer = renderer;
+        _mercury = new MercuryEffect(graphicsSet, mercuryParticleEffect, renderer);
     }
+
     public event RaiseEffectComplete? ParticleEffectComplete;
 
-    public ParticleEffect Effect => _mercuryParticleEffect;
+    public ParticleEffect Effect => _mercury.Effect;
+
+    /// <summary>
+    ///     This one has no active flag of its own: it is emitting for as long as there is anything
+    ///     in flight, which is what lets the same effect be triggered again at a second place
+    ///     before the first lot has finished.
+    /// </summary>
+    public bool EffectActive => _mercury.ActiveParticles > 0;
 
     public void Start(int xPos, int yPos)
-    {
-        var position = new Vector2(xPos, yPos);
-        _mercuryParticleEffect.Trigger(ref position);
-    }
+        => _mercury.Trigger(xPos, yPos);
 
     public void Update(GameTime gameTime)
     {
-        float deltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
-        _mercuryParticleEffect.Update(deltaSeconds);
+        _mercury.Advance(gameTime);
 
-        if (_mercuryParticleEffect.ActiveParticlesCount == 0)
+        if (_mercury.ActiveParticles == 0)
         {
-            if (ParticleEffectComplete != null)
-            {
-                ParticleEffectComplete();
-            }
+            ParticleEffectComplete?.Invoke();
         }
     }
-
-    public bool EffectActive
-    {
-        get
-        {
-            if (_mercuryParticleEffect.ActiveParticlesCount > 0)
-            {
-                return true;
-            }
-            return false;
-        }
-    }
-
 
     public void Stop()
-    {
-        _mercuryParticleEffect.Terminate();
-    }
+        => _mercury.Terminate();
 
     public void Reset()
-    {
-        _mercuryParticleEffect.Terminate();
-    }
+        => _mercury.Terminate();
 
+    /// <remarks>
+    ///     Unlike the other two this skips the draw entirely when nothing is in flight, rather than
+    ///     handing Mercury an empty effect to render.
+    /// </remarks>
     public void Draw()
     {
-        if (_graphicsSet.IsRedrawn)
+        if (_mercury.ActiveParticles > 0)
         {
-            // We must always call this!
-            if (_mercuryParticleEffect.ActiveParticlesCount > 0)
-            {
-                _renderer.RenderEffect(_mercuryParticleEffect);
-            }
+            _mercury.Render();
         }
     }
 
+    /// <inheritdoc cref="Draw()" />
     public void Draw(int screenFade)
     {
-        if (_graphicsSet.IsRedrawn)
+        if (_mercury.ActiveParticles > 0)
         {
-            // We must always call this!
-            if (_mercuryParticleEffect.ActiveParticlesCount > 0)
-            {
-                _renderer.RenderEffect(_mercuryParticleEffect, screenFade);
-            }
+            _mercury.Render(screenFade);
         }
     }
 }
