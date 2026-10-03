@@ -120,7 +120,7 @@ That target framework still compiles everywhere - `EnableWindowsTargeting` sees 
 just ships no content off a Mac, which costs nothing because the Windows head cannot run there.
 **Build the Windows head's content on Windows.** There it needs no Wine at all.
 
-Six shaders are built, all of them `ps_2_0` because the profile is `Reach` and allows no higher:
+Seven shaders are built, all of them `ps_2_0` because the profile is `Reach` and allows no higher:
 
 | Shader | What it does |
 | --- | --- |
@@ -130,6 +130,7 @@ Six shaders are built, all of them `ps_2_0` because the profile is `Reach` and a
 | `Splat.fx` | An organic nasty coming apart along a wandering boundary, with a wet rim |
 | `Electric.fx` | The node and gate arcs: a white core on the filaments, a halo, a flicker |
 | `Overload.fx` | Blob's energy failing: drained by a nasty, the charge building, the cracking, the blast |
+| `CoreFunnel.fx` | The funnel of energy turning about the planet's core |
 
 **`ps_2_0` has no dynamic branching and 64 arithmetic slots**, and that is a real ceiling rather
 than a theoretical one. It is why `Crt.fx` is three techniques rather than one shader with
@@ -138,9 +139,17 @@ nothing to spare: eight glow taps instead of four compile to 71 slots and will n
 the shared terms does not help, because the compiler has already found them.
 
 `Overload.fx`'s cracking pass hit the same wall at 85 slots, with two crossing sines and a rim on
-it, and came back under by dropping to one sine across a slope and no rim. Each technique gets the
-budget to itself, which is the other reason to split a shader rather than branch inside one. The
-remaining shaders are small and nowhere near it.
+it, and came back under by dropping to one sine across a slope and no rim. `CoreFunnel.fx` hit it
+at 76. Each technique gets the budget to itself, which is the other reason to split a shader rather
+than branch inside one. The remaining shaders are small and nowhere near it.
+
+**Two things buy slots back cheaply**, both learnt on `CoreFunnel.fx`:
+
+- **`pow` is not a multiply.** It compiles to a logarithm, a multiply and an exponent. `x * x * x`
+  is nearly free where `pow(x, 3.0)` is not, and three of them were most of that shader's overrun.
+- **Divide on the processor, not per pixel.** A span that never changes between frames can have
+  its reciprocal worked out once and passed in as a uniform, turning a per-pixel divide into a
+  per-pixel multiply.
 
 The three in `Assets/Shaders/` that are not in `Content/Shaders/` remain unbuilt and unreferenced.
 
