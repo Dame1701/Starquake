@@ -120,13 +120,24 @@ That target framework still compiles everywhere - `EnableWindowsTargeting` sees 
 just ships no content off a Mac, which costs nothing because the Windows head cannot run there.
 **Build the Windows head's content on Windows.** There it needs no Wine at all.
 
-Two shaders are built. `Desaturate.fx` is a luminance desaturation for the tunnel transition,
-and `Crt.fx` is the cathode ray tube F9 steps through - scanlines, a phosphor grille, a glow and
-a curve. Both are `ps_2_0`, because the profile is `Reach` and allows no higher, and that is why
-`Crt.fx` is three techniques rather than one shader with branches: `ps_2_0` has no dynamic
-branching and 64 arithmetic slots, so each mode is compiled as only the work it needs and the
-whole-tube pass is the one with no room to spare. The three in `Assets/Shaders/` that are not in
-`Content/Shaders/` remain unbuilt and unreferenced.
+Five shaders are built, all of them `ps_2_0` because the profile is `Reach` and allows no higher:
+
+| Shader | What it does |
+| --- | --- |
+| `Desaturate.fx` | Drains the colour and light for the tunnel transition |
+| `Crt.fx` | The cathode ray tube F9 steps through - scanlines, a phosphor grille, a glow, a curve |
+| `Materialise.fx` | A nasty arriving: two lines opening out of it, and the colour channels converging |
+| `Splat.fx` | An organic nasty coming apart along a wandering boundary, with a wet rim |
+| `Electric.fx` | The node and gate arcs: a white core on the filaments, a halo, a flicker |
+
+**`ps_2_0` has no dynamic branching and 64 arithmetic slots**, and that is a real ceiling rather
+than a theoretical one. It is why `Crt.fx` is three techniques rather than one shader with
+branches - each mode compiles as only the work it needs - and the whole-tube pass is the one with
+nothing to spare: eight glow taps instead of four compile to 71 slots and will not build. Hoisting
+the shared terms does not help, because the compiler has already found them. The other four
+shaders are small and nowhere near it.
+
+The three in `Assets/Shaders/` that are not in `Content/Shaders/` remain unbuilt and unreferenced.
 
 If the toolchain ever becomes a liability - Rosetta is on notice, and this Wine is an x86_64
 binary running a x86_64 Windows compiler - MGCB's `/copy:` directive takes a prebuilt `.xnb`
