@@ -13,8 +13,8 @@ namespace Starquake.Engines.ScreenEffects;
 /// <summary>
 ///     Blob squeezing through a tunnel into the next screen. The screen he is leaving is squashed
 ///     towards the edge he leaves by while the screen he is arriving at swells from the opposite
-///     edge, and the dark of the tunnel opens between them as they pass. Each melts into that dark
-///     rather than ending at it, so one picture becomes the other without ever cutting.
+///     edge, the two meeting at a seam that is never a line - each bleeds into the other across it,
+///     so one picture becomes the other without ever cutting.
 ///     <para>
 ///         Which edge the picture collapses towards is the only difference between going left and
 ///         going right, so both directions share this and say nothing but which way they go. They
@@ -51,40 +51,6 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
     private const double ArriveSlowdown = 1.4;
 
     /// <summary>
-    ///     How much of the play area the tunnel takes up at its widest, as a fraction of it. The
-    ///     two screens are held apart by this much, and what shows between them is the dark of the
-    ///     tunnel Blob is passing through.
-    ///     <para>
-    ///         It opens and closes rather than being held, which is the whole difference between
-    ///         this and the pause it replaces: there is no dark at either end of the transition,
-    ///         most of the screen is dark as the seam crosses the middle, and the dark travels with
-    ///         the seam the whole way. Nothing is ever still.
-    ///     </para>
-    ///     <para>
-    ///         The band is not a black box - <see cref="BleedOfTheSeam" /> reaches into it from both
-    ///         sides, so the screens melt into the dark rather than ending at it, and only the
-    ///         middle of it is truly black. That is also why this has to be large: the two fades
-    ///         eat twice <see cref="BleedOfTheSeam" /> out of whatever this opens, so a tunnel only
-    ///         half the play area wide left a quarter of it actually dark, which read as a soft
-    ///         join rather than as a passage.
-    ///     </para>
-    /// </summary>
-    private const double DarkOfTheTunnel = 0.85;
-
-    /// <summary>
-    ///     How much the tunnel lingers at its widest, as the power its opening curve is raised to.
-    ///     One is the bare parabola, which touches its peak for an instant and spends most of the
-    ///     transition barely open; below one flattens the top so the screen stays dark across the
-    ///     middle of the crossing, which is what makes it read as a length of tunnel rather than a
-    ///     dip in brightness.
-    ///     <para>
-    ///         It is not a hold. The curve is still moving every frame at every value of this - it
-    ///         is the shape of the opening that changes, not whether it is changing.
-    ///     </para>
-    /// </summary>
-    private const double DarkSpread = 0.45;
-
-    /// <summary>
     ///     How far each picture's inner edge fades out over, as a fraction of the play area, and so
     ///     also how far it is drawn past where it ends. It does both jobs because they are the same
     ///     job: the band that fades is the band that reaches across, so the two screens always
@@ -95,7 +61,7 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
     ///         back.
     ///     </para>
     /// </summary>
-    private const double BleedOfTheSeam = 0.09;
+    private const double BleedOfTheSeam = 0.16;
 
     /// <summary>
     ///     How many strips the fading band is drawn in. <c>SpriteBatch</c> tints a whole quad at
@@ -198,15 +164,13 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
             return;
         }
 
-        // One clock, two widths that share what the tunnel leaves them: whatever the screen being
-        // left gives up, the one arriving takes, and the dark between them opens and closes as it
-        // travels. There is no frame in which nothing is moving, which is what makes the transition
-        // read as a single move rather than as halves with a wait between them.
+        // One clock, two complementary widths: whatever the screen being left gives up, the one
+        // arriving takes. There is no frame in which neither is moving, which is what makes the
+        // transition read as a single move rather than as two halves with a wait between them.
         var crossedOver = SeamCrossing(_frame / (double)_transitionFrames);
-        var litWidth = master - (int)(master * DarkOfTheTunnel * TunnelOpenness(crossedOver));
 
-        _outgoingWidth = Math.Max(0, (int)(litWidth * (1 - crossedOver)));
-        _incomingWidth = Math.Max(0, (int)(litWidth * crossedOver));
+        _outgoingWidth = Math.Max(0, (int)(master * (1 - crossedOver)));
+        _incomingWidth = Math.Max(0, (int)(master * crossedOver));
 
         // The view port still describes the live picture, which is the one arriving, so anything
         // reading its width while the transition runs sees what is actually being drawn into.
@@ -272,26 +236,6 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
             ? 0.5 * StretchedIn(throughTheTransition / _seamReachesTheMiddle)
             : 0.5 + (0.5 * StretchedOut((throughTheTransition - _seamReachesTheMiddle) /
                                         (1 - _seamReachesTheMiddle)));
-
-    /// <summary>
-    ///     How far open the tunnel is, from nothing at either end of the transition to all of
-    ///     <see cref="DarkOfTheTunnel" /> as the seam passes the middle.
-    /// </summary>
-    /// <remarks>
-    ///     A parabola flattened by <see cref="DarkSpread" />, so it opens and closes smoothly and
-    ///     is never held at its widest while still staying dark across the middle of the crossing.
-    ///     <para>
-    ///         Clamped because <see cref="SeamCrossing" /> deliberately leaves the nought-to-one
-    ///         range at both ends to stretch and overshoot. There is no tunnel out there - the
-    ///         transition has either not started crossing or has finished.
-    ///     </para>
-    /// </remarks>
-    private static double TunnelOpenness(double crossedOver)
-    {
-        var crossing = Math.Clamp(crossedOver, 0, 1);
-
-        return Math.Pow(4 * crossing * (1 - crossing), DarkSpread);
-    }
 
     /// <summary>
     ///     Draws <paramref name="picture" /> across <paramref name="area" />, reaching
