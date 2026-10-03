@@ -26,7 +26,7 @@ internal readonly record struct TeleportDestination(int Screen, string Code);
 ///         so changing one affects every screen that has ever used that tile.
 ///     </para>
 ///     <para>
-///         Each screen also carries a <see cref="GameScreenData.CollisionMap" />, but the game throws
+///         Each screen used to carry a collision map of its own, but the game threw
 ///         that away and rebuilds it from the masks the moment Blob walks onto the screen. The
 ///         editor therefore leaves whatever was in the file untouched rather than trying to keep
 ///         derived data in step with edits that will never be read.
@@ -112,10 +112,7 @@ internal sealed class EditorDocument
         var screens = new GameScreenData[WorldMap.ScreenCount];
         for (int screen = 0; screen < screens.Length; screen++)
         {
-            screens[screen] = new GameScreenData(TileMetrics.TilesAcross, TileMetrics.TilesDown)
-            {
-                CollisionMap = []
-            };
+            screens[screen] = new GameScreenData(TileMetrics.TilesAcross, TileMetrics.TilesDown);
         }
 
         int[,,] masks = new int[TunnelTiles.LastMouth + 1,

@@ -70,8 +70,8 @@ internal class JumpPlatform
 
         // A platform that has not been allocated to a screen still sits at a position, and
         // JumpPlatforms replaces both tiles every time it hands this platform out again
-        LeftCollisionTile = new CollisionTile((int)CollisionObjectType.JumpPlatform, XPos, YPos, CollisionTileType.EveryoneHits);
-        RightCollisionTile = new CollisionTile((int)CollisionObjectType.JumpPlatform, XPos + 32, YPos, CollisionTileType.EveryoneHits);
+        LeftCollisionTile = CollisionTile.ForObject(CollisionObjectType.JumpPlatform, XPos, YPos, CollisionTileType.EveryoneHits);
+        RightCollisionTile = CollisionTile.ForObject(CollisionObjectType.JumpPlatform, XPos + 32, YPos, CollisionTileType.EveryoneHits);
 
         Reset();
     }

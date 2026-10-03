@@ -106,8 +106,8 @@ internal class JumpPlatforms : IDynamicCollisionCells
             _platforms.Add(newPlatform);
         }
 
-        newPlatform.LeftCollisionTile = new CollisionTile((int)CollisionObjectType.JumpPlatform, newPlatform.XPos, newPlatform.YPos, CollisionTileType.EveryoneHits);
-        newPlatform.RightCollisionTile = new CollisionTile((int)CollisionObjectType.JumpPlatform, newPlatform.XPos + 32, newPlatform.YPos, CollisionTileType.EveryoneHits);
+        newPlatform.LeftCollisionTile = CollisionTile.ForObject(CollisionObjectType.JumpPlatform, newPlatform.XPos, newPlatform.YPos, CollisionTileType.EveryoneHits);
+        newPlatform.RightCollisionTile = CollisionTile.ForObject(CollisionObjectType.JumpPlatform, newPlatform.XPos + 32, newPlatform.YPos, CollisionTileType.EveryoneHits);
         newPlatform.PlatformActive = true;
         newPlatform.ReadyToAllocate = false;
         newPlatform.ScreenNumber = _gameScreens.ScreenNumber;

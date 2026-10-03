@@ -31,8 +31,10 @@ public sealed class GameScreenData
     [Key(0)]
     public ScreenTile[,] ScreenTiles { get; set; } = new ScreenTile[0, 0];
 
-    [Key(1)]
-    public List<CollisionTile> CollisionMap { get; set; } = [];
+    // Key 1 was the collision map. The screen editor only ever wrote an empty list and the game
+    // threw whatever was there away and built its own, so it came off the record rather than
+    // staying as a field nothing filled in. The number is left unused so the keys below keep theirs
+    // and the shipped file still reads.
 
     /// <summary>
     ///     The destination code that reaches the teleport booth on this screen, or null for a screen

@@ -27,6 +27,29 @@ internal static class CollisionDetection
     /// <summary>
     ///     Checks for a collision between two objects and returns the amount of distance that it is legal to travel
     /// </summary>
+    /// <remarks>
+    ///     Solved rather than walked. This used to step one pixel at a time up to the velocity and
+    ///     count the steps that were free, with a separate test in front of it to skip the walk for
+    ///     a box the mover could not reach however far it went. Both are the same question asked of
+    ///     the whole move at once, so it is answered that way:
+    ///     <list type="bullet">
+    ///         <item>
+    ///             Across the move, nothing changes as the step is taken - so if the centres are
+    ///             already further apart than the two half-widths, they stay that way and the whole
+    ///             velocity is legal.
+    ///         </item>
+    ///         <item>
+    ///             Along it, the centres close by exactly one pixel a step, so the steps that
+    ///             overlap form one unbroken run. The answer is the step before that run starts,
+    ///             and the full velocity if the run starts beyond it or never starts at all.
+    ///         </item>
+    ///     </list>
+    ///     The halves are integer divisions, written exactly as
+    ///     <see cref="Check(int,int,int,int,int,int,int,int)" /> writes them, so the two agree on
+    ///     the boundary rather than drifting a pixel apart. <c>CollisionBroadPhaseTests</c> holds
+    ///     this against the walk it replaced over every offset, size and speed, because a result a
+    ///     pixel too generous would let a mover through a wall.
+    /// </remarks>
     public static int CheckDirection(Direction direction, int obj1Velocity,
         int obj1X, int obj1Y, int obj1W, int obj1H,
         int obj2X, int obj2Y, int obj2W, int obj2H)
@@ -38,56 +61,6 @@ internal static class CollisionDetection
             return 0;
         }
 
-        if (obj1Velocity > 0 &&
-            CannotMeet(stepX, stepY, obj1Velocity, obj1X, obj1Y, obj1W, obj1H, obj2X, obj2Y, obj2W, obj2H))
-        {
-            return obj1Velocity;
-        }
-
-        int amountThatCanBeMoved = 0;
-
-        // A pixel at a time, so the answer is how far it may travel rather than merely whether it
-        // can travel the whole way.
-        for (int a = 1; a <= obj1Velocity; a++)
-        {
-            if (Check(obj1X + stepX * a, obj1Y + stepY * a, obj1W, obj1H, obj2X, obj2Y, obj2W, obj2H))
-            {
-                break;
-            }
-
-            amountThatCanBeMoved++;
-        }
-
-        return amountThatCanBeMoved;
-    }
-
-    /// <summary>
-    ///     Whether the two boxes stay apart for every step of the move, and so whether the walk below
-    ///     can be skipped. The walk tests one pixel at a time up to the velocity, so a screen's worth
-    ///     of cells costs cells times velocity - and nearly all of those cells are nowhere near the
-    ///     thing that is moving.
-    /// </summary>
-    /// <remarks>
-    ///     Exact rather than approximate, so skipping changes no answer. It asks the same question
-    ///     <see cref="Check(int,int,int,int,int,int,int,int)" /> asks - centres closer than the two
-    ///     half-widths - of the whole swept path at once:
-    ///     <list type="bullet">
-    ///         <item>
-    ///             Across the move, nothing changes as the step is taken, so one comparison settles
-    ///             every step of it.
-    ///         </item>
-    ///         <item>
-    ///             Along it, the centre sweeps between its first step and its last, and the nearest
-    ///             it ever comes to the other box is at one end of that run or inside it.
-    ///         </item>
-    ///     </list>
-    ///     The halves are integer divisions, written exactly as <c>Check</c> writes them, so the two
-    ///     agree on the boundary rather than drifting a pixel apart.
-    /// </remarks>
-    private static bool CannotMeet(int stepX, int stepY, int obj1Velocity,
-        int obj1X, int obj1Y, int obj1W, int obj1H,
-        int obj2X, int obj2Y, int obj2W, int obj2H)
-    {
         bool movingSideways = stepX != 0;
 
         int acrossTheMove = movingSideways
@@ -100,7 +73,7 @@ internal static class CollisionDetection
 
         if (acrossTheMove >= acrossReach)
         {
-            return true;
+            return obj1Velocity;
         }
 
         int step = movingSideways ? stepX : stepY;
@@ -108,11 +81,18 @@ internal static class CollisionDetection
         int other = movingSideways ? obj2X + obj2W / 2 : obj2Y + obj2H / 2;
         int alongReach = movingSideways ? obj1W / 2 + obj2W / 2 : obj1H / 2 + obj2H / 2;
 
-        int firstStep = centre + step;
-        int lastStep = centre + step * obj1Velocity;
+        // How far ahead the other centre lies in the direction being travelled. Negative for a box
+        // that is behind the mover, which is why the run below can end before it begins.
+        int gapAlongTravel = (other - centre) * step;
 
-        return other <= Math.Min(firstStep, lastStep) - alongReach ||
-               other >= Math.Max(firstStep, lastStep) + alongReach;
+        // The run of blocked steps is every a with |a - gapAlongTravel| < alongReach. Steps start
+        // at one, so the first blocked step is the start of that run or the first step, whichever
+        // is later.
+        int firstBlockedStep = Math.Max(1, gapAlongTravel - alongReach + 1);
+
+        return firstBlockedStep >= gapAlongTravel + alongReach
+            ? obj1Velocity
+            : Math.Min(obj1Velocity, firstBlockedStep - 1);
     }
 
     /// <summary>

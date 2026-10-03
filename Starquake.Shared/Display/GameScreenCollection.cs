@@ -327,14 +327,9 @@ internal class GameScreenCollection : IDynamicCollisionCells
                 int cellX = tileX * _tileWidth + cellAcross * CollAreaWidth;
                 int cellY = tileY * _tileHeight + cellDown * CollAreaHeight;
 
-                foreach (CollisionTile collisionTile in _gameScreens[ScreenNumber].CollisionMap)
+                if (Collisions.HasNastyOnlyCellAt(cellX, cellY))
                 {
-                    if (collisionTile.XPos == cellX &&
-                        collisionTile.YPos == cellY &&
-                        collisionTile.CollisionTileType == CollisionTileType.NotBlob)
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
         }
@@ -591,9 +586,9 @@ internal class GameScreenCollection : IDynamicCollisionCells
     {
         for (int c = 0; c < 3; c++)
         {
-            var keyLockCollisionTile =
-                new CollisionTile(
-                    (int)CollisionObjectType.KeyAccessDoor, // Random image that's meaningless
+            CollisionTile keyLockCollisionTile =
+                CollisionTile.ForObject(
+                    CollisionObjectType.KeyAccessDoor,
                     keyLockDoor.Location.X + 48,
                     keyLockDoor.Location.Y + c * 32,
                     CollisionTileType.None);

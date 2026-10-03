@@ -33,7 +33,7 @@ public class ScreenCollisionMapTests
         map.Rebuild(0);
 
         // Assert
-        Assert.Empty(screen.CollisionMap);
+        Assert.Empty(CellsOf(map));
     }
 
     [Fact]
@@ -51,8 +51,8 @@ public class ScreenCollisionMapTests
         // Assert
         Assert.Equal(
             TileMetrics.CollisionCellsAcrossTile * TileMetrics.CollisionCellsDownTile,
-            screen.CollisionMap.Count);
-        Assert.All(screen.CollisionMap, cell => Assert.Equal(CollisionTileType.EveryoneHits, cell.CollisionTileType));
+            CellsOf(map).Count);
+        Assert.All(CellsOf(map), cell => Assert.Equal(CollisionTileType.EveryoneHits, cell.CollisionTileType));
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public class ScreenCollisionMapTests
         map.Rebuild(0);
 
         // Assert
-        Assert.All(screen.CollisionMap, cell =>
+        Assert.All(CellsOf(map), cell =>
         {
             Assert.InRange(cell.XPos, 3 * TileMetrics.TileWidth, 4 * TileMetrics.TileWidth - 1);
             Assert.InRange(cell.YPos, 2 * TileMetrics.TileHeight, 3 * TileMetrics.TileHeight - 1);
@@ -88,8 +88,8 @@ public class ScreenCollisionMapTests
         map.Rebuild(0);
 
         // Assert
-        Assert.Equal(TileMetrics.CollisionCellsAcrossTile, screen.CollisionMap.Count);
-        Assert.All(screen.CollisionMap, cell => Assert.Equal(0, cell.YPos));
+        Assert.Equal(TileMetrics.CollisionCellsAcrossTile, CellsOf(map).Count);
+        Assert.All(CellsOf(map), cell => Assert.Equal(0, cell.YPos));
     }
 
     [Fact]
@@ -105,8 +105,8 @@ public class ScreenCollisionMapTests
         map.Rebuild(0);
 
         // Assert - the four middle cells, none of which stops Blob
-        Assert.Equal(4, screen.CollisionMap.Count);
-        Assert.All(screen.CollisionMap, cell => Assert.Equal(CollisionTileType.NotBlob, cell.CollisionTileType));
+        Assert.Equal(4, CellsOf(map).Count);
+        Assert.All(CellsOf(map), cell => Assert.Equal(CollisionTileType.NotBlob, cell.CollisionTileType));
     }
 
     [Fact]
@@ -122,8 +122,8 @@ public class ScreenCollisionMapTests
         map.Rebuild(0);
 
         // Assert
-        Assert.Equal(4, screen.CollisionMap.Count);
-        Assert.All(screen.CollisionMap, cell =>
+        Assert.Equal(4, CellsOf(map).Count);
+        Assert.All(CellsOf(map), cell =>
             Assert.True(cell.XPos >= TileMetrics.CollisionCellWidth * 2));
     }
 
@@ -142,8 +142,8 @@ public class ScreenCollisionMapTests
         // Assert
         Assert.Equal(
             TileMetrics.CollisionCellsAcrossTile * TileMetrics.CollisionCellsDownTile,
-            screen.CollisionMap.Count);
-        Assert.All(screen.CollisionMap, cell => Assert.Equal(CollisionTileType.NotBlob, cell.CollisionTileType));
+            CellsOf(map).Count);
+        Assert.All(CellsOf(map), cell => Assert.Equal(CollisionTileType.NotBlob, cell.CollisionTileType));
     }
 
     [Fact]
@@ -159,9 +159,9 @@ public class ScreenCollisionMapTests
         map.Rebuild(0);
 
         // Assert
-        Assert.Equal(4, screen.CollisionMap.Count);
-        Assert.All(screen.CollisionMap, cell => Assert.Equal(CollisionTileType.NotBlob, cell.CollisionTileType));
-        Assert.Contains(screen.CollisionMap, cell => cell is { XPos: 100, YPos: 200 });
+        Assert.Equal(4, CellsOf(map).Count);
+        Assert.All(CellsOf(map), cell => Assert.Equal(CollisionTileType.NotBlob, cell.CollisionTileType));
+        Assert.Contains(CellsOf(map), cell => cell is { XPos: 100, YPos: 200 });
     }
 
     [Fact]
@@ -175,11 +175,11 @@ public class ScreenCollisionMapTests
 
         // Act
         map.Rebuild(0);
-        int afterFirst = screen.CollisionMap.Count;
+        int afterFirst = CellsOf(map).Count;
         map.Rebuild(0);
 
         // Assert
-        Assert.Equal(afterFirst, screen.CollisionMap.Count);
+        Assert.Equal(afterFirst, CellsOf(map).Count);
     }
 
     [Fact]
@@ -195,10 +195,14 @@ public class ScreenCollisionMapTests
         // Act
         map.Rebuild(1);
 
-        // Assert
+        // Assert - the map is of the screen it was pointed at, and of nothing else
         Assert.Equal(1, map.ScreenNumber);
-        Assert.NotEmpty(solid.CollisionMap);
-        Assert.Empty(empty.CollisionMap);
+        Assert.NotEmpty(CellsOf(map));
+
+        map.Rebuild(0);
+
+        Assert.Equal(0, map.ScreenNumber);
+        Assert.Empty(CellsOf(map));
     }
 
     [Fact]
@@ -419,7 +423,7 @@ public class ScreenCollisionMapTests
             (int)CollisionObjectType.JumpPlatform, 64, 64, CollisionTileType.EveryoneHits));
 
         // Assert
-        Assert.Single(screen.CollisionMap);
+        Assert.Single(CellsOf(map));
     }
 
     /// <summary>
@@ -441,7 +445,7 @@ public class ScreenCollisionMapTests
         map.Rebuild(0);
 
         // Assert
-        Assert.Empty(screen.CollisionMap);
+        Assert.Empty(CellsOf(map));
     }
 
     /// <summary>
@@ -463,7 +467,7 @@ public class ScreenCollisionMapTests
         map.Rebuild(0);
 
         // Assert
-        Assert.Same(platform, Assert.Single(screen.CollisionMap));
+        Assert.Same(platform, Assert.Single(CellsOf(map)));
     }
 
     [Fact]
@@ -478,11 +482,14 @@ public class ScreenCollisionMapTests
 
         // Act
         map.Rebuild(0);
+        List<CollisionTile> onTheScreenWithout = CellsOf(map);
+
         map.Rebuild(1);
+        List<CollisionTile> onTheScreenWith = CellsOf(map);
 
         // Assert
-        Assert.Empty(first.CollisionMap);
-        Assert.NotEmpty(second.CollisionMap);
+        Assert.Empty(onTheScreenWithout);
+        Assert.NotEmpty(onTheScreenWith);
     }
 
     /// <summary>
@@ -506,7 +513,7 @@ public class ScreenCollisionMapTests
         map.Rebuild(0);
 
         // Assert
-        Assert.Same(platform, Assert.Single(screen.CollisionMap));
+        Assert.Same(platform, Assert.Single(CellsOf(map)));
     }
 
     [Fact]
@@ -524,7 +531,7 @@ public class ScreenCollisionMapTests
         map.Remove(platform);
 
         // Assert
-        Assert.Empty(screen.CollisionMap);
+        Assert.Empty(CellsOf(map));
     }
 
     /// <summary>
@@ -551,6 +558,14 @@ public class ScreenCollisionMapTests
 
     private static ScreenCollisionMap MapOf(GameScreenData screen)
         => new([screen], TestData.TileCollisionData());
+
+    /// <summary>
+    ///     The cells the map is holding, as a list. The map keeps the ones read off the tiles as a
+    ///     grid and hands them back built afresh, so a test that wants to count them or look
+    ///     through them takes a copy first.
+    /// </summary>
+    private static List<CollisionTile> CellsOf(ScreenCollisionMap map)
+        => [.. map.Cells];
 
     /// <summary>
     ///     A source of cells the tiles do not describe, standing in for the jump platforms, the

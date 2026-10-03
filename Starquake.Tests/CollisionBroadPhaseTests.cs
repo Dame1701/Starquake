@@ -163,9 +163,118 @@ public class CollisionBroadPhaseTests
         Assert.Equal(0, faraway);
     }
 
+    /// <summary>
+    ///     Odd widths and heights, which is where solving for the move could drift from walking it.
+    ///     The halves either side are integer divisions, so an odd box is treated as one pixel
+    ///     narrower than it is - and the solved form has to make exactly the same mistake as the
+    ///     walk, on both boxes, for the two to agree.
+    /// </summary>
+    [Theory]
+    [InlineData(Direction.Left)]
+    [InlineData(Direction.Right)]
+    [InlineData(Direction.Up)]
+    [InlineData(Direction.Down)]
+    internal void CheckDirection_AtEverySizeAndOffset_AgreesWithTheWalk(Direction direction)
+    {
+        // Arrange
+        List<string> disagreements = [];
+
+        // Act
+        foreach (int moverWidth in TestData.Sizes)
+        {
+            foreach (int moverHeight in TestData.Sizes)
+            {
+                foreach (int otherSize in TestData.Sizes)
+                {
+                    foreach (int velocity in TestData.Velocities)
+                    {
+                        for (int offset = -TestData.SweepReach; offset <= TestData.SweepReach; offset++)
+                        {
+                            int otherX = TestData.MoverX + (direction is Direction.Left or Direction.Right
+                                ? offset
+                                : TestData.SlightlyOffAxis);
+                            int otherY = TestData.MoverY + (direction is Direction.Up or Direction.Down
+                                ? offset
+                                : TestData.SlightlyOffAxis);
+
+                            int walked = WalkedOneStepAtATime(direction, velocity,
+                                TestData.MoverX, TestData.MoverY, moverWidth, moverHeight,
+                                otherX, otherY, otherSize, otherSize);
+
+                            int solved = CollisionDetection.CheckDirection(direction, velocity,
+                                TestData.MoverX, TestData.MoverY, moverWidth, moverHeight,
+                                otherX, otherY, otherSize, otherSize);
+
+                            if (walked != solved && disagreements.Count < 10)
+                            {
+                                disagreements.Add(
+                                    $"{direction} v{velocity} mover {moverWidth}x{moverHeight} " +
+                                    $"other {otherSize} at offset {offset}: " +
+                                    $"walked {walked}, solved {solved}");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Assert
+        Assert.Empty(disagreements);
+    }
+
+    /// <summary>
+    ///     A box the mover has already gone past. The run of blocked steps lies behind it, so every
+    ///     step ahead is free - the case the solved form gets wrong if it looks only at where the
+    ///     run starts and not at whether it has already ended.
+    /// </summary>
+    [Theory]
+    [InlineData(Direction.Up)]
+    [InlineData(Direction.Down)]
+    [InlineData(Direction.Left)]
+    [InlineData(Direction.Right)]
+    internal void CheckDirection_AgainstSomethingBehindIt_AllowsTheWholeMove(Direction direction)
+    {
+        // Arrange - the other box placed opposite the way the mover is going
+        (int stepX, int stepY) = direction switch
+        {
+            Direction.Up => (0, -1),
+            Direction.Down => (0, 1),
+            Direction.Left => (-1, 0),
+            _ => (1, 0)
+        };
+
+        int behindX = TestData.MoverX - stepX * TestData.WellBehind;
+        int behindY = TestData.MoverY - stepY * TestData.WellBehind;
+
+        // Act
+        int solved = CollisionDetection.CheckDirection(direction, TestData.Velocity,
+            TestData.MoverX, TestData.MoverY, TestData.MoverWidth, TestData.MoverHeight,
+            behindX, behindY, TestData.CellSize, TestData.CellSize);
+
+        // Assert
+        Assert.Equal(TestData.Velocity, solved);
+    }
+
     private static class TestData
     {
         public const int CellSize = 32;
+
+        /// <summary>
+        ///     Box sizes to sweep, odd ones included. The halves are integer divisions, so 31 and
+        ///     33 are the sizes that tell whether the solved form rounds the way the walk does.
+        /// </summary>
+        public static readonly int[] Sizes = [31, 32, 33, 56, 64];
+
+        /// <summary>
+        ///     Far enough along the other axis to stay overlapping, so the sweep tests the move
+        ///     rather than the boxes missing each other sideways.
+        /// </summary>
+        public const int SlightlyOffAxis = 4;
+
+        /// <summary>
+        ///     A distance the other way, past any reach the sweep uses.
+        /// </summary>
+        public const int WellBehind = 200;
 
         public const int PlayAreaWidth = 1024;
 
