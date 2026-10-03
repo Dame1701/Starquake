@@ -39,7 +39,6 @@ internal class GameScreenCollection : IDynamicCollisionCells
     private List<KeyLockDoor>? _keyLockDoors;
 
 
-
     private int _screenNumber;
 
     public GameScreenCollection(

@@ -143,7 +143,13 @@ public class NastyBrainTests
         Assert.Equal(MoveType.DiagonalBouncing, brain.State.MovementType);
         Assert.Contains(
             brain.Direction,
-            new[] { Direction.UpLeft, Direction.UpRight, Direction.DownLeft, Direction.DownRight });
+            new[]
+            {
+                Direction.UpLeft,
+                Direction.UpRight,
+                Direction.DownLeft,
+                Direction.DownRight
+            });
     }
 
     [Fact]
@@ -225,7 +231,13 @@ public class NastyBrainTests
         // Assert
         Assert.Contains(
             brain.Direction,
-            new[] { Direction.UpLeft, Direction.UpRight, Direction.DownLeft, Direction.DownRight });
+            new[]
+            {
+                Direction.UpLeft,
+                Direction.UpRight,
+                Direction.DownLeft,
+                Direction.DownRight
+            });
     }
 
     [Fact]

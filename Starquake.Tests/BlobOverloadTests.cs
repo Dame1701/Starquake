@@ -119,7 +119,15 @@ public class BlobOverloadTests
         }
 
         // Assert
-        Assert.Equal(new[] { true, false, true, false, true, false }, drawn);
+        Assert.Equal(new[]
+        {
+            true,
+            false,
+            true,
+            false,
+            true,
+            false
+        }, drawn);
     }
 
     [Fact]
@@ -153,8 +161,7 @@ public class BlobOverloadTests
         {
             stage = overload.Swell();
             scales.Add(overload.Scale);
-        }
-        while (stage != OverloadStage.Exploded && scales.Count < TestData.LongerThanAnyDeath);
+        } while (stage != OverloadStage.Exploded && scales.Count < TestData.LongerThanAnyDeath);
 
         // Assert
         Assert.Equal(TestData.LargestScale, scales.Max());

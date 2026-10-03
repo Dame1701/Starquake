@@ -811,9 +811,9 @@ internal class NastyBrain
         }
 
         _state.StepsToMove = _randomNumberGenerator.Next(
-                           (int)(stepsFromBlob / (double)_state.MoveSpeed / 2),
-                           (int)(stepsFromBlob / (double)_state.MoveSpeed)) +
-                       SpikeyOvershoot;
+                                 (int)(stepsFromBlob / (double)_state.MoveSpeed / 2),
+                                 (int)(stepsFromBlob / (double)_state.MoveSpeed)) +
+                             SpikeyOvershoot;
     }
 
     /// <summary>

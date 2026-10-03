@@ -72,7 +72,12 @@ public class BlobFallTests
 
         // Assert
         Assert.Equal(
-            new[] { TestData.StartingFallSpeed, TestData.StartingFallSpeed, TestData.StartingFallSpeed },
+            new[]
+            {
+                TestData.StartingFallSpeed,
+                TestData.StartingFallSpeed,
+                TestData.StartingFallSpeed
+            },
             distances[..3]);
         Assert.Equal(TestData.StartingFallSpeed + 1, distances[3]);
     }

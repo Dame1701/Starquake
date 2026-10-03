@@ -4,7 +4,6 @@
 // -
 using Starquake.Animations;
 using Starquake.Constants;
-using Starquake.SharedLibs;
 using Starquake.Structure;
 
 namespace Starquake.ActiveSprites.BlobParts;

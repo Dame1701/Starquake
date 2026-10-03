@@ -138,7 +138,16 @@ public class CoreSiteTests
         GameScreenData[] world = TestData.World();
 
         // Act
-        foreach (int screen in new[] { 0, 5, 199, 42, 511, 199, 8 })
+        foreach (int screen in new[]
+                 {
+                     0,
+                     5,
+                     199,
+                     42,
+                     511,
+                     199,
+                     8
+                 })
         {
             CoreSite.PlaceOn(world, screen, new CorePlacement(64, 64));
         }

@@ -21,8 +21,6 @@ internal class ScreenEffectEngine
     private readonly List<ScreenEffectBase> _screenEffects;
 
 
-
-
     public ScreenEffectEngine(
         GraphicsDeviceManager graphics,
         PresentationSettings presentation,

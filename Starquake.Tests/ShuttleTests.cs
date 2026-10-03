@@ -3,7 +3,6 @@
 // ---------------------------------------------------------
 // -
 using Starquake.ActiveSprites.BlobParts;
-using Starquake.SharedLibs;
 using Starquake.Structure;
 using Xunit;
 

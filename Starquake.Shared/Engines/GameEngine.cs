@@ -118,16 +118,12 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     // Game Sequences
 
 
-
     private bool _particleTestTrigger;
-
-
 
 
     private SpriteCollection _scanlines;
 
     private ScreenEffectEngine _screenEffectEngine;
-
 
 
     // Tunnel lift animations

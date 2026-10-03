@@ -1,4 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+
 <XnaContent xmlns:Modifiers="ProjectMercury.Modifiers">
     <Asset Type="ProjectMercury.ParticleEffect">
         <Item>
@@ -455,6 +456,6 @@
         </Item>
         <Name>Particle Effect</Name>
         <Author>Damien Green</Author>
-        <Description/>
+        <Description />
     </Asset>
 </XnaContent>

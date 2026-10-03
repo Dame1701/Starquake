@@ -8,7 +8,6 @@ using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Starquake.Constants;
-using Starquake.ScreenEditor.Content;
 using Starquake.ScreenEditor.Editing;
 using Starquake.Structure;
 

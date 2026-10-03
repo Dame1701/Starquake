@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using System.Collections.ObjectModel;
 using Starquake.Constants;
 using Starquake.ScreenEditor.Content;
 using Starquake.ScreenEditor.ViewModels;
@@ -27,15 +26,9 @@ internal sealed class EditorSession : ViewModelBase
     ///     How many recently used tiles to keep to hand. Enough to cover the handful a screen is
     ///     usually built from, short enough to stay a glance rather than a search.
     /// </summary>
-
-
-
-
-
     private int[]? _clipboard;
 
     private int _currentScreen;
-
 
 
     private int _selectedTile;
@@ -43,14 +36,7 @@ internal sealed class EditorSession : ViewModelBase
     private TileSheet? _sheet;
 
 
-
-
-
-
-
-
     private EditorTool _tool = EditorTool.Paint;
-
 
 
     public EditorSession()
@@ -309,8 +295,6 @@ internal sealed class EditorSession : ViewModelBase
     ///     tile by construction - see <see cref="TilePaletteState.Remember" />.
     /// </remarks>
     private int LastOrdinaryTile => Palette.RecentTiles.Count > 0 ? Palette.RecentTiles[0] : 0;
-
-
 
 
     /// <summary>
@@ -705,8 +689,6 @@ internal sealed class EditorSession : ViewModelBase
 
         RaisePropertyChanged(nameof(ScreenDescription));
     }
-
-
 
 
 }

@@ -1,4 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+
 <XnaContent xmlns:Emitters="ProjectMercury.Emitters" xmlns:Modifiers="ProjectMercury.Modifiers">
     <Asset Type="ProjectMercury.ParticleEffect">
         <Item Type="Emitters:RectEmitter">
@@ -144,6 +145,6 @@
         </Item>
         <Name>Beam Me Up</Name>
         <Author>Matt Davey</Author>
-        <Description/>
+        <Description />
     </Asset>
 </XnaContent>

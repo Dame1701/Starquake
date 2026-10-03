@@ -28,8 +28,8 @@
           a single source file: Starquake.Shared.csproj excludes it so it is never compiled
           twice.
         -->
-        <Compile Include="$(StarquakeSharedDir)Program.cs" Link="Program.cs"/>
-        <ProjectReference Include="$(StarquakeSharedDir)Starquake.Shared.csproj"/>
+        <Compile Include="$(StarquakeSharedDir)Program.cs" Link="Program.cs" />
+        <ProjectReference Include="$(StarquakeSharedDir)Starquake.Shared.csproj" />
     </ItemGroup>
 
 </Project>

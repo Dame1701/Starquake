@@ -87,9 +87,7 @@ public static class MarkerTiles
     ///     step out of - and the screen editor is what holds the map to it.
     /// </summary>
     public static bool IsOnePerMap(MarkerTile marker)
-        => marker is MarkerTile.BlobStartPosition
-            or MarkerTile.ShipCrashSite
-            or MarkerTile.CoreExitPosition;
+        => marker is MarkerTile.BlobStartPosition or MarkerTile.ShipCrashSite or MarkerTile.CoreExitPosition;
 
     /// <summary>
     ///     Whether a tile number is a marker. Asked once per tile per frame while a screen is drawn and

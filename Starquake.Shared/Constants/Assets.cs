@@ -34,85 +34,85 @@ internal static class Assets
     internal static class Graphics
     {
         // Shared
-        public const string Background1                    = "Background1";
-        public const string Background2                    = "Background2";
-        public const string ProportionalNumbers            = "ProportionalNumbers";
+        public const string Background1 = "Background1";
+        public const string Background2 = "Background2";
+        public const string ProportionalNumbers = "ProportionalNumbers";
 
         // Presentation screens
-        public const string OptionScreenBackground         = "OptionScreenBackground";
-        public const string OptionScreenForeground         = "OptionScreenForeground";
+        public const string OptionScreenBackground = "OptionScreenBackground";
+        public const string OptionScreenForeground = "OptionScreenForeground";
         public const string ComputerReportScreenBackground = "ComputerReportScreenBackground";
         public const string ComputerReportScreenForeground = "ComputerReportScreenForeground";
-        public const string GameOverScreenBackground       = "GameOverScreenBackground";
-        public const string GameOverScreenForeground       = "GameOverScreenForeground";
-        public const string HiScoreScreenBackground        = "HiScoreScreenBackground";
-        public const string HiScoreScreenForeground        = "HiScoreScreenForeground";
-        public const string GameCompleteScreenBackground   = "GameCompleteScreenBackground";
-        public const string GameCompleteScreenForeground   = "GameCompleteScreenForeground";
+        public const string GameOverScreenBackground = "GameOverScreenBackground";
+        public const string GameOverScreenForeground = "GameOverScreenForeground";
+        public const string HiScoreScreenBackground = "HiScoreScreenBackground";
+        public const string HiScoreScreenForeground = "HiScoreScreenForeground";
+        public const string GameCompleteScreenBackground = "GameCompleteScreenBackground";
+        public const string GameCompleteScreenForeground = "GameCompleteScreenForeground";
 
         // Screen tiles
-        public const string ExitShadows                    = "ExitShadows";
+        public const string ExitShadows = "ExitShadows";
 
         // Blob
-        public const string BlobParts                      = "BlobParts";
-        public const string BlobShuttle                    = "BlobShuttle";
-        public const string BlobShuttleOriginal            = "BlobShuttleOriginal";
-        public const string BlobFire1                      = "BlobFire1";
-        public const string BlobFire2                      = "BlobFire2";
-        public const string BlobFire2Original              = "BlobFire2Original";
-        public const string BlobFire2Overlay               = "BlobFire2Overlay";
-        public const string JumpPlatforms                  = "JumpPlatforms";
-        public const string JumpPlatformsOriginal          = "JumpPlatformsOriginal";
+        public const string BlobParts = "BlobParts";
+        public const string BlobShuttle = "BlobShuttle";
+        public const string BlobShuttleOriginal = "BlobShuttleOriginal";
+        public const string BlobFire1 = "BlobFire1";
+        public const string BlobFire2 = "BlobFire2";
+        public const string BlobFire2Original = "BlobFire2Original";
+        public const string BlobFire2Overlay = "BlobFire2Overlay";
+        public const string JumpPlatforms = "JumpPlatforms";
+        public const string JumpPlatformsOriginal = "JumpPlatformsOriginal";
 
         // Pick-ups and nasties
-        public const string Nasties                        = "Nasties";
-        public const string NastiesOriginal                = "NastiesOriginal";
-        public const string ConveyerNasty                  = "ConveyerNasty";
+        public const string Nasties = "Nasties";
+        public const string NastiesOriginal = "NastiesOriginal";
+        public const string ConveyerNasty = "ConveyerNasty";
 
         // Access booths
-        public const string ScanLine                       = "ScanLine";
-        public const string AccessCodesGray                = "AccessCodesGray";
-        public const string AccessCodesGrayOriginal        = "AccessCodesGrayOriginal";
+        public const string ScanLine = "ScanLine";
+        public const string AccessCodesGray = "AccessCodesGray";
+        public const string AccessCodesGrayOriginal = "AccessCodesGrayOriginal";
 
         // Cheops
-        public const string CheopsPyramid                  = "CheopsPyramid";
-        public const string CheopsPyramidOriginal          = "CheopsPyramidOriginal";
+        public const string CheopsPyramid = "CheopsPyramid";
+        public const string CheopsPyramidOriginal = "CheopsPyramidOriginal";
 
         // Teleporters
-        public const string TeleportInteriorLower          = "TeleportInteriorLower";
-        public const string TeleportInteriorUpper          = "TeleportInteriorUpper";
-        public const string TeleporterKeyOverlays          = "TeleporterKeyOverlays";
-        public const string TeleporterPowerSupply          = "TeleporterPowerSupply";
+        public const string TeleportInteriorLower = "TeleportInteriorLower";
+        public const string TeleportInteriorUpper = "TeleportInteriorUpper";
+        public const string TeleporterKeyOverlays = "TeleporterKeyOverlays";
+        public const string TeleporterPowerSupply = "TeleporterPowerSupply";
 
         // Electricity
-        public const string ElectricityNodeElectricity1    = "ElectricityNodeElectricity1";
-        public const string ElectricityNodeElectricity2    = "ElectricityNodeElectricity2";
-        public const string NodeLights                     = "NodeLights";
-        public const string GateLights                     = "GateLights";
-        public const string ElectricityOriginal            = "ElectricityOriginal";
+        public const string ElectricityNodeElectricity1 = "ElectricityNodeElectricity1";
+        public const string ElectricityNodeElectricity2 = "ElectricityNodeElectricity2";
+        public const string NodeLights = "NodeLights";
+        public const string GateLights = "GateLights";
+        public const string ElectricityOriginal = "ElectricityOriginal";
 
         // Odd sizes
-        public const string OllyBackground                 = "OllyBackground";
-        public const string OllyLower                      = "OllyLower";
-        public const string OllyUpper                      = "OllyUpper";
-        public const string OllyEyes                       = "OllyEyes";
-        public const string OllyOriginal                   = "OllyOriginal";
-        public const string BlobsShipHazardLights          = "BlobsShipHazardLights";
-        public const string BlobsShipHeadLights            = "BlobsShipHeadLights";
-        public const string BlankingTile                   = "BlankingTile";
-        public const string BreakableBridge                = "BreakableBridge";
-        public const string BreakableBridgeOriginal        = "BreakableBridgeOriginal";
+        public const string OllyBackground = "OllyBackground";
+        public const string OllyLower = "OllyLower";
+        public const string OllyUpper = "OllyUpper";
+        public const string OllyEyes = "OllyEyes";
+        public const string OllyOriginal = "OllyOriginal";
+        public const string BlobsShipHazardLights = "BlobsShipHazardLights";
+        public const string BlobsShipHeadLights = "BlobsShipHeadLights";
+        public const string BlankingTile = "BlankingTile";
+        public const string BreakableBridge = "BreakableBridge";
+        public const string BreakableBridgeOriginal = "BreakableBridgeOriginal";
 
         // Status panel
-        public const string StatusPanelGraphic             = "StatusPanelGraphic";
-        public const string EnergyBar                      = "EnergyBar";
-        public const string JumpBar                        = "JumpBar";
-        public const string AmmoBar                        = "AmmoBar";
-        public const string PanelNumbers                   = "PanelNumbers";
-        public const string StatusPanelShadow              = "StatusPanelShadow";
-        public const string StatusPanelOverlay             = "StatusPanelOverlay";
-        public const string ParticleSprite                 = "ParticleSprite";
-        public const string CollisionTile                  = "CollisionTile";
+        public const string StatusPanelGraphic = "StatusPanelGraphic";
+        public const string EnergyBar = "EnergyBar";
+        public const string JumpBar = "JumpBar";
+        public const string AmmoBar = "AmmoBar";
+        public const string PanelNumbers = "PanelNumbers";
+        public const string StatusPanelShadow = "StatusPanelShadow";
+        public const string StatusPanelOverlay = "StatusPanelOverlay";
+        public const string ParticleSprite = "ParticleSprite";
+        public const string CollisionTile = "CollisionTile";
     }
 
     /// <summary>
@@ -120,8 +120,8 @@ internal static class Assets
     /// </summary>
     internal static class Animations
     {
-        public const string BreakableBridges         = "BreakableBridges";
-        public const string TeleporterPadsOccupied   = "TeleporterPadsOccupied";
+        public const string BreakableBridges = "BreakableBridges";
+        public const string TeleporterPadsOccupied = "TeleporterPadsOccupied";
         public const string TeleporterPadsUnoccupied = "TeleporterPadsUnoccupied";
     }
 
@@ -130,21 +130,21 @@ internal static class Assets
     /// </summary>
     internal static class Effects
     {
-        public const string BeamMeUpSmall                 = "BeamMeUp_Small";
-        public const string FireTrail                     = "FireTrail";
-        public const string Fireball                      = "Fireball";
-        public const string NastyDies                     = "NastyDies";
-        public const string NastySplat                    = "NastySplat";
-        public const string BinaryEffect                  = "BinaryEffect";
-        public const string BasicSmokeSmall               = "BasicSmokeSmall";
-        public const string BasicSmokePlume               = "BasicSmokePlume";
-        public const string BasicSmokePlume2              = "BasicSmokePlume2";
-        public const string Sparks                        = "Sparks";
-        public const string CoreSparks                    = "CoreSparks";
+        public const string BeamMeUpSmall = "BeamMeUp_Small";
+        public const string FireTrail = "FireTrail";
+        public const string Fireball = "Fireball";
+        public const string NastyDies = "NastyDies";
+        public const string NastySplat = "NastySplat";
+        public const string BinaryEffect = "BinaryEffect";
+        public const string BasicSmokeSmall = "BasicSmokeSmall";
+        public const string BasicSmokePlume = "BasicSmokePlume";
+        public const string BasicSmokePlume2 = "BasicSmokePlume2";
+        public const string Sparks = "Sparks";
+        public const string CoreSparks = "CoreSparks";
         public const string CoreReplacementParticleEffect = "CoreReplacementParticleEffect";
-        public const string FireSparks                    = "FireSparks";
-        public const string ForceField                    = "ForceField";
-        public const string BlobFragmentExplosion         = "BlobFragmentExplosion";
+        public const string FireSparks = "FireSparks";
+        public const string ForceField = "ForceField";
+        public const string BlobFragmentExplosion = "BlobFragmentExplosion";
     }
 
     /// <summary>
@@ -152,39 +152,39 @@ internal static class Assets
     /// </summary>
     internal static class Sounds
     {
-        public const string ScanCode             = "ScanCode";
-        public const string AccessSuccess        = "AccessSuccess";
-        public const string AccessFailed         = "AccessFailed";
-        public const string MachineryBackground  = "MachineryBackground";
-        public const string Tunnel               = "Tunnel";
-        public const string TunnelSwish1         = "TunnelSwish1";
-        public const string TunnelSwish2         = "TunnelSwish2";
-        public const string NastyDeath           = "NastyDeath";
-        public const string BlobLazer            = "BlobLazer";
-        public const string ElectricityNodes     = "ElectricityNodes";
-        public const string BridgeBreak          = "BridgeBreak";
-        public const string BlobRun              = "BlobRun";
-        public const string BlobFalls            = "BlobFalls";
-        public const string TunnelLift           = "TunnelLift";
-        public const string NastyAppear          = "NastyAppear";
-        public const string Rumble               = "Rumble";
-        public const string BlobJumps            = "BlobJumps";
+        public const string ScanCode = "ScanCode";
+        public const string AccessSuccess = "AccessSuccess";
+        public const string AccessFailed = "AccessFailed";
+        public const string MachineryBackground = "MachineryBackground";
+        public const string Tunnel = "Tunnel";
+        public const string TunnelSwish1 = "TunnelSwish1";
+        public const string TunnelSwish2 = "TunnelSwish2";
+        public const string NastyDeath = "NastyDeath";
+        public const string BlobLazer = "BlobLazer";
+        public const string ElectricityNodes = "ElectricityNodes";
+        public const string BridgeBreak = "BridgeBreak";
+        public const string BlobRun = "BlobRun";
+        public const string BlobFalls = "BlobFalls";
+        public const string TunnelLift = "TunnelLift";
+        public const string NastyAppear = "NastyAppear";
+        public const string Rumble = "Rumble";
+        public const string BlobJumps = "BlobJumps";
         public const string BlobJumpsNoPlatforms = "BlobJumpsNoPlatforms";
-        public const string BlobPickUp           = "BlobPickUp";
-        public const string BlobOverloadAlarm    = "BlobOverloadAlarm";
-        public const string BlobShipFall         = "BlobShipFall";
-        public const string BlobShipExplodes     = "BlobShipExplodes";
-        public const string BlobExplodes         = "BlobExplodes";
-        public const string BlobPartClang        = "BlobPartClang";
-        public const string NastyAppears         = "NastyAppears";
-        public const string TeleportKeyClick     = "TeleportKeyClick";
-        public const string TeleportInvalidCode  = "TeleportInvalidCode";
-        public const string Teleport             = "Teleport";
-        public const string PowerUp1             = "PowerUp1";
-        public const string PowerUp2             = "PowerUp2";
-        public const string PowerUp3             = "PowerUp3";
-        public const string LifePowerUp          = "LifePowerUp";
-        public const string BackgroundSound1     = "BackgroundSound1";
+        public const string BlobPickUp = "BlobPickUp";
+        public const string BlobOverloadAlarm = "BlobOverloadAlarm";
+        public const string BlobShipFall = "BlobShipFall";
+        public const string BlobShipExplodes = "BlobShipExplodes";
+        public const string BlobExplodes = "BlobExplodes";
+        public const string BlobPartClang = "BlobPartClang";
+        public const string NastyAppears = "NastyAppears";
+        public const string TeleportKeyClick = "TeleportKeyClick";
+        public const string TeleportInvalidCode = "TeleportInvalidCode";
+        public const string Teleport = "Teleport";
+        public const string PowerUp1 = "PowerUp1";
+        public const string PowerUp2 = "PowerUp2";
+        public const string PowerUp3 = "PowerUp3";
+        public const string LifePowerUp = "LifePowerUp";
+        public const string BackgroundSound1 = "BackgroundSound1";
     }
 
     /// <summary>
@@ -210,7 +210,7 @@ internal static class Assets
     /// </summary>
     internal static class Fonts
     {
-        public const string ElektoraSmall  = @"Fonts\elektoraSmall";
+        public const string ElektoraSmall = @"Fonts\elektoraSmall";
         public const string ElektoraMedium = @"Fonts\elektoraMedium";
     }
 
@@ -228,7 +228,7 @@ internal static class Assets
         /// <summary>
         ///     The CRT scanline overlay, drawn by the engine over the finished picture.
         /// </summary>
-        public const string Scanlines            = @"Graphics\Scanlines2";
+        public const string Scanlines = @"Graphics\Scanlines2";
 
         /// <summary>
         ///     The boot screen and its progress bar, drawn by <c>LoadingScreen</c>. The 2 on the
@@ -236,10 +236,10 @@ internal static class Assets
         ///     than being a second layer drawn with it, and the same goes for
         ///     <see cref="Scanlines" />.
         /// </summary>
-        public const string BootScreen           = @"Graphics\BootScreen2";
+        public const string BootScreen = @"Graphics\BootScreen2";
 
         /// <inheritdoc cref="BootScreen" />
-        public const string BootProgress         = @"Graphics\BootProgress";
+        public const string BootProgress = @"Graphics\BootProgress";
 
         /// <inheritdoc cref="BootScreen" />
         public const string ProgressBarBackground = @"Graphics\ProgressBarBackground";
@@ -250,7 +250,7 @@ internal static class Assets
     /// </summary>
     internal static class Data
     {
-        public const string GameScreens         = "GameScreens";
+        public const string GameScreens = "GameScreens";
         public const string ScreenCollisionData = "ScreenCollisionData";
     }
 }

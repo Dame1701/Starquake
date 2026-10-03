@@ -29,6 +29,7 @@ internal class StartableGameComponentBase
         get => _percentComplete;
         private set => _percentComplete = value;
     }
+
     public event RaiseEngineComponentStatusChanged? OnGameComponentStatusChanged;
 
     private volatile int _percentComplete;

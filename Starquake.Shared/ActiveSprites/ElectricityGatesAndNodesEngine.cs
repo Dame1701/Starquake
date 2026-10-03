@@ -424,12 +424,12 @@ internal class ElectricityGatesAndNodesEngine
             SpriteCollection electricityNodeElectricity1 = _resources.GetSpriteCollection(Assets.Graphics.ElectricityNodeElectricity1);
             electricityNodeElectricity1.Begin(BlendState.Additive);
             electricityNodeElectricity1.DrawSprite(
-                    _electricityAnimation.CurrentFrame,
-                    nasty.XLocation,
-                    nasty.YLocation + ConveyerArcYOffset,
-                    Color.White,
-                    ConveyerArcScale,
-                    0);
+                _electricityAnimation.CurrentFrame,
+                nasty.XLocation,
+                nasty.YLocation + ConveyerArcYOffset,
+                Color.White,
+                ConveyerArcScale,
+                0);
             electricityNodeElectricity1.End();
         }
     }
