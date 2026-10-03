@@ -82,14 +82,14 @@ internal abstract class TunnelEntryEffect(
     private const double ArriveSlowdown = 1.4;
 
     /// <summary>
-    ///     How far each picture's inner edge fades out over, as a fraction of the play area, and so
-    ///     also how far it is drawn past where it ends. It does both jobs because they are the same
-    ///     job: the band that fades is the band that reaches across, so the two screens always
-    ///     overlap at the seam and one dissolves into the other rather than butting up against it.
+    ///     How far each picture's inner edge fades out over, as a fraction of the play area. A hard
+    ///     edge is what made the two screens read as two pictures; fading the edge each turns
+    ///     towards the other softens the join into a band rather than a line.
     ///     <para>
-    ///         A hard edge is what made the two read as two pictures. Raising this makes them bleed
-    ///         into each other over a wider band; lowering it back towards nothing puts the cut
-    ///         back.
+    ///         The band is inside the picture rather than beyond it. Reaching past the edge meant
+    ///         drawing the picture into a rectangle wider than itself, which stretched it sideways
+    ///         by a sixth for the whole transition and then snapped it back the moment the effect
+    ///         handed over - see <see cref="BleedNow" />.
     ///     </para>
     /// </summary>
     private const double BleedOfTheSeam = 0.16;
@@ -217,7 +217,7 @@ internal abstract class TunnelEntryEffect(
     /// </summary>
     public override bool Draw(SpriteBatch renderer, RenderViewPort renderViewPortToUse)
     {
-        var bleed = (int)(renderViewPortToUse.MasterWidth * BleedOfTheSeam);
+        var bleed = BleedNow(renderViewPortToUse.MasterWidth);
 
         // One shader over the whole batch, so both screens drain together and the seam between
         // them does not have a colour or a brightness boundary running down it.
@@ -232,14 +232,14 @@ internal abstract class TunnelEntryEffect(
 
         if (outgoingScreen.Picture is { } leaving && _outgoingWidth > 0)
         {
-            DrawBleedingInwards(renderer, leaving,
+            DrawFadingInwards(renderer, leaving,
                 PlacedAgainst(renderViewPortToUse, _outgoingWidth, SqueezesTowardsTheLeftEdge),
                 bleed, SqueezesTowardsTheLeftEdge);
         }
 
         if (_incomingWidth > 0)
         {
-            DrawBleedingInwards(renderer, renderViewPortToUse.RenderTarget,
+            DrawFadingInwards(renderer, renderViewPortToUse.RenderTarget,
                 PlacedAgainst(renderViewPortToUse, _incomingWidth, !SqueezesTowardsTheLeftEdge),
                 bleed, !SqueezesTowardsTheLeftEdge);
         }
@@ -306,44 +306,59 @@ internal abstract class TunnelEntryEffect(
     }
 
     /// <summary>
-    ///     Draws <paramref name="picture" /> across <paramref name="area" />, reaching
-    ///     <paramref name="bleed" /> pixels further towards the middle of the screen than the
-    ///     picture is wide and fading away across that reach.
+    ///     How wide the softening band is this frame. Widest in the middle of the crossing, where
+    ///     there is a seam to soften, and nothing at either end of it.
     /// </summary>
     /// <remarks>
-    ///     The reach is more of the picture rather than its edge column smeared outwards, so the
-    ///     band that fades is real content and the two screens dissolve into one another where
-    ///     their bands meet.
+    ///     Tapering it is what makes the hand-over invisible. On its last frame this effect draws
+    ///     the arriving screen and on the next frame the engine's own renderer draws the same
+    ///     screen, flat and full width; anything this is still doing to the picture at that moment
+    ///     is a step. At nought bleed the two draw the same thing, so there is nothing to see.
+    /// </remarks>
+    private int BleedNow(int master)
+        => (int)(master * BleedOfTheSeam * DrainedBy());
+
+    /// <summary>
+    ///     Draws <paramref name="picture" /> across <paramref name="area" /> with the edge facing
+    ///     the middle of the screen fading away over the last <paramref name="bleed" /> pixels of
+    ///     it.
+    /// </summary>
+    /// <remarks>
+    ///     The picture maps onto <paramref name="area" /> exactly, so it is never stretched - the
+    ///     fade is taken out of the picture's own width rather than added beyond it.
     /// </remarks>
     /// <param name="pinnedToTheLeftEdge">
     ///     Which edge the picture is held against, and so which of its edges is the one facing in.
     /// </param>
-    private static void DrawBleedingInwards(SpriteBatch renderer, Texture2D picture, Rectangle area, int bleed,
+    private static void DrawFadingInwards(SpriteBatch renderer, Texture2D picture, Rectangle area, int bleed,
         bool pinnedToTheLeftEdge)
     {
-        var reached = pinnedToTheLeftEdge
-            ? area with { Width = area.Width + bleed }
-            : area with { X = area.X - bleed, Width = area.Width + bleed };
+        bleed = Math.Min(bleed, area.Width);
 
-        var solid = reached.Width - bleed;
+        var solid = area.Width - bleed;
 
-        DrawSlice(renderer, picture, reached, pinnedToTheLeftEdge ? reached.Left : reached.Left + bleed, solid,
+        DrawSlice(renderer, picture, area, pinnedToTheLeftEdge ? area.Left : area.Left + bleed, solid,
             ColourLevels.Full);
+
+        if (bleed <= 0)
+        {
+            return;
+        }
 
         var strip = Math.Max(1, bleed / BleedStrips);
 
-        for (int step = 0; step < BleedStrips; step++)
+        for (int step = 0; step * strip < bleed; step++)
         {
             var into = step * strip;
 
             var x = pinnedToTheLeftEdge
-                ? reached.Right - bleed + into
-                : reached.Left + bleed - into - strip;
+                ? area.Right - bleed + into
+                : area.Left + bleed - into - strip;
 
-            // Falls off across the band, so the far end of it is all but gone.
+            // Falls off across the band, so the edge itself is all but gone.
             var fade = (int)(ColourLevels.Full * (1 - ((into + (strip / 2.0)) / bleed)));
 
-            DrawSlice(renderer, picture, reached, x, strip, fade);
+            DrawSlice(renderer, picture, area, x, strip, fade);
         }
     }
 
