@@ -43,7 +43,15 @@ internal class TestModeKeys(
     private const int TestModeLivesRestored = 5;
 
     /// <inheritdoc cref="TestModeLivesRestored" />
-    private const int TestModeScreenStepDelayMs = 100;
+    private const int TestModeScreenStepDelayFrames = LogicClock.FramesPerSecond / 10;
+
+    /// <summary>
+    ///     Frames still to wait before the keypad may step again. Counted down rather than slept
+    ///     through: this runs inside <c>GameHost</c>'s fixed-timestep loop, so blocking the thread
+    ///     here stops the whole game - draw and sound included - and then leaves the loop a backlog
+    ///     to fast-forward through.
+    /// </summary>
+    private int _framesUntilNextStep;
 
     public void Update()
     {
@@ -75,13 +83,20 @@ internal class TestModeKeys(
 
     private void StepBetweenScreens()
     {
+        if (_framesUntilNextStep > 0)
+        {
+            _framesUntilNextStep--;
+
+            return;
+        }
+
         if (input.KeyboardState.IsKeyDown(Keys.NumPad4))
         {
             if (gameScreens.ScreenNumber > 0)
             {
                 gameScreens.ScreenNumber--;
                 screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.KeepPicture());
-                Thread.Sleep(TestModeScreenStepDelayMs);
+                _framesUntilNextStep = TestModeScreenStepDelayFrames;
             }
         }
 
@@ -91,7 +106,7 @@ internal class TestModeKeys(
             {
                 gameScreens.ScreenNumber++;
                 screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.KeepPicture());
-                Thread.Sleep(TestModeScreenStepDelayMs);
+                _framesUntilNextStep = TestModeScreenStepDelayFrames;
             }
         }
 
@@ -101,7 +116,7 @@ internal class TestModeKeys(
             {
                 gameScreens.ScreenNumber -= WorldMap.ScreensAcross;
                 screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.KeepPicture());
-                Thread.Sleep(TestModeScreenStepDelayMs);
+                _framesUntilNextStep = TestModeScreenStepDelayFrames;
             }
         }
 
@@ -117,6 +132,6 @@ internal class TestModeKeys(
 
         gameScreens.ScreenNumber += WorldMap.ScreensAcross;
         screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.KeepPicture());
-        Thread.Sleep(TestModeScreenStepDelayMs);
+        _framesUntilNextStep = TestModeScreenStepDelayFrames;
     }
 }
