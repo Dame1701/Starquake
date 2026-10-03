@@ -67,7 +67,6 @@ internal class BitmapFont
         _fontSpriteBatch.DrawString(_font, text, new Vector2(xPos, yPos), ColourHelper.GetXna4Colour(colour.R, colour.G, colour.B, screenFade));
     }
 
-    // Write some text with a predefined leading
     public void WriteText(int xPos, int yPos, string text, int leading, Color colour, byte screenFade)
     {
         for (int a = 0; a < text.Length; a++)
@@ -129,7 +128,9 @@ internal class BitmapFont
 
     private Vector2 MeasureString(string text) => _font.MeasureString(text);
 
-    // Measure the string and take into account horizontal leading
+    /// <summary>
+    ///     How wide and tall a string will be once drawn, with the gap between characters counted in.
+    /// </summary>
     private Vector2 MeasureString(string text, int leading)
     {
         Vector2 temp = _font.MeasureString(text);

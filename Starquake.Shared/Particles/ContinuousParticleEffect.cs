@@ -33,7 +33,9 @@ internal class ContinuousParticleEffect(GraphicsSet graphicsSet, ParticleEffect 
 
     public event RaiseEffectComplete? ParticleEffectComplete;
 
-    // Starts an effect that is not triggered
+    /// <summary>
+    ///     Starts the effect emitting, and keeps it emitting until <see cref="Stop" />.
+    /// </summary>
     public void Start()
     {
         if (EffectActive)
@@ -47,7 +49,10 @@ internal class ContinuousParticleEffect(GraphicsSet graphicsSet, ParticleEffect 
             : 0;
     }
 
-    // Stops an effect that is not trigger nor has a duration
+    /// <summary>
+    ///     Stops it emitting. Particles already in the air are left to age out, which is what makes
+    ///     this different from clearing the effect.
+    /// </summary>
     public void Stop()
     {
         EffectActive = false;

@@ -325,13 +325,13 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
     /// </summary>
     private static Guid PlaySingleInstance(SoundEffectInstanceRecord record, float volume, bool looped)
     {
-        // If the sound is currently playing or paused, reset it
+        // A one-shot asked for again starts over from the beginning; a looped one is left alone, so
+        // asking for it every frame does not restart it every frame.
         if (!looped && record.SoundInstance.State is SoundState.Playing or SoundState.Paused)
         {
             record.SoundInstance.Stop(true);
         }
 
-        // Play the sound
         record.SoundInstance.Volume = volume;
 
         if (!looped || record.SoundInstance.State is SoundState.Stopped or SoundState.Paused)
@@ -348,7 +348,6 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
     /// </summary>
     private Guid PlayMultiInstance(string soundName, float volume)
     {
-        // Create a new instance, but maybe keep a list of all instances created so we can put a max seal of the number of instances per sound allowed
         if (!_multiInstanceSoundEffects.TryGetValue(soundName, out MultiInstanceSoundEffect? multiInstanceSound))
         {
             return Guid.Empty;
@@ -371,7 +370,6 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
         soundToPlay.SoundInstance.Volume = volume;
         soundToPlay.SoundInstance.Play();
 
-        // Return the ID of the multisound
         return soundToPlay.Id;
     }
 
@@ -393,7 +391,8 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
 
         soundToPlay.SoundInstance.Stop();
 
-        // Update the playtime - this should update the master list automatically since we have kept the same reference.
+        // The record is the one in the master list, so writing through this reference is what keeps
+        // the list's idea of the oldest instance up to date.
         // Environment.TickCount64 rather than DateTime.Now: this only ever answers which of two
         // instances started first, and a monotonic counter does that without a timezone conversion
         // and without a clock step being able to reorder them.
@@ -411,11 +410,9 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
             0,
             multiInstanceSound.KillOnScreenChange)
         {
-            // Set the ID of the sound we're playing
             Id = Guid.NewGuid()
         };
 
-        // Record the instance
         _multiInstanceSoundEffectInstances.Add(soundToPlay);
 
         return soundToPlay;

@@ -34,7 +34,10 @@ internal class ResourceManager : StartableGameComponentBase
     private readonly Dictionary<string, object> _resources;
     private readonly List<SoundDescription> _soundDescriptions;
 
-    // Sound Engine
+    /// <summary>
+    ///     The one sound engine, handed to everything that plays a sound through
+    ///     <see cref="GetSoundFxEngine" />.
+    /// </summary>
     private readonly SoundEffectEngine _soundEngine;
 
     private readonly List<SpriteDescription> _spriteDescriptions;

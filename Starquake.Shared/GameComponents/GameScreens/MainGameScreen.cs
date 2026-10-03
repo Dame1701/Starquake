@@ -193,7 +193,10 @@ internal class MainGameScreen : IGameScreen
 
     public void LoadContent() => _gameEngine.Nasties.LoadContent();
 
-    // Resets the game back to defaults
+    /// <summary>
+    ///     A new game: the clock, the score, the core, the planet and everything on it back to how
+    ///     they start.
+    /// </summary>
     public void Reset()
     {
         _framesPlayed = 0;

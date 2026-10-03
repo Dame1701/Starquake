@@ -85,7 +85,6 @@ internal class GameScreenCollection : IDynamicCollisionCells
         CollAreaWidth = collAreaWidth;
         CollAreaHeight = collAreaHeight;
 
-        // Load screen data
         _gameScreens = (GameScreenData[])_resources.GetDataResource(Assets.Data.GameScreens);
 
         LandingSite = LandingSite.FindIn(_gameScreens);
@@ -116,7 +115,6 @@ internal class GameScreenCollection : IDynamicCollisionCells
             (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.BasicSmokePlume2,
                 ParticleEffectType.Continual, null);
 
-        // Make this better in the future...?
         _tileWidth = TileMetrics.TileWidth;
         _tileHeight = TileMetrics.TileHeight;
     }
@@ -246,11 +244,12 @@ internal class GameScreenCollection : IDynamicCollisionCells
         return -1;
     }
 
-    public void Initialise()
-    {
-        // Setup Collision map, we're using 8 x 8 blocks for each collision area for improved accuracy
-        UpdateCollisionMap(true);
-    }
+    /// <summary>
+    ///     Builds the collision map for the first time. The cells are finer than the tiles -
+    ///     <see cref="TileMetrics.CollisionCellWidth" /> square - so a sprite can stand part way
+    ///     across a tile rather than snapping to it.
+    /// </summary>
+    public void Initialise() => UpdateCollisionMap(true);
 
     public int GetPercentageOfScreensVisited()
     {

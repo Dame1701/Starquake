@@ -36,7 +36,11 @@ internal abstract class ScreenEffectBase
 
     public abstract void Update();
 
-    // If this returns true the we want to use the default renderer
+    /// <summary>
+    ///     Composes the playfield this frame. Returns true to say the plain renderer should draw it
+    ///     as usual - an effect that only tints or shifts what is there hands it back that way, and
+    ///     one that draws the picture itself returns false.
+    /// </summary>
     public virtual bool Draw(SpriteBatch renderer, RenderViewPort renderViewPortToUse)
         => true;
 }

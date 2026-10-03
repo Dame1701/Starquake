@@ -79,7 +79,7 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
         if (_gotHighScore)
         {
             _playersHighScore = playersScore;
-            _playersHighScore.Name = "";
+            _playersHighScore.Name = string.Empty;
 
             _hiScoreList.AddScoreToTable(_playersHighScore);
         }

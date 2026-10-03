@@ -81,7 +81,6 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     private readonly List<Nasty> _coreAliens;
     private readonly IStandardParticleEffect _coreComputationEffect;
 
-    //private MercuryParticleEngine.MercuryParticleEffect coreVortex;
     private readonly IStandardParticleEffect _coreSparks;
 
     private readonly CoreElements _elements;

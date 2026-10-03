@@ -283,7 +283,6 @@ internal sealed class BlobWeapon
             {
                 if (_canFire)
                 {
-                    // Play sound
                     _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobLazer);
 
                     _fire.Launch(blob.X + FireOffset, blob.Y + FireOffset);

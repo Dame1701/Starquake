@@ -44,7 +44,7 @@ internal class AdditiveFade : ScreenEffectBase
         }
     }
 
-    // We're going to override the default renderer
+    /// <inheritdoc />
     public override bool Draw(SpriteBatch renderer, RenderViewPort renderViewPortToUse)
     {
         renderer.Begin(SpriteSortMode.Deferred, BlendState.Additive, null, null, null, null,
@@ -74,7 +74,7 @@ internal class AdditiveFade : ScreenEffectBase
 
         renderer.End();
 
-        // No need to run the default renderer
+        // The fade drew the picture itself, so the plain renderer has nothing to add.
         return false;
     }
 

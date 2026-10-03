@@ -94,8 +94,9 @@ internal static class ContentManifest
 
     private static void BlobGraphics(ResourceManager resources)
     {
-        //resources.AddSpriteResource(gameEngine.GraphicsSet.Names.BlobSprites, "Graphics\\blobNew", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        //resources.AddSpriteResource(gameEngine.GraphicsSet.Names.BlobSprites, "Graphics\\blobNewAlt", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        // The third of three redraws of Blob. blobNew and blobNewAlt are the earlier two; both are
+        // still in Content and still built by Content.mgcb, so either can be put back by changing
+        // this one line.
         resources.AddSpriteResource(ResourceNames.Redrawn.BlobSprites, "Graphics\\blobNewAlt2", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
         resources.AddSpriteResource(ResourceNames.Original.BlobSprites, "Graphics\\BlobOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
 

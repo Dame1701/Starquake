@@ -158,7 +158,10 @@ internal class ElectricityGatesAndNodesEngine
         _electricityAnimation2.AnimateForwards = false;
     }
 
-    // Turn off electricity on all nodes and gates
+    /// <summary>
+    ///     Turns the electricity off on every node and gate, and starts their timers again from the
+    ///     longer interval - which is what gives the player a moment after a death.
+    /// </summary>
     public void Reset()
     {
         if (_secondLayerTiles != null)

@@ -152,7 +152,7 @@ internal class BlobAccessBoothAnim
 
     public void Draw()
     {
-        // Draw Blob animation
+
         SpriteCollection blobSprites = _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites);
         blobSprites.Begin(BlendState.AlphaBlend);
         blobSprites.DrawSprite(_blobFrame, _blobX, 192);

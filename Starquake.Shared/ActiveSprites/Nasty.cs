@@ -139,7 +139,6 @@ internal class Nasty
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsSet _graphicsSet;
 
-    // Animation
     private readonly Animation _nastyAnim;
     private readonly IStandardParticleEffect _nastyDies;
 
@@ -153,30 +152,26 @@ internal class Nasty
 
     private int _birthColourLevel;
 
-    // Birth stuff
     private int _birthFadeLevel;
     private float _birthRotateSpeed = BirthStartRotateSpeed;
 
     private float _birthScale;
     private int _birthTimer;
 
-    // Counters
     private int _conceptionWaitCounter;
 
     private bool _deathAnticlockwise;
 
-    // Death stuff
     private int _deathFadeLevel = ColourLevels.Full;
     private float _deathScale = 1f;
 
-    // Behaviour
-
+    /// <summary>
+    ///     How long a dead nasty has been lying there. Every nasty regenerates after a random wait -
+    ///     the comment that used to sit here said they "usually disappear for good but there is a
+    ///     small chance they'll regenerate", which is the opposite of what the code does.
+    /// </summary>
     private int _nastyDeadPauseCounter;
-    //bool attractedToBlobFlag;
 
-
-    // When shot monsters usually disappear for good but there is a small chance they'll regenerate
-    // Tech stuff
     private SpriteCollection _nastySprite;
 
     private NastyType _nastyType;
@@ -188,8 +183,6 @@ internal class Nasty
     ///     as it was: the clones belong to the nasty, and a swap resets a birth or a death anyway.
     /// </summary>
     private float _rotation;
-
-    // Position
 
     public Nasty(
         ResourceManager resources,
@@ -533,14 +526,12 @@ internal class Nasty
             _birthScale = 1.0f;
         }
 
-
         if (_birthFadeLevel < ColourLevels.Full)
         {
             _birthFadeLevel += (int)(ColourLevels.Full /
                                      ((double)BirthPeriod /
                                       BirthColourFadeHalf)); // We only have half the time to do the colour fade in 
         }
-
 
         // The colour and the slowing of the spin both start half way through, so a nasty arrives
         // grey and spinning and settles into its own colours.

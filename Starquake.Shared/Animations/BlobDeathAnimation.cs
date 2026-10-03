@@ -14,7 +14,11 @@ namespace Starquake.Animations;
 
 internal class BlobDeathAnimation
 {
-    // The six fragment sprites Blob comes apart into. Deliberately not a straight run
+    /// <summary>
+    ///     The six fragment sprites Blob comes apart into. Deliberately not a straight run: the
+    ///     repeated 1 and the gap before 5 are the artwork as it is, not a mistake to be tidied into
+    ///     0 to 5.
+    /// </summary>
     private static readonly int[] FragmentSpriteNumbers = [0, 1, 1, 2, 3, 5];
 
     private readonly Animation _blobDeathParticlesOriginal;

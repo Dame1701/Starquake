@@ -80,7 +80,11 @@ internal class BouncingParticle
 
     public bool Triggered => _particleBounce.Triggered;
 
-    // True while the emitter still holds particles, which outlives the bounce itself
+    /// <summary>
+    ///     True while the emitter still holds particles, which outlives the bounce itself - so the
+    ///     last few released can fade out under their own modifiers instead of vanishing with the
+    ///     fragment.
+    /// </summary>
     public bool HasActiveParticles => Fireball.Effect.ActiveParticlesCount > 0;
 
     public required IPositionalTriggerParticleEffect SparkEffect { get; init; }
@@ -158,7 +162,8 @@ internal class BouncingParticle
     {
         bool movingPositive = requestedStep > 0;
 
-        // Ensure we don't move more than the size of the collision tilemap
+        // Never more than its own size in one step, or it could pass clean through a wall between
+        // one frame and the next.
         int step = movingPositive
             ? Math.Min(requestedStep, ParticleSize)
             : Math.Max(requestedStep, -ParticleSize);
@@ -169,7 +174,8 @@ internal class BouncingParticle
                 ? Direction.Right
                 : Direction.Left;
 
-        // Absolute value used here to convert the negative to positive for col routine
+        // CheckCollision wants a distance rather than a signed step; the direction is already in the
+        // argument above it.
         int speed = _gameScreens.CheckCollision(
             direction,
             XPos,
@@ -186,7 +192,7 @@ internal class BouncingParticle
 
         if (!movingPositive)
         {
-            // Convert back to negative number
+            // CheckCollision answers a distance, so the sign the step came in with is put back.
             speed = -speed;
         }
 
@@ -195,7 +201,8 @@ internal class BouncingParticle
             ? _gameScreens.ScreenHeight
             : _gameScreens.ScreenWidth;
 
-        // Keep the parts within the screen bounds, makes for a better effect
+        // Bounced off the screen edges as well as the scenery, which keeps the fragments on screen
+        // where they can be seen.
         if (movingPositive && position > screenSize - ParticleSize)
         {
             BounceBackTo(vertical, screenSize - ParticleSize);

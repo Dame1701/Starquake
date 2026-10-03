@@ -55,7 +55,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     private readonly ContentManager _contentMgr;
     public readonly ResourceManager ContentResourceManager;
 
-    //public MercuryParticleEngine ParticleEngine;
     private readonly GraphicsDeviceManager _graphicsDeviceMgr;
 
     /// <summary>
@@ -91,7 +90,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     public readonly ScreenDirectory ScreenDirectory = new();
 
-
     /// <summary>
     ///     The boot screen. Built before anything else, because it is what is on screen while
     ///     everything else is being loaded.
@@ -104,28 +102,32 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     private GlobalHotkeys _hotkeys;
 
     /// <summary>
-    ///     The debug keys, in a debug build. Null in a release one, which never builds it.
+    ///     The game itself, once content has loaded. Null until then, which is what
+    ///     <see cref="Game" /> answers for.
     /// </summary>
     private RunningGame? _game;
 
+    /// <summary>
+    ///     The debug keys, in a debug build. Null in a release one, which never builds it.
+    /// </summary>
     private TestModeKeys? _testModeKeys;
 
     private bool _disposed;
 
-
-    // Game Sequences
-
-
     private bool _particleTestTrigger;
 
-
+    /// <summary>
+    ///     The CRT scanline overlay, drawn over the finished picture by
+    ///     <see cref="DrawScanlines" />.
+    /// </summary>
     private SpriteCollection _scanlines;
 
     private ScreenEffectEngine _screenEffectEngine;
 
-
-    // Tunnel lift animations
-
+    /// <summary>
+    ///     The panel above the playfield. Drawn and updated only while
+    ///     <see cref="ScreenDirectory.InPlay" />.
+    /// </summary>
     public StatusPanel BlobStatusPanel;
 
     /// <summary>
@@ -135,19 +137,25 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     public PlayerStats Stats;
 
-    // Central objects
+    /// <summary>
+    ///     The nine elements the core is missing, and what Blob has done about them.
+    /// </summary>
     public CoreElements Elements;
 
-    // Font 1
+    /// <summary>
+    ///     The two bitmap fonts everything that writes text draws through.
+    /// </summary>
     public BitmapFont Font1;
 
-    // Font 2
+    /// <inheritdoc cref="Font1" />
     public BitmapFont Font2;
 
-    // Test area
+    /// <summary>
+    ///     Draws plain filled rectangles, for the screens that frame something with a block of
+    ///     colour rather than a sprite.
+    /// </summary>
     public Shapes ShapeDrawer;
 
-    // Scaling
     public GameEngine(
         GraphicsDeviceManager graphics,
         ContentManager content,
@@ -156,7 +164,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         Action quitGame)
     {
         Input = input;
-        // Setup graphics device and content management
         _graphicsDeviceMgr = graphics;
         _contentMgr = content;
         _window = window;
@@ -169,9 +176,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
 
         ContentResourceManager = new ResourceManager(content, graphics, _graphicsSet);
         ContentResourceManager.OnGameComponentStatusChanged += ContentResourceManager_OnGameComponentStatusChanged;
-
-
-        // Starting screen will be the title screen later.....
 
         DefineContent();
         Initialise();
@@ -321,11 +325,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     }
 
     private void Player_OnBlobActionRaised(BlobAction action, object? data)
-    {
-        // inform status panel that something has happened
-        Stats.BlobHasPerformedAnAction(action, data);
-
-    }
+        => Stats.BlobHasPerformedAnAction(action, data);
 
     [MemberNotNull(nameof(BlobStatusPanel), nameof(Stats), nameof(Elements), nameof(_hotkeys),
         nameof(ShapeDrawer), nameof(Session), nameof(_screenEffectEngine))]
@@ -349,10 +349,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             ArtworkSwapped,
             _quitGame);
 
-        // Core Elements
         Elements = new CoreElements(Stats, ContentResourceManager, _graphicsSet, RandomNumberGenerator);
-
-        // Test area
         ShapeDrawer = new Shapes(_graphicsDeviceMgr.GraphicsDevice);
 
         // Built here rather than with its view ports, so that anything constructed from here on -
@@ -883,7 +880,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             _loadingScreen.Draw(PercentComplete, FullyLoadedPercent);
         }
 
-        // Screen effects compose over whatever was just drawn
         _screenEffectEngine.Draw();
 
         DrawScanlines();

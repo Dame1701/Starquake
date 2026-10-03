@@ -119,7 +119,10 @@ internal class ScreenRenderer
     private readonly ResourceManager _resources;
     private readonly GameScreenData[] _screens;
 
-    // olly
+    /// <summary>
+    ///     Where Olly's eyes are looking. He is the face in the backdrop, and his eyes follow Blob
+    ///     about the screen.
+    /// </summary>
     private int _ollyEyesX;
     private int _ollyEyesY;
 

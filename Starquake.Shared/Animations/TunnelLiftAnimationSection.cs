@@ -51,7 +51,7 @@ internal class TunnelLiftAnimationSection
                 else
                 {
                     _lightDirection = 0;
-                    //DelayCounter = DelayStart;
+
                 }
             }
         }

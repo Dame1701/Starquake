@@ -113,8 +113,8 @@ internal class GlobalHotkeys(
 
         if (screenDirectory.InPlay && screenDirectory.Current != GameScreenType.Teleporter)
         {
-            // Automatically pause the game after switching to or from fullscreen so the player
-            // doesn't die unexpectedly
+            // Paused after switching to or from fullscreen, so the player does not die while the
+            // window is still resizing.
             session.Paused = true;
         }
 
