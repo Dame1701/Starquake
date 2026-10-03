@@ -81,6 +81,24 @@ internal class TestModeKeys(
         }
     }
 
+    /// <summary>
+    ///     The keypad walks the map: NumPad4 and NumPad6 step a screen left and right, NumPad8 and
+    ///     NumPad2 a row up and down. Held keys combine, so 4 and 8 together step diagonally.
+    /// </summary>
+    /// <remarks>
+    ///     The keys are resolved into one destination and applied once. Applying them one at a time
+    ///     walked the map through an intermediate screen, and arriving somewhere is not free here -
+    ///     <c>PerformPostScreenChangeActions</c> marks a screen visited and scores it, and hands over
+    ///     to the core screen if that is where it has landed. Stepping left and up from 200 passed
+    ///     through 199 to reach 183, so it scored a screen nobody had been on and handed over to the
+    ///     core on the way past.
+    ///     <para>
+    ///         Working in rows and columns rather than in the flat screen index is what keeps a step
+    ///         on an edge from wrapping onto the row above or below. The index alone cannot tell the
+    ///         difference: screen 16 is the first of row 1, and one to the left of it is 15, which is
+    ///         the last of row 0 rather than anywhere next to it.
+    ///     </para>
+    /// </remarks>
     private void StepBetweenScreens()
     {
         if (_framesUntilNextStep > 0)
@@ -90,47 +108,37 @@ internal class TestModeKeys(
             return;
         }
 
-        if (input.KeyboardState.IsKeyDown(Keys.NumPad4))
+        int column = gameScreens.ScreenNumber % WorldMap.ScreensAcross;
+        int row = gameScreens.ScreenNumber / WorldMap.ScreensAcross;
+
+        if (input.KeyboardState.IsKeyDown(Keys.NumPad4) && column > 0)
         {
-            if (gameScreens.ScreenNumber > 0)
-            {
-                gameScreens.ScreenNumber--;
-                screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.KeepPicture());
-                _framesUntilNextStep = TestModeScreenStepDelayFrames;
-            }
+            column--;
         }
 
-        if (input.KeyboardState.IsKeyDown(Keys.NumPad6))
+        if (input.KeyboardState.IsKeyDown(Keys.NumPad6) && column < WorldMap.ScreensAcross - 1)
         {
-            if (gameScreens.ScreenNumber < WorldMap.LastScreenNumber)
-            {
-                gameScreens.ScreenNumber++;
-                screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.KeepPicture());
-                _framesUntilNextStep = TestModeScreenStepDelayFrames;
-            }
+            column++;
         }
 
-        if (input.KeyboardState.IsKeyDown(Keys.NumPad8))
+        if (input.KeyboardState.IsKeyDown(Keys.NumPad8) && row > 0)
         {
-            if (gameScreens.ScreenNumber - WorldMap.ScreensAcross >= 0)
-            {
-                gameScreens.ScreenNumber -= WorldMap.ScreensAcross;
-                screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.KeepPicture());
-                _framesUntilNextStep = TestModeScreenStepDelayFrames;
-            }
+            row--;
         }
 
-        if (!input.KeyboardState.IsKeyDown(Keys.NumPad2))
+        if (input.KeyboardState.IsKeyDown(Keys.NumPad2) && row < WorldMap.ScreensDown - 1)
+        {
+            row++;
+        }
+
+        int destination = row * WorldMap.ScreensAcross + column;
+
+        if (destination == gameScreens.ScreenNumber)
         {
             return;
         }
 
-        if (gameScreens.ScreenNumber + WorldMap.ScreensAcross > WorldMap.LastScreenNumber)
-        {
-            return;
-        }
-
-        gameScreens.ScreenNumber += WorldMap.ScreensAcross;
+        gameScreens.ScreenNumber = destination;
         screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.MainGame, new ScreenChange.KeepPicture());
         _framesUntilNextStep = TestModeScreenStepDelayFrames;
     }
