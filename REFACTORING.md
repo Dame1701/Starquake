@@ -246,8 +246,8 @@ clear as it is going to get.
 - `LayJumpPlatformOrJump` still contains the empty `if (temp == -1) { }` and the comment about
   `-1` sitting above a test for `-1000`. Left exactly as found, per the plan. *Fixed in `d31561b`.*
 - `DrawOverloadFlare` and `LayJumpPlatformOrJump` both have a local called `temp`. Worth renaming,
-  not in a move commit. *Half done: `LayJumpPlatformOrJump`'s is `newYPos`; the other is still
-  `temp`.*
+  not in a move commit. *Done: `LayJumpPlatformOrJump`'s is `newYPos` and `DrawOverloadFlare` no
+  longer has one either.*
 
 ---
 
@@ -542,9 +542,13 @@ the reasoning is wanted. **Three are still open.**
   `NastyHelpers.ApplyNastyColours` has a `///` saying so. Could be deliberate, could be a paste;
   nobody has asked the question of whoever drew them.
 
-A fifth is half open. **Three methods still have a local called `temp`** - `Blob.DrawOverloadFlare`,
-`Blob.AccessInventory` and `Nasty.GetRandomNastyType` - though
-`LayJumpPlatformOrJump`'s is now `newYPos`.
+A fifth is half open. **Two methods still have a local called `temp`** - `ParticleEngine.AddEffect`
+and `HiScore.AdventureScoreString`. Neither was ever in this list, and none of the four it did name
+has one any more: `LayJumpPlatformOrJump`'s is `newYPos`, and `Blob.DrawOverloadFlare`,
+`Blob.AccessInventory` and `Nasty.GetRandomNastyType` have all since been renamed by other work.
+The count had been carried forward rather than re-measured, so it was both too high and pointing at
+the wrong files - worth a mention, because it is the one item on this list where that could happen
+without anybody noticing.
 
 ### Taken
 
