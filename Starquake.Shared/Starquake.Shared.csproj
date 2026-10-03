@@ -91,7 +91,20 @@
           other writing the same .xnb files. The built content reaches each head's output
           through the project reference.
         -->
-        <MonoGameContentReference Include="Content\Content.mgcb" />
+        <!--
+          Shaders are the exception to "every project builds on every platform". MonoGame has no
+          shader compiler of its own: on Windows it uses the DirectX one that is already there,
+          and on macOS and Linux it runs that same Windows compiler under Wine. Wine covers the
+          DesktopGL build, which is what the Mac and Linux heads use, and does not cover the
+          WindowsDX one - so building the Windows platform's content on a Mac fails on the first
+          .fx it meets.
+
+          So the Windows content is built on Windows. Everywhere else that target framework still
+          compiles - EnableWindowsTargeting sees to that - it simply ships no content, which costs
+          nothing because the Windows head cannot run on a Mac anyway. See BUILD.md.
+        -->
+        <MonoGameContentReference Include="Content\Content.mgcb"
+                                  Condition="'$(TargetFramework)' != 'net9.0-windows' or '$(OS)' == 'Windows_NT'" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">

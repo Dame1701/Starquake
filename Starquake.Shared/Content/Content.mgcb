@@ -1328,6 +1328,12 @@
 /processor:PassThroughProcessor
 /build:ParticleEffects/Sparks.xml
 
+#begin Shaders/Desaturate.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/Desaturate.fx
+
 #begin Sounds/AccessFailed.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor

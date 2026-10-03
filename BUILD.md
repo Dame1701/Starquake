@@ -71,29 +71,63 @@ It was called `Temp/` until a folder of that name proved to be one confident `rm
 gone. If you edit art, edit it here and copy the result into `Content/`; nothing automates that,
 which is why the two have drifted apart in 17 places.
 
-### Shaders need Wine, which is why none of them is built
+### Shaders need Wine on macOS and Linux
 
-Adding one to `Content.mgcb` and building it on macOS fails with
+MonoGame has no shader compiler of its own. On Windows `EffectProcessor` uses the DirectX HLSL
+compiler that is already on the machine; on macOS and Linux it runs that same Windows compiler
+under Wine, and wants `MGFXC_WINE_PATH` pointing at a prefix MonoGame builds for the purpose.
+Without one the content build fails outright - not just that asset - with
 
 ```
 System.PlatformNotSupportedException: Wine is not installed on this system.
    at MonoGame.Effect.Compiler.WineHelper..cctor()
 ```
 
-MonoGame 3.8 has no shader compiler of its own. `EffectProcessor` shells out to the DirectX
-HLSL compiler, which is a Windows executable, so on macOS and Linux it runs it under Wine and
-needs `MGFXC_WINE_PATH` pointing at a prefix that MonoGame's `mgfxc_wine_setup.sh` builds.
-Nothing here has one.
+**Homebrew is not the way in.** All three `wine` casks were disabled on 2026-09-01 for failing
+Homebrew's Gatekeeper audit, so `brew install --cask wine-stable` refuses. MonoGame's own macOS
+setup page sidesteps Homebrew entirely and fetches the same Gcenx build directly, which is what
+works:
 
-It fails the whole content build rather than that one asset, so the first `.fx` added to the
-pipeline takes the game down with it until Wine is installed. It is also not a one-machine
-problem: CI builds on Ubuntu, macOS and Windows, and only the Windows runner would manage it
-without the workflow installing Wine first.
+```sh
+curl -L -o wine.tar.xz \
+  "https://github.com/Gcenx/macOS_Wine_builds/releases/download/11.0_1/wine-stable-11.0_1-osx64.tar.xz"
+tar -xJf wine.tar.xz
+mv "Wine Stable.app" ~/Applications/          # /Applications and sudo are not needed
+export PATH="$HOME/Applications/Wine Stable.app/Contents/Resources/wine/bin:$PATH"
+curl -sL https://monogame.net/downloads/net9_mgfxc_wine_setup.sh | bash
+```
 
-`Desaturate.fx` is the shader this was found with - a working desaturation for the tunnel
-transition, `ps_2_0` so it fits the `Reach` profile with room to spare. It is kept here with
-the other three, unbuilt, because the obstacle is the toolchain rather than anything about the
-shader.
+Four notes on that, each of which cost something to find:
+
+- **Use the `net9_` script, not the one on MonoGame's `develop` branch.** The older one tests for
+  a `wine64` binary, and Wine 11 ships only `wine`; it exits at line 6. The `net9_` script falls
+  back to `wine` and symlinks a wrapper.
+- **The quarantine flag never appears.** MonoGame's docs run `xattr -dr com.apple.quarantine`,
+  and it is harmless, but a file fetched with `curl` is marked `com.apple.provenance` instead and
+  was never blocked.
+- **MonoGame's step 7 is written with `>` rather than `>>`**, which truncates `~/.zprofile`
+  instead of adding to it. Append.
+- It wants `7z` (`brew install p7zip`) and pulls down about 450MB: Wine, a Windows .NET SDK for
+  the prefix, and a Firefox 62 installer that `d3dcompiler_47.dll` is extracted out of.
+
+### Shaders are built for DesktopGL only on a Mac
+
+Wine covers the DesktopGL content build and does **not** cover the WindowsDX one, which fails
+with an unexplained `Unexpected error compiling`. So `Content.mgcb` is referenced conditionally:
+the `net9.0-windows` target framework builds content only on Windows.
+
+That target framework still compiles everywhere - `EnableWindowsTargeting` sees to that - it
+just ships no content off a Mac, which costs nothing because the Windows head cannot run there.
+**Build the Windows head's content on Windows.** There it needs no Wine at all.
+
+`Desaturate.fx` is the first shader the game actually builds: a luminance desaturation for the
+tunnel transition, `ps_2_0` so it fits the `Reach` profile with room to spare. The other three
+in `Assets/Shaders/` are still unbuilt and unreferenced.
+
+If the toolchain ever becomes a liability - Rosetta is on notice, and this Wine is an x86_64
+binary running a x86_64 Windows compiler - MGCB's `/copy:` directive takes a prebuilt `.xnb`
+verbatim. Compiling the shader once and committing the result would drop the dependency
+entirely, at the cost of one `.xnb` per platform.
 
 ## CI
 
