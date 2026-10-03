@@ -343,13 +343,28 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
         // them out again the moment anything else on this screen rebuilt the map.
         _gameScreens.ScreenNumber = _gameScreens.CoreSite.ScreenNumber;
 
+        PlaceCoreGuardians(0);
+    }
+
+    /// <summary>
+    ///     Stands the guardians from <paramref name="firstToPlace" /> up to
+    ///     <see cref="_coreAlienCount" /> somewhere the room allows, and brings them to life. Clamps
+    ///     the count if the room offers fewer places than that.
+    /// </summary>
+    /// <param name="firstToPlace">
+    ///     The first guardian that needs placing. Nought on arriving in the room, so all of them are
+    ///     put down; the old count when a replacement has just raised it, so the ones already walking
+    ///     about are left where they are rather than jumping to fresh squares.
+    /// </param>
+    private void PlaceCoreGuardians(int firstToPlace)
+    {
         List<Point> potentialLocations = _gameScreens.GetNastyPotentialLocations();
         if (potentialLocations.Count < _coreAlienCount)
         {
             _coreAlienCount = potentialLocations.Count;
         }
 
-        for (int a = 0; a < _coreAlienCount; a++)
+        for (int a = firstToPlace; a < _coreAlienCount; a++)
         {
             _coreAliens[a].XPos = potentialLocations[a].X;
             _coreAliens[a].YPos = potentialLocations[a].Y;
@@ -363,13 +378,21 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
         if (_elementsToReplace.Count > 0)
         {
             _elements.ReplaceElement(_elementsToReplace.Dequeue());
+
+            return;
         }
-        else
-        {
-            _entryTime = 0;
-            _replacingElements = false;
-            CalculateCoreAlienCount();
-        }
+
+        _entryTime = 0;
+        _replacingElements = false;
+
+        // Replacing an element can earn another guardian, and one that has never been placed is
+        // still sitting at the origin with nothing to move it - a core guardian is drawn whatever
+        // its state, so it showed as a guardian stuck in the top left corner until the room was
+        // left and entered again, which is what did place it.
+        int guardiansAlreadyPlaced = _coreAlienCount;
+
+        CalculateCoreAlienCount();
+        PlaceCoreGuardians(guardiansAlreadyPlaced);
     }
 
     private void CalculateCoreAlienCount()
