@@ -21,52 +21,45 @@ internal class HiScores
             Score = 55250,
             AdventureScore = 36
         },
-
         new()
         {
-            Name = "Lucy",
+            Name = "Jacqui",
             Score = 40350,
             AdventureScore = 30
         },
-
         new()
         {
             Name = "Chris",
             Score = 27150,
             AdventureScore = 26
         },
-
         new()
         {
-            Name = "Swainy",
+            Name = "Rowan",
             Score = 20750,
             AdventureScore = 20
         },
-
         new()
         {
             Name = "Matt",
             Score = 16500,
             AdventureScore = 15
         },
-
         new()
         {
-            Name = "Glenn",
+            Name = "Pete",
             Score = 10250,
             AdventureScore = 11
         },
-
         new()
         {
             Name = "Andy",
             Score = 5250,
             AdventureScore = 5
         },
-
         new()
         {
-            Name = "Nick",
+            Name = "Maui",
             Score = 2150,
             AdventureScore = 3
         }
