@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+using Starquake.Display;
 using Starquake.Structure;
 
 namespace Starquake.Engines.ScreenEffects;
@@ -9,7 +10,8 @@ namespace Starquake.Engines.ScreenEffects;
 /// <inheritdoc cref="TunnelEntryEffect" />
 internal class LeftTunnelEntryEffect : TunnelEntryEffect
 {
-    public LeftTunnelEntryEffect()
+    public LeftTunnelEntryEffect(ScreenSnapshot outgoingScreen, PresentationSettings presentation)
+        : base(outgoingScreen, presentation)
     {
         ScreenEffectType = ScreenEffectType.LeftTunnelEntry;
     }

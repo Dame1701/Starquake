@@ -34,8 +34,12 @@ internal class ScreenEffectEngine
         _screenEffects = new List<ScreenEffectBase>();
 
         // Add all of the screen effects we can find - do this eventually through reflection but for now - manually!
-        _screenEffects.Add(new LeftTunnelEntryEffect());
-        _screenEffects.Add(new RightTunnelEntryEffect());
+        // One snapshot between the two tunnel directions: only one effect is ever active, so they
+        // cannot both be mid-transition and want a picture of their own.
+        var outgoingScreen = new ScreenSnapshot(graphics);
+
+        _screenEffects.Add(new LeftTunnelEntryEffect(outgoingScreen, presentation));
+        _screenEffects.Add(new RightTunnelEntryEffect(outgoingScreen, presentation));
         _screenEffects.Add(new AdditiveFade(presentation));
 
         _renderer = new SpriteBatch(_graphicsDeviceManager.GraphicsDevice);
