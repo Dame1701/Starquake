@@ -389,3 +389,8 @@ MigrationBackup/
 # MGCB writes a build report next to Content.mgcb on every content build. It is output, not
 # a source, and the copies under Content/obj are already ignored by the obj rule above.
 .mgstats
+
+# The screen editor keeps one generation of backup beside the map it saves, so that a save
+# that goes wrong costs a rename to put right rather than a trip here. That is a safety net
+# on the disk rather than a second copy of the planet to track - see ScreenDataFile.Save.
+*.bak
