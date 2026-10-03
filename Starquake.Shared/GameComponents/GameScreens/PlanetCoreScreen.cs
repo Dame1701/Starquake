@@ -19,8 +19,6 @@ namespace Starquake.GameComponents.GameScreens;
 
 internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 {
-
-
     /// <summary>
     ///     The most aliens the core room ever holds, which is also how many it holds once Blob
     ///     has nearly finished repairing it - the fuller the core, the busier its guards.
@@ -172,10 +170,13 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
         {
             _blankingTilesOpacity = ColourLevels.Full;
             _replacingElements = false;
+
+            // The count has to be settled before EnterCore, because that is what places and clamps
+            // that many guardians. Called the other way round it positioned the previous visit's
+            // number of them and left the rest of this visit's wherever they last stood.
+            CalculateCoreAlienCount();
             EnterCore();
             _justEnteredCore = false;
-
-            CalculateCoreAlienCount();
 
             _elementsToReplace.Clear();
 
@@ -298,7 +299,8 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     }
 
     /// <summary>
-    ///     Puts the core screen and its guardians in place for when he has just arrived.
+    ///     Puts the core screen and its guardians in place for when he has just arrived. Places
+    ///     <see cref="_coreAlienCount" /> of them, so <see cref="CalculateCoreAlienCount" /> runs first.
     /// </summary>
     private void EnterCore()
     {
@@ -344,19 +346,19 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
         {
             _coreAlienCount = 0;
         }
-        else if (elementsLeftToReplace <= OneAlienFrom && elementsLeftToReplace > TwoAliensFrom)
+        else if (elementsLeftToReplace > TwoAliensFrom)
         {
             _coreAlienCount = 1;
         }
-        else if (elementsLeftToReplace <= TwoAliensFrom && elementsLeftToReplace > ThreeAliensFrom)
+        else if (elementsLeftToReplace > ThreeAliensFrom)
         {
             _coreAlienCount = 2;
         }
-        else if (elementsLeftToReplace <= ThreeAliensFrom && elementsLeftToReplace > FourAliensFrom)
+        else if (elementsLeftToReplace > FourAliensFrom)
         {
             _coreAlienCount = 3;
         }
-        else if (elementsLeftToReplace < FourAliensFrom)
+        else
         {
             _coreAlienCount = MaxCoreAliens;
         }
