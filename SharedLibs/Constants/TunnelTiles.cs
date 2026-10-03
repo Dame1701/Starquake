@@ -98,4 +98,25 @@ public static class TunnelTiles
 
     /// <inheritdoc cref="RightMouth1" />
     public const int RightMouth10 = 439;
+
+    /// <summary>
+    ///     Whether <paramref name="tileImage" /> is one of the ten left-hand mouths - the tiles that
+    ///     step the screen number down when Blob walks into one.
+    /// </summary>
+    /// <remarks>
+    ///     The run is contiguous and the two directions alternate from an even first mouth, which is
+    ///     what <see cref="FirstMouth" />, <see cref="LastMouth" /> and <see cref="MouthStride" />
+    ///     are for. Those three were already here and the question was still being asked by naming
+    ///     all ten, four times over - twice in <c>Blob</c> and twice in <c>ScreenRenderer</c>.
+    /// </remarks>
+    public static bool IsLeftMouth(int tileImage)
+        => tileImage is >= FirstMouth and <= LastMouth && tileImage % MouthStride == 0;
+
+    /// <summary>
+    ///     Whether <paramref name="tileImage" /> is one of the ten right-hand mouths - the tiles that
+    ///     step the screen number up.
+    /// </summary>
+    /// <inheritdoc cref="IsLeftMouth" />
+    public static bool IsRightMouth(int tileImage)
+        => tileImage is >= FirstMouth and <= LastMouth && tileImage % MouthStride != 0;
 }

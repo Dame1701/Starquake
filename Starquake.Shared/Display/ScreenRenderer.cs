@@ -457,32 +457,12 @@ internal class ScreenRenderer
             return (ShadowSprite, 1);
         }
 
-        if (tileImage is
-            TunnelTiles.LeftMouth1 or
-            TunnelTiles.LeftMouth2 or
-            TunnelTiles.LeftMouth3 or
-            TunnelTiles.LeftMouth4 or
-            TunnelTiles.LeftMouth5 or
-            TunnelTiles.LeftMouth6 or
-            TunnelTiles.LeftMouth7 or
-            TunnelTiles.LeftMouth8 or
-            TunnelTiles.LeftMouth9 or
-            TunnelTiles.LeftMouth10)
+        if (TunnelTiles.IsLeftMouth(tileImage))
         {
             return (LeftTunnelMouthSprite, 0);
         }
 
-        if (tileImage is
-            TunnelTiles.RightMouth1 or
-            TunnelTiles.RightMouth2 or
-            TunnelTiles.RightMouth3 or
-            TunnelTiles.RightMouth4 or
-            TunnelTiles.RightMouth5 or
-            TunnelTiles.RightMouth6 or
-            TunnelTiles.RightMouth7 or
-            TunnelTiles.RightMouth8 or
-            TunnelTiles.RightMouth9 or
-            TunnelTiles.RightMouth10)
+        if (TunnelTiles.IsRightMouth(tileImage))
         {
             return (RightTunnelMouthSprite, 0);
         }
