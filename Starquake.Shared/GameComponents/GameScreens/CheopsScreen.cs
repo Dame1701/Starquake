@@ -67,11 +67,21 @@ internal class CheopsScreen : IGameScreen
     /// </summary>
     private const int ScreenReadNotWaiting = -1;
 
+    /// <summary>
+    ///     How many digits the pyramid asks for, and so how many scanners it shows. The world
+    ///     generator draws pyramid codes from 10 to 99, which is the same two.
+    /// </summary>
+    private const int DigitsInCode = 2;
+
+    /// <summary>
+    ///     Which slot each scanner reads, and whether the pyramid is satisfied. Replaced whole by
+    ///     <see cref="CheckInventoryAgainstCode" /> rather than written into a digit at a time.
+    /// </summary>
+    private AccessCodeScan _scan = new([], false);
+
     private int _resultMessageFade;
-    private readonly int[] _accessCode;
-    private readonly int[] _inventorySlotToScan;
+    private int[] _accessCode = [];
     private readonly KeyScanner[] _accessCodes;
-    private bool _codeSucceeded;
     private int _screenReadWaitFrames = ScreenReadNotWaiting;
     private bool _elementSelectionMode;
     private bool _soundPlayed;
@@ -105,13 +115,7 @@ internal class CheopsScreen : IGameScreen
         _shapeDrawer = shapeDrawer;
         _input = input;
 
-        _accessCode = new int[2]
-        {
-            -1,
-            -1
-        };
-        _accessCodes = new KeyScanner[2];
-        _inventorySlotToScan = new int[2];
+        _accessCodes = new KeyScanner[DigitsInCode];
 
         for (int a = 0; a < _accessCodes.Length; a++)
         {
@@ -132,7 +136,7 @@ internal class CheopsScreen : IGameScreen
         CheckInventoryAgainstCode();
         ChooseItemToSwap();
 
-        if (_codeSucceeded)
+        if (_scan.Accepted)
         {
             ChooseElementsOnOffer();
         }
@@ -142,54 +146,18 @@ internal class CheopsScreen : IGameScreen
     ///     The code is stored on the screen as a string of digits, one per element the pyramid wants.
     /// </summary>
     private void ReadAccessCode()
-    {
-        if (_gameScreens.CurrentGameScreenData.CheopsAccessCode != null)
-        {
-            for (int a = 0; a < _accessCode.Length; a++)
-            {
-                _accessCode[a] = int.Parse(_gameScreens.CurrentGameScreenData.CheopsAccessCode.Substring(a, 1));
-            }
-        }
-    }
+        => _accessCode = AccessCodeLock.Digits(_gameScreens.CurrentGameScreenData.CheopsAccessCode, DigitsInCode);
 
     /// <summary>
     ///     Scan Blob's inventory to see if he is carrying the right stuff.
     /// </summary>
     private void CheckInventoryAgainstCode()
     {
-        _codeSucceeded = true;
+        _scan = AccessCodeLock.Scan(_blob.BlobInventory, _accessCode);
 
-        for (int b = 0; b < _accessCode.Length; b++)
+        for (int digit = 0; digit < _accessCodes.Length; digit++)
         {
-            bool match = false;
-
-            int a;
-            for (a = 0; a < _blob.BlobInventory.Length; a++)
-            {
-                if ((int)_blob.BlobInventory[a] - 10 == _accessCode[b] ||
-                    _blob.BlobInventory[a] == Collectables.AccessCard)
-                {
-                    match = true;
-                    break;
-                }
-            }
-
-            if (match)
-            {
-                _inventorySlotToScan[b] = a;
-            }
-            else
-            {
-                _inventorySlotToScan[b] = -1;
-            }
-
-            // if we don't have a match the shows over!
-            if (!match)
-            {
-                _codeSucceeded = match;
-            }
-
-            _accessCodes[b].Reset(match);
+            _accessCodes[digit].Reset(_scan.SlotToScan[digit] != AccessCodeLock.NoSlot);
         }
     }
 
@@ -293,7 +261,7 @@ internal class CheopsScreen : IGameScreen
             if (!_accessCodes[0].Scanned)
             {
                 _accessCodes[0].StartScan();
-                _statusPanel.ScanSlot(_inventorySlotToScan[0]);
+                _statusPanel.ScanSlot(_scan.SlotToScan[0]);
             }
 
             // Follow with the subsequent ones...
@@ -301,10 +269,10 @@ internal class CheopsScreen : IGameScreen
             {
                 if (_accessCodes[a].Scanned)
                 {
-                    if (a < 1 && !_accessCodes[a + 1].Scanned)
+                    if (a < DigitsInCode - 1 && !_accessCodes[a + 1].Scanned)
                     {
                         _accessCodes[a + 1].StartScan();
-                        _statusPanel.ScanSlot(_inventorySlotToScan[a + 1]);
+                        _statusPanel.ScanSlot(_scan.SlotToScan[a + 1]);
                     }
                 }
                 _accessCodes[a].Update();
@@ -319,7 +287,7 @@ internal class CheopsScreen : IGameScreen
 
             if (_screenReadWaitFrames > ScreenReadWaitFrames)
             {
-                if (_codeSucceeded) // move into selection mode
+                if (_scan.Accepted) // move into selection mode
                 {
                     _elementSelectionMode = true;
                 }
@@ -390,7 +358,7 @@ internal class CheopsScreen : IGameScreen
         }
 
         _resources.GetSoundFxEngine()
-            .PlaySound(_codeSucceeded ? Assets.Sounds.AccessSuccess : Assets.Sounds.AccessFailed, 1f, false);
+            .PlaySound(_scan.Accepted ? Assets.Sounds.AccessSuccess : Assets.Sounds.AccessFailed, 1f, false);
 
         _soundPlayed = true;
         _screenReadWaitFrames = 0;
@@ -442,15 +410,15 @@ internal class CheopsScreen : IGameScreen
             _font.WriteText(366, 200, "CHEOPS KEY CODE", 2, Color.White, ColourLevels.Full);
             _font.End();
 
-            for (int a = 0; a < 2; a++)
+            for (int a = 0; a < DigitsInCode; a++)
             {
-                _accessCodes[a].Draw(_accessCode[a] + 10, 420 + a * 128, 260);
+                _accessCodes[a].Draw(_accessCode[a] + AccessCodeLock.FirstDigitPickup, 420 + a * 128, 260);
             }
 
             // Draw the result
             if (_accessCodes[1].Scanned)
             {
-                if (_codeSucceeded)
+                if (_scan.Accepted)
                 {
                     _shapeDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
                     _shapeDrawer.FillRectangle(new Rectangle(187, 498, 40, 40), new Color(0, _resultMessageFade, 0));

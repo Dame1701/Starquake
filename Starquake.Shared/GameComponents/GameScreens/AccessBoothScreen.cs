@@ -19,7 +19,7 @@ internal class AccessBoothScreen : IGameScreen
 {
 
 
-    private readonly int[] _accessCode;
+    private int[] _accessCode = [];
 
     private readonly KeyScanner[] _accessCodes;
     private readonly Blob _blob;
@@ -29,7 +29,6 @@ internal class AccessBoothScreen : IGameScreen
     private readonly BitmapFont _font;
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsSet _graphicsSet;
-    private readonly int[] _inventorySlotToScan;
     private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
     private readonly ScreenDirectory _screenDirectory;
@@ -47,6 +46,12 @@ internal class AccessBoothScreen : IGameScreen
     ///     What <see cref="_screenReadWaitFrames" /> holds before the pause has started.
     /// </summary>
     private const int ScreenReadNotWaiting = -1;
+
+    /// <summary>
+    ///     How many digits a booth door asks for, and so how many scanners it shows. The world
+    ///     generator draws booth codes from 100 to 999, which is the same three.
+    /// </summary>
+    private const int DigitsInCode = 3;
 
     private int _resultMessageFade;
     private int _screenReadWaitFrames = ScreenReadNotWaiting;
@@ -73,14 +78,7 @@ internal class AccessBoothScreen : IGameScreen
         _screenDirectory = screenDirectory;
         _shapeDrawer = shapeDrawer;
 
-        _accessCode = new int[3]
-        {
-            -1,
-            -1,
-            -1
-        };
-        _accessCodes = new KeyScanner[3];
-        _inventorySlotToScan = new int[3];
+        _accessCodes = new KeyScanner[DigitsInCode];
 
         for (int a = 0; a < _accessCodes.Length; a++)
         {
@@ -99,7 +97,13 @@ internal class AccessBoothScreen : IGameScreen
     ///     one screen with a real answer, and it passes it on explicitly as the post-change parameter
     ///     rather than leaving anyone to read it off the property.
     /// </summary>
-    private bool Success { get; set; }
+    private bool Success => _scan.Accepted;
+
+    /// <summary>
+    ///     Which slot each scanner reads, and whether the booth is satisfied. Replaced whole by
+    ///     <see cref="CheckInventoryAgainstCode" /> rather than written into a digit at a time.
+    /// </summary>
+    private AccessCodeScan _scan = new([], false);
 
     public void Update(GameTime gameTime)
     {
@@ -112,7 +116,7 @@ internal class AccessBoothScreen : IGameScreen
         if (!_accessCodes[0].Scanned)
         {
             _accessCodes[0].StartScan();
-            _statusPanel.ScanSlot(_inventorySlotToScan[0]);
+            _statusPanel.ScanSlot(_scan.SlotToScan[0]);
         }
 
         // Follow with the subsequent ones...
@@ -120,10 +124,10 @@ internal class AccessBoothScreen : IGameScreen
         {
             if (_accessCodes[a].Scanned)
             {
-                if (a < 2 && !_accessCodes[a + 1].Scanned)
+                if (a < DigitsInCode - 1 && !_accessCodes[a + 1].Scanned)
                 {
                     _accessCodes[a + 1].StartScan();
-                    _statusPanel.ScanSlot(_inventorySlotToScan[a + 1]);
+                    _statusPanel.ScanSlot(_scan.SlotToScan[a + 1]);
                 }
             }
             _accessCodes[a].Update();
@@ -186,9 +190,9 @@ internal class AccessBoothScreen : IGameScreen
 
         DrawDoorHighlights();
 
-        for (int a = 0; a < 3; a++)
+        for (int a = 0; a < DigitsInCode; a++)
         {
-            _accessCodes[a].Draw(_accessCode[a] + 10, 348 + a * 128, 364);
+            _accessCodes[a].Draw(_accessCode[a] + AccessCodeLock.FirstDigitPickup, 348 + a * 128, 364);
         }
 
         if (_accessCodes[2].Scanned)
@@ -293,54 +297,18 @@ internal class AccessBoothScreen : IGameScreen
     ///     The code is stored on the screen as a string of digits, one per scanner.
     /// </summary>
     private void ReadAccessCode()
-    {
-        if (_gameScreens.CurrentGameScreenData.AccessCode != null)
-        {
-            for (int a = 0; a < _accessCode.Length; a++)
-            {
-                _accessCode[a] = int.Parse(_gameScreens.CurrentGameScreenData.AccessCode.Substring(a, 1));
-            }
-        }
-    }
+        => _accessCode = AccessCodeLock.Digits(_gameScreens.CurrentGameScreenData.AccessCode, DigitsInCode);
 
     /// <summary>
     ///     Scan Blob's inventory to see if he is carrying the right stuff.
     /// </summary>
     private void CheckInventoryAgainstCode()
     {
-        Success = true;
+        _scan = AccessCodeLock.Scan(_blob.BlobInventory, _accessCode);
 
-        for (int b = 0; b < _accessCode.Length; b++)
+        for (int digit = 0; digit < _accessCodes.Length; digit++)
         {
-            bool match = false;
-
-            int a;
-            for (a = 0; a < _blob.BlobInventory.Length; a++)
-            {
-                if ((int)_blob.BlobInventory[a] - 10 == _accessCode[b] ||
-                    _blob.BlobInventory[a] == Collectables.AccessCard)
-                {
-                    match = true;
-                    break;
-                }
-            }
-
-            if (match)
-            {
-                _inventorySlotToScan[b] = a;
-            }
-            else
-            {
-                _inventorySlotToScan[b] = -1;
-            }
-
-            // if we don't have a match the shows over!
-            if (!match)
-            {
-                Success = match;
-            }
-
-            _accessCodes[b].Reset(match);
+            _accessCodes[digit].Reset(_scan.SlotToScan[digit] != AccessCodeLock.NoSlot);
         }
     }
 
