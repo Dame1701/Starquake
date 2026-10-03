@@ -63,10 +63,26 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
     ///     <para>
     ///         The band is not a black box - <see cref="BleedOfTheSeam" /> reaches into it from both
     ///         sides, so the screens melt into the dark rather than ending at it, and only the
-    ///         middle of it is truly black. Raising this makes the tunnel longer and darker.
+    ///         middle of it is truly black. That is also why this has to be large: the two fades
+    ///         eat twice <see cref="BleedOfTheSeam" /> out of whatever this opens, so a tunnel only
+    ///         half the play area wide left a quarter of it actually dark, which read as a soft
+    ///         join rather than as a passage.
     ///     </para>
     /// </summary>
-    private const double DarkOfTheTunnel = 0.5;
+    private const double DarkOfTheTunnel = 0.85;
+
+    /// <summary>
+    ///     How much the tunnel lingers at its widest, as the power its opening curve is raised to.
+    ///     One is the bare parabola, which touches its peak for an instant and spends most of the
+    ///     transition barely open; below one flattens the top so the screen stays dark across the
+    ///     middle of the crossing, which is what makes it read as a length of tunnel rather than a
+    ///     dip in brightness.
+    ///     <para>
+    ///         It is not a hold. The curve is still moving every frame at every value of this - it
+    ///         is the shape of the opening that changes, not whether it is changing.
+    ///     </para>
+    /// </summary>
+    private const double DarkSpread = 0.45;
 
     /// <summary>
     ///     How far each picture's inner edge fades out over, as a fraction of the play area, and so
@@ -79,7 +95,7 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
     ///         back.
     ///     </para>
     /// </summary>
-    private const double BleedOfTheSeam = 0.16;
+    private const double BleedOfTheSeam = 0.09;
 
     /// <summary>
     ///     How many strips the fading band is drawn in. <c>SpriteBatch</c> tints a whole quad at
@@ -262,9 +278,8 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
     ///     <see cref="DarkOfTheTunnel" /> as the seam passes the middle.
     /// </summary>
     /// <remarks>
-    ///     A parabola, so it opens and closes smoothly and is never held at its widest. Raising it
-    ///     to a power below one would flatten the top and keep the screen dark for longer, at the
-    ///     cost of the dark arriving and leaving more abruptly.
+    ///     A parabola flattened by <see cref="DarkSpread" />, so it opens and closes smoothly and
+    ///     is never held at its widest while still staying dark across the middle of the crossing.
     ///     <para>
     ///         Clamped because <see cref="SeamCrossing" /> deliberately leaves the nought-to-one
     ///         range at both ends to stretch and overshoot. There is no tunnel out there - the
@@ -275,7 +290,7 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
     {
         var crossing = Math.Clamp(crossedOver, 0, 1);
 
-        return 4 * crossing * (1 - crossing);
+        return Math.Pow(4 * crossing * (1 - crossing), DarkSpread);
     }
 
     /// <summary>
