@@ -34,6 +34,31 @@ internal class IntroSequence
     /// </summary>
     private const float FullTurn = 360f;
 
+    /// <summary>
+    ///     How fast the tumble slows once the ship has hit, in degrees per logic frame off the
+    ///     rotation speed. It divides the speed the ship enters at, so the spin stops dead rather
+    ///     than reversing.
+    /// </summary>
+    private const float TumbleSlowingStep = 2;
+
+    /// <summary>
+    ///     How fast the crash darkens into the caption, and how fast the caption itself comes up
+    ///     and goes back down, in colour levels per logic frame.
+    /// </summary>
+    private const int CrashFadeOutStep = 2;
+
+    /// <inheritdoc cref="CrashFadeOutStep" />
+    private const int CaptionFadeStep = 3;
+
+    /// <summary>
+    ///     How hard the ground shakes when the ship hits, and how fast that dies away. The shake is
+    ///     a random offset of up to this many pixels in each direction.
+    /// </summary>
+    private const float RumbleFrom = 100;
+
+    /// <inheritdoc cref="RumbleFrom" />
+    private const float RumbleFadeStep = 0.5f;
+
     private readonly BlobDeathAnimation _blobKiller;
 
 
@@ -60,7 +85,7 @@ internal class IntroSequence
     private int _preFadeOutPause = 50;
     private int _preFadeOutPauseCounter;
 
-    private double _rumbleAmount = 100;
+    private float _rumbleAmount = RumbleFrom;
     private Guid _rumbleSound = Guid.Empty;
 
     private int _sequenceFrameCount;
@@ -125,7 +150,7 @@ internal class IntroSequence
     {
         MainScreen.ScreenFade = ColourLevels.Full;
 
-        _rumbleAmount = 100;
+        _rumbleAmount = RumbleFrom;
 
         _preFadeOutPause = 50;
         _preFadeOutPauseCounter = 0;
@@ -257,27 +282,17 @@ internal class IntroSequence
     private void UpdatePreFadePause(GameTime gameTime)
     {
         _presentation.ScreenClearColour = Color.Black;
-        if (_shipRotationSpeed > 0)
-        {
-            _shipRotationSpeed = _shipRotationSpeed - 2;
-        }
+        _shipRotationSpeed = Ramp.Down(_shipRotationSpeed, TumbleSlowingStep, 0f);
 
         if (_preFadeOutPauseCounter >= _preFadeOutPause)
         {
-            if (MainScreen.ScreenFade > 0)
+            if (MainScreen.ScreenFade > ColourLevels.None)
             {
-                if (MainScreen.ScreenFade - 2 < 0)
-                {
-                    MainScreen.ScreenFade = 0;
-                }
-                else
-                {
-                    MainScreen.ScreenFade = MainScreen.ScreenFade - 2;
-                }
+                MainScreen.ScreenFade = Ramp.Down(MainScreen.ScreenFade, CrashFadeOutStep, ColourLevels.None);
             }
             else
             {
-                MainScreen.ResetScreenFade(2);
+                MainScreen.ResetScreenFade(CrashFadeOutStep);
                 MainScreen.ScreenFade = 0;
                 SequenceStage = IntroSequenceStage.CaptionFadeUp;
             }
@@ -292,7 +307,7 @@ internal class IntroSequence
             int xShakeOffset = _randomNumberGenerator.Next(0, (int)_rumbleAmount);
             int yShakeOffset = _randomNumberGenerator.Next(0, (int)_rumbleAmount);
 
-            _rumbleAmount = _rumbleAmount - 0.5;
+            _rumbleAmount = Ramp.Down(_rumbleAmount, RumbleFadeStep, 0f);
 
             _screenEffects.MoveViewPort(ViewPorts.GameArea, xShakeOffset, yShakeOffset);
 
@@ -307,14 +322,7 @@ internal class IntroSequence
     {
         if (MainScreen.ScreenFade < ColourLevels.Full)
         {
-            if (MainScreen.ScreenFade + 3 < ColourLevels.Full)
-            {
-                MainScreen.ScreenFade = MainScreen.ScreenFade + 3;
-            }
-            else
-            {
-                MainScreen.ScreenFade = ColourLevels.Full;
-            }
+            MainScreen.ScreenFade = Ramp.Up(MainScreen.ScreenFade, CaptionFadeStep, ColourLevels.Full);
         }
         else
         {
@@ -324,16 +332,9 @@ internal class IntroSequence
 
     private void UpdateCaptionFadeDown()
     {
-        if (MainScreen.ScreenFade > 0)
+        if (MainScreen.ScreenFade > ColourLevels.None)
         {
-            if (MainScreen.ScreenFade - 3 > 0)
-            {
-                MainScreen.ScreenFade = MainScreen.ScreenFade - 3;
-            }
-            else
-            {
-                MainScreen.ScreenFade = 0;
-            }
+            MainScreen.ScreenFade = Ramp.Down(MainScreen.ScreenFade, CaptionFadeStep, ColourLevels.None);
         }
         else
         {
