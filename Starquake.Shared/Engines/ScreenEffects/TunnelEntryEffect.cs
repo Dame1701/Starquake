@@ -12,10 +12,9 @@ namespace Starquake.Engines.ScreenEffects;
 
 /// <summary>
 ///     Blob squeezing through a tunnel into the next screen. The screen he is leaving is squashed
-///     horizontally towards the edge he leaves by until nothing is left, while the screen he is
-///     arriving at opens from the opposite edge - so for a moment both are on screen as slivers
-///     with the dark of the tunnel between them, and it reads as being pulled through a gap rather
-///     than as a wipe across one.
+///     towards the edge he leaves by while the screen he is arriving at swells from the opposite
+///     edge, the two meeting at a seam that is never a line - each bleeds into the other across it,
+///     so one picture becomes the other without ever cutting.
 ///     <para>
 ///         Which edge the picture collapses towards is the only difference between going left and
 ///         going right, so both directions share this and say nothing but which way they go. They
@@ -24,10 +23,10 @@ namespace Starquake.Engines.ScreenEffects;
 ///     </para>
 ///     <para>
 ///         The numbers below are the feel of it, and they are the ones to turn. What matters is
-///         that the motion is not linear: the squeeze accelerates, so the picture is snatched away
-///         rather than slid away; there is a beat where little but the tunnel is showing, so it has
-///         a length; and coming out is slower than going in, so the new screen settles rather than
-///         snapping.
+///         that the motion is one unbroken move: the seam is driven by a single eased clock, so
+///         there is no frame where anything is held still. It starts by stretching the screen being
+///         left past full width, whips across, overshoots and settles - and leaving is quicker than
+///         arriving, so the new screen beds in rather than snapping into place.
 ///     </para>
 /// </summary>
 /// <remarks>
@@ -35,55 +34,31 @@ namespace Starquake.Engines.ScreenEffects;
 ///     port, because by the time this is drawing, the game has already moved on: <c>Blob</c> steps
 ///     the screen number, repositions himself at the far tunnel mouth and only then starts the
 ///     effect. Before the snapshot existed the squeeze was showing the destination being snatched
-///     away, so the same screen arrived twice - about a third of a second of the wrong picture,
-///     and the opposite of what the first paragraph above has always claimed.
+///     away, so the same screen arrived twice.
 /// </remarks>
 internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, PresentationSettings presentation)
     : ScreenEffectBase
 {
     /// <summary>
-    ///     How long the arrival is held at <see cref="SliverOfLight" /> before it opens out - the
-    ///     time spent inside the tunnel. Without it the picture turns around the instant it
-    ///     vanishes, and the two halves read as one bounce instead of a passage.
-    /// </summary>
-    private const int FramesInTheDark = 7;
-
-    /// <summary>
-    ///     How much longer emerging takes than being squeezed. Equal times feel mechanical; arriving
-    ///     more slowly than you left reads as settling into the new screen.
-    /// </summary>
-    private const double EmergeSlowdown = 1.4;
-
-    /// <summary>
-    ///     How much of the squeeze the arriving screen is already showing for, as a fraction of it.
-    ///     This is the overlap that makes the transition a merge rather than a swap: for these last
-    ///     few frames the screen being left and the screen being entered are both on display, each
-    ///     a sliver against its own edge, with the tunnel dark between them.
+    ///     How much longer arriving takes than leaving. Equal halves feel mechanical; coming in
+    ///     more slowly than you went out reads as settling into the new screen.
     ///     <para>
-    ///         It wants to stay small. The squeeze is heavily back-loaded - the picture is still at
-    ///         full width three fifths of the way through it - so anything much past a fifth starts
-    ///         the arrival while the screen being left is still large, and the two read as two
-    ///         pictures rather than as one passage.
+    ///         This is where the seam reaches the middle rather than two separate timings - the
+    ///         whole transition is one clock now, and this is the point along it at which the two
+    ///         screens are the same width.
     ///     </para>
     /// </summary>
-    private const double OverlapOfTheSqueeze = 0.35;
-
-    /// <summary>
-    ///     How wide the arriving screen sits while the tunnel is being crossed, as a fraction of the
-    ///     play area - the light at the end of it. A true black here would be a cut; a sliver of the
-    ///     place being arrived at is what gives the beat somewhere to go.
-    /// </summary>
-    private const double SliverOfLight = 0.12;
+    private const double ArriveSlowdown = 1.4;
 
     /// <summary>
     ///     How far each picture's inner edge fades out over, as a fraction of the play area, and so
     ///     also how far it is drawn past where it ends. It does both jobs because they are the same
-    ///     job: the band that fades is the band that reaches across, so where the two are close
-    ///     enough their fades sit on top of each other and one dissolves into the other, and where
-    ///     they are not they melt into the dark of the tunnel instead of stopping at a hard line.
+    ///     job: the band that fades is the band that reaches across, so the two screens always
+    ///     overlap at the seam and one dissolves into the other rather than butting up against it.
     ///     <para>
     ///         A hard edge is what made the two read as two pictures. Raising this makes them bleed
-    ///         into each other for longer; lowering it back towards nothing puts the cut back.
+    ///         into each other over a wider band; lowering it back towards nothing puts the cut
+    ///         back.
     ///     </para>
     /// </summary>
     private const double BleedOfTheSeam = 0.16;
@@ -98,8 +73,8 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
     /// <summary>
     ///     How hard the picture stretches before it is pulled through and after it lands, as a
     ///     fraction of the play area. Squashing alone reads as being crushed; stretching first, and
-    ///     overshooting on the way back, reads as being accelerated - the trailing edge lags going
-    ///     in, and the leading edge overshoots and settles coming out.
+    ///     overshooting on the way back, reads as being accelerated - the screen being left lags
+    ///     before it goes, and the one arriving overshoots and settles.
     ///     <para>
     ///         There is room for this. The play area is 1024 wide inside a 1280 composition, so
     ///         there are 128 pixels of margin either side of it; a tenth of the play area is 102,
@@ -113,27 +88,31 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
     ///     How far into the arrival Blob gets control back, as a fraction of it. He is let go
     ///     before the transition has finished, so the last of the overshoot settles while he is
     ///     already walking - but not while the picture is still narrow, because the play area is
-    ///     drawn into a rectangle of the current width and his movement would be squashed along with
-    ///     it. At two fifths the picture is back to within a per cent of full width, which is the
+    ///     drawn into a rectangle of the current width and his movement would be squashed along
+    ///     with it. At two fifths of the arrival the picture is back to full width, which is the
     ///     earliest it reads honestly.
     /// </summary>
     private const double HeldThroughArrival = 0.4;
 
-    private int _emergeFrames;
-    private int _emergeStart;
     private int _frame;
     private int _incomingWidth;
     private int _outgoingWidth;
     private int _releaseFrame;
-    private int _sliverStart;
-    private int _squeezeFrames;
+
+    /// <summary>
+    ///     Where along the transition the two screens are the same width - the moment the seam is
+    ///     in the middle. Before it the screen being left is the larger.
+    /// </summary>
+    private double _seamReachesTheMiddle;
+
+    private int _transitionFrames;
 
     /// <inheritdoc />
     public override bool HoldsGameplay => !EffectFinished && _frame < _releaseFrame;
 
     /// <summary>
-    ///     Whether the picture collapses towards the left edge as Blob leaves, and so expands
-    ///     from the right edge as it arrives. The other direction is the mirror of it.
+    ///     Whether the picture collapses towards the left edge as Blob leaves, and so the next one
+    ///     swells from the right edge as it arrives. The other direction is the mirror of it.
     /// </summary>
     protected abstract bool SqueezesTowardsTheLeftEdge { get; }
 
@@ -146,12 +125,15 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
         outgoingScreen.Capture(effectSurface.RenderTarget);
 
         // Kept in terms of the speed the callers ask for, so the pace is still theirs to set: the
-        // squeeze takes as long as it would have at that many pixels a frame, and the rest follows.
-        _squeezeFrames = Math.Max(1, effectSurface.MasterWidth / Math.Max(1, EffectSpeed));
-        _emergeFrames = Math.Max(1, (int)(_squeezeFrames * EmergeSlowdown));
-        _sliverStart = _squeezeFrames - (int)(_squeezeFrames * OverlapOfTheSqueeze);
-        _emergeStart = _squeezeFrames + FramesInTheDark;
-        _releaseFrame = _emergeStart + (int)(_emergeFrames * HeldThroughArrival);
+        // leaving half takes as long as it would have at that many pixels a frame, and the arriving
+        // half is the slower one.
+        var leavingFrames = Math.Max(1, effectSurface.MasterWidth / Math.Max(1, EffectSpeed));
+        var arrivingFrames = Math.Max(1, (int)(leavingFrames * ArriveSlowdown));
+
+        _transitionFrames = leavingFrames + arrivingFrames;
+        _seamReachesTheMiddle = leavingFrames / (double)_transitionFrames;
+        _releaseFrame = (int)(_transitionFrames *
+                              (_seamReachesTheMiddle + ((1 - _seamReachesTheMiddle) * HeldThroughArrival)));
         _frame = 0;
 
         _outgoingWidth = effectSurface.MasterWidth;
@@ -167,15 +149,13 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
 
         _frame++;
 
-        int master = EffectSurface.MasterWidth;
+        var master = EffectSurface.MasterWidth;
 
-        _outgoingWidth = WidthOfTheScreenBeingLeft(master);
-        _incomingWidth = WidthOfTheScreenBeingEntered(master);
-
-        if (_frame > _emergeStart + _emergeFrames)
+        if (_frame >= _transitionFrames)
         {
             // Landed. Set both ends exactly rather than clamping one and leaving the other,
             // which is what left the play area sixteen pixels adrift before.
+            _outgoingWidth = 0;
             _incomingWidth = master;
             EffectSurface.Width = master;
             EffectSurface.XPos = EffectSurface.MasterXPos;
@@ -183,6 +163,14 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
 
             return;
         }
+
+        // One clock, two complementary widths: whatever the screen being left gives up, the one
+        // arriving takes. There is no frame in which neither is moving, which is what makes the
+        // transition read as a single move rather than as two halves with a wait between them.
+        var crossedOver = SeamCrossing(_frame / (double)_transitionFrames);
+
+        _outgoingWidth = Math.Max(0, (int)(master * (1 - crossedOver)));
+        _incomingWidth = Math.Max(0, (int)(master * crossedOver));
 
         // The view port still describes the live picture, which is the one arriving, so anything
         // reading its width while the transition runs sees what is actually being drawn into.
@@ -192,9 +180,9 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
 
     /// <summary>
     ///     Draws both screens: the one being left, from the snapshot, against the edge it is
-    ///     collapsing towards, and the one being entered, live, against the other. They never
-    ///     overlap - the gap between them is the tunnel - so the back buffer's clear colour shows
-    ///     through between them and no blending is needed.
+    ///     collapsing towards, and the one being entered, live, against the other. Each reaches
+    ///     past the other's edge and fades across the reach, so the join between them is a band
+    ///     that mixes rather than a line.
     /// </summary>
     public override bool Draw(SpriteBatch renderer, RenderViewPort renderViewPortToUse)
     {
@@ -232,41 +220,22 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
     }
 
     /// <summary>
-    ///     Stretched, then snatched away. The trailing edge lags behind at first, which is what
-    ///     makes it look pulled rather than shrunk, and the last few frames go quickest.
+    ///     How much of the way the seam has crossed the screen, from nought at the start to one at
+    ///     the end. Nought means the screen being left fills the play area and the one arriving has
+    ///     no width at all; a half means they share it.
     /// </summary>
-    private int WidthOfTheScreenBeingLeft(int master)
-    {
-        if (_frame > _squeezeFrames)
-        {
-            return 0;
-        }
-
-        return (int)(master * (1 - StretchedIn(_frame / (double)_squeezeFrames)));
-    }
-
-    /// <summary>
-    ///     A sliver from before the screen being left has finished going, held across the tunnel,
-    ///     then opened out fast, past full width, and settled back into it.
-    /// </summary>
-    private int WidthOfTheScreenBeingEntered(int master)
-    {
-        if (_frame < _sliverStart)
-        {
-            return 0;
-        }
-
-        var sliver = (int)(master * SliverOfLight);
-
-        if (_frame <= _emergeStart)
-        {
-            return sliver;
-        }
-
-        var travelled = (_frame - _emergeStart) / (double)_emergeFrames;
-
-        return Math.Max(sliver, (int)(master * StretchedOut(travelled)));
-    }
+    /// <remarks>
+    ///     Two back eases laid end to end at <see cref="_seamReachesTheMiddle" />, which is what
+    ///     makes the move continuous and still asymmetric. It leaves the range deliberately at both
+    ///     ends - below nought early, so the screen being left is stretched past full width before
+    ///     it goes, and above one late, so the one arriving overshoots and comes back. Both
+    ///     spill into the margin either side of the play area rather than off the picture.
+    /// </remarks>
+    private double SeamCrossing(double throughTheTransition)
+        => throughTheTransition < _seamReachesTheMiddle
+            ? 0.5 * StretchedIn(throughTheTransition / _seamReachesTheMiddle)
+            : 0.5 + (0.5 * StretchedOut((throughTheTransition - _seamReachesTheMiddle) /
+                                        (1 - _seamReachesTheMiddle)));
 
     /// <summary>
     ///     Draws <paramref name="picture" /> across <paramref name="area" />, reaching
@@ -322,13 +291,11 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
             return;
         }
 
-        var sourceX = (int)((x - across.X) / (double)across.Width * picture.Width);
+        var sourceX = Math.Clamp((int)((x - across.X) / (double)across.Width * picture.Width), 0,
+            picture.Width - 1);
         var sourceWidth = (int)(width / (double)across.Width * picture.Width);
 
-        var source = new Rectangle(
-            Math.Clamp(sourceX, 0, picture.Width - 1),
-            0,
-            Math.Clamp(sourceWidth, 1, picture.Width - Math.Clamp(sourceX, 0, picture.Width - 1)),
+        var source = new Rectangle(sourceX, 0, Math.Clamp(sourceWidth, 1, picture.Width - sourceX),
             picture.Height);
 
         renderer.Draw(picture, new Rectangle(x, across.Y, width, across.Height), source,
@@ -345,19 +312,19 @@ internal abstract class TunnelEntryEffect(ScreenSnapshot outgoingScreen, Present
 
     /// <summary>
     ///     Leaving. Goes negative early - which is what stretches the picture past full width - then
-    ///     accelerates to exactly 1, so the picture is exactly gone on the last frame of the squeeze.
+    ///     accelerates to exactly 1.
     /// </summary>
     private static double StretchedIn(double travelled)
-        => (Stretch + 1) * travelled * travelled * travelled - Stretch * travelled * travelled;
+        => ((Stretch + 1) * travelled * travelled * travelled) - (Stretch * travelled * travelled);
 
     /// <summary>
-    ///     Arriving. The mirror of <see cref="StretchedIn" />: exactly 0 on the first frame, rises
-    ///     past 1 to overshoot, and comes back to exactly 1 on the last.
+    ///     Arriving. The mirror of <see cref="StretchedIn" />: exactly 0 at the start, rises past 1
+    ///     to overshoot, and comes back to exactly 1 at the end.
     /// </summary>
     private static double StretchedOut(double travelled)
     {
         var overshot = travelled - 1;
 
-        return 1 + (Stretch + 1) * overshot * overshot * overshot + Stretch * overshot * overshot;
+        return 1 + ((Stretch + 1) * overshot * overshot * overshot) + (Stretch * overshot * overshot);
     }
 }
