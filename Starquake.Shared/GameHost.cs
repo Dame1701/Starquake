@@ -30,9 +30,7 @@ public class GameHost : Game
     ///     backlog that the game fast-forwards through all in one go.
     /// </summary>
     private const int MaxCatchUpFrames = 5;
-
     private static readonly TimeSpan LogicFrameLength = TimeSpan.FromTicks((long)(TimeSpan.TicksPerSecond / LogicFramesPerSecond));
-
     private readonly GraphicsDeviceManager _graphics;
 
     /// <summary>

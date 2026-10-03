@@ -131,9 +131,11 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
                 randomNumberGenerator,
                 0,
                 0,
-                CoreElementsToReplace);
+                CoreElementsToReplace)
+            {
+                NastyType = NastyType.CoreGuardian
+            };
 
-            coreAlien.NastyType = NastyType.CoreGuardian;
             _coreAliens.Add(coreAlien);
         }
 

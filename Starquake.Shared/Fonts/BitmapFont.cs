@@ -11,11 +11,8 @@ namespace Starquake.Fonts;
 internal class BitmapFont
 {
     private readonly SpriteFont _font;
-
     private readonly SpriteBatch _fontSpriteBatch;
-
     private Color _flashColour;
-
     private int _flashCounter;
 
     public BitmapFont(SpriteFont font, SpriteBatch fontSpriteBatch, Color colour1, Color colour2, int flashInterval)
@@ -130,8 +127,7 @@ internal class BitmapFont
         _fontSpriteBatch.End();
     }
 
-    private Vector2 MeasureString(string text)
-        => _font.MeasureString(text);
+    private Vector2 MeasureString(string text) => _font.MeasureString(text);
 
     // Measure the string and take into account horizontal leading
     private Vector2 MeasureString(string text, int leading)

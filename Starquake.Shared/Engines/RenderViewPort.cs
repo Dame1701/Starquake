@@ -7,43 +7,25 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Starquake.Engines;
 
-internal class RenderViewPort
+internal class RenderViewPort(GraphicsDeviceManager graphics, string name, int xPos, int yPos, int width, int height)
 {
-
-    public RenderViewPort(GraphicsDeviceManager graphics, string name, int xPos, int yPos, int width, int height)
-    {
-        MasterXPos = xPos;
-        MasterYPos = yPos;
-
-        Width = width;
-        Height = height;
-
-        RenderTarget = new RenderTarget2D(graphics.GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24, 0, RenderTargetUsage.PreserveContents);
-
-
-        XPos = xPos;
-        YPos = yPos;
-        Name = name;
-        Active = false;
-    }
-    public RenderTarget2D RenderTarget { get; }
+    public RenderTarget2D RenderTarget { get; } = new(graphics.GraphicsDevice, width, height, false, SurfaceFormat.Color, DepthFormat.Depth24, 0, RenderTargetUsage.PreserveContents);
 
     public bool Active { get; set; }
 
-    public int XPos { get; set; }
+    public int XPos { get; set; } = xPos;
 
-    public int YPos { get; set; }
+    public int YPos { get; set; } = yPos;
 
-    public int MasterXPos { get; }
+    public int MasterXPos { get; } = xPos;
 
-    public int MasterYPos { get; }
+    public int MasterYPos { get; } = yPos;
 
-    public int Width { get; set; }
+    public int Width { get; set; } = width;
 
-    public int Height { get; }
+    public int Height { get; } = height;
 
     public int MasterWidth => RenderTarget.Width;
 
-    public string Name { get; }
-
+    public string Name { get; } = name;
 }
