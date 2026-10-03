@@ -58,11 +58,11 @@ internal class TunnelLiftAnimationColumn
         {
             if (section.Intensity > ColourLevels.Full)
             {
-                tunnelSprites.DrawSprite(13, section.X, section.Y, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenfade));
+                tunnelSprites.DrawSprite(13, section.X, section.Y, ColourHelper.WhiteFadedTo((byte)screenfade));
             }
             else
             {
-                tunnelSprites.DrawSprite(13, section.X, section.Y, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, section.Intensity * (byte)screenfade / ColourLevels.Full));
+                tunnelSprites.DrawSprite(13, section.X, section.Y, ColourHelper.WhiteFadedTo(section.Intensity * (byte)screenfade / ColourLevels.Full));
             }
         }
     }

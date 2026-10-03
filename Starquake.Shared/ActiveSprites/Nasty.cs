@@ -794,7 +794,7 @@ internal class Nasty
 
         // Choose the image
         _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade), 1.0f, MathHelper.ToRadians(_rotation));
+            ColourHelper.WhiteFadedTo((byte)screenFade), 1.0f, MathHelper.ToRadians(_rotation));
         _nastySprite.End();
     }
 
@@ -831,7 +831,7 @@ internal class Nasty
         {
             _nastySprite.Begin(BlendState.AlphaBlend);
             _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
+                ColourHelper.WhiteFadedTo((byte)screenFade));
         }
 
         _nastySprite.End();
@@ -850,8 +850,7 @@ internal class Nasty
         {
             _nastySprite.Begin(BlendState.AlphaBlend);
             _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
-                    (byte)(_deathFadeLevel * ((double)screenFade / ColourLevels.Full))), _deathScale,
+                ColourHelper.WhiteFadedTo((byte)(_deathFadeLevel * ((double)screenFade / ColourLevels.Full))), _deathScale,
                 MathHelper.ToRadians(_rotation));
             _nastySprite.End();
         }
@@ -862,7 +861,7 @@ internal class Nasty
             blobFire2Original.Begin(BlendState.AlphaBlend);
             blobFire2Original.DrawSprite(
                 _nastyDiesAnimation.CurrentFrame, XPos, YPos,
-                ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, screenFade), 1f, 0f);
+                ColourHelper.WhiteFadedTo(screenFade), 1f, 0f);
             blobFire2Original.End();
         }
     }

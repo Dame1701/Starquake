@@ -1328,7 +1328,7 @@ internal class Blob
                 blobShuttleOriginal.Begin(BlendState.AlphaBlend);
                 blobShuttleOriginal.DrawSprite(
                     _shuttle.Frame, _blobXPos, _blobYPos + SpriteMetrics.SpriteHeight,
-                    ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
+                    ColourHelper.WhiteFadedTo((byte)screenFade));
                 blobShuttleOriginal.End();
             }
             else
@@ -1336,7 +1336,7 @@ internal class Blob
                 SpriteCollection blobShuttle = _resources.GetSpriteCollection(Assets.Graphics.BlobShuttle);
                 blobShuttle.Begin(BlendState.AlphaBlend);
                 blobShuttle.DrawSprite(0, _blobXPos,
-                    _blobYPos + SpriteMetrics.SpriteHeight, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
+                    _blobYPos + SpriteMetrics.SpriteHeight, ColourHelper.WhiteFadedTo((byte)screenFade));
                 blobShuttle.End();
             }
         }
@@ -1382,7 +1382,7 @@ internal class Blob
             SpriteCollection blobShuttle = _resources.GetSpriteCollection(Assets.Graphics.BlobShuttle);
             blobShuttle.Begin(BlendState.AlphaBlend);
             blobShuttle.DrawSprite(0, _blobXPos,
-                _blobYPos + SpriteMetrics.SpriteHeight, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
+                _blobYPos + SpriteMetrics.SpriteHeight, ColourHelper.WhiteFadedTo((byte)screenFade));
             blobShuttle.End();
         }
     }
@@ -1396,7 +1396,7 @@ internal class Blob
         {
             _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites)
                 .DrawSprite(BlobFrame, _blobXPos, _blobYPos,
-                    ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, OverloadFlareAlpha), scale, 0f);
+                    ColourHelper.WhiteFadedTo(OverloadFlareAlpha), scale, 0f);
         }
 
         _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites).End();

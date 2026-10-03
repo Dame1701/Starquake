@@ -90,7 +90,7 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
         ScreenEffects.SelectRenderViewPort(ViewPorts.EntireScreen);
         _backgroundImage.Begin(BlendState.AlphaBlend);
 
-        _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
+        _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.WhiteFadedTo((byte)ScreenFade));
 
         _backgroundImage.End();
 
@@ -107,7 +107,7 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
         ProportionalNumbers.Draw(630, 260, _stats.PlayerScore.ToString("000000"), Resources, ColourHelper.GetXna4Colour(150, 150, 150, (byte)ScreenFade));
 
         // Adventure Score
-        ProportionalNumbers.Draw(814, 320, _gameScreens.GetPercentageOfScreensVisited() + "%", Resources, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
+        ProportionalNumbers.Draw(814, 320, _gameScreens.GetPercentageOfScreensVisited() + "%", Resources, ColourHelper.WhiteFadedTo((byte)ScreenFade));
 
         // Time Taken
         ProportionalNumbers.Draw(710, 380, _playTime.Minutes + "." + _playTime.Seconds.ToString("00"), Resources, ColourHelper.GetXna4Colour(150, 150, 150, (byte)ScreenFade));
@@ -120,7 +120,7 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
 
         _foregroundImage.Begin(BlendState.AlphaBlend);
 
-        _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
+        _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.WhiteFadedTo((byte)ScreenFade));
 
         _foregroundImage.End();
     }

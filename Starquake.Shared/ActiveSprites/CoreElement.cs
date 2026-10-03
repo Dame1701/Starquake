@@ -188,14 +188,14 @@ internal class CoreElement
         {
             SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
             pickups.Begin(BlendState.AlphaBlend);
-            pickups.DrawSprite(FinalElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)fade));
+            pickups.DrawSprite(FinalElement, xPos, yPos, ColourHelper.WhiteFadedTo((byte)fade));
             pickups.End();
         }
         else if (ElementState == CoreElementState.Missing)
         {
             SpriteCollection accessCodesGray = _resources.GetSpriteCollection(Assets.Graphics.AccessCodesGray);
             accessCodesGray.Begin(BlendState.AlphaBlend);
-            accessCodesGray.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)fade));
+            accessCodesGray.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.WhiteFadedTo((byte)fade));
             accessCodesGray.End();
         }
     }
@@ -208,24 +208,24 @@ internal class CoreElement
             {
                 SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
                 pickups.Begin(BlendState.Additive);
-                pickups.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MissingElementAlpha));
+                pickups.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.WhiteFadedTo(MissingElementAlpha));
                 pickups.End();
             }
             else
             {
                 SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
                 pickups.Begin(BlendState.Additive);
-                pickups.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_fader1.FadeLevel));
+                pickups.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.WhiteFadedTo((byte)_fader1.FadeLevel));
                 pickups.End();
 
                 SpriteCollection accessCodesFailed = _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesFailed);
                 accessCodesFailed.Begin(BlendState.AlphaBlend);
-                accessCodesFailed.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_fader2.FadeLevel));
+                accessCodesFailed.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.WhiteFadedTo((byte)_fader2.FadeLevel));
                 accessCodesFailed.End();
 
                 SpriteCollection accessCodesPassed = _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesPassed);
                 accessCodesPassed.Begin(BlendState.AlphaBlend);
-                accessCodesPassed.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_fader3.FadeLevel));
+                accessCodesPassed.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.WhiteFadedTo((byte)_fader3.FadeLevel));
                 accessCodesPassed.End();
             }
         }
@@ -233,12 +233,12 @@ internal class CoreElement
         {
             SpriteCollection pickupsIlluminated = _resources.GetSpriteCollection(_graphicsSet.Names.PickupsIlluminated);
             pickupsIlluminated.Begin(BlendState.Additive);
-            pickupsIlluminated.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, _elementFader.ColourLevel), _currentElementDownScaler.Value, 0);
+            pickupsIlluminated.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.WhiteFadedTo(_elementFader.ColourLevel), _currentElementDownScaler.Value, 0);
             pickupsIlluminated.End();
 
             SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
             pickups.Begin(BlendState.Additive);
-            pickups.DrawSprite(FinalElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ColourLevels.Full - _elementFader.ColourLevel), _finalElementUpScaler.Value, 0);
+            pickups.DrawSprite(FinalElement, xPos, yPos, ColourHelper.WhiteFadedTo(ColourLevels.Full - _elementFader.ColourLevel), _finalElementUpScaler.Value, 0);
             pickups.End();
         }
         else if (ElementState == CoreElementState.Replaced)
@@ -247,14 +247,14 @@ internal class CoreElement
             {
                 SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
                 pickups.Begin(BlendState.Additive);
-                pickups.DrawSprite(FinalElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MissingElementAlpha));
+                pickups.DrawSprite(FinalElement, xPos, yPos, ColourHelper.WhiteFadedTo(MissingElementAlpha));
                 pickups.End();
             }
             else
             {
                 SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
                 pickups.Begin(BlendState.Additive);
-                pickups.DrawSprite(FinalElement, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, ColourLevels.Full));
+                pickups.DrawSprite(FinalElement, xPos, yPos, ColourHelper.WhiteFadedTo(ColourLevels.Full));
                 pickups.End();
             }
         }

@@ -256,7 +256,7 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
             {
                 for (int b = 0; b < BlankingTilesAcross; b++)
                 {
-                    _resources.GetSpriteCollection(Assets.Graphics.BlankingTile).DrawSprite(0, b * TileMetrics.TileWidth + BlankingTilesFirstColumn, a * TileMetrics.TileHeight, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_blankingTilesOpacity));
+                    _resources.GetSpriteCollection(Assets.Graphics.BlankingTile).DrawSprite(0, b * TileMetrics.TileWidth + BlankingTilesFirstColumn, a * TileMetrics.TileHeight, ColourHelper.WhiteFadedTo((byte)_blankingTilesOpacity));
                 }
             }
             _resources.GetSpriteCollection(Assets.Graphics.BlankingTile).End();

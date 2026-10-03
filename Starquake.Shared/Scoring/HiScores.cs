@@ -124,7 +124,7 @@ internal class HiScores
         {
             if (a % 2 == 0)
             {
-                ProportionalNumbers.Draw(currentXPos, currentYPos, a + 1 + ".", resources, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, fade));
+                ProportionalNumbers.Draw(currentXPos, currentYPos, a + 1 + ".", resources, ColourHelper.WhiteFadedTo(fade));
             }
             else
             {
@@ -157,7 +157,7 @@ internal class HiScores
         {
             if (a % 2 == 0)
             {
-                ProportionalNumbers.Draw(currentXPos + 250, currentYPos, _scores[a].Score.ToString("000000") + " " + _scores[a].AdventureScoreString + "%", resources, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, fade));
+                ProportionalNumbers.Draw(currentXPos + 250, currentYPos, _scores[a].Score.ToString("000000") + " " + _scores[a].AdventureScoreString + "%", resources, ColourHelper.WhiteFadedTo(fade));
             }
             else
             {

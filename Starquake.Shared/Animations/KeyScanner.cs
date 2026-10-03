@@ -108,7 +108,7 @@ internal class KeyScanner
         // Draw the code keys
         SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
         pickups.Begin(BlendState.AlphaBlend);
-        pickups.DrawSprite(codeNumber, xPos + 2, yPos + 6, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
+        pickups.DrawSprite(codeNumber, xPos + 2, yPos + 6, ColourHelper.WhiteFadedTo((byte)_keyCodeFade));
         pickups.End();
 
         var height = _scanLineY > 64 ? 64 : _scanLineY;
@@ -120,7 +120,7 @@ internal class KeyScanner
             {
                 SpriteCollection accessCodesPassed = _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesPassed);
                 accessCodesPassed.Begin(BlendState.AlphaBlend);
-                accessCodesPassed.DrawSpriteSubSection(codeNumber, xPos + 2, yPos + 6, new Rectangle(0, 0, 64, height), ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
+                accessCodesPassed.DrawSpriteSubSection(codeNumber, xPos + 2, yPos + 6, new Rectangle(0, 0, 64, height), ColourHelper.WhiteFadedTo((byte)_keyCodeFade));
                 accessCodesPassed.End();
 
             }
@@ -128,14 +128,14 @@ internal class KeyScanner
             {
                 SpriteCollection accessCodesFailed = _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesFailed);
                 accessCodesFailed.Begin(BlendState.AlphaBlend);
-                accessCodesFailed.DrawSpriteSubSection(codeNumber, xPos + 2, yPos + 6, new Rectangle(0, 0, 64, height), ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_keyCodeFade));
+                accessCodesFailed.DrawSpriteSubSection(codeNumber, xPos + 2, yPos + 6, new Rectangle(0, 0, 64, height), ColourHelper.WhiteFadedTo((byte)_keyCodeFade));
                 accessCodesFailed.End();
             }
 
             // Draw the scanlines
             SpriteCollection scanLine = _resources.GetSpriteCollection(Assets.Graphics.ScanLine);
             scanLine.Begin(BlendState.Additive);
-            scanLine.DrawSprite(0, xPos - 4, _scanLineY + yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_scanLineFade));
+            scanLine.DrawSprite(0, xPos - 4, _scanLineY + yPos, ColourHelper.WhiteFadedTo((byte)_scanLineFade));
             scanLine.End();
         }
     }

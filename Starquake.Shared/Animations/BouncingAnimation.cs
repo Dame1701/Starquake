@@ -141,11 +141,11 @@ internal class BouncingAnimation
     {
         if (spriteNumberOverride >= 0)
         {
-            spriteToDraw.DrawSprite(spriteNumberOverride, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_fade), _scale, _rotation);
+            spriteToDraw.DrawSprite(spriteNumberOverride, xPos, yPos, ColourHelper.WhiteFadedTo((byte)_fade), _scale, _rotation);
         }
         else
         {
-            spriteToDraw.DrawSprite(_spriteNo, xPos, yPos, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)_fade), _scale, _rotation);
+            spriteToDraw.DrawSprite(_spriteNo, xPos, yPos, ColourHelper.WhiteFadedTo((byte)_fade), _scale, _rotation);
         }
     }
 }

@@ -426,8 +426,7 @@ internal sealed class BlobWeapon
             frame,
             X,
             yPos,
-            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full,
-                (byte)(alpha * ((double)screenFade / ColourLevels.Full))),
+            ColourHelper.WhiteFadedTo((byte)(alpha * ((double)screenFade / ColourLevels.Full))),
             1.0f,
             rotation);
         flame.End();

@@ -473,7 +473,7 @@ internal class MainGameScreen : IGameScreen
             GameEngine.ElectricityNodeGateEngine.Draw();
 
             GameEngine.GameScreens.Draw(
-                ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade),
+                ColourHelper.WhiteFadedTo((byte)ScreenFade),
                 GameEngine.IntroSequence.SequenceRunning, GameEngine.IntroSequence.SequenceStage);
 
 
@@ -600,7 +600,7 @@ internal class MainGameScreen : IGameScreen
         GameEngine.ElectricityNodeGateEngine.DrawUpperLayer();
 
         GameEngine.GameScreens.DrawUpperLayer(
-            ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
+            ColourHelper.WhiteFadedTo((byte)ScreenFade));
     }
 
     private void DrawShipSmoke1()

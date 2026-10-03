@@ -74,7 +74,7 @@ internal class GameCompleteScreen : GameScreenBase, IGameScreen
         ScreenEffects.SelectRenderViewPort(ViewPorts.EntireScreen);
         _backgroundImage.Begin(BlendState.AlphaBlend);
 
-        _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
+        _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.WhiteFadedTo((byte)ScreenFade));
 
         _backgroundImage.End();
 
@@ -91,7 +91,7 @@ internal class GameCompleteScreen : GameScreenBase, IGameScreen
 
         _foregroundImage.Begin(BlendState.AlphaBlend);
 
-        _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)ScreenFade));
+        _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.WhiteFadedTo((byte)ScreenFade));
 
         _foregroundImage.End();
     }

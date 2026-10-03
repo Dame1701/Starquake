@@ -199,7 +199,7 @@ internal class ConveyerNasty
         if (NastyState == NastyState.Normal)
         {
             _nastySprite.Begin(BlendState.AlphaBlend);
-            _nastySprite.DrawSprite(_anim.CurrentFrame, XLocation, YLocation + HangsBelowRailBy, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)screenFade));
+            _nastySprite.DrawSprite(_anim.CurrentFrame, XLocation, YLocation + HangsBelowRailBy, ColourHelper.WhiteFadedTo((byte)screenFade));
             _nastySprite.End();
         }
         else if (NastyState == NastyState.Dead)
@@ -210,7 +210,7 @@ internal class ConveyerNasty
             if (_deathFadeLevel > 0)
             {
                 _nastySprite.Begin(BlendState.AlphaBlend);
-                _nastySprite.DrawSprite(_anim.CurrentFrame, XLocation, YLocation + HangsBelowRailBy, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, (byte)(_deathFadeLevel * ((double)screenFade / ColourLevels.Full))), _deathScale, 0f);
+                _nastySprite.DrawSprite(_anim.CurrentFrame, XLocation, YLocation + HangsBelowRailBy, ColourHelper.WhiteFadedTo((byte)(_deathFadeLevel * ((double)screenFade / ColourLevels.Full))), _deathScale, 0f);
                 _nastySprite.End();
             }
         }
