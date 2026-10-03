@@ -63,7 +63,6 @@ internal class HiScores
             Score = 2150,
             AdventureScore = 3
         }
-
     ];
 
     /// <summary>
@@ -80,7 +79,6 @@ internal class HiScores
                 return true;
             }
         }
-
         return false;
     }
 
@@ -137,7 +135,6 @@ internal class HiScores
 
             currentYPos += 50;
         }
-
         currentYPos = yPos;
 
         for (int a = 0; a < _scores.Count; a++)
@@ -152,7 +149,6 @@ internal class HiScores
             }
             currentYPos += 50;
         }
-
         font.End();
     }
 }
