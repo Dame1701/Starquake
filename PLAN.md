@@ -24,9 +24,11 @@ it was overturned for a reason worth not relearning.
 | 6.1 | The key and the access card, placed by computed reachability rather than by hand - see below | *uncommitted as this was written* |
 | — | The landing site and the markers out of the tile sheet: `MarkerTile` at 500+, `LandingSite`, and the shipped map migrated onto both | *uncommitted as this was written* |
 | — | Three drawing defects older than the repository: the background's alpha, the force field drawn on every screen, and the emitter names a deep copy threw away | *uncommitted as this was written* |
+| — | The collision map off a scanned list and onto a grid, the pixel-walk sweep solved, and the tile probe that hid the mouth Blob stood in - see below | `893d700` |
 
-**65 tests to 211.** That was phase 4's own measure of whether the splits earned anything; 159 of
-them were its own, and the rest came with the work below.
+**65 tests to 460.** 211 of those were phase 4's own measure of whether the splits earned anything
+- 159 of them its own, the rest coming with the work below - and the collision rework roughly
+doubled the count again, for the different reason given in its section.
 
 ## Still open
 
@@ -178,6 +180,92 @@ carrying nothing but the key and the card has to give up the key, or the card if
 A door is passable only while the key is *in the inventory*, so trading it away re-locks every door,
 and the player can no longer start a game holding one. Whether a pyramid should refuse both items is
 a design question, not a defect, and nothing has been changed about it.
+
+## The collision rework — what is worth not relearning
+
+**Done**, in `893d700`. The code carries the reasoning method by method; this is the handful of
+decisions that are not visible from any one of them.
+
+### The map is a grid, except where it cannot be
+
+A screen's solid cells are derived from its tiles, so they are grid-aligned by construction and
+want indexing rather than scanning. Three things are not, and finding them out was most of the
+work:
+
+- **One cell can stop everything and stop only the nasties at once.** A booth lays nasty-only
+  cells over its whole tile, on top of whatever its own mask made solid. So the grid is two
+  planes, not one enum per cell. A single plane answers `NastiesMayStandOn` wrongly wherever the
+  two coincide, which is a nasty walking where nothing should.
+- **A door's cells are mutated in place.** `UpdateKeyLockDoor` flips their type as Blob picks the
+  key up and puts it down, writing to objects it already handed the map. They have to stay live
+  objects in a list; they cannot be baked.
+- **Items, platforms and core elements sit at arbitrary positions.** They stay in a list too, and
+  it is short.
+
+### Staleness is decided by looking, not by being told
+
+Tiles change while the game runs - a breakable bridge sets its tile to `-1` and later restores it,
+a shuttle pad swaps between two numbers - so a bake kept from the last rebuild can go stale.
+`BakeIfStale` compares all 48 tile images on every rebuild rather than taking an invalidation
+call. It is a few hundred comparisons against re-deriving a screen, and in exchange **no caller
+has to remember anything.** The alternative was a notification every tile write had to make, and
+a missed one is a phantom wall on one screen after one event, which is exactly the kind of defect
+that ships. There are only four such writes today; the point is that a fifth cannot get it wrong.
+
+### The sweep was a loop around a question with a closed form
+
+`CheckDirection` walked the move a pixel at a time, with `CannotMeet` in front of it purely to
+skip the walk. Across the move nothing changes as the step is taken; along it the centres close by
+exactly one pixel a step, so the blocked steps form one unbroken run and the answer is the step
+before it begins. Both the loop and its guard went. The halves are integer divisions written
+exactly as `Check` writes them, so the two agree on the boundary rather than drifting a pixel
+apart - which is the one way this could have gone wrong, and a result a pixel too generous is a
+mover through a wall.
+
+### The one deliberate behaviour change, and why it was safe to make
+
+`CheckTileByObject` is how Blob finds a tunnel mouth, a lift shaft or a booth, and it reported
+whichever tile came first in a scan along the top row and down. Going left that is the tile he has
+just left, so it hid the mouth he was standing in: an **eight-pixel dead zone** at the far end of
+an acceptance window four to six walk-steps wide. Walking in he hits 32, 24, 16 or 8 and fires
+long before reaching it; he lands inside it only by arriving from a fall.
+
+The fix is the smallest rule that closes it - prefer a tile the mover is actually standing in,
+otherwise keep the old scan order exactly - and the reason it could be taken at all is that it is
+**additive, by measurement rather than by argument.** Over every position on every shipped screen,
+nothing that could be entered stopped being enterable, and what is gained is eighteen places by
+eight pixels each. Two earlier attempts were not additive and were discarded: ranking by greatest
+overlap on the *stretched* probe lost right-hand triggers, because the probe's shape differs per
+direction and the ranking has to use Blob's own box. `CheckTileByObjectTests` pins the
+measurement, so a future change to the rule has to answer for it.
+
+It also skips markers now, as `Rebuild` always has. Nothing on the shipped map was affected -
+this one is a guard, so that a marker dropped beside a mouth in the editor cannot silently stop
+the tunnel working.
+
+### Why the test count doubled, when tests are not a goal here
+
+Phase 4's rule stands: a split that adds no testable surface has earned nothing. This was not a
+split. It was a rewrite of live collision maths meant to change how fast an answer arrives and
+**not what the answer is**, and the only honest evidence for that is differential.
+`ReferenceCollisionMap` is the flat-list map transcribed into the test project, sharing no code
+with the real one - it walks a move a pixel at a time and answers from a list, so the two agreeing
+is evidence rather than a tautology. It is held against the real map over every shipped screen,
+and over hand-built screens for the items and dynamic cells a stored screen cannot carry, since
+those are placed by `WorldPopulator` when a game starts. That is the same trick
+`CollisionBroadPhaseTests` plays one level down, and it is why the grid could be attempted at all.
+
+The reference map is deliberately *not* kept in step with the two corrections that were meant to
+happen - it skips only tile `-1` rather than markers too, and it takes the first tile in scan
+order. `CheckTileByObjectTests` is where those two are pinned instead.
+
+### What has been seen running
+
+Unusually for this document, this part has. Blob was dropped into tunnel lifts from above while
+pushing left and right, and into a left-hand mouth: entry behaves as it did before. That covers
+the no-regression half at a consumer the measurement said should be unchanged, and the gained half
+at eleven of the eighteen places. The seven access booths were not walked, and are the same
+mechanism with a wider window.
 
 ## Still deliberately out of scope
 
