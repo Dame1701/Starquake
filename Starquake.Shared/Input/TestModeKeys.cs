@@ -15,7 +15,8 @@ namespace Starquake.Input;
 
 /// <summary>
 ///     The debug keys: F1 kills Blob, F2 refills his lives, F3 runs the fade effect, F4 hands him
-///     a core element the core is still missing, and the numeric keypad steps between screens.
+///     a core element the core is still missing, F7 hands him the key and the access card, and the
+///     numeric keypad steps between screens.
 /// </summary>
 /// <remarks>
 ///     Nothing in a release build constructs this or calls it. <c>GameEngine</c> builds it and steps
@@ -80,6 +81,14 @@ internal class TestModeKeys(
             HandOverACoreElement();
         }
 
+        // F7 rather than the F5 that would have followed F4: macOS takes F5 and F6 for itself and
+        // the game never sees them, with the function keys set to be function keys and no shortcut
+        // of the user's own on either. F7 arrives, as F8 to F12 do.
+        if (input.GetPressedKey() == Keys.F7)
+        {
+            HandOverTheWayIn();
+        }
+
         if (screenDirectory.Current == GameScreenType.MainGame)
         {
             StepBetweenScreens();
@@ -113,6 +122,40 @@ internal class TestModeKeys(
 
         player.BlobInventory[slot] = (Collectables)element;
     }
+
+    /// <summary>
+    ///     Puts the key and the access card into Blob's hands, so that the two things the planet
+    ///     locks - the force field across a key door, and the booth that asks for a code - can be
+    ///     reached without first hunting down the one of each the world holds.
+    /// </summary>
+    /// <remarks>
+    ///     Either may already be there: the pair is handed over one at a time and each is skipped
+    ///     if he has it, so pressing this twice does not fill two more slots with a second key and
+    ///     a second card. The core refuses duplicates for a reason - see
+    ///     <see cref="WantedElementNotYetCarried" /> - and while these two are not core elements,
+    ///     a slot spent on a duplicate is a slot he cannot carry an element in.
+    /// </remarks>
+    private void HandOverTheWayIn()
+    {
+        HandOver(Collectables.Key);
+        HandOver(Collectables.AccessCard);
+    }
+
+    /// <inheritdoc cref="HandOverTheWayIn" />
+    private void HandOver(Collectables item)
+    {
+        if (SlotFor(player.BlobInventory, item) is { } slot)
+        {
+            player.BlobInventory[slot] = item;
+        }
+    }
+
+    /// <summary>
+    ///     Where an item the key hands over should go, or null when it should not be handed over at
+    ///     all - because Blob is already carrying one, or because he has no room for it.
+    /// </summary>
+    public static int? SlotFor(Collectables[] carried, Collectables item)
+        => carried.Contains(item) ? null : FirstEmptySlot(carried);
 
     /// <summary>
     ///     The first slot of the inventory holding nothing, or null when Blob is full.

@@ -9,8 +9,9 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     F4's two rules: which slot a handed-over core element goes into, and which element it is.
-///     The key itself needs a keyboard and a running game; these are the parts that do not.
+///     F4's two rules - which slot a handed-over core element goes into, and which element it is -
+///     and F7's one, which is that it hands over nothing Blob already has. The keys themselves need
+///     a keyboard and a running game; these are the parts that do not.
 /// </summary>
 public class TestModeKeysTests
 {
@@ -51,6 +52,44 @@ public class TestModeKeysTests
 
         // Act / Assert
         Assert.Equal(1, TestModeKeys.FirstEmptySlot(carried));
+    }
+
+    /// <summary>
+    ///     F7 hands over the key and the access card, and may be pressed again - to top Blob up
+    ///     after the booth has taken his card, say. Pressing it while he already has one must not
+    ///     spend a second slot on a duplicate: he has four, and the core wants all of them.
+    /// </summary>
+    [Fact]
+    public void SlotFor_SomethingHeIsAlreadyCarrying_IsNothingAtAll()
+    {
+        // Arrange
+        Collectables[] carried =
+            [Collectables.Key, Collectables.None, Collectables.None, Collectables.None];
+
+        // Act / Assert
+        Assert.Null(TestModeKeys.SlotFor(carried, Collectables.Key));
+    }
+
+    [Fact]
+    public void SlotFor_SomethingHeIsNotCarrying_IsTheFirstEmptySlot()
+    {
+        // Arrange
+        Collectables[] carried =
+            [Collectables.Key, Collectables.None, Collectables.None, Collectables.None];
+
+        // Act / Assert
+        Assert.Equal(1, TestModeKeys.SlotFor(carried, Collectables.AccessCard));
+    }
+
+    [Fact]
+    public void SlotFor_WhenHeIsFull_IsNothingAtAll()
+    {
+        // Arrange
+        Collectables[] carried =
+            [(Collectables)3, (Collectables)7, (Collectables)11, (Collectables)14];
+
+        // Act / Assert
+        Assert.Null(TestModeKeys.SlotFor(carried, Collectables.Key));
     }
 
     /// <summary>
