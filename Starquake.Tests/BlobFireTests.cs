@@ -157,9 +157,9 @@ public class BlobFireTests
     }
 
     [Theory]
-    [InlineData(Direction.Left, TestData.PastLowEdge, TestData.MidScreenY)]
+    [InlineData(Direction.Left, TestData.AtLowEdge, TestData.MidScreenY)]
     [InlineData(Direction.Right, TestData.AtHighEdgeX, TestData.MidScreenY)]
-    [InlineData(Direction.Up, TestData.MidScreenX, TestData.PastLowEdge)]
+    [InlineData(Direction.Up, TestData.MidScreenX, TestData.AtLowEdge)]
     [InlineData(Direction.Down, TestData.MidScreenX, TestData.AtHighEdgeY)]
     internal void Advance_ReachesTheScreenEdgeTravellingStraight_DiesQuietly(Direction firedIn, int x, int y)
     {
@@ -210,7 +210,7 @@ public class BlobFireTests
             Blocked = [Direction.Right]
         };
         var shot = new BlobFire(surroundings);
-        shot.Launch(TestData.PastLowEdge, TestData.MidScreenY);
+        shot.Launch(TestData.AtLowEdge, TestData.MidScreenY);
         shot.Advance(Direction.Right, TestData.FromShuttle, TestData.NotPointBlank);
 
         // Act
@@ -219,6 +219,36 @@ public class BlobFireTests
         // Assert
         Assert.False(inFlight);
         Assert.Single(surroundings.Sparks);
+    }
+
+    /// <summary>
+    ///     A shot that runs out of screen has not hit anything, and must not throw the sparks that
+    ///     say it has. This held going right and not going left: the edge was measured as the
+    ///     shot's <em>height</em> along both axes, which called a rightward shot spent thirty
+    ///     pixels early and so hid the fault, while the leftward test asked for the shot to be past
+    ///     nought - which it never is, because the collision map clamps it to the screen.
+    /// </summary>
+    [Theory]
+    [InlineData(Direction.Left, TestData.AtLowEdge, TestData.MidScreenY)]
+    [InlineData(Direction.Right, TestData.AtHighEdgeX, TestData.MidScreenY)]
+    [InlineData(Direction.Up, TestData.MidScreenX, TestData.AtLowEdge)]
+    [InlineData(Direction.Down, TestData.MidScreenX, TestData.AtHighEdgeY)]
+    internal void Advance_RunningOutOfScreen_LeavesWithoutSparksWhicheverWayItWentOut(
+        Direction firedIn,
+        int x,
+        int y)
+    {
+        // Arrange - nothing in the way, so only the edge can stop it
+        var surroundings = new Surroundings();
+        var shot = new BlobFire(surroundings);
+        shot.Launch(x, y);
+
+        // Act
+        bool inFlight = shot.Advance(firedIn, TestData.FromShuttle, TestData.NotPointBlank);
+
+        // Assert
+        Assert.False(inFlight);
+        Assert.Empty(surroundings.Sparks);
     }
 
     [Fact]
@@ -408,21 +438,33 @@ public class BlobFireTests
         /// <inheritdoc cref="Speed" />
         public const int Length = 32;
 
+        /// <summary>
+        ///     The shot's box is <see cref="Width" /> across and <see cref="Length" /> down, which
+        ///     is why the two high-edge constants below do not use the same one.
+        /// </summary>
+        public const int Width = 2;
+
         public const int MidScreenX = 100;
 
         public const int MidScreenY = 100;
 
-        /// <summary>Already off the low end of either axis, so any shot heading that way is spent.</summary>
-        public const int PastLowEdge = -1;
+        /// <summary>
+        ///     Hard against the low end of either axis, which is as far as a shot gets: the
+        ///     collision map clamps anything that is not Blob to the screen, so one travelling that
+        ///     way stops at nought rather than passing it.
+        /// </summary>
+        public const int AtLowEdge = 0;
 
         /// <summary>
-        ///     Far enough along that the shot's far end is past the screen, which is what the high-end
-        ///     boundary tests, rather than its origin.
+        ///     Far enough along that the shot's far end has reached the screen, which is what the
+        ///     high-end boundary tests, rather than its origin. Measured with the extent along the
+        ///     axis being travelled - across for the one, down for the other - which this used to
+        ///     get wrong on both counts.
         /// </summary>
-        public const int AtHighEdgeX = ScreenWidth - Length + 1;
+        public const int AtHighEdgeX = ScreenWidth - Width;
 
         /// <inheritdoc cref="AtHighEdgeX" />
-        public const int AtHighEdgeY = ScreenHeight - Length + 1;
+        public const int AtHighEdgeY = ScreenHeight - Length;
 
         public const bool FromShuttle = true;
 

@@ -201,13 +201,32 @@ internal sealed class BlobFire(IFireSurroundings surroundings)
     private bool WithinPointBlankReach(int? pointBlankReach)
         => pointBlankReach is { } reach && DistanceTravelled < reach;
 
+    /// <summary>
+    ///     Whether the shot has run out of screen rather than run into something. What hangs off it
+    ///     is whether <see cref="Die" /> throws sparks: a shot that reaches the edge goes quietly,
+    ///     and one stopped anywhere else has hit scenery and says so.
+    /// </summary>
+    /// <remarks>
+    ///     This was wrong twice over, and the two faults hid each other. It measured the shot as
+    ///     <see cref="Length" /> along both axes, where the box is <see cref="Width" /> across and
+    ///     <see cref="Length" /> down - so a shot travelling right was called spent thirty pixels
+    ///     early, which is what made that direction look correct. And the low side tested for the
+    ///     shot being <em>past</em> the edge rather than at it, which it never reaches: the
+    ///     collision map clamps anything that is not Blob to the screen, so a shot fired left stops
+    ///     dead at nought with its position still not below it, and threw sparks as though it had
+    ///     hit a wall. The measurement is right on both axes now and both bounds are inclusive.
+    /// </remarks>
     private bool IsAtScreenEdge(Axis along, int sign)
     {
-        int position = along == Axis.Horizontal ? X : Y;
+        bool sideways = along == Axis.Horizontal;
+
+        int position = sideways ? X : Y;
+        int extent = sideways ? Width : Length;
+        int screen = sideways ? surroundings.ScreenWidth : surroundings.ScreenHeight;
 
         return sign < 0
-            ? position < 0
-            : position + Length > (along == Axis.Horizontal ? surroundings.ScreenWidth : surroundings.ScreenHeight);
+            ? position <= 0
+            : position + extent >= screen;
     }
 
     private void Move(Axis along, int amount)
