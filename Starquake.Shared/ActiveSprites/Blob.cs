@@ -252,7 +252,7 @@ internal class Blob
                 ParticleEffectType.Triggered, null);
         _blobTeleporterBeam.ParticleEffectComplete += BlobTeleporterBeam_ParticleEffectComplete;
 
-        Weapon = new BlobWeapon(resources, gameScreens, graphicsSet, stats, randomNumberGenerator,
+        Weapon = new BlobWeapon(resources, gameScreens, graphics, graphicsSet, stats, randomNumberGenerator,
             () => OnBlobActionRaised?.Invoke(BlobAction.FiredLazer, null));
 
         _lift = new TunnelLift(

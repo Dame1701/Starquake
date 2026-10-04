@@ -60,17 +60,12 @@ internal sealed class BlobWeapon
     /// </summary>
     private const int FireAnimLastFrame = 3;
 
-    /// <inheritdoc cref="FireAnimLastFrame" />
-    private const int ShuttleFireAnimLastFrame = 23;
 
     /// <inheritdoc cref="FireAnimLastFrame" />
     private const int AnimationDelay = 2;
 
-    /// <inheritdoc cref="FireAnimLastFrame" />
-    private const int ShuttleFireAnimationDelay = 1;
 
     private readonly Animation _animFire1;
-    private readonly Animation _animFire2;
     private readonly BlobFire _fire;
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsSet _graphicsSet;
@@ -85,6 +80,23 @@ internal sealed class BlobWeapon
     private readonly IPositionalTriggerParticleEffect _sparks;
     private readonly PlayerStats _stats;
     private readonly IStandardParticleEffect _trail;
+
+    /// <summary>
+    ///     The batch and the one white texel the beam is laid over. There is no artwork for a
+    ///     beam and there does not need to be: the shader works every pixel of it out, so all it
+    ///     wants is something to work them out on.
+    /// </summary>
+    private readonly SpriteBatch _beam;
+
+    /// <inheritdoc cref="_beam" />
+    private readonly Texture2D _beamQuad;
+
+    /// <summary>
+    ///     Logic frames the weapon has been running, which drives the beam's writhing. Counted on
+    ///     the update and never in the draw - <c>GameHost</c> draws once per vertical retrace, so a
+    ///     wave counted in drawn frames travels faster on a better monitor.
+    /// </summary>
+    private int _beamFrame;
 
     private bool _canFire = true;
 
@@ -103,6 +115,7 @@ internal sealed class BlobWeapon
     public BlobWeapon(
         ResourceManager resources,
         GameScreenCollection gameScreens,
+        GraphicsDeviceManager graphics,
         GraphicsSet graphicsSet,
         PlayerStats stats,
         Random randomNumberGenerator,
@@ -124,8 +137,11 @@ internal sealed class BlobWeapon
         // call - and the only reason Blob had to give out a reference to itself mid-construction.
         _fire = new BlobFire(new FireSurroundings(gameScreens, randomNumberGenerator, _sparks));
 
+        _beam = new SpriteBatch(graphics.GraphicsDevice);
+        _beamQuad = new Texture2D(graphics.GraphicsDevice, 1, 1);
+        _beamQuad.SetData([Color.White]);
+
         _animFire1 = Animation.Looping(0, FireAnimLastFrame, AnimationDelay, true);
-        _animFire2 = Animation.Looping(0, ShuttleFireAnimLastFrame, ShuttleFireAnimationDelay, true);
     }
 
     /// <summary>Whether a shot is in flight, which is what a nasty checks before testing for a hit.</summary>
@@ -191,6 +207,8 @@ internal sealed class BlobWeapon
     {
         _sparks.Update(gameTime);
         _trail.Update(X + FireTrailOffset, Y + FireTrailOffset, gameTime);
+
+        _beamFrame++;
     }
 
     /// <summary>
@@ -200,9 +218,20 @@ internal sealed class BlobWeapon
     public void DrawTrail() => _trail.Draw();
 
     /// <summary>
-    ///     The flame at the head of the shot. Only the redrawn artwork draws one on foot; the original
-    ///     draws nothing unless Blob is on the shuttle.
+    ///     The flame at the head of the shot.
     /// </summary>
+    /// <remarks>
+    ///     This used to say that only the redrawn artwork drew one on foot and the original drew
+    ///     nothing off the shuttle, which is the wrong way round twice over: the original drew one
+    ///     in both cases and the redrawn set drew <em>nothing at all</em> on foot. So shooting
+    ///     while walking - which is most shooting - put out a shot with no flame on it and nothing
+    ///     but a two-particle trail behind it. It draws one now, turned to the way the shot is
+    ///     going.
+    ///     <para>
+    ///         Every flame also gets a white core laid over it from <c>BlobFire2Overlay</c>, a glow
+    ///         that was drawn and registered and then never put on screen.
+    ///     </para>
+    /// </remarks>
     public void Draw(int screenFade, bool onShuttle)
     {
         if (!HasFired)
@@ -222,12 +251,67 @@ internal sealed class BlobWeapon
                 DrawFlame(Assets.Graphics.BlobFire1, _animFire1.CurrentFrame, Y - FireOffset, ColourLevels.Full,
                     screenFade, 0f);
             }
+
+            return;
         }
-        else if (onShuttle)
-        {
-            DrawFlame(Assets.Graphics.BlobFire2, _animFire2.CurrentFrame, Y, _fade, screenFade,
-                MathHelper.ToRadians(_rotation));
-        }
+
+        DrawBeam(screenFade, onShuttle);
+    }
+
+    /// <summary>
+    ///     The beam itself, drawn out of nothing over a plain filled rectangle turned to the way
+    ///     the shot is going.
+    /// </summary>
+    /// <remarks>
+    ///     No flame sprite is drawn on foot, which is how the game has always been: one was taken
+    ///     out years ago for adding nothing, and putting it back to make the shot read better
+    ///     proved the point rather than fixing it. The light is the shot's own now, so the on-foot
+    ///     case needs no artwork at all and the shuttle's flame has a beam through it.
+    /// </remarks>
+    private void DrawBeam(int screenFade, bool onShuttle)
+    {
+        Effect laser = _resources.GetEffect(Assets.Shaders.Laser);
+
+        // The reciprocals are worked out here rather than costing a divide on every pixel - the
+        // pass has no slots to spare, and these never change between frames.
+        laser.Parameters["OverCoreWidth"].SetValue(1f / LaserSettings.CoreWidth);
+        laser.Parameters["CoreColour"].SetValue(LaserSettings.CoreColour);
+        laser.Parameters["EdgeColour"].SetValue(LaserSettings.EdgeColour);
+        laser.Parameters["Spread"].SetValue(LaserSettings.Spread);
+        (int length, int thickness, float intensity) = LaserSettings.BeamFor(onShuttle);
+
+        laser.Parameters["Intensity"].SetValue(intensity);
+        laser.Parameters["WaveAmplitude"].SetValue(LaserSettings.WaveAmplitude);
+        laser.Parameters["WaveFrequency"].SetValue(LaserSettings.WaveFrequency);
+        laser.Parameters["WavePhase"].SetValue(LaserSettings.WavePhaseAt(_beamFrame));
+        laser.Parameters["OverEndFade"].SetValue(1f / LaserSettings.EndFade);
+        laser.Parameters["OverHeadSize"].SetValue(1f / LaserSettings.HeadSize);
+        laser.Parameters["HeadStretch"].SetValue(LaserSettings.HeadStretch);
+        laser.Parameters["HeadBoost"].SetValue(LaserSettings.HeadBoost);
+        laser.Parameters["BackShare"].SetValue(LaserSettings.BackShare);
+
+        // Turned to the way the shot travels. On the shuttle it may be going any of the four ways
+        // and deflecting as well, so the shot's own angle is used; on foot it is one of two.
+        float along = onShuttle
+            ? MathHelper.ToRadians(_rotation)
+            : _directionFired == Direction.Left ? MathHelper.Pi : 0f;
+
+        _beam.Begin(SpriteSortMode.Deferred, BlendState.Additive, null, null, null, laser);
+        // Centred where the trail is emitted from, which is the middle of the shot. It used to be
+        // offset by half a *sprite* - thirty-two, half of sixty-four - where the shot is two by
+        // thirty-two, so the beam hung sixteen pixels off it on both axes and read as something
+        // flying alongside rather than as the shot itself.
+        _beam.Draw(
+            _beamQuad,
+            new Vector2(X + FireTrailOffset, Y + FireTrailOffset),
+            null,
+            ColourHelper.WhiteFadedTo((byte)(_fade * ((double)screenFade / ColourLevels.Full))),
+            along,
+            new Vector2(0.5f, 0.5f),
+            new Vector2(length, thickness),
+            SpriteEffects.None,
+            0f);
+        _beam.End();
     }
 
     /// <summary>
@@ -315,15 +399,14 @@ internal sealed class BlobWeapon
         }
 
         _animFire1.GetNextFrame();
-        _animFire2.GetNextFrame();
 
         AdvanceAppearance();
     }
 
     /// <summary>
-    ///     How the shot looks this frame: its additive glow comes up to full over the first few frames of
-    ///     flight so it does not appear at full brightness on the frame it is launched, and the shuttle's
-    ///     flame turns as it goes.
+    ///     How the shot looks this frame: its glow comes up to full over the first few frames of
+    ///     flight so it does not appear at full brightness on the frame it is launched, and the
+    ///     shuttle's shot turns as it goes.
     /// </summary>
     /// <remarks>
     ///     Both of these were done while drawing, which ran them at the display's refresh rate rather
@@ -430,9 +513,20 @@ internal sealed class BlobWeapon
         return items;
     }
 
+    /// <summary>
+    ///     One flame, lit as a beam along the way the shot is going.
+    /// </summary>
+    /// <remarks>
+    ///     The hot line down the middle is <c>Shaders/Laser.fx</c> rather than a second sprite laid
+    ///     over the top. A white glow was tried that way first - <c>BlobFire2Overlay</c>, which had
+    ///     been drawn for exactly that and never used - and it was both too bright and one
+    ///     mechanism too many: the core is the heat of the flame and belongs in the same pass as
+    ///     the flame, where a single intensity governs it.
+    /// </remarks>
     private void DrawFlame(string sheetName, int frame, int yPos, int alpha, int screenFade, float rotation)
     {
         SpriteCollection flame = _resources.GetSpriteCollection(sheetName);
+
         flame.Begin(BlendState.Additive);
         flame.DrawSprite(
             frame,

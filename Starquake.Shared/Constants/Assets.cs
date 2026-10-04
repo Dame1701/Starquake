@@ -248,6 +248,11 @@ internal static class Assets
         ///     <c>CoreReplacementSettings</c>.
         /// </summary>
         public const string CoreSurge = @"Shaders\CoreSurge";
+
+        /// <summary>
+        ///     Blob's shot, lit as a beam along the way it is going. See <c>LaserSettings</c>.
+        /// </summary>
+        public const string Laser = @"Shaders\Laser";
     }
 
     /// <summary>
