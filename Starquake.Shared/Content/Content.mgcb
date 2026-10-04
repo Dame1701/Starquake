@@ -1328,6 +1328,12 @@
 /processorParam:DebugMode=Auto
 /build:Shaders/TeleportArrival.fx
 
+#begin Shaders/CoreSurge.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/CoreSurge.fx
+
 #begin Sounds/AccessFailed.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor

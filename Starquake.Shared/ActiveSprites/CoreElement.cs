@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Animations;
 using Starquake.Constants;
+using Starquake.Display;
 using Starquake.ContentManagement;
 using Starquake.Helpers;
 using Starquake.Particles;
@@ -68,6 +69,11 @@ internal class CoreElement
 
     private bool _elementReplacementStarted;
 
+    /// <summary>
+    ///     Logic frames this part has been picked out for, which drives its glow and its shake.
+    /// </summary>
+    private int _identifiedFrame;
+
     private int _xPos;
     private int _yPos;
 
@@ -114,6 +120,14 @@ internal class CoreElement
 
     public event RaiseEffectComplete? OnCoreElementReplaced;
 
+    /// <summary>
+    ///     Raised the moment the incoming part reaches full size, which is when it has visibly
+    ///     landed. <see cref="OnCoreElementReplaced" /> is a fifth of a second later - it waits for
+    ///     the burst that goes off at the landing to finish - so anything that should feel like
+    ///     part of the landing itself has to hang off this one or it reads as a separate event.
+    /// </summary>
+    public event RaiseEffectComplete? OnCoreElementLanded;
+
     public void SetFadeToZero()
     {
         _fader1.SetFadeToZero();
@@ -145,6 +159,10 @@ internal class CoreElement
             _fader2.Update();
             _fader3.Update();
         }
+        else if (ElementState == CoreElementState.Identified)
+        {
+            _identifiedFrame++;
+        }
         else if (ElementState == CoreElementState.Replacing)
         {
             if (_elementReplacementStarted)
@@ -160,6 +178,7 @@ internal class CoreElement
                         if (!_coreReplacementEffect.EffectActive)
                         {
                             _coreReplacementEffect.Start();
+                            OnCoreElementLanded?.Invoke();
                         }
                     }
                 }
@@ -200,6 +219,35 @@ internal class CoreElement
         }
     }
 
+    /// <summary>
+    ///     The part the core has picked out, shaking in its slot with the light rising and falling
+    ///     on it. The illuminated artwork over the plain, so the pulse is the core worrying at it
+    ///     rather than a tint laid on top.
+    /// </summary>
+    private void DrawIdentified(int xPos, int yPos)
+    {
+        Vector2 shake = CoreReplacementSettings.ShakeAt(_identifiedFrame);
+        float pulse = CoreReplacementSettings.PulseAt(_identifiedFrame);
+
+        int x = xPos + (int)shake.X;
+        int y = yPos + (int)shake.Y;
+
+        SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
+        pickups.Begin(BlendState.AlphaBlend);
+        pickups.DrawSprite(CurrentElement, x, y, Color.White);
+        pickups.End();
+
+        SpriteCollection illuminated =
+            _resources.GetSpriteCollection(_graphicsSet.Names.PickupsIlluminated);
+
+        illuminated.Begin(BlendState.Additive);
+        illuminated.DrawSprite(
+            CurrentElement, x, y,
+            ColourHelper.WhiteFadedTo((byte)(pulse * CoreReplacementSettings.GlowAmount
+                                             * ColourLevels.Full)));
+        illuminated.End();
+    }
+
     public void Draw(int xPos, int yPos, bool replacingElement)
     {
         if (ElementState == CoreElementState.Missing)
@@ -228,6 +276,10 @@ internal class CoreElement
                 accessCodesPassed.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.WhiteFadedTo((byte)_fader3.FadeLevel));
                 accessCodesPassed.End();
             }
+        }
+        else if (ElementState == CoreElementState.Identified)
+        {
+            DrawIdentified(xPos, yPos);
         }
         else if (ElementState == CoreElementState.Replacing)
         {

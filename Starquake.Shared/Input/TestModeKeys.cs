@@ -14,8 +14,8 @@ using Starquake.Structure;
 namespace Starquake.Input;
 
 /// <summary>
-///     The debug keys: F1 kills Blob, F2 refills his lives, F3 runs the fade effect, and the
-///     numeric keypad steps between screens.
+///     The debug keys: F1 kills Blob, F2 refills his lives, F3 runs the fade effect, F4 hands him
+///     a core element the core is still missing, and the numeric keypad steps between screens.
 /// </summary>
 /// <remarks>
 ///     Nothing in a release build constructs this or calls it. <c>GameEngine</c> builds it and steps
@@ -34,7 +34,8 @@ internal class TestModeKeys(
     PlayerStats stats,
     ScreenEffectEngine screenEffects,
     ScreenDirectory screenDirectory,
-    GameScreenCollection gameScreens)
+    GameScreenCollection gameScreens,
+    CoreElements coreElements)
 {
     /// <summary>
     ///     Test-mode cheats: how many lives F2 hands back, and how long the screen-stepping keys wait
@@ -74,10 +75,81 @@ internal class TestModeKeys(
             screenEffects.ExecuteScreenEffect(ScreenEffectType.AdditiveFade, -1, 50, false);
         }
 
+        if (input.GetPressedKey() == Keys.F4)
+        {
+            HandOverACoreElement();
+        }
+
         if (screenDirectory.Current == GameScreenType.MainGame)
         {
             StepBetweenScreens();
         }
+    }
+
+    /// <summary>
+    ///     Puts one core element the core is still missing into an empty slot of Blob's inventory,
+    ///     so the replacement sequence can be reached without first finding nine of them on the
+    ///     planet. Press it four times to fill him up, then walk into the core.
+    /// </summary>
+    /// <remarks>
+    ///     Never an element he is already carrying. The core matches every inventory slot against
+    ///     every element it wants, so two copies of one would queue that element twice - scoring
+    ///     it twice and starting its replacement a second time while the first was still running.
+    /// </remarks>
+    private void HandOverACoreElement()
+    {
+        if (FirstEmptySlot(player.BlobInventory) is not { } slot)
+        {
+            return;
+        }
+
+        IEnumerable<int> wanted = coreElements.GetActiveElements()
+            .Select(element => element.CurrentElement);
+
+        if (WantedElementNotYetCarried(wanted, player.BlobInventory) is not { } element)
+        {
+            return;
+        }
+
+        player.BlobInventory[slot] = (Collectables)element;
+    }
+
+    /// <summary>
+    ///     The first slot of the inventory holding nothing, or null when Blob is full.
+    /// </summary>
+    public static int? FirstEmptySlot(Collectables[] carried)
+    {
+        for (int slot = 0; slot < carried.Length; slot++)
+        {
+            if (carried[slot] == Collectables.None)
+            {
+                return slot;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    ///     An element the core is still missing that Blob has not already got, or null when there
+    ///     is no such thing - every one it wants is either already in his hands or already in it.
+    /// </summary>
+    /// <remarks>
+    ///     Takes the element numbers rather than the <c>CoreElements</c> they came off, so the one
+    ///     rule in here can be checked without a content pipeline - building a real set of them
+    ///     needs a resource manager, and a resource manager needs the game's content.
+    /// </remarks>
+    public static int? WantedElementNotYetCarried(IEnumerable<int> wanted, Collectables[] carried)
+    {
+        foreach (int element in wanted)
+        {
+            if (!carried.Contains((Collectables)element))
+            {
+                return element;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>

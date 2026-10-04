@@ -668,7 +668,9 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             Player,
             RandomNumberGenerator,
             Elements,
-            ShapeDrawer));
+            ShapeDrawer,
+            ScreenEffectEngine,
+            BlobStatusPanel));
         ScreenDirectory.Add(new AccessBoothScreen(
             BlobStatusPanel,
             ContentResourceManager,
@@ -812,7 +814,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     [Conditional("DEBUG")]
     private void BuildTestModeKeys()
         => _testModeKeys = new TestModeKeys(
-            Input, Player, Stats, ScreenEffectEngine, ScreenDirectory, GameScreens);
+            Input, Player, Stats, ScreenEffectEngine, ScreenDirectory, GameScreens, Elements);
 
     private void UpdateActiveScreen(GameTime gameTime)
     {

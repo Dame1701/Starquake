@@ -53,7 +53,31 @@ internal class CoreElements
     }
     public CoreElement[] Elements { get; }
 
+    /// <summary>
+    ///     Which slot is being filled right now, or null when none is. The core's own energy reads
+    ///     this to gather on the element going in - the room used to switch off for a replacement
+    ///     rather than respond to one, so there was nothing that needed to know.
+    /// </summary>
+    public int? SlotBeingFilled
+    {
+        get
+        {
+            for (int element = 0; element < Elements.Length; element++)
+            {
+                if (Elements[element].ElementState == CoreElementState.Replacing)
+                {
+                    return element;
+                }
+            }
+
+            return null;
+        }
+    }
+
     public event RaiseEffectComplete? OnCoreElementReplaced;
+
+    /// <inheritdoc cref="CoreElement.OnCoreElementLanded" />
+    public event RaiseEffectComplete? OnCoreElementLanded;
 
     private void CoreElements_OnCoreElementReplaced()
     {
@@ -72,6 +96,44 @@ internal class CoreElements
             {
                 Elements[a].SetFadeToZero();
             }
+        }
+    }
+
+    /// <summary>
+    ///     Picks a part out as the one the core is about to take, so it glows and shakes in its
+    ///     slot before anything happens to it.
+    /// </summary>
+    public void IdentifyElement(int elementNoToReplace)
+    {
+        for (int a = 0; a < 9; a++)
+        {
+            if (Elements[a].CurrentElement == elementNoToReplace)
+            {
+                Elements[a].ElementState = CoreElementState.Identified;
+
+                return;
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Which slot the core has picked out, or null when it has not. Separate from
+    ///     <see cref="SlotBeingFilled" /> because the room answers the two differently - it gathers
+    ///     on the one it is about to take and bears down on the one going in.
+    /// </summary>
+    public int? SlotIdentified
+    {
+        get
+        {
+            for (int element = 0; element < Elements.Length; element++)
+            {
+                if (Elements[element].ElementState == CoreElementState.Identified)
+                {
+                    return element;
+                }
+            }
+
+            return null;
         }
     }
 
@@ -134,6 +196,7 @@ internal class CoreElements
                 int randomChoice = _randomNumberGenerator.Next(0, elementsToChoose.Count);
                 Elements[counter] = new CoreElement(_resources, _graphicsSet, _randomNumberGenerator, elementsToChoose[randomChoice], counter, fadeUp);
                 Elements[counter].OnCoreElementReplaced += CoreElements_OnCoreElementReplaced;
+                Elements[counter].OnCoreElementLanded += () => OnCoreElementLanded?.Invoke();
                 elementsToChoose.RemoveAt(randomChoice);
                 Elements[counter].ElementState = CoreElementState.Missing;
                 counter++;

@@ -13,5 +13,10 @@ internal enum ScreenEffectType
     /// <summary>
     ///     The room settling after Blob has arrived somewhere by teleport.
     /// </summary>
-    TeleportArrival
+    TeleportArrival,
+
+    /// <summary>
+    ///     The room being wrung round a slot after a part has gone into the planet's core.
+    /// </summary>
+    CoreSurge
 }

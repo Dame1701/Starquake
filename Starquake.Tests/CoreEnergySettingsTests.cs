@@ -164,7 +164,7 @@ public class CoreEnergySettingsTests
 
         for (int frame = 0; frame < 60; frame++)
         {
-            emitters.Add(CoreEnergySettings.EmitterAt(frame, 512, 288));
+            emitters.Add(CoreEnergySettings.EmitterAt(CoreEnergySettings.TurnedBy(frame), 512, 288));
         }
 
         // Assert - it moves, and it keeps its distance rather than wandering off or spiralling in
@@ -191,7 +191,7 @@ public class CoreEnergySettingsTests
 
         for (int frame = 0; frame < 8; frame++)
         {
-            Point emitter = CoreEnergySettings.EmitterAt(frame, 512, 288);
+            Point emitter = CoreEnergySettings.EmitterAt(CoreEnergySettings.TurnedBy(frame), 512, 288);
             angles.Add(Math.Atan2(emitter.Y - 288, emitter.X - 512));
         }
 
@@ -206,6 +206,97 @@ public class CoreEnergySettingsTests
         Assert.True(emitterFellBy > 0, "the emitter turned against the funnel");
         Assert.True(emitterFellBy > funnelFellBy, "the emitter did not outrun the funnel");
     }
+
+    /// <summary>
+    ///     While a slot is being filled every beam has to end on it - that is the core gathering
+    ///     on the part going in, and it is the whole of what the targeting is for.
+    /// </summary>
+    [Fact]
+    public void BeamEndsAt_WhileASlotIsBeingFilled_EveryBeamArrivesAtIt()
+    {
+        // Act / Assert
+        for (int frame = 0; frame < 300; frame++)
+        {
+            for (int beam = 0; beam < CoreEnergySettings.BeamCount; beam++)
+            {
+                (int from, int to) = CoreEnergySettings.BeamEndsAt(frame, beam, 4);
+
+                Assert.Equal(4, to);
+                Assert.NotEqual(4, from);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     The beam that was already starting at the slot is turned around rather than dropped, or
+    ///     the three would sometimes collapse to two.
+    /// </summary>
+    [Fact]
+    public void BeamEndsAt_WhenABeamAlreadyStartedAtTheSlot_KeepsItsOtherEnd()
+    {
+        // Arrange - find a frame and beam that starts at the slot of its own accord
+        for (int frame = 0; frame < 500; frame++)
+        {
+            for (int beam = 0; beam < CoreEnergySettings.BeamCount; beam++)
+            {
+                (int wouldStartAt, int wouldEndAt) = CoreEnergySettings.BeamEndsAt(frame, beam);
+
+                if (wouldStartAt != 2)
+                {
+                    continue;
+                }
+
+                // Act
+                (int from, int to) = CoreEnergySettings.BeamEndsAt(frame, beam, 2);
+
+                // Assert - turned about, so the end it had is the end it keeps
+                Assert.Equal(wouldEndAt, from);
+                Assert.Equal(2, to);
+
+                return;
+            }
+        }
+
+        Assert.Fail("no beam ever started at that slot, so the turnaround was never exercised");
+    }
+
+    [Fact]
+    public void BeamEndsAt_WithNoSlotBeingFilled_IsLeftToWanderAsBefore()
+    {
+        // Act / Assert
+        for (int frame = 0; frame < 200; frame++)
+        {
+            for (int beam = 0; beam < CoreEnergySettings.BeamCount; beam++)
+            {
+                Assert.Equal(
+                    CoreEnergySettings.BeamEndsAt(frame, beam),
+                    CoreEnergySettings.BeamEndsAt(frame, beam, null));
+            }
+        }
+    }
+
+    /// <summary>
+    ///     The core leans into a replacement and settles out of it rather than snapping either
+    ///     way, which is what a ramp buys over a flag.
+    /// </summary>
+    [Fact]
+    public void WoundUpBy_AcrossTheWind_RunsFromRestToFullBearing()
+    {
+        // Assert
+        Assert.Equal(0f, CoreEnergySettings.WoundUpBy(0));
+        Assert.Equal(1f, CoreEnergySettings.WoundUpBy(CoreEnergySettings.WindFrames));
+        Assert.InRange(CoreEnergySettings.WoundUpBy(CoreEnergySettings.WindFrames / 2), 0.4f, 0.6f);
+    }
+
+    /// <summary>
+    ///     A wind that ran past one would push the funnel brighter than it was ever meant to go,
+    ///     and a replacement that took longer than the wind-up is the ordinary case.
+    /// </summary>
+    [Theory]
+    [InlineData(-5)]
+    [InlineData(10000)]
+    public void WoundUpBy_OutsideTheWind_IsHeldAtRestOrFullBearing(int frames)
+        => Assert.InRange(CoreEnergySettings.WoundUpBy(frames), 0f, 1f);
 
     /// <summary>
     ///     The funnel has to be gone before the corners of the rectangle it is drawn over, or it

@@ -42,6 +42,7 @@ internal class ScreenEffectEngine
         _screenEffects.Add(new RightTunnelEntryEffect(outgoingScreen, presentation, resources));
         _screenEffects.Add(new AdditiveFade(presentation));
         _screenEffects.Add(new TeleportArrivalEffect(presentation, resources));
+        _screenEffects.Add(new CoreSurgeEffect(presentation, resources));
 
         _renderer = new SpriteBatch(_graphicsDeviceManager.GraphicsDevice);
         _haltBlobAndNastiesRequested = false;
@@ -113,6 +114,24 @@ internal class ScreenEffectEngine
     private RenderViewPort GetRenderViewPort(string name)
         => FindRenderViewPort(name)
            ?? throw new InvalidOperationException($"Could not find a RenderViewPort named '{name}'.");
+
+    /// <summary>
+    ///     Says where the next core surge should be centred. Separate from triggering it because
+    ///     <see cref="ExecuteScreenEffect" /> is the same call for every effect and only this one
+    ///     has somewhere to be.
+    /// </summary>
+    public void WringCoreSurgeAbout(Vector2 slotInPlayfield)
+    {
+        foreach (ScreenEffectBase screenEffect in _screenEffects)
+        {
+            if (screenEffect is CoreSurgeEffect surge)
+            {
+                surge.WringAbout(slotInPlayfield);
+
+                return;
+            }
+        }
+    }
 
     public void ExecuteScreenEffect(ScreenEffectType screenEffectToExecute, int effectSpeed, int effectDuration, bool haltBlobAndNasties)
     {

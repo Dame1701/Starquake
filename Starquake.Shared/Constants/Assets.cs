@@ -237,6 +237,12 @@ internal static class Assets
         ///     The room settling after a teleport arrival. See <c>TeleportArrivalSettings</c>.
         /// </summary>
         public const string TeleportArrival = @"Shaders\TeleportArrival";
+
+        /// <summary>
+        ///     The room wrung round a slot as the core takes a part. See
+        ///     <c>CoreReplacementSettings</c>.
+        /// </summary>
+        public const string CoreSurge = @"Shaders\CoreSurge";
     }
 
     /// <summary>

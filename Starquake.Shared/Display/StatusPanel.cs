@@ -9,6 +9,7 @@ using Starquake.Animations;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.GameComponents;
+using Starquake.Helpers;
 using Starquake.Scoring;
 using Starquake.Sprites;
 using Starquake.Structure;
@@ -112,6 +113,16 @@ internal class StatusPanel
     private Collectables[]? _blobsInventory;
     private int _slotToScan = -1;
 
+    /// <summary>
+    ///     The slot the core has picked out, or -1 for none. Drawn glowing and shaking, so a match
+    ///     is shown at both ends - in Blob's hands and in the core - rather than a part simply
+    ///     vanishing from one and appearing in the other.
+    /// </summary>
+    private int _slotIdentified = -1;
+
+    /// <inheritdoc cref="_slotIdentified" />
+    private int _identifiedFrame;
+
     public StatusPanel(
         ResourceManager resources,
         GraphicsSet graphicsSet,
@@ -165,6 +176,19 @@ internal class StatusPanel
         {
             blob.BlobsState = _stats.TakeALife() ? BlobState.GameOver : BlobState.Normal;
         }
+    }
+
+    /// <summary>
+    ///     Says which inventory slot the core is drawing a part out of, or -1 once it is not.
+    /// </summary>
+    public void IdentifySlot(int slotNo)
+    {
+        if (slotNo != _slotIdentified)
+        {
+            _identifiedFrame = 0;
+        }
+
+        _slotIdentified = slotNo;
     }
 
     public void ScanSlot(int slotNo)
@@ -256,17 +280,56 @@ internal class StatusPanel
                 _resources,
                 holdingSomething ? Color.OrangeRed : Color.White);
 
-            if (holdingSomething && _slotToScan != slot)
+            if (!holdingSomething || _slotToScan == slot)
             {
-                pickups.DrawSprite(
-                    (int)_blobsInventory[slot],
-                    InventorySlotSpacing * slot + InventoryItemXPos,
-                    InventoryItemYPos,
-                    Color.White);
+                continue;
             }
+
+            // The one the core has picked out rattles and glows where the others sit still.
+            Vector2 shake = slot == _slotIdentified
+                ? CoreReplacementSettings.ShakeAt(_identifiedFrame)
+                : Vector2.Zero;
+
+            pickups.DrawSprite(
+                (int)_blobsInventory[slot],
+                InventorySlotSpacing * slot + InventoryItemXPos + (int)shake.X,
+                InventoryItemYPos + (int)shake.Y,
+                Color.White);
         }
 
         pickups.End();
+
+        DrawIdentifiedSlotGlow();
+    }
+
+    /// <summary>
+    ///     The light rising and falling on the part the core is drawing out, over the plain
+    ///     artwork so the pulse is light on it rather than a tint of it.
+    /// </summary>
+    private void DrawIdentifiedSlotGlow()
+    {
+        if (_slotIdentified < 0 || _blobsInventory == null ||
+            _blobsInventory[_slotIdentified] == Collectables.None)
+        {
+            return;
+        }
+
+        _identifiedFrame++;
+
+        Vector2 shake = CoreReplacementSettings.ShakeAt(_identifiedFrame);
+        float pulse = CoreReplacementSettings.PulseAt(_identifiedFrame);
+
+        SpriteCollection illuminated =
+            _resources.GetSpriteCollection(_graphicsSet.Names.PickupsIlluminated);
+
+        illuminated.Begin(BlendState.Additive);
+        illuminated.DrawSprite(
+            (int)_blobsInventory[_slotIdentified],
+            InventorySlotSpacing * _slotIdentified + InventoryItemXPos + (int)shake.X,
+            InventoryItemYPos + (int)shake.Y,
+            ColourHelper.WhiteFadedTo((byte)(pulse * CoreReplacementSettings.GlowAmount
+                                             * ColourLevels.Full)));
+        illuminated.End();
     }
 
     /// <summary>

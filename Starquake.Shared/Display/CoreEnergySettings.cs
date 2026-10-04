@@ -107,9 +107,14 @@ internal static class CoreEnergySettings
     public static float TurnedBy(int logicFrame) => (float)(logicFrame * TurnSpeed);
 
     /// <summary>
-    ///     Where the core's particles are thrown from on a given logic frame - a point going round
-    ///     the middle rather than the middle itself.
+    ///     Where the core's particles are thrown from - a point going round the middle rather than
+    ///     the middle itself.
     /// </summary>
+    /// <remarks>
+    ///     Driven by how far the funnel has actually turned rather than by the frame, so the two
+    ///     stay in step when it winds up for a replacement. Working it out from the frame kept them
+    ///     together only while the rate never changed.
+    /// </remarks>
     /// <remarks>
     ///     It turns the same way the funnel does, which is anticlockwise on screen: the shader's
     ///     arms hold their shape where <c>angle * Arms + Turned</c> is constant, so the angle they
@@ -117,14 +122,37 @@ internal static class CoreEnergySettings
     ///     downward. Hence the minus. If the two are ever seen turning against each other, that
     ///     sign is the whole of it.
     /// </remarks>
-    public static Point EmitterAt(int logicFrame, int centreX, int centreY)
+    public static Point EmitterAt(float funnelTurned, int centreX, int centreY)
     {
-        double turned = -TurnedBy(logicFrame) * ParticleTurnFaster;
+        double turned = -funnelTurned * ParticleTurnFaster;
 
         return new Point(
             centreX + (int)(Math.Cos(turned) * EmitterOrbit),
             centreY + (int)(Math.Sin(turned) * EmitterOrbit));
     }
+
+    /// <summary>
+    ///     How much brighter the funnel burns while a slot is being filled, and how much faster it
+    ///     turns. The core is a machine being repaired: it should bear down on the part going in,
+    ///     not stop and wait for it.
+    /// </summary>
+    public const float FillingBrightness = 2.1f;
+
+    /// <inheritdoc cref="FillingBrightness" />
+    public const float FillingTurnFaster = 2.6f;
+
+    /// <summary>
+    ///     How many frames the funnel takes to wind up to that and back down again.
+    /// </summary>
+    public static readonly int WindFrames = LogicClock.Seconds(0.35);
+
+    /// <summary>
+    ///     How far along winding up to a filling the core is, nought at rest and one at full
+    ///     bearing. Ramped rather than switched, so the room leans into a replacement and settles
+    ///     out of it instead of snapping either way.
+    /// </summary>
+    public static float WoundUpBy(int framesWinding)
+        => Math.Clamp(framesWinding / (float)WindFrames, 0f, 1f);
 
     /// <summary>
     ///     Which two elements a beam joins at a given moment. Deterministic, so the core looks the
@@ -135,6 +163,26 @@ internal static class CoreEnergySettings
     ///     The two are never the same element - a beam from a thing to itself has no length and
     ///     would draw as a blot sitting on it.
     /// </remarks>
+    /// <remarks>
+    ///     <paramref name="slotBeingFilled" /> pulls every beam onto the one element going in. A
+    ///     beam that would otherwise have started there keeps its other end, so the three do not
+    ///     collapse onto one line - which is also why the slot is the <c>To</c> and never the
+    ///     <c>From</c>: the energy arrives at it.
+    /// </remarks>
+    public static (int From, int To) BeamEndsAt(int logicFrame, int beam, int? slotBeingFilled)
+    {
+        (int from, int to) = BeamEndsAt(logicFrame, beam);
+
+        if (slotBeingFilled is not { } slot)
+        {
+            return (from, to);
+        }
+
+        // The one beam that was already coming from there is turned around rather than dropped.
+        return from == slot ? (to, slot) : (from, slot);
+    }
+
+    /// <inheritdoc cref="BeamEndsAt(int,int,System.Nullable{int})" />
     public static (int From, int To) BeamEndsAt(int logicFrame, int beam)
     {
         int step = logicFrame / BeamHoldFrames;
