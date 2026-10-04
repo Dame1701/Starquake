@@ -1,4 +1,4 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
@@ -47,11 +47,33 @@ internal sealed class ScreenShake
     /// </summary>
     private const int LargestOffset = 5;
 
+    /// <summary>
+    ///     How long a jolt lasts, in logic frames, and how hard it starts. Short and sharp where a
+    ///     tremor is long and low: something has gone off, rather than the ground grumbling.
+    /// </summary>
+    private const int JoltFrames = 11;
+
+    /// <inheritdoc cref="JoltFrames" />
+    private const int LargestJoltOffset = 11;
+
     private int _framesShaken;
+
+    private int _joltFramesLeft;
 
     private int _framesToShake;
 
     private bool _shaking;
+
+    /// <summary>
+    ///     Something has exploded. Knocks the picture about for a fraction of a second, harder
+    ///     than a tremor and over much sooner.
+    /// </summary>
+    /// <remarks>
+    ///     A jolt makes no rumble. The tremor's sound is the ground complaining and goes on for
+    ///     seconds; a blast is already carrying its own noise, and a rumble started and stopped
+    ///     inside a fifth of a second would be a click.
+    /// </remarks>
+    public void Jolt() => _joltFramesLeft = JoltFrames;
 
     /// <summary>
     ///     One logic frame of the ground moving.
@@ -100,6 +122,24 @@ internal sealed class ScreenShake
         if (screenEffectRunning)
         {
             return null;
+        }
+
+        // A jolt is drawn over whatever the ground is doing, and takes the frame from it. It
+        // cannot simply add to the tremor's offset: both are rolled fresh each frame, so adding
+        // them would make a tremor during a jolt no different from a jolt on its own.
+        if (_joltFramesLeft > 0)
+        {
+            _joltFramesLeft--;
+
+            // Hardest on the first frame and all but gone by the last, so it hits and settles
+            // rather than buzzing for a fifth of a second. Never nought, because a Shake with an
+            // offset of nought on either axis does not move the picture at all.
+            int hardness = 1 + LargestJoltOffset * _joltFramesLeft / JoltFrames;
+
+            return new Shake(
+                randomNumberGenerator.Next(1, hardness + 1),
+                randomNumberGenerator.Next(1, hardness + 1),
+                false);
         }
 
         if (!_shaking)

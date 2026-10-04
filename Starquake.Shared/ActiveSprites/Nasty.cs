@@ -140,6 +140,12 @@ internal class Nasty
     private readonly GraphicsSet _graphicsSet;
 
     private readonly Animation _nastyAnim;
+    /// <summary>
+    ///     Told when this nasty blows itself apart, so the picture can be knocked about. A callback
+    ///     rather than the thing that shakes it, which a nasty has no business holding.
+    /// </summary>
+    private readonly Action _onExploded;
+
     private readonly IStandardParticleEffect _nastyArrives;
 
     private readonly IStandardParticleEffect _nastyDies;
@@ -192,10 +198,13 @@ internal class Nasty
         GraphicsSet graphicsSet,
         Blob blob,
         Random randomNumberGenerator,
+        Action onExploded,
         int xposition,
         int yposition,
         int moveSpeed)
     {
+        _onExploded = onExploded;
+
         _resources = resources;
         _gameScreens = gameScreens;
         _graphicsSet = graphicsSet;
@@ -608,6 +617,10 @@ internal class Nasty
         if (IsMechanical)
         {
             _nastyDies.Start();
+
+            // Only the machines. A creature coming apart is wet rather than loud, and a jolt on
+            // every nasty Blob shoots would have the picture moving most of the time.
+            _onExploded();
         }
         else
         {

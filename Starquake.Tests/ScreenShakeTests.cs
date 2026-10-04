@@ -1,7 +1,8 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+using Starquake.Constants;
 using Starquake.Display;
 using Starquake.Structure;
 using Xunit;
@@ -188,6 +189,108 @@ public class ScreenShakeTests
         // Assert
         Assert.NotEmpty(offsets);
         Assert.All(offsets, offset => Assert.InRange(offset, 0, TestData.LargestOffset));
+    }
+
+    /// <summary>
+    ///     A jolt is what something exploding does to the picture: short, hard, and over before a
+    ///     tremor would have got going.
+    /// </summary>
+    [Fact]
+    public void Jolt_OnceAsked_ShakesHardAndIsOverQuickly()
+    {
+        // Arrange
+        var shake = new ScreenShake();
+        Random generator = TestData.Generator();
+
+        // Act
+        shake.Jolt();
+
+        var offsets = new List<int>();
+        int frames = 0;
+
+        while (true)
+        {
+            Shake step = shake.Step(generator, false, false, false)!.Value;
+
+            if (!step.MovesTheViewPort)
+            {
+                break;
+            }
+
+            offsets.Add(Math.Max(step.XOffset, step.YOffset));
+            frames++;
+        }
+
+        // Assert - harder than a tremor ever is, and gone inside a quarter of a second
+        Assert.NotEmpty(offsets);
+        Assert.True(offsets.Max() > TestData.LargestOffset,
+            $"a jolt peaked at {offsets.Max()}, no harder than a tremor");
+        Assert.InRange(frames, 1, LogicClock.Seconds(0.3));
+    }
+
+    /// <summary>
+    ///     It hits and settles rather than buzzing for a fifth of a second, so the end of a jolt
+    ///     has to be gentler than its beginning.
+    /// </summary>
+    [Fact]
+    public void Jolt_OverItsRun_DiesAwayRatherThanHoldingItsForce()
+    {
+        // Arrange
+        var shake = new ScreenShake();
+        Random generator = TestData.Generator();
+
+        // Act
+        shake.Jolt();
+
+        var offsets = new List<int>();
+
+        for (int frame = 0; frame < 11; frame++)
+        {
+            Shake step = shake.Step(generator, false, false, false)!.Value;
+            offsets.Add(Math.Max(step.XOffset, step.YOffset));
+        }
+
+        // Assert - the first third hits harder than the last
+        Assert.True(
+            offsets.Take(4).Max() > offsets.TakeLast(4).Max(),
+            $"a jolt did not die away: {string.Join(", ", offsets)}");
+    }
+
+    /// <summary>
+    ///     A jolt makes no rumble. The tremor's sound runs for seconds; a blast carries its own
+    ///     noise, and a rumble started and stopped inside a fifth of a second would be a click.
+    /// </summary>
+    [Fact]
+    public void Jolt_WhileItRuns_NeverAsksForTheRumble()
+    {
+        // Arrange
+        var shake = new ScreenShake();
+        Random generator = TestData.Generator();
+
+        // Act / Assert
+        shake.Jolt();
+
+        for (int frame = 0; frame < 11; frame++)
+        {
+            Assert.False(shake.Step(generator, false, false, false)!.Value.Rumbling);
+        }
+    }
+
+    /// <summary>
+    ///     The view port belongs to a screen effect while one is composing the picture, so a jolt
+    ///     waits rather than fighting it for the offset - which is the rule a tremor already keeps.
+    /// </summary>
+    [Fact]
+    public void Jolt_WhileAScreenEffectIsRunning_LeavesTheViewPortAlone()
+    {
+        // Arrange
+        var shake = new ScreenShake();
+
+        // Act
+        shake.Jolt();
+
+        // Assert
+        Assert.Null(shake.Step(TestData.Generator(), false, false, true));
     }
 
     private static class TestData

@@ -203,6 +203,10 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
                 graphicsSet,
                 _blob,
                 randomNumberGenerator,
+                // A guardian is a CoreGuardian and so never mechanical, which is the only kind
+                // that explodes this way - but it is wired truthfully rather than with a no-op, so
+                // that one ever made mechanical would shake the room like anything else.
+                () => screenDirectory.MainGame.JoltScreen(),
                 0,
                 0,
                 CoreElementsToReplace)

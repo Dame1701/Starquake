@@ -337,6 +337,17 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         ScreenDirectory.MainGame.PerformPostScreenChangeActions(triggerScreen, new ScreenChange.FadeIn());
     }
 
+    /// <summary>
+    ///     Knocks the picture about for something that has exploded - a machine Blob has shot, or
+    ///     Blob himself.
+    /// </summary>
+    /// <remarks>
+    ///     Handed out as a callback rather than letting a nasty or Blob hold the thing that shakes
+    ///     the screen, which is the main game screen's and has no business being reached into from
+    ///     an actor.
+    /// </remarks>
+    private void JoltTheScreen() => ScreenDirectory.MainGame.JoltScreen();
+
     private void Player_OnBlobActionRaised(BlobAction action, object? data)
         => Stats.BlobHasPerformedAnAction(action, data);
 
@@ -504,7 +515,8 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             blobKiller,
             breakableBridges,
             RandomNumberGenerator,
-            Input);
+            Input,
+            JoltTheScreen);
         player.OnScreenChanged += Player_OnScreenChanged;
         player.OnBlobActionRaised += Player_OnBlobActionRaised;
 
@@ -559,6 +571,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             RandomNumberGenerator,
             conveyorNasties,
             electricityNodeGates,
+            JoltTheScreen,
             NastiesPerScreen,
             Input);
         nasties.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;

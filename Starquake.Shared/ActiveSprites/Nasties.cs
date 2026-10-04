@@ -61,6 +61,12 @@ internal class Nasties
     private readonly ResourceManager _resources;
     private int _previousScreenVisited;
 
+    /// <summary>
+    ///     Told when one of these blows itself apart, and handed on to each of them. Only the
+    ///     mechanical ones ever raise it.
+    /// </summary>
+    private readonly Action _onNastyExploded;
+
     public Nasties(
         ResourceManager resources,
         GameScreenCollection gameScreens,
@@ -69,9 +75,11 @@ internal class Nasties
         Random randomNumberGenerator,
         ConveyorNasties conveyorNasties,
         ElectricityGatesAndNodesEngine electricityNodeGates,
+        Action onNastyExploded,
         int nastyCount,
         ToggleKeys input)
     {
+        _onNastyExploded = onNastyExploded;
         _resources = resources;
         _gameScreens = gameScreens;
         _graphicsSet = graphicsSet;
@@ -104,6 +112,7 @@ internal class Nasties
                     _graphicsSet,
                     _blob,
                     _randomNumberGenerator,
+                    _onNastyExploded,
                     0,
                     0,
                     3));

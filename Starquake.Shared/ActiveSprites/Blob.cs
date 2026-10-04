@@ -223,7 +223,8 @@ internal class Blob
         BlobDeathAnimation blobKiller,
         BreakableBridges breakableBridges,
         Random randomNumberGenerator,
-        ToggleKeys input)
+        ToggleKeys input,
+        Action onExploded)
     {
         _resources = resources;
         _gameScreens = gameScreens;
@@ -251,6 +252,8 @@ internal class Blob
             (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.BeamMeUpSmall,
                 ParticleEffectType.Triggered, null);
         _blobTeleporterBeam.ParticleEffectComplete += BlobTeleporterBeam_ParticleEffectComplete;
+
+        _onExploded = onExploded;
 
         Weapon = new BlobWeapon(resources, gameScreens, graphics, graphicsSet, stats, randomNumberGenerator,
             () => OnBlobActionRaised?.Invoke(BlobAction.FiredLazer, null));
@@ -327,6 +330,12 @@ internal class Blob
     public BlobWeapon Weapon { get; }
 
     public CustomControl BlobsControl { get; }
+
+    /// <summary>
+    ///     Told when Blob comes apart, so the picture can be knocked about. A callback rather than
+    ///     the thing that shakes it, which Blob has no business holding.
+    /// </summary>
+    private readonly Action _onExploded;
 
     public event RaiseScreenChanged? OnScreenChanged;
 
@@ -1189,6 +1198,7 @@ internal class Blob
 
             _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobExplodes, false);
             _blobKiller.Trigger(BlobXPos, BlobYPos, true);
+            _onExploded();
             BlobsState = BlobState.Dying;
         }
     }

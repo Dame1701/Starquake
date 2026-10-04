@@ -546,6 +546,11 @@ internal class MainGameScreen : IGameScreen
     ///     <see cref="ScreenShake" />'s; the rumble and the view port are this screen's, because only it
     ///     has the sound engine and the screen effects.
     /// </summary>
+    /// <summary>
+    ///     Knocks the picture about for a moment, for something that has just exploded.
+    /// </summary>
+    public void JoltScreen() => _shake.Jolt();
+
     private void ShakeScreen()
     {
         // Null while a screen effect is composing the picture: the view port is its to move, and the
