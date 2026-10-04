@@ -120,7 +120,7 @@ That target framework still compiles everywhere - `EnableWindowsTargeting` sees 
 just ships no content off a Mac, which costs nothing because the Windows head cannot run there.
 **Build the Windows head's content on Windows.** There it needs no Wine at all.
 
-Twelve shaders are built, all of them `ps_2_0` because the profile is `Reach` and allows no higher:
+Thirteen shaders are built, all of them `ps_2_0` because the profile is `Reach` and allows no higher:
 
 | Shader | What it does |
 | --- | --- |
@@ -136,6 +136,7 @@ Twelve shaders are built, all of them `ps_2_0` because the profile is `Reach` an
 | `Laser.fx` | Blob's shot: a beam with a ball of plasma at each end, drawn out of no artwork |
 | `Platform.fx` | A jump platform dissolving, with every hole the dissolve opens burning at its edge |
 | `Water.fx` | Olly's screen flooded: everything below the waterline read through moving water |
+| `Halo.fx` | The glow under a shuttle tag's lights, drawn from no texture at all |
 
 **`ps_2_0` has no dynamic branching and 64 arithmetic slots**, and that is a real ceiling rather
 than a theoretical one. It is why `Crt.fx` is three techniques rather than one shader with
