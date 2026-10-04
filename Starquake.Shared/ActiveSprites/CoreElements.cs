@@ -254,7 +254,7 @@ internal class CoreElements
         }
     }
 
-    public void Draw(int coreX, int coreY, bool replacingElement)
+    public void Draw(int coreX, int coreY)
     {
         int counter = 0;
 
@@ -262,11 +262,10 @@ internal class CoreElements
         {
             for (int x = 0; x < CoreGridAcross; x++)
             {
-                Elements[counter].Draw(coreX + x * SpriteMetrics.SpriteWidth, coreY + y * SpriteMetrics.SpriteHeight, replacingElement);
+                Elements[counter].Draw(coreX + x * SpriteMetrics.SpriteWidth, coreY + y * SpriteMetrics.SpriteHeight);
                 counter++;
             }
         }
-
     }
 
     public void Draw(int xPos, int yPos, int fade)

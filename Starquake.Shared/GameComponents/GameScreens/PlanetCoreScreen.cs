@@ -323,7 +323,7 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
         // Where the core is comes off the map, so it is asked for rather than known here.
         Point core = _gameScreens.CorePosition;
 
-        _elements.Draw(core.X, core.Y, _replacingElements);
+        _elements.Draw(core.X, core.Y);
 
         DrawBeamsAcrossTheElements(core);
     }

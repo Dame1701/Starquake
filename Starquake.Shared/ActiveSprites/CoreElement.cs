@@ -47,11 +47,6 @@ internal class CoreElement
     /// </summary>
     private const int ElementFadeStep = 8;
 
-    /// <summary>
-    ///     How faintly a core element still to be replaced is drawn, so the gaps in the core read as
-    ///     gaps without disappearing altogether.
-    /// </summary>
-    private const int MissingElementAlpha = 50;
     private readonly IStandardParticleEffect _coreReplacementEffect;
 
 
@@ -248,34 +243,34 @@ internal class CoreElement
         illuminated.End();
     }
 
-    public void Draw(int xPos, int yPos, bool replacingElement)
+    /// <summary>
+    ///     One element of the core as it stands in the room.
+    /// </summary>
+    /// <remarks>
+    ///     This took a flag saying whether any element was being replaced, and drew every other one
+    ///     at an alpha of fifty when it was - so for the whole of a replacement the rest of the
+    ///     core all but vanished. That was of a piece with the room switching off its own energy
+    ///     for a replacement, which it no longer does: the core is a machine being repaired and
+    ///     should be visible while it is.
+    /// </remarks>
+    public void Draw(int xPos, int yPos)
     {
         if (ElementState == CoreElementState.Missing)
         {
-            if (replacingElement)
-            {
-                SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
-                pickups.Begin(BlendState.Additive);
-                pickups.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.WhiteFadedTo(MissingElementAlpha));
-                pickups.End();
-            }
-            else
-            {
-                SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
-                pickups.Begin(BlendState.Additive);
-                pickups.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.WhiteFadedTo((byte)_fader1.FadeLevel));
-                pickups.End();
+            SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
+            pickups.Begin(BlendState.Additive);
+            pickups.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.WhiteFadedTo((byte)_fader1.FadeLevel));
+            pickups.End();
 
-                SpriteCollection accessCodesFailed = _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesFailed);
-                accessCodesFailed.Begin(BlendState.AlphaBlend);
-                accessCodesFailed.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.WhiteFadedTo((byte)_fader2.FadeLevel));
-                accessCodesFailed.End();
+            SpriteCollection accessCodesFailed = _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesFailed);
+            accessCodesFailed.Begin(BlendState.AlphaBlend);
+            accessCodesFailed.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.WhiteFadedTo((byte)_fader2.FadeLevel));
+            accessCodesFailed.End();
 
-                SpriteCollection accessCodesPassed = _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesPassed);
-                accessCodesPassed.Begin(BlendState.AlphaBlend);
-                accessCodesPassed.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.WhiteFadedTo((byte)_fader3.FadeLevel));
-                accessCodesPassed.End();
-            }
+            SpriteCollection accessCodesPassed = _resources.GetSpriteCollection(_graphicsSet.Names.AccessCodesPassed);
+            accessCodesPassed.Begin(BlendState.AlphaBlend);
+            accessCodesPassed.DrawSprite(CurrentElement, xPos, yPos, ColourHelper.WhiteFadedTo((byte)_fader3.FadeLevel));
+            accessCodesPassed.End();
         }
         else if (ElementState == CoreElementState.Identified)
         {
@@ -295,20 +290,10 @@ internal class CoreElement
         }
         else if (ElementState == CoreElementState.Replaced)
         {
-            if (replacingElement)
-            {
-                SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
-                pickups.Begin(BlendState.Additive);
-                pickups.DrawSprite(FinalElement, xPos, yPos, ColourHelper.WhiteFadedTo(MissingElementAlpha));
-                pickups.End();
-            }
-            else
-            {
-                SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
-                pickups.Begin(BlendState.Additive);
-                pickups.DrawSprite(FinalElement, xPos, yPos, ColourHelper.WhiteFadedTo(ColourLevels.Full));
-                pickups.End();
-            }
+            SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
+            pickups.Begin(BlendState.Additive);
+            pickups.DrawSprite(FinalElement, xPos, yPos, ColourHelper.WhiteFadedTo(ColourLevels.Full));
+            pickups.End();
         }
 
         if (_elementReplacementStarted && ElementState == CoreElementState.Replacing)
