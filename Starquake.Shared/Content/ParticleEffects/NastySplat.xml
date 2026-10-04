@@ -5,7 +5,7 @@
         <Item>
             <Name>Bones</Name>
             <Budget>6</Budget>
-            <Term>3</Term>
+            <Term>1.5</Term>
             <ReleaseQuantity>6</ReleaseQuantity>
             <Enabled>true</Enabled>
             <ReleaseSpeed>
@@ -50,7 +50,7 @@
         <Item>
             <Name>Left Eye</Name>
             <Budget>1</Budget>
-            <Term>3</Term>
+            <Term>1.5</Term>
             <ReleaseQuantity>1</ReleaseQuantity>
             <Enabled>true</Enabled>
             <ReleaseSpeed>
@@ -95,7 +95,7 @@
         <Item>
             <Name>Right Eye</Name>
             <Budget>1</Budget>
-            <Term>3</Term>
+            <Term>1.5</Term>
             <ReleaseQuantity>1</ReleaseQuantity>
             <Enabled>true</Enabled>
             <ReleaseSpeed>
@@ -140,7 +140,7 @@
         <Item>
             <Name>Left Splat</Name>
             <Budget>1000</Budget>
-            <Term>3</Term>
+            <Term>1.5</Term>
             <ReleaseQuantity>100</ReleaseQuantity>
             <Enabled>true</Enabled>
             <ReleaseSpeed>
@@ -181,7 +181,7 @@
         <Item>
             <Name>Right Splat</Name>
             <Budget>1000</Budget>
-            <Term>3</Term>
+            <Term>1.5</Term>
             <ReleaseQuantity>100</ReleaseQuantity>
             <Enabled>true</Enabled>
             <ReleaseSpeed>
@@ -222,7 +222,7 @@
         <Item>
             <Name>Splodges</Name>
             <Budget>1000</Budget>
-            <Term>2</Term>
+            <Term>1</Term>
             <ReleaseQuantity>20</ReleaseQuantity>
             <Enabled>true</Enabled>
             <ReleaseSpeed>
@@ -263,7 +263,7 @@
         <Item>
             <Name>Blood</Name>
             <Budget>1000</Budget>
-            <Term>1</Term>
+            <Term>0.5</Term>
             <ReleaseQuantity>100</ReleaseQuantity>
             <Enabled>true</Enabled>
             <ReleaseSpeed>

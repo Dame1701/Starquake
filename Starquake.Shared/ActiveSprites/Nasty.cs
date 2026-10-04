@@ -84,13 +84,13 @@ internal class Nasty
     /// <summary>
     ///     How quickly a dead nasty shrinks away, and how fast the corpse spins as it goes.
     /// </summary>
-    private const float DeathShrinkStep = 0.01f;
+    private const float DeathShrinkStep = 0.02f;
 
     /// <inheritdoc cref="DeathShrinkStep" />
     private const float DeathRotateSpeed = 16f;
 
     /// <inheritdoc cref="DeathShrinkStep" />
-    private const int DeathFadeStep = 20;
+    private const int DeathFadeStep = 40;
 
     /// <summary>
     ///     How fast a live nasty rocks from side to side as it walks.
