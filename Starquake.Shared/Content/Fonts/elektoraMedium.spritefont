@@ -55,6 +55,16 @@ with.
         <Start>&#32;</Start>
         <End>&#126;</End>
       </CharacterRegion>
+
+      <!--
+      The options screen signs itself off with a copyright sign, which is the one character it
+      needs from outside basic Latin. There is no DefaultCharacter above, so a character the font
+      was not built with is an exception at the moment it is drawn rather than a gap on the screen.
+      -->
+      <CharacterRegion>
+        <Start>&#169;</Start>
+        <End>&#169;</End>
+      </CharacterRegion>
     </CharacterRegions>
   </Asset>
 </XnaContent>

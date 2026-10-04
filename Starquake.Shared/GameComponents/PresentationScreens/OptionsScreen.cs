@@ -144,7 +144,7 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
             _keyDefiner.Draw(ScreenFade);
         }
 
-        Font.WriteText(555, 640, "2017", 2, new Color(112, 155, 155), (byte)ScreenFade);
+        Font.WriteTextCentred(1280, 640, "Remake © 2026 Damien Green", 2, new Color(112, 155, 155), (byte)ScreenFade);
 
         Font.End();
 
