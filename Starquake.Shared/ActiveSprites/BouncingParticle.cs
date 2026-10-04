@@ -146,8 +146,37 @@ internal class BouncingParticle
         double around = spin + point * (2 * Math.PI / Math.Max(points, 1));
 
         return new Point(
-            (int)Math.Round(Math.Cos(around) * speed),
+            WithoutRoundingItAway(Math.Cos(around) * speed),
             (int)Math.Round(Math.Sin(around) * speed));
+    }
+
+    /// <summary>
+    ///     A sideways throw in whole pixels a frame, never rounded to none at all.
+    /// </summary>
+    /// <remarks>
+    ///     A part thrown within a degree of the vertical has a cosine small enough to round away,
+    ///     and the sideways speed is the one thing nothing afterwards ever changes - no gravity
+    ///     acts along it and nothing damps it - so a part that starts with none has none for the
+    ///     whole of its life. It goes straight up, comes straight back down the same line, and
+    ///     bounces on that spot until its time runs out. That is about one crash landing in
+    ///     twenty: the star is turned by a fresh angle every time, and six points spaced sixty
+    ///     degrees apart put one of them within a degree of the vertical that often.
+    ///     <para>
+    ///         Rounding up rather than away is the smallest answer that keeps the star even. The
+    ///         part is still thrown as near to straight up as the arithmetic allows - it simply
+    ///         lands somewhere other than where it left.
+    ///     </para>
+    /// </remarks>
+    private static int WithoutRoundingItAway(double sideways)
+    {
+        int wholePixels = (int)Math.Round(sideways);
+
+        if (wholePixels != 0)
+        {
+            return wholePixels;
+        }
+
+        return sideways < 0 ? -1 : 1;
     }
 
     public void Reset()
@@ -188,9 +217,23 @@ internal class BouncingParticle
     ///     This was four blocks - one per axis per direction - which were the same twelve lines with the
     ///     axis and the sign swapped. The sign is what decides everything: which way to probe, whether
     ///     the result is negated, and which of the two screen edges is the one to stop at.
+    ///     <para>
+    ///         A step of nothing is not a wall. <c>CheckCollision</c> answers with the distance it was
+    ///         handed and can only ever lower it, so asking it for nought gets nought back - which read
+    ///         here as blocked and turned the part round on that axis, with a clang and a shower of
+    ///         sparks, on every frame it was not moving along that axis. Vertically that was the top of
+    ///         every arc, where the fall passes through nought on its way back down. Horizontally it
+    ///         never ended: nothing changes a part's sideways speed once it is thrown, so a part thrown
+    ///         straight up spent its whole life striking sparks off thin air.
+    ///     </para>
     /// </remarks>
     private int StepAlongAxis(bool vertical, int requestedStep)
     {
+        if (requestedStep == 0)
+        {
+            return 0;
+        }
+
         bool movingPositive = requestedStep > 0;
 
         // Never more than its own size in one step, or it could pass clean through a wall between

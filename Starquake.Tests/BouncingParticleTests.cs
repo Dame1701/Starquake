@@ -121,6 +121,44 @@ public class BouncingParticleTests
     }
 
     /// <summary>
+    ///     The sideways speed is the one thing nothing afterwards ever changes - no gravity acts
+    ///     along it and nothing damps it - so a part thrown with none of it has none for the whole
+    ///     of its life: straight up, straight back down the same line, and bouncing on that spot
+    ///     until its time runs out. The ship crash is where that showed, because it throws the
+    ///     parts without drawing them and all that is seen is the fire each one trails.
+    /// </summary>
+    /// <remarks>
+    ///     Every turn of the star rather than a handful: a point lands near enough to the vertical
+    ///     to round away about one crash in twenty, so a test of three spins would have passed on
+    ///     the code this was written against.
+    /// </remarks>
+    [Fact]
+    public void StarburstVelocity_HoweverTheStarIsTurned_ThrowsNoPartStraightUpOrStraightDown()
+    {
+        // Act / Assert - a tenth of a degree at a time, all the way round
+        for (int tenths = 0; tenths < 3600; tenths++)
+        {
+            double spin = tenths * Math.PI / 1800;
+
+            for (int point = 0; point < Points; point++)
+            {
+                Assert.NotEqual(0, BouncingParticle.StarburstVelocity(point, Points, Speed, spin).X);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     And it is thrown the way it was aimed. Rounding a cosine of nearly nothing up to one
+    ///     whole pixel must not throw a part that was aimed leftwards off to the right.
+    /// </summary>
+    [Theory]
+    [InlineData(0.5 * Math.PI - 0.001, 1)]
+    [InlineData(0.5 * Math.PI + 0.001, -1)]
+    public void StarburstVelocity_AimedWithinADegreeOfTheVertical_KeepsTheSideItWasAimedAt(
+        double spin, int sideways)
+        => Assert.Equal(sideways, BouncingParticle.StarburstVelocity(0, Points, Speed, spin).X);
+
+    /// <summary>
     ///     A star of one point would divide by nought working out the step between them.
     /// </summary>
     [Fact]
