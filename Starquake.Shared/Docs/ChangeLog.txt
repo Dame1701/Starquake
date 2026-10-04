@@ -12,7 +12,7 @@
 
 21/03/2013
 - Added: Routine to ensure Blob never gets stuck in screen tiles when he's changing screens
-- Fixed: Bug in nasty AI routine which led to their inital spawn movements carrying over from the previous killed nasty
+- Fixed: Bug in nasty AI routine which led to their initial spawn movements carrying over from the previous killed nasty
 - Changed: When nasties spawn they start off slowly - gives Blob a chance to react and makes the game fairer
 - Added: Splat death effect for the organic nasties
 - Added: When organic nasties die they splat in their original colours
@@ -46,14 +46,14 @@
 
 12/03/2013
 - Fixed: Object ref error when Blob drops a pickup on certain screens
-- Fixed: Powerup that tops up lowest capability (ammo, jump, life) wasn't always topping up the right one
+- Fixed: Power-up that tops up lowest capability (ammo, jump, life) wasn't always topping up the right one
 - Changed: Decreased accuracy at which Blob can be struck by the electricity gates to make the game a little easier
 
 11/03/2013
 - Changed: Blob's energy is drained by the same amount no matter how many nasties are touching him - make the game a little easier
 - Changed: Status bars updated to proper 256 pixel versions
 - Added: Exit shadowing to make exits to screens appear dark and mysterious
-- Added: Shadowing to secret passages 
+- Added: Shadowing to secret passages
 
 07/03/2013
 - Changed: Initial work for new status panel to match title screen style
@@ -86,7 +86,7 @@
 18/12/2012
 - Added: Proper distribution of core elements
 - Changed: Spiky nasties now move slower
-- Changed: Blob can now shoot nbasties during birth
+- Changed: Blob can now shoot nasties during birth
 - Fixed: Occasions when Blob's fire gets stuck in mid air
 
 06/12/2012
@@ -216,9 +216,9 @@
 - Added: Started a routine that will cause Blob's laser to spark when it hits the game blocks etc
 
 26/07/2011
-- Added: Implimented multi trigger particle effect
+- Added: Implemented multi trigger particle effect
 
-27/07/2011 
+27/07/2011
 - Fixed: Bugs in Blob fire spark routine
 - Added: Nasty Smoke effect routine
 - Added: More work to fix the nasties getting stuck on active objects. Improved but still broken
