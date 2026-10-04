@@ -19,9 +19,9 @@ namespace Starquake.Constants;
 internal static class LogicClock
 {
     /// <summary>
-    ///     How many logic frames make a second. 50 matches the PAL original; 60 is the NTSC speed
-    ///     and is what the game runs at. <c>GameHost</c> paces itself from this and is the only
-    ///     thing that may change it.
+    ///     How many logic frames make a second. 50 is the PAL rate the original was written for and
+    ///     is what the game runs at; 60 is the NTSC speed and 20% faster. <c>GameHost</c> paces
+    ///     itself from this and is the only thing that may change it.
     /// </summary>
     public const int FramesPerSecond = 50;
 
