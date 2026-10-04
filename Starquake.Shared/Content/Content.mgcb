@@ -1363,6 +1363,12 @@
 /processorParam:DebugMode=Auto
 /build:Shaders/Halo.fx
 
+#begin Shaders/ForceField.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/ForceField.fx
+
 #begin Shaders/Malfunction.fx
 /importer:EffectImporter
 /processor:EffectProcessor

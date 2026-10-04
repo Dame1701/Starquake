@@ -271,6 +271,11 @@ internal static class Assets
         public const string Halo = @"Shaders\Halo";
 
         /// <summary>
+        ///     The sheet of light across a key-locked door. See <c>ForceFieldSettings</c>.
+        /// </summary>
+        public const string ForceField = @"Shaders\ForceField";
+
+        /// <summary>
         ///     The flight computer's display failing. See <c>MalfunctionSettings</c>.
         /// </summary>
         public const string Malfunction = @"Shaders\Malfunction";

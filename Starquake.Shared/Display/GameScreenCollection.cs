@@ -32,6 +32,13 @@ internal class GameScreenCollection : IDynamicCollisionCells
     private const int LoopForever = -1;
 
     /// <summary>
+    ///     How loudly a key-locked door says it has given way. The booth's own success tone, which
+    ///     is what the planet already uses for access granted - quietly, because a door may be
+    ///     opened again every time Blob walks back onto its screen.
+    /// </summary>
+    private const float DoorGivingWayVolume = 0.25f;
+
+    /// <summary>
     ///     The three tiles that mark a shuttle pad, in the order they were always started in. Their
     ///     colours are <c>ColourAnimatedTiles</c>'s; this is only which three they are.
     /// </summary>
@@ -64,6 +71,7 @@ internal class GameScreenCollection : IDynamicCollisionCells
         GraphicsSet graphicsSet,
         CoreElements elements,
         Random randomNumberGenerator,
+        Shapes shapes,
         BitmapFont signpostFont,
         int tilesAcross,
         int tilesDown,
@@ -109,6 +117,7 @@ internal class GameScreenCollection : IDynamicCollisionCells
             _gameScreens,
             ColourAnimations,
             (IStandardParticleEffect)resources.GetParticleEffectInstance(Assets.Effects.ForceField, ParticleEffectType.Continual, null),
+            shapes,
             signpostFont);
 
         BlobsShipSmoke1 =
@@ -520,7 +529,7 @@ internal class GameScreenCollection : IDynamicCollisionCells
 
             foreach (KeyLockDoor keyLockDoor in _keyLockDoors)
             {
-                UpdateKeyLockDoor(keyLockDoor, gameTime, blobHasKey);
+                UpdateKeyLockDoor(keyLockDoor, gameTime, blobHasKey, blobXPos, blobYPos);
             }
         }
         else
@@ -543,7 +552,8 @@ internal class GameScreenCollection : IDynamicCollisionCells
     ///     way, which is why the tiles flip between <see cref="CollisionTileType.NotBlob" /> and
     ///     <see cref="CollisionTileType.EveryoneHits" /> rather than being removed.
     /// </summary>
-    private void UpdateKeyLockDoor(KeyLockDoor keyLockDoor, GameTime gameTime, bool blobHasKey)
+    private void UpdateKeyLockDoor(
+        KeyLockDoor keyLockDoor, GameTime gameTime, bool blobHasKey, int blobXPos, int blobYPos)
     {
         if (keyLockDoor.CollisionTiles.Count == 0)
         {
@@ -557,7 +567,42 @@ internal class GameScreenCollection : IDynamicCollisionCells
                 : CollisionTileType.EveryoneHits;
         }
 
-        Renderer.AnimateForceField(keyLockDoor, gameTime, blobHasKey);
+        StepTheForceField(keyLockDoor, blobHasKey, blobXPos, blobYPos);
+
+        Renderer.AnimateForceField(keyLockDoor, gameTime);
+    }
+
+    /// <summary>
+    ///     Moves the door's own state on a frame: how far open it is drawn, what is left of the
+    ///     burst at the moment it gave way, and the clock the field's bands and scanner run off.
+    /// </summary>
+    /// <remarks>
+    ///     The opening is light and nothing else - the cells above have already flipped on the key
+    ///     alone, so a door caught halfway through opening is passable. What it buys is the moment:
+    ///     a door that is shut when Blob walks onto the screen and opens in front of him says he
+    ///     has the key for it far better than one that was already green when the screen appeared.
+    ///     <para>
+    ///         A door is found afresh every time its screen is shown - see
+    ///         <c>UpdateCollisionMap</c> - so that moment is had on each arrival rather than once
+    ///         in the game.
+    ///     </para>
+    /// </remarks>
+    private void StepTheForceField(KeyLockDoor keyLockDoor, bool blobHasKey, int blobXPos, int blobYPos)
+    {
+        keyLockDoor.Frame++;
+        keyLockDoor.Brace = ForceFieldSettings.BraceAgainst(keyLockDoor.Doorway, blobXPos, blobYPos);
+
+        if (blobHasKey && !keyLockDoor.WasOpen)
+        {
+            keyLockDoor.Flash = ForceFieldSettings.NewFlash();
+
+            _resources.GetSoundFxEngine()
+                .PlaySound(Assets.Sounds.AccessSuccess, DoorGivingWayVolume, false);
+        }
+
+        keyLockDoor.WasOpen = blobHasKey;
+        keyLockDoor.Openness = ForceFieldSettings.OpennessAfter(keyLockDoor.Openness, blobHasKey);
+        keyLockDoor.Flash = ForceFieldSettings.FlashAfter(keyLockDoor.Flash);
     }
 
     /// <summary>
@@ -584,13 +629,15 @@ internal class GameScreenCollection : IDynamicCollisionCells
 
     private void AddKeyLockDoorCollisionTiles(KeyLockDoor keyLockDoor)
     {
-        for (int c = 0; c < 3; c++)
+        Rectangle doorway = keyLockDoor.Doorway;
+
+        for (int c = 0; c < TileMetrics.CollisionCellsDownTile; c++)
         {
             CollisionTile keyLockCollisionTile =
                 CollisionTile.ForObject(
                     CollisionObjectType.KeyAccessDoor,
-                    keyLockDoor.Location.X + 48,
-                    keyLockDoor.Location.Y + c * 32,
+                    doorway.Left,
+                    doorway.Top + c * TileMetrics.CollisionCellHeight,
                     CollisionTileType.None);
 
             // The door keeps its own tiles so it can take them out again, and the collision map is

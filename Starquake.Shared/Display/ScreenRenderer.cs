@@ -112,6 +112,30 @@ internal class ScreenRenderer
     private const int BrightFieldQuantity = 10;
 
     /// <summary>
+    ///     What those two quantities fall to once the door has opened. The sheet of light draws
+    ///     back onto the jambs when it opens - see <c>ForceFieldSettings</c> - and crackle left
+    ///     burning down the middle of a gap the field has let go of says the opposite of what the
+    ///     sheet is saying.
+    /// </summary>
+    private const int DimFieldOpenQuantity = 45;
+
+    /// <inheritdoc cref="DimFieldOpenQuantity" />
+    private const int BrightFieldOpenQuantity = 2;
+
+    /// <summary>
+    ///     Where the particles are emitted within the doorway: how far in from each jamb the two
+    ///     columns of the dim pass sit, how wide each is, and how wide the bright core down the
+    ///     middle is. All in the gap's own pixels, of which there are thirty-two across.
+    /// </summary>
+    private const int FieldColumnInset = 4;
+
+    /// <inheritdoc cref="FieldColumnInset" />
+    private const int FieldColumnWidth = 4;
+
+    /// <inheritdoc cref="FieldColumnInset" />
+    private const int FieldCoreWidth = 12;
+
+    /// <summary>
     ///     How solid that ink is. Short of opaque, because the letters the sign used to carry were
     ///     painted thinly enough to let the board show through them, and ink that covers it
     ///     completely reads as a label stuck on the sign rather than as part of it.
@@ -132,6 +156,12 @@ internal class ScreenRenderer
     private static readonly string[] ForceFieldEmitterNames = ["Emitter01", "Emitter05"];
 
     /// <summary>
+    ///     The grey the dim pass down each jamb is released in. Unlit enough to read as the body of
+    ///     the field rather than as light of its own, which is the bright pass's job.
+    /// </summary>
+    private static readonly Vector3 DimFieldColour = new(0.4f, 0.4f, 0.4f);
+
+    /// <summary>
     ///     The colour a signpost's code is written in. The board the artwork draws is gold, and black
     ///     on it is what reads from across a room.
     /// </summary>
@@ -140,7 +170,8 @@ internal class ScreenRenderer
 
     private readonly ColourAnimationEngine _colourAnimations;
     private readonly GraphicsSet _graphicsSet;
-    private readonly IStandardParticleEffect _keyDoorForceFieldNoAccess;
+    private readonly IStandardParticleEffect _keyDoorForceField;
+    private readonly Shapes _shapes;
     private readonly ResourceManager _resources;
     private readonly GameScreenData[] _screens;
     private readonly BitmapFont _signpostFont;
@@ -158,13 +189,15 @@ internal class ScreenRenderer
         GameScreenData[] screens,
         ColourAnimationEngine colourAnimations,
         IStandardParticleEffect keyDoorForceField,
+        Shapes shapes,
         BitmapFont signpostFont)
     {
         _resources = resources;
         _graphicsSet = graphicsSet;
         _screens = screens;
         _colourAnimations = colourAnimations;
-        _keyDoorForceFieldNoAccess = keyDoorForceField;
+        _keyDoorForceField = keyDoorForceField;
+        _shapes = shapes;
         _signpostFont = signpostFont;
     }
 
@@ -181,60 +214,85 @@ internal class ScreenRenderer
     public List<KeyLockDoor>? KeyLockDoors { get; set; }
 
     /// <summary>
-    ///     Runs one frame of the force field across a key-locked door. Drawn twice: a dim grey pass
-    ///     for the body of it, then a bright additive pass over the middle, which is what gives it
-    ///     its core. It turns green when Blob is carrying the key that opens the door.
+    ///     Runs one frame of the crackle over a key-locked door. Emitted twice: a dim grey pass down
+    ///     each jamb for the body of it, then a bright pass over the middle, which is what gives it
+    ///     its core. Both thin out as the door opens, and the core's colour crossfades from red to
+    ///     green with it rather than switching the moment Blob picks the key up.
     /// </summary>
-    public void AnimateForceField(KeyLockDoor keyLockDoor, GameTime gameTime, bool blobHasKey)
+    /// <remarks>
+    ///     The sheet of light the crackle sits on is <see cref="DrawKeyDoorForceFields" />, which is
+    ///     a draw rather than an update and so cannot be done from here. Both are measured off
+    ///     <see cref="KeyLockDoor.Doorway" />, which is the one place the gap's shape is written
+    ///     down.
+    /// </remarks>
+    public void AnimateForceField(KeyLockDoor keyLockDoor, GameTime gameTime)
     {
-        SetForceFieldEmitters(new Color(100, 100, 100), DimFieldQuantity, EmitterBlendMode.Alpha);
+        Rectangle doorway = keyLockDoor.Doorway;
+        float openness = keyLockDoor.Openness;
 
-        for (int c = 0; c < 4; c++)
+        SetForceFieldEmitters(
+            DimFieldColour, QuantityAt(DimFieldQuantity, DimFieldOpenQuantity, openness),
+            EmitterBlendMode.Alpha);
+
+        EmitFieldColumn(doorway, doorway.Left + FieldColumnInset, FieldColumnWidth, gameTime);
+        EmitFieldColumn(
+            doorway, doorway.Right - FieldColumnInset - FieldColumnWidth, FieldColumnWidth, gameTime);
+
+        SetForceFieldColour(ForceFieldSettings.ColourAt(openness));
+
+        SetForceFieldEmitters(
+            null, QuantityAt(BrightFieldQuantity, BrightFieldOpenQuantity, openness), EmitterBlendMode.Add);
+
+        EmitFieldColumn(
+            doorway, doorway.Center.X - FieldCoreWidth / 2, FieldCoreWidth, gameTime);
+    }
+
+    /// <summary>
+    ///     One column of the crackle: the emitters triggered once on each pixel across it, down the
+    ///     middle of the gap's height. The emitters are lines as tall as the doorway, so one trigger
+    ///     is a column and this is how wide a band of them is laid down.
+    /// </summary>
+    private void EmitFieldColumn(Rectangle doorway, int left, int width, GameTime gameTime)
+    {
+        for (int c = 0; c < width; c++)
         {
-            _keyDoorForceFieldNoAccess.Update(keyLockDoor.Location.X + 52 + c, keyLockDoor.Location.Y + 48, gameTime);
-        }
-
-        for (int c = 0; c < 4; c++)
-        {
-            _keyDoorForceFieldNoAccess.Update(keyLockDoor.Location.X + 76 + c, keyLockDoor.Location.Y + 48, gameTime);
-        }
-
-        SetForceFieldColour(blobHasKey ? new Color(0, ColourLevels.Full, 0) : new Color(ColourLevels.Full, 0, 0));
-
-        SetForceFieldEmitters(null, BrightFieldQuantity, EmitterBlendMode.Add);
-
-        for (int c = 0; c < 12; c++)
-        {
-            _keyDoorForceFieldNoAccess.Update(keyLockDoor.Location.X + 60 + c, keyLockDoor.Location.Y + 48, gameTime);
+            _keyDoorForceField.Update(left + c, doorway.Center.Y, gameTime);
         }
     }
+
+    /// <summary>
+    ///     How many particles a pass releases at a given openness, between what it releases across a
+    ///     shut door and what it is left releasing once the door has let go.
+    /// </summary>
+    private static int QuantityAt(int shut, int open, float openness)
+        => (int)MathHelper.Lerp(shut, open, openness);
 
     /// <summary>
     ///     Starts the force field emitting, once per screen that has a key-locked door on it.
     /// </summary>
     public void StartForceField()
-        => _keyDoorForceFieldNoAccess.Start();
+        => _keyDoorForceField.Start();
 
     /// <summary>
     ///     Stops the force field and kills the particles it has in the air, for a screen with no door
     ///     on it to emit them.
     /// </summary>
     public void ClearForceField()
-        => _keyDoorForceFieldNoAccess.Reset();
+        => _keyDoorForceField.Reset();
 
     /// <summary>
     ///     The force field is two emitters that are always set together, so this sets both.
     ///     <paramref name="colour" /> is null to leave the colour as it is.
     /// </summary>
-    private void SetForceFieldEmitters(Color? colour, int quantity, EmitterBlendMode blendMode)
+    private void SetForceFieldEmitters(Vector3? colour, int quantity, EmitterBlendMode blendMode)
     {
         foreach (string name in ForceFieldEmitterNames)
         {
-            Emitter? emitter = _keyDoorForceFieldNoAccess!.Effect[name];
+            Emitter? emitter = _keyDoorForceField!.Effect[name];
 
             if (colour is { } releaseColour)
             {
-                emitter.ReleaseColour = releaseColour.ToVector3();
+                emitter.ReleaseColour = releaseColour;
             }
 
             emitter.ReleaseQuantity = quantity;
@@ -243,11 +301,11 @@ internal class ScreenRenderer
     }
 
     /// <inheritdoc cref="SetForceFieldEmitters" />
-    private void SetForceFieldColour(Color colour)
+    private void SetForceFieldColour(Vector3 colour)
     {
         foreach (string name in ForceFieldEmitterNames)
         {
-            _keyDoorForceFieldNoAccess!.Effect[name].ReleaseColour = colour.ToVector3();
+            _keyDoorForceField!.Effect[name].ReleaseColour = colour;
         }
     }
 
@@ -478,7 +536,7 @@ internal class ScreenRenderer
         DrawTunnelEntrances(colour);
 
         DrawOlly(colour);
-        DrawKeyDoorForceFields();
+        DrawKeyDoorForceFields(colour);
 
         _colourAnimations.DrawUpperLayer();
     }
@@ -629,14 +687,54 @@ internal class ScreenRenderer
         }
     }
 
-    private void DrawKeyDoorForceFields()
+    /// <summary>
+    ///     The force field across each key-locked door on the screen: the sheet of light first and
+    ///     the crackle over the top of it, which is the order they read in - the sheet is what bars
+    ///     the way and the particles are what it does while it is barring it.
+    /// </summary>
+    /// <remarks>
+    ///     One batch per door, because the shader is told what state that door is in and a batch
+    ///     holds one set of values. That is at most a handful of batches on the few screens with a
+    ///     door on them, which is why it is affordable here - the same reason <c>DrawHalos</c>
+    ///     gives for the shuttle tags.
+    /// </remarks>
+    private void DrawKeyDoorForceFields(Color colour)
     {
         // Only where there is a door. An empty list is not null, so this used to draw the field on
         // every screen in the game - see GameScreenCollection.Update.
-        if (KeyLockDoors is { Count: > 0 })
+        if (KeyLockDoors is not { Count: > 0 })
         {
-            _keyDoorForceFieldNoAccess.Draw();
+            return;
         }
+
+        Effect field = _resources.GetEffect(Assets.Shaders.ForceField);
+
+        field.Parameters["Frequency"].SetValue(ForceFieldSettings.Frequency);
+        field.Parameters["OverScanWidth"].SetValue(ForceFieldSettings.OverScanWidth);
+        field.Parameters["PostGlow"].SetValue(ForceFieldSettings.PostGlow);
+
+        foreach (KeyLockDoor keyLockDoor in KeyLockDoors)
+        {
+            float openness = keyLockDoor.Openness;
+
+            field.Parameters["Colour"].SetValue(ForceFieldSettings.ColourAt(openness));
+            field.Parameters["DrawBack"].SetValue(ForceFieldSettings.DrawBackAt(openness));
+            field.Parameters["Flash"].SetValue(keyLockDoor.Flash);
+            field.Parameters["Phase"].SetValue(ForceFieldSettings.PhaseAt(keyLockDoor.Frame));
+            field.Parameters["ScanAt"].SetValue(ForceFieldSettings.ScanAt(keyLockDoor.Frame));
+
+            field.Parameters["Intensity"].SetValue(ForceFieldSettings.IntensityAt(
+                openness, keyLockDoor.Brace, keyLockDoor.Frame));
+
+            // Over a plain filled rectangle the size of the gap, because every pixel of the sheet
+            // is worked out rather than sampled and the door's tile has nothing painted on it to
+            // sample anyway - see Shaders/ForceField.fx.
+            _shapes.Begin(SpriteSortMode.Deferred, BlendState.Additive, null, null, null, field);
+            _shapes.FillRectangle(keyLockDoor.Doorway, colour);
+            _shapes.End();
+        }
+
+        _keyDoorForceField.Draw();
     }
 
     public void DrawShadowing()
