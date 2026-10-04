@@ -264,6 +264,11 @@ internal static class Assets
         ///     Olly's screen under water. See <c>WaterSettings</c>.
         /// </summary>
         public const string Water = @"Shaders\Water";
+
+        /// <summary>
+        ///     The halo a pulsing tile throws - the shuttle tags. See <c>HaloSettings</c>.
+        /// </summary>
+        public const string Halo = @"Shaders\Halo";
     }
 
     /// <summary>

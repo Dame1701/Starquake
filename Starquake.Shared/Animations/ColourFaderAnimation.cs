@@ -70,4 +70,20 @@ internal class ColourFaderAnimation
     ///     tile already there - which is what the shuttle tags do.
     /// </summary>
     public int UpperTileToDraw;
+
+    /// <summary>
+    ///     Where the lights are within this tile, for each of which a halo is thrown. Empty for a
+    ///     tile that does not glow, which is everything but the shuttle tags.
+    /// </summary>
+    /// <remarks>
+    ///     Positions rather than a bare flag, because the lights are not where a tile's middle is.
+    ///     A tag cell is 128 by 96 and its lights are blobs of 28 by 36 sitting at one end of it -
+    ///     tag 417 has two, at opposite ends - so a halo centred on the tile lands in the middle of
+    ///     the launcher with the lights off at its edges, which is what the first attempt did.
+    ///     <para>
+    ///         They are measured off the artwork rather than chosen. If the tiles are ever redrawn
+    ///         these move with them.
+    ///     </para>
+    /// </remarks>
+    public Point[] HaloLights = [];
 }

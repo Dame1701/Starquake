@@ -1,4 +1,4 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
@@ -64,11 +64,14 @@ internal static class ColourAnimatedTiles
                 Speed = 32
             },
 
-            // The tags draw no upper tile of their own - they pulse the tile that is already there.
+            // The tags draw no upper tile of their own - they pulse the tile that is already
+            // there, and throw a halo from each of the lights on it. The positions are measured
+            // off the artwork: each light is a blob of 28 by 36 at one end of a 128 by 96 cell.
             new()
             {
                 TileNo = (int)ActionTiles.ShuttleTag1,
                 UpperTileToDraw = NoUpperTile,
+                HaloLights = [new Point(108, 76)],
                 Intensity = 2,
                 TransitionColour = new Color(ColourLevels.Full, ColourLevels.Full, 0),
                 Speed = 16
@@ -77,6 +80,7 @@ internal static class ColourAnimatedTiles
             {
                 TileNo = (int)ActionTiles.ShuttleTag3,
                 UpperTileToDraw = NoUpperTile,
+                HaloLights = [new Point(16, 76), new Point(110, 76)],
                 Intensity = 6,
                 TransitionColour = new Color(ColourLevels.Full, 0, 0),
                 Speed = 16
@@ -85,6 +89,7 @@ internal static class ColourAnimatedTiles
             {
                 TileNo = (int)ActionTiles.ShuttleTag2,
                 UpperTileToDraw = NoUpperTile,
+                HaloLights = [new Point(16, 76)],
                 Intensity = 6,
                 TransitionColour = new Color(0, TagBlueGreen, ColourLevels.Full),
                 Speed = 16

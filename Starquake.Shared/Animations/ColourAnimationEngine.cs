@@ -178,7 +178,11 @@ internal class ColourAnimationEngine
     {
         SpriteCollection tiles = _resources.GetSpriteCollection(sheetName);
 
-        tiles.Begin(BlendState.Additive);
+        // Found before any of it is drawn, for two reasons. A halo needs the shader pointed at its
+        // own tile and a batch holds one set of values, so the halos cannot share the batch the
+        // plain pulses go down in - and the halo has to go *under* the light it belongs to, which
+        // means it cannot be drawn as it is found either.
+        List<(int Tile, int X, int Y, ColourFaderAnimation Animation)> pulsing = [];
 
         for (int y = 0; y < _gameScreens.TilesDown; y++)
         {
@@ -203,12 +207,78 @@ internal class ColourAnimationEngine
                         continue;
                     }
 
-                    DrawLayeredUp(tiles, tileToDraw, x, y, colourAnimation);
+                    pulsing.Add((tileToDraw, x, y, colourAnimation));
                 }
             }
         }
 
+        DrawHalos(tiles, pulsing);
+
+        tiles.Begin(BlendState.Additive);
+
+        foreach ((int tile, int x, int y, ColourFaderAnimation animation) in pulsing)
+        {
+            DrawLayeredUp(tiles, tile, x, y, animation);
+        }
+
         tiles.End();
+    }
+
+    /// <summary>
+    ///     The halo under each tile that asked for one: a soft glow drawn at rather more than the
+    ///     tile's own size, which is where the spreading comes from.
+    /// </summary>
+    /// <remarks>
+    ///     One batch per tile, because the shader has to be told which square of the sheet the
+    ///     tile occupies, and a batch holds one set of values. That is a batch apiece for at most a
+    ///     handful of tiles on a screen, which is why it is affordable here and would not be for
+    ///     the tiles at large.
+    ///     <para>
+    ///         The halo takes its colour from the pulse's own, because the shader multiplies by the
+    ///         tint it is drawn with - so a tag that pulses red throws a red halo without being
+    ///         told what colour it is.
+    ///     </para>
+    /// </remarks>
+    private void DrawHalos(
+        SpriteCollection tiles,
+        List<(int Tile, int X, int Y, ColourFaderAnimation Animation)> pulsing)
+    {
+        Effect halo = _resources.GetEffect(Assets.Shaders.Halo);
+
+        halo.Parameters["OverReach"].SetValue(HaloSettings.OverReach);
+        halo.Parameters["Falloff"].SetValue(HaloSettings.Falloff);
+
+        halo.Parameters["YOverX"].SetValue(HaloSettings.YOverX);
+
+        foreach ((int tile, int x, int y, ColourFaderAnimation animation) in pulsing)
+        {
+            if (animation.HaloLights.Length == 0)
+            {
+                continue;
+            }
+
+            halo.Parameters["SpriteRect"].SetValue(tiles.SpriteRectIn01(tile));
+
+            tiles.Begin(BlendState.Additive, null, halo);
+
+            foreach (Point light in animation.HaloLights)
+            {
+                // The scaled draw turns about the tile's own middle, so the corner is stepped back
+                // by half a tile to put that middle on the light instead.
+                int haloX = x * TileMetrics.TileWidth + light.X - TileMetrics.TileWidth / 2;
+                int haloY = y * TileMetrics.TileHeight + light.Y - TileMetrics.TileHeight / 2;
+
+                // Over itself, because it is competing with a pulse that has already drawn the
+                // tile over itself as many as six times - see HaloSettings.Passes.
+                for (int pass = 0; pass < HaloSettings.Passes; pass++)
+                {
+                    tiles.DrawSprite(
+                        tile, haloX, haloY, animation.TransitionColour, HaloSettings.Scale, 0f);
+                }
+            }
+
+            tiles.End();
+        }
     }
 
     /// <summary>

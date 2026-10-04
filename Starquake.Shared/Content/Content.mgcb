@@ -1357,6 +1357,12 @@
 /processorParam:DebugMode=Auto
 /build:Shaders/Water.fx
 
+#begin Shaders/Halo.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/Halo.fx
+
 #begin Sounds/AccessFailed.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
