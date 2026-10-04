@@ -145,6 +145,11 @@ internal static class Assets
         public const string FireSparks = "FireSparks";
         public const string ForceField = "ForceField";
         public const string BlobFragmentExplosion = "BlobFragmentExplosion";
+
+        /// <summary>
+        ///     The ring thrown out when Blob comes apart, whichever way he came apart.
+        /// </summary>
+        public const string BlobShockwave = "BlobShockwave";
     }
 
     /// <summary>

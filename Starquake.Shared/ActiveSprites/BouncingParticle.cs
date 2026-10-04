@@ -40,22 +40,26 @@ internal class BouncingParticle
     /// <summary>
     ///     How hard a part is thrown sideways, in pixels a logic frame. Which way is a coin flip.
     /// </summary>
-    private const int SlowestSideways = 4;
-
-    /// <inheritdoc cref="SlowestSideways" />
-    private const int FastestSideways = 12;
-
     /// <summary>
-    ///     How hard a part is thrown upward, and the gravity that brings it back down. The throw used to
-    ///     be <em>downward</em> at one to nineteen pixels a frame, so the parts dribbled off the bottom of
-    ///     Blob instead of bursting out of him.
+    ///     How hard a part is thrown, and the gravity that brings it back down.
     /// </summary>
-    private const int SlowestUpward = 10;
+    /// <remarks>
+    ///     Every part used to be thrown <em>upward</em> - ten to twenty-two a frame - with four to
+    ///     twelve of sideways either way, which is a fountain: they all went the same way and
+    ///     differed only in how far they leaned. They are thrown out along the points of a star
+    ///     now, evenly around the circle, so he bursts rather than spouts. Harder, too, because a
+    ///     part going sideways has no height to fall from and needs the speed to get anywhere.
+    ///     <para>
+    ///         The throw was <em>downward</em> before even that, at one to nineteen, so the parts
+    ///         dribbled off the bottom of him.
+    ///     </para>
+    /// </remarks>
+    private const int SlowestBurst = 19;
 
-    /// <inheritdoc cref="SlowestUpward" />
-    private const int FastestUpward = 22;
+    /// <inheritdoc cref="SlowestBurst" />
+    private const int FastestBurst = 29;
 
-    /// <inheritdoc cref="SlowestUpward" />
+    /// <inheritdoc cref="SlowestBurst" />
     private const double Gravity = 1.0;
 
     private readonly GameScreenCollection _gameScreens;
@@ -89,7 +93,24 @@ internal class BouncingParticle
 
     public required IPositionalTriggerParticleEffect SparkEffect { get; init; }
 
-    public void Trigger(int xPos, int yPos, int effectMinDuration = 50, int effectMaxDuration = 100)
+    /// <summary>
+    ///     Throws this part out of Blob along its own point of the star.
+    /// </summary>
+    /// <remarks>
+    ///     <paramref name="point" /> is which point of the star it goes along and
+    ///     <paramref name="points" /> is how many there are, which is how many parts he comes
+    ///     apart into. <paramref name="spin" /> turns the whole star, in radians: it is drawn once
+    ///     per death and given to every part, so they stay evenly spread but the burst is not in
+    ///     the same attitude every time.
+    /// </remarks>
+    public void Trigger(
+        int xPos,
+        int yPos,
+        int point,
+        int points,
+        double spin,
+        int effectMinDuration = 50,
+        int effectMaxDuration = 100)
     {
         XPos = xPos + 16;
         YPos = yPos + 16;
@@ -101,22 +122,32 @@ internal class BouncingParticle
         // emitter's buffer at the positions they froze at when the bounce stopped
         Fireball.Reset();
 
-        int xSpeed = _randomNumberGenerator.Next(SlowestSideways, FastestSideways);
-
-        int xDirection = _randomNumberGenerator.Next(0, 2);
-        if (xDirection == 0)
-        {
-            xSpeed = -xSpeed;
-        }
-
         Fireball.Start();
 
-        // Negative is upward, so the parts are thrown out of him and fall back rather than starting
-        // downward. The gravity was a Next(1, 2), which can only ever return the one.
+        Point thrown = StarburstVelocity(
+            point, points, _randomNumberGenerator.Next(SlowestBurst, FastestBurst), spin);
+
+        // The gravity was a Next(1, 2), which can only ever return the one.
         _particleBounce.Trigger(
-            Gravity,
-            -_randomNumberGenerator.Next(SlowestUpward, FastestUpward),
-            xSpeed, effectMinDuration, effectMaxDuration);
+            Gravity, thrown.Y, thrown.X, effectMinDuration, effectMaxDuration);
+    }
+
+    /// <summary>
+    ///     Which way one point of the star is thrown, and how fast.
+    /// </summary>
+    /// <remarks>
+    ///     Y counts downward on the screen, so a part on the upper half of the circle comes back
+    ///     negative and is thrown up. The parts below the middle are thrown into the floor on
+    ///     purpose: they are travelling hardest when they meet it and come off it again, which is
+    ///     half of what makes the burst read as one.
+    /// </remarks>
+    public static Point StarburstVelocity(int point, int points, int speed, double spin)
+    {
+        double around = spin + point * (2 * Math.PI / Math.Max(points, 1));
+
+        return new Point(
+            (int)Math.Round(Math.Cos(around) * speed),
+            (int)Math.Round(Math.Sin(around) * speed));
     }
 
     public void Reset()

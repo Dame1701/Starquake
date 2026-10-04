@@ -1230,6 +1230,11 @@
 /processor:PassThroughProcessor
 /build:ParticleEffects/BinaryEffect.xml
 
+#begin ParticleEffects/BlobShockwave.xml
+/importer:XmlImporter
+/processor:PassThroughProcessor
+/build:ParticleEffects/BlobShockwave.xml
+
 #begin ParticleEffects/BlobFragmentExplosion.xml
 /importer:XmlImporter
 /processor:PassThroughProcessor

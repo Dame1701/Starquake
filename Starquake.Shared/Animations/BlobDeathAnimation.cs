@@ -29,7 +29,16 @@ internal class BlobDeathAnimation
     private readonly ResourceManager _resources;
 
     private IPositionalTriggerParticleEffect? _blobFragmentBounceSparks;
+
+    /// <summary>
+    ///     The ring thrown out at the moment he comes apart. One for the whole death rather than
+    ///     one per fragment: six rings from six fragments would be a smear rather than a blast.
+    /// </summary>
+    private IStandardParticleEffect? _shockwave;
     private bool _drawBlobParts;
+
+    /// <inheritdoc cref="_shockwave" />
+    private Point _shockwavePosition;
 
     public BlobDeathAnimation(
         ResourceManager resources,
@@ -86,6 +95,11 @@ internal class BlobDeathAnimation
                 }
             }
 
+            // The shockwave is deliberately not counted. This is what holds Blob dead until the
+            // death has finished playing, and the ring is half a second against the fragments'
+            // one to two - so it can never be the last thing running, and counting it would only
+            // mean that an effect which failed to report itself finished left him unable to
+            // respawn at all.
             return _blobFragmentBounceSparks is { EffectActive: true };
         }
     }
@@ -94,6 +108,9 @@ internal class BlobDeathAnimation
     {
         _blobFragmentBounceSparks = (IPositionalTriggerParticleEffect)_resources
             .GetParticleEffectInstance(Assets.Effects.FireSparks, ParticleEffectType.TriggeredMultiLocationTimed, null);
+
+        _shockwave = (IStandardParticleEffect)_resources
+            .GetParticleEffectInstance(Assets.Effects.BlobShockwave, ParticleEffectType.Triggered, null);
 
         // Each fragment needs its own explosion emitter, but they all spark off the one effect
         _bouncingParticles.Clear();
@@ -108,14 +125,28 @@ internal class BlobDeathAnimation
         }
     }
 
+    /// <remarks>
+    ///     Both of Blob's deaths come through here - the overload he builds up to and the instant
+    ///     one a spike or a gate gives him - because an instant death is an overload that begins
+    ///     already exploded. So the shockwave is started once, here, and belongs to both.
+    /// </remarks>
     public void Trigger(int effectXPosition, int effectYPosition, bool drawBlobParts, int effectMinDuration = 50,
         int effectMaxDuration = 100)
     {
         _drawBlobParts = drawBlobParts;
 
-        foreach (BouncingParticle bouncingParticle in _bouncingParticles)
+        _shockwavePosition = new Point(effectXPosition, effectYPosition);
+        _shockwave?.Start();
+
+        // One turn for the whole star, so the parts stay evenly spread around it but the burst is
+        // not in the same attitude every time Blob dies.
+        double spin = _randomNumberGenerator.NextDouble() * 2 * Math.PI;
+
+        for (int point = 0; point < _bouncingParticles.Count; point++)
         {
-            bouncingParticle.Trigger(effectXPosition, effectYPosition, effectMinDuration, effectMaxDuration);
+            _bouncingParticles[point].Trigger(
+                effectXPosition, effectYPosition, point, _bouncingParticles.Count, spin,
+                effectMinDuration, effectMaxDuration);
         }
     }
 
@@ -146,10 +177,19 @@ internal class BlobDeathAnimation
         {
             _blobFragmentBounceSparks.Update(gameTime);
         }
+
+        if (_shockwave is { EffectActive: true })
+        {
+            _shockwave.Update(_shockwavePosition.X, _shockwavePosition.Y, gameTime);
+        }
     }
 
     public void Draw(int screenFade)
     {
+        // Under the fragments, so they come out of it rather than through it. Drawn for both sets
+        // of artwork: the ring is the blast and not a piece of the redrawn look.
+        _shockwave?.Draw();
+
         if (_graphicsSet.IsOriginal)
         {
             _resources.GetSpriteCollection(Assets.Graphics.BlobFire2Original)

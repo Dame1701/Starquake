@@ -17,7 +17,16 @@ internal class BouncingAnimation
     ///     It used to begin shrinking and fading on the very first frame, which left the parts small and
     ///     translucent for nearly all of the flight - the explosion was there but barely readable.
     /// </summary>
-    private const double TimeAtFullSize = 0.6;
+    private const double TimeAtFullSize = 0.72;
+
+    /// <summary>
+    ///     How much of its size a part keeps as it goes out. It used to shrink all the way to
+    ///     nothing on the same straight line its brightness went out on, so the last of its life
+    ///     was a dim speck - a quarter the size at a quarter the light. A part that stays mostly
+    ///     itself and fades reads as burning out; one that shrinks to a point reads as being
+    ///     scaled away.
+    /// </summary>
+    private const double SizeKeptAtTheEnd = 0.62;
 
     /// <summary>
     ///     How fast a part tumbles, in degrees a logic frame. It used to be a half-degree either way,
@@ -81,6 +90,13 @@ internal class BouncingAnimation
     ///     A part holds its size and brightness for <see cref="TimeAtFullSize" /> of its life and then goes
     ///     out over what is left, rather than shrinking and fading from the moment it is thrown.
     /// </summary>
+    /// <remarks>
+    ///     The two no longer run down the same straight line. The light goes out on a curve, so a
+    ///     part dies away rather than being turned down like a dimmer, and it keeps most of its
+    ///     size while it does - see <see cref="SizeKeptAtTheEnd" />. Shrinking and fading together
+    ///     and evenly spent the last of every part as a speck too small and too dim to be seen,
+    ///     which is a third of the tail doing no work.
+    /// </remarks>
     private void FadeAndShrinkOverTheTail()
     {
         int framesAtFullSize = (int)(_effectDuration * TimeAtFullSize);
@@ -94,8 +110,10 @@ internal class BouncingAnimation
         int tail = Math.Max(_effectDuration - framesAtFullSize, 1);
         double throughTheTail = Math.Min((double)(_effectDurationCounter - framesAtFullSize) / tail, 1.0);
 
-        _scale = (float)(1.0 - throughTheTail);
-        _fade = ColourLevels.Full * (1.0 - throughTheTail);
+        double left = 1.0 - throughTheTail;
+
+        _scale = (float)(1.0 - throughTheTail * (1.0 - SizeKeptAtTheEnd));
+        _fade = ColourLevels.Full * left * left;
     }
 
     public void YBounce()
