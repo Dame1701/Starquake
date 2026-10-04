@@ -1,15 +1,15 @@
 ﻿Notes for Starquake
 ===================
 
-Remake and graphics (c) 2016 Damien Green. Original (c) 1984 Steve Crow
+Remake and graphics (c) 2026 Damien Green. Original (c) 1984 Steve Crow
 
 http://www.zxsoftware.co.uk/Data/Spectrum/S/instructions/Starquake.txt
 
 The teleport codes have been changed for the remake so any you find on cheat sites won't give you any joy - sorry!
 
 The game runs a little faster than the original. This is because most monitors now default to a refresh rate of 60hz (or oddly 59 in some cases), especially LCD displays. Back when
-Starquake was written, home computers used UK PAL screens at 50hz (though in the US it was 60hz so PAL games ran a little faster). I'm syncing with the monitor refresh rate because 
-it allows the game to run smoothly in a 2D environment, trying to force 60HZ into 50HZ causes jerkiness since the timings aren't synced with the monitor refresh. 
+Starquake was written, home computers used UK PAL screens at 50hz (though in the US it was 60hz so PAL games ran a little faster). I'm syncing with the monitor refresh rate because
+it allows the game to run smoothly in a 2D environment, trying to force 60HZ into 50HZ causes jerkiness since the timings aren't synced with the monitor refresh.
 As an arcade game, this needs to run smoothly. There is potentially a way to fix it, but it would involve resizing all the graphics so blob can move in 6 steps instead of 8.
 The work involved is significant so therefore it is not happening ;).
 
@@ -17,7 +17,7 @@ Controls and additional function keys
 =====================================
 - Control blob with the cursor keys.
 - Fire with Right Alt or Left Ctrl. Push up to pick up an object and to cycle through your inventory
-- F12 switches between full-screen and windowed mode. 
+- F12 switches between full-screen and windowed mode.
 - F9 Turns scanlines on and off
 - F8 switches between the original CPC / Speccy / C64 graphics (maybe slightly recoloured and the new HD graphics)
 - ESC Exits the game to desktop

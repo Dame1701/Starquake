@@ -44,7 +44,6 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
 
     private bool _definingKeys;
 
-
     public OptionsScreen(
         ResourceManager resources,
         BitmapFont font,

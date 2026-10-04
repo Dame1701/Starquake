@@ -92,6 +92,16 @@ internal class ScreenEffectEngine
         }
     }
 
+    /// <summary>
+    ///     Says that one view port should be composed through a pixel shader this frame, rather
+    ///     than handed to the back buffer as it is. The full-screen pages' way in: they are not the
+    ///     play area, so <see cref="ExecuteScreenEffect" /> cannot reach them, and what the
+    ///     computer report's malfunction has to distort is the finished page - text, artwork and
+    ///     all - which only exists once the page has drawn itself into its target.
+    /// </summary>
+    public void ComposeViewPortThrough(string name, Effect shader)
+        => GetRenderViewPort(name).ComposeThrough = shader;
+
     public void MoveViewPort(string name, int xOffset, int yOffset)
     {
         RenderViewPort viewPort = GetRenderViewPort(name);
@@ -212,12 +222,14 @@ internal class ScreenEffectEngine
             }
 
             renderViewPort.Active = false;
+            renderViewPort.ComposeThrough = null;
         }
     }
 
     /// <summary>
     ///     Whether this is the view port the screen effects apply to. Only the playfield gets them -
-    ///     the status panel and the full-screen pages are composed plainly.
+    ///     the status panel and the full-screen pages are composed by
+    ///     <see cref="DrawViewPortDirectly" />, with or without a shader of their own.
     /// </summary>
     private static bool IsTheGameArea(RenderViewPort renderViewPort)
         => renderViewPort.Name == ViewPorts.GameArea;
@@ -232,12 +244,13 @@ internal class ScreenEffectEngine
 
     /// <summary>
     ///     One view port's render target onto the back buffer, through the presentation transform so
-    ///     it lands where the composition says it should.
+    ///     it lands where the composition says it should - and through whatever shader the view port
+    ///     was handed by <see cref="ComposeViewPortThrough" />, if it was handed one.
     /// </summary>
     private void DrawViewPortDirectly(RenderViewPort renderViewPort)
     {
-        _renderer.Begin(SpriteSortMode.Deferred, BlendState.Opaque, null, null, null, null,
-            _presentation.Transform);
+        _renderer.Begin(SpriteSortMode.Deferred, BlendState.Opaque, null, null, null,
+            renderViewPort.ComposeThrough, _presentation.Transform);
 
         _renderer.Draw(renderViewPort.RenderTarget, new Rectangle(
             renderViewPort.XPos,

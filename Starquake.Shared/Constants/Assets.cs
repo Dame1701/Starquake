@@ -269,6 +269,11 @@ internal static class Assets
         ///     The halo a pulsing tile throws - the shuttle tags. See <c>HaloSettings</c>.
         /// </summary>
         public const string Halo = @"Shaders\Halo";
+
+        /// <summary>
+        ///     The flight computer's display failing. See <c>MalfunctionSettings</c>.
+        /// </summary>
+        public const string Malfunction = @"Shaders\Malfunction";
     }
 
     /// <summary>

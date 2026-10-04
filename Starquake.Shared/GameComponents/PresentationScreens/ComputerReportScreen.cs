@@ -19,11 +19,16 @@ namespace Starquake.GameComponents.PresentationScreens;
 
 internal class ComputerReportScreen : GameScreenBase, IGameScreen
 {
-
     private readonly SpriteCollection _backgroundImage;
     private readonly SpriteCollection _foregroundImage;
     private readonly Random _randomNumberGenerator;
     private bool _fadeComplete;
+
+    /// <summary>
+    ///     How long the page has been on screen, in logic frames, which is the whole of what the
+    ///     malfunction is driven by - see <see cref="MalfunctionSettings" />.
+    /// </summary>
+    private int _framesShown;
 
     public ComputerReportScreen(
         ResourceManager resources,
@@ -79,12 +84,20 @@ internal class ComputerReportScreen : GameScreenBase, IGameScreen
             }
         }
 
+        _framesShown++;
+
         base.Update(gameTime);
     }
 
     public void Draw()
     {
         ScreenEffects.SelectRenderViewPort(ViewPorts.EntireScreen);
+
+        // Asked for before the page is drawn and applied after it, when the view port is composed:
+        // what the malfunction has to break up is the finished page, so that the text comes apart
+        // along with the artwork under it rather than swimming about on top of it.
+        ScreenEffects.ComposeViewPortThrough(ViewPorts.EntireScreen, Malfunctioning());
+
         _backgroundImage.Begin(BlendState.AlphaBlend);
 
         if (_fadeComplete)
@@ -125,7 +138,29 @@ internal class ComputerReportScreen : GameScreenBase, IGameScreen
     public void PerformPostScreenChangeActions()
     {
         _fadeComplete = false;
+        _framesShown = 0;
         ScreenFade = 0;
         ScreenFadeSpeed = 5;
+    }
+
+    /// <summary>
+    ///     The display failing, set up for this frame. <c>Shaders/Malfunction.fx</c> does the work;
+    ///     everything handed to it is a function of how long the page has been up, so it fails the
+    ///     same way every time anybody reads it.
+    /// </summary>
+    private Effect Malfunctioning()
+    {
+        Effect failing = Resources.GetEffect(Assets.Shaders.Malfunction);
+
+        failing.Parameters["Breakup"].SetValue(MalfunctionSettings.BreakupAt(_framesShown));
+        failing.Parameters["Phase"].SetValue(MalfunctionSettings.PhaseAt(_framesShown));
+        failing.Parameters["Roll"].SetValue(MalfunctionSettings.RollAt(_framesShown));
+        failing.Parameters["BandScale"].SetValue(MalfunctionSettings.BandScale);
+        failing.Parameters["Slip"].SetValue(MalfunctionSettings.Slip);
+        failing.Parameters["ChromaSplit"].SetValue(MalfunctionSettings.ChromaSplit);
+        failing.Parameters["Dropout"].SetValue(MalfunctionSettings.Dropout);
+        failing.Parameters["SignalColour"].SetValue(MalfunctionSettings.SignalColour);
+
+        return failing;
     }
 }
