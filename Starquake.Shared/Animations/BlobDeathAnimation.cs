@@ -150,12 +150,27 @@ internal class BlobDeathAnimation
         }
     }
 
+    /// <summary>
+    ///     Stops the whole thing dead: the fragments, the particles still in the air behind them,
+    ///     and the shockwave.
+    /// </summary>
+    /// <remarks>
+    ///     This used to reset only the bounces, which left every emitter still holding its
+    ///     particles - so <see cref="Active" /> stayed true on their account and the clangs carried
+    ///     on being struck. The intro's crash is the one caller that needs it to mean stop, and it
+    ///     needs it to mean stop completely.
+    /// </remarks>
     public void Reset()
     {
         foreach (BouncingParticle bouncingParticle in _bouncingParticles)
         {
             bouncingParticle.Reset();
+            bouncingParticle.Fireball.Stop();
+            bouncingParticle.Fireball.Reset();
         }
+
+        _blobFragmentBounceSparks?.Stop();
+        _shockwave?.Stop();
     }
 
     public void Update(GameTime gameTime)

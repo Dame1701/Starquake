@@ -7,6 +7,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
+using Starquake.Helpers;
+using Starquake.Particles;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
 using Starquake.GameComponents;
@@ -90,6 +92,21 @@ internal class IntroSequence
     private float _rumbleAmount = RumbleFrom;
     private Guid _rumbleSound = Guid.Empty;
 
+    /// <summary>
+    ///     Logic frames since the ship came to rest, which is what the wreck's electrics are timed
+    ///     off. It keeps counting for the rest of the game: the wreck stays on the landing site and
+    ///     goes on failing for as long as Blob is there to see it.
+    /// </summary>
+    private int _wreckFrame;
+
+    /// <summary>
+    ///     The sparks the wreck throws. The same effect Blob's own fragments strike off the ground
+    ///     with - a wreck spitting and a part of him bouncing are the same small shower.
+    /// </summary>
+    private readonly IPositionalTriggerParticleEffect _wreckSparks;
+
+
+
     private Guid _shipExplosionSound = Guid.Empty;
 
     /// <summary>
@@ -123,6 +140,9 @@ internal class IntroSequence
         _screenDirectory = screenDirectory;
         _screenEffects = screenEffects;
         _blobKiller = blobKiller;
+
+        _wreckSparks = (IPositionalTriggerParticleEffect)_resources.GetParticleEffectInstance(
+            Assets.Effects.FireSparks, ParticleEffectType.TriggeredMultiLocationTimed, null);
         _randomNumberGenerator = randomNumberGenerator;
 
         _blobShipHazardLightFlash = new FaderAnimation(10);
@@ -138,6 +158,43 @@ internal class IntroSequence
     public int BlobSpaceShipXPos => (int)_descent.Position.X + _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).SpriteWidth / 2;
 
     public int BlobSpaceShipYPos => (int)_descent.Position.Y + _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).SpriteHeight / 2;
+    /// <summary>
+    ///     The caption that plays once Blob's ship has come down: what he is here for, and the
+    ///     joke the game tells about it, in one breath.
+    /// </summary>
+    /// <remarks>
+    ///     This was "Prepare for mission Starquake ...", which was wrong twice. It is not a
+    ///     briefing - the caption comes *after* the crash, so there is nothing left to prepare for
+    ///     - and it is written in a voice the game does not use anywhere else. The 1985 inlay is
+    ///     dramatic and then immediately undercuts itself: "If the core of this planet is not
+    ///     rebuilt it will implode causing the whole universe to go 'Ka Boomf!' - Strewth, a
+    ///     Starquake...", and on why Blob was chosen for it, "Nope - 'Cause all the other guys
+    ///     have pranged their spaceships." These lines are that sentence, cut to fit, and the
+    ///     "Betta" is the inlay's register rather than a typo - it belongs with "Strewth" and
+    ///     "'Cause", and correcting it to "Better" would take the voice out of it.
+    /// </remarks>
+    private static readonly string[] Caption =
+    [
+        "Betta rebuild that core",
+        "or the universe goes Ka Boomf!"
+    ];
+
+    /// <summary>
+    ///     Where the caption sits and how far apart its lines are. Centred on the playfield rather
+    ///     than indented by a number that happened to suit the old caption's length - the playfield
+    ///     and not the composition, because the intro is drawn into the game area's own render
+    ///     target, which is 1024 wide against the composition's 1280. Centring on the wider of the
+    ///     two put the caption 128 pixels right of where it belonged. That the old caption's
+    ///     hand-set indent of 180 is almost exactly where centring in 1024 lands it is the clue
+    ///     that said so - which
+    ///     is also why it is broken across lines at all: fifty-three characters will not go across
+    ///     the screen at this size, where the thirty the break leaves will.
+    /// </summary>
+    private const int CaptionTopLine = 180;
+
+    /// <inheritdoc cref="CaptionTopLine" />
+    private const int CaptionLineSpacing = 56;
+
     public IntroSequenceStage SequenceStage { get; private set; } = IntroSequenceStage.None;
 
     /// <summary>
@@ -215,7 +272,7 @@ internal class IntroSequence
         }
         else if (SequenceStage == IntroSequenceStage.EndPause || SequenceStage == IntroSequenceStage.Finished)
         {
-            UpdateEndPause();
+            UpdateEndPause(gameTime);
         }
     }
 
@@ -272,6 +329,16 @@ internal class IntroSequence
                 MainScreen.ResetScreenFade(CrashFadeOutStep);
                 MainScreen.ScreenFade = 0;
                 SequenceStage = IntroSequenceStage.CaptionFadeUp;
+
+                // The wreckage stops here. It is thrown for a hundred to two hundred frames, and
+                // the intro stops updating it at this point - but MainGameScreen picks it straight
+                // back up, because its DeathRoutineRunning counts BlobKiller.Active and the parts
+                // are still in the air. So the ship's fragments went on bouncing and clanging
+                // through the caption and into the game, which is the noise that has been heard
+                // over the opening for as long as anybody can remember. By now the screen has
+                // faded to black and there is nothing of them left to see.
+                _blobKiller.Reset();
+                _resources.GetSoundFxEngine().StopSound(_shipExplosionSound, SoundFade.Fast);
             }
         }
         else
@@ -318,7 +385,11 @@ internal class IntroSequence
         }
     }
 
-    private void UpdateEndPause()
+    /// <remarks>
+    ///     Takes the clock only for the wreck's sparks, which outlive the sequence: this is the
+    ///     one update that keeps running once the intro has finished.
+    /// </remarks>
+    private void UpdateEndPause(GameTime gameTime)
     {
         if (SequenceStage == IntroSequenceStage.EndPause)
         {
@@ -336,6 +407,42 @@ internal class IntroSequence
 
         _blobShipHazardLightFlash.Update();
         _blobShipHeadLightFlash.Update();
+
+        SparkOffTheWreck(gameTime);
+
+        _wreckFrame++;
+    }
+
+    /// <summary>
+    ///     The occasional spark off the wreck once it has come to rest. Started on one frame and
+    ///     left to live its own half second, which is why this only has to decide when and where.
+    /// </summary>
+    /// <remarks>
+    ///     Only once the ship is down and still - while it is falling and exploding there is
+    ///     already more than enough happening to it - and only for the redrawn artwork, as the
+    ///     rest of the 1985 set is left as it was.
+    /// </remarks>
+    private void SparkOffTheWreck(GameTime gameTime)
+    {
+        if (_graphicsSet.IsOriginal ||
+            SequenceStage is not (IntroSequenceStage.Finished or IntroSequenceStage.EndPause))
+        {
+            return;
+        }
+
+        if (ShipWreckSettings.SparksThisFrame(_wreckFrame))
+        {
+            SpriteCollection hull = _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip);
+
+            Point from = ShipWreckSettings.SparkAt(
+                _wreckFrame, hull.SpriteWidth, hull.SpriteHeight);
+
+            _wreckSparks.Start(
+                _descent.Rest.X + hull.SpriteWidth / 2 + from.X,
+                _descent.Rest.Y + hull.SpriteHeight / 2 + from.Y);
+        }
+
+        _wreckSparks.Update(gameTime);
     }
 
     public void Draw()
@@ -401,11 +508,24 @@ internal class IntroSequence
             {
                 _blobKiller.Draw(MainScreen.ScreenFade);
             }
+
+            _wreckSparks.Draw(MainScreen.ScreenFade);
         }
         else
         {
             _font.Begin(BlendState.AlphaBlend);
-            _font.WriteText(180, 210, "Prepare for mission Starquake ...", 2, Color.White, (byte)MainScreen.ScreenFade);
+
+            for (int line = 0; line < Caption.Length; line++)
+            {
+                _font.WriteTextCentred(
+                    TileMetrics.PlayAreaWidth,
+                    CaptionTopLine + line * CaptionLineSpacing,
+                    Caption[line],
+                    2,
+                    Color.White,
+                    (byte)MainScreen.ScreenFade);
+            }
+
             _font.End();
         }
     }
