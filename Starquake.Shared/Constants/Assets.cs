@@ -253,6 +253,12 @@ internal static class Assets
         ///     Blob's shot, lit as a beam along the way it is going. See <c>LaserSettings</c>.
         /// </summary>
         public const string Laser = @"Shaders\Laser";
+
+        /// <summary>
+        ///     A jump platform coming apart, with every hole the dissolve opens burning at its
+        ///     edge. See <c>PlatformSettings</c>.
+        /// </summary>
+        public const string Platform = @"Shaders\Platform";
     }
 
     /// <summary>

@@ -1345,6 +1345,12 @@
 /processorParam:DebugMode=Auto
 /build:Shaders/Laser.fx
 
+#begin Shaders/Platform.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/Platform.fx
+
 #begin Sounds/AccessFailed.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor

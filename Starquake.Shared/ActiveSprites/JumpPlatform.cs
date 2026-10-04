@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
 using Starquake.SharedLibs;
 using Starquake.Sprites;
@@ -37,6 +38,12 @@ internal class JumpPlatform
     private readonly Random _randomNumberGenerator;
 
     private readonly RenderTarget2D _renderTarget;
+
+    /// <summary>
+    ///     Held for the dissolve's shader. The sprites are taken at construction and kept, so this
+    ///     was not needed until something had to be fetched every frame.
+    /// </summary>
+    private readonly ResourceManager _resources;
     private readonly ScreenEffectEngine _screenEffects;
     private readonly SpriteBatch _textureDrawer;
 
@@ -52,6 +59,7 @@ internal class JumpPlatform
         ScreenEffectEngine screenEffects,
         Point position)
     {
+        _resources = resources;
         _textureDrawer = new SpriteBatch(graphics.GraphicsDevice);
         _graphicsDeviceManager = graphics;
         _graphicsSet = graphicsSet;
@@ -172,12 +180,37 @@ internal class JumpPlatform
     }
 
     /// <summary>
+    ///     The shader that lights the edges the dissolve has opened. Handed the size of one texel
+    ///     because it has to look at what is next to each one, and the render target is one to one
+    ///     with the sprite - so unlike the game's other sprite shaders there is no sheet to stray
+    ///     into and no rectangle to clamp against.
+    /// </summary>
+    private Effect DissolveShader()
+    {
+        Effect platform = _resources.GetEffect(Assets.Shaders.Platform);
+
+        platform.Parameters["TexelSize"].SetValue(new Vector2(
+            1f / _renderTarget.Width, 1f / _renderTarget.Height));
+
+        platform.Parameters["Decay"].SetValue(
+            PlatformSettings.DecayFrom(_dissolveTime, DissolveStartsAt));
+
+        platform.Parameters["Flicker"].SetValue(ElectricSettings.FlickerAt(_dissolveTime));
+        platform.Parameters["EdgeColour"].SetValue(PlatformSettings.EdgeColour);
+        platform.Parameters["EdgeBoost"].SetValue(PlatformSettings.EdgeBoost);
+        platform.Parameters["Charge"].SetValue(PlatformSettings.Charge);
+
+        return platform;
+    }
+
+    /// <summary>
     ///     Puts the composed texture on the screen, rotated about its own centre - which is why the
     ///     position is offset by half the sprite as well as the origin being set to it.
     /// </summary>
     private void DrawComposedPlatform()
     {
-        _textureDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+        _textureDrawer.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null,
+            DissolveShader());
 
         _textureDrawer.Draw(
             _renderTarget,
