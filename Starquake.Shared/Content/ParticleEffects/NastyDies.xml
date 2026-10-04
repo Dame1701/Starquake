@@ -6,7 +6,7 @@
             <Name>Smoke Trail</Name>
             <Budget>2500</Budget>
             <Term>1.25</Term>
-            <ReleaseQuantity>16</ReleaseQuantity>
+            <ReleaseQuantity>28</ReleaseQuantity>
             <Enabled>true</Enabled>
             <ReleaseSpeed>
                 <Value>0</Value>
@@ -61,12 +61,12 @@
         <Item Type="Emitters:CircleEmitter">
             <Name>Flames</Name>
             <Budget>5000</Budget>
-            <Term>0.5</Term>
-            <ReleaseQuantity>64</ReleaseQuantity>
+            <Term>0.6</Term>
+            <ReleaseQuantity>96</ReleaseQuantity>
             <Enabled>true</Enabled>
             <ReleaseSpeed>
                 <Value>0</Value>
-                <Variation>100</Variation>
+                <Variation>210</Variation>
             </ReleaseSpeed>
             <ReleaseColour>
                 <Value>1 0.5019608 0</Value>
@@ -77,8 +77,8 @@
                 <Variation>0</Variation>
             </ReleaseOpacity>
             <ReleaseScale>
-                <Value>48</Value>
-                <Variation>32</Variation>
+                <Value>76</Value>
+                <Variation>44</Variation>
             </ReleaseScale>
             <ReleaseRotation>
                 <Value>3.14</Value>
@@ -88,7 +88,7 @@
             <ParticleTextureAssetName>Textures\Particle004</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="Modifiers:OpacityModifier">
-                    <Initial>0.5</Initial>
+                    <Initial>0.9</Initial>
                     <Ultimate>0</Ultimate>
                 </Item>
                 <Item Type="Modifiers:RotationModifier">
@@ -106,14 +106,56 @@
             <Radiate>true</Radiate>
         </Item>
         <Item>
-            <Name>Sparks</Name>
-            <Budget>1250</Budget>
-            <Term>0.375</Term>
-            <ReleaseQuantity>35</ReleaseQuantity>
+            <Name>Shockwave</Name>
+            <Budget>8</Budget>
+            <Term>0.42</Term>
+            <ReleaseQuantity>1</ReleaseQuantity>
             <Enabled>true</Enabled>
             <ReleaseSpeed>
                 <Value>0</Value>
-                <Variation>250</Variation>
+                <Variation>0</Variation>
+            </ReleaseSpeed>
+            <ReleaseColour>
+                <Value>1 0.85 0.6</Value>
+                <Variation>0 0 0</Variation>
+            </ReleaseColour>
+            <ReleaseOpacity>
+                <Value>1</Value>
+                <Variation>0</Variation>
+            </ReleaseOpacity>
+            <ReleaseScale>
+                <Value>32</Value>
+                <Variation>0</Variation>
+            </ReleaseScale>
+            <ReleaseRotation>
+                <Value>0</Value>
+                <Variation>3.14</Variation>
+            </ReleaseRotation>
+            <ReleaseImpulse>0 0</ReleaseImpulse>
+            <ParticleTextureAssetName>Textures\Ring001</ParticleTextureAssetName>
+            <Modifiers>
+                <Item Type="Modifiers:ScaleModifier">
+                    <InitialScale>32</InitialScale>
+                    <UltimateScale>1400</UltimateScale>
+                </Item>
+                <Item Type="Modifiers:OpacityModifier">
+                    <Initial>0.85</Initial>
+                    <Ultimate>0</Ultimate>
+                </Item>
+            </Modifiers>
+            <BlendMode>Add</BlendMode>
+            <TriggerOffset>0 0</TriggerOffset>
+            <MinimumTriggerPeriod>0.25</MinimumTriggerPeriod>
+        </Item>
+        <Item>
+            <Name>Sparks</Name>
+            <Budget>1250</Budget>
+            <Term>0.55</Term>
+            <ReleaseQuantity>95</ReleaseQuantity>
+            <Enabled>true</Enabled>
+            <ReleaseSpeed>
+                <Value>0</Value>
+                <Variation>440</Variation>
             </ReleaseSpeed>
             <ReleaseColour>
                 <Value>1 0.8784314 0.7529412</Value>
@@ -124,8 +166,8 @@
                 <Variation>0</Variation>
             </ReleaseOpacity>
             <ReleaseScale>
-                <Value>5</Value>
-                <Variation>2</Variation>
+                <Value>8</Value>
+                <Variation>6</Variation>
             </ReleaseScale>
             <ReleaseRotation>
                 <Value>0</Value>
@@ -149,7 +191,7 @@
         <Item>
             <Name>Flash</Name>
             <Budget>160</Budget>
-            <Term>0.05</Term>
+            <Term>0.14</Term>
             <ReleaseQuantity>1</ReleaseQuantity>
             <Enabled>true</Enabled>
             <ReleaseSpeed>
@@ -161,11 +203,11 @@
                 <Variation>0 0 0</Variation>
             </ReleaseColour>
             <ReleaseOpacity>
-                <Value>0.5</Value>
+                <Value>1</Value>
                 <Variation>0</Variation>
             </ReleaseOpacity>
             <ReleaseScale>
-                <Value>192</Value>
+                <Value>340</Value>
                 <Variation>0</Variation>
             </ReleaseScale>
             <ReleaseRotation>
