@@ -29,9 +29,18 @@ float Phase;
 float Amplitude;
 float Frequency;
 
-// What the water is, how much of it is laid over what is behind, and what the surface burns.
+// What the water is, how much of it is laid over what is behind, and how much of that is already
+// there at the surface rather than waiting for depth to bring it on.
 float3 WaterColour;
 float Tint;
+float AtTheSurface;
+
+// A blue cast laid over everything under the water, so that something just below it is blue
+// rather than merely short of red. The multiplier alone cannot do that: it can only take colour
+// away, and what it takes from something already dark is nothing.
+float3 BlueCast;
+
+// What the surface itself burns.
 float3 SurfaceColour;
 
 // How thick the bright line at the surface is, as a fraction of the picture.
@@ -57,8 +66,18 @@ float4 Flooded(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
 
     float4 room = tex2D(SpriteTexture, uv);
 
-    // Greener and darker with depth, the way looking down through water goes.
-    float3 lit = lerp(room.rgb, WaterColour * room.rgb, Tint * deep * under);
+    // Greener and darker with depth, the way looking down through water goes - but already
+    // coloured at the surface rather than only once it is deep, or the first stretch below the
+    // line looks like dry land with a wobble on it.
+    float coloured = Tint * lerp(AtTheSurface, 1.0, deep) * under;
+
+    float3 lit = lerp(room.rgb, WaterColour * room.rgb, coloured);
+
+    // And the water's own colour over the top of that, which is what makes something under it
+    // read as blue rather than as having had its reds taken out. Scaled by what is lit, so the
+    // empty parts of the room stay empty.
+    lit += BlueCast * (coloured * room.a);
+
     lit *= 1.0 - deep * 0.35 * under;
 
     // The surface itself, which moves with the waves rather than lying flat.

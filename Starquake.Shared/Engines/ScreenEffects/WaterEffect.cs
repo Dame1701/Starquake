@@ -64,6 +64,8 @@ internal sealed class WaterEffect : ScreenEffectBase
         water.Parameters["Frequency"].SetValue(WaterSettings.Frequency);
         water.Parameters["WaterColour"].SetValue(WaterSettings.WaterColour);
         water.Parameters["Tint"].SetValue(WaterSettings.Tint);
+        water.Parameters["AtTheSurface"].SetValue(WaterSettings.AtTheSurface);
+        water.Parameters["BlueCast"].SetValue(WaterSettings.BlueCast);
         water.Parameters["SurfaceColour"].SetValue(WaterSettings.SurfaceColour);
         water.Parameters["SurfaceThickness"].SetValue(WaterSettings.SurfaceThickness);
 

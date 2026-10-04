@@ -54,6 +54,21 @@ internal static class WaterSettings
     /// <inheritdoc cref="WaterColour" />
     public const float Tint = 0.85f;
 
+    /// <summary>
+    ///     How much of that is already there right at the surface, before any depth has brought it
+    ///     on. Without it the first stretch below the line looks like dry land with a wobble on it,
+    ///     and Blob standing in the shallows looks no different from Blob standing beside them.
+    /// </summary>
+    public const float AtTheSurface = 0.7f;
+
+    /// <summary>
+    ///     The blue laid over everything under the water. <see cref="WaterColour" /> is a
+    ///     multiplier and can only take colour away - which turns something bright cyan and does
+    ///     nothing at all to something already dark. This is what actually makes what is under the
+    ///     water look blue.
+    /// </summary>
+    public static Vector3 BlueCast => new(0.02f, 0.1f, 0.22f);
+
     /// <summary>What the line at the surface burns, and how thick it is as a fraction.</summary>
     public static Vector3 SurfaceColour => new(0.3f, 0.55f, 0.6f);
 
