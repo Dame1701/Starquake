@@ -283,7 +283,7 @@ internal static class Assets
     ///     with everything else - see <c>GameEngine.DefineFonts</c>.
     ///     <para>
     ///         Both are built from <c>elektora.ttf</c> by MGCB's font description processor. The
-    ///         bitmap atlases under <c>Assets\Fonts</c> are what that superseded.
+    ///         bitmap atlases it superseded went with the <c>Assets\</c> folder.
     ///     </para>
     /// </summary>
     internal static class Fonts

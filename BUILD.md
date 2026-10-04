@@ -59,17 +59,30 @@ main reason this is on MonoGame 3.8.4: 3.8.2's content builder shipped x86_64-on
 natives (FreeImage, freetype) and could only be built by routing MGCB through an x64 .NET
 host under Rosetta.
 
-## Assets/
+## Where the art lives
 
-`Assets/` is the master art and sound, 197 files and 20 MB of it. It is not built by anything:
-`Content.mgcb` compiles `Starquake.Shared/Content/`, which holds its own copy of nearly all
-the same files. 175 of the two folders' files are byte-identical, 17 differ, and five exist
-only here - the four `Shaders/*.fx`, which nothing in the pipeline compiles today, and the two
-font PNGs the `.spritefont` descriptions replaced.
+`Starquake.Shared/Content/` holds it, and `Content.mgcb` compiles it. There is one copy and
+one place to edit.
 
-It was called `Temp/` until a folder of that name proved to be one confident `rm -rf` away from
-gone. If you edit art, edit it here and copy the result into `Content/`; nothing automates that,
-which is why the two have drifted apart in 17 places.
+There used to be two. `Assets/` sat alongside it as a second copy of nearly the same files -
+199 of them, called `Temp/` until a folder of that name proved to be one confident `rm -rf`
+away from gone. Nothing read it: every one of `Content.mgcb`'s entries resolves inside
+`Content/`, and a clone with `Assets/` deleted outright still builds. Keeping the two in step
+was manual, so they drifted, and because the stale copy was the one nothing built, a stale
+copy looked exactly like a current one. The options screen's credit line is what it cost -
+the painted artwork was cleared in `Content/` and left alone in `Assets/`, and only the live
+copy was right.
+
+Of its 199 files, 170 were byte-identical to their `Content/` twin - Git stores one blob per
+pair, so those were free and deleting them cost nothing either. The other 29 were set aside
+for review before the folder went. None is loaded by the game: the 10 with no twin are all
+superseded, most of them documented as such in `Assets.cs` - the bitmap font atlases the
+`.spritefont` descriptions replaced, the `BootScreen.png` that `BootScreen2.png` supersedes,
+the `Scanlines` pair that `Shaders/Crt.fx` now computes, the old `StarFont.png`, an `Icon.png`
+no head consumes, and three `.fx` files the pipeline has never compiled.
+
+The layered originals were never in `Assets/` anyway. They are in
+`Starquake.Shared/Creation/Graphics/`, as `.psd` and `.rdw`.
 
 ### Shaders need Wine on macOS and Linux
 
@@ -158,7 +171,8 @@ than branch inside one. The remaining shaders are small and nowhere near it.
   its reciprocal worked out once and passed in as a uniform, turning a per-pixel divide into a
   per-pixel multiply.
 
-The three in `Assets/Shaders/` that are not in `Content/Shaders/` remain unbuilt and unreferenced.
+`disappear.fx`, `drawaswhite.fx` and `refraction.fx` were never under `Content/Shaders/` and
+nothing referenced them; they went with `Assets/`.
 
 If the toolchain ever becomes a liability - Rosetta is on notice, and this Wine is an x86_64
 binary running a x86_64 Windows compiler - MGCB's `/copy:` directive takes a prebuilt `.xnb`
