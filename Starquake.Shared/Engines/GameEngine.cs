@@ -548,7 +548,8 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             ContentResourceManager,
             gameScreens,
             player,
-            RandomNumberGenerator);
+            RandomNumberGenerator,
+            JoltTheScreen);
         conveyorNasties.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
         conveyorNasties.LoadContent();
 

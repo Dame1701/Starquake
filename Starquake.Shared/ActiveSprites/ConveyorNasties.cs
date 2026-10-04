@@ -11,10 +11,15 @@ using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
 
+/// <param name="onNastyExploded">
+///     Told when one of these blows itself apart, and handed on to each of them. Every one of them
+///     raises it: a nasty on a rail is a machine, and all of them go off when they are shot.
+/// </param>
 internal class ConveyorNasties(ResourceManager resources,
     GameScreenCollection gameScreens,
     Blob blob,
-    Random randomNumberGenerator)
+    Random randomNumberGenerator,
+    Action onNastyExploded)
 {
     /// <summary>
     ///     How far Blob's box is pulled in each side before a touch counts, so that passing close by a
@@ -60,6 +65,7 @@ internal class ConveyorNasties(ResourceManager resources,
                 new ConveyorNasty(resources,
                     gameScreens,
                     randomNumberGenerator,
+                    onNastyExploded,
                     0,
                     0,
                     0,

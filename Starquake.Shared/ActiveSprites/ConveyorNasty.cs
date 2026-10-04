@@ -37,6 +37,13 @@ internal class ConveyorNasty
     private readonly IStandardParticleEffect _conveyorNastyDies;
     private readonly GameScreenCollection _gameScreens;
 
+    /// <summary>
+    ///     Told when this nasty blows itself apart, so the picture can be knocked about. A callback
+    ///     rather than the thing that shakes it, which a nasty has no business holding - the same
+    ///     trade <c>Nasty</c> makes.
+    /// </summary>
+    private readonly Action _onExploded;
+
     private readonly SpriteCollection _nastySprite;
     private readonly Random _randomNumberGenerator;
 
@@ -49,6 +56,7 @@ internal class ConveyorNasty
         ResourceManager resources,
         GameScreenCollection gameScreens,
         Random randomNumberGenerator,
+        Action onExploded,
         int xposition,
         int yposition,
         int moveSpeed,
@@ -56,6 +64,7 @@ internal class ConveyorNasty
     {
         _gameScreens = gameScreens;
         _randomNumberGenerator = randomNumberGenerator;
+        _onExploded = onExploded;
 
         XLocation = xposition;
         YLocation = yposition;
@@ -168,6 +177,12 @@ internal class ConveyorNasty
             _deathScale = 1.0f;
 
             _conveyorNastyDies.Start();
+
+            // One of these is a machine and goes off like one - the same explosion the spiky
+            // nasties throw, out of the same effect. It was the only thing in the game that blew
+            // up without the picture moving: the jolt is Nasty's, and this is not one of those,
+            // so it never reached a nasty on a rail.
+            _onExploded();
 
             NastyState = NastyState.Dead;
             NastyActive = false;
