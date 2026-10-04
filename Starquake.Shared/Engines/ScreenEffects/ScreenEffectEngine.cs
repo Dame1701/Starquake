@@ -43,6 +43,7 @@ internal class ScreenEffectEngine
         _screenEffects.Add(new AdditiveFade(presentation));
         _screenEffects.Add(new TeleportArrivalEffect(presentation, resources));
         _screenEffects.Add(new CoreSurgeEffect(presentation, resources));
+        _screenEffects.Add(new WaterEffect(presentation, resources));
 
         _renderer = new SpriteBatch(_graphicsDeviceManager.GraphicsDevice);
         _haltBlobAndNastiesRequested = false;
@@ -152,6 +153,18 @@ internal class ScreenEffectEngine
                 break;
             }
         }
+    }
+
+    /// <summary>
+    ///     Ends whatever is running, if anything. For the effects that do not run down on their
+    ///     own - the water on Olly's screen is the only one - which have to be told when the thing
+    ///     they belong to has gone.
+    /// </summary>
+    public void StopActiveScreenEffect()
+    {
+        ActiveScreenEffect?.Reset();
+        ActiveScreenEffect = null;
+        _haltBlobAndNastiesRequested = false;
     }
 
     public void Update()

@@ -1351,6 +1351,12 @@
 /processorParam:DebugMode=Auto
 /build:Shaders/Platform.fx
 
+#begin Shaders/Water.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/Water.fx
+
 #begin Sounds/AccessFailed.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor

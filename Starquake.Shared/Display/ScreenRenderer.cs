@@ -84,7 +84,11 @@ internal class ScreenRenderer
     ///     Olly, the eye that watches Blob from the wall of one particular screen, and the screen
     ///     it lives on. Its pupil tracks Blob across the room at a fraction of Blob's speed.
     /// </summary>
-    private const int OllyScreenNumber = 477;
+    /// <summary>
+    ///     The screen Olly sits on. Public because the water he sits in is a screen effect, and
+    ///     the thing that starts and stops it has to know which screen that is.
+    /// </summary>
+    public const int OllyScreenNumber = 477;
 
     /// <inheritdoc cref="OllyScreenNumber" />
     private const int OllyEyesRestX = 486;

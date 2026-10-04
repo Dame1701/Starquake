@@ -259,6 +259,11 @@ internal static class Assets
         ///     edge. See <c>PlatformSettings</c>.
         /// </summary>
         public const string Platform = @"Shaders\Platform";
+
+        /// <summary>
+        ///     Olly's screen under water. See <c>WaterSettings</c>.
+        /// </summary>
+        public const string Water = @"Shaders\Water";
     }
 
     /// <summary>

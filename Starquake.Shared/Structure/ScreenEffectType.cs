@@ -18,5 +18,10 @@ internal enum ScreenEffectType
     /// <summary>
     ///     The room being wrung round a slot after a part has gone into the planet's core.
     /// </summary>
-    CoreSurge
+    CoreSurge,
+
+    /// <summary>
+    ///     Olly's screen, flooded. The only effect that does not end on its own.
+    /// </summary>
+    Water
 }

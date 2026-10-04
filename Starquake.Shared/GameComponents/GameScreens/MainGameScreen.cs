@@ -10,6 +10,7 @@ using Starquake.ActiveSprites;
 using Starquake.Animations;
 using Starquake.Constants;
 using Starquake.Display;
+using Starquake.Engines.ScreenEffects;
 using Starquake.Engines;
 using Starquake.Helpers;
 using Starquake.Sounds;
@@ -255,6 +256,8 @@ internal class MainGameScreen : IGameScreen
 
         ScoreFirstVisitToThisScreen();
 
+        FloodOllysScreen();
+
         // Walking onto the screen that carries the core hands over to the core screen entirely. Which
         // screen that is comes off the map.
         if (_gameEngine.GameScreens.ScreenNumber == _gameEngine.GameScreens.CoreSite.ScreenNumber)
@@ -445,6 +448,43 @@ internal class MainGameScreen : IGameScreen
         if (DeathRoutineRunning)
         {
             _gameEngine.BlobKiller.Update(gameTime);
+        }
+    }
+
+    /// <summary>
+    ///     Puts the water in on Olly's screen and takes it out again everywhere else.
+    /// </summary>
+    /// <remarks>
+    ///     The water is the one screen effect that does not run down on its own, so leaving the
+    ///     screen has to end it - and that is why this runs on every screen change rather than
+    ///     only on the one that arrives at him.
+    ///     <para>
+    ///         Nothing is done if something else is already running. An effect that is mid-way
+    ///         through - a tunnel entry, say - would be cut off by this, and the only way onto
+    ///         Olly's screen while one is playing is to walk off the end of it, which ends the
+    ///         effect of its own accord a frame later.
+    ///     </para>
+    /// </remarks>
+    private void FloodOllysScreen()
+    {
+        bool withOlly = _gameEngine.GameScreens.ScreenNumber == ScreenRenderer.OllyScreenNumber;
+
+        ScreenEffectBase? running = _gameEngine.ScreenEffectEngine.ActiveScreenEffect;
+
+        if (withOlly)
+        {
+            if (running is null)
+            {
+                _gameEngine.ScreenEffectEngine.ExecuteScreenEffect(
+                    ScreenEffectType.Water, -1, -1, false);
+            }
+
+            return;
+        }
+
+        if (running is { ScreenEffectType: ScreenEffectType.Water })
+        {
+            _gameEngine.ScreenEffectEngine.StopActiveScreenEffect();
         }
     }
 
