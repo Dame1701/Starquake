@@ -31,8 +31,8 @@
             <ReleaseImpulse>0 0</ReleaseImpulse>
             <ParticleTextureAssetName>Textures\Bone</ParticleTextureAssetName>
             <Modifiers>
-                <Item Type="Modifiers:LinearGravityModifier">
-                    <Gravity>50 600</Gravity>
+                <Item Type="Modifiers:DampingModifier">
+                    <DampingCoefficient>1.6</DampingCoefficient>
                 </Item>
                 <Item Type="Modifiers:RotationRateModifier">
                     <InitialRate>4</InitialRate>
@@ -76,8 +76,8 @@
             <ReleaseImpulse>0 0</ReleaseImpulse>
             <ParticleTextureAssetName>Textures\Eye</ParticleTextureAssetName>
             <Modifiers>
-                <Item Type="Modifiers:LinearGravityModifier">
-                    <Gravity>50 600</Gravity>
+                <Item Type="Modifiers:DampingModifier">
+                    <DampingCoefficient>1.6</DampingCoefficient>
                 </Item>
                 <Item Type="Modifiers:OpacityModifier">
                     <Initial>1</Initial>
@@ -121,8 +121,8 @@
             <ReleaseImpulse>0 0</ReleaseImpulse>
             <ParticleTextureAssetName>Textures\Eye</ParticleTextureAssetName>
             <Modifiers>
-                <Item Type="Modifiers:LinearGravityModifier">
-                    <Gravity>-50 600</Gravity>
+                <Item Type="Modifiers:DampingModifier">
+                    <DampingCoefficient>1.6</DampingCoefficient>
                 </Item>
                 <Item Type="Modifiers:OpacityModifier">
                     <Initial>1</Initial>
@@ -166,8 +166,8 @@
             <ReleaseImpulse>0 0</ReleaseImpulse>
             <ParticleTextureAssetName>Textures\Particle004</ParticleTextureAssetName>
             <Modifiers>
-                <Item Type="Modifiers:LinearGravityModifier">
-                    <Gravity>50 500</Gravity>
+                <Item Type="Modifiers:DampingModifier">
+                    <DampingCoefficient>1.6</DampingCoefficient>
                 </Item>
                 <Item Type="Modifiers:OpacityModifier">
                     <Initial>0.8</Initial>
@@ -207,8 +207,8 @@
             <ReleaseImpulse>0 0</ReleaseImpulse>
             <ParticleTextureAssetName>Textures\Particle004</ParticleTextureAssetName>
             <Modifiers>
-                <Item Type="Modifiers:LinearGravityModifier">
-                    <Gravity>-50 500</Gravity>
+                <Item Type="Modifiers:DampingModifier">
+                    <DampingCoefficient>1.6</DampingCoefficient>
                 </Item>
                 <Item Type="Modifiers:OpacityModifier">
                     <Initial>0.8</Initial>
@@ -248,8 +248,8 @@
             <ReleaseImpulse>0 0</ReleaseImpulse>
             <ParticleTextureAssetName>Textures\MultiDot</ParticleTextureAssetName>
             <Modifiers>
-                <Item Type="Modifiers:LinearGravityModifier">
-                    <Gravity>0 550</Gravity>
+                <Item Type="Modifiers:DampingModifier">
+                    <DampingCoefficient>1.6</DampingCoefficient>
                 </Item>
                 <Item Type="Modifiers:OpacityModifier">
                     <Initial>0.4</Initial>
@@ -289,8 +289,8 @@
             <ReleaseImpulse>0 0</ReleaseImpulse>
             <ParticleTextureAssetName>Textures\MultiDot</ParticleTextureAssetName>
             <Modifiers>
-                <Item Type="Modifiers:LinearGravityModifier">
-                    <Gravity>0 550</Gravity>
+                <Item Type="Modifiers:DampingModifier">
+                    <DampingCoefficient>1.6</DampingCoefficient>
                 </Item>
                 <Item Type="Modifiers:OpacityModifier">
                     <Initial>0.2</Initial>
