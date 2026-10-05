@@ -219,7 +219,6 @@ internal static class ContentManifest
 
         resources.AddParticleResource(Assets.Effects.ForceField, "ParticleEffects\\ForceField");
         resources.AddParticleResource(Assets.Effects.BlobFragmentExplosion, "ParticleEffects\\BlobFragmentExplosion");
-        resources.AddParticleResource(Assets.Effects.BlobShockwave, "ParticleEffects\\BlobShockwave");
     }
 
     private static void AnimationTiles(ResourceManager resources)

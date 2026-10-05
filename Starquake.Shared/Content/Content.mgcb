@@ -1230,11 +1230,6 @@
 /processor:PassThroughProcessor
 /build:ParticleEffects/BinaryEffect.xml
 
-#begin ParticleEffects/BlobShockwave.xml
-/importer:XmlImporter
-/processor:PassThroughProcessor
-/build:ParticleEffects/BlobShockwave.xml
-
 #begin ParticleEffects/BlobFragmentExplosion.xml
 /importer:XmlImporter
 /processor:PassThroughProcessor
@@ -1374,6 +1369,12 @@
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:Shaders/Malfunction.fx
+
+#begin Shaders/Shockwave.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/Shockwave.fx
 
 #begin Sounds/AccessFailed.wav
 /importer:WavImporter

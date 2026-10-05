@@ -111,6 +111,12 @@ internal static class Assets
         public const string PanelNumbers = "PanelNumbers";
         public const string StatusPanelShadow = "StatusPanelShadow";
         public const string StatusPanelOverlay = "StatusPanelOverlay";
+
+        /// <summary>
+        ///     A plain square sprite, drawn at whatever size is wanted and filled by a shader that
+        ///     reads nothing from it. <c>Shockwave</c>'s ring is what it is for - the quad is the
+        ///     only thing a sprite batch can hand a pixel shader to work on.
+        /// </summary>
         public const string ParticleSprite = "ParticleSprite";
         public const string CollisionTile = "CollisionTile";
     }
@@ -145,11 +151,6 @@ internal static class Assets
         public const string FireSparks = "FireSparks";
         public const string ForceField = "ForceField";
         public const string BlobFragmentExplosion = "BlobFragmentExplosion";
-
-        /// <summary>
-        ///     The ring thrown out when Blob comes apart, whichever way he came apart.
-        /// </summary>
-        public const string BlobShockwave = "BlobShockwave";
     }
 
     /// <summary>
@@ -279,6 +280,12 @@ internal static class Assets
         ///     The flight computer's display failing. See <c>MalfunctionSettings</c>.
         /// </summary>
         public const string Malfunction = @"Shaders\Malfunction";
+
+        /// <summary>
+        ///     The ring a blast throws out - Blob coming apart, and the nasties that are machines.
+        ///     See <c>ShockwaveSettings</c>.
+        /// </summary>
+        public const string Shockwave = @"Shaders\Shockwave";
     }
 
     /// <summary>

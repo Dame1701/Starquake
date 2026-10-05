@@ -133,7 +133,7 @@ That target framework still compiles everywhere - `EnableWindowsTargeting` sees 
 just ships no content off a Mac, which costs nothing because the Windows head cannot run there.
 **Build the Windows head's content on Windows.** There it needs no Wine at all.
 
-Fifteen shaders are built, all of them `ps_2_0` because the profile is `Reach` and allows no higher:
+Sixteen shaders are built, all of them `ps_2_0` because the profile is `Reach` and allows no higher:
 
 | Shader | What it does |
 | --- | --- |
@@ -152,6 +152,7 @@ Fifteen shaders are built, all of them `ps_2_0` because the profile is `Reach` a
 | `Halo.fx` | The glow under a shuttle tag's lights, drawn from no texture at all |
 | `ForceField.fx` | The sheet of light across a key-locked door, drawn back onto its jambs as it opens |
 | `Malfunction.fx` | The flight computer's display failing - bands thrown sideways, the colour channels split, lines losing their signal, the vertical hold going |
+| `Shockwave.fx` | The ring a blast throws out - a hot front, the ripples behind it, and two waves running round its rim |
 
 **`ps_2_0` has no dynamic branching and 64 arithmetic slots**, and that is a real ceiling rather
 than a theoretical one. It is why `Crt.fx` is three techniques rather than one shader with
@@ -161,16 +162,27 @@ the shared terms does not help, because the compiler has already found them.
 
 `Overload.fx`'s cracking pass hit the same wall at 85 slots, with two crossing sines and a rim on
 it, and came back under by dropping to one sine across a slope and no rim. `CoreFunnel.fx` hit it
-at 76. Each technique gets the budget to itself, which is the other reason to split a shader rather
-than branch inside one. The remaining shaders are small and nowhere near it.
+at 76, and `Shockwave.fx` at 71 the moment the waves round its rim went in - and again at 65 when
+those waves were made finer, which needed one more doubling. It sits at the ceiling now, so
+anything added to it has to buy its slots from somewhere. Each technique gets the
+budget to itself, which is the other reason to split a shader rather than branch inside one. The
+remaining shaders are small and nowhere near it.
 
-**Two things buy slots back cheaply**, both learnt on `CoreFunnel.fx`:
+**Three things buy slots back cheaply**, the first two learnt on `CoreFunnel.fx` and the third on
+`Shockwave.fx`:
 
 - **`pow` is not a multiply.** It compiles to a logarithm, a multiply and an exponent. `x * x * x`
   is nearly free where `pow(x, 3.0)` is not, and three of them were most of that shader's overrun.
 - **Divide on the processor, not per pixel.** A span that never changes between frames can have
   its reciprocal worked out once and passed in as a uniform, turning a per-pixel divide into a
-  per-pixel multiply.
+  per-pixel multiply. An amplitude a uniform is multiplied by can be folded into that uniform for
+  the same reason, and so can a rectangle a coordinate is shifted and scaled by - one multiply and
+  add in the shader instead of a subtract and a divide.
+- **A cosine costs about ten slots.** Where the wave only has to look periodic rather than be a
+  true sinusoid, `frac` and `abs` make a triangle in four, and squaring it once or twice sharpens
+  the crest further for a slot apiece. That one swap is most of what brought `Shockwave.fx` back
+  under; `rsqrt` serving as both a length and a direction is cheap for the same
+  reason - one reciprocal square root instead of a `sqrt` and a divide.
 
 `disappear.fx`, `drawaswhite.fx` and `refraction.fx` were never under `Content/Shaders/` and
 nothing referenced them; they went with `Assets/`.

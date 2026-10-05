@@ -158,6 +158,12 @@ internal class Nasty
     private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
 
+    /// <summary>
+    ///     The ring a machine throws as it goes off. Only the machines have one - a creature
+    ///     coming apart is wet rather than loud, and the splat is the whole of what it does.
+    /// </summary>
+    private readonly Shockwave _shockwave;
+
     private int _birthColourLevel;
 
     private int _birthFadeLevel;
@@ -239,6 +245,9 @@ internal class Nasty
         _nastySpriteNew = _resources.GetSpriteCollection(Assets.Graphics.Nasties).Clone();
 
         CheckSpritesInUse();
+
+        _shockwave = new Shockwave(
+            resources, randomNumberGenerator, ShockwaveSettings.NastyDiameter, ShockwaveSettings.NastyFrames);
 
         _nastyDies = (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.NastyDies,
             ParticleEffectType.Triggered, null);
@@ -617,6 +626,7 @@ internal class Nasty
         if (IsMechanical)
         {
             _nastyDies.Start();
+            _shockwave.Trigger(XPos + SpriteMetrics.HalfSpriteWidth, YPos + SpriteMetrics.HalfSpriteHeight);
 
             // Only the machines. A creature coming apart is wet rather than loud, and a jolt on
             // every nasty Blob shoots would have the picture moving most of the time.
@@ -669,6 +679,8 @@ internal class Nasty
     /// </summary>
     private void UpdateDeathEffects(GameTime gameTime)
     {
+        _shockwave.Update();
+
         _nastyDies.Update(XPos + SpriteMetrics.HalfSpriteWidth, YPos + SpriteMetrics.HalfSpriteHeight, gameTime);
         _nastyDiesType2.Update(XPos + SpriteMetrics.HalfSpriteWidth, YPos + SpriteMetrics.HalfSpriteHeight, gameTime);
         _nastyArrives.Update(XPos + SpriteMetrics.HalfSpriteWidth, YPos + SpriteMetrics.HalfSpriteHeight, gameTime);
@@ -706,6 +718,7 @@ internal class Nasty
         _nastyDies.Stop();
         _nastyDiesType2.Stop();
         _nastyArrives.Stop();
+        _shockwave.Stop();
 
         if (NastyState == NastyState.Disabled)
         {
@@ -889,6 +902,10 @@ internal class Nasty
     /// </summary>
     private void DrawDeath(int nastyImage, int screenFade)
     {
+        // Under the explosion, so the flames and sparks come out of the ring rather than
+        // through it.
+        _shockwave.Draw(screenFade);
+
         _nastyDies.Draw();
         _nastyDiesType2.Draw();
 

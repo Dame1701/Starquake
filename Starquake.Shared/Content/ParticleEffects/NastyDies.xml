@@ -106,48 +106,6 @@
             <Radiate>true</Radiate>
         </Item>
         <Item>
-            <Name>Shockwave</Name>
-            <Budget>8</Budget>
-            <Term>0.42</Term>
-            <ReleaseQuantity>1</ReleaseQuantity>
-            <Enabled>true</Enabled>
-            <ReleaseSpeed>
-                <Value>0</Value>
-                <Variation>0</Variation>
-            </ReleaseSpeed>
-            <ReleaseColour>
-                <Value>1 0.85 0.6</Value>
-                <Variation>0 0 0</Variation>
-            </ReleaseColour>
-            <ReleaseOpacity>
-                <Value>1</Value>
-                <Variation>0</Variation>
-            </ReleaseOpacity>
-            <ReleaseScale>
-                <Value>32</Value>
-                <Variation>0</Variation>
-            </ReleaseScale>
-            <ReleaseRotation>
-                <Value>0</Value>
-                <Variation>3.14</Variation>
-            </ReleaseRotation>
-            <ReleaseImpulse>0 0</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\Ring001</ParticleTextureAssetName>
-            <Modifiers>
-                <Item Type="Modifiers:ScaleModifier">
-                    <InitialScale>32</InitialScale>
-                    <UltimateScale>1400</UltimateScale>
-                </Item>
-                <Item Type="Modifiers:OpacityModifier">
-                    <Initial>0.85</Initial>
-                    <Ultimate>0</Ultimate>
-                </Item>
-            </Modifiers>
-            <BlendMode>Add</BlendMode>
-            <TriggerOffset>0 0</TriggerOffset>
-            <MinimumTriggerPeriod>0.25</MinimumTriggerPeriod>
-        </Item>
-        <Item>
             <Name>Sparks</Name>
             <Budget>1250</Budget>
             <Term>0.55</Term>

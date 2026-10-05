@@ -47,6 +47,12 @@ internal class ConveyorNasty
     private readonly SpriteCollection _nastySprite;
     private readonly Random _randomNumberGenerator;
 
+    /// <summary>
+    ///     The ring it throws as it goes off - the same blast a spiky nasty makes, because these
+    ///     two are the machines and they go off the same way.
+    /// </summary>
+    private readonly Shockwave _shockwave;
+
     private int _deathFadeLevel = ColourLevels.Full;
     private float _deathScale = 1f;
 
@@ -84,6 +90,8 @@ internal class ConveyorNasty
 
         _nastySprite = resources.GetSpriteCollection(Assets.Graphics.ConveyorNasty);
         _conveyorNastyDies = (IStandardParticleEffect)resources.GetParticleEffectInstance(Assets.Effects.NastyDies, ParticleEffectType.Triggered, null);
+        _shockwave = new Shockwave(
+            resources, randomNumberGenerator, ShockwaveSettings.NastyDiameter, ShockwaveSettings.NastyFrames);
         _conveyorNastyDies.ParticleEffectComplete += ConveyorNastyDies_ParticleEffectComplete;
     }
 
@@ -127,6 +135,7 @@ internal class ConveyorNasty
     public void PerformPostChangeScreenActions()
     {
         _conveyorNastyDies.Stop();
+        _shockwave.Stop();
 
         NastyActive = false;
     }
@@ -134,6 +143,7 @@ internal class ConveyorNasty
     public void Update(GameTime gameTime)
     {
         _conveyorNastyDies.Update(XLocation + SpriteMetrics.HalfSpriteWidth, YLocation + SpriteMetrics.SpriteHeight, gameTime);
+        _shockwave.Update();
 
         if (NastyState == NastyState.Conception)
         {
@@ -177,6 +187,7 @@ internal class ConveyorNasty
             _deathScale = 1.0f;
 
             _conveyorNastyDies.Start();
+            _shockwave.Trigger(XLocation + SpriteMetrics.HalfSpriteWidth, YLocation + SpriteMetrics.SpriteHeight);
 
             // One of these is a machine and goes off like one - the same explosion the spiky
             // nasties throw, out of the same effect. It was the only thing in the game that blew
@@ -214,6 +225,10 @@ internal class ConveyorNasty
         }
         else if (NastyState == NastyState.Dead)
         {
+            // Under the explosion, so the flames and sparks come out of the ring rather than
+            // through it.
+            _shockwave.Draw(screenFade);
+
             _conveyorNastyDies.Draw();
 
             if (_deathFadeLevel > 0)
