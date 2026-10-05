@@ -9,10 +9,19 @@ namespace Starquake.Display;
 ///     <c>Shaders/Splat.fx</c>; see <c>Nasty.DrawDeath</c> for where it is handed over.
 /// </summary>
 /// <remarks>
-///     The corpse already shrank, span and faded over about a second while the splat particles
-///     played over it. The fade is what this replaces: a body is eaten away from its edges inward
-///     along a wandering boundary instead, with a wet rim in the colour that kind of nasty
-///     splatters. The shrinking and the spin are untouched.
+///     The corpse already shrank, span and faded while the splat particles played over it. The
+///     fade is what this replaces: a body is eaten away from its edges inward along a wandering
+///     boundary instead, with a wet rim in the colour that kind of nasty splatters. The shrinking
+///     and the spin are untouched.
+///     <para>
+///         It runs over the death fade's own countdown, so it takes exactly as long as that does
+///         and nothing here sets its speed. That is four frames now - the death has been halved
+///         twice since this was written, from three seconds to under one - so the dissolve is a
+///         flicker of a body being taken apart rather than something to watch. If it is ever
+///         wanted back, <c>Nasty.CreatureFadeStep</c> is the one number - and it is a creature's
+///         alone, where a machine's wreck lies in its explosion three times as long under
+///         <see cref="MachineDeathSettings" />.
+///     </para>
 ///     <para>
 ///         Spiky and conveyor nasties never reach this. They are machines, they explode, and
 ///         nothing about that wanted changing.

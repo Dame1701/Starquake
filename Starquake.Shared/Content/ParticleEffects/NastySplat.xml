@@ -5,11 +5,11 @@
         <Item>
             <Name>Bones</Name>
             <Budget>6</Budget>
-            <Term>1.5</Term>
+            <Term>0.75</Term>
             <ReleaseQuantity>6</ReleaseQuantity>
             <Enabled>true</Enabled>
             <ReleaseSpeed>
-                <Value>100</Value>
+                <Value>200</Value>
                 <Variation>0</Variation>
             </ReleaseSpeed>
             <ReleaseColour>
@@ -35,8 +35,8 @@
                     <DampingCoefficient>1.6</DampingCoefficient>
                 </Item>
                 <Item Type="Modifiers:RotationRateModifier">
-                    <InitialRate>4</InitialRate>
-                    <FinalRate>8</FinalRate>
+                    <InitialRate>8</InitialRate>
+                    <FinalRate>16</FinalRate>
                 </Item>
                 <Item Type="Modifiers:OpacityModifier">
                     <Initial>1</Initial>
@@ -50,11 +50,11 @@
         <Item>
             <Name>Left Eye</Name>
             <Budget>1</Budget>
-            <Term>1.5</Term>
+            <Term>0.75</Term>
             <ReleaseQuantity>1</ReleaseQuantity>
             <Enabled>true</Enabled>
             <ReleaseSpeed>
-                <Value>100</Value>
+                <Value>200</Value>
                 <Variation>0</Variation>
             </ReleaseSpeed>
             <ReleaseColour>
@@ -84,8 +84,8 @@
                     <Ultimate>0</Ultimate>
                 </Item>
                 <Item Type="Modifiers:RotationRateModifier">
-                    <InitialRate>4</InitialRate>
-                    <FinalRate>8</FinalRate>
+                    <InitialRate>8</InitialRate>
+                    <FinalRate>16</FinalRate>
                 </Item>
             </Modifiers>
             <BlendMode>Alpha</BlendMode>
@@ -95,11 +95,11 @@
         <Item>
             <Name>Right Eye</Name>
             <Budget>1</Budget>
-            <Term>1.5</Term>
+            <Term>0.75</Term>
             <ReleaseQuantity>1</ReleaseQuantity>
             <Enabled>true</Enabled>
             <ReleaseSpeed>
-                <Value>100</Value>
+                <Value>200</Value>
                 <Variation>0</Variation>
             </ReleaseSpeed>
             <ReleaseColour>
@@ -129,8 +129,8 @@
                     <Ultimate>0</Ultimate>
                 </Item>
                 <Item Type="Modifiers:RotationRateModifier">
-                    <InitialRate>4</InitialRate>
-                    <FinalRate>8</FinalRate>
+                    <InitialRate>8</InitialRate>
+                    <FinalRate>16</FinalRate>
                 </Item>
             </Modifiers>
             <BlendMode>Alpha</BlendMode>
@@ -140,12 +140,12 @@
         <Item>
             <Name>Left Splat</Name>
             <Budget>1000</Budget>
-            <Term>1.5</Term>
+            <Term>0.75</Term>
             <ReleaseQuantity>100</ReleaseQuantity>
             <Enabled>true</Enabled>
             <ReleaseSpeed>
-                <Value>100</Value>
-                <Variation>50</Variation>
+                <Value>200</Value>
+                <Variation>100</Variation>
             </ReleaseSpeed>
             <ReleaseColour>
                 <Value>0 0.1 0</Value>
@@ -181,12 +181,12 @@
         <Item>
             <Name>Right Splat</Name>
             <Budget>1000</Budget>
-            <Term>1.5</Term>
+            <Term>0.75</Term>
             <ReleaseQuantity>100</ReleaseQuantity>
             <Enabled>true</Enabled>
             <ReleaseSpeed>
-                <Value>100</Value>
-                <Variation>50</Variation>
+                <Value>200</Value>
+                <Variation>100</Variation>
             </ReleaseSpeed>
             <ReleaseColour>
                 <Value>0 0.1 0</Value>
@@ -222,12 +222,12 @@
         <Item>
             <Name>Splodges</Name>
             <Budget>1000</Budget>
-            <Term>1</Term>
+            <Term>0.5</Term>
             <ReleaseQuantity>20</ReleaseQuantity>
             <Enabled>true</Enabled>
             <ReleaseSpeed>
-                <Value>50</Value>
-                <Variation>25</Variation>
+                <Value>100</Value>
+                <Variation>50</Variation>
             </ReleaseSpeed>
             <ReleaseColour>
                 <Value>0.5 1 0</Value>
@@ -263,12 +263,12 @@
         <Item>
             <Name>Blood</Name>
             <Budget>1000</Budget>
-            <Term>0.5</Term>
+            <Term>0.25</Term>
             <ReleaseQuantity>100</ReleaseQuantity>
             <Enabled>true</Enabled>
             <ReleaseSpeed>
-                <Value>100</Value>
-                <Variation>50</Variation>
+                <Value>200</Value>
+                <Variation>100</Variation>
             </ReleaseSpeed>
             <ReleaseColour>
                 <Value>1 0 0</Value>
@@ -303,6 +303,6 @@
         </Item>
         <Name>NastySplat</Name>
         <Author>Damien Green</Author>
-        <Description>A simple splat effect.</Description>
+        <Description>An organic nasty coming apart. Thrown hard and over quickly: every term is half what it was and every rate - the speed the pieces leave at, the rate they tumble - is double, so the whole thing plays at twice the pace. The damping is deliberately left where it was rather than doubled with the rest, which is what makes the pieces carry further as well as faster.</Description>
     </Asset>
 </XnaContent>

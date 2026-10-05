@@ -98,15 +98,51 @@ internal class Nasty
     private const int LongestWaitToFirstAppear = 60;
 
     /// <summary>
-    ///     How quickly a dead nasty shrinks away, and how fast the corpse spins as it goes.
+    ///     How fast a creature's corpse goes, and with it how fast the splat dissolve runs: the
+    ///     shader is driven by what is left of this fade, so the two are one countdown rather
+    ///     than two. Eighty a frame against a full level of 255 is four frames, an eyeblink at
+    ///     fifty a second - which is the point. The splat used to take three seconds, then one
+    ///     and a half, and is now under a second end to end including its debris.
     /// </summary>
-    private const float DeathShrinkStep = 0.02f;
+    private const int CreatureFadeStep = 80;
 
-    /// <inheritdoc cref="DeathShrinkStep" />
-    private const float DeathRotateSpeed = 16f;
+    /// <summary>
+    ///     How quickly a creature's corpse draws in as it goes. A ramp it never reaches the end
+    ///     of: the body is drawn only while something of the fade is left, which is four frames,
+    ///     and the scale has come down by about a tenth by then. So this sets how fast the body
+    ///     is pulling in rather than how long it takes to go.
+    /// </summary>
+    private const float CreatureShrinkStep = 0.04f;
 
-    /// <inheritdoc cref="DeathShrinkStep" />
-    private const int DeathFadeStep = 40;
+    /// <summary>
+    ///     How fast a creature's corpse spins as it goes, in degrees a logic frame. Doubled along
+    ///     with everything else about the splat, so the body whips round rather than turning
+    ///     sedately while its own debris is already across the room.
+    /// </summary>
+    private const float CreatureSpinSpeed = 32f;
+
+    /// <summary>
+    ///     Which of the two sets of numbers this nasty's death runs on. A machine's wreck lasts
+    ///     thirteen frames and a creature's four, so these cannot be one constant - and they were
+    ///     one, which is what made a spiky nasty vanish the instant it was shot while a conveyor
+    ///     nasty lay in its explosion.
+    /// </summary>
+    private int DeathFadeStep => IsMechanical ? MachineDeathSettings.FadeStep : CreatureFadeStep;
+
+    /// <inheritdoc cref="DeathFadeStep" />
+    private float DeathShrinkStep => IsMechanical ? MachineDeathSettings.ShrinkStep : CreatureShrinkStep;
+
+    /// <inheritdoc cref="DeathFadeStep" />
+    /// <remarks>
+    ///     A machine's wreck does not turn at all, the way the conveyor nasty's never has: it is
+    ///     sitting in a fire, not tumbling through the air. It used to turn at sixteen degrees a
+    ///     frame, which over the quarter second it now lies there was most of a half revolution
+    ///     of a thing that plainly is not falling.
+    /// </remarks>
+    private float DeathRotateSpeed => IsMechanical ? NoSpin : CreatureSpinSpeed;
+
+    /// <inheritdoc cref="DeathRotateSpeed" />
+    private const float NoSpin = 0f;
 
     /// <summary>
     ///     How fast a live nasty rocks from side to side as it walks.
@@ -670,6 +706,12 @@ internal class Nasty
 
         if (IsMechanical)
         {
+            // Square, and staying square. The spin is nought for a machine, but the birth leaves
+            // a few degrees on the clock - it ends when the angle is merely near zero, and its
+            // backstop can end it anywhere at all - and the death is the only thing that draws
+            // this nasty with its angle.
+            _rotation = 0f;
+
             _nastyDies.Start();
             _shockwave.Trigger(XPos + SpriteMetrics.HalfSpriteWidth, YPos + SpriteMetrics.HalfSpriteHeight);
 

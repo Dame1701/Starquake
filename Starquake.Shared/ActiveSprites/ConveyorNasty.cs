@@ -24,14 +24,6 @@ internal class ConveyorNasty
     /// </summary>
     private const int HangsBelowRailBy = TileMetrics.CollisionCellHeight;
 
-    /// <summary>
-    ///     How quickly a shot conveyor nasty shrinks away.
-    /// </summary>
-    private const float DeathShrinkStep = 0.01f;
-
-    /// <inheritdoc cref="DeathShrinkStep" />
-    private const int DeathFadeStep = 20;
-
 
     private readonly Animation _anim;
     private readonly IStandardParticleEffect _conveyorNastyDies;
@@ -211,8 +203,8 @@ internal class ConveyorNasty
     /// </summary>
     private void FadeAndShrinkTheCorpse()
     {
-        _deathFadeLevel = Ramp.Down(_deathFadeLevel, DeathFadeStep, ColourLevels.None);
-        _deathScale = Ramp.Down(_deathScale, DeathShrinkStep, 0f);
+        _deathFadeLevel = Ramp.Down(_deathFadeLevel, MachineDeathSettings.FadeStep, ColourLevels.None);
+        _deathScale = Ramp.Down(_deathScale, MachineDeathSettings.ShrinkStep, 0f);
     }
 
     public void Draw(int screenFade)
