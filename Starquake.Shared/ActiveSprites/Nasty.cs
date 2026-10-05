@@ -75,11 +75,27 @@ internal class Nasty
     /// </summary>
     private const int DeadPauseFrames = 50;
 
-    /// <inheritdoc cref="DeadPauseFrames" />
-    private const int LongestConceptionWait = 500;
+    /// <summary>
+    ///     The longest a nasty that has been killed stays away before it is conceived again, in
+    ///     logic frames - ten seconds, rolled fresh each death, so a room Blob has cleared stays
+    ///     cleared for a while and the one he killed does not walk straight back into his fire.
+    /// </summary>
+    /// <remarks>
+    ///     This was being set and then thrown away. Both deaths set it and moved the nasty to
+    ///     <see cref="NastyState.PreConception" />; <see cref="BeginConception" /> ran on the very
+    ///     next frame and overwrote it with <see cref="LongestWaitToFirstAppear" /> before
+    ///     anything had read it, so every nasty came back inside a second and a quarter however
+    ///     this was set. The wait is armed where the reason for it is known now, and
+    ///     <see cref="BeginConception" /> leaves it alone.
+    /// </remarks>
+    private const int LongestWaitToComeBack = 500;
 
-    /// <inheritdoc cref="DeadPauseFrames" />
-    private const int ShortestConceptionWaitOnCoreScreen = 60;
+    /// <summary>
+    ///     The longest one waits when it is the screen being populated rather than a death, in
+    ///     logic frames - a second and a bit at the outside. Walking into a room should fill it,
+    ///     not leave Blob standing in an empty one wondering whether the game has stopped.
+    /// </summary>
+    private const int LongestWaitToFirstAppear = 60;
 
     /// <summary>
     ///     How quickly a dead nasty shrinks away, and how fast the corpse spins as it goes.
@@ -348,8 +364,10 @@ internal class Nasty
     ///             caller's.
     ///         </item>
     ///         <item>
-    ///             <see cref="NastyState.PreConception" /> sets everything it needs in
-    ///             <see cref="BeginConception" />, and <see cref="NastyState.Disabled" /> reads nothing.
+    ///             <see cref="NastyState.PreConception" /> settles what kind it will be in
+    ///             <see cref="BeginConception" />, but its wait was armed on the way into that state
+    ///             and is carried above - a nasty stored part way through one is still part way
+    ///             through it when Blob comes back. <see cref="NastyState.Disabled" /> reads nothing.
     ///         </item>
     ///     </list>
     ///     <para>
@@ -418,10 +436,32 @@ internal class Nasty
         if (NastyState == NastyState.Dead)
         {
             _nastyDeadPauseCounter = 0;
-            NastyState = NastyState.PreConception;
-            _conceptionWaitCounter = _randomNumberGenerator.Next(0, LongestConceptionWait);
+            AwaitConception(LongestWaitToComeBack);
         }
     }
+
+    /// <summary>
+    ///     Sends this nasty away to be conceived again, and arms the wait before it is.
+    /// </summary>
+    /// <remarks>
+    ///     The only way into <see cref="NastyState.PreConception" />, because the wait has to be
+    ///     armed on the way in: the state carries no record of why it was entered, and the two
+    ///     reasons want waits an order apart. <see cref="CopyFromSource" /> carries the counter,
+    ///     so a nasty stored while waiting is still waiting when Blob comes back to it.
+    /// </remarks>
+    /// <param name="longestWait">The longest it may wait, in logic frames. Rolled against.</param>
+    private void AwaitConception(int longestWait)
+    {
+        _conceptionWaitCounter = _randomNumberGenerator.Next(0, longestWait);
+        NastyState = NastyState.PreConception;
+    }
+
+    /// <summary>
+    ///     Sends this nasty away to be conceived as one of a screen's own, rather than because it
+    ///     was killed - so it is back almost at once. For <c>Nasties</c>, which populates a screen
+    ///     by putting every nasty on it through here.
+    /// </summary>
+    public void AwaitFirstAppearance() => AwaitConception(LongestWaitToFirstAppear);
 
     /// <summary>
     ///     Picks a nasty at random, from the fifteen kinds that walk about the planet. Bird appears
@@ -488,9 +528,14 @@ internal class Nasty
     ///     Picks how long this nasty waits to be conceived, and what kind of nasty it is going to be
     ///     when it gets there.
     /// </summary>
+    /// <summary>
+    ///     What a nasty settles before it is born: what kind it will be, and where its movement
+    ///     starts from. The wait is not set here - it was armed by whatever sent the nasty to
+    ///     <see cref="NastyState.PreConception" />, which is the only thing that knows how long it
+    ///     should be.
+    /// </summary>
     private void BeginConception()
     {
-        _conceptionWaitCounter = _randomNumberGenerator.Next(0, ShortestConceptionWaitOnCoreScreen);
         NastyState = NastyState.Conception;
 
         if (!KeepNastyTheSame)
@@ -665,8 +710,7 @@ internal class Nasty
             }
             else
             {
-                NastyState = NastyState.PreConception;
-                _conceptionWaitCounter = _randomNumberGenerator.Next(0, LongestConceptionWait);
+                AwaitConception(LongestWaitToComeBack);
                 _nastyDeadPauseCounter = 0;
             }
         }

@@ -123,7 +123,7 @@ internal class Nasties
     {
         for (int a = 0; a < _nastyCount; a++)
         {
-            _nasties[a].NastyState = NastyState.PreConception;
+            _nasties[a].AwaitFirstAppearance();
         }
 
         PerformPostChangeScreenActions();
@@ -360,7 +360,10 @@ internal class Nasties
         {
             if (_nasties[a].NastyState is NastyState.Dead or NastyState.Shot)
             {
-                _nasties[a].NastyState = NastyState.PreConception;
+                // The short wait, not the long one a death would take: this is a screen being put
+                // away, and Blob walking back into it should find it populated rather than find
+                // the nasty he killed still serving out its ten seconds.
+                _nasties[a].AwaitFirstAppearance();
             }
 
             _nasties[a + _nastyCount].CopyFromSource(_nasties[a]);
@@ -385,7 +388,7 @@ internal class Nasties
         for (int a = 0; a < _nastyCount; a++)
         {
             _nasties[a].KeepNastyTheSame = screenData.KeepNastiesTheSame;
-            _nasties[a].NastyState = NastyState.PreConception;
+            _nasties[a].AwaitFirstAppearance();
 
             if (screenData.KeepNastiesTheSame)
             {
