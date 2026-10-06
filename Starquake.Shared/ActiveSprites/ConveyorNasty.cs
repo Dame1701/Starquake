@@ -146,7 +146,7 @@ internal class ConveyorNasty
         {
             if (_nastyDirection == Direction.Left)
             {
-                int amountToMove = _gameScreens.CheckCollision(Direction.Left, XLocation, YLocation + HangsBelowRailBy, SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight, MoveSpeed, false);
+                int amountToMove = _gameScreens.Collisions.CheckCollision(Direction.Left, XLocation, YLocation + HangsBelowRailBy, SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight, MoveSpeed, false);
                 if (amountToMove > 0)
                 {
                     XLocation -= amountToMove;
@@ -159,7 +159,7 @@ internal class ConveyorNasty
             }
             else if (_nastyDirection == Direction.Right)
             {
-                int amountToMove = _gameScreens.CheckCollision(Direction.Right, XLocation, YLocation + HangsBelowRailBy, SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight, MoveSpeed, false);
+                int amountToMove = _gameScreens.Collisions.CheckCollision(Direction.Right, XLocation, YLocation + HangsBelowRailBy, SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight, MoveSpeed, false);
                 if (amountToMove > 0)
                 {
                     XLocation += amountToMove;

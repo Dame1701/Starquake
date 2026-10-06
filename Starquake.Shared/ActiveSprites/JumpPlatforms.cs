@@ -75,7 +75,7 @@ internal class JumpPlatforms : IDynamicCollisionCells
 
         if (checkCollision)
         {
-            if (_gameScreens.CheckRectangles(xPos, position.Y - 64, width, height, true) >= 0)
+            if (_gameScreens.Collisions.CheckRectangles(xPos, position.Y - 64, width, height, true) >= 0)
             {
                 return NoRoomForPlatform;
             }

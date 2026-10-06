@@ -249,7 +249,7 @@ internal class BouncingParticle
 
         // CheckCollision wants a distance rather than a signed step; the direction is already in the
         // argument above it.
-        int speed = _gameScreens.CheckCollision(
+        int speed = _gameScreens.Collisions.CheckCollision(
             direction,
             XPos,
             YPos,

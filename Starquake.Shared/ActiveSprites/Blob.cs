@@ -504,7 +504,7 @@ internal class Blob
                 _blobAnimLeft.GetNextFrame();
             }
 
-            int amountToMove = _gameScreens.CheckCollision(Direction.Left, _blobXPos, _blobYPos,
+            int amountToMove = _gameScreens.Collisions.CheckCollision(Direction.Left, _blobXPos, _blobYPos,
                 BlobWidth, BlobHeight, BlobHSpeed, true);
             if (amountToMove > 0)
             {
@@ -540,7 +540,7 @@ internal class Blob
                 _blobAnimRight.GetNextFrame();
             }
 
-            int amountToMove = _gameScreens.CheckCollision(Direction.Right, _blobXPos, _blobYPos,
+            int amountToMove = _gameScreens.Collisions.CheckCollision(Direction.Right, _blobXPos, _blobYPos,
                 BlobWidth, BlobHeight, BlobHSpeed, true);
             if (amountToMove > 0)
             {
@@ -576,7 +576,7 @@ internal class Blob
 
         if (BlobsControl.MovedUp())
         {
-            _blobYPos -= _gameScreens.CheckCollision(Direction.Up, _blobXPos,
+            _blobYPos -= _gameScreens.Collisions.CheckCollision(Direction.Up, _blobXPos,
                 _blobYPos,
                 BlobWidth, BlobHeight, BlobVSpeed, true);
             DirectionBlobMoved = Direction.Up;
@@ -584,7 +584,7 @@ internal class Blob
 
         if (BlobsControl.MovedDown())
         {
-            _blobYPos += _gameScreens.CheckCollision(Direction.Down, _blobXPos,
+            _blobYPos += _gameScreens.Collisions.CheckCollision(Direction.Down, _blobXPos,
                 _blobYPos, BlobWidth, BlobHeight, BlobVSpeed, true);
             DirectionBlobMoved = Direction.Down;
         }
@@ -645,9 +645,9 @@ internal class Blob
     ///     jump above where he stands means that position still has slack over it.
     /// </remarks>
     private bool CanJumpWithoutAPlatform()
-        => _gameScreens.CheckCollision(Direction.Down, _blobXPos, _blobYPos,
+        => _gameScreens.Collisions.CheckCollision(Direction.Down, _blobXPos, _blobYPos,
                BlobWidth, BlobHeight, 1, true) == 0 &&
-           _gameScreens.CheckCollision(Direction.Up, _blobXPos,
+           _gameScreens.Collisions.CheckCollision(Direction.Up, _blobXPos,
                _blobYPos - JumpHeightWithoutPlatforms,
                BlobWidth, BlobHeight, 1, true) != 0;
 
@@ -706,7 +706,7 @@ internal class Blob
     ///     through one, which is what stops him swapping an item while he is inside a door.
     /// </summary>
     private bool InAnAccessForceField()
-        => _gameScreens.CheckTileByObject(Direction.None, _blobXPos, _blobYPos, BlobWidth, BlobHeight, 0)
+        => _gameScreens.Collisions.CheckTileByObject(Direction.None, _blobXPos, _blobYPos, BlobWidth, BlobHeight, 0)
             is { TileNumber: (int)ActionTiles.AccessForceField };
 
     /// <summary>
@@ -1052,7 +1052,7 @@ internal class Blob
     private void CheckSpikes()
     {
         TileDetected? tileIntersectingBlob =
-            _gameScreens.CheckTileByObject(Direction.None, _blobXPos, _blobYPos, BlobWidth,
+            _gameScreens.Collisions.CheckTileByObject(Direction.None, _blobXPos, _blobYPos, BlobWidth,
                 BlobHeight, 0);
 
         if (tileIntersectingBlob != null && SpikesHaveGotHim(tileIntersectingBlob))

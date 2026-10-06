@@ -319,7 +319,7 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
             _resources.GetSpriteCollection(Assets.Graphics.BlankingTile).End();
         }
 
-        _gameScreens.Draw(Color.White);
+        _gameScreens.Renderer.Draw(Color.White);
 
         DrawCoreGuardians();
 

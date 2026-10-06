@@ -557,7 +557,7 @@ internal sealed class BlobWeapon
         ///     The shot is not Blob, so it gets none of the leniency the collision map gives him.
         /// </remarks>
         public int DistanceClear(Direction direction, int x, int y, int width, int height, int distance)
-            => gameScreens.CheckCollision(direction, x, y, width, height, distance, false);
+            => gameScreens.Collisions.CheckCollision(direction, x, y, width, height, distance, false);
 
         /// <inheritdoc />
         public FireDeflection ChooseDeflection()

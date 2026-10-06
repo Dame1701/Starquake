@@ -183,7 +183,7 @@ internal class MainGameScreen : IGameScreen
 
             _game.ElectricityNodeGates.Draw();
 
-            _game.GameScreens.Draw(
+            _game.GameScreens.Renderer.Draw(
                 ColourHelper.WhiteFadedTo((byte)ScreenFade),
                 _game.IntroSequence.SequenceRunning, _game.IntroSequence.SequenceStage);
 
@@ -209,7 +209,7 @@ internal class MainGameScreen : IGameScreen
 
             if (GameIsInPlay)
             {
-                _game.GameScreens.DrawShadowing();
+                _game.GameScreens.Renderer.DrawShadowing();
             }
 
             // Last, so Blob's sparks are in front of the shadows down the screen exits rather than
@@ -665,7 +665,7 @@ internal class MainGameScreen : IGameScreen
     private void DrawUpperGraphics()
     {
         _game.ElectricityNodeGates.DrawUpperLayer();
-        _game.GameScreens.DrawUpperLayer(
+        _game.GameScreens.Renderer.DrawUpperLayer(
             ColourHelper.WhiteFadedTo((byte)ScreenFade));
     }
 
