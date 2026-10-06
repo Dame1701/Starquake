@@ -5,11 +5,11 @@
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 
-namespace Starquake.Display;
+namespace Starquake.Tuning;
 
 /// <summary>
 ///     The shape of the ring a blast throws out. Driven by <c>Shaders/Shockwave.fx</c>; see
-///     <see cref="Shockwave" /> for where it is handed over.
+///     <c>Shockwave</c> for where it is handed over.
 /// </summary>
 /// <remarks>
 ///     Two sizes of the one blast: Blob coming apart throws a wider ring than a machine does and

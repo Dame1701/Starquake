@@ -6,11 +6,11 @@ using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.Structure;
 
-namespace Starquake.Display;
+namespace Starquake.Tuning;
 
 /// <summary>
 ///     The numbers the CRT shader is driven by, and the look it is tuned to. Pure arithmetic on
-///     the back buffer's size, kept apart from <see cref="ScreenPresenter" /> so it can be checked
+///     the back buffer's size, kept apart from <c>ScreenPresenter</c> so it can be checked
 ///     without a graphics device - the same split <see cref="PresentationSettings.TransformFor" />
 ///     is written for.
 /// </summary>

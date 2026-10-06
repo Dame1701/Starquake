@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 
-namespace Starquake.Display;
+namespace Starquake.Tuning;
 
 /// <summary>
 ///     The shape of the shimmer a teleport arrival leaves on the room. Driven by

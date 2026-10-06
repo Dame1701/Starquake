@@ -3,7 +3,7 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
-using Starquake.Display;
+using Starquake.Tuning;
 using Xunit;
 
 namespace Starquake.Tests;

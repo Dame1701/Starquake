@@ -3,8 +3,8 @@
 // ---------------------------------------------------------
 // -
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 using Starquake.ActiveSprites.NastyBehaviour;
 using Starquake.Constants;
 using Starquake.ContentManagement;
@@ -13,6 +13,8 @@ using Starquake.Helpers;
 using Starquake.Particles;
 using Starquake.Sprites;
 using Starquake.Structure;
+using Starquake.Tuning;
+using Starquake.World;
 
 namespace Starquake.ActiveSprites;
 

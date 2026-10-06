@@ -4,7 +4,7 @@
 // -
 using Microsoft.Xna.Framework;
 
-namespace Starquake.Display;
+namespace Starquake.Tuning;
 
 /// <summary>
 ///     What a nasty arriving looks like, and the one sum behind it. Driven by

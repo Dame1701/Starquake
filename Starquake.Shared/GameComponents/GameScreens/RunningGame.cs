@@ -4,7 +4,7 @@
 // -
 using Starquake.ActiveSprites;
 using Starquake.Animations;
-using Starquake.Display;
+using Starquake.World;
 
 namespace Starquake.GameComponents.GameScreens;
 

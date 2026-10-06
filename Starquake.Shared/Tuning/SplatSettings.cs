@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-namespace Starquake.Display;
+namespace Starquake.Tuning;
 
 /// <summary>
 ///     What an organic nasty coming apart looks like, and the one sum behind it. Driven by

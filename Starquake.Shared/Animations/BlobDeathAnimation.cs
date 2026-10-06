@@ -9,6 +9,8 @@ using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Particles;
 using Starquake.Structure;
+using Starquake.Tuning;
+using Starquake.World;
 
 namespace Starquake.Animations;
 

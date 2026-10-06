@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-namespace Starquake.Display;
+namespace Starquake.Tuning;
 
 /// <summary>
 ///     How long a machine's wreck lies in its own explosion, and how it goes. The two nasties

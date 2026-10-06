@@ -4,7 +4,7 @@
 // -
 using Microsoft.Xna.Framework;
 
-namespace Starquake.Display;
+namespace Starquake.Tuning;
 
 /// <summary>
 ///     What a jump platform looks like as it comes apart. Driven by <c>Shaders/Platform.fx</c>; the

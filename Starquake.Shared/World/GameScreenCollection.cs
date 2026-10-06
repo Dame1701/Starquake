@@ -6,13 +6,14 @@ using Microsoft.Xna.Framework;
 using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Display;
 using Starquake.Fonts;
 using Starquake.Particles;
 using Starquake.SharedLibs;
 using Starquake.Structure;
 using Starquake.WorldGeneration;
 
-namespace Starquake.Display;
+namespace Starquake.World;
 
 /// <summary>
 ///     The planet. Its 512 screens and the tiles on each, where the landing site, the core and its

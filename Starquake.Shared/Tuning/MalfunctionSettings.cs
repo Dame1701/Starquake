@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 
-namespace Starquake.Display;
+namespace Starquake.Tuning;
 
 /// <summary>
 ///     The flight computer's display failing, which is what the report it is printing says has

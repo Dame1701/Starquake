@@ -8,8 +8,9 @@ using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.SharedLibs;
 using Starquake.Structure;
+using Starquake.Tuning;
 
-namespace Starquake.Display;
+namespace Starquake.World;
 
 /// <summary>
 ///     The key-locked doors on the screen being shown: where they are, whether each lets Blob

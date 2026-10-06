@@ -6,8 +6,8 @@ using Microsoft.Xna.Framework;
 using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.ContentManagement;
-using Starquake.Display;
 using Starquake.Structure;
+using Starquake.World;
 
 namespace Starquake.ActiveSprites;
 

@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 
-namespace Starquake.Display;
+namespace Starquake.Tuning;
 
 /// <summary>
 ///     What a nasty draining Blob's energy looks like. Driven by <c>Shaders/Overload.fx</c>'s

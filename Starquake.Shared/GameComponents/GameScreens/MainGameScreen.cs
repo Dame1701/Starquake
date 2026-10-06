@@ -3,9 +3,9 @@
 // ---------------------------------------------------------
 // -
 using System.Diagnostics;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
 using Starquake.ActiveSprites;
 using Starquake.Constants;
 using Starquake.Display;
@@ -14,6 +14,8 @@ using Starquake.Helpers;
 using Starquake.Sounds;
 using Starquake.Sprites;
 using Starquake.Structure;
+using Starquake.Tuning;
+using Starquake.World;
 
 namespace Starquake.GameComponents.GameScreens;
 

@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 
-namespace Starquake.Display;
+namespace Starquake.Tuning;
 
 /// <summary>
 ///     The water Olly sits in. Driven by <c>Shaders/Water.fx</c>; see <c>WaterEffect</c>.

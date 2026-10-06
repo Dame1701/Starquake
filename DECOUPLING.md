@@ -465,6 +465,54 @@ wanted "would still be coming out of the engine - so it would hold both this and
 is worse than holding one". The premise was right and the conclusion did not follow. It holds
 neither.
 
+### Acyclic is not the same as sensible
+
+With the graph a DAG it was worth asking the other question - whether each namespace holds what its
+name says - and two did not. Both were the same mistake the cycles had been, which is why they
+survived: a leaf filed in the feature namespace that consumes it does not show up as a cycle, only
+as a thing sitting ten layers higher than it needs to.
+
+**`Starquake.Tuning`** takes the eighteen `*Settings` classes out of `Display`. Every one is an
+`internal static class` of constants; seven have no `Starquake` dependency at all and the rest need
+only `Constants`. They were at layer ten. Of the twelve types `ActiveSprites` reached into `Display`
+for, ten were these - so gameplay depended on the drawing namespace mostly to read numbers.
+`PresentationSettings` is deliberately not among them: it is a mutable `sealed class`, actual live
+state rather than a table, and it is in `Structure` already.
+
+**`Starquake.World`** takes the planet out of `Display`. `GameScreenCollection` is the map - 512
+screens, the landing site, the core - and the drawing namespace was never where that belonged. It
+moves with the three things that are of this planet and nothing else: `ScreenRenderer`, which draws
+these screens' tiles and takes their data, `ColourAnimationEngine`, which pulses these tiles and
+holds the planet, and `KeyLockDoors`. What is left in `Display` is general presentation furniture -
+`Shapes`, `ScreenPresenter`, `ArtworkCrossfade`, `StatusPanel`, `Overlays`, `PanelNumbers`,
+`ModeAnnouncement`, `ScreenShake`, `KeyScanner`, `Shockwave` - and it is a coherent ten files rather
+than an incoherent thirty-two.
+
+Measured, that pair is worth:
+
+| | Before | After |
+| --- | --- | --- |
+| `ActiveSprites` → `Display` | 11 files, 12 types | **2 files, 1 type** (`Shockwave`) |
+| `Animations` → `Display` | 3 files, 3 types | 1 file, 1 type (`Shockwave`) |
+| `Display` | 32 files | 10 files |
+| Cycles | 0 | 0 |
+
+`World` → `Display` is two references and both are `Shapes`, a `SpriteBatch` subclass with no
+`Starquake` dependency that eight files across four namespaces draw with. `Display` → `World` is
+nothing.
+
+**What this does not do is make `World` headless.** The planet still owns its renderer - that is why
+`ScreenRenderer` had to move with it rather than stay behind - so a logic assembly split out of here
+would still drag the drawing along. The namespace is honest about the code now, which it was not
+before; making the code headless means splitting `GameScreenCollection` itself into the map and the
+thing that draws it, and that is a different piece of work from this one.
+
+Still open, and named here so it is not rediscovered: **`Structure` (42 files) and `Helpers` (4) have
+names that no longer describe what is in them.** `Structure` is the leaf layer - shared enums,
+delegates, records and small values with no dependencies - which is a real role its name does not
+convey, and `Helpers` is four classes with a non-name. Neither is doing harm and both are a rename
+across many files, so they wait.
+
 ### What is left, and why
 
 Two files, and both are deliberate.

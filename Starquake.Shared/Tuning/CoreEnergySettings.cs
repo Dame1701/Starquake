@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.Structure;
 
-namespace Starquake.Display;
+namespace Starquake.Tuning;
 
 /// <summary>
 ///     The planet's core as a living thing: a funnel of energy turning about it, and beams of

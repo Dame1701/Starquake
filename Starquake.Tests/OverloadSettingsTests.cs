@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using Starquake.ActiveSprites;
 using Starquake.Constants;
-using Starquake.Display;
+using Starquake.Tuning;
 using Xunit;
 
 namespace Starquake.Tests;

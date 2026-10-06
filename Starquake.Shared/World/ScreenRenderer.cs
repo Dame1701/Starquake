@@ -2,18 +2,20 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 using ProjectMercury.Emitters;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Display;
 using Starquake.Fonts;
 using Starquake.Particles;
 using Starquake.SharedLibs;
 using Starquake.Sprites;
 using Starquake.Structure;
+using Starquake.Tuning;
 
-namespace Starquake.Display;
+namespace Starquake.World;
 
 /// <summary>
 ///     Draws one screen of the planet: its two layers of tiles, whatever is lying on it, the force

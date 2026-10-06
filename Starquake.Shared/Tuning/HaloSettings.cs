@@ -4,7 +4,7 @@
 // -
 using Starquake.Constants;
 
-namespace Starquake.Display;
+namespace Starquake.Tuning;
 
 /// <summary>
 ///     The halo thrown by a pulsing tile that asks for one - which is the three shuttle tags, the

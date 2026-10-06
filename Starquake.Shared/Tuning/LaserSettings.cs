@@ -4,7 +4,7 @@
 // -
 using Microsoft.Xna.Framework;
 
-namespace Starquake.Display;
+namespace Starquake.Tuning;
 
 /// <summary>
 ///     What Blob's shot burns like. Driven by <c>Shaders/Laser.fx</c>; see <c>BlobWeapon</c>.

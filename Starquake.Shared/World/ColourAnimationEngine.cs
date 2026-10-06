@@ -8,8 +8,9 @@ using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Sprites;
 using Starquake.Structure;
+using Starquake.Tuning;
 
-namespace Starquake.Display;
+namespace Starquake.World;
 
 internal class ColourAnimationEngine
 {
