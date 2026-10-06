@@ -10,7 +10,7 @@ using Starquake.Sprites;
 
 namespace Starquake.Animations;
 
-internal class BouncingAnimation
+internal class Bounce
 {
     /// <summary>
     ///     How much of a part's life it spends at full size and full brightness before it starts to go.
@@ -54,7 +54,7 @@ internal class BouncingAnimation
     private int _xDelta;
     private double _yDelta;
 
-    public BouncingAnimation(ResourceManager resources, Random randomNumberGenerator, int spriteNo)
+    public Bounce(ResourceManager resources, Random randomNumberGenerator, int spriteNo)
     {
         _spriteNo = spriteNo;
         _resources = resources;

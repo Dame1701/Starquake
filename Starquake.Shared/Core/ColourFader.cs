@@ -15,13 +15,13 @@ namespace Starquake.Core;
 ///     <c>ColourAnimatedTiles.All</c> hands out a fresh set every call - a shared static set
 ///     would have the registered animations and the live ones be the same objects.
 /// </remarks>
-internal class ColourFaderAnimation
+internal class ColourFader
 {
     /// <summary>
     ///     Which way the current pulse is going. A pulse fades up to
     ///     <see cref="TransitionColour" /> and back down again, once per loop.
     /// </summary>
-    public ColourAnimationDirection Direction;
+    public ColourFaderDirection Direction;
 
     /// <summary>
     ///     How many times the tile is drawn over itself. The blend is additive, so a higher

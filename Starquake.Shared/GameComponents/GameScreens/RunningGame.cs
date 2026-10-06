@@ -50,7 +50,7 @@ internal sealed class RunningGame
     public required Nasties Nasties { get; init; }
 
     /// <summary>How he comes apart when one of them gets him.</summary>
-    public required BlobDeathAnimation BlobKiller { get; init; }
+    public required BlobDeath BlobKiller { get; init; }
 
     /// <summary>The nasties that run along conveyor rails.</summary>
     public required ConveyorNasties ConveyorNasties { get; init; }

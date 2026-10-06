@@ -4,7 +4,7 @@
 // -
 namespace Starquake.Core;
 
-internal enum ColourAnimationDirection
+internal enum ColourFaderDirection
 {
     FadeUp = 1,
     FadeDown = 2

@@ -92,7 +92,7 @@ internal class Blob
 
 
     private readonly JumpPlatforms _blobJumpPlatformEngine;
-    private readonly BlobDeathAnimation _blobKiller;
+    private readonly BlobDeath _blobKiller;
 
     private readonly IStandardParticleEffect _blobTeleporterBeam;
     private readonly BreakableBridges _breakableBridges;
@@ -152,7 +152,7 @@ internal class Blob
         ScreenEffectEngine screenEffects,
         PlayerStats stats,
         GameSession session,
-        BlobDeathAnimation blobKiller,
+        BlobDeath blobKiller,
         BreakableBridges breakableBridges,
         Random randomNumberGenerator,
         ToggleKeys input,

@@ -39,8 +39,8 @@ internal class AccessBoothScreen : IGameScreen
     private readonly KeyScanner[] _accessCodes;
     private readonly Blob _blob;
 
-    private readonly BlobAccessBoothAnim _blobAnim1;
-    private readonly BlobAccessBoothAnim _blobAnim2;
+    private readonly BlobAccessBooth _blobAnim1;
+    private readonly BlobAccessBooth _blobAnim2;
     private readonly BitmapFont _font;
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsSet _graphicsSet;
@@ -89,8 +89,8 @@ internal class AccessBoothScreen : IGameScreen
             _accessCodes[a] = new KeyScanner(_resources, _graphicsSet, _randomNumberGenerator, true);
         }
 
-        _blobAnim1 = new BlobAccessBoothAnim(_resources, _graphicsSet, 164, 800);
-        _blobAnim2 = new BlobAccessBoothAnim(_resources, _graphicsSet, 164, 800);
+        _blobAnim1 = new BlobAccessBooth(_resources, _graphicsSet, 164, 800);
+        _blobAnim2 = new BlobAccessBooth(_resources, _graphicsSet, 164, 800);
 
         Reset();
     }

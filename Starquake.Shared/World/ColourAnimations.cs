@@ -15,7 +15,7 @@ namespace Starquake.World;
 internal class ColourAnimations
 {
 
-    private readonly List<ColourFaderAnimation> _colourAnimationsRegistered;
+    private readonly List<ColourFader> _registered;
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsSet _graphicsSet;
     private readonly ResourceManager _resources;
@@ -26,23 +26,23 @@ internal class ColourAnimations
         _gameScreens = gameScreens;
         _graphicsSet = graphicsSet;
 
-        _colourAnimationsRegistered = new List<ColourFaderAnimation>();
+        _registered = new List<ColourFader>();
     }
 
-    public void RegisterTile(ColourFaderAnimation faderAnimation)
+    public void RegisterTile(ColourFader fader)
     {
-        _colourAnimationsRegistered.Add(faderAnimation);
+        _registered.Add(fader);
     }
 
     public void Start(int tileNo, int loopCount)
     {
-        foreach (ColourFaderAnimation colourAnimation in _colourAnimationsRegistered)
+        foreach (ColourFader fader in _registered)
         {
-            if (colourAnimation.TileNo == tileNo)
+            if (fader.TileNo == tileNo)
             {
-                if (!colourAnimation.Running)
+                if (!fader.Running)
                 {
-                    Begin(colourAnimation, loopCount);
+                    Begin(fader, loopCount);
                 }
             }
         }
@@ -50,16 +50,16 @@ internal class ColourAnimations
 
     public void Start(int tileNo, int loopCount, Color transitionColour, int intensity)
     {
-        foreach (ColourFaderAnimation colourAnimation in _colourAnimationsRegistered)
+        foreach (ColourFader fader in _registered)
         {
-            if (colourAnimation.TileNo == tileNo)
+            if (fader.TileNo == tileNo)
             {
-                if (!colourAnimation.Running)
+                if (!fader.Running)
                 {
-                    colourAnimation.TransitionColour = transitionColour;
-                    colourAnimation.Intensity = intensity;
+                    fader.TransitionColour = transitionColour;
+                    fader.Intensity = intensity;
 
-                    Begin(colourAnimation, loopCount);
+                    Begin(fader, loopCount);
                 }
             }
         }
@@ -70,26 +70,26 @@ internal class ColourAnimations
     ///     reset. The transition colour's alpha is zeroed here rather than by the caller, so an
     ///     animation always begins invisible whichever overload asked for it.
     /// </summary>
-    private static void Begin(ColourFaderAnimation colourAnimation, int loopCount)
+    private static void Begin(ColourFader fader, int loopCount)
     {
-        colourAnimation.TransitionColour.A = 0;
-        colourAnimation.Running = true;
-        colourAnimation.Direction = ColourAnimationDirection.FadeUp;
-        colourAnimation.Stopping = false;
-        colourAnimation.LoopCount = loopCount;
-        colourAnimation.LoopCounter = 0;
+        fader.TransitionColour.A = 0;
+        fader.Running = true;
+        fader.Direction = ColourFaderDirection.FadeUp;
+        fader.Stopping = false;
+        fader.LoopCount = loopCount;
+        fader.LoopCounter = 0;
     }
 
     public void Stop(int tileNo)
     {
-        for (int a = 0; a < _colourAnimationsRegistered.Count; a++)
+        for (int a = 0; a < _registered.Count; a++)
         {
-            if (_colourAnimationsRegistered[a].TileNo == tileNo)
+            if (_registered[a].TileNo == tileNo)
             {
-                if (_colourAnimationsRegistered[a].Running &&
-                    !_colourAnimationsRegistered[a].Stopping)
+                if (_registered[a].Running &&
+                    !_registered[a].Stopping)
                 {
-                    _colourAnimationsRegistered[a].Stopping = true;
+                    _registered[a].Stopping = true;
                 }
             }
         }
@@ -97,66 +97,66 @@ internal class ColourAnimations
 
     public void Update()
     {
-        foreach (ColourFaderAnimation colourAnimation in _colourAnimationsRegistered)
+        foreach (ColourFader fader in _registered)
         {
-            if (colourAnimation.Running)
+            if (fader.Running)
             {
-                if (colourAnimation.Direction == ColourAnimationDirection.FadeUp)
+                if (fader.Direction == ColourFaderDirection.FadeUp)
                 {
-                    if (colourAnimation.TransitionColour.A < ColourLevels.Full)
+                    if (fader.TransitionColour.A < ColourLevels.Full)
                     {
-                        int value = colourAnimation.TransitionColour.A;
-                        value += colourAnimation.Speed;
+                        int value = fader.TransitionColour.A;
+                        value += fader.Speed;
 
                         if (value > ColourLevels.Full)
                         {
                             value = ColourLevels.Full;
                         }
 
-                        colourAnimation.TransitionColour.A = (byte)value;
+                        fader.TransitionColour.A = (byte)value;
                     }
                     else
                     {
-                        colourAnimation.Direction = ColourAnimationDirection.FadeDown;
+                        fader.Direction = ColourFaderDirection.FadeDown;
                     }
                 }
-                else if (colourAnimation.Direction == ColourAnimationDirection.FadeDown)
+                else if (fader.Direction == ColourFaderDirection.FadeDown)
                 {
-                    if (colourAnimation.TransitionColour.A > 0)
+                    if (fader.TransitionColour.A > 0)
                     {
-                        int value = colourAnimation.TransitionColour.A;
-                        value -= colourAnimation.Speed;
+                        int value = fader.TransitionColour.A;
+                        value -= fader.Speed;
 
                         if (value < 0)
                         {
                             value = 0;
                         }
 
-                        colourAnimation.TransitionColour.A = (byte)value;
+                        fader.TransitionColour.A = (byte)value;
                     }
                     else
                     {
-                        if (!colourAnimation.Stopping &&
-                            colourAnimation.LoopCounter < colourAnimation.LoopCount - 1)
+                        if (!fader.Stopping &&
+                            fader.LoopCounter < fader.LoopCount - 1)
                         {
-                            if (colourAnimation.LoopCount >= 0)
+                            if (fader.LoopCount >= 0)
                             {
-                                colourAnimation.LoopCounter++;
+                                fader.LoopCounter++;
                             }
 
-                            colourAnimation.Direction = ColourAnimationDirection.FadeUp;
+                            fader.Direction = ColourFaderDirection.FadeUp;
                         }
                         else
                         {
-                            if (colourAnimation.Stopping ||
-                                colourAnimation.LoopCount >= 0)
+                            if (fader.Stopping ||
+                                fader.LoopCount >= 0)
                             {
-                                colourAnimation.Running = false;
-                                colourAnimation.LoopCounter = 0;
+                                fader.Running = false;
+                                fader.LoopCounter = 0;
                             }
                             else
                             {
-                                colourAnimation.Direction = ColourAnimationDirection.FadeUp;
+                                fader.Direction = ColourFaderDirection.FadeUp;
                             }
                         }
                     }
@@ -183,32 +183,32 @@ internal class ColourAnimations
         // own tile and a batch holds one set of values, so the halos cannot share the batch the
         // plain pulses go down in - and the halo has to go *under* the light it belongs to, which
         // means it cannot be drawn as it is found either.
-        List<(int Tile, int X, int Y, ColourFaderAnimation Animation)> pulsing = [];
+        List<(int Tile, int X, int Y, ColourFader Animation)> pulsing = [];
 
         for (int y = 0; y < TileMetrics.TilesDown; y++)
         {
             for (int x = 0; x < TileMetrics.TilesAcross; x++)
             {
-                foreach (ColourFaderAnimation colourAnimation in _colourAnimationsRegistered)
+                foreach (ColourFader fader in _registered)
                 {
-                    if (!colourAnimation.Running)
+                    if (!fader.Running)
                     {
                         continue;
                     }
 
-                    int tileToDraw = upperLayer ? colourAnimation.UpperTileToDraw : colourAnimation.TileNo;
+                    int tileToDraw = upperLayer ? fader.UpperTileToDraw : fader.TileNo;
 
                     if (upperLayer && tileToDraw < 0)
                     {
                         continue;
                     }
 
-                    if (_gameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage != colourAnimation.TileNo)
+                    if (_gameScreens.CurrentGameScreenData.ScreenTiles[x, y].TileImage != fader.TileNo)
                     {
                         continue;
                     }
 
-                    pulsing.Add((tileToDraw, x, y, colourAnimation));
+                    pulsing.Add((tileToDraw, x, y, fader));
                 }
             }
         }
@@ -217,7 +217,7 @@ internal class ColourAnimations
 
         tiles.Begin(BlendState.Additive);
 
-        foreach ((int tile, int x, int y, ColourFaderAnimation animation) in pulsing)
+        foreach ((int tile, int x, int y, ColourFader animation) in pulsing)
         {
             DrawLayeredUp(tiles, tile, x, y, animation);
         }
@@ -242,7 +242,7 @@ internal class ColourAnimations
     /// </remarks>
     private void DrawHalos(
         SpriteCollection tiles,
-        List<(int Tile, int X, int Y, ColourFaderAnimation Animation)> pulsing)
+        List<(int Tile, int X, int Y, ColourFader Animation)> pulsing)
     {
         Effect halo = _resources.GetEffect(Assets.Shaders.Halo);
 
@@ -251,7 +251,7 @@ internal class ColourAnimations
 
         halo.Parameters["YOverX"].SetValue(HaloSettings.YOverX);
 
-        foreach ((int tile, int x, int y, ColourFaderAnimation animation) in pulsing)
+        foreach ((int tile, int x, int y, ColourFader animation) in pulsing)
         {
             if (animation.HaloLights.Length == 0)
             {
@@ -291,15 +291,15 @@ internal class ColourAnimations
         int tileToDraw,
         int x,
         int y,
-        ColourFaderAnimation colourAnimation)
+        ColourFader fader)
     {
-        for (int layer = 0; layer < colourAnimation.Intensity; layer++)
+        for (int layer = 0; layer < fader.Intensity; layer++)
         {
             tiles.DrawSprite(
                 tileToDraw,
                 x * TileMetrics.TileWidth,
                 y * TileMetrics.TileHeight,
-                colourAnimation.TransitionColour);
+                fader.TransitionColour);
         }
     }
 }

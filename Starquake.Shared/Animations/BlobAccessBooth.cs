@@ -9,7 +9,7 @@ using Starquake.Sprites;
 
 namespace Starquake.Animations;
 
-internal class BlobAccessBoothAnim
+internal class BlobAccessBooth
 {
     private readonly Animation _animLeft;
     private readonly Animation _animRight;
@@ -23,7 +23,7 @@ internal class BlobAccessBoothAnim
     private int _blobFrame;
     private int _blobX;
 
-    public BlobAccessBoothAnim(ResourceManager resources, GraphicsSet graphicsSet, int startPoint, int endPoint)
+    public BlobAccessBooth(ResourceManager resources, GraphicsSet graphicsSet, int startPoint, int endPoint)
     {
         _resources = resources;
         _graphicsSet = graphicsSet;

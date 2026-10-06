@@ -468,7 +468,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         var tunnelLiftArrows = new TunnelLiftArrows(ContentResourceManager, gameScreens, _graphicsSet);
 
         // Blob's death throes. After the planet, which each thrown-off fragment bounces around.
-        var blobKiller = new BlobDeathAnimation(ContentResourceManager, gameScreens, _graphicsSet, RandomNumberGenerator);
+        var blobKiller = new BlobDeath(ContentResourceManager, gameScreens, _graphicsSet, RandomNumberGenerator);
 
         // Its fragments each take a particle effect instance, so this cannot run until the resources are
         // loaded - which is now, not when the load was started.
@@ -581,7 +581,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     private void RegisterColourAnimations()
     {
-        foreach (ColourFaderAnimation animation in ColourAnimatedTiles.All())
+        foreach (ColourFader animation in ColourAnimatedTiles.All())
         {
             GameScreens.ColourAnimations.RegisterTile(animation);
         }

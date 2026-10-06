@@ -65,11 +65,11 @@ internal class IntroSequence
     /// </summary>
     private const int EndPauseFrames = LogicClock.FramesPerSecond * 4;
 
-    private readonly BlobDeathAnimation _blobKiller;
+    private readonly BlobDeath _blobKiller;
 
 
-    private readonly FaderAnimation _blobShipHazardLightFlash;
-    private readonly RandomFaderAnimation _blobShipHeadLightFlash;
+    private readonly Fader _blobShipHazardLightFlash;
+    private readonly RandomFader _blobShipHeadLightFlash;
     private readonly BitmapFont _font;
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsSet _graphicsSet;
@@ -128,7 +128,7 @@ internal class IntroSequence
         PresentationSettings presentation,
         ScreenDirectory screenDirectory,
         ScreenEffectEngine screenEffects,
-        BlobDeathAnimation blobKiller,
+        BlobDeath blobKiller,
         Random randomNumberGenerator)
     {
         _resources = resources;
@@ -144,8 +144,8 @@ internal class IntroSequence
             Assets.Effects.FireSparks, ParticleEffectType.TriggeredMultiLocationTimed, null);
         _randomNumberGenerator = randomNumberGenerator;
 
-        _blobShipHazardLightFlash = new FaderAnimation(10);
-        _blobShipHeadLightFlash = new RandomFaderAnimation(4, _randomNumberGenerator, 100);
+        _blobShipHazardLightFlash = new Fader(10);
+        _blobShipHeadLightFlash = new RandomFader(4, _randomNumberGenerator, 100);
     }
 
     /// <summary>

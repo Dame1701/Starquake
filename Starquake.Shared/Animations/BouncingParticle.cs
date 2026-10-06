@@ -62,7 +62,7 @@ internal class BouncingParticle
     private const double Gravity = 1.0;
 
     private readonly GameScreenCollection _gameScreens;
-    private readonly BouncingAnimation _particleBounce;
+    private readonly Bounce _particleBounce;
     private readonly Random _randomNumberGenerator;
 
     private int _oldXPos;
@@ -72,7 +72,7 @@ internal class BouncingParticle
     {
         _gameScreens = gameScreens;
         _randomNumberGenerator = randomNumberGenerator;
-        _particleBounce = new BouncingAnimation(resources, randomNumberGenerator, spriteNo);
+        _particleBounce = new Bounce(resources, randomNumberGenerator, spriteNo);
     }
 
     public required IStandardParticleEffect Fireball { get; init; }

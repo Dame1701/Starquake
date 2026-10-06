@@ -14,7 +14,7 @@ namespace Starquake.Animations;
 ///     is not data.
 /// </summary>
 /// <remarks>
-///     A fresh set every call, deliberately. <see cref="ColourFaderAnimation" /> is where a pulse keeps
+///     A fresh set every call, deliberately. <see cref="ColourFader" /> is where a pulse keeps
 ///     its running state - whether it is going, how far through its loop it is, whether it is stopping -
 ///     so a shared static set would have the registered animations and the live ones be the same objects.
 /// </remarks>
@@ -22,7 +22,7 @@ internal static class ColourAnimatedTiles
 {
 
     /// <summary>
-    ///     What <see cref="ColourFaderAnimation.UpperTileToDraw" /> holds for a pulse that has no second
+    ///     What <see cref="ColourFader.UpperTileToDraw" /> holds for a pulse that has no second
     ///     tile laid over the first.
     /// </summary>
     private const int NoUpperTile = -1;
@@ -37,7 +37,7 @@ internal static class ColourAnimatedTiles
     ///     three shuttle tags are the yellow, red and blue ones, which is the only place their colour is
     ///     written down.
     /// </summary>
-    public static IEnumerable<ColourFaderAnimation> All()
+    public static IEnumerable<ColourFader> All()
         =>
         [
             new()

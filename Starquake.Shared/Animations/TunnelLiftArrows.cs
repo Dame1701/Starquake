@@ -23,7 +23,7 @@ internal class TunnelLiftArrows
     private readonly GraphicsSet _graphicsSet;
     private readonly ResourceManager _resources;
 
-    private List<TunnelLiftAnimationColumn>? _columns;
+    private List<TunnelLiftColumn>? _columns;
 
     public TunnelLiftArrows(ResourceManager resources, GameScreenCollection gameScreens, GraphicsSet graphicsSet)
     {
@@ -66,15 +66,15 @@ internal class TunnelLiftArrows
 
         if (tunnelLiftArrowLocations != null)
         {
-            _columns = new List<TunnelLiftAnimationColumn>();
+            _columns = new List<TunnelLiftColumn>();
 
             for (int a = 0; a < tunnelLiftArrowLocations.Length; a++)
             {
-                TunnelLiftAnimationColumn? existingColumn = _columns.Where(col => col.XPosition == tunnelLiftArrowLocations[a].X).FirstOrDefault();
+                TunnelLiftColumn? existingColumn = _columns.Where(col => col.XPosition == tunnelLiftArrowLocations[a].X).FirstOrDefault();
 
                 if (existingColumn == null)
                 {
-                    existingColumn = new TunnelLiftAnimationColumn(initialDelayTime);
+                    existingColumn = new TunnelLiftColumn(initialDelayTime);
                     initialDelayTime += ColumnStartStagger;
                     _columns.Add(existingColumn);
                 }
@@ -88,7 +88,7 @@ internal class TunnelLiftArrows
     {
         if (_columns != null && _columns.Count > 0)
         {
-            foreach (TunnelLiftAnimationColumn column in _columns)
+            foreach (TunnelLiftColumn column in _columns)
             {
                 column.Update();
             }
@@ -101,7 +101,7 @@ internal class TunnelLiftArrows
         {
             _resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles).Begin(BlendState.AlphaBlend);
 
-            foreach (TunnelLiftAnimationColumn column in _columns)
+            foreach (TunnelLiftColumn column in _columns)
             {
                 column.Draw(_resources.GetSpriteCollection(_graphicsSet.Names.UpperScreenTiles), screenfade);
             }

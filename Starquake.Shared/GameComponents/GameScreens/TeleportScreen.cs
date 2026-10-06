@@ -62,14 +62,14 @@ internal class TeleportScreen : IGameScreen
     private readonly GraphicsSet _graphicsSet;
     private readonly ToggleKeys _input;
 
-    private readonly FaderAnimation[] _keyFades;
-    private readonly FaderAnimation _powerSupplyFader;
+    private readonly Fader[] _keyFades;
+    private readonly Fader _powerSupplyFader;
     private readonly PresentationSettings _presentation;
     private readonly ResourceManager _resources;
     private readonly ScreenDirectory _screenDirectory;
     private readonly Shapes _shapeDrawer;
 
-    private readonly FaderAnimation _teleportingMessageFader;
+    private readonly Fader _teleportingMessageFader;
     private bool _attemptingTeleport;
     private bool _codeRecognised;
     private string _currentCode = EmptyCode;
@@ -104,13 +104,13 @@ internal class TeleportScreen : IGameScreen
         _shapeDrawer = shapeDrawer;
         _input = input;
 
-        _keyFades = new FaderAnimation[16];
-        _powerSupplyFader = new FaderAnimation(1, null, 100);
-        _teleportingMessageFader = new FaderAnimation(6, null, 50);
+        _keyFades = new Fader[16];
+        _powerSupplyFader = new Fader(1, null, 100);
+        _teleportingMessageFader = new Fader(6, null, 50);
 
         for (int a = 0; a < 16; a++)
         {
-            _keyFades[a] = new FaderAnimation(4, randomNumberGenerator);
+            _keyFades[a] = new Fader(4, randomNumberGenerator);
         }
     }
 
@@ -120,7 +120,7 @@ internal class TeleportScreen : IGameScreen
     {
         _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.MachineryBackground, 0.5f, true);
 
-        foreach (FaderAnimation keyFade in _keyFades)
+        foreach (Fader keyFade in _keyFades)
         {
             keyFade.Update();
         }

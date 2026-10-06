@@ -7,7 +7,7 @@ using Starquake.SharedLibs;
 
 namespace Starquake.Animations;
 
-internal class FaderAnimation
+internal class Fader
 {
     private readonly int _minFade;
     private readonly Random? _randomGenerator;
@@ -16,7 +16,7 @@ internal class FaderAnimation
     private int _fadeSpeed;
     public int FadeLevel;
 
-    public FaderAnimation(int fadeSpeed, Random? randomGenerator = null, int minFade = 0)
+    public Fader(int fadeSpeed, Random? randomGenerator = null, int minFade = 0)
     {
         _minFade = minFade;
         _randomGenerator = randomGenerator;

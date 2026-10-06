@@ -14,7 +14,7 @@ using Starquake.World;
 
 namespace Starquake.Animations;
 
-internal class BlobDeathAnimation
+internal class BlobDeath
 {
     /// <summary>
     ///     The six fragment sprites Blob comes apart into. Deliberately not a straight run: the
@@ -40,7 +40,7 @@ internal class BlobDeathAnimation
 
     private bool _drawBlobParts;
 
-    public BlobDeathAnimation(
+    public BlobDeath(
         ResourceManager resources,
         GameScreenCollection gameScreens,
         GraphicsSet graphicsSet,

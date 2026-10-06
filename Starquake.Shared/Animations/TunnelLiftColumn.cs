@@ -9,14 +9,14 @@ using Starquake.Sprites;
 
 namespace Starquake.Animations;
 
-internal class TunnelLiftAnimationColumn
+internal class TunnelLiftColumn
 {
-    private readonly List<TunnelLiftAnimationSection> _sections;
+    private readonly List<TunnelLiftSection> _sections;
 
     private int _delayTime;
-    public TunnelLiftAnimationColumn(int initialDelayTime)
+    public TunnelLiftColumn(int initialDelayTime)
     {
-        _sections = new List<TunnelLiftAnimationSection>();
+        _sections = new List<TunnelLiftSection>();
         _delayTime = initialDelayTime;
     }
 
@@ -35,7 +35,7 @@ internal class TunnelLiftAnimationColumn
 
     public void AddSection(Point coordinates)
     {
-        _sections.Add(new TunnelLiftAnimationSection(_delayTime)
+        _sections.Add(new TunnelLiftSection(_delayTime)
         {
             X = coordinates.X,
             Y = coordinates.Y,
@@ -46,7 +46,7 @@ internal class TunnelLiftAnimationColumn
 
     public void Update()
     {
-        foreach (TunnelLiftAnimationSection section in _sections)
+        foreach (TunnelLiftSection section in _sections)
         {
             section.Update();
         }
@@ -54,7 +54,7 @@ internal class TunnelLiftAnimationColumn
 
     public void Draw(SpriteCollection tunnelSprites, int screenfade)
     {
-        foreach (TunnelLiftAnimationSection section in _sections)
+        foreach (TunnelLiftSection section in _sections)
         {
             if (section.Intensity > ColourLevels.Full)
             {
