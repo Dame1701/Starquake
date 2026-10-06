@@ -18,6 +18,30 @@
     <PropertyGroup>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <!--
+          IDE0005 - the unused using - does not fire in `dotnet build` at all unless this is set.
+          Nothing set it, so for the whole of the namespace work the only way to find a using left
+          behind by a move was to switch both on by hand. That found thirty-six, and missed five in
+          the test project because the hand-rolled check was scoped to Starquake.Shared.
+
+          It is on for the broken cref as well, which is the other thing it buys. CS1574 is how a
+          <see cref> that no longer resolves says so, and this codebase leans on crefs heavily:
+          turning this on reported two of them, both left by a namespace move, both silent until now.
+        -->
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <!--
+          What comes with it that we do not want. CS1591 is "no XML comment on a public member",
+          which is a demand for complete documentation; the house style is to document what is not
+          obvious and say nothing about what is, so it fires 327 times and would be answered by
+          writing "The resources." three hundred times. CS1573 is the same demand one level down -
+          some parameters documented and not all - and Shockwave's constructor is the example to
+          keep: diameter and frames are explained because they are decisions, resources and the
+          generator are not because they are plumbing.
+
+          The cref warnings are deliberately not in this list. Those report something that is
+          actually wrong.
+        -->
+        <NoWarn>$(NoWarn);CS1591;CS1573</NoWarn>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <LangVersion>latest</LangVersion>

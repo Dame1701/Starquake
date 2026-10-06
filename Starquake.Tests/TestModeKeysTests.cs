@@ -3,7 +3,6 @@
 // ---------------------------------------------------------
 // -
 using Starquake.Engines;
-using Starquake.Input;
 using Starquake.Structure;
 using Xunit;
 

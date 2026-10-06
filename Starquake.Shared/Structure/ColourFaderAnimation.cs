@@ -12,7 +12,7 @@ namespace Starquake.Structure;
 /// </summary>
 /// <remarks>
 ///     The running state lives here rather than beside the registration, which is why
-///     <see cref="ColourAnimatedTiles.All" /> hands out a fresh set every call - a shared static set
+///     <c>ColourAnimatedTiles.All</c> hands out a fresh set every call - a shared static set
 ///     would have the registered animations and the live ones be the same objects.
 /// </remarks>
 internal class ColourFaderAnimation

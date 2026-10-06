@@ -12,7 +12,7 @@ namespace Starquake.Animations;
 ///     the path bends over as it goes and the ship arrives nose down rather than on a straight line.
 /// </summary>
 /// <remarks>
-///     Seven of <see cref="IntroSequence" />'s mutable fields and the eight lines that moved them,
+///     Seven of <c>IntroSequence</c>'s mutable fields and the eight lines that moved them,
 ///     which is the one part of the intro that is arithmetic rather than sound, particles and
 ///     drawing. It needs the crash site and nothing else - no resource manager, no graphics device -
 ///     so it is the piece of that class a test can reach.
