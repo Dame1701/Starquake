@@ -338,7 +338,7 @@ internal class MainGameScreen : IGameScreen
         _gameEngine.Session.Paused = false;
         _gameEngine.Stats.Reset();
         _gameEngine.Elements.Reset();
-        _gameEngine.GameScreens.Reset();
+        _gameEngine.GameScreens.Reset(_gameEngine.Elements.ElementsWanted());
         _gameEngine.Player.Reset();
         _gameEngine.Nasties.Reset();
         _gameEngine.IntroSequence.Reset();

@@ -4,7 +4,6 @@
 // -
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Starquake.ActiveSprites;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.GameComponents;
@@ -142,24 +141,31 @@ internal class StatusPanel
     public int Height => _resources.GetSpriteCollection(Assets.Graphics.StatusPanelGraphic).SpriteHeight;
 
     /// <summary>
-    ///     Steps the panel. Takes Blob rather than holding him, and is told whether the intro is
-    ///     at a point where energy should drain, because the panel is built before either exists -
-    ///     Blob needs the panel to read his supplies from, and the panel needs Blob to drain
-    ///     and revive. Handing it over per call is what makes that pair acyclic.
+    ///     Steps the panel, and says what has to happen to Blob as a result. It is told what state he
+    ///     is in and whether the intro is at a point where energy should drain, because the panel is
+    ///     built before he is: Blob needs the panel to read his supplies from, so the panel cannot
+    ///     hold him.
     /// </summary>
-    public void Update(Collectables[] blobsInventory, Blob blob, bool energyMayDrain)
+    /// <remarks>
+    ///     It used to take Blob per call and act on him - call <c>KillBlob</c>, assign
+    ///     <c>BlobsState</c>. That is safe to construct in either order, which was the point, but it
+    ///     still named a type from <c>ActiveSprites</c>. See <see cref="BlobInstruction" />; the
+    ///     engine calls this holding both and applies the answer.
+    /// </remarks>
+    public BlobInstruction Update(Collectables[] blobsInventory, BlobState blobsState, bool energyMayDrain)
     {
-        if (blob.BlobsState == BlobState.Normal)
+        if (blobsState == BlobState.Normal)
         {
             _blobsInventory = blobsInventory;
 
+            BlobInstruction instruction = BlobInstruction.None;
+
             // Blob is only drained while he is walking the planet - a teleporter, a booth or a
-            // pyramid is a safe place to stand. PlayerStats decides whether that has killed him;
-            // applying the answer to Blob is this class's job because it is the one holding one.
+            // pyramid is a safe place to stand. PlayerStats decides whether that has killed him.
             if (_stats.DrainEnergy(energyMayDrain && _screenDirectory.Current == GameScreenType.MainGame))
             {
-                blob.KillBlob(false, true);
                 _stats.EnergyLevel = 0;
+                instruction = BlobInstruction.Overload;
             }
 
             if (_inventoryScanner.Scanned)
@@ -170,11 +176,16 @@ internal class StatusPanel
             {
                 _inventoryScanner.Update();
             }
+
+            return instruction;
         }
-        else if (blob.BlobsState == BlobState.Dead)
+
+        if (blobsState != BlobState.Dead)
         {
-            blob.BlobsState = _stats.TakeALife() ? BlobState.GameOver : BlobState.Normal;
+            return BlobInstruction.None;
         }
+
+        return _stats.TakeALife() ? BlobInstruction.EndTheGame : BlobInstruction.Revive;
     }
 
     /// <summary>

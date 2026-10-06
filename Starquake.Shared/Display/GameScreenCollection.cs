@@ -3,7 +3,6 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
-using Starquake.ActiveSprites;
 using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.ContentManagement;
@@ -48,7 +47,6 @@ internal class GameScreenCollection : IDynamicCollisionCells
         ActionTiles.ShuttleTag2
     ];
 
-    private readonly CoreElements _elements;
 
     private readonly GameScreenData[] _gameScreens;
     private readonly GraphicsSet _graphicsSet;
@@ -68,7 +66,6 @@ internal class GameScreenCollection : IDynamicCollisionCells
     public GameScreenCollection(
         ResourceManager resources,
         GraphicsSet graphicsSet,
-        CoreElements elements,
         Random randomNumberGenerator,
         Shapes shapes,
         BitmapFont signpostFont,
@@ -79,7 +76,6 @@ internal class GameScreenCollection : IDynamicCollisionCells
     {
         _resources = resources;
         _graphicsSet = graphicsSet;
-        _elements = elements;
 
         // The colour animations are animations of this planet's own tiles, and nothing but the
         // planet and the main screen drives them - so the planet owns one and hands itself to it.
@@ -684,17 +680,15 @@ internal class GameScreenCollection : IDynamicCollisionCells
     ///     Starts a new game on this planet: Blob back at the wreck, and the whole map scattered
     ///     with things to find.
     /// </summary>
-    public void Reset()
+    /// <param name="coreElementsWanted">
+    ///     The parts the core is still asking for, from <c>CoreElements.ElementsWanted</c>. Passed in
+    ///     rather than read off a core held here: the planet needs this list once, at the start of a
+    ///     game, and holding the core for it was the planet's whole dependency on the things that
+    ///     walk about on it.
+    /// </param>
+    public void Reset(IReadOnlyList<int> coreElementsWanted)
     {
         ScreenNumber = LandingSite.ScreenNumber;
-
-        // The elements the core is asking for are read off here rather than in the populator,
-        // which would drag the graphics in behind them.
-        var coreElementsWanted = new List<int>();
-        foreach (CoreElement element in _elements.GetActiveElements())
-        {
-            coreElementsWanted.Add(element.CurrentElement);
-        }
 
         _worldPopulator.Populate(coreElementsWanted);
     }

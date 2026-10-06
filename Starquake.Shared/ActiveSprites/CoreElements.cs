@@ -167,6 +167,24 @@ internal class CoreElements
     }
 
     /// <summary>
+    ///     Which parts the core is still asking for, as the pick-up numbers they are collected as.
+    ///     Two callers wanted exactly this and each turned <see cref="GetActiveElements" /> into it
+    ///     themselves - the planet to tell the populator what to scatter, and the test-mode key that
+    ///     hands over a part Blob is not already carrying.
+    /// </summary>
+    public List<int> ElementsWanted()
+    {
+        var wanted = new List<int>();
+
+        foreach (CoreElement element in GetActiveElements())
+        {
+            wanted.Add(element.CurrentElement);
+        }
+
+        return wanted;
+    }
+
+    /// <summary>
     ///     A fresh set of nine elements for the core to be missing, drawn without repeats so no two
     ///     of them ask for the same thing.
     /// </summary>

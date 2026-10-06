@@ -113,10 +113,7 @@ internal class TestModeKeys(
             return;
         }
 
-        IEnumerable<int> wanted = coreElements.GetActiveElements()
-            .Select(element => element.CurrentElement);
-
-        if (WantedElementNotYetCarried(wanted, player.BlobInventory) is not { } element)
+        if (WantedElementNotYetCarried(coreElements.ElementsWanted(), player.BlobInventory) is not { } element)
         {
             return;
         }

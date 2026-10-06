@@ -471,7 +471,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         var gameScreens = new GameScreenCollection(
             ContentResourceManager,
             _graphicsSet,
-            Elements,
             RandomNumberGenerator,
             ShapeDrawer,
             Font1,
@@ -850,12 +849,33 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
 
     private void UpdateStatusPanel()
     {
-        if (ScreenDirectory.InPlay)
+        if (!ScreenDirectory.InPlay)
         {
-            BlobStatusPanel.Update(
-                Player.BlobInventory,
-                Player,
-                !IntroSequence.SequenceRunning || IntroSequence.SequenceStage == IntroSequenceStage.EndPause);
+            return;
+        }
+
+        BlobInstruction instruction = BlobStatusPanel.Update(
+            Player.BlobInventory,
+            Player.BlobsState,
+            !IntroSequence.SequenceRunning || IntroSequence.SequenceStage == IntroSequenceStage.EndPause);
+
+        switch (instruction)
+        {
+            case BlobInstruction.Overload:
+            {
+                Player.KillBlob(false, true);
+                break;
+            }
+            case BlobInstruction.Revive:
+            {
+                Player.BlobsState = BlobState.Normal;
+                break;
+            }
+            case BlobInstruction.EndTheGame:
+            {
+                Player.BlobsState = BlobState.GameOver;
+                break;
+            }
         }
     }
 
