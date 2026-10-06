@@ -12,7 +12,7 @@ using Starquake.Tuning;
 
 namespace Starquake.World;
 
-internal class ColourAnimationEngine
+internal class ColourAnimations
 {
 
     private readonly List<ColourFaderAnimation> _colourAnimationsRegistered;
@@ -20,7 +20,7 @@ internal class ColourAnimationEngine
     private readonly GraphicsSet _graphicsSet;
     private readonly ResourceManager _resources;
 
-    public ColourAnimationEngine(ResourceManager resources, GameScreenCollection gameScreens, GraphicsSet graphicsSet)
+    public ColourAnimations(ResourceManager resources, GameScreenCollection gameScreens, GraphicsSet graphicsSet)
     {
         _resources = resources;
         _gameScreens = gameScreens;

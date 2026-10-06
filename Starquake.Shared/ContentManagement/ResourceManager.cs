@@ -22,7 +22,7 @@ internal class ResourceManager : StartableGameComponentBase
     /// </summary>
     private const int FullyLoadedPercent = 100;
 
-    private readonly AnimTileEngine _animationTileEngine;
+    private readonly AnimTiles _animTiles;
     private readonly List<AnimSpriteDescription> _animSpriteDescriptions;
     private readonly ContentManager _contentManagerInstance;
     private readonly List<DataDescription> _dataDescriptions;
@@ -53,7 +53,7 @@ internal class ResourceManager : StartableGameComponentBase
         _graphicsSet = graphicsSet;
 
         _particleEngine = new ParticleEngine(content, graphics, graphicsSet);
-        _animationTileEngine = new AnimTileEngine();
+        _animTiles = new AnimTiles();
         // Random.Shared rather than the game's own generator: the delay between background
         // rumbles is drawn on a thread pool timer callback, and System.Random is not thread-safe -
         // concurrent use can corrupt its state so that it returns zero indefinitely, and about a
@@ -180,7 +180,7 @@ internal class ResourceManager : StartableGameComponentBase
         {
             ReportProgress("anim sprite set", t.ResourceName, totalComponentsToLoad, componentsLoaded);
 
-            _animationTileEngine.AnimTilesList.Add(
+            _animTiles.AnimTilesList.Add(
                 new AnimTile(
                     _graphicsSet,
                     t.TileToAnimate,
@@ -334,8 +334,8 @@ internal class ResourceManager : StartableGameComponentBase
         throw new InvalidOperationException($"There is no particle effect of type '{effectType}'.");
     }
 
-    public AnimTileEngine GetAnimationEngine()
-        => _animationTileEngine;
+    public AnimTiles GetAnimTiles()
+        => _animTiles;
 
     public SoundEffectEngine GetSoundFxEngine()
         => _soundEngine;

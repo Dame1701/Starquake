@@ -48,7 +48,7 @@ internal class Nasties
     private const int SameNastyScreenOdds = 4;
     private readonly Blob _blob;
     private readonly ConveyorNasties _conveyorNasties;
-    private readonly ElectricityGatesAndNodesEngine _electricityNodeGates;
+    private readonly Electricity _electricity;
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsSet _graphicsSet;
     private readonly ToggleKeys _input;
@@ -73,7 +73,7 @@ internal class Nasties
         Blob blob,
         Random randomNumberGenerator,
         ConveyorNasties conveyorNasties,
-        ElectricityGatesAndNodesEngine electricityNodeGates,
+        Electricity electricity,
         Action onNastyExploded,
         int nastyCount,
         ToggleKeys input)
@@ -85,7 +85,7 @@ internal class Nasties
         _blob = blob;
         _randomNumberGenerator = randomNumberGenerator;
         _conveyorNasties = conveyorNasties;
-        _electricityNodeGates = electricityNodeGates;
+        _electricity = electricity;
         _input = input;
 
         _nastyCount = nastyCount;
@@ -258,18 +258,18 @@ internal class Nasties
     {
         _nasties[a].Smoking = false;
 
-        if (_electricityNodeGates.ElectricityNodeControllers != null)
+        if (_electricity.ElectricityNodeControllers != null)
         {
             for (int b = 0;
-                 b < _electricityNodeGates.ElectricityNodeControllers.Length;
+                 b < _electricity.ElectricityNodeControllers.Length;
                  b++)
             {
-                if (_electricityNodeGates.ElectricityNodeControllers[b].ElectricityOn)
+                if (_electricity.ElectricityNodeControllers[b].ElectricityOn)
                 {
                     if (CollisionDetection.Check(
-                            _electricityNodeGates.ElectricityNodeControllers[b].Location
+                            _electricity.ElectricityNodeControllers[b].Location
                                 .X,
-                            _electricityNodeGates.ElectricityNodeControllers[b].Location
+                            _electricity.ElectricityNodeControllers[b].Location
                                 .Y,
                             ElectricityArcWidth,
                             ElectricityArcHeight,
@@ -284,9 +284,9 @@ internal class Nasties
                             _nasties[a].YPos,
                             _nasties[a].NastyWidth,
                             _nasties[a].NastyHeight,
-                            _electricityNodeGates.ElectricityNodeControllers[b].Location
+                            _electricity.ElectricityNodeControllers[b].Location
                                 .X,
-                            _electricityNodeGates.ElectricityNodeControllers[b].Location
+                            _electricity.ElectricityNodeControllers[b].Location
                                 .Y,
                             ElectricityArcWidth,
                             ElectricityArcHeight);

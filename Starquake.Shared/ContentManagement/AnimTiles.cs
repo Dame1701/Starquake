@@ -6,9 +6,9 @@ using Microsoft.Xna.Framework;
 
 namespace Starquake.ContentManagement;
 
-internal class AnimTileEngine
+internal class AnimTiles
 {
-    public AnimTileEngine()
+    public AnimTiles()
     {
         AnimTilesList = [];
     }

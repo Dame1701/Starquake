@@ -170,7 +170,7 @@ internal class ScreenRenderer
     private static readonly Color SignpostInk = Color.Black;
 
 
-    private readonly ColourAnimationEngine _colourAnimations;
+    private readonly ColourAnimations _colourAnimations;
     private readonly GraphicsSet _graphicsSet;
     private readonly IStandardParticleEffect _keyDoorForceField;
     private readonly Shapes _shapes;
@@ -189,7 +189,7 @@ internal class ScreenRenderer
         ResourceManager resources,
         GraphicsSet graphicsSet,
         GameScreenData[] screens,
-        ColourAnimationEngine colourAnimations,
+        ColourAnimations colourAnimations,
         IStandardParticleEffect keyDoorForceField,
         Shapes shapes,
         BitmapFont signpostFont)
@@ -390,7 +390,7 @@ internal class ScreenRenderer
     /// </summary>
     private void DrawTileAnimations(Color colour)
     {
-        AnimTileEngine animations = _resources.GetAnimationEngine();
+        AnimTiles animations = _resources.GetAnimTiles();
 
         for (int y = 0; y < TileMetrics.TilesDown; y++)
         {

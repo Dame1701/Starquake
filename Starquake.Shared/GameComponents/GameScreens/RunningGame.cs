@@ -41,7 +41,7 @@ internal sealed class RunningGame
     public required BreakableBridges BreakableBridges { get; init; }
 
     /// <summary>The lifts that carry him up a shaft.</summary>
-    public required TunnelLiftAnimationEngine TunnelAnimations { get; init; }
+    public required TunnelLiftArrows TunnelLiftArrows { get; init; }
 
     /// <summary>His ship coming down over the planet, which is how a game opens.</summary>
     public required IntroSequence IntroSequence { get; init; }
@@ -56,5 +56,5 @@ internal sealed class RunningGame
     public required ConveyorNasties ConveyorNasties { get; init; }
 
     /// <summary>The electricity gates and the nodes that feed them.</summary>
-    public required ElectricityGatesAndNodesEngine ElectricityNodeGates { get; init; }
+    public required Electricity Electricity { get; init; }
 }

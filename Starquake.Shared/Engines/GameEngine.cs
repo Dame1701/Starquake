@@ -315,7 +315,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         }
     }
 
-    private void ElectricityNodeGateEngine_OnBlobStruckByElectricity(object? sender, EventArgs e)
+    private void Electricity_OnBlobStruckByElectricity(object? sender, EventArgs e)
     {
         Player.KillBlob(false, false);
     }
@@ -465,7 +465,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             Font1);
 
         // Tunnel lift animations. After the planet, which it reads the lift shafts from.
-        var tunnelAnimations = new TunnelLiftAnimationEngine(ContentResourceManager, gameScreens, _graphicsSet);
+        var tunnelLiftArrows = new TunnelLiftArrows(ContentResourceManager, gameScreens, _graphicsSet);
 
         // Blob's death throes. After the planet, which each thrown-off fragment bounces around.
         var blobKiller = new BlobDeathAnimation(ContentResourceManager, gameScreens, _graphicsSet, RandomNumberGenerator);
@@ -536,15 +536,15 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         conveyorNasties.OnNastyInteractionWithBlob += Nasties_OnNastyInteractionWithBlob;
         conveyorNasties.LoadContent();
 
-        var electricityNodeGates = new ElectricityGatesAndNodesEngine(
+        var electricity = new Electricity(
             ContentResourceManager,
             gameScreens,
             _graphicsSet,
             player,
             RandomNumberGenerator,
             conveyorNasties);
-        electricityNodeGates.OnBlobStruckByElectricity += ElectricityNodeGateEngine_OnBlobStruckByElectricity;
-        player.OnBlobDiedAndRespawned += electricityNodeGates.Reset;
+        electricity.OnBlobStruckByElectricity += Electricity_OnBlobStruckByElectricity;
+        player.OnBlobDiedAndRespawned += electricity.Reset;
 
         // The nasties last of the three: they chase Blob, read the planet, and ask the other two where
         // the conveyors and the electricity are.
@@ -555,7 +555,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             player,
             RandomNumberGenerator,
             conveyorNasties,
-            electricityNodeGates,
+            electricity,
             JoltTheScreen,
             NastiesPerScreen,
             Input);
@@ -566,12 +566,12 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             GameScreens = gameScreens,
             Player = player,
             BreakableBridges = breakableBridges,
-            TunnelAnimations = tunnelAnimations,
+            TunnelLiftArrows = tunnelLiftArrows,
             IntroSequence = introSequence,
             Nasties = nasties,
             BlobKiller = blobKiller,
             ConveyorNasties = conveyorNasties,
-            ElectricityNodeGates = electricityNodeGates
+            Electricity = electricity
         };
     }
 

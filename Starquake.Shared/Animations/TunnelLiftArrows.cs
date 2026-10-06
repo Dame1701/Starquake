@@ -11,7 +11,7 @@ using Starquake.World;
 
 namespace Starquake.Animations;
 
-internal class TunnelLiftAnimationEngine
+internal class TunnelLiftArrows
 {
 
     /// <summary>
@@ -25,7 +25,7 @@ internal class TunnelLiftAnimationEngine
 
     private List<TunnelLiftAnimationColumn>? _columns;
 
-    public TunnelLiftAnimationEngine(ResourceManager resources, GameScreenCollection gameScreens, GraphicsSet graphicsSet)
+    public TunnelLiftArrows(ResourceManager resources, GameScreenCollection gameScreens, GraphicsSet graphicsSet)
     {
         _resources = resources;
         _gameScreens = gameScreens;

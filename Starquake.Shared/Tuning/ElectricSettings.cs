@@ -9,7 +9,7 @@ namespace Starquake.Tuning;
 
 /// <summary>
 ///     What the electricity burns like, and the flicker behind it. Driven by
-///     <c>Shaders/Electric.fx</c>; see <c>ElectricityGatesAndNodesEngine</c> for where it is handed
+///     <c>Shaders/Electric.fx</c>; see <c>Electricity</c> for where it is handed
 ///     over.
 /// </summary>
 /// <remarks>

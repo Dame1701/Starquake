@@ -13,7 +13,7 @@ using Starquake.World;
 
 namespace Starquake.ActiveSprites;
 
-internal class ElectricityGatesAndNodesEngine
+internal class Electricity
 {
 
     /// <summary>
@@ -120,7 +120,7 @@ internal class ElectricityGatesAndNodesEngine
 
     private List<SecondLayerTile>? _secondLayerTiles;
 
-    public ElectricityGatesAndNodesEngine(
+    public Electricity(
         ResourceManager resources,
         GameScreenCollection gameScreens,
         GraphicsSet graphicsSet,

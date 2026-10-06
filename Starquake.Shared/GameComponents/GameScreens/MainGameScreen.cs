@@ -183,7 +183,7 @@ internal class MainGameScreen : IGameScreen
         {
             DrawBackground();
 
-            _game.ElectricityNodeGates.Draw();
+            _game.Electricity.Draw();
 
             _game.GameScreens.Renderer.Draw(
                 Colours.WhiteFadedTo((byte)ScreenFade),
@@ -205,7 +205,7 @@ internal class MainGameScreen : IGameScreen
 
             DrawUpperGraphics();
 
-            _game.TunnelAnimations.Draw((byte)ScreenFade);
+            _game.TunnelLiftArrows.Draw((byte)ScreenFade);
 
             DrawShipSmoke1();
 
@@ -240,10 +240,10 @@ internal class MainGameScreen : IGameScreen
             _game.ConveyorNasties.PerformPostChangeScreenActions();
             _game.Nasties.PerformPostChangeScreenActions();
 
-            _game.ElectricityNodeGates.PerformPostChangeScreenActions();
+            _game.Electricity.PerformPostChangeScreenActions();
             _context.Resources.GetSoundFxEngine().KillSounds(false);
 
-            _game.TunnelAnimations.PerformPostChangeScreenActions();
+            _game.TunnelLiftArrows.PerformPostChangeScreenActions();
         }
 
         if (change is ScreenChange.FadeIn)
@@ -328,7 +328,7 @@ internal class MainGameScreen : IGameScreen
     ///     underneath the one being held.
     /// </remarks>
     public void SpritesChanged()
-        => _game.TunnelAnimations.PerformPostChangeScreenActions();
+        => _game.TunnelLiftArrows.PerformPostChangeScreenActions();
 
     public void LoadContent() => _game.Nasties.LoadContent();
 
@@ -520,9 +520,9 @@ internal class MainGameScreen : IGameScreen
             }
         }
 
-        _game.TunnelAnimations.Update();
+        _game.TunnelLiftArrows.Update();
         _game.ConveyorNasties.Update(gameTime);
-        _game.ElectricityNodeGates.Update();
+        _game.Electricity.Update();
 
         _game.BreakableBridges.Update();
     }
@@ -666,7 +666,7 @@ internal class MainGameScreen : IGameScreen
 
     private void DrawUpperGraphics()
     {
-        _game.ElectricityNodeGates.DrawUpperLayer();
+        _game.Electricity.DrawUpperLayer();
         _game.GameScreens.Renderer.DrawUpperLayer(
             Colours.WhiteFadedTo((byte)ScreenFade));
     }

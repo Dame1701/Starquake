@@ -64,7 +64,7 @@ internal class GameScreenCollection
     private const int FullPercentage = 100;
 
     /// <summary>
-    ///     What <c>ColourAnimationEngine.Start</c> is given for an animation that should pulse until
+    ///     What <c>ColourAnimations.Start</c> is given for an animation that should pulse until
     ///     it is stopped rather than for a set number of loops.
     /// </summary>
     private const int LoopForever = -1;
@@ -103,7 +103,7 @@ internal class GameScreenCollection
         // planet and the main screen drives them - so the planet owns one and hands itself to it.
         // That is the last cycle in the graph: the animation engine needs the planet to read tiles
         // from, and the planet was reaching back through the engine to find the animation engine.
-        ColourAnimations = new ColourAnimationEngine(resources, this, graphicsSet);
+        ColourAnimations = new ColourAnimations(resources, this, graphicsSet);
 
 
         _gameScreens = (GameScreenData[])_resources.GetDataResource(Assets.Data.GameScreens);
@@ -220,7 +220,7 @@ internal class GameScreenCollection
     ///     The tiles on this planet that pulse through colours. Owned here because they are this
     ///     planet's tiles; <c>MainGameScreen</c> starts them for the teleporter and access booths.
     /// </summary>
-    public ColourAnimationEngine ColourAnimations { get; }
+    public ColourAnimations ColourAnimations { get; }
 
     public int ScreenWidth => _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
         .SpriteWidth * TileMetrics.TilesAcross;
@@ -456,7 +456,7 @@ internal class GameScreenCollection
 
         Renderer.TrackBlobWithOllysEyes(blobXPos, blobYPos);
 
-        _resources.GetAnimationEngine().Update();
+        _resources.GetAnimTiles().Update();
         ColourAnimations.Update();
     }
 
