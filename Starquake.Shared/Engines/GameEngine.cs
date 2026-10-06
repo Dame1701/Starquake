@@ -208,31 +208,19 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     private RunningGame Game => NotBeforeContentLoads(_game);
 
     /// <inheritdoc cref="RunningGame.GameScreens" />
-    public GameScreenCollection GameScreens => Game.GameScreens;
+    private GameScreenCollection GameScreens => Game.GameScreens;
 
     /// <inheritdoc cref="RunningGame.Player" />
-    public Blob Player => Game.Player;
+    private Blob Player => Game.Player;
 
-    /// <inheritdoc cref="RunningGame.BreakableBridges" />
-    public BreakableBridges BreakableBridgesEngine => Game.BreakableBridges;
 
-    /// <inheritdoc cref="RunningGame.TunnelAnimations" />
-    public TunnelLiftAnimationEngine TunnelAnimations => Game.TunnelAnimations;
 
     /// <inheritdoc cref="RunningGame.IntroSequence" />
-    public IntroSequence IntroSequence => Game.IntroSequence;
+    private IntroSequence IntroSequence => Game.IntroSequence;
 
-    /// <inheritdoc cref="RunningGame.Nasties" />
-    public Nasties Nasties => Game.Nasties;
 
-    /// <inheritdoc cref="RunningGame.BlobKiller" />
-    public BlobDeathAnimation BlobKiller => Game.BlobKiller;
 
-    /// <inheritdoc cref="RunningGame.ConveyorNasties" />
-    public ConveyorNasties ConveyorNastiesInstance => Game.ConveyorNasties;
 
-    /// <inheritdoc cref="RunningGame.ElectricityNodeGates" />
-    public ElectricityGatesAndNodesEngine ElectricityNodeGateEngine => Game.ElectricityNodeGates;
 
     /// <summary>
     ///     The game being played - score, lives, pause and controls. Built by <see cref="Initialise" />,
@@ -611,7 +599,21 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     {
         GameScreens.Initialise();
 
-        var mainScreen = new MainGameScreen(this);
+        // The main screen is handed the running game and the standing collaborators rather than the
+        // engine they hang off. It was the last class holding one, and the only reason the engine's
+        // nine forwarding properties were public.
+        var mainScreen = new MainGameScreen(Game, new GameplayContext
+        {
+            Resources = ContentResourceManager,
+            ScreenEffects = ScreenEffectEngine,
+            Input = Input,
+            Presentation = Presentation,
+            ScreenDirectory = ScreenDirectory,
+            Session = Session,
+            Stats = Stats,
+            Elements = Elements,
+            RandomNumberGenerator = RandomNumberGenerator
+        });
 
         ScreenDirectory.Add(new OptionsScreen(
             ContentResourceManager,

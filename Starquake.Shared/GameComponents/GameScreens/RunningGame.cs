@@ -1,20 +1,19 @@
-// ---------------------------------------------------------
+﻿// ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
 using Starquake.ActiveSprites;
 using Starquake.Animations;
 using Starquake.Display;
-using Starquake.GameComponents.GameScreens;
 
-namespace Starquake.Engines;
+namespace Starquake.GameComponents.GameScreens;
 
 /// <summary>
 ///     Everything that cannot exist until the game's content has loaded: the planet, Blob, and the
 ///     seven things that chase him around it or come apart with him.
 /// </summary>
 /// <remarks>
-///     This exists to say "not yet" once rather than nine times. <see cref="GameEngine" /> is built before
+///     This exists to say "not yet" once rather than nine times. <c>GameEngine</c> is built before
 ///     any content is - it registers the manifest, starts the load, and draws the loading screen while it
 ///     runs - so for as long as that takes, none of these nine exists. That used to be nine nullable
 ///     fields behind nine identical guards, which read as nine separate doubts rather than the one real
@@ -22,6 +21,12 @@ namespace Starquake.Engines;
 ///     <para>
 ///         Every property here is non-null, because the object is only ever built once all nine have
 ///         been. The one place that can still answer "not yet" is <c>GameEngine.Game</c>.
+///     </para>
+///     <para>
+///         It lives here rather than beside the engine that builds it because <see cref="MainGameScreen" />
+///         is handed one instead of the engine, and because <see cref="IntroSequence" /> is one of the nine -
+///         so any namespace below this one that held this record would point straight back up at it. Here,
+///         that reference is to a neighbour, and <c>Engines</c> depends on this namespace one way.
 ///     </para>
 /// </remarks>
 internal sealed class RunningGame

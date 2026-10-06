@@ -29,11 +29,18 @@ namespace Starquake.GameComponents;
 ///     Cheops and the planet core - are not pages of text over a cleared screen and do not belong here.
 ///     <c>MainGameScreen</c> is the one worth saying so about, because it is the only other screen with a
 ///     fade of its own and so looks like a sixth. It takes five of the seven things above and not the font
-///     or the graphics device, and the thirteen members it actually wants would still be coming out of the
-///     engine - so it would hold both this and the engine, which is worse than holding one. The others take
-///     between two and five of the seven, and a base class that fits none of its five subclasses exactly
-///     is a worse answer than five constructors that each name what they use. The fade is the one thing
-///     two of them really did share, and that is <see cref="Ramp.Up(int,int,int)" /> now.
+///     or the graphics device. The others take between two and five of the seven, and a base class that
+///     fits none of its five subclasses exactly is a worse answer than five constructors that each name
+///     what they use. The fade is the one thing two of them really did share, and that is
+///     <see cref="Ramp.Up(int,int,int)" /> now.
+///     <para>
+///         This used to go on to argue that <c>MainGameScreen</c> could not be brought in because the
+///         members it wants "would still be coming out of the engine - so it would hold both this and the
+///         engine, which is worse than holding one". The second half was true and the conclusion did not
+///         follow: it holds neither now. <c>GameplayContext</c> and <c>RunningGame</c> name the eighteen
+///         members it actually wanted, and the reason it still does not belong here is the first half -
+///         it is not a page of text over a cleared screen.
+///     </para>
 /// </remarks>
 internal class GameScreenBase
 {

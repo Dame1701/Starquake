@@ -444,9 +444,26 @@ have no `Starquake` using at all), so the leaves moved *into* it rather than int
 which is where a cheat console and a hotkey handler belong anyway.
 
 `tools/namespace-cycles.py` holds the measurement and fails on a new one, because this drifted for
-the whole of this plan precisely because nothing was counting. The three that remain are design
-rather than filing, and they are `MainGameScreen` holding a `GameEngine` and `GameScreenCollection`
-doing four jobs - relocating the latter was tried, and the cycle simply followed the file.
+the whole of this plan precisely because nothing was counting.
+
+**The graph is acyclic on both axes now.** The last three took three commits and were design rather
+than filing:
+
+| Landed | What it took |
+| --- | --- |
+| `Display` ↔ `Animations` | `ColourAnimationEngine` and `KeyScanner` were each one half of a mutual pair with `GameScreenCollection` and `StatusPanel`, split across the boundary. Both halves of both pairs are in `Display`. That exposed `ColourFaderAnimation` and `ColourAnimationDirection` as leaves, invisible until then because they shared a namespace with their engine, where a reference costs no `using`. |
+| `ActiveSprites` ↔ `Display` | The planet held a `CoreElements` for one loop in `Reset`; it is handed the list instead, and the translation both it and `TestModeKeys` were doing by hand is `CoreElements.ElementsWanted`. `StatusPanel` called `KillBlob` and assigned `BlobsState`; it answers with a `BlobInstruction` and the engine applies it. |
+| `GameComponents.GameScreens` ↔ `Engines` | `MainGameScreen` held a `GameEngine` and reached 18 members over 117 call sites. It holds `RunningGame` and a new `GameplayContext` - the split between them is lifetime, loaded content against the whole process. `RunningGame` moves into `GameScreens`, because it holds `IntroSequence` and so cannot sit below it. |
+
+**`GameEngine` is 17 public members, from about 50 when this plan opened, and no class outside
+`GameHost` holds one.** Narrowing its nine forwarding properties to `private` turned six of them
+into IDE0051 errors - they had existed solely for `MainGameScreen` - so they are deleted and three
+remain, private.
+
+`GameScreenBase`'s remarks argued this last one could not be done: the members `MainGameScreen`
+wanted "would still be coming out of the engine - so it would hold both this and the engine, which
+is worse than holding one". The premise was right and the conclusion did not follow. It holds
+neither.
 
 ### What is left, and why
 
