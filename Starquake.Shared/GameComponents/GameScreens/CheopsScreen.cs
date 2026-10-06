@@ -204,7 +204,7 @@ internal class CheopsScreen : IGameScreen
     /// </summary>
     private void CheckInventoryAgainstCode()
     {
-        _scan = AccessCodeLock.Scan(_blob.BlobInventory, _accessCode);
+        _scan = AccessCodeLock.Scan(_blob.Carrying, _accessCode);
 
         for (int digit = 0; digit < _accessCodes.Length; digit++)
         {
@@ -221,11 +221,11 @@ internal class CheopsScreen : IGameScreen
         var slotsToSelectFrom = new List<int>();
         _itemToSwap = NoItemSelected;
 
-        for (int a = 0; a < _blob.BlobInventory.Length; a++)
+        for (int a = 0; a < _blob.Carrying.Length; a++)
         {
-            if (_blob.BlobInventory[a] != Collectables.AccessCard &&
-                _blob.BlobInventory[a] != Collectables.Key &&
-                _blob.BlobInventory[a] != Collectables.None)
+            if (_blob.Carrying[a] != Collectables.AccessCard &&
+                _blob.Carrying[a] != Collectables.Key &&
+                _blob.Carrying[a] != Collectables.None)
             {
                 slotsToSelectFrom.Add(a);
             }
@@ -257,9 +257,9 @@ internal class CheopsScreen : IGameScreen
     {
         int slot = NoItemSelected;
 
-        for (int a = 0; a < _blob.BlobInventory.Length; a++)
+        for (int a = 0; a < _blob.Carrying.Length; a++)
         {
-            if (_blob.BlobInventory[a] == item)
+            if (_blob.Carrying[a] == item)
             {
                 slot = a;
             }
@@ -299,7 +299,7 @@ internal class CheopsScreen : IGameScreen
                 }
                 else if (a == swapItemSlot)
                 {
-                    _itemsToSelect[a] = new InteractiveItem(0, 0, (int)_blob.BlobInventory[_itemToSwap]);
+                    _itemsToSelect[a] = new InteractiveItem(0, 0, (int)_blob.Carrying[_itemToSwap]);
                 }
                 else
                 {
@@ -329,7 +329,7 @@ internal class CheopsScreen : IGameScreen
                 continue;
             }
 
-            _blob.BlobInventory[_itemToSwap] = (Collectables)_itemsToSelect[slot].Type;
+            _blob.Carrying[_itemToSwap] = (Collectables)_itemsToSelect[slot].Type;
             _screenDirectory.MainGame.ScreenFade = 40;
             _screenDirectory.Current = GameScreenType.MainGame;
             _gameScreens.CurrentGameScreenData.CheopsPyramid = null;
@@ -456,7 +456,7 @@ internal class CheopsScreen : IGameScreen
 
         SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
         pickups.Begin(BlendState.AlphaBlend);
-        pickups.DrawSprite((int)_blob.BlobInventory[_itemToSwap], 590, 168, Color.White);
+        pickups.DrawSprite((int)_blob.Carrying[_itemToSwap], 590, 168, Color.White);
 
         for (int a = 0; a < ElementsOnOffer; a++)
         {

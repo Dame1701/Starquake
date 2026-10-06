@@ -207,10 +207,10 @@ internal class Electricity
 
                     if (secondLayerTile.TileType == TileType.ElectricityNode)
                     {
-                        if (_blob.BlobXPos + _blob.BlobWidth > ElectricityNodeControllers[electricityNodeCounter].Location.X + NodeArcLeft &&
-                            _blob.BlobXPos < ElectricityNodeControllers[electricityNodeCounter].Location.X + NodeArcRight &&
-                            _blob.BlobYPos + SpriteMetrics.SpriteHeight > ElectricityNodeControllers[electricityNodeCounter].Location.Y + NodeArcTop &&
-                            _blob.BlobYPos < ElectricityNodeControllers[electricityNodeCounter].Location.Y + NodeArcBottom)
+                        if (_blob.XPos + _blob.Width > ElectricityNodeControllers[electricityNodeCounter].Location.X + NodeArcLeft &&
+                            _blob.XPos < ElectricityNodeControllers[electricityNodeCounter].Location.X + NodeArcRight &&
+                            _blob.YPos + SpriteMetrics.SpriteHeight > ElectricityNodeControllers[electricityNodeCounter].Location.Y + NodeArcTop &&
+                            _blob.YPos < ElectricityNodeControllers[electricityNodeCounter].Location.Y + NodeArcBottom)
                         {
                             if (ElectricityNodeControllers[electricityNodeCounter].ElectricityOn)
                             {
@@ -223,10 +223,10 @@ internal class Electricity
                     }
                     else if (secondLayerTile.TileType == TileType.ElectricityGate)
                     {
-                        if (_blob.BlobXPos + _blob.BlobWidth > ElectricityNodeControllers[electricityNodeCounter].Location.X + GateArcLeft &&
-                            _blob.BlobXPos < ElectricityNodeControllers[electricityNodeCounter].Location.X + GateArcRight &&
-                            _blob.BlobYPos + SpriteMetrics.SpriteHeight > ElectricityNodeControllers[electricityNodeCounter].Location.Y + GateArcTop &&
-                            _blob.BlobYPos < ElectricityNodeControllers[electricityNodeCounter].Location.Y + GateArcBottom)
+                        if (_blob.XPos + _blob.Width > ElectricityNodeControllers[electricityNodeCounter].Location.X + GateArcLeft &&
+                            _blob.XPos < ElectricityNodeControllers[electricityNodeCounter].Location.X + GateArcRight &&
+                            _blob.YPos + SpriteMetrics.SpriteHeight > ElectricityNodeControllers[electricityNodeCounter].Location.Y + GateArcTop &&
+                            _blob.YPos < ElectricityNodeControllers[electricityNodeCounter].Location.Y + GateArcBottom)
                         {
                             if (ElectricityNodeControllers[electricityNodeCounter].ElectricityOn)
                             {

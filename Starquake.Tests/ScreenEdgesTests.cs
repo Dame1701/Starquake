@@ -16,7 +16,7 @@ namespace Starquake.Tests;
 /// </summary>
 public class ScreenEdgesTests
 {
-    private const int BlobWidth = SpriteMetrics.SpriteWidth;
+    private const int Width = SpriteMetrics.SpriteWidth;
     private const int BlobHeight = SpriteMetrics.SpriteHeight;
     private const int ScreenWidth = TileMetrics.PlayAreaWidth;
     private const int ScreenHeight = TileMetrics.PlayAreaHeight;
@@ -26,31 +26,31 @@ public class ScreenEdgesTests
 
     [Fact]
     public void OffLeft_StillOnTheScreen_IsNotACrossing()
-        => Assert.Null(ScreenEdges.OffLeft(0, 100, BlobWidth, ScreenWidth, MiddleScreen));
+        => Assert.Null(ScreenEdges.OffLeft(0, 100, Width, ScreenWidth, MiddleScreen));
 
     [Fact]
     public void OffLeft_PastTheEdge_ArrivesAgainstTheFarWallOfThePreviousScreen()
     {
         // Act
-        ScreenCrossing? crossing = ScreenEdges.OffLeft(-8, 100, BlobWidth, ScreenWidth, MiddleScreen);
+        ScreenCrossing? crossing = ScreenEdges.OffLeft(-8, 100, Width, ScreenWidth, MiddleScreen);
 
         // Assert
         Assert.NotNull(crossing);
         Assert.Equal(MiddleScreen - 1, crossing.Value.ScreenNumber);
-        Assert.Equal(ScreenWidth - BlobWidth, crossing.Value.XPos);
+        Assert.Equal(ScreenWidth - Width, crossing.Value.XPos);
         Assert.Equal(100, crossing.Value.YPos);
     }
 
     [Fact]
     public void OffLeft_OnTheFirstScreenOfTheMap_HasNowhereToGo()
-        => Assert.Null(ScreenEdges.OffLeft(-8, 100, BlobWidth, ScreenWidth, 0));
+        => Assert.Null(ScreenEdges.OffLeft(-8, 100, Width, ScreenWidth, 0));
 
     [Fact]
     public void OffRight_PastTheEdge_ArrivesAtTheNearSideOfTheNextScreen()
     {
         // Act
         ScreenCrossing? crossing =
-            ScreenEdges.OffRight(ScreenWidth - BlobWidth + 8, 100, BlobWidth, ScreenWidth, MiddleScreen);
+            ScreenEdges.OffRight(ScreenWidth - Width + 8, 100, Width, ScreenWidth, MiddleScreen);
 
         // Assert
         Assert.NotNull(crossing);
@@ -62,7 +62,7 @@ public class ScreenEdgesTests
     [Fact]
     public void OffRight_OnTheLastScreenOfTheMap_HasNowhereToGo()
         => Assert.Null(ScreenEdges.OffRight(
-            ScreenWidth - BlobWidth + 8, 100, BlobWidth, ScreenWidth, WorldMap.LastScreenNumber));
+            ScreenWidth - Width + 8, 100, Width, ScreenWidth, WorldMap.LastScreenNumber));
 
     /// <summary>
     ///     The pair of equalities that stop one step across a boundary being taken as two. Blob's four
@@ -76,11 +76,11 @@ public class ScreenEdgesTests
     {
         // Arrange - the arrival the left edge hands back
         ScreenCrossing landed =
-            ScreenEdges.OffLeft(-8, 100, BlobWidth, ScreenWidth, MiddleScreen)!.Value;
+            ScreenEdges.OffLeft(-8, 100, Width, ScreenWidth, MiddleScreen)!.Value;
 
         // Assert
         Assert.Null(ScreenEdges.OffRight(
-            landed.XPos, landed.YPos, BlobWidth, ScreenWidth, landed.ScreenNumber));
+            landed.XPos, landed.YPos, Width, ScreenWidth, landed.ScreenNumber));
     }
 
     /// <inheritdoc cref="OffRight_WhereGoingLeftLandsHim_IsNotAFurtherCrossing" />
@@ -89,11 +89,11 @@ public class ScreenEdgesTests
     {
         // Arrange
         ScreenCrossing landed = ScreenEdges
-            .OffRight(ScreenWidth - BlobWidth + 8, 100, BlobWidth, ScreenWidth, MiddleScreen)!.Value;
+            .OffRight(ScreenWidth - Width + 8, 100, Width, ScreenWidth, MiddleScreen)!.Value;
 
         // Assert
         Assert.Null(ScreenEdges.OffLeft(
-            landed.XPos, landed.YPos, BlobWidth, ScreenWidth, landed.ScreenNumber));
+            landed.XPos, landed.YPos, Width, ScreenWidth, landed.ScreenNumber));
     }
 
     /// <inheritdoc cref="OffRight_WhereGoingLeftLandsHim_IsNotAFurtherCrossing" />
@@ -174,7 +174,7 @@ public class ScreenEdgesTests
     {
         // Act
         ScreenCrossing sideways =
-            ScreenEdges.OffLeft(-8, -8, BlobWidth, ScreenWidth, MiddleScreen)!.Value;
+            ScreenEdges.OffLeft(-8, -8, Width, ScreenWidth, MiddleScreen)!.Value;
         ScreenCrossing? upwards =
             ScreenEdges.OffTop(sideways.XPos, sideways.YPos, sideways.ScreenNumber);
 

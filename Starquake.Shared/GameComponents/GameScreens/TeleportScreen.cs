@@ -306,8 +306,8 @@ internal class TeleportScreen : IGameScreen
             return;
         }
 
-        _blob.BlobXPos = booths[0].X + BoothMetrics.BlobXOffset;
-        _blob.BlobYPos = booths[0].Y + BoothMetrics.BlobYOffset;
+        _blob.XPos = booths[0].X + BoothMetrics.BlobXOffset;
+        _blob.YPos = booths[0].Y + BoothMetrics.BlobYOffset;
     }
 
     private void DrawInteriorLowerLayer()

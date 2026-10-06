@@ -10,7 +10,7 @@ namespace Starquake.Core;
 ///     draws a widget and has no business reaching into Blob to act on either.
 /// </summary>
 /// <remarks>
-///     It did reach in: it called <c>KillBlob</c> and assigned <c>BlobsState</c> directly. Taking
+///     It did reach in: it called <c>Kill</c> and assigned <c>State</c> directly. Taking
 ///     Blob per call rather than holding him made that pair safe to construct in either order, which
 ///     was the question being asked at the time, and left the panel naming a type from
 ///     <c>ActiveSprites</c> - so <c>Display</c> and <c>ActiveSprites</c> each needed the other.

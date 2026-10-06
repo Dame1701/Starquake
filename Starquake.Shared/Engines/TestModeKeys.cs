@@ -60,16 +60,16 @@ internal class TestModeKeys(
     {
         if (input.KeyboardState.IsKeyDown(Keys.F1))
         {
-            if (player.BlobsState == BlobState.Normal)
+            if (player.State == BlobState.Normal)
             {
-                player.KillBlob(false, false);
+                player.Kill(false, false);
             }
         }
 
         if (input.KeyboardState.IsKeyDown(Keys.F2))
         {
             stats.BlobLives = TestModeLivesRestored;
-            player.BlobsState = BlobState.Dead;
+            player.State = BlobState.Dead;
         }
 
         if (input.GetPressedKey() == Keys.F3)
@@ -108,17 +108,17 @@ internal class TestModeKeys(
     /// </remarks>
     private void HandOverACoreElement()
     {
-        if (FirstEmptySlot(player.BlobInventory) is not { } slot)
+        if (FirstEmptySlot(player.Carrying) is not { } slot)
         {
             return;
         }
 
-        if (WantedElementNotYetCarried(coreElements.ElementsWanted(), player.BlobInventory) is not { } element)
+        if (WantedElementNotYetCarried(coreElements.ElementsWanted(), player.Carrying) is not { } element)
         {
             return;
         }
 
-        player.BlobInventory[slot] = (Collectables)element;
+        player.Carrying[slot] = (Collectables)element;
     }
 
     /// <summary>
@@ -142,9 +142,9 @@ internal class TestModeKeys(
     /// <inheritdoc cref="HandOverTheWayIn" />
     private void HandOver(Collectables item)
     {
-        if (SlotFor(player.BlobInventory, item) is { } slot)
+        if (SlotFor(player.Carrying, item) is { } slot)
         {
-            player.BlobInventory[slot] = item;
+            player.Carrying[slot] = item;
         }
     }
 

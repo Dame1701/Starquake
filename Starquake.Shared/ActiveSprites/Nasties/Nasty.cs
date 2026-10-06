@@ -556,7 +556,7 @@ internal class Nasty
 
         _nastyAnim.GetNextFrame();
 
-        Movement.Step(_blob.BlobXPos, _blob.BlobYPos);
+        Movement.Step(_blob.XPos, _blob.YPos);
     }
 
     /// <summary>

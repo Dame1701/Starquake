@@ -22,15 +22,17 @@ internal class AnimTile
         ScreenTileRef = screenTileRef;
         _tileAnimationSpriteSet = tileAnimationSpriteSet;
 
-        TileAnimation = new Animation();
-        TileAnimation.FirstFrame = 0;
+        TileAnimation = new Animation
+        {
+            FirstFrame = 0,
+            LastFrame = _tileAnimationSpriteSet.SpriteCount - 1,
+            AnimateForwards = true,
+            Repeat = true,
+            CurrentFrame = 0,
+            Delay = delay,
+            Yoyo = true
+        };
 
-        TileAnimation.LastFrame = _tileAnimationSpriteSet.SpriteCount - 1;
-        TileAnimation.AnimateForwards = true;
-        TileAnimation.Repeat = true;
-        TileAnimation.CurrentFrame = 0;
-        TileAnimation.Delay = delay;
-        TileAnimation.Yoyo = true;
     }
     public int ScreenTileRef { get; }
 

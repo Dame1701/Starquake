@@ -302,11 +302,11 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         {
             if (nastyType == NastyType.Spiky)
             {
-                Player.KillBlob(false, false);
+                Player.Kill(false, false);
             }
             else if (nastyType == NastyType.Conveyor)
             {
-                Player.KillBlob(true, false);
+                Player.Kill(true, false);
             }
             else
             {
@@ -317,7 +317,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
 
     private void Electricity_OnBlobStruckByElectricity(object? sender, EventArgs e)
     {
-        Player.KillBlob(false, false);
+        Player.Kill(false, false);
     }
 
     private void Player_OnScreenChanged(GameScreenType triggerScreen)
@@ -502,12 +502,12 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             Input,
             JoltTheScreen);
         player.OnScreenChanged += Player_OnScreenChanged;
-        player.OnBlobActionRaised += Player_OnBlobActionRaised;
+        player.OnActionRaised += Player_OnBlobActionRaised;
 
         // Subscribed here rather than with the session's other event in Initialise, so that there is no
         // window in which the keys can change and there is no Blob to tell. The options screen can be used
         // before content has loaded, and Blob reads the current set off the session as he is built.
-        Session.OnPlayerKeysChanged += keys => player.BlobsControl.PlayerKeySet = keys;
+        Session.OnPlayerKeysChanged += keys => player.Control.PlayerKeySet = keys;
 
         // The intro sequence flies Blob's ship in over the planet and blows it up, so it comes after
         // both the planet and the death animation.
@@ -544,7 +544,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             RandomNumberGenerator,
             conveyorNasties);
         electricity.OnBlobStruckByElectricity += Electricity_OnBlobStruckByElectricity;
-        player.OnBlobDiedAndRespawned += electricity.Reset;
+        player.OnDiedAndRespawned += electricity.Reset;
 
         // The nasties last of the three: they chase Blob, read the planet, and ask the other two where
         // the conveyors and the electricity are.
@@ -854,25 +854,25 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         }
 
         BlobInstruction instruction = BlobStatusPanel.Update(
-            Player.BlobInventory,
-            Player.BlobsState,
+            Player.Carrying,
+            Player.State,
             !IntroSequence.SequenceRunning || IntroSequence.SequenceStage == IntroSequenceStage.EndPause);
 
         switch (instruction)
         {
             case BlobInstruction.Overload:
             {
-                Player.KillBlob(false, true);
+                Player.Kill(false, true);
                 break;
             }
             case BlobInstruction.Revive:
             {
-                Player.BlobsState = BlobState.Normal;
+                Player.State = BlobState.Normal;
                 break;
             }
             case BlobInstruction.EndTheGame:
             {
-                Player.BlobsState = BlobState.GameOver;
+                Player.State = BlobState.GameOver;
                 break;
             }
         }

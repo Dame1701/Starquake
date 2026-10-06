@@ -125,7 +125,7 @@ internal class MainGameScreen : IGameScreen
     ///     while the explosion fades out - which is why this asks it as well as asking Blob.
     /// </summary>
     private bool DeathRoutineRunning
-        => _game.Player.BlobsState is BlobState.Dead or BlobState.Dying or BlobState.Overloading ||
+        => _game.Player.State is BlobState.Dead or BlobState.Dying or BlobState.Overloading ||
            _game.BlobKiller.Active;
 
     /// <summary>
@@ -152,9 +152,9 @@ internal class MainGameScreen : IGameScreen
         _context.ScreenEffects.Update();
         _game.GameScreens.Update(
             gameTime,
-            _game.Player.BlobXPos,
-            _game.Player.BlobYPos,
-            _game.Player.BlobInventory.Contains(Collectables.Key));
+            _game.Player.XPos,
+            _game.Player.YPos,
+            _game.Player.Carrying.Contains(Collectables.Key));
 
         if (GameIsInPlay)
         {
@@ -271,7 +271,7 @@ internal class MainGameScreen : IGameScreen
         if (triggeringScreen == GameScreenType.Teleporter)
         {
             ScreenFadeSpeed = 16;
-            _game.Player.TriggerBlobTeleportedAnimation();
+            _game.Player.TriggerTeleportedAnimation();
 
             // The room arrives unsettled and shivers itself straight. Blob is not held still for
             // it - he has just got here and should be able to walk.
@@ -418,7 +418,7 @@ internal class MainGameScreen : IGameScreen
 
         if (_context.Input.GetPressedKey() == Keys.U)
         {
-            _game.Player.UnstickBlobFromTiles();
+            _game.Player.UnstickFromTiles();
         }
     }
 
@@ -529,7 +529,7 @@ internal class MainGameScreen : IGameScreen
 
     private void EndGameIfOutOfLives()
     {
-        if (_game.Player.BlobsState != BlobState.GameOver)
+        if (_game.Player.State != BlobState.GameOver)
         {
             return;
         }

@@ -130,7 +130,7 @@ internal class Nasties
 
     public void Update(GameTime gameTime)
     {
-        if (_blob.BlobsState != BlobState.Normal)
+        if (_blob.State != BlobState.Normal)
         {
             Reset();
             return;
@@ -138,7 +138,7 @@ internal class Nasties
 
         // Cleared each frame and set again by whichever nasty is touching him, so letting go of Blob
         // needs no event of its own.
-        _blob.BlobTouchedByNasty = false;
+        _blob.TouchedByNasty = false;
 
         if (_input.KeyboardState.IsKeyDown(Keys.R))
         {
@@ -190,10 +190,10 @@ internal class Nasties
     private void TouchBlob(int a, ref bool nastyInteractingWithBlob)
     {
         if (CollisionDetection.Check(
-                _blob.BlobXPos + 8,
-                _blob.BlobYPos + 8,
-                _blob.BlobWidth - 16,
-                _blob.BlobHeight - 16,
+                _blob.XPos + 8,
+                _blob.YPos + 8,
+                _blob.Width - 16,
+                _blob.Height - 16,
                 _nasties[a].XPos,
                 _nasties[a].YPos,
                 _nasties[a].NastyWidth,
@@ -210,7 +210,7 @@ internal class Nasties
                     }
                 }
 
-                _blob.BlobTouchedByNasty = true;
+                _blob.TouchedByNasty = true;
             }
         }
     }
@@ -410,7 +410,7 @@ internal class Nasties
 
     public void Draw(int screenFade)
     {
-        if (_blob.BlobsState == BlobState.Normal)
+        if (_blob.State == BlobState.Normal)
         {
             for (int a = 0; a < _nastyCount; a++)
             {

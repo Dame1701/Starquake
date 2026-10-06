@@ -541,7 +541,7 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
         (int element, int slot) = _elementsToReplace.Dequeue();
 
         // Taken out of his hands at the moment it goes in, not when he walked through the door.
-        _blob.BlobInventory[slot] = Collectables.None;
+        _blob.Carrying[slot] = Collectables.None;
         _statusPanel.IdentifySlot(NoSlotIdentified);
 
         _elements.ReplaceElement(element);
@@ -560,11 +560,11 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
         List<CoreElement> activeElements = _elements.GetActiveElements();
 
-        for (int slot = 0; slot < _blob.BlobInventory.Length; slot++)
+        for (int slot = 0; slot < _blob.Carrying.Length; slot++)
         {
             foreach (CoreElement activeElement in activeElements)
             {
-                if ((int)_blob.BlobInventory[slot] != activeElement.CurrentElement)
+                if ((int)_blob.Carrying[slot] != activeElement.CurrentElement)
                 {
                     continue;
                 }
@@ -591,8 +591,8 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
         _gameScreens.ScreenNumber = _gameScreens.CoreExit.ScreenNumber;
         _screenDirectory.Current = GameScreenType.MainGame;
-        _blob.BlobXPos = exit.X;
-        _blob.BlobYPos = exit.Y;
+        _blob.XPos = exit.X;
+        _blob.YPos = exit.Y;
         _screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.PlanetCore, new ScreenChange.FadeIn());
 
         _justEnteredCore = true;

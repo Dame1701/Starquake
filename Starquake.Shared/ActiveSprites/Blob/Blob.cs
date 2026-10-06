@@ -64,7 +64,7 @@ internal class Blob
     /// <summary>
     ///     How fast Blob walks, in pixels a logic frame, horizontally and vertically.
     /// </summary>
-    private const int BlobWalkSpeed = 8;
+    private const int WalkSpeed = 8;
 
     /// <summary>
     ///     Where the teleport beam and the shot's smoke trail are emitted from, measured in from the
@@ -122,9 +122,9 @@ internal class Blob
 
     private Guid _blobTunnelLiftSoundId = Guid.Empty;
 
-    private int _blobXPos;
+    private int _xPos;
 
-    private int _blobYPos;
+    private int _yPos;
 
     private Direction _directionGoingThroughTunnel = Direction.None;
 
@@ -174,21 +174,21 @@ internal class Blob
             graphicsSet,
             randomNumberGenerator,
             screenEffects);
-        BlobsControl = new CustomControl(session.PlayerKeys, input);
+        Control = new CustomControl(session.PlayerKeys, input);
         _blobTouched = false;
         _teleportFadeLevel = ColourLevels.Full;
         _startBlobTeleporting = false;
-        BlobsState = BlobState.Normal;
+        State = BlobState.Normal;
 
         _blobTeleporterBeam =
             (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.BeamMeUpSmall,
                 ParticleEffectType.Triggered, null);
-        _blobTeleporterBeam.ParticleEffectComplete += BlobTeleporterBeam_ParticleEffectComplete;
+        _blobTeleporterBeam.ParticleEffectComplete += TeleporterBeam_ParticleEffectComplete;
 
         _onExploded = onExploded;
 
         Weapon = new BlobWeapon(resources, gameScreens, graphics, graphicsSet, stats, randomNumberGenerator,
-            () => OnBlobActionRaised?.Invoke(BlobAction.FiredLazer, null));
+            () => OnActionRaised?.Invoke(BlobAction.FiredLazer, null));
 
         _lift = new TunnelLift(
             () => _blobTunnelLiftSoundId = _resources.GetSoundFxEngine()
@@ -198,7 +198,7 @@ internal class Blob
 
         // The shot starts where Blob is, which at this point is the origin - he is put onto a screen
         // afterwards, and that goes through PerformPostChangeScreenActions.
-        Weapon.ResetTo(_blobXPos, _blobYPos);
+        Weapon.ResetTo(_xPos, _yPos);
 
         // Both of these loop forward with no yoyo except the left walk, which runs backwards through the
         // right walk's frames
@@ -213,47 +213,47 @@ internal class Blob
     ///     What Blob is carrying. The queue itself is <see cref="Inventory" />'s; this is what
     ///     the status panel draws and the access booths read.
     /// </summary>
-    public Collectables[] BlobInventory => _inventory.Items;
+    public Collectables[] Carrying => _inventory.Items;
 
     private Direction DirectionBlobMoved { get; set; } = Direction.None;
 
-    public int BlobXPos
+    public int XPos
     {
-        get => _blobXPos;
+        get => _xPos;
         set
         {
-            _blobXPos = value;
+            _xPos = value;
             _entryPoint.XPos = value;
         }
     }
 
-    public int BlobYPos
+    public int YPos
     {
-        get => _blobYPos;
+        get => _yPos;
         set
         {
-            _blobYPos = value;
+            _yPos = value;
             _entryPoint.YPos = value;
         }
     }
 
-    public BlobState BlobsState { get; set; }
+    public BlobState State { get; set; }
 
-    public bool BlobTouchedByNasty { get; set; }
+    public bool TouchedByNasty { get; set; }
 
-    public int BlobWidth => SpriteMetrics.SpriteWidth;
+    public int Width => SpriteMetrics.SpriteWidth;
 
     /// <summary>
     ///     How tall he is, shuttle included. Owned by <see cref="Shuttle" /> because the two facts
     ///     are one: riding it is what makes him taller.
     /// </summary>
-    public int BlobHeight => _shuttle.BlobHeight;
+    public int Height => _shuttle.BlobHeight;
 
-    public int BlobFrame { get; set; } = BlobWalkFrames.Resting;
+    public int Frame { get; set; } = BlobWalkFrames.Resting;
 
-    private int BlobHSpeed { get; } = BlobWalkSpeed;
+    private int HorizontalSpeed { get; } = WalkSpeed;
 
-    private int BlobVSpeed { get; } = BlobWalkSpeed;
+    private int VerticalSpeed { get; } = WalkSpeed;
 
     /// <summary>
     ///     The lazer. A nasty asks it whether a shot is in flight and where it is, and tells it when it
@@ -261,7 +261,7 @@ internal class Blob
     /// </summary>
     public BlobWeapon Weapon { get; }
 
-    public CustomControl BlobsControl { get; }
+    public CustomControl Control { get; }
 
     /// <summary>
     ///     Told when Blob comes apart, so the picture can be knocked about. A callback rather than
@@ -271,7 +271,7 @@ internal class Blob
 
     public event RaiseScreenChanged? OnScreenChanged;
 
-    public event RaiseBlobAction? OnBlobActionRaised;
+    public event RaiseBlobAction? OnActionRaised;
 
     /// <summary>
     ///     Raised as Blob is put back together after a death, so anything holding hazard state
@@ -282,11 +282,11 @@ internal class Blob
     ///         graph, and it was this one line.
     ///     </para>
     /// </summary>
-    public event Action? OnBlobDiedAndRespawned;
+    public event Action? OnDiedAndRespawned;
 
-    public void KillBlob(bool resetBlobToScreenEntryPoint, bool overloadFirst)
+    public void Kill(bool resetBlobToScreenEntryPoint, bool overloadFirst)
     {
-        if (BlobsState != BlobState.Normal)
+        if (State != BlobState.Normal)
         {
             return;
         }
@@ -295,14 +295,14 @@ internal class Blob
 
         _overload.Begin(overloadFirst);
 
-        BlobsState = BlobState.Overloading;
+        State = BlobState.Overloading;
     }
 
     /// <summary>
     ///     Starts Blob dissolving into a teleport beam. The booth he walked into has already decided
     ///     he is going somewhere; this is only how it looks.
     /// </summary>
-    public void TriggerBlobTeleportedAnimation()
+    public void TriggerTeleportedAnimation()
     {
         _blobTeleporterBeam.Start();
         _startBlobTeleporting = true;
@@ -313,7 +313,7 @@ internal class Blob
     {
         bool changedScreens = false;
 
-        switch (BlobsState)
+        switch (State)
         {
             case BlobState.Normal:
             {
@@ -332,7 +332,7 @@ internal class Blob
             }
         }
 
-        _blobTeleporterBeam.Update(_blobXPos + TeleportBeamXOffset, _blobYPos + TeleportBeamYOffset, gameTime);
+        _blobTeleporterBeam.Update(_xPos + TeleportBeamXOffset, _yPos + TeleportBeamYOffset, gameTime);
         Weapon.UpdateEffects(gameTime);
 
         if (!changedScreens)
@@ -340,7 +340,7 @@ internal class Blob
             return;
         }
 
-        _entryPoint.Record(BlobXPos, BlobYPos, BlobFrame, _shuttle.Riding);
+        _entryPoint.Record(XPos, YPos, Frame, _shuttle.Riding);
     }
 
     /// <summary>
@@ -369,8 +369,8 @@ internal class Blob
         }
 
         Weapon.Step(
-            BlobsControl.HasFired(),
-            new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight),
+            Control.HasFired(),
+            new Rectangle(_xPos, _yPos, Width, Height),
             DirectionBlobMoved,
             _shuttle.Riding);
 
@@ -402,7 +402,7 @@ internal class Blob
     /// </summary>
     private void HandleShuttlePad(TileDetected? below)
     {
-        switch (_shuttle.Step(below, BlobsControl.MovedUp(), BlobsControl.MovedLeft(), BlobsControl.MovedRight()))
+        switch (_shuttle.Step(below, Control.MovedUp(), Control.MovedLeft(), Control.MovedRight()))
         {
             case ShuttleBoarding.NotOnThePad:
             {
@@ -425,29 +425,29 @@ internal class Blob
 
     private void WalkLeft()
     {
-        if (BlobsControl.MovedLeft())
+        if (Control.MovedLeft())
         {
             if (_blobsLastAnimDirection == Direction.Right)
             {
-                _blobAnimLeft.CurrentFrame = BlobWalkFrames.TurningLeftFrom(BlobFrame);
+                _blobAnimLeft.CurrentFrame = BlobWalkFrames.TurningLeftFrom(Frame);
             }
             else
             {
                 _blobAnimLeft.GetNextFrame();
             }
 
-            int amountToMove = _gameScreens.Collisions.CheckCollision(Direction.Left, _blobXPos, _blobYPos,
-                BlobWidth, BlobHeight, BlobHSpeed, true);
+            int amountToMove = _gameScreens.Collisions.CheckCollision(Direction.Left, _xPos, _yPos,
+                Width, Height, HorizontalSpeed, true);
             if (amountToMove > 0)
             {
-                _blobXPos -= amountToMove;
+                _xPos -= amountToMove;
                 if (_shuttle.Riding)
                 {
                     _shuttle.Advance();
                 }
             }
 
-            BlobFrame = _blobAnimLeft.CurrentFrame;
+            Frame = _blobAnimLeft.CurrentFrame;
             DirectionBlobMoved = Direction.Left;
             _blobsLastAnimDirection = Direction.Left;
 
@@ -461,29 +461,29 @@ internal class Blob
 
     private void WalkRight()
     {
-        if (BlobsControl.MovedRight())
+        if (Control.MovedRight())
         {
             if (_blobsLastAnimDirection == Direction.Left)
             {
-                _blobAnimRight.CurrentFrame = BlobWalkFrames.TurningRightFrom(BlobFrame);
+                _blobAnimRight.CurrentFrame = BlobWalkFrames.TurningRightFrom(Frame);
             }
             else
             {
                 _blobAnimRight.GetNextFrame();
             }
 
-            int amountToMove = _gameScreens.Collisions.CheckCollision(Direction.Right, _blobXPos, _blobYPos,
-                BlobWidth, BlobHeight, BlobHSpeed, true);
+            int amountToMove = _gameScreens.Collisions.CheckCollision(Direction.Right, _xPos, _yPos,
+                Width, Height, HorizontalSpeed, true);
             if (amountToMove > 0)
             {
-                _blobXPos += amountToMove;
+                _xPos += amountToMove;
                 if (_shuttle.Riding)
                 {
                     _shuttle.Advance();
                 }
             }
 
-            BlobFrame = _blobAnimRight.CurrentFrame;
+            Frame = _blobAnimRight.CurrentFrame;
             DirectionBlobMoved = Direction.Right;
             _blobsLastAnimDirection = Direction.Right;
 
@@ -506,27 +506,27 @@ internal class Blob
             _blobAnimLeft.Repeat = false;
         }
 
-        if (BlobsControl.MovedUp())
+        if (Control.MovedUp())
         {
-            _blobYPos -= _gameScreens.Collisions.CheckCollision(Direction.Up, _blobXPos,
-                _blobYPos,
-                BlobWidth, BlobHeight, BlobVSpeed, true);
+            _yPos -= _gameScreens.Collisions.CheckCollision(Direction.Up, _xPos,
+                _yPos,
+                Width, Height, VerticalSpeed, true);
             DirectionBlobMoved = Direction.Up;
         }
 
-        if (BlobsControl.MovedDown())
+        if (Control.MovedDown())
         {
-            _blobYPos += _gameScreens.Collisions.CheckCollision(Direction.Down, _blobXPos,
-                _blobYPos, BlobWidth, BlobHeight, BlobVSpeed, true);
+            _yPos += _gameScreens.Collisions.CheckCollision(Direction.Down, _xPos,
+                _yPos, Width, Height, VerticalSpeed, true);
             DirectionBlobMoved = Direction.Down;
         }
     }
 
     private void LayJumpPlatformOrJump()
     {
-        if (BlobsControl.MovedDown() &&
-            !BlobsControl.MovedLeft() &&
-            !BlobsControl.MovedRight())
+        if (Control.MovedDown() &&
+            !Control.MovedLeft() &&
+            !Control.MovedRight())
         {
             if (!_jumpPressed)
             {
@@ -536,20 +536,20 @@ internal class Blob
                 {
                     if (!_shuttle.OnThePad)
                     {
-                        int newYPos = _blobJumpPlatformEngine.GetNewJumpPlatform(_blobXPos, _blobYPos,
-                            BlobWidth,
-                            BlobHeight, true);
+                        int newYPos = _blobJumpPlatformEngine.GetNewJumpPlatform(_xPos, _yPos,
+                            Width,
+                            Height, true);
 
                         if (newYPos != JumpPlatforms.NoRoomForPlatform)
                         {
-                            _blobYPos = newYPos;
+                            _yPos = newYPos;
 
                             _resources.GetSoundFxEngine()
                                 .PlaySound(Assets.Sounds.BlobJumps, 0.3f, false);
 
-                            if (OnBlobActionRaised != null)
+                            if (OnActionRaised != null)
                             {
-                                OnBlobActionRaised(BlobAction.LaidPlatform, null);
+                                OnActionRaised(BlobAction.LaidPlatform, null);
                             }
                         }
                     }
@@ -558,7 +558,7 @@ internal class Blob
                 {
                     if (CanJumpWithoutAPlatform())
                     {
-                        _blobYPos -= JumpHeightWithoutPlatforms;
+                        _yPos -= JumpHeightWithoutPlatforms;
                         _resources.GetSoundFxEngine()
                             .PlaySound(Assets.Sounds.BlobJumpsNoPlatforms, 1f, false);
                     }
@@ -577,11 +577,11 @@ internal class Blob
     ///     jump above where he stands means that position still has slack over it.
     /// </remarks>
     private bool CanJumpWithoutAPlatform()
-        => _gameScreens.Collisions.CheckCollision(Direction.Down, _blobXPos, _blobYPos,
-               BlobWidth, BlobHeight, 1, true) == 0 &&
-           _gameScreens.Collisions.CheckCollision(Direction.Up, _blobXPos,
-               _blobYPos - JumpHeightWithoutPlatforms,
-               BlobWidth, BlobHeight, 1, true) != 0;
+        => _gameScreens.Collisions.CheckCollision(Direction.Down, _xPos, _yPos,
+               Width, Height, 1, true) == 0 &&
+           _gameScreens.Collisions.CheckCollision(Direction.Up, _xPos,
+               _yPos - JumpHeightWithoutPlatforms,
+               Width, Height, 1, true) != 0;
 
     private void AccessInventory()
     {
@@ -590,8 +590,8 @@ internal class Blob
         {
             if (CollisionDetection.Check(
                     new Rectangle(
-                        _blobXPos,
-                        _blobYPos,
+                        _xPos,
+                        _yPos,
                         SpriteMetrics.SpriteWidth,
                         SpriteMetrics.SpriteHeight),
                     new Rectangle(
@@ -604,9 +604,9 @@ internal class Blob
             }
         }
 
-        if (BlobsControl.MovedUp() &&
-            !BlobsControl.MovedLeft() &&
-            !BlobsControl.MovedRight())
+        if (Control.MovedUp() &&
+            !Control.MovedLeft() &&
+            !Control.MovedRight())
         {
             if (!_inventoryAccessed &&
                 !_lift.GoingUp &&
@@ -624,7 +624,7 @@ internal class Blob
                     _inventoryAccessed = true;
 
                     _inventory.SwapWithFloor(
-                        new Rectangle(_blobXPos, BlobYPos, BlobWidth, BlobHeight),
+                        new Rectangle(_xPos, YPos, Width, Height),
                         _gameScreens.CurrentGameScreenData.PickUps);
 
                     _gameScreens.UpdateCollisionMap(false);
@@ -638,7 +638,7 @@ internal class Blob
     ///     through one, which is what stops him swapping an item while he is inside a door.
     /// </summary>
     private bool InAnAccessForceField()
-        => _gameScreens.Collisions.CheckTileByObject(Direction.None, _blobXPos, _blobYPos, BlobWidth, BlobHeight, 0)
+        => _gameScreens.Collisions.CheckTileByObject(Direction.None, _xPos, _yPos, Width, Height, 0)
             is { TileNumber: (int)ActionTiles.AccessForceField };
 
     /// <summary>
@@ -652,12 +652,12 @@ internal class Blob
 
     private void ReleaseHeldControls()
     {
-        if (!BlobsControl.MovedUp())
+        if (!Control.MovedUp())
         {
             _inventoryAccessed = false;
         }
 
-        if (!BlobsControl.MovedDown())
+        if (!Control.MovedDown())
         {
             _jumpPressed = false;
         }
@@ -686,9 +686,9 @@ internal class Blob
 
         Fall fall = _fall.Step(
             _gameScreens.Collisions,
-            new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight),
-            BlobsControl.MovedLeft(),
-            BlobsControl.MovedRight());
+            new Rectangle(_xPos, _yPos, Width, Height),
+            Control.MovedLeft(),
+            Control.MovedRight());
 
         if (fall.Audible)
         {
@@ -702,7 +702,7 @@ internal class Blob
                 .StopSound(_blobFallsSoundId, SoundFade.Fast);
         }
 
-        _blobYPos += fall.Distance;
+        _yPos += fall.Distance;
     }
 
     /// <summary>
@@ -728,14 +728,14 @@ internal class Blob
 
     private bool ChangeScreenOffLeftEdge()
     {
-        if (ScreenEdges.OffLeft(_blobXPos, _blobYPos, BlobWidth, _gameScreens.ScreenWidth,
+        if (ScreenEdges.OffLeft(_xPos, _yPos, Width, _gameScreens.ScreenWidth,
                 _gameScreens.ScreenNumber) is not { } crossing)
         {
             return false;
         }
 
         _gameScreens.ScreenNumber = crossing.ScreenNumber;
-        _blobXPos = crossing.XPos;
+        _xPos = crossing.XPos;
 
         RaiseScreenChangedToMainGame();
 
@@ -745,14 +745,14 @@ internal class Blob
     /// <inheritdoc cref="ChangeScreenOffLeftEdge" />
     private bool ChangeScreenOffRightEdge()
     {
-        if (ScreenEdges.OffRight(_blobXPos, _blobYPos, BlobWidth, _gameScreens.ScreenWidth,
+        if (ScreenEdges.OffRight(_xPos, _yPos, Width, _gameScreens.ScreenWidth,
                 _gameScreens.ScreenNumber) is not { } crossing)
         {
             return false;
         }
 
         _gameScreens.ScreenNumber = crossing.ScreenNumber;
-        _blobXPos = crossing.XPos;
+        _xPos = crossing.XPos;
 
         RaiseScreenChangedToMainGame();
 
@@ -767,7 +767,7 @@ internal class Blob
     /// </summary>
     private bool ChangeScreenOffTopEdge()
     {
-        if (ScreenEdges.OffTop(_blobXPos, _blobYPos, _gameScreens.ScreenNumber) is not { } crossing)
+        if (ScreenEdges.OffTop(_xPos, _yPos, _gameScreens.ScreenNumber) is not { } crossing)
         {
             return false;
         }
@@ -778,12 +778,12 @@ internal class Blob
 
         if (_shuttle.Riding || _lift.GoingUp)
         {
-            _blobYPos = _gameScreens.ScreenHeight - BlobHeight;
+            _yPos = _gameScreens.ScreenHeight - Height;
         }
         else
         {
-            _blobYPos = _blobJumpPlatformEngine.GetNewJumpPlatform(
-                _blobXPos,
+            _yPos = _blobJumpPlatformEngine.GetNewJumpPlatform(
+                _xPos,
                 _gameScreens.ScreenHeight - _resources
                     .GetSpriteCollection(_graphicsSet.Names.BlobSprites).SpriteHeight,
                 0,
@@ -797,14 +797,14 @@ internal class Blob
     /// <inheritdoc cref="ChangeScreenOffLeftEdge" />
     private bool ChangeScreenOffBottomEdge()
     {
-        if (ScreenEdges.OffBottom(_blobXPos, _blobYPos, BlobHeight, _gameScreens.ScreenHeight,
+        if (ScreenEdges.OffBottom(_xPos, _yPos, Height, _gameScreens.ScreenHeight,
                 _gameScreens.ScreenNumber) is not { } crossing)
         {
             return false;
         }
 
         _gameScreens.ScreenNumber = crossing.ScreenNumber;
-        _blobYPos = crossing.YPos;
+        _yPos = crossing.YPos;
 
         // He is falling onto the new screen, so the fall starts again from the top of it
         _fall.StartFallingAgain();
@@ -826,20 +826,20 @@ internal class Blob
     private BlobSurroundings DetectSurroundingTiles()
         => BlobSurroundings.Around(
             _gameScreens.Collisions,
-            _blobXPos,
-            _blobYPos,
-            BlobWidth,
-            BlobHeight,
+            _xPos,
+            _yPos,
+            Width,
+            Height,
             // The ground is looked for from his own feet rather than the shuttle's, and his own
             // height is the sprite's whether he is aboard or not - the shuttle is all of the
             // difference between the two.
             SpriteMetrics.SpriteHeight,
-            BlobHSpeed,
-            BlobVSpeed);
+            HorizontalSpeed,
+            VerticalSpeed);
 
     private void DetectTeleporter(TileDetected? toTheRight)
     {
-        if (toTheRight == null || !BlobsControl.MovedRight())
+        if (toTheRight == null || !Control.MovedRight())
         {
             return;
         }
@@ -853,8 +853,8 @@ internal class Blob
 
         _screenDirectory.Current = GameScreenType.Teleporter;
         _screenDirectory.Teleporter.Reset();
-        _blobXPos = toTheRight.MapXPosition * TileMetrics.TileWidth + BoothMetrics.BlobXOffset;
-        BlobFrame = BlobWalkFrames.WalkRightFirst;
+        _xPos = toTheRight.MapXPosition * TileMetrics.TileWidth + BoothMetrics.BlobXOffset;
+        Frame = BlobWalkFrames.WalkRightFirst;
     }
 
     /// <summary>
@@ -958,23 +958,23 @@ internal class Blob
     }
 
     private void GoUpTheShaft(TileDetected? above)
-        => _blobYPos -= _lift.Step(
+        => _yPos -= _lift.Step(
             _gameScreens.Collisions,
-            new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight),
+            new Rectangle(_xPos, _yPos, Width, Height),
             above,
-            BlobsControl.MovedLeft(),
-            BlobsControl.MovedRight(),
-            BlobHSpeed);
+            Control.MovedLeft(),
+            Control.MovedRight(),
+            HorizontalSpeed);
 
     private void CheckSpikes()
     {
         TileDetected? tileIntersectingBlob =
-            _gameScreens.Collisions.CheckTileByObject(Direction.None, _blobXPos, _blobYPos, BlobWidth,
-                BlobHeight, 0);
+            _gameScreens.Collisions.CheckTileByObject(Direction.None, _xPos, _yPos, Width,
+                Height, 0);
 
         if (tileIntersectingBlob != null && Spikes.HaveGotHim(tileIntersectingBlob))
         {
-            KillBlob(true, false);
+            Kill(true, false);
         }
     }
 
@@ -986,10 +986,10 @@ internal class Blob
         }
 
         if (!CollisionDetection.Check(
-                _blobXPos,
-                BlobYPos,
-                BlobWidth,
-                BlobHeight,
+                _xPos,
+                YPos,
+                Width,
+                Height,
                 _gameScreens.CurrentGameScreenData.PowerUp.XLocation,
                 _gameScreens.CurrentGameScreenData.PowerUp.YLocation,
                 TileMetrics.CollisionCellWidth,
@@ -998,7 +998,7 @@ internal class Blob
             return;
         }
 
-        OnBlobActionRaised?.Invoke(BlobAction.GotPowerUp, _gameScreens.CurrentGameScreenData.PowerUp.Type);
+        OnActionRaised?.Invoke(BlobAction.GotPowerUp, _gameScreens.CurrentGameScreenData.PowerUp.Type);
 
         _gameScreens.CurrentGameScreenData.PowerUp = null;
         _gameScreens.UpdateCollisionMap(false);
@@ -1033,7 +1033,7 @@ internal class Blob
     {
         Effect overload = _resources.GetEffect(Assets.Shaders.Overload);
 
-        Vector4 spriteRect = sprites.SpriteRectIn01(BlobFrame);
+        Vector4 spriteRect = sprites.SpriteRectIn01(Frame);
 
         overload.Parameters["SpriteRect"].SetValue(spriteRect);
         overload.Parameters["Charge"].SetValue(
@@ -1088,7 +1088,7 @@ internal class Blob
             Weapon.Disarm();
 
             _blobJumpPlatformEngine.ResetPlatforms();
-            OnBlobDiedAndRespawned?.Invoke();
+            OnDiedAndRespawned?.Invoke();
 
             if (_overload.Swell() != OverloadStage.Exploded)
             {
@@ -1096,9 +1096,9 @@ internal class Blob
             }
 
             _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobExplodes, false);
-            _blobKiller.Trigger(BlobXPos, BlobYPos, true);
+            _blobKiller.Trigger(XPos, YPos, true);
             _onExploded();
-            BlobsState = BlobState.Dying;
+            State = BlobState.Dying;
         }
     }
 
@@ -1114,18 +1114,18 @@ internal class Blob
         // If Blob is killed by a spiky tile, we reset his position to when he entered
         if (_resetBlobToScreenEntryPoint)
         {
-            _blobYPos = _entryPoint.YPos;
-            _blobXPos = _entryPoint.XPos;
+            _yPos = _entryPoint.YPos;
+            _xPos = _entryPoint.XPos;
             _shuttle.PutBack(_entryPoint.OnShuttle);
             _gameScreens.ChangeShuttlePlatformState(_shuttle.Riding);
             _gameScreens.UpdateCollisionMap(false);
-            BlobFrame = _entryPoint.Frame;
+            Frame = _entryPoint.Frame;
             _lift.LetGo();
             _fall.StartFallingAgain();
         }
 
         _resetBlobToScreenEntryPoint = false;
-        BlobsState = BlobState.Dead;
+        State = BlobState.Dead;
         _blobKiller.Reset();
     }
 
@@ -1139,22 +1139,22 @@ internal class Blob
     ///     edges were four copies of this, differing only in which thin strip is probed and which way
     ///     he is then walked.
     /// </remarks>
-    public void UnstickBlobFromTiles()
+    public void UnstickFromTiles()
     {
         Point freed = _unstickProbe.FreePositionFor(
-            new Rectangle(_blobXPos, _blobYPos, BlobWidth, BlobHeight));
+            new Rectangle(_xPos, _yPos, Width, Height));
 
-        _blobXPos = freed.X;
-        _blobYPos = freed.Y;
+        _xPos = freed.X;
+        _yPos = freed.Y;
     }
 
     public void PerformPostChangeScreenActions()
     {
-        Weapon.ResetTo(_blobXPos, _blobYPos);
+        Weapon.ResetTo(_xPos, _yPos);
 
         _blobJumpPlatformEngine.ResetPlatforms();
 
-        UnstickBlobFromTiles();
+        UnstickFromTiles();
 
         if (_directionGoingThroughTunnel != Direction.None)
         {
@@ -1171,8 +1171,8 @@ internal class Blob
                             continue;
                         }
 
-                        _blobXPos = tiles[0].X + TunnelExitRightXOffset;
-                        _blobYPos = tiles[0].Y + TunnelExitYOffset;
+                        _xPos = tiles[0].X + TunnelExitRightXOffset;
+                        _yPos = tiles[0].Y + TunnelExitYOffset;
                         break;
                     }
                 }
@@ -1188,8 +1188,8 @@ internal class Blob
                         continue;
                     }
 
-                    _blobXPos = tiles[0].X + TunnelExitLeftXOffset;
-                    _blobYPos = tiles[0].Y + TunnelExitYOffset;
+                    _xPos = tiles[0].X + TunnelExitLeftXOffset;
+                    _yPos = tiles[0].Y + TunnelExitYOffset;
                     break;
                 }
             }
@@ -1212,7 +1212,7 @@ internal class Blob
 
     public void Draw(int screenFade)
     {
-        switch (BlobsState)
+        switch (State)
         {
             case BlobState.Normal:
             {
@@ -1258,7 +1258,7 @@ internal class Blob
     {
         _drainFrame++;
 
-        if (BlobTouchedByNasty)
+        if (TouchedByNasty)
         {
             if (!_blobTouched)
             {
@@ -1308,8 +1308,8 @@ internal class Blob
         bool draining = EnergyDrainSettings.IsDraining(_blobEnergyDrainCounter);
 
         blobSprites.Begin(BlendState.AlphaBlend, null, draining ? DrainShader(blobSprites) : null);
-        blobSprites.DrawSprite(BlobFrame,
-            _blobXPos, _blobYPos,
+        blobSprites.DrawSprite(Frame,
+            _xPos, _yPos,
             Colours.WhiteFadedTo(
                 (byte)(_teleportFadeLevel * ((double)screenFade / ColourLevels.Full))), 1f, 0f);
         blobSprites.End();
@@ -1324,7 +1324,7 @@ internal class Blob
     {
         Effect drain = _resources.GetEffect(Assets.Shaders.Overload);
 
-        Vector4 spriteRect = sprites.SpriteRectIn01(BlobFrame);
+        Vector4 spriteRect = sprites.SpriteRectIn01(Frame);
 
         drain.Parameters["SpriteRect"].SetValue(spriteRect);
         drain.Parameters["Drain"].SetValue(
@@ -1351,7 +1351,7 @@ internal class Blob
                 SpriteCollection blobShuttleOriginal = _resources.GetSpriteCollection(Assets.Graphics.BlobShuttleOriginal);
                 blobShuttleOriginal.Begin(BlendState.AlphaBlend);
                 blobShuttleOriginal.DrawSprite(
-                    _shuttle.Frame, _blobXPos, _blobYPos + SpriteMetrics.SpriteHeight,
+                    _shuttle.Frame, _xPos, _yPos + SpriteMetrics.SpriteHeight,
                     Colours.WhiteFadedTo((byte)screenFade));
                 blobShuttleOriginal.End();
             }
@@ -1359,8 +1359,8 @@ internal class Blob
             {
                 SpriteCollection blobShuttle = _resources.GetSpriteCollection(Assets.Graphics.BlobShuttle);
                 blobShuttle.Begin(BlendState.AlphaBlend);
-                blobShuttle.DrawSprite(0, _blobXPos,
-                    _blobYPos + SpriteMetrics.SpriteHeight, Colours.WhiteFadedTo((byte)screenFade));
+                blobShuttle.DrawSprite(0, _xPos,
+                    _yPos + SpriteMetrics.SpriteHeight, Colours.WhiteFadedTo((byte)screenFade));
                 blobShuttle.End();
             }
         }
@@ -1398,7 +1398,7 @@ internal class Blob
             blobSprites.Begin(BlendState.AlphaBlend, null,
                 OverloadShader(blobSprites, "Charging"));
             blobSprites.DrawSprite(
-                BlobFrame, _blobXPos, _blobYPos,
+                Frame, _xPos, _yPos,
                 Colours.WhiteFadedTo(
                     (byte)(_teleportFadeLevel * ((double)screenFade / ColourLevels.Full))), 1f, 0f);
             blobSprites.End();
@@ -1408,8 +1408,8 @@ internal class Blob
         {
             SpriteCollection blobShuttle = _resources.GetSpriteCollection(Assets.Graphics.BlobShuttle);
             blobShuttle.Begin(BlendState.AlphaBlend);
-            blobShuttle.DrawSprite(0, _blobXPos,
-                _blobYPos + SpriteMetrics.SpriteHeight, Colours.WhiteFadedTo((byte)screenFade));
+            blobShuttle.DrawSprite(0, _xPos,
+                _yPos + SpriteMetrics.SpriteHeight, Colours.WhiteFadedTo((byte)screenFade));
             blobShuttle.End();
         }
     }
@@ -1433,9 +1433,9 @@ internal class Blob
 
         blobSprites.Begin(BlendState.AlphaBlend, null, OverloadShader(blobSprites, "Splitting"));
         blobSprites.DrawSprite(
-            BlobFrame,
-            _blobXPos + (int)shake.X,
-            _blobYPos + (int)shake.Y,
+            Frame,
+            _xPos + (int)shake.X,
+            _yPos + (int)shake.Y,
             Colours.WhiteFadedTo((byte)screenFade), _overload.Scale, 0f);
         blobSprites.End();
 
@@ -1457,8 +1457,8 @@ internal class Blob
     {
         SpriteCollection arc = _resources.GetSpriteCollection(Assets.Graphics.ElectricityNodeElectricity1);
 
-        int centreX = _blobXPos + SpriteMetrics.HalfSpriteWidth + (int)shake.X;
-        int centreY = _blobYPos + SpriteMetrics.HalfSpriteHeight + (int)shake.Y;
+        int centreX = _xPos + SpriteMetrics.HalfSpriteWidth + (int)shake.X;
+        int centreY = _yPos + SpriteMetrics.HalfSpriteHeight + (int)shake.Y;
 
         arc.Begin(BlendState.Additive, null, ElectricSettings.PointAt(
             _resources.GetEffect(Assets.Shaders.Electric),
@@ -1504,7 +1504,7 @@ internal class Blob
             // in one batch rather than needing a shader setting apiece.
             Vector3 shell = OverloadSettings.ShellColour(copy, BlobOverload.FlareCopies);
 
-            blobSprites.DrawSprite(BlobFrame, _blobXPos, _blobYPos,
+            blobSprites.DrawSprite(Frame, _xPos, _yPos,
                 new Color(shell.X, shell.Y, shell.Z, OverloadFlareAlpha / (float)ColourLevels.Full),
                 scale, 0f);
 
@@ -1526,14 +1526,14 @@ internal class Blob
     public void Reset()
     {
         _blobEnergyDrainCounter = 0;
-        BlobFrame = BlobWalkFrames.Resting;
-        BlobsState = BlobState.Normal;
+        Frame = BlobWalkFrames.Resting;
+        State = BlobState.Normal;
 
         // Where he starts belongs to the map - the author marks the square the ship came down on -
         // so it is asked for rather than written down here.
         Point start = _gameScreens.BlobStartPosition;
-        _blobXPos = start.X;
-        _blobYPos = start.Y;
+        _xPos = start.X;
+        _yPos = start.Y;
 
         TakeBlobOffTheShuttle();
 
@@ -1550,7 +1550,7 @@ internal class Blob
         _gameScreens.ChangeShuttlePlatformState(false);
     }
 
-    private void BlobTeleporterBeam_ParticleEffectComplete()
+    private void TeleporterBeam_ParticleEffectComplete()
     {
         _startBlobTeleporting = false;
     }

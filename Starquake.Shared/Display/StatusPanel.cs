@@ -147,8 +147,8 @@ internal class StatusPanel
     ///     hold him.
     /// </summary>
     /// <remarks>
-    ///     It used to take Blob per call and act on him - call <c>KillBlob</c>, assign
-    ///     <c>BlobsState</c>. That is safe to construct in either order, which was the point, but it
+    ///     It used to take Blob per call and act on him - call <c>Kill</c>, assign
+    ///     <c>State</c>. That is safe to construct in either order, which was the point, but it
     ///     still named a type from <c>ActiveSprites</c>. See <see cref="BlobInstruction" />; the
     ///     engine calls this holding both and applies the answer.
     /// </remarks>

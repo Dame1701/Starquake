@@ -150,9 +150,9 @@ internal class ConveyorNasties(ResourceManager resources,
     private void TouchBlob(ConveyorNasty nasty)
     {
         if (!CollisionDetection.Check(
-                blob.BlobXPos + BlobBoxInset,
-                blob.BlobYPos - SpriteMetrics.SpriteHeight / 2,
-                blob.BlobWidth - BlobBoxInset * 2,
+                blob.XPos + BlobBoxInset,
+                blob.YPos - SpriteMetrics.SpriteHeight / 2,
+                blob.Width - BlobBoxInset * 2,
                 SpriteMetrics.SpriteHeight,
                 nasty.XLocation,
                 nasty.YLocation,
@@ -172,7 +172,7 @@ internal class ConveyorNasties(ResourceManager resources,
             OnNastyInteractionWithBlob(NastyInteractionType.HitBlob, NastyType.Conveyor);
         }
 
-        blob.BlobTouchedByNasty = true;
+        blob.TouchedByNasty = true;
     }
 
     private void TakeAnyFireHit(ConveyorNasty nasty)

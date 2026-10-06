@@ -283,7 +283,7 @@ internal class AccessBoothScreen : IGameScreen
     /// </summary>
     private void CheckInventoryAgainstCode()
     {
-        _scan = AccessCodeLock.Scan(_blob.BlobInventory, _accessCode);
+        _scan = AccessCodeLock.Scan(_blob.Carrying, _accessCode);
 
         for (int digit = 0; digit < _accessCodes.Length; digit++)
         {
@@ -306,16 +306,16 @@ internal class AccessBoothScreen : IGameScreen
         switch (approachedFrom)
         {
             case Direction.Left:
-                _blob.BlobXPos = Success
+                _blob.XPos = Success
                     ? (doorMapXPosition - 1) * 128 + 16
                     : doorMapXPosition * 128 + 48;
-                _blob.BlobFrame = 0;
+                _blob.Frame = 0;
                 break;
             case Direction.Right:
-                _blob.BlobXPos = Success
+                _blob.XPos = Success
                     ? (doorMapXPosition + 1) * 128 + 48
                     : doorMapXPosition * 128 + 16;
-                _blob.BlobFrame = 10;
+                _blob.Frame = 10;
                 break;
         }
     }
