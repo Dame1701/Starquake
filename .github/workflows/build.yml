@@ -46,3 +46,22 @@ jobs:
 
       - name: Test
         run: dotnet test Starquake.Tests/Starquake.Tests.csproj --no-build
+
+  # A second gate the repository did not have. tools/namespace-cycles.py counts the namespaces in
+  # Starquake.Shared that depend on each other both ways, and the count is zero. Nothing but this
+  # keeps it there: C# has no rule against a namespace cycle - one assembly, so any type may
+  # reference any other - which is why the count had drifted to fourteen before anything measured
+  # it, through the whole of a plan whose stated goal was cutting cycles.
+  #
+  # Its own job rather than a step in the matrix above. It reads source and nothing else: no
+  # restore, no build, no .NET, and no reason to run it once per operating system. It fails in
+  # about a second, which is the point - a new cycle is one misfiled file, and it is far cheaper
+  # to hear about before the three builds finish than after.
+  namespaces:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: No namespace cycles
+        run: python3 tools/namespace-cycles.py
