@@ -7,12 +7,11 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
-using Starquake.Helpers;
 using Starquake.Input;
 using Starquake.Sprites;
-using Starquake.Structure;
 using Starquake.Tuning;
 
 namespace Starquake.GameComponents.PresentationScreens;
@@ -106,13 +105,13 @@ internal class ComputerReportScreen : GameScreenBase, IGameScreen
         }
         else
         {
-            _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.WhiteFadedTo((byte)ScreenFade));
+            _backgroundImage.DrawSprite(0, 0, 0, Colours.WhiteFadedTo((byte)ScreenFade));
         }
 
         _backgroundImage.End();
 
         Font.Begin(BlendState.AlphaBlend);
-        Font.WriteTextCentred(1280, 180, "Flight Computer Report", 2, ColourHelper.GetXna4Colour(200, 200, 100), (byte)ScreenFade);
+        Font.WriteTextCentred(1280, 180, "Flight Computer Report", 2, Colours.GetXna4Colour(200, 200, 100), (byte)ScreenFade);
         Font.WriteTextCentred(1280, 260, "Touchdown Imminent Prepare", 2, Color.White, (byte)ScreenFade);
         Font.WriteTextCentred(1280, 320, "For Mission Starquake . . .", 2, Color.White, (byte)ScreenFade);
         Font.WriteTextCentred(1280, 380, "Crash . . . Bang . . . Smash . . .", 2, Color.Red, (byte)ScreenFade);
@@ -129,7 +128,7 @@ internal class ComputerReportScreen : GameScreenBase, IGameScreen
         }
         else
         {
-            _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.WhiteFadedTo((byte)ScreenFade));
+            _foregroundImage.DrawSprite(0, 230, 120, Colours.WhiteFadedTo((byte)ScreenFade));
         }
 
         _foregroundImage.End();

@@ -2,8 +2,8 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Starquake.Structure;
 
+using Starquake.Core;
 namespace Starquake.Collisions;
 
 /// <summary>

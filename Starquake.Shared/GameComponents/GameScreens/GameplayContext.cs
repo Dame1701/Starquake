@@ -4,10 +4,10 @@
 // -
 using Starquake.ActiveSprites;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Input;
 using Starquake.Scoring;
-using Starquake.Structure;
 
 namespace Starquake.GameComponents.GameScreens;
 

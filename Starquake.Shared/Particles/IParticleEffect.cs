@@ -3,7 +3,7 @@
 // ---------------------------------------------------------
 // -
 using ProjectMercury;
-using Starquake.Structure;
+using Starquake.Core;
 
 namespace Starquake.Particles;
 

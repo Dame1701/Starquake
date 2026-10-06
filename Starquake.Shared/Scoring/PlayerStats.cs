@@ -3,8 +3,8 @@
 // ---------------------------------------------------------
 // -
 using Starquake.Constants;
+using Starquake.Core;
 using Starquake.Sounds;
-using Starquake.Structure;
 
 namespace Starquake.Scoring;
 

@@ -3,9 +3,9 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
+using Starquake.ActiveSprites;
 using Starquake.Constants;
-using Starquake.Helpers;
-using Starquake.Structure;
+using Starquake.Core;
 using Starquake.Tuning;
 using Xunit;
 
@@ -50,7 +50,7 @@ public class SplatSettingsTests
     internal void SplatColourFor_ANastyWithColours_IsTheOneItAlreadySplatters(NastyType nastyType)
     {
         // Act
-        Vector3 rim = NastyHelpers.SplatColourFor(nastyType);
+        Vector3 rim = NastyColours.SplatColourFor(nastyType);
 
         // Assert - a real colour from the table rather than the white fallback
         Assert.NotEqual(Vector3.One, rim);
@@ -68,5 +68,5 @@ public class SplatSettingsTests
     [InlineData(NastyType.Conveyor)]
     internal void SplatColourFor_AMechanicalNasty_FallsBackToWhiteRatherThanThrowing(
         NastyType nastyType)
-        => Assert.Equal(Vector3.One, NastyHelpers.SplatColourFor(nastyType));
+        => Assert.Equal(Vector3.One, NastyColours.SplatColourFor(nastyType));
 }

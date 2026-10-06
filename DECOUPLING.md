@@ -512,11 +512,48 @@ identifier list having been wrong - is `tools/class-metrics.py` now. It was neve
 so neither its numbers nor its bug could be checked by anyone reading about them. `GODCLASSES.md`'s
 *Where this stands now* is the re-measurement.
 
-Still open, and named here so it is not rediscovered: **`Structure` (42 files) and `Helpers` (4) have
-names that no longer describe what is in them.** `Structure` is the leaf layer - shared enums,
-delegates, records and small values with no dependencies - which is a real role its name does not
-convey, and `Helpers` is four classes with a non-name. Neither is doing harm and both are a rename
-across many files, so they wait.
+### The two names, done
+
+`Structure` and `Helpers` were the last two namespaces whose names did not describe their contents.
+Both are gone.
+
+**`Helpers` dissolved rather than being renamed.** It was not a namespace: four unrelated classes,
+and three of them had exactly one caller each. `ColourHelper` is `Colours` and stays in the leaf
+layer, where 23 files across nine namespaces reach for it. The other three went to their one
+caller: `NastyHelpers` is `NastyColours` beside `Nasty`, `SpriteHelpers` is `SpriteOffsets` beside
+`Nasties`, `TextHelper` is `AsciiCodes` beside `BitmapFont`.
+
+**`Structure` split in two**, because the cluster work changed what was in it. It was 42 files of
+type declarations when this was first written down; seven pure rule classes were extracted into it
+over the following commits for want of a better home, and that made it two things.
+
+- **`Starquake.Rules`** - eight files: `ScreenEdges`, `ScreenCrossing`, `Spikes`, `TunnelMouths`,
+  `BoothEntry`, `BlobWalkFrames`, `Ramp`, `RampedValue`. Every one has tests, none has a mutable
+  field, and all of them decide something by arithmetic alone.
+- **`Starquake.Core`** - the other 41: nineteen enums, five delegates, eight records and structs,
+  an interface, and the small value objects. The leaf layer, named for being the leaf layer, with
+  `Constants` below it as the floor that depends on nothing at all.
+
+`Animation` was in the list for `Rules` and is in `Core` instead. It has two mutable fields and no
+tests, so it is a stateful sequencer rather than a rule, and putting it there would have made the
+namespace's claim false on its first day.
+
+**The rename turned up something nothing had noticed: `Starquake.Structure` was two namespaces in
+two projects sharing a name.** `SharedLibs` declares nine types in it - `ActionTiles`,
+`MarkerTiles`, `CoreSite`, `CoreExit`, `LandingSite`, `Signposts`, `TeleportCodes` and two more -
+which are the level-data vocabulary the screen editor authors and the game reads. Renaming the
+game's half made that visible, and the survivor is coherent: `Starquake.Structure` now means the
+structure of a level and nothing else. 36 files reach into it and said so only by accident before.
+
+Two crefs broke and are worth knowing about as a class of error. One was fully qualified as
+`Starquake.Structure.AccessCodeLock`, which a namespace rename silently invalidates; the other
+pointed at `ActionTiles.AccessForceField` from a file that had lost the using. Both are CS1574,
+both were caught by the build, and neither would have been caught before
+`GenerateDocumentationFile` was turned on.
+
+What is still open is naming of a different kind, and smaller: the `Engine` suffix on eight
+unrelated types carries no information, and members stutter their own class name (`Blob.BlobXPos`,
+`Blob.BlobsState`).
 
 ### What is left, and why
 

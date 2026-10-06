@@ -3,8 +3,8 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
+using Starquake.Core;
 using Starquake.GameComponents;
-using Starquake.Structure;
 using Xunit;
 
 namespace Starquake.Tests;

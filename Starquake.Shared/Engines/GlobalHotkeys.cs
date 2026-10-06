@@ -7,10 +7,10 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Display;
 using Starquake.GameComponents;
 using Starquake.Input;
-using Starquake.Structure;
 
 namespace Starquake.Engines;
 

@@ -6,11 +6,10 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.GameComponents;
-using Starquake.Helpers;
 using Starquake.Scoring;
 using Starquake.Sprites;
-using Starquake.Structure;
 using Starquake.Tuning;
 
 namespace Starquake.Display;
@@ -338,7 +337,7 @@ internal class StatusPanel
             (int)_blobsInventory[_slotIdentified],
             InventorySlotSpacing * _slotIdentified + InventoryItemXPos + (int)shake.X,
             InventoryItemYPos + (int)shake.Y,
-            ColourHelper.WhiteFadedTo((byte)(pulse * CoreReplacementSettings.GlowAmount
+            Colours.WhiteFadedTo((byte)(pulse * CoreReplacementSettings.GlowAmount
                                              * ColourLevels.Full)));
         illuminated.End();
     }

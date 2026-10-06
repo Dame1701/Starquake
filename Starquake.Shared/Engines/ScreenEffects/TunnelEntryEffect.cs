@@ -6,8 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
-using Starquake.Helpers;
-using Starquake.Structure;
+using Starquake.Core;
 
 namespace Starquake.Engines.ScreenEffects;
 
@@ -383,7 +382,7 @@ internal abstract class TunnelEntryEffect(
             picture.Height);
 
         renderer.Draw(picture, new Rectangle(x, across.Y, width, across.Height), source,
-            ColourHelper.WhiteFadedTo(fade));
+            Colours.WhiteFadedTo(fade));
     }
 
     private static Rectangle PlacedAgainst(RenderViewPort viewPort, int width, bool theLeftEdge)

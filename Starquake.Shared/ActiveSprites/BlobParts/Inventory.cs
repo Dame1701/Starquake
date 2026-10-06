@@ -5,8 +5,8 @@
 using Microsoft.Xna.Framework;
 using Starquake.Collisions;
 using Starquake.Constants;
+using Starquake.Core;
 using Starquake.SharedLibs;
-using Starquake.Structure;
 
 namespace Starquake.ActiveSprites.BlobParts;
 

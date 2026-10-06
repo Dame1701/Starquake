@@ -13,16 +13,15 @@ using Starquake.ActiveSprites;
 using Starquake.Animations;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
 using Starquake.GameComponents.GameScreens;
 using Starquake.GameComponents.PresentationScreens;
 using Starquake.GameComponents;
-using Starquake.Helpers;
 using Starquake.Input;
 using Starquake.Scoring;
-using Starquake.Structure;
 using Starquake.Tuning;
 using Starquake.World;
 
@@ -415,8 +414,8 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     [MemberNotNull(nameof(Font1), nameof(Font2), nameof(_presenter), nameof(_crossfade))]
     private void DefineFonts()
     {
-        Font1 = new BitmapFont(_contentMgr.Load<SpriteFont>(Assets.Fonts.ElektoraSmall), new SpriteBatch(_graphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
-        Font2 = new BitmapFont(_contentMgr.Load<SpriteFont>(Assets.Fonts.ElektoraMedium), new SpriteBatch(_graphicsDeviceMgr.GraphicsDevice), Color.White, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), 12);
+        Font1 = new BitmapFont(_contentMgr.Load<SpriteFont>(Assets.Fonts.ElektoraSmall), new SpriteBatch(_graphicsDeviceMgr.GraphicsDevice), Color.White, Colours.GetXna4Colour(130, 130, ColourLevels.Full), 12);
+        Font2 = new BitmapFont(_contentMgr.Load<SpriteFont>(Assets.Fonts.ElektoraMedium), new SpriteBatch(_graphicsDeviceMgr.GraphicsDevice), Color.White, Colours.GetXna4Colour(130, 130, ColourLevels.Full), 12);
         _presenter = new ScreenPresenter(_graphicsDeviceMgr, ContentResourceManager, Presentation);
         _crossfade = new ArtworkCrossfade(_graphicsDeviceMgr);
     }

@@ -2,13 +2,12 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
-using Starquake.Helpers;
+using Starquake.Core;
 using Starquake.Sprites;
-using Starquake.Structure;
 
 namespace Starquake.Display;
 
@@ -69,7 +68,7 @@ internal class KeyScanner
     /// <remarks>
     ///     The access booths ask for three digits and the Cheops pyramid for two, and this was
     ///     written out twice - once per screen - differing in nothing but that count, which it now
-    ///     takes from the array it is given. <see cref="Starquake.Structure.AccessCodeLock" /> is the
+    ///     takes from the array it is given. <see cref="AccessCodeLock" /> is the
     ///     same split: the part that needs no graphics device went there, and this is the animation
     ///     the digits are shown through, which does.
     /// </remarks>
@@ -172,7 +171,7 @@ internal class KeyScanner
 
         pickups.Begin(BlendState.AlphaBlend);
         pickups.DrawSprite(codeNumber, xPos + KeyXInset, yPos + KeyYInset,
-            ColourHelper.WhiteFadedTo((byte)_keyCodeFade));
+            Colours.WhiteFadedTo((byte)_keyCodeFade));
         pickups.End();
     }
 
@@ -193,7 +192,7 @@ internal class KeyScanner
         verdict.Begin(BlendState.AlphaBlend);
         verdict.DrawSpriteSubSection(codeNumber, xPos + KeyXInset, yPos + KeyYInset,
             new Rectangle(0, 0, SpriteMetrics.SpriteWidth, revealed),
-            ColourHelper.WhiteFadedTo((byte)_keyCodeFade));
+            Colours.WhiteFadedTo((byte)_keyCodeFade));
         verdict.End();
     }
 
@@ -206,7 +205,7 @@ internal class KeyScanner
 
         scanLine.Begin(BlendState.Additive);
         scanLine.DrawSprite(0, xPos - ScanLineXOutset, _scanLineY + yPos,
-            ColourHelper.WhiteFadedTo((byte)_scanLineFade));
+            Colours.WhiteFadedTo((byte)_scanLineFade));
         scanLine.End();
     }
 }

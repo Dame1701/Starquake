@@ -8,13 +8,12 @@ using Microsoft.Xna.Framework;
 using Starquake.ActiveSprites;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
-using Starquake.Helpers;
 using Starquake.Input;
 using Starquake.Scoring;
 using Starquake.Sprites;
-using Starquake.Structure;
 using Starquake.World;
 
 namespace Starquake.GameComponents.PresentationScreens;
@@ -121,12 +120,12 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
         ScreenEffects.SelectRenderViewPort(ViewPorts.EntireScreen);
         _backgroundImage.Begin(BlendState.AlphaBlend);
 
-        _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.WhiteFadedTo((byte)ScreenFade));
+        _backgroundImage.DrawSprite(0, 0, 0, Colours.WhiteFadedTo((byte)ScreenFade));
 
         _backgroundImage.End();
 
         Font.Begin(BlendState.AlphaBlend);
-        Font.WriteTextCentred(1280, 180, "GAME OVER", 2, ColourHelper.GetXna4Colour(230, 200, 0), (byte)ScreenFade);
+        Font.WriteTextCentred(1280, 180, "GAME OVER", 2, Colours.GetXna4Colour(230, 200, 0), (byte)ScreenFade);
         Font.WriteText(490, 260, "SCORE", 2, Color.Gray, (byte)ScreenFade);
         Font.WriteText(440, 320, "ADVENTURE SCORE", 2, new Color((byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ScreenFade), (byte)ScreenFade);
         Font.WriteText(470, 380, "TIME TAKEN", 2, new Color((byte)150, (byte)150, (byte)150, (byte)ScreenFade), (byte)ScreenFade);
@@ -156,7 +155,7 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
     /// </summary>
     private void DrawPlayerScore()
         => ProportionalNumbers.Draw(ScoreXPos, ScoreYPos, _stats.PlayerScore.ToString("000000"),
-            Resources, ColourHelper.GetXna4Colour(DimGrey, DimGrey, DimGrey, (byte)ScreenFade));
+            Resources, Colours.GetXna4Colour(DimGrey, DimGrey, DimGrey, (byte)ScreenFade));
 
     /// <summary>
     ///     How much of the planet was walked, as a percentage of its screens.
@@ -164,7 +163,7 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
     private void DrawAdventureScore()
         => ProportionalNumbers.Draw(AdventureScoreXPos, AdventureScoreYPos,
             _gameScreens.GetPercentageOfScreensVisited() + "%",
-            Resources, ColourHelper.WhiteFadedTo((byte)ScreenFade));
+            Resources, Colours.WhiteFadedTo((byte)ScreenFade));
 
     /// <summary>
     ///     How long the game lasted, as minutes and seconds.
@@ -172,7 +171,7 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
     private void DrawTimeTaken()
         => ProportionalNumbers.Draw(TimeTakenXPos, TimeTakenYPos,
             _playTime.Minutes + "." + _playTime.Seconds.ToString("00"),
-            Resources, ColourHelper.GetXna4Colour(DimGrey, DimGrey, DimGrey, (byte)ScreenFade));
+            Resources, Colours.GetXna4Colour(DimGrey, DimGrey, DimGrey, (byte)ScreenFade));
 
     /// <summary>
     ///     How many of the nine core elements were put back.
@@ -180,13 +179,13 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
     private void DrawElementsReplaced()
         => ProportionalNumbers.Draw(ElementsReplacedXPos, ElementsReplacedYPos,
             _elements.GetElementsReplacedCount().ToString("00"),
-            Resources, ColourHelper.GetXna4Colour(CorePurpleRed, 0, CorePurpleBlue, (byte)ScreenFade));
+            Resources, Colours.GetXna4Colour(CorePurpleRed, 0, CorePurpleBlue, (byte)ScreenFade));
 
     private void DrawCoreElements()
     {
         _elements.Draw(820, 446, ScreenFade);
         _foregroundImage.Begin(BlendState.AlphaBlend);
-        _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.WhiteFadedTo((byte)ScreenFade));
+        _foregroundImage.DrawSprite(0, 230, 120, Colours.WhiteFadedTo((byte)ScreenFade));
         _foregroundImage.End();
     }
 }

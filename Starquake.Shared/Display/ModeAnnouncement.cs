@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.Fonts;
-using Starquake.Structure;
+using Starquake.Rules;
 
 namespace Starquake.Display;
 

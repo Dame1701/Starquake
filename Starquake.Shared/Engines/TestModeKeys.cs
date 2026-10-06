@@ -5,11 +5,11 @@
 using Microsoft.Xna.Framework.Input;
 using Starquake.ActiveSprites;
 using Starquake.Constants;
+using Starquake.Core;
 using Starquake.Engines.ScreenEffects;
 using Starquake.GameComponents;
 using Starquake.Input;
 using Starquake.Scoring;
-using Starquake.Structure;
 using Starquake.World;
 
 namespace Starquake.Engines;

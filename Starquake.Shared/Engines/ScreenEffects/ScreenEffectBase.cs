@@ -3,7 +3,7 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework.Graphics;
-using Starquake.Structure;
+using Starquake.Core;
 
 namespace Starquake.Engines.ScreenEffects;
 

@@ -5,6 +5,7 @@
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Scoring;
 using Starquake.SharedLibs;
 using Starquake.Structure;

@@ -4,9 +4,9 @@
 // -
 using Microsoft.Xna.Framework;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Particles;
 using Starquake.Sprites;
-using Starquake.Structure;
 using Starquake.World;
 
 namespace Starquake.Animations;

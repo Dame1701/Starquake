@@ -4,7 +4,7 @@
 // -
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
-using Starquake.Structure;
+using Starquake.Core;
 
 namespace Starquake.Tuning;
 

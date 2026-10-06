@@ -6,9 +6,9 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Display;
 using Starquake.Particles;
-using Starquake.Structure;
 using Starquake.Tuning;
 using Starquake.World;
 

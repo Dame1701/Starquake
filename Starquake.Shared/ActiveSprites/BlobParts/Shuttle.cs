@@ -3,6 +3,7 @@
 // ---------------------------------------------------------
 // -
 using Starquake.Constants;
+using Starquake.Core;
 using Starquake.Structure;
 
 namespace Starquake.ActiveSprites.BlobParts;

@@ -3,7 +3,7 @@
 // ---------------------------------------------------------
 // -
 using Starquake.ContentManagement;
-using Starquake.Structure;
+using Starquake.Core;
 
 namespace Starquake.Engines.ScreenEffects;
 

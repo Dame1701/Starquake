@@ -2,11 +2,11 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 using Starquake.Constants;
-using Starquake.Helpers;
+using Starquake.Core;
 
 namespace Starquake.Sprites;
 
@@ -168,7 +168,7 @@ internal class SpriteCollection
             new Vector2(xPosition, yPosition),
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
                 SpriteHeight),
-            ColourHelper.WhiteFadedTo(fade),
+            Colours.WhiteFadedTo(fade),
             0f,
             new Vector2(0, 0),
             new Vector2(1, 1),
@@ -186,7 +186,7 @@ internal class SpriteCollection
             new Vector2(xPosition * hScaling, yPosition * vScaling),
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
                 SpriteHeight),
-            ColourHelper.WhiteFadedTo(_fade),
+            Colours.WhiteFadedTo(_fade),
             0f,
             new Vector2(0, 0),
             new Vector2(hScaling, vScaling),
@@ -268,7 +268,7 @@ internal class SpriteCollection
             new Vector2(xPosition * hScaling, yPosition * vScaling),
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
                 SpriteHeight),
-            ColourHelper.GetXna4Colour(spriteColour.R, spriteColour.G, spriteColour.B, spriteColour.A),
+            Colours.GetXna4Colour(spriteColour.R, spriteColour.G, spriteColour.B, spriteColour.A),
             0f,
             new Vector2(0, 0),
             new Vector2(hScaling, vScaling),
@@ -324,7 +324,7 @@ internal class SpriteCollection
                 (float)(yPosition + SpriteHeight / 2.0) * vScaling),
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
                 SpriteHeight),
-            ColourHelper.GetXna4Colour(spriteColour.R, spriteColour.G, spriteColour.B, spriteColour.A),
+            Colours.GetXna4Colour(spriteColour.R, spriteColour.G, spriteColour.B, spriteColour.A),
             rotation,
             new Vector2((float)SpriteWidth / 2, (float)SpriteHeight / 2),
             new Vector2(hScaling * scale, vScaling * scale),
@@ -345,7 +345,7 @@ internal class SpriteCollection
                 (float)(yPosition + SpriteHeight / 2.0) * vScaling),
             new Rectangle(_spriteTexturePosX[spriteNumber], _spriteTexturePosY[spriteNumber], SpriteWidth,
                 SpriteHeight),
-            ColourHelper.GetXna4Colour(spriteColour.R, spriteColour.G, spriteColour.B, spriteColour.A),
+            Colours.GetXna4Colour(spriteColour.R, spriteColour.G, spriteColour.B, spriteColour.A),
             rotation,
             new Vector2((float)SpriteWidth / 2, (float)SpriteHeight / 2),
             new Vector2(hScaling * scale, vScaling * scale),

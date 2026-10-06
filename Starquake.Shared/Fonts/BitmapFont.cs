@@ -2,9 +2,9 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Starquake.Helpers;
+using Microsoft.Xna.Framework;
+using Starquake.Core;
 
 namespace Starquake.Fonts;
 
@@ -90,7 +90,7 @@ internal class BitmapFont
 
     public void WriteText(int xPos, int yPos, string text, Color colour, byte screenFade)
     {
-        _fontSpriteBatch.DrawString(_font, text, new Vector2(xPos, yPos), ColourHelper.GetXna4Colour(colour.R, colour.G, colour.B, screenFade));
+        _fontSpriteBatch.DrawString(_font, text, new Vector2(xPos, yPos), Colours.GetXna4Colour(colour.R, colour.G, colour.B, screenFade));
     }
 
     public void WriteText(int xPos, int yPos, string text, int leading, Color colour, byte screenFade)
@@ -99,7 +99,7 @@ internal class BitmapFont
         {
             string letterToDraw = text.Substring(a, 1);
             Vector2 letterLength = MeasureString(letterToDraw);
-            _fontSpriteBatch.DrawString(_font, letterToDraw, new Vector2(xPos, yPos), ColourHelper.GetXna4Colour(colour.R, colour.G, colour.B, screenFade));
+            _fontSpriteBatch.DrawString(_font, letterToDraw, new Vector2(xPos, yPos), Colours.GetXna4Colour(colour.R, colour.G, colour.B, screenFade));
             xPos = xPos + (int)letterLength.X + leading;
         }
     }
@@ -110,7 +110,7 @@ internal class BitmapFont
         {
             string letterToDraw = text.Substring(a, 1);
             Vector2 letterLength = MeasureString(letterToDraw);
-            _fontSpriteBatch.DrawString(_font, letterToDraw, new Vector2(xPos, yPos), ColourHelper.GetXna4Colour(colour.R, colour.G, colour.B, screenFade), 0, new Vector2(0, 0), scale, SpriteEffects.None, 0);
+            _fontSpriteBatch.DrawString(_font, letterToDraw, new Vector2(xPos, yPos), Colours.GetXna4Colour(colour.R, colour.G, colour.B, screenFade), 0, new Vector2(0, 0), scale, SpriteEffects.None, 0);
             xPos = xPos + (int)letterLength.X + leading;
         }
     }
@@ -121,7 +121,7 @@ internal class BitmapFont
         {
             string letterToDraw = text.Substring(a, 1);
             Vector2 letterLength = MeasureString(letterToDraw);
-            _fontSpriteBatch.DrawString(_font, letterToDraw, new Vector2(xPos, yPos), ColourHelper.GetXna4Colour(colour.R, colour.G, colour.B, screenFade), 0, new Vector2(0, 0), scale, spriteEffect, 0);
+            _fontSpriteBatch.DrawString(_font, letterToDraw, new Vector2(xPos, yPos), Colours.GetXna4Colour(colour.R, colour.G, colour.B, screenFade), 0, new Vector2(0, 0), scale, spriteEffect, 0);
             xPos = xPos + (int)letterLength.X + leading;
         }
     }
@@ -163,7 +163,7 @@ internal class BitmapFont
             _font,
             text,
             new Vector2(xPos, yPos),
-            ColourHelper.GetXna4Colour(colour.R, colour.G, colour.B, screenFade),
+            Colours.GetXna4Colour(colour.R, colour.G, colour.B, screenFade),
             0,
             new Vector2(0, 0),
             scale,

@@ -9,11 +9,12 @@ using Starquake.Animations;
 using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Engines.ScreenEffects;
 using Starquake.GameComponents;
-using Starquake.Helpers;
 using Starquake.Input;
 using Starquake.Particles;
+using Starquake.Rules;
 using Starquake.Scoring;
 using Starquake.SharedLibs;
 using Starquake.Sounds;
@@ -1311,7 +1312,7 @@ internal class Blob
         blobSprites.Begin(BlendState.AlphaBlend, null, draining ? DrainShader(blobSprites) : null);
         blobSprites.DrawSprite(BlobFrame,
             _blobXPos, _blobYPos,
-            ColourHelper.WhiteFadedTo(
+            Colours.WhiteFadedTo(
                 (byte)(_teleportFadeLevel * ((double)screenFade / ColourLevels.Full))), 1f, 0f);
         blobSprites.End();
     }
@@ -1353,7 +1354,7 @@ internal class Blob
                 blobShuttleOriginal.Begin(BlendState.AlphaBlend);
                 blobShuttleOriginal.DrawSprite(
                     _shuttle.Frame, _blobXPos, _blobYPos + SpriteMetrics.SpriteHeight,
-                    ColourHelper.WhiteFadedTo((byte)screenFade));
+                    Colours.WhiteFadedTo((byte)screenFade));
                 blobShuttleOriginal.End();
             }
             else
@@ -1361,7 +1362,7 @@ internal class Blob
                 SpriteCollection blobShuttle = _resources.GetSpriteCollection(Assets.Graphics.BlobShuttle);
                 blobShuttle.Begin(BlendState.AlphaBlend);
                 blobShuttle.DrawSprite(0, _blobXPos,
-                    _blobYPos + SpriteMetrics.SpriteHeight, ColourHelper.WhiteFadedTo((byte)screenFade));
+                    _blobYPos + SpriteMetrics.SpriteHeight, Colours.WhiteFadedTo((byte)screenFade));
                 blobShuttle.End();
             }
         }
@@ -1400,7 +1401,7 @@ internal class Blob
                 OverloadShader(blobSprites, "Charging"));
             blobSprites.DrawSprite(
                 BlobFrame, _blobXPos, _blobYPos,
-                ColourHelper.WhiteFadedTo(
+                Colours.WhiteFadedTo(
                     (byte)(_teleportFadeLevel * ((double)screenFade / ColourLevels.Full))), 1f, 0f);
             blobSprites.End();
         }
@@ -1410,7 +1411,7 @@ internal class Blob
             SpriteCollection blobShuttle = _resources.GetSpriteCollection(Assets.Graphics.BlobShuttle);
             blobShuttle.Begin(BlendState.AlphaBlend);
             blobShuttle.DrawSprite(0, _blobXPos,
-                _blobYPos + SpriteMetrics.SpriteHeight, ColourHelper.WhiteFadedTo((byte)screenFade));
+                _blobYPos + SpriteMetrics.SpriteHeight, Colours.WhiteFadedTo((byte)screenFade));
             blobShuttle.End();
         }
     }
@@ -1437,7 +1438,7 @@ internal class Blob
             BlobFrame,
             _blobXPos + (int)shake.X,
             _blobYPos + (int)shake.Y,
-            ColourHelper.WhiteFadedTo((byte)screenFade), _overload.Scale, 0f);
+            Colours.WhiteFadedTo((byte)screenFade), _overload.Scale, 0f);
         blobSprites.End();
 
         DrawOverloadBeams(screenFade, shake);
@@ -1477,7 +1478,7 @@ internal class Blob
                 _overloadArcFrame,
                 centreX + offset.X - arc.SpriteWidth / 2f,
                 centreY + offset.Y - arc.SpriteHeight / 2f,
-                ColourHelper.WhiteFadedTo((byte)screenFade),
+                Colours.WhiteFadedTo((byte)screenFade),
                 OverloadSettings.BeamScale,
                 angle);
         }

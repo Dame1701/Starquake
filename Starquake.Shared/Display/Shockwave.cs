@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
-using Starquake.Helpers;
+using Starquake.Core;
 using Starquake.Sprites;
 using Starquake.Tuning;
 
@@ -139,7 +139,7 @@ internal sealed class Shockwave
             0,
             _centre.X - quad.SpriteWidth / 2,
             _centre.Y - quad.SpriteHeight / 2,
-            ColourHelper.WhiteFadedTo(screenFade),
+            Colours.WhiteFadedTo(screenFade),
             _diameter / (float)quad.SpriteWidth,
             0f);
         quad.End();

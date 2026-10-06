@@ -7,9 +7,9 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
+using Starquake.Core;
 using Starquake.Input;
 using Starquake.Sprites;
-using Starquake.Structure;
 
 namespace Starquake.GameComponents.PresentationScreens;
 

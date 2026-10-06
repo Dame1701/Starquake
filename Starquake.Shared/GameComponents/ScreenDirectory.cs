@@ -2,9 +2,9 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+using Starquake.Core;
 using Starquake.GameComponents.GameScreens;
 using Starquake.GameComponents.PresentationScreens;
-using Starquake.Structure;
 
 namespace Starquake.GameComponents;
 

@@ -7,11 +7,10 @@ using Microsoft.Xna.Framework;
 using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.ContentManagement;
-using Starquake.Helpers;
+using Starquake.Core;
 using Starquake.Input;
 using Starquake.Particles;
 using Starquake.SharedLibs;
-using Starquake.Structure;
 using Starquake.World;
 
 namespace Starquake.ActiveSprites;
@@ -297,10 +296,10 @@ internal class Nasties
                         {
                             _nasties[a].Smoking = true;
                             _nastySmokes.Start(
-                                SpriteHelpers.GetSpriteLocationOffset(_nasties[a].Direction,
+                                SpriteOffsets.GetSpriteLocationOffset(_nasties[a].Direction,
                                     _nasties[a].NastyWidth, _nasties[a].NastyHeight).X +
                                 _nasties[a].XPos,
-                                SpriteHelpers.GetSpriteLocationOffset(_nasties[a].Direction,
+                                SpriteOffsets.GetSpriteLocationOffset(_nasties[a].Direction,
                                     _nasties[a].NastyWidth, _nasties[a].NastyHeight).Y +
                                 _nasties[a].YPos);
                         }

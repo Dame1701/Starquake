@@ -4,8 +4,8 @@
 // -
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Starquake.Core;
 using Starquake.Sprites;
-using Starquake.Structure;
 
 namespace Starquake.ContentManagement;
 

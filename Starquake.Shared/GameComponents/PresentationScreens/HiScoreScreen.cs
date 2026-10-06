@@ -2,18 +2,17 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
-using Starquake.Helpers;
 using Starquake.Input;
 using Starquake.Scoring;
 using Starquake.Sprites;
-using Starquake.Structure;
 
 namespace Starquake.GameComponents.PresentationScreens;
 
@@ -71,7 +70,7 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
             if (Input.GetPressedKey() != Keys.None)
             {
                 string keyPressedString = Input.GetPressedKey().ToString().ToUpper();
-                int keyPressed = TextHelper.GetAsciiCode(keyPressedString);
+                int keyPressed = AsciiCodes.GetAsciiCode(keyPressedString);
 
                 if (_playersHighScore.Name.Length < 6)
                 {
@@ -115,25 +114,25 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
         ScreenEffects.SelectRenderViewPort(ViewPorts.EntireScreen);
         _backgroundImage.Begin(BlendState.AlphaBlend);
 
-        _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.WhiteFadedTo((byte)ScreenFade));
+        _backgroundImage.DrawSprite(0, 0, 0, Colours.WhiteFadedTo((byte)ScreenFade));
 
         _backgroundImage.End();
 
         if (_gotHighScore)
         {
             Font.Begin(BlendState.AlphaBlend);
-            Font.WriteTextCentred(1280, 180, "ENCODE YOUR NAME", 2, ColourHelper.GetXna4Colour(9, 132, ColourLevels.Full), (byte)ScreenFade);
-            Font.WriteTextCentred(1280, 240, "INTO THE CORE", 2, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full), (byte)ScreenFade);
-            Font.WriteTextCentred(1280, 300, "FOR YOU HAVE ACHIEVED", 2, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full), (byte)ScreenFade);
-            Font.WriteTextCentred(1280, 360, "A HERO'S SCORE", 2, ColourHelper.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full), (byte)ScreenFade);
+            Font.WriteTextCentred(1280, 180, "ENCODE YOUR NAME", 2, Colours.GetXna4Colour(9, 132, ColourLevels.Full), (byte)ScreenFade);
+            Font.WriteTextCentred(1280, 240, "INTO THE CORE", 2, Colours.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full), (byte)ScreenFade);
+            Font.WriteTextCentred(1280, 300, "FOR YOU HAVE ACHIEVED", 2, Colours.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full), (byte)ScreenFade);
+            Font.WriteTextCentred(1280, 360, "A HERO'S SCORE", 2, Colours.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full), (byte)ScreenFade);
 
-            Font.WriteTextCentred(1280, 420, _playersHighScore.Name, 2, ColourHelper.GetXna4Colour(9, 132, ColourLevels.Full), (byte)ScreenFade);
+            Font.WriteTextCentred(1280, 420, _playersHighScore.Name, 2, Colours.GetXna4Colour(9, 132, ColourLevels.Full), (byte)ScreenFade);
             Font.End();
         }
         else
         {
             Font.Begin(BlendState.AlphaBlend);
-            Font.WriteTextCentred(1280, 180, "CORE OF HEROES", 2, ColourHelper.GetXna4Colour(9, 132, ColourLevels.Full), (byte)ScreenFade);
+            Font.WriteTextCentred(1280, 180, "CORE OF HEROES", 2, Colours.GetXna4Colour(9, 132, ColourLevels.Full), (byte)ScreenFade);
             Font.End();
 
             _hiScoreList.Draw(Resources, Font, 380, 250, ScreenFade);
@@ -141,7 +140,7 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
 
         _foregroundImage.Begin(BlendState.AlphaBlend);
 
-        _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.WhiteFadedTo((byte)ScreenFade));
+        _foregroundImage.DrawSprite(0, 230, 120, Colours.WhiteFadedTo((byte)ScreenFade));
 
         _foregroundImage.End();
     }

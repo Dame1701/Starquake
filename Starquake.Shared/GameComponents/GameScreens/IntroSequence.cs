@@ -7,12 +7,13 @@ using Microsoft.Xna.Framework;
 using Starquake.Animations;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
 using Starquake.Particles;
+using Starquake.Rules;
 using Starquake.Sounds;
 using Starquake.Sprites;
-using Starquake.Structure;
 using Starquake.Tuning;
 using Starquake.World;
 

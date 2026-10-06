@@ -4,7 +4,7 @@
 // -
 using Microsoft.Xna.Framework;
 using Starquake.Collisions;
-using Starquake.Structure;
+using Starquake.Core;
 using Xunit;
 
 namespace Starquake.Tests;

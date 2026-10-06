@@ -2,12 +2,12 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Fonts;
-using Starquake.Helpers;
 
 namespace Starquake.Scoring;
 
@@ -107,11 +107,11 @@ internal class HiScores
         {
             if (a % 2 == 0)
             {
-                ProportionalNumbers.Draw(currentXPos, currentYPos, a + 1 + ".", resources, ColourHelper.WhiteFadedTo(fade));
+                ProportionalNumbers.Draw(currentXPos, currentYPos, a + 1 + ".", resources, Colours.WhiteFadedTo(fade));
             }
             else
             {
-                ProportionalNumbers.Draw(currentXPos, currentYPos, a + 1 + ".", resources, ColourHelper.GetXna4Colour(150, 150, 150, fade));
+                ProportionalNumbers.Draw(currentXPos, currentYPos, a + 1 + ".", resources, Colours.GetXna4Colour(150, 150, 150, fade));
             }
 
             currentYPos += 50;
@@ -139,11 +139,11 @@ internal class HiScores
         {
             if (a % 2 == 0)
             {
-                ProportionalNumbers.Draw(currentXPos + 250, currentYPos, _scores[a].Score.ToString("000000") + " " + _scores[a].AdventureScoreString + "%", resources, ColourHelper.WhiteFadedTo(fade));
+                ProportionalNumbers.Draw(currentXPos + 250, currentYPos, _scores[a].Score.ToString("000000") + " " + _scores[a].AdventureScoreString + "%", resources, Colours.WhiteFadedTo(fade));
             }
             else
             {
-                ProportionalNumbers.Draw(currentXPos + 250, currentYPos, _scores[a].Score.ToString("000000") + " " + _scores[a].AdventureScoreString + "%", resources, ColourHelper.GetXna4Colour(150, 150, 150, fade));
+                ProportionalNumbers.Draw(currentXPos + 250, currentYPos, _scores[a].Score.ToString("000000") + " " + _scores[a].AdventureScoreString + "%", resources, Colours.GetXna4Colour(150, 150, 150, fade));
             }
             currentYPos += 50;
         }

@@ -2,12 +2,12 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Fonts;
-using Starquake.Helpers;
 using Starquake.Input;
 
 namespace Starquake.GameComponents.PresentationScreens;
@@ -112,7 +112,7 @@ internal class KeyDefiner(ResourceManager resources, BitmapFont font, ToggleKeys
 
     public void Draw(int screenFade)
     {
-        font.WriteText(480, 236, "Press a key for:", 2, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
+        font.WriteText(480, 236, "Press a key for:", 2, Colours.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
 
         int keyDefineYPos = 290;
         foreach (string keysToDefine in _keysToDefine)
@@ -126,7 +126,7 @@ internal class KeyDefiner(ResourceManager resources, BitmapFont font, ToggleKeys
         {
             if (definedKey != Keys.None)
             {
-                font.WriteText(660, keyDefineYPos, ToggleKeys.GetFriendlyName(definedKey), 2, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
+                font.WriteText(660, keyDefineYPos, ToggleKeys.GetFriendlyName(definedKey), 2, Colours.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
             }
 
             keyDefineYPos += 40;
@@ -134,7 +134,7 @@ internal class KeyDefiner(ResourceManager resources, BitmapFont font, ToggleKeys
 
         if (_allDone)
         {
-            font.WriteText(540, 590, "OK ?  (Y / N )", ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
+            font.WriteText(540, 590, "OK ?  (Y / N )", Colours.GetXna4Colour(130, 130, ColourLevels.Full), (byte)screenFade);
         }
     }
 }

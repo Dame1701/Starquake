@@ -5,6 +5,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Structure;
 using Starquake.World;
 

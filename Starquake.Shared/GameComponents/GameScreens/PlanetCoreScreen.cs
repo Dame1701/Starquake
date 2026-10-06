@@ -8,13 +8,13 @@ using Starquake.ActiveSprites;
 using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
-using Starquake.Helpers;
 using Starquake.Particles;
+using Starquake.Rules;
 using Starquake.SharedLibs;
 using Starquake.Sprites;
-using Starquake.Structure;
 using Starquake.Tuning;
 using Starquake.World;
 
@@ -315,7 +315,7 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
             {
                 for (int b = 0; b < BlankingTilesAcross; b++)
                 {
-                    _resources.GetSpriteCollection(Assets.Graphics.BlankingTile).DrawSprite(0, b * TileMetrics.TileWidth + BlankingTilesFirstColumn, a * TileMetrics.TileHeight, ColourHelper.WhiteFadedTo((byte)_blankingTilesOpacity));
+                    _resources.GetSpriteCollection(Assets.Graphics.BlankingTile).DrawSprite(0, b * TileMetrics.TileWidth + BlankingTilesFirstColumn, a * TileMetrics.TileHeight, Colours.WhiteFadedTo((byte)_blankingTilesOpacity));
                 }
             }
             _resources.GetSpriteCollection(Assets.Graphics.BlankingTile).End();

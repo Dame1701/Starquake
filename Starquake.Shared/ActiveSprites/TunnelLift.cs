@@ -4,6 +4,7 @@
 // -
 using Microsoft.Xna.Framework;
 using Starquake.Collisions;
+using Starquake.Core;
 using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;

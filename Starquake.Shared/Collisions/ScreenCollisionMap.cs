@@ -4,6 +4,7 @@
 // -
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
+using Starquake.Core;
 using Starquake.SharedLibs;
 using Starquake.Structure;
 

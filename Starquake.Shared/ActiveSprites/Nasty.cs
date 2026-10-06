@@ -8,11 +8,11 @@ using Microsoft.Xna.Framework;
 using Starquake.ActiveSprites.NastyBehaviour;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Display;
-using Starquake.Helpers;
 using Starquake.Particles;
+using Starquake.Rules;
 using Starquake.Sprites;
-using Starquake.Structure;
 using Starquake.Tuning;
 using Starquake.World;
 
@@ -722,7 +722,7 @@ internal class Nasty
         }
         else
         {
-            NastyHelpers.ApplyNastyColours(_nastyType, _nastyDiesType2.Effect);
+            NastyColours.ApplyNastyColours(_nastyType, _nastyDiesType2.Effect);
             _nastyDiesType2.Start();
         }
 
@@ -883,7 +883,7 @@ internal class Nasty
         _nastySprite.Begin(BlendState.Additive);
 
         _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-            ColourHelper.WhiteFadedTo((byte)screenFade), 1.0f, MathHelper.ToRadians(_rotation));
+            Colours.WhiteFadedTo((byte)screenFade), 1.0f, MathHelper.ToRadians(_rotation));
         _nastySprite.End();
     }
 
@@ -900,7 +900,7 @@ internal class Nasty
             SplatSettings.DecayFrom(_deathFadeLevel, ColourLevels.Full));
         splat.Parameters["EdgeSoftness"].SetValue(SplatSettings.EdgeSoftness);
         splat.Parameters["RimWidth"].SetValue(SplatSettings.RimWidth);
-        splat.Parameters["RimColour"].SetValue(NastyHelpers.SplatColourFor(_nastyType));
+        splat.Parameters["RimColour"].SetValue(NastyColours.SplatColourFor(_nastyType));
         splat.Parameters["RimBrightness"].SetValue(SplatSettings.RimBrightness);
         splat.Parameters["Lumpiness"].SetValue(SplatSettings.Lumpiness);
 
@@ -952,7 +952,7 @@ internal class Nasty
         _nastySprite.Begin(BlendState.AlphaBlend, null, materialise);
 
         _nastySprite.DrawSprite(frame, XPos, YPos,
-            ColourHelper.GetXna4Colour((byte)_birthColourLevel, (byte)_birthColourLevel, ColourLevels.Full,
+            Colours.GetXna4Colour((byte)_birthColourLevel, (byte)_birthColourLevel, ColourLevels.Full,
                 (byte)(ColourLevels.Full * ((double)screenFade / ColourLevels.Full))), _birthScale,
             MathHelper.ToRadians(_rotation));
         _nastySprite.End();
@@ -968,17 +968,17 @@ internal class Nasty
         {
             _nastySprite.Begin(BlendState.Additive);
             _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                ColourHelper.GetXna4Colour(ShotNastyGrey, ShotNastyGrey, ShotNastyGrey, (byte)screenFade));
+                Colours.GetXna4Colour(ShotNastyGrey, ShotNastyGrey, ShotNastyGrey, (byte)screenFade));
             _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                ColourHelper.GetXna4Colour(ColourLevels.Full, 0, 0, (byte)screenFade));
+                Colours.GetXna4Colour(ColourLevels.Full, 0, 0, (byte)screenFade));
             _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                ColourHelper.GetXna4Colour(0, ConveyorNastyGreen, 0, (byte)screenFade));
+                Colours.GetXna4Colour(0, ConveyorNastyGreen, 0, (byte)screenFade));
         }
         else
         {
             _nastySprite.Begin(BlendState.AlphaBlend);
             _nastySprite.DrawSprite(nastyImage + _nastyAnim.CurrentFrame, XPos, YPos,
-                ColourHelper.WhiteFadedTo((byte)screenFade));
+                Colours.WhiteFadedTo((byte)screenFade));
         }
 
         _nastySprite.End();
@@ -1011,7 +1011,7 @@ internal class Nasty
 
             _nastySprite.Begin(BlendState.AlphaBlend, null, splat);
             _nastySprite.DrawSprite(frame, XPos, YPos,
-                ColourHelper.WhiteFadedTo(fade), _deathScale,
+                Colours.WhiteFadedTo(fade), _deathScale,
                 MathHelper.ToRadians(_rotation));
             _nastySprite.End();
         }
@@ -1022,7 +1022,7 @@ internal class Nasty
             blobFire2Original.Begin(BlendState.AlphaBlend);
             blobFire2Original.DrawSprite(
                 _nastyDiesAnimation.CurrentFrame, XPos, YPos,
-                ColourHelper.WhiteFadedTo(screenFade), 1f, 0f);
+                Colours.WhiteFadedTo(screenFade), 1f, 0f);
             blobFire2Original.End();
         }
     }

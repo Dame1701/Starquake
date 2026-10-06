@@ -4,7 +4,7 @@
 // -
 using Starquake.ActiveSprites;
 using Starquake.Constants;
-using Starquake.Structure;
+using Starquake.Core;
 using Xunit;
 
 namespace Starquake.Tests;

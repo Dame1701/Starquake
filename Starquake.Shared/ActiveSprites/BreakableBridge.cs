@@ -6,9 +6,9 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Sprites;
-using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
 

@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Starquake.ActiveSprites;
 using Starquake.Collisions;
 using Starquake.Constants;
+using Starquake.Core;
 using Starquake.SharedLibs;
 using Starquake.Structure;
 using Xunit;

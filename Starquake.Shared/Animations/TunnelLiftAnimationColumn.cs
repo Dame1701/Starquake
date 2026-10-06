@@ -4,7 +4,7 @@
 // -
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
-using Starquake.Helpers;
+using Starquake.Core;
 using Starquake.Sprites;
 
 namespace Starquake.Animations;
@@ -58,11 +58,11 @@ internal class TunnelLiftAnimationColumn
         {
             if (section.Intensity > ColourLevels.Full)
             {
-                tunnelSprites.DrawSprite(13, section.X, section.Y, ColourHelper.WhiteFadedTo((byte)screenfade));
+                tunnelSprites.DrawSprite(13, section.X, section.Y, Colours.WhiteFadedTo((byte)screenfade));
             }
             else
             {
-                tunnelSprites.DrawSprite(13, section.X, section.Y, ColourHelper.WhiteFadedTo(section.Intensity * (byte)screenfade / ColourLevels.Full));
+                tunnelSprites.DrawSprite(13, section.X, section.Y, Colours.WhiteFadedTo(section.Intensity * (byte)screenfade / ColourLevels.Full));
             }
         }
     }

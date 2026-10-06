@@ -6,11 +6,11 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Display;
-using Starquake.Helpers;
 using Starquake.Particles;
+using Starquake.Rules;
 using Starquake.Sprites;
-using Starquake.Structure;
 using Starquake.Tuning;
 using Starquake.World;
 
@@ -213,7 +213,7 @@ internal class ConveyorNasty
         if (NastyState == NastyState.Normal)
         {
             _nastySprite.Begin(BlendState.AlphaBlend);
-            _nastySprite.DrawSprite(_anim.CurrentFrame, XLocation, YLocation + HangsBelowRailBy, ColourHelper.WhiteFadedTo((byte)screenFade));
+            _nastySprite.DrawSprite(_anim.CurrentFrame, XLocation, YLocation + HangsBelowRailBy, Colours.WhiteFadedTo((byte)screenFade));
             _nastySprite.End();
         }
         else if (NastyState == NastyState.Dead)
@@ -227,7 +227,7 @@ internal class ConveyorNasty
             if (_deathFadeLevel > 0)
             {
                 _nastySprite.Begin(BlendState.AlphaBlend);
-                _nastySprite.DrawSprite(_anim.CurrentFrame, XLocation, YLocation + HangsBelowRailBy, ColourHelper.WhiteFadedTo((byte)(_deathFadeLevel * ((double)screenFade / ColourLevels.Full))), _deathScale, 0f);
+                _nastySprite.DrawSprite(_anim.CurrentFrame, XLocation, YLocation + HangsBelowRailBy, Colours.WhiteFadedTo((byte)(_deathFadeLevel * ((double)screenFade / ColourLevels.Full))), _deathScale, 0f);
                 _nastySprite.End();
             }
         }

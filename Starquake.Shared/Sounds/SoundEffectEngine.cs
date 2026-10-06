@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Starquake.Constants;
-using Starquake.Structure;
+using Starquake.Core;
 
 namespace Starquake.Sounds;
 

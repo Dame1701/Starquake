@@ -3,7 +3,7 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
-using Starquake.Structure;
+using Starquake.Core;
 
 namespace Starquake.Collisions;
 

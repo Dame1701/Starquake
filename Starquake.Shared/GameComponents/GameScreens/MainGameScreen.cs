@@ -8,9 +8,10 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using Starquake.ActiveSprites;
 using Starquake.Constants;
+using Starquake.Core;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
-using Starquake.Helpers;
+using Starquake.Rules;
 using Starquake.Sounds;
 using Starquake.Sprites;
 using Starquake.Structure;
@@ -186,7 +187,7 @@ internal class MainGameScreen : IGameScreen
             _game.ElectricityNodeGates.Draw();
 
             _game.GameScreens.Renderer.Draw(
-                ColourHelper.WhiteFadedTo((byte)ScreenFade),
+                Colours.WhiteFadedTo((byte)ScreenFade),
                 _game.IntroSequence.SequenceRunning, _game.IntroSequence.SequenceStage);
 
 
@@ -611,7 +612,7 @@ internal class MainGameScreen : IGameScreen
     ///         </c>
     ///         it was an integer division of 150 by 255, which is 0 -
     ///         so the planet was drawn on every frame at an alpha of nothing, and had been since the
-    ///         first commit in the repository. <see cref="ColourHelper.GetXna4Colour(int,int,int,int)" /> had the right
+    ///         first commit in the repository. <see cref="Colours.GetXna4Colour(int,int,int,int)" /> had the right
     ///         of it all along.
     ///     </para>
     /// </remarks>
@@ -642,7 +643,7 @@ internal class MainGameScreen : IGameScreen
             0,
             xOffset,
             0,
-            ColourHelper.GetXna4Colour(
+            Colours.GetXna4Colour(
                 ColourLevels.Full,
                 ColourLevels.Full,
                 ColourLevels.Full,
@@ -668,7 +669,7 @@ internal class MainGameScreen : IGameScreen
     {
         _game.ElectricityNodeGates.DrawUpperLayer();
         _game.GameScreens.Renderer.DrawUpperLayer(
-            ColourHelper.WhiteFadedTo((byte)ScreenFade));
+            Colours.WhiteFadedTo((byte)ScreenFade));
     }
 
     private void DrawShipSmoke1()

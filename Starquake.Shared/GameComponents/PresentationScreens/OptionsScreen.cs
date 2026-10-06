@@ -2,17 +2,16 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
-using Starquake.Helpers;
 using Starquake.Input;
 using Starquake.Sprites;
-using Starquake.Structure;
 
 namespace Starquake.GameComponents.PresentationScreens;
 
@@ -78,8 +77,8 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
             new Option("2", "Cursor Keys, Left Alt", true, Color.White),
             new Option("3", "Keyboard . . O, P, A, Q, SP", false, Color.White),
             new Option("4", "UDK Keyboard . . " + _keyDefiner.GetKeys(), false, Color.White),
-            new Option("5", "Define your own keys", false, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full)),
-            new Option("0", "Start game", false, ColourHelper.GetXna4Colour(130, 130, ColourLevels.Full)),
+            new Option("5", "Define your own keys", false, Colours.GetXna4Colour(130, 130, ColourLevels.Full)),
+            new Option("0", "Start game", false, Colours.GetXna4Colour(130, 130, ColourLevels.Full)),
             new Option("Q", "Quit to title screen", false, Color.White)
         ];
     }
@@ -105,7 +104,7 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
         ScreenEffects.SelectRenderViewPort(ViewPorts.EntireScreen);
 
         _backgroundImage.Begin(BlendState.AlphaBlend);
-        _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.WhiteFadedTo((byte)ScreenFade));
+        _backgroundImage.DrawSprite(0, 0, 0, Colours.WhiteFadedTo((byte)ScreenFade));
         _backgroundImage.End();
 
         Font.Begin(BlendState.AlphaBlend);
@@ -118,8 +117,8 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
             {
                 if (opt.Unavailable)
                 {
-                    Font.WriteText(optionXPos, optionYPos, opt.ActivationKey + ".", 2, ColourHelper.GetXna4Colour(100, 0, 0), (byte)ScreenFade);
-                    Font.WriteText(optionXPos + 50, optionYPos, opt.OptionText + " (not connected)", 2, ColourHelper.GetXna4Colour(100, 0, 0), (byte)ScreenFade);
+                    Font.WriteText(optionXPos, optionYPos, opt.ActivationKey + ".", 2, Colours.GetXna4Colour(100, 0, 0), (byte)ScreenFade);
+                    Font.WriteText(optionXPos + 50, optionYPos, opt.OptionText + " (not connected)", 2, Colours.GetXna4Colour(100, 0, 0), (byte)ScreenFade);
                 }
                 else
                 {
@@ -148,7 +147,7 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
         Font.End();
 
         _foregroundImage.Begin(BlendState.AlphaBlend);
-        _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.WhiteFadedTo((byte)ScreenFade));
+        _foregroundImage.DrawSprite(0, 230, 120, Colours.WhiteFadedTo((byte)ScreenFade));
         _foregroundImage.End();
     }
 

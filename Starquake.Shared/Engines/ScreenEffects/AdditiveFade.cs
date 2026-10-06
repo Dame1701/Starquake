@@ -2,9 +2,9 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Starquake.Structure;
+using Microsoft.Xna.Framework;
+using Starquake.Core;
 
 namespace Starquake.Engines.ScreenEffects;
 

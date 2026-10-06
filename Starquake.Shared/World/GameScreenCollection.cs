@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Display;
 using Starquake.Fonts;
 using Starquake.Particles;

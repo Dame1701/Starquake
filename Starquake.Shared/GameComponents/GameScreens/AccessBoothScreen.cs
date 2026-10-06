@@ -8,10 +8,10 @@ using Starquake.ActiveSprites;
 using Starquake.Animations;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Display;
 using Starquake.Fonts;
 using Starquake.Sprites;
-using Starquake.Structure;
 using Starquake.World;
 
 namespace Starquake.GameComponents.GameScreens;

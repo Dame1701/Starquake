@@ -2,18 +2,17 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
 using Starquake.ActiveSprites;
 using Starquake.Constants;
 using Starquake.ContentManagement;
+using Starquake.Core;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
-using Starquake.Helpers;
 using Starquake.Input;
 using Starquake.Sprites;
-using Starquake.Structure;
 
 namespace Starquake.GameComponents.PresentationScreens;
 
@@ -67,11 +66,11 @@ internal class GameCompleteScreen : GameScreenBase, IGameScreen
         ScreenEffects.SelectRenderViewPort(ViewPorts.EntireScreen);
 
         _backgroundImage.Begin(BlendState.AlphaBlend);
-        _backgroundImage.DrawSprite(0, 0, 0, ColourHelper.WhiteFadedTo((byte)ScreenFade));
+        _backgroundImage.DrawSprite(0, 0, 0, Colours.WhiteFadedTo((byte)ScreenFade));
         _backgroundImage.End();
 
         Font.Begin(BlendState.AlphaBlend);
-        Font.WriteTextCentred(1280, 150, "THE CORES COMPLETE", 2, ColourHelper.GetXna4Colour(230, 0, 0), (byte)ScreenFade);
+        Font.WriteTextCentred(1280, 150, "THE CORES COMPLETE", 2, Colours.GetXna4Colour(230, 0, 0), (byte)ScreenFade);
         Font.WriteTextCentred(1280, 210, "BUT HOW ARE YOU GONNA", 2, Color.Gray, (byte)ScreenFade);
         Font.WriteTextCentred(1280, 270, "GET HOME WHEN ONLY A", 2, new Color((byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ColourLevels.Full, (byte)ScreenFade), (byte)ScreenFade);
         Font.WriteTextCentred(1280, 330, "THTUPID LOONY WOULD WANDER", 2, new Color((byte)150, (byte)150, (byte)150, (byte)ScreenFade), (byte)ScreenFade);
@@ -91,7 +90,7 @@ internal class GameCompleteScreen : GameScreenBase, IGameScreen
     {
         _elements.Draw(540, 450, ScreenFade);
         _foregroundImage.Begin(BlendState.AlphaBlend);
-        _foregroundImage.DrawSprite(0, 230, 120, ColourHelper.WhiteFadedTo((byte)ScreenFade));
+        _foregroundImage.DrawSprite(0, 230, 120, Colours.WhiteFadedTo((byte)ScreenFade));
         _foregroundImage.End();
     }
 }

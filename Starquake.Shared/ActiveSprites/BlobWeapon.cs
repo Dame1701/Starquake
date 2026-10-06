@@ -7,12 +7,11 @@ using Microsoft.Xna.Framework;
 using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.ContentManagement;
-using Starquake.Helpers;
+using Starquake.Core;
 using Starquake.Particles;
 using Starquake.Scoring;
 using Starquake.SharedLibs;
 using Starquake.Sprites;
-using Starquake.Structure;
 using Starquake.Tuning;
 using Starquake.World;
 
@@ -305,7 +304,7 @@ internal sealed class BlobWeapon
             _beamQuad,
             new Vector2(X + FireTrailOffset, Y + FireTrailOffset),
             null,
-            ColourHelper.WhiteFadedTo((byte)(_fade * ((double)screenFade / ColourLevels.Full))),
+            Colours.WhiteFadedTo((byte)(_fade * ((double)screenFade / ColourLevels.Full))),
             along,
             new Vector2(0.5f, 0.5f),
             new Vector2(length, thickness),
@@ -532,7 +531,7 @@ internal sealed class BlobWeapon
             frame,
             X,
             yPos,
-            ColourHelper.WhiteFadedTo((byte)(alpha * ((double)screenFade / ColourLevels.Full))),
+            Colours.WhiteFadedTo((byte)(alpha * ((double)screenFade / ColourLevels.Full))),
             1.0f,
             rotation);
         flame.End();

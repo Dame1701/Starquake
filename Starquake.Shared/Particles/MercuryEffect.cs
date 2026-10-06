@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using ProjectMercury.Renderers;
 using ProjectMercury;
-using Starquake.Structure;
+using Starquake.Core;
 
 namespace Starquake.Particles;
 

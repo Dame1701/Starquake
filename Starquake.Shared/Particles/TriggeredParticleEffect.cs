@@ -3,9 +3,9 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
-using ProjectMercury;
 using ProjectMercury.Renderers;
-using Starquake.Structure;
+using ProjectMercury;
+using Starquake.Core;
 
 namespace Starquake.Particles;
 
