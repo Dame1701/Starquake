@@ -987,19 +987,7 @@ internal class Blob
         _gameScreens.UpdateCollisionMap(false);
     }
 
-    /// <summary>
-    ///     Logic frames since the overload began, which is all the arcing on his skin needs to
-    ///     know. Counted on the update and never in the draw: <c>GameHost</c> draws once per
-    ///     vertical retrace, so a flicker counted in drawn frames crackles faster on a better
-    ///     monitor.
-    /// </summary>
-    private int _overloadFrame;
 
-    /// <summary>
-    ///     Which frame of the electricity artwork the beams are drawn from. Stepped every logic
-    ///     frame of the overload so the beams crawl as well as turn.
-    /// </summary>
-    private int _overloadArcFrame;
 
 
     /// <summary>
@@ -1016,7 +1004,7 @@ internal class Blob
         overload.Parameters["SpriteRect"].SetValue(spriteRect);
         overload.Parameters["Charge"].SetValue(
             OverloadSettings.ChargeFrom(_drain.Level));
-        overload.Parameters["Flicker"].SetValue(ElectricSettings.FlickerAt(_overloadFrame));
+        overload.Parameters["Flicker"].SetValue(ElectricSettings.FlickerAt(_overload.Frame));
 
         overload.Parameters["EmberColour"].SetValue(OverloadSettings.EmberColour);
         overload.Parameters["MidColour"].SetValue(OverloadSettings.MidColour);
@@ -1045,8 +1033,7 @@ internal class Blob
 
     private void UpdateOverloadingState()
     {
-        _overloadFrame++;
-        _overloadArcFrame = _overloadFrame % OverloadSettings.BeamArcFrames;
+        _overload.CountAFrame();
 
         if (_overload.AlarmJustStarted)
         {
@@ -1358,7 +1345,7 @@ internal class Blob
     {
         SpriteCollection blobSprites = _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites);
 
-        Vector2 shake = OverloadSettings.ShakeAt(_overloadFrame, _overload.Split);
+        Vector2 shake = OverloadSettings.ShakeAt(_overload.Frame, _overload.Split);
 
         blobSprites.Begin(BlendState.AlphaBlend, null, OverloadShader(blobSprites, "Splitting"));
         blobSprites.DrawSprite(
@@ -1391,18 +1378,18 @@ internal class Blob
 
         arc.Begin(BlendState.Additive, null, ElectricSettings.PointAt(
             _resources.GetEffect(Assets.Shaders.Electric),
-            arc.SpriteRectIn01(_overloadArcFrame),
+            arc.SpriteRectIn01(_overload.ArcFrame),
             arc.SpriteWidth,
             arc.SpriteHeight,
-            _overloadFrame));
+            _overload.Frame));
 
         for (int beam = 0; beam < OverloadSettings.BeamCount; beam++)
         {
             (Vector2 offset, float angle) = OverloadSettings.BeamAt(
-                _overloadFrame, beam, _overload.Split);
+                _overload.Frame, beam, _overload.Split);
 
             arc.DrawSprite(
-                _overloadArcFrame,
+                _overload.ArcFrame,
                 centreX + offset.X - arc.SpriteWidth / 2f,
                 centreY + offset.Y - arc.SpriteHeight / 2f,
                 Colours.WhiteFadedTo((byte)screenFade),

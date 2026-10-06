@@ -4,6 +4,7 @@
 // -
 
 using Starquake.Core;
+using Starquake.Tuning;
 namespace Starquake.ActiveSprites;
 
 /// <summary>
@@ -128,6 +129,30 @@ internal sealed class BlobOverload
 
     /// <summary>One more frame of the alarm.</summary>
     public void CountAnAlarmFrame() => _alarmFramesSounded++;
+
+    /// <summary>
+    ///     Logic frames the overload has run for, which is what the flicker on his skin and the
+    ///     shake of the picture are both read off. Counted on the update and never in the draw:
+    ///     <c>GameHost</c> draws once per vertical retrace, so anything counted in drawn frames
+    ///     crackles faster on a better monitor.
+    /// </summary>
+    /// <remarks>
+    ///     Deliberately not reset by <see cref="Begin" />. It carries across lives, so two deaths
+    ///     start at different points of <c>OverloadSettings.ShakeAt</c>'s sines and do not shake
+    ///     identically - and nothing reading it cares where it started, because the shake's size
+    ///     comes from <see cref="Split" /> and the flicker is a clock.
+    /// </remarks>
+    public int Frame { get; private set; }
+
+    /// <summary>
+    ///     Which frame of the electricity artwork the beams are drawn from, so they crawl as well
+    ///     as turn. Derived rather than held: it is <see cref="Frame" /> wrapped to the length of
+    ///     the run.
+    /// </summary>
+    public int ArcFrame => Frame % OverloadSettings.BeamArcFrames;
+
+    /// <inheritdoc cref="Frame" />
+    public void CountAFrame() => Frame++;
 
     /// <summary>
     ///     One frame of coming apart, and what stage that leaves him at. If he began already exploded

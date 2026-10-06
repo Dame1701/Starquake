@@ -5,6 +5,7 @@
 using Starquake.ActiveSprites;
 using Starquake.Constants;
 using Starquake.Core;
+using Starquake.Tuning;
 using Xunit;
 
 namespace Starquake.Tests;
@@ -368,6 +369,65 @@ public class BlobOverloadTests
             {
                 overload.CountAnAlarmFrame();
             }
+        }
+    }
+
+    /// <summary>
+    ///     The frame counter the flicker on his skin and the shake of the picture are both read off.
+    ///     It was two of Blob's fields, stepped at the top of his overload update.
+    /// </summary>
+    [Fact]
+    public void Frame_Stepped_CountsEveryOne()
+    {
+        // Arrange
+        var overload = new BlobOverload();
+
+        // Act
+        overload.CountAFrame();
+        overload.CountAFrame();
+        overload.CountAFrame();
+
+        // Assert
+        Assert.Equal(3, overload.Frame);
+    }
+
+    /// <summary>
+    ///     Deliberately carried across lives rather than reset by Begin, so two deaths start at
+    ///     different points of the shake's sines and do not look identical. Nothing reading it cares
+    ///     where it started: the shake's size comes from the split and the flicker is a clock.
+    /// </summary>
+    [Fact]
+    public void Frame_ABeginAfterAnEarlierOverload_CarriesOnRatherThanStartingOver()
+    {
+        // Arrange
+        var overload = new BlobOverload();
+        overload.CountAFrame();
+        overload.CountAFrame();
+
+        // Act
+        overload.Begin(true);
+
+        // Assert
+        Assert.Equal(2, overload.Frame);
+    }
+
+    /// <summary>
+    ///     The arc frame is the frame wrapped to the length of the electricity run, so the beams
+    ///     crawl as well as turn - and it is derived rather than held, so it cannot drift from the
+    ///     frame it comes off.
+    /// </summary>
+    [Fact]
+    public void ArcFrame_AcrossMoreThanOneRunOfTheArtwork_WrapsToTheRunRatherThanRunningOff()
+    {
+        // Arrange
+        var overload = new BlobOverload();
+
+        // Act and assert
+        for (int frame = 0; frame < OverloadSettings.BeamArcFrames * 3; frame++)
+        {
+            Assert.Equal(frame % OverloadSettings.BeamArcFrames, overload.ArcFrame);
+            Assert.InRange(overload.ArcFrame, 0, OverloadSettings.BeamArcFrames - 1);
+            overload.CountAFrame();
         }
     }
 }
