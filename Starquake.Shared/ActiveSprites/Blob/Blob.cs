@@ -52,12 +52,6 @@ internal class Blob
     private const int OverloadFlareAlpha = 150;
 
     /// <summary>
-    ///     How fast Blob fades back in after a teleport, in colour channel levels a frame. The
-    ///     drain's own step went with it to <see cref="EnergyDrain" />.
-    /// </summary>
-    private const int TeleportFadeStep = 8;
-
-    /// <summary>
     ///     How fast Blob walks, in pixels a logic frame, horizontally and vertically.
     /// </summary>
     private const int WalkSpeed = 8;
@@ -94,6 +88,7 @@ internal class Blob
     private readonly BreakableBridges _breakableBridges;
     private readonly BlobEntryPoint _entryPoint = new();
     private readonly EnergyDrain _drain = new();
+    private readonly TeleportFade _teleport = new();
     private readonly BlobFall _fall = new();
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsSet _graphicsSet;
@@ -126,7 +121,6 @@ internal class Blob
 
     private bool _jumpPressed;
     private bool _resetBlobToScreenEntryPoint;
-    private bool _startBlobTeleporting;
 
     /// <summary>
     ///     The last reading of what is around him. A field rather than a local because the shuttle pad
@@ -135,7 +129,6 @@ internal class Blob
     /// </summary>
     private BlobSurroundings _surroundings;
 
-    private int _teleportFadeLevel;
 
     public Blob(
         ResourceManager resources,
@@ -169,8 +162,6 @@ internal class Blob
             randomNumberGenerator,
             screenEffects);
         Control = new CustomControl(session.PlayerKeys, input);
-        _teleportFadeLevel = ColourLevels.Full;
-        _startBlobTeleporting = false;
         State = BlobState.Normal;
 
         _blobTeleporterBeam =
@@ -298,8 +289,7 @@ internal class Blob
     public void TriggerTeleportedAnimation()
     {
         _blobTeleporterBeam.Start();
-        _startBlobTeleporting = true;
-        _teleportFadeLevel = 0;
+        _teleport.Begin();
     }
 
     public void Update(GameTime gameTime)
@@ -383,7 +373,7 @@ internal class Blob
         _blobJumpPlatformEngine.Update();
 
         _drain.Step(TouchedByNasty);
-        FadeInAfterTeleport();
+        _teleport.Step();
 
         return changedScreens;
     }
@@ -1262,7 +1252,7 @@ internal class Blob
         blobSprites.DrawSprite(Frame,
             _xPos, _yPos,
             Colours.WhiteFadedTo(
-                (byte)(_teleportFadeLevel * ((double)screenFade / ColourLevels.Full))), 1f, 0f);
+                (byte)(_teleport.Level * ((double)screenFade / ColourLevels.Full))), 1f, 0f);
         blobSprites.End();
     }
 
@@ -1319,24 +1309,12 @@ internal class Blob
 
     private void DrawTeleportBeam()
     {
-        if (_startBlobTeleporting)
+        if (_teleport.BeamPlaying)
         {
             _blobTeleporterBeam.Draw();
         }
     }
 
-    private void FadeInAfterTeleport()
-    {
-        if (_teleportFadeLevel < ColourLevels.Full)
-        {
-            _teleportFadeLevel += TeleportFadeStep;
-        }
-
-        if (_teleportFadeLevel > ColourLevels.Full)
-        {
-            _teleportFadeLevel = ColourLevels.Full;
-        }
-    }
 
     private void DrawOverloadAlarmState(int screenFade)
     {
@@ -1351,7 +1329,7 @@ internal class Blob
             blobSprites.DrawSprite(
                 Frame, _xPos, _yPos,
                 Colours.WhiteFadedTo(
-                    (byte)(_teleportFadeLevel * ((double)screenFade / ColourLevels.Full))), 1f, 0f);
+                    (byte)(_teleport.Level * ((double)screenFade / ColourLevels.Full))), 1f, 0f);
             blobSprites.End();
         }
 
@@ -1503,6 +1481,6 @@ internal class Blob
 
     private void TeleporterBeam_ParticleEffectComplete()
     {
-        _startBlobTeleporting = false;
+        _teleport.BeamFinished();
     }
 }
