@@ -7,7 +7,7 @@ using Starquake.Collisions;
 using Starquake.Core;
 using Starquake.Structure;
 
-namespace Starquake.ActiveSprites.BlobParts;
+namespace Starquake.ActiveSprites;
 
 /// <summary>
 ///     The lift that carries Blob up a shaft. He gets on by walking under one, goes up until the

@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Starquake.ActiveSprites.TileEncounters;
+using Starquake.ActiveSprites;
 using Starquake.Constants;
 using Starquake.Core;
 using Xunit;

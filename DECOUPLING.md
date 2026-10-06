@@ -582,6 +582,29 @@ pointed at `ActionTiles.AccessForceField` from a file that had lost the using. B
 both were caught by the build, and neither would have been caught before
 `GenerateDocumentationFile` was turned on.
 
+### The one place a folder is not a namespace
+
+`ActiveSprites` is sectioned by subject - `Blob/` holds Blob and the twenty pieces that are his
+alone, `Nasties/` holds the nasties and theirs, and what is shared stays in the root. **Those two
+folders are deliberately not namespaces, and they cannot be.**
+
+C# resolves a name against the enclosing namespaces before it considers any `using`. So declaring
+`namespace Starquake.ActiveSprites.Blob` makes `Blob` a *namespace* member of
+`Starquake.ActiveSprites`, and every file in or beside that namespace which names the `Blob` type
+then fails with **CS0118: 'Blob' is a namespace but is used like a type**. Measured rather than
+assumed: fourteen errors across `Nasty`, `Nasties`, `ConveyorNasties` and
+`ElectricityGatesAndNodesEngine`. `Nasties/` would do the same for the `Nasties` type.
+
+`BlobParts/` and `NastyBehaviour/`, which these replaced, worked only because nothing is named
+`BlobParts` or `NastyBehaviour`. That is also why `GameComponents/GameScreens` and
+`Engines/ScreenEffects` are namespaces without trouble - no type collides with either.
+
+So everything under `ActiveSprites` is one namespace and the two folders are navigation. The cost
+is the only exception to an otherwise exact rule: **28 of 200 files have a folder that does not
+match their namespace, all of them in those two directories, all of them on purpose.** The
+alternatives were worse - renaming the folders away from the subjects they name, or qualifying
+`ActiveSprites.Blob.Blob` at every site for ever.
+
 What is still open is naming of a different kind, and smaller: the `Engine` suffix on eight
 unrelated types carries no information, and members stutter their own class name (`Blob.BlobXPos`,
 `Blob.BlobsState`).

@@ -6,7 +6,7 @@ using Starquake.Constants;
 using Starquake.Core;
 using Starquake.Structure;
 
-namespace Starquake.ActiveSprites.BlobParts;
+namespace Starquake.ActiveSprites;
 
 /// <summary>
 ///     The shuttle Blob rides, and the pad he takes it from. Press up while standing squarely on

@@ -7,7 +7,7 @@ using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.Core;
 
-namespace Starquake.ActiveSprites.BlobParts;
+namespace Starquake.ActiveSprites;
 
 /// <summary>
 ///     How Blob falls: how fast, how far he has come, and how far he is allowed to drop this frame.

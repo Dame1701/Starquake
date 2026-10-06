@@ -8,7 +8,7 @@ using Starquake.Constants;
 using Starquake.Core;
 using Starquake.SharedLibs;
 
-namespace Starquake.ActiveSprites.BlobParts;
+namespace Starquake.ActiveSprites;
 
 /// <summary>
 ///     The four things Blob can carry, and the one move he can make with them: press down on a

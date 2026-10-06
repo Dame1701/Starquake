@@ -4,7 +4,7 @@
 // -
 
 using Starquake.Core;
-namespace Starquake.ActiveSprites.BlobParts;
+namespace Starquake.ActiveSprites;
 
 /// <summary>
 ///     One shot in flight, and the rules that move it.

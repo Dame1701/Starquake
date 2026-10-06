@@ -4,7 +4,7 @@
 // -
 
 using Starquake.Core;
-namespace Starquake.ActiveSprites.BlobParts;
+namespace Starquake.ActiveSprites;
 
 /// <summary>
 ///     How Blob comes apart. Running out of energy sounds an alarm for a second first; everything else

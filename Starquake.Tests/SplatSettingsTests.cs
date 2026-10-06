@@ -3,7 +3,7 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
-using Starquake.ActiveSprites.NastyBehaviour;
+using Starquake.ActiveSprites;
 using Starquake.Constants;
 using Starquake.Core;
 using Starquake.Tuning;

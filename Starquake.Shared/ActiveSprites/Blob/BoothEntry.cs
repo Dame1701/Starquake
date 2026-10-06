@@ -6,7 +6,7 @@ using Starquake.Constants;
 using Starquake.Core;
 using Starquake.Structure;
 
-namespace Starquake.ActiveSprites.TileEncounters;
+namespace Starquake.ActiveSprites;
 
 /// <summary>
 ///     Whether Blob has walked far enough into a booth's doorway for the booth to take over - a

@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 using Starquake.Collisions;
 using Starquake.Core;
 
-namespace Starquake.ActiveSprites.BlobParts;
+namespace Starquake.ActiveSprites;
 
 /// <summary>
 ///     Works out where Blob has to be moved to get free when he is buried in scenery. That happens

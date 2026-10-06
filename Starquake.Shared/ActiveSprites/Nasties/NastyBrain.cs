@@ -6,7 +6,7 @@ using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.Core;
 
-namespace Starquake.ActiveSprites.NastyBehaviour;
+namespace Starquake.ActiveSprites;
 
 /// <summary>
 ///     How a nasty decides where to go, and the going. Fourteen behaviours - bouncing, scuttling,

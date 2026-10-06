@@ -15,7 +15,7 @@ using Starquake.Sprites;
 using Starquake.Tuning;
 using Starquake.World;
 
-namespace Starquake.ActiveSprites.BlobParts;
+namespace Starquake.ActiveSprites;
 
 /// <summary>
 ///     Blob's lazer: what decides a shot is fired, which way it leaves, and everything that is

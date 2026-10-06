@@ -4,7 +4,7 @@
 // -
 
 using Starquake.Core;
-namespace Starquake.ActiveSprites.NastyBehaviour;
+namespace Starquake.ActiveSprites;
 
 /// <summary>
 ///     A nasty's frame of mind, as one value.

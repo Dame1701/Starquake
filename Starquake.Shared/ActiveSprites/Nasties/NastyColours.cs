@@ -7,7 +7,7 @@ using ProjectMercury;
 using Starquake.Constants;
 using Starquake.Core;
 
-namespace Starquake.ActiveSprites.NastyBehaviour;
+namespace Starquake.ActiveSprites;
 
 internal static class NastyColours
 {

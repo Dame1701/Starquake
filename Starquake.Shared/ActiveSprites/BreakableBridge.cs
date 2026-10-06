@@ -14,7 +14,6 @@ namespace Starquake.ActiveSprites;
 
 internal class BreakableBridge
 {
-
     private readonly SpriteCollection _breakableBridge;
     private readonly SpriteCollection _breakableBridgeOriginal;
     private readonly GraphicsDeviceManager _graphicsDeviceManager;

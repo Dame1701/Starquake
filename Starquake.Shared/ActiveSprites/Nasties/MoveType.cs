@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-namespace Starquake.ActiveSprites.NastyBehaviour;
+namespace Starquake.ActiveSprites;
 
 /// <summary>
 ///     The six ways a nasty can move. A wandering nasty draws from all but the last, a chasing one
