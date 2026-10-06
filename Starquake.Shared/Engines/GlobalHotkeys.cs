@@ -115,7 +115,10 @@ internal class GlobalHotkeys(
             return;
         }
 
-        if (screenDirectory.InPlay && screenDirectory.Current != GameScreenType.Teleporter)
+        bool pausedForTheSwitch =
+            screenDirectory.InPlay && screenDirectory.Current != GameScreenType.Teleporter;
+
+        if (pausedForTheSwitch)
         {
             // Paused after switching to or from fullscreen, so the player does not die while the
             // window is still resizing.
@@ -126,7 +129,45 @@ internal class GlobalHotkeys(
         {
             ToggleFullScreen();
         }
-        catch { }
+        catch
+        {
+            PutTheWindowBack(pausedForTheSwitch);
+
+            throw;
+        }
+    }
+
+    /// <summary>
+    ///     Leaves the window in a state the player can still use after a failed display switch. The
+    ///     caller rethrows: this tidies up, it does not handle anything.
+    /// </summary>
+    /// <remarks>
+    ///     What was here was a bare <c>catch { }</c>, and it was wrong twice over. It swallowed
+    ///     everything, including a bug in the method it wrapped - and it swallowed it into the one
+    ///     state <see cref="ToggleFullScreen" />'s own remarks warn about. Going fullscreen drops the
+    ///     window's border before the switch, because SDL ignores a border change on a window that
+    ///     is already fullscreen; so a throw anywhere after that line left the window borderless and
+    ///     still windowed, which is a game with no title bar and no way to close it with the mouse.
+    ///     Silently. With the game paused, because the pause is set before the attempt.
+    ///     <para>
+    ///         So the border is put back to match where the device actually ended up, the pause is
+    ///         lifted if this is what set it, and the player is told. Then it rethrows, because none
+    ///         of that makes the failure handled: there is no documented exception set for a device
+    ///         reset, nothing here can judge whether the graphics device is still fit to draw with,
+    ///         and a game that cannot switch its own display has something wrong with it that is
+    ///         worth seeing rather than worth hiding behind an F12 that quietly does nothing.
+    ///     </para>
+    /// </remarks>
+    private void PutTheWindowBack(bool pausedForTheSwitch)
+    {
+        window.IsBorderless = graphics.IsFullScreen;
+
+        if (pausedForTheSwitch)
+        {
+            session.Paused = false;
+        }
+
+        announce.Show("DISPLAY SWITCH FAILED");
     }
 
     private void ToggleBackgroundsIfAsked()
