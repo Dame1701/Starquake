@@ -507,6 +507,11 @@ would still drag the drawing along. The namespace is honest about the code now, 
 before; making the code headless means splitting `GameScreenCollection` itself into the map and the
 thing that draws it, and that is a different piece of work from this one.
 
+The metric script both this document and `GODCLASSES.md` quote - including the note above about its
+identifier list having been wrong - is `tools/class-metrics.py` now. It was never in the repository,
+so neither its numbers nor its bug could be checked by anyone reading about them. `GODCLASSES.md`'s
+*Where this stands now* is the re-measurement.
+
 Still open, and named here so it is not rediscovered: **`Structure` (42 files) and `Helpers` (4) have
 names that no longer describe what is in them.** `Structure` is the leaf layer - shared enums,
 delegates, records and small values with no dependencies - which is a real role its name does not

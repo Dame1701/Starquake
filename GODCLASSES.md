@@ -68,12 +68,70 @@ written about. 299 tests.
 | `Nasty` | 863 | 579 | 11 | 13 | Mid-tier, and booby-trapped |
 | `MainGameScreen` | 676 | 424 | 1 | 6 | Coupling, not size |
 
+**Those six numbers are the baseline and are left as they were measured.** Everything below in this
+document was written against them, and rewriting them would make the argument unreadable. What they
+are not is current - see *Where this stands now*.
+
 "Code" is total lines less blanks and comments, because several of these files are a fifth `///` and
 the raw count flatters them. "Held objects" is `readonly` backing fields — collaborators and
 animations — and "mutable fields" is everything else, constants excluded. `NastyBrain.cs` is 941
 lines and 576 of code over six mutable fields, which is why it is on the leave-alone list rather
 than in this table. `Blob` and `Nasty` each gained a mutable field and lost a held one to the three
 commits above - an angle that now belongs to them, and a `GameSession` that never did.
+
+## Where this stands now
+
+Re-measured with `tools/class-metrics.py`, which is the script the numbers above and in
+`DECOUPLING.md` were always quoted from and which was never in the repository until now. Its
+definitions are calibrated against figures those documents already state: `NastyBrain` at 941 lines,
+576 of code and 6 mutable fields comes back as 943 / 575 / 6, and `ScreenCanvas`'s 1 held field comes
+back as 1.
+
+| Class | Lines | Code | Held | Mutable | Then |
+| --- | --- | --- | --- | --- | --- |
+| `Blob` | 1,660 | 1,113 | 21 | **20** | 2,062 / 1,492 / 21 / 36 |
+| `GameEngine` | 970 | 572 | 10 | 15 | 995 / 623 / 6 / 24 |
+| `Nasty` | 1,030 | 569 | 14 | 13 | 863 / 579 / 11 / 13 |
+| `EditorSession` | 778 | 447 | 0 | 8 | 934 / 597 / 1 / 19 |
+| `ScreenCanvas` | 398 | 262 | 1 | 6 | 912 / 624 / 1 / 7 |
+| `MainGameScreen` | 690 | 407 | 3 | **3** | 676 / 424 / 1 / 6 |
+
+686 tests, 0 warnings, 0 errors, 0 namespace cycles.
+
+Three things in that table are worth saying out loud.
+
+**The document's central claim still holds, narrowly.** `Blob` is still the largest file and still
+owns the most state, at 1,113 code lines over 20 mutable fields against `GameEngine`'s 572 over 15.
+But *What has landed already* claims 1,081 code lines and 16 mutable fields after stage 5, and both
+have gone back up since - so the stages below bought less than the write-up says, or later work
+spent some of it. The claim of 16 is the one to distrust; 20 is what is there.
+
+**`Nasty` grew 167 lines and lost 10 of code.** It gained comments, not behaviour, which is what
+that column exists to show.
+
+**`MainGameScreen` went the other way on length and halved on state.** 676 lines to 690 - the
+`GameplayContext` and `RunningGame` fields that replaced its `GameEngine` - and 6 mutable fields to
+3. *Coupling, not size* was the right verdict and the coupling is what went: it reached eighteen
+members of the engine across 117 call sites, and it holds neither the engine nor a base class now.
+
+### What the metric cannot see
+
+`GameScreenCollection` was four jobs in one file - the map, a collision facade, a renderer facade,
+and the key-locked doors with the only mutable door state in the codebase - and it **never appeared
+in this table**, because it held two mutable fields the whole time. It is 282 code lines over **one**
+mutable field now, and was never far off that.
+
+So the thesis of this document is right and it is not the whole test. Owning too much state is one
+way for a class to be hard to change, and counting fields finds it. Being the answer to four
+unrelated questions is another, and no count of fields will ever see it. The question that found
+`GameScreenCollection` was "what is this class's name promising, and does it do only that" - and the
+thing that made it visible was the namespace graph, because three of the six forwarders it carried
+were what put `Display` and `ActiveSprites` on both sides of a cycle.
+
+The script is also blind the other way: eleven mutable fields is the entire point of
+`ColourFaderAnimation`, which is the state of one pulsing tile, and seven is the point of
+`PlayerKeySet`. Read the mutable count against the code count, which is why the table above only
+lists large classes.
 
 ## The order, in one table
 
