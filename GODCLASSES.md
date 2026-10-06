@@ -89,22 +89,27 @@ back as 1.
 
 | Class | Lines | Code | Held | Mutable | Then |
 | --- | --- | --- | --- | --- | --- |
-| `Blob` | 1,660 | 1,113 | 21 | **20** | 2,062 / 1,492 / 21 / 36 |
-| `GameEngine` | 970 | 572 | 10 | 15 | 995 / 623 / 6 / 24 |
-| `Nasty` | 1,030 | 569 | 14 | 13 | 863 / 579 / 11 / 13 |
+| `GameEngine` | 969 | 571 | 10 | **15** | 995 / 623 / 6 / 24 |
+| `Blob` | 1,474 | 1,010 | 23 | 13 | 2,062 / 1,492 / 21 / 36 |
+| `Nasty` | 1,028 | 567 | 14 | 13 | 863 / 579 / 11 / 13 |
 | `EditorSession` | 778 | 447 | 0 | 8 | 934 / 597 / 1 / 19 |
 | `ScreenCanvas` | 398 | 262 | 1 | 6 | 912 / 624 / 1 / 7 |
 | `MainGameScreen` | 690 | 407 | 3 | **3** | 676 / 424 / 1 / 6 |
 
-686 tests, 0 warnings, 0 errors, 0 namespace cycles.
+804 tests, 0 warnings, 0 errors, 0 namespace cycles.
 
-Three things in that table are worth saying out loud.
+Four things in that table are worth saying out loud.
 
-**The document's central claim still holds, narrowly.** `Blob` is still the largest file and still
-owns the most state, at 1,113 code lines over 20 mutable fields against `GameEngine`'s 572 over 15.
-But *What has landed already* claims 1,081 code lines and 16 mutable fields after stage 5, and both
-have gone back up since - so the stages below bought less than the write-up says, or later work
-spent some of it. The claim of 16 is the one to distrust; 20 is what is there.
+**This document's subject is no longer the class it was written about.** `Blob` owns 13 mutable
+fields against `GameEngine`'s 15. It is still the largest file by a long way and it still holds the
+most collaborators, but on the one measurement this document chose to argue by, it is second. The
+closing claim of *Where this ends* - that `Blob` is the real one - has been true for the whole of
+this plan and is not true now.
+
+**An earlier claim here was wrong and is worth leaving visible.** *What has landed already* says
+`Blob` reached 1,081 code lines over 16 mutable fields after stage 5. It was at 1,113 over 20 when
+that was first checked, so either the stages bought less than the write-up says or later work spent
+some of it back. 13 is what is there now, by a different route than the one that claimed 16.
 
 **`Nasty` grew 167 lines and lost 10 of code.** It gained comments, not behaviour, which is what
 that column exists to show.
