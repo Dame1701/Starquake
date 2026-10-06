@@ -112,7 +112,12 @@ internal class Blob
     private readonly UnstickProbe _unstickProbe;
 
 
-    private int _blobEnergyDrainCounter;
+    /// <summary>
+    ///     The green and blue Blob has left, which is what the drain is drawn from. Full means
+    ///     unhurt and nought means a nasty has all of it - see
+    ///     <see cref="EnergyDrainSettings.DrainFrom" /> - so it starts full.
+    /// </summary>
+    private int _blobEnergyDrainCounter = ColourLevels.Full;
 
     private Guid _blobFallsSoundId;
 
@@ -1525,7 +1530,7 @@ internal class Blob
     /// </summary>
     public void Reset()
     {
-        _blobEnergyDrainCounter = 0;
+        _blobEnergyDrainCounter = ColourLevels.Full;
         Frame = BlobWalkFrames.Resting;
         State = BlobState.Normal;
 
