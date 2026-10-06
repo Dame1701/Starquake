@@ -184,9 +184,9 @@ internal class ColourAnimationEngine
         // means it cannot be drawn as it is found either.
         List<(int Tile, int X, int Y, ColourFaderAnimation Animation)> pulsing = [];
 
-        for (int y = 0; y < _gameScreens.TilesDown; y++)
+        for (int y = 0; y < TileMetrics.TilesDown; y++)
         {
-            for (int x = 0; x < _gameScreens.TilesAcross; x++)
+            for (int x = 0; x < TileMetrics.TilesAcross; x++)
             {
                 foreach (ColourFaderAnimation colourAnimation in _colourAnimationsRegistered)
                 {

@@ -43,8 +43,6 @@ internal sealed class KeyLockDoors : IDynamicCollisionCells
     private readonly ScreenRenderer _renderer;
     private readonly ResourceManager _resources;
     private readonly GameScreenData[] _screens;
-    private readonly int _tilesAcross;
-    private readonly int _tilesDown;
 
     /// <summary>
     ///     The doors on the screen being shown, or null when they have not been looked for yet.
@@ -63,17 +61,13 @@ internal sealed class KeyLockDoors : IDynamicCollisionCells
         GraphicsSet graphicsSet,
         GameScreenData[] screens,
         ScreenCollisionMap collisions,
-        ScreenRenderer renderer,
-        int tilesAcross,
-        int tilesDown)
+        ScreenRenderer renderer)
     {
         _resources = resources;
         _graphicsSet = graphicsSet;
         _screens = screens;
         _collisions = collisions;
         _renderer = renderer;
-        _tilesAcross = tilesAcross;
-        _tilesDown = tilesDown;
     }
 
     /// <summary>
@@ -141,9 +135,9 @@ internal sealed class KeyLockDoors : IDynamicCollisionCells
     {
         var found = new List<KeyLockDoor>();
 
-        for (int y = 0; y < _tilesDown; y++)
+        for (int y = 0; y < TileMetrics.TilesDown; y++)
         {
-            for (int x = 0; x < _tilesAcross; x++)
+            for (int x = 0; x < TileMetrics.TilesAcross; x++)
             {
                 if (_screens[screenNumber].ScreenTiles[x, y].TileImage != (int)ActionTiles.AccessForceField)
                 {

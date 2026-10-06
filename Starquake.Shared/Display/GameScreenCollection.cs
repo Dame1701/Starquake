@@ -41,6 +41,16 @@ namespace Starquake.Display;
 ///         keeps them in step - see <see cref="UpdateCollisionMap" />. What it no longer does is
 ///         answer for them.
 ///     </para>
+///     <para>
+///         The constructor took nine arguments and four of them were <see cref="TileMetrics" />
+///         constants - the tiles across and down and the size of a collision cell - handed in by the
+///         one place that builds a planet, which read them off <c>TileMetrics</c> to do it. They were
+///         parameters dressed as configuration: a planet with a different grid is not a thing this
+///         game has, and <c>TileMetrics</c> says why in its own remarks. They are read where they are
+///         used now, along with the two more the constructor was copying into fields of its own, and
+///         <c>TilesAcross</c> and <c>TilesDown</c> are no longer properties of the planet either -
+///         the one caller outside it reads the constant, the same way the inside does.
+///     </para>
 /// </remarks>
 internal class GameScreenCollection
 {
@@ -73,10 +83,6 @@ internal class GameScreenCollection
     private readonly GraphicsSet _graphicsSet;
     private readonly ResourceManager _resources;
 
-    private readonly int _tileHeight;
-
-    private readonly int _tileWidth;
-
     private readonly WorldPopulator _worldPopulator;
 
     private int _screenNumber;
@@ -86,11 +92,7 @@ internal class GameScreenCollection
         GraphicsSet graphicsSet,
         Random randomNumberGenerator,
         Shapes shapes,
-        BitmapFont signpostFont,
-        int tilesAcross,
-        int tilesDown,
-        int collAreaWidth,
-        int collAreaHeight)
+        BitmapFont signpostFont)
     {
         _resources = resources;
         _graphicsSet = graphicsSet;
@@ -101,12 +103,6 @@ internal class GameScreenCollection
         // from, and the planet was reaching back through the engine to find the animation engine.
         ColourAnimations = new ColourAnimationEngine(resources, this, graphicsSet);
 
-
-        TilesAcross = tilesAcross;
-        TilesDown = tilesDown;
-
-        CollAreaWidth = collAreaWidth;
-        CollAreaHeight = collAreaHeight;
 
         _gameScreens = (GameScreenData[])_resources.GetDataResource(Assets.Data.GameScreens);
 
@@ -137,9 +133,7 @@ internal class GameScreenCollection
             graphicsSet,
             _gameScreens,
             Collisions,
-            Renderer,
-            TilesAcross,
-            TilesDown);
+            Renderer);
         Collisions.RegisterDynamicCells(Doors);
 
         BlobsShipSmoke1 =
@@ -148,9 +142,6 @@ internal class GameScreenCollection
         BlobsShipSmoke2 =
             (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.BasicSmokePlume2,
                 ParticleEffectType.Continual, null);
-
-        _tileWidth = TileMetrics.TileWidth;
-        _tileHeight = TileMetrics.TileHeight;
     }
 
     /// <summary>
@@ -171,9 +162,7 @@ internal class GameScreenCollection
     /// </summary>
     public ScreenRenderer Renderer { get; }
 
-    public int TilesAcross { get; }
 
-    public int TilesDown { get; }
 
     public GameScreenData CurrentGameScreenData => _gameScreens[ScreenNumber];
 
@@ -232,10 +221,10 @@ internal class GameScreenCollection
     public ColourAnimationEngine ColourAnimations { get; }
 
     public int ScreenWidth => _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
-        .SpriteWidth * TilesAcross;
+        .SpriteWidth * TileMetrics.TilesAcross;
 
     public int ScreenHeight => _resources.GetSpriteCollection(_graphicsSet.Names.LowerScreenTiles)
-        .SpriteHeight * TilesDown;
+        .SpriteHeight * TileMetrics.TilesDown;
 
     public int PreviousScreenNumber { get; private set; }
 
@@ -249,15 +238,6 @@ internal class GameScreenCollection
             UpdateCollisionMap(true);
         }
     }
-
-    /// <summary>
-    ///     How big one collision cell is. Only <see cref="NastiesMayStandOn" /> reads these, so they
-    ///     are private - nothing outside has ever asked.
-    /// </summary>
-    private int CollAreaWidth { get; }
-
-    /// <inheritdoc cref="CollAreaWidth" />
-    private int CollAreaHeight { get; }
 
     /// <summary>
     ///     Blob standing in a marked square: centred across it, with his feet on the bottom of it.
@@ -318,9 +298,9 @@ internal class GameScreenCollection
     {
         List<Point> potentialLocations = [];
 
-        for (int y = 0; y < TilesDown; y++)
+        for (int y = 0; y < TileMetrics.TilesDown; y++)
         {
-            for (int x = 0; x < TilesAcross; x++)
+            for (int x = 0; x < TileMetrics.TilesAcross; x++)
             {
                 if (CurrentGameScreenData.ScreenTiles[x, y].TileImage == -1 && NastiesMayStandOn(x, y))
                 {
@@ -343,8 +323,8 @@ internal class GameScreenCollection
         {
             for (int cellAcross = 0; cellAcross < TileMetrics.CollisionCellsAcrossTile; cellAcross++)
             {
-                int cellX = tileX * _tileWidth + cellAcross * CollAreaWidth;
-                int cellY = tileY * _tileHeight + cellDown * CollAreaHeight;
+                int cellX = tileX * TileMetrics.TileWidth + cellAcross * TileMetrics.CollisionCellWidth;
+                int cellY = tileY * TileMetrics.TileHeight + cellDown * TileMetrics.CollisionCellHeight;
 
                 if (Collisions.HasNastyOnlyCellAt(cellX, cellY))
                 {
@@ -378,9 +358,9 @@ internal class GameScreenCollection
     {
         foreach (GameScreenData gameScreen in _gameScreens)
         {
-            for (int y = 0; y < TilesDown; y++)
+            for (int y = 0; y < TileMetrics.TilesDown; y++)
             {
-                for (int x = 0; x < TilesAcross; x++)
+                for (int x = 0; x < TileMetrics.TilesAcross; x++)
                 {
                     if (padRemoved)
                     {
@@ -416,9 +396,9 @@ internal class GameScreenCollection
     {
         var returnedTiles = new List<Point>();
 
-        for (int y = 0; y < TilesDown; y++)
+        for (int y = 0; y < TileMetrics.TilesDown; y++)
         {
-            for (int x = 0; x < TilesAcross; x++)
+            for (int x = 0; x < TileMetrics.TilesAcross; x++)
             {
                 if (_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage == tileType)
                 {
@@ -438,9 +418,9 @@ internal class GameScreenCollection
     {
         var returnedTiles = new List<Point>();
 
-        for (int y = 0; y < TilesDown; y++)
+        for (int y = 0; y < TileMetrics.TilesDown; y++)
         {
-            for (int x = 0; x < TilesAcross; x++)
+            for (int x = 0; x < TileMetrics.TilesAcross; x++)
             {
                 if (tileTypes.Contains(_gameScreens[_screenNumber].ScreenTiles[x, y].TileImage))
                 {
@@ -504,9 +484,9 @@ internal class GameScreenCollection
     {
         var tilesToReturn = new List<SecondLayerTile>();
 
-        for (int y = 0; y < TilesDown; y++)
+        for (int y = 0; y < TileMetrics.TilesDown; y++)
         {
-            for (int x = 0; x < TilesAcross; x++)
+            for (int x = 0; x < TileMetrics.TilesAcross; x++)
             {
                 int tileType = _gameScreens[_screenNumber].ScreenTiles[x, y].TileImage;
                 var tiletypeFound = (TileType)tileType;

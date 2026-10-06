@@ -461,11 +461,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             _graphicsSet,
             RandomNumberGenerator,
             ShapeDrawer,
-            Font1,
-            TileMetrics.TilesAcross,
-            TileMetrics.TilesDown,
-            TileMetrics.CollisionCellWidth,
-            TileMetrics.CollisionCellHeight);
+            Font1);
 
         // Tunnel lift animations. After the planet, which it reads the lift shafts from.
         var tunnelAnimations = new TunnelLiftAnimationEngine(ContentResourceManager, gameScreens, _graphicsSet);
