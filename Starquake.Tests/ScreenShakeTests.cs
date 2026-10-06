@@ -18,7 +18,7 @@ namespace Starquake.Tests;
 ///     <see cref="ScreenShake" /> takes a <see cref="Random" /> and three flags and hands back a
 ///     <see cref="Shake" />, so a test can seed the generator and step it. The rumble and the view port
 ///     stayed with the screen, which is the trade that makes this reachable - the same one
-///     <see cref="Starquake.ActiveSprites.BlobFall" /> makes with the sound of a long fall.
+///     <c>BlobFall</c> makes with the sound of a long fall.
 /// </remarks>
 public class ScreenShakeTests
 {

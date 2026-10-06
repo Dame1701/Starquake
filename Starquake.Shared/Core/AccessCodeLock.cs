@@ -18,7 +18,7 @@ namespace Starquake.Core;
 ///         Neither needs a graphics device, so both are here and both are tested. What stayed behind
 ///         is the part that does: the <c>KeyScanner</c> animation each digit is shown through, which
 ///         the screens reset from the slots this hands back. That is the same trade
-///         <see cref="Starquake.ActiveSprites.BlobFall" /> makes with the sound of a long fall.
+///         <c>BlobFall</c> makes with the sound of a long fall.
 ///     </para>
 /// </remarks>
 internal static class AccessCodeLock

@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-namespace Starquake.ActiveSprites;
+namespace Starquake.ActiveSprites.BlobParts;
 
 /// <summary>
 ///     Where walking off the edge of a screen puts Blob: the screen he arrives on, and where on it.

@@ -3,7 +3,7 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
-using Starquake.ActiveSprites;
+using Starquake.ActiveSprites.BlobParts;
 using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.Core;

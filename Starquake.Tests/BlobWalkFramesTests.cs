@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Starquake.ActiveSprites;
+using Starquake.ActiveSprites.BlobParts;
 using Xunit;
 
 namespace Starquake.Tests;

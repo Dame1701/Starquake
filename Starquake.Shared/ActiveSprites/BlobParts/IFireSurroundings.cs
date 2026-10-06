@@ -4,7 +4,7 @@
 // -
 
 using Starquake.Core;
-namespace Starquake.ActiveSprites;
+namespace Starquake.ActiveSprites.BlobParts;
 
 /// <summary>
 ///     Everything outside itself that a shot in flight has to ask about. <see cref="BlobFire" />

@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-namespace Starquake.ActiveSprites;
+namespace Starquake.ActiveSprites.BlobParts;
 
 /// <summary>
 ///     Where Blob arrived on the screen he is on, and how he looked arriving. A death by spikes puts

@@ -13,7 +13,7 @@ namespace Starquake.Display;
 /// <remarks>
 ///     The rumble and the view port are the caller's to act on. This decides whether the ground is moving
 ///     and by how much, and hands back a <see cref="Shake" /> saying so - the same trade
-///     <see cref="Starquake.ActiveSprites.BlobFall" /> makes with the sound of a long fall, and what lets
+///     <c>BlobFall</c> makes with the sound of a long fall, and what lets
 ///     this be reached from a test with no sound engine and no screen effects.
 /// </remarks>
 internal sealed class ScreenShake

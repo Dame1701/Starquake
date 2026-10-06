@@ -5,6 +5,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Starquake.ActiveSprites.BlobParts;
+using Starquake.ActiveSprites.TileEncounters;
 using Starquake.Animations;
 using Starquake.Collisions;
 using Starquake.Constants;

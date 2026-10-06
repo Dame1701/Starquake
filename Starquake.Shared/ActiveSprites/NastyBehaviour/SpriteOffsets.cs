@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using Starquake.Core;
 
-namespace Starquake.ActiveSprites;
+namespace Starquake.ActiveSprites.NastyBehaviour;
 
 /// <summary>
 ///     Geometry shared by anything that needs to place something against a sprite rather than draw it.

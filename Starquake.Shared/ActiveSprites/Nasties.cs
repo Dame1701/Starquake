@@ -4,6 +4,7 @@
 // -
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
+using Starquake.ActiveSprites.NastyBehaviour;
 using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.ContentManagement;
