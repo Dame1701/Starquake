@@ -40,7 +40,7 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'Starquake
 # ColourAnimationEngine while all three need it back. Both are the classes themselves doing too
 # much, not files in the wrong folder - relocating GameScreenCollection was tried and the cycle
 # simply followed it. Splitting them is the fix; lower this number when they are split.
-BASELINE = 3
+BASELINE = 2
 
 DECL = re.compile(
     r'^\s*(?:\[[^\]]*\]\s*)?(?:(?:public|internal|protected|private|abstract|sealed|static|partial'

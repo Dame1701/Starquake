@@ -4,7 +4,7 @@
 // -
 using Microsoft.Xna.Framework;
 
-namespace Starquake.Animations;
+namespace Starquake.Structure;
 
 /// <summary>
 ///     One pulsing tile: which tile, what colour it pulses towards, how fast, and how far through

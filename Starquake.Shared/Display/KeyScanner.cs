@@ -6,12 +6,11 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
 using Starquake.ContentManagement;
-using Starquake.Display;
 using Starquake.Helpers;
 using Starquake.Sprites;
 using Starquake.Structure;
 
-namespace Starquake.Animations;
+namespace Starquake.Display;
 
 internal class KeyScanner
 {

@@ -6,11 +6,10 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
-using Starquake.Display;
 using Starquake.Sprites;
 using Starquake.Structure;
 
-namespace Starquake.Animations;
+namespace Starquake.Display;
 
 internal class ColourAnimationEngine
 {
