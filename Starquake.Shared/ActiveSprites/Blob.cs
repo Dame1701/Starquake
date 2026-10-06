@@ -111,13 +111,6 @@ internal class Blob
     private const int TeleportBeamYOffset = 50;
 
     /// <summary>
-    ///     How far into a booth's tile Blob has to have walked for it to count as having stepped in.
-    ///     A little past <see cref="BoothMetrics.BlobXOffset" />, so Blob settles back onto the
-    ///     doorway as the booth takes over rather than having to be walked into exactly.
-    /// </summary>
-    private const int TeleportBoothEntryReach = 24;
-
-    /// <summary>
     ///     Where Blob is put down after coming through a tunnel - just far enough inside the
     ///     mouth on the far side that it is not standing in the tunnel it just left.
     /// </summary>
@@ -886,16 +879,9 @@ internal class Blob
             return;
         }
 
-        if (toTheRight.TileNumber != (int)ActionTiles.TeleportBooth)
-        {
-            return;
-        }
-
-        // Far enough in to be in the doorway, and standing on the booth's floor rather than
-        // passing it in mid air. Only the X is set from here: the Y test is the arrival
-        // offset, so Blob is already standing exactly where a booth puts him.
-        if (toTheRight.XPosition < TeleportBoothEntryReach ||
-            toTheRight.YPosition != BoothMetrics.BlobYOffset)
+        // Only the X is set below: the Y the booth tests for is the arrival offset, so Blob is
+        // already standing exactly where a booth puts him.
+        if (!BoothEntry.IntoATeleporter(toTheRight))
         {
             return;
         }
@@ -912,24 +898,17 @@ internal class Blob
     /// </summary>
     private void DetectAccessBooth(TileDetected? toTheLeft, TileDetected? toTheRight)
     {
-        if (toTheLeft is { TileNumber: (int)ActionTiles.AccessBoothRight } && toTheRight != null)
+        if (toTheRight != null && BoothEntry.IntoARightHandBooth(toTheLeft))
         {
-            if (toTheLeft is { XPosition: <= 46, YPosition: 32 })
-            {
-                _screenDirectory.AccessBooth.Reset(Direction.Left, toTheRight.MapXPosition);
-                _screenDirectory.Current = GameScreenType.AccessBooth;
-            }
+            _screenDirectory.AccessBooth.Reset(Direction.Left, toTheRight.MapXPosition);
+            _screenDirectory.Current = GameScreenType.AccessBooth;
         }
 
-        if (toTheRight is not { TileNumber: (int)ActionTiles.AccessBoothLeft } || toTheLeft == null)
+        if (toTheLeft == null || !BoothEntry.IntoALeftHandBooth(toTheRight))
         {
             return;
         }
 
-        if (toTheRight.XPosition < 24 || toTheRight.YPosition != 32)
-        {
-            return;
-        }
         _screenDirectory.AccessBooth.Reset(Direction.Right, toTheLeft.MapXPosition);
         _screenDirectory.Current = GameScreenType.AccessBooth;
     }
