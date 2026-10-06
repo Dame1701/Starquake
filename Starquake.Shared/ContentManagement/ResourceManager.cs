@@ -6,7 +6,6 @@ using MessagePack;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Starquake.Animations;
 using Starquake.Particles;
 using Starquake.SharedLibs;
 using Starquake.Sounds;

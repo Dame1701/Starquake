@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-namespace Starquake.Animations;
+namespace Starquake.Structure;
 
 /// <summary>
 ///     One frame of a value moving steadily toward a limit and stopping there. A fade up out of

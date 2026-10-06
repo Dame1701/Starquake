@@ -3,13 +3,12 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
-using Starquake.Animations;
 using Starquake.Constants;
 using Starquake.ContentManagement;
-using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
 using Starquake.Input;
+using Starquake.Structure;
 
 namespace Starquake.GameComponents;
 

@@ -2,21 +2,20 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
+using Starquake.Animations;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
-using Starquake.GameComponents;
-using Starquake.GameComponents.GameScreens;
 using Starquake.Particles;
 using Starquake.Sounds;
 using Starquake.Sprites;
 using Starquake.Structure;
 
-namespace Starquake.Animations;
+namespace Starquake.GameComponents.GameScreens;
 
 internal class IntroSequence
 {

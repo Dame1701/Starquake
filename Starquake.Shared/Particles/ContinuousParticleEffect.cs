@@ -6,7 +6,6 @@ using Microsoft.Xna.Framework;
 using ProjectMercury;
 using ProjectMercury.Renderers;
 using Starquake.Constants;
-using Starquake.ContentManagement;
 using Starquake.Structure;
 
 namespace Starquake.Particles;

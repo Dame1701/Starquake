@@ -414,10 +414,39 @@ and each lands at four to nine constructor parameters.
 | `GameScreenCollection` (4) | The `ColourAnimationEngine` cycle the first pass left untouched. Broken by **ownership**: the colour animations are animations of this planet's tiles and the planet drives all nine call sites, so the planet builds one and hands itself to it. |
 | `Blob` (12) | Two of its three blockers were ordering only. The third was one line — it called `ElectricityNodeGateEngine.Reset()` on respawn, so it now raises `OnBlobDiedAndRespawned` and the engine subscribes the reset. `FireSurroundings`, the interface this plan held up as the model, was *still* taking a whole engine; it now takes the planet and a `Random`. |
 
-Every cycle in the graph is cut. The techniques, in the order they kept working: **check whether the
-order is load-bearing** (most cases); **pass values instead of the object** (the planet ← Blob);
-**own the thing you drive** (the planet → colour animations); **raise an event instead of calling**
-(Blob → electricity, the session → sound and Blob).
+Every cycle in the *object* graph is cut. The techniques, in the order they kept working: **check
+whether the order is load-bearing** (most cases); **pass values instead of the object** (the planet
+← Blob); **own the thing you drive** (the planet → colour animations); **raise an event instead of
+calling** (Blob → electricity, the session → sound and Blob).
+
+Read "object graph" strictly. This plan measured what can be constructed before what, and the
+technique it leant on hardest - turning a field into a parameter - fixes exactly that and nothing
+else: a `using` does not care whether a dependency is a field or a parameter. So the **namespace**
+graph drifted the whole way through this work untouched, to fourteen two-cycles over twenty-two
+namespaces. `StatusPanel` is the case worth holding onto: the cycle above was real, cutting it by
+making Blob a parameter of `Update` was right, and `StatusPanel.cs` still said
+`using Starquake.ActiveSprites;` afterwards because it still names `Blob` in the signature.
+
+Twelve of the fourteen turned out to be one misfiled file each rather than a design fault, and the
+recurring mistake was always the same: **a shared leaf value filed inside the feature namespace
+that happens to produce it, instead of below everything that consumes it.** `Ramp` is pure easing
+maths with no dependency of its own and it sat in `Animations`, so `Display`, `GameComponents` and
+`ActiveSprites` all had to depend on `Animations` to reach it - and `Animations` needed all three
+back. One file, three cycles. `GraphicsSet` did the same to `Particles` and `ContentManagement`.
+`BouncingParticle` was the purest case of all: its caller and its callee both already lived in
+`Animations` while it sat in `ActiveSprites`, so the object graph was a clean one-way chain and the
+cycle was a filing error and nothing more.
+
+Thirteen moves took it to **three**, with no code changed - only `namespace` lines and the `using`
+lines that follow from them. `Structure` turned out to be the leaf layer already (32 of its 35 files
+have no `Starquake` using at all), so the leaves moved *into* it rather than into a new namespace;
+`Input` became a leaf the same way, by moving `TestModeKeys` and `GlobalHotkeys` out to `Engines`,
+which is where a cheat console and a hotkey handler belong anyway.
+
+`tools/namespace-cycles.py` holds the measurement and fails on a new one, because this drifted for
+the whole of this plan precisely because nothing was counting. The three that remain are design
+rather than filing, and they are `MainGameScreen` holding a `GameEngine` and `GameScreenCollection`
+doing four jobs - relocating the latter was tried, and the cycle simply followed the file.
 
 ### What is left, and why
 

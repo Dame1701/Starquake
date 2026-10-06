@@ -2,16 +2,17 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.GameComponents;
+using Starquake.Input;
 using Starquake.Structure;
 
-namespace Starquake.Input;
+namespace Starquake.Engines;
 
 /// <summary>
 ///     The five keys that work anywhere in the game rather than belonging to a screen: pause,

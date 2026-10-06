@@ -9,6 +9,7 @@ using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
 using Starquake.SharedLibs;
+using Starquake.Structure;
 
 namespace Starquake.ActiveSprites;
 

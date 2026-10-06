@@ -4,7 +4,7 @@
 // -
 using Microsoft.Xna.Framework;
 
-namespace Starquake.Animations;
+namespace Starquake.ContentManagement;
 
 internal class AnimTileEngine
 {

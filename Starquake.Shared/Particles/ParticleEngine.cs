@@ -2,11 +2,11 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
-using ProjectMercury;
+using Microsoft.Xna.Framework;
 using ProjectMercury.Renderers;
-using Starquake.ContentManagement;
+using ProjectMercury;
+using Starquake.Structure;
 
 namespace Starquake.Particles;
 

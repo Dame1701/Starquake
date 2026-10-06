@@ -8,10 +8,11 @@ using Starquake.Constants;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
 using Starquake.GameComponents;
+using Starquake.Input;
 using Starquake.Scoring;
 using Starquake.Structure;
 
-namespace Starquake.Input;
+namespace Starquake.Engines;
 
 /// <summary>
 ///     The debug keys: F1 kills Blob, F2 refills his lives, F3 runs the fade effect, F4 hands him

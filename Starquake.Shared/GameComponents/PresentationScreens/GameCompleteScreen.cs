@@ -8,7 +8,6 @@ using Microsoft.Xna.Framework.Input;
 using Starquake.ActiveSprites;
 using Starquake.Constants;
 using Starquake.ContentManagement;
-using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
 using Starquake.Helpers;

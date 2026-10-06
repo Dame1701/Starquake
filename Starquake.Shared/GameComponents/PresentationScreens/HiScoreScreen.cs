@@ -7,7 +7,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Starquake.Constants;
 using Starquake.ContentManagement;
-using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
 using Starquake.Helpers;

@@ -2,9 +2,9 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Starquake.Collisions;
+using Starquake.Structure;
 
-namespace Starquake.Structure;
+namespace Starquake.Collisions;
 
 /// <summary>
 ///     What Blob can reach in each of the four directions this frame: the tile he would meet if he

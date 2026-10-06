@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-namespace Starquake.Animations;
+namespace Starquake.Structure;
 
 /// <summary>
 ///     A value that travels from where it starts to where it is going, a step per logic frame, and

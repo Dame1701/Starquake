@@ -4,9 +4,8 @@
 // -
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
-using Starquake.Structure;
 
-namespace Starquake.Display;
+namespace Starquake.Structure;
 
 /// <summary>
 ///     How the composed picture is put on the screen: the transform that scales it onto the back

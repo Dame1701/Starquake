@@ -6,7 +6,6 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Starquake.ActiveSprites.NastyBehaviour;
-using Starquake.Animations;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Display;

@@ -2,12 +2,12 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Starquake.ContentManagement;
+using Microsoft.Xna.Framework;
 using Starquake.Sprites;
+using Starquake.Structure;
 
-namespace Starquake.Animations;
+namespace Starquake.ContentManagement;
 
 internal class AnimTile
 {

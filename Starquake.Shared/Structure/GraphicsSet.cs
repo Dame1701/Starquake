@@ -4,7 +4,7 @@
 // -
 using Starquake.Constants;
 
-namespace Starquake.ContentManagement;
+namespace Starquake.Structure;
 
 /// <summary>
 ///     Which of the two sets of artwork the game is currently drawn with. F8 switches between the

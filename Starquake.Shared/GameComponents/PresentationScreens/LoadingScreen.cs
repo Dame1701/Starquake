@@ -2,14 +2,14 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
 using Starquake.Constants;
-using Starquake.Display;
 using Starquake.Input;
 using Starquake.Sprites;
+using Starquake.Structure;
 
 namespace Starquake.GameComponents.PresentationScreens;
 

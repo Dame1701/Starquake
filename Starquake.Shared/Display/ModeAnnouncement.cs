@@ -2,11 +2,11 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Starquake.Animations;
+using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.Fonts;
+using Starquake.Structure;
 
 namespace Starquake.Display;
 

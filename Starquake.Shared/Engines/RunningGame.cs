@@ -5,6 +5,7 @@
 using Starquake.ActiveSprites;
 using Starquake.Animations;
 using Starquake.Display;
+using Starquake.GameComponents.GameScreens;
 
 namespace Starquake.Engines;
 

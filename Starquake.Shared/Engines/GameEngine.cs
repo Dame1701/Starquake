@@ -22,7 +22,6 @@ using Starquake.GameComponents.PresentationScreens;
 using Starquake.Helpers;
 using Starquake.Input;
 using Starquake.Scoring;
-using Starquake.Sprites;
 using Starquake.Structure;
 
 namespace Starquake.Engines;

@@ -3,14 +3,13 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
-using Starquake.Animations;
 using Starquake.ContentManagement;
 using Starquake.Display;
 using Starquake.Particles;
 using Starquake.Sprites;
 using Starquake.Structure;
 
-namespace Starquake.ActiveSprites;
+namespace Starquake.Animations;
 
 internal class BouncingParticle
 {

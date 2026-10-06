@@ -4,7 +4,7 @@
 // -
 using Starquake.Structure;
 
-namespace Starquake.ContentManagement;
+namespace Starquake.Sounds;
 
 internal sealed record SoundDescription(
     string ResourceName,

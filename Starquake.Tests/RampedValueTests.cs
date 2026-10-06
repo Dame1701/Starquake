@@ -4,6 +4,7 @@
 // -
 using Starquake.Animations;
 using Starquake.Constants;
+using Starquake.Structure;
 using Xunit;
 
 namespace Starquake.Tests;
