@@ -102,33 +102,6 @@ internal class Blob
     private const int BlobWalkSpeed = 8;
 
     /// <summary>
-    ///     How far inside a spiked tile Blob has to be before the spikes get him. The three spike
-    ///     tiles are drawn differently - one standing in the middle of its tile, one mounted on the
-    ///     right hand wall, one a field of broken glass on the floor - so each is given the reach its
-    ///     artwork suggests rather than the whole tile. The numbers are Blob's position relative
-    ///     to the tile, so a negative one means the tile starts before Blob does.
-    /// </summary>
-    private const int SpikeReachLeft = -16;
-
-    /// <inheritdoc cref="SpikeReachLeft" />
-    private const int SpikeReachRight = 64;
-
-    /// <inheritdoc cref="SpikeReachLeft" />
-    private const int CentralSpikeReachUp = -8;
-
-    /// <inheritdoc cref="SpikeReachLeft" />
-    private const int WallSpikeReachDown = 64;
-
-    /// <inheritdoc cref="SpikeReachLeft" />
-    private const int WallSpikeReachUp = -32;
-
-    /// <inheritdoc cref="SpikeReachLeft" />
-    private const int WallSpikeReachIn = 16;
-
-    /// <inheritdoc cref="SpikeReachLeft" />
-    private const int BrokenGlassReachUp = -16;
-
-    /// <summary>
     ///     Where the teleport beam and the shot's smoke trail are emitted from, measured in from the
     ///     top left of Blob and of the shot respectively.
     /// </summary>
@@ -1055,29 +1028,11 @@ internal class Blob
             _gameScreens.Collisions.CheckTileByObject(Direction.None, _blobXPos, _blobYPos, BlobWidth,
                 BlobHeight, 0);
 
-        if (tileIntersectingBlob != null && SpikesHaveGotHim(tileIntersectingBlob))
+        if (tileIntersectingBlob != null && Spikes.HaveGotHim(tileIntersectingBlob))
         {
             KillBlob(true, false);
         }
     }
-
-    /// <summary>
-    ///     Whether Blob is far enough into a spiked tile for its spikes to reach him. Each of the
-    ///     three is given the reach its own artwork suggests rather than the whole tile - see
-    ///     <see cref="SpikeReachLeft" /> - so the three cases here are the three reaches, not three
-    ///     copies of one test.
-    /// </summary>
-    private static bool SpikesHaveGotHim(TileDetected tile)
-        => tile.TileNumber switch
-        {
-            (int)ActionTiles.Spike2 => tile.XPosition is > SpikeReachLeft and < SpikeReachRight &&
-                                       tile.YPosition > CentralSpikeReachUp,
-            (int)ActionTiles.Spike1 => tile.YPosition is < WallSpikeReachDown and > WallSpikeReachUp &&
-                                       tile.XPosition > WallSpikeReachIn,
-            (int)ActionTiles.Spike3 => tile.XPosition is > SpikeReachLeft and < SpikeReachRight &&
-                                       tile.YPosition > BrokenGlassReachUp,
-            _ => false
-        };
 
     private void CollectPowerUp()
     {
