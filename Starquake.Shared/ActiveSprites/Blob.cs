@@ -35,40 +35,6 @@ internal class Blob
     private const int TunnelEntrySpeed = 64;
 
     /// <summary>
-    ///     The frame Blob stands still on - the one he is drawn in on a fresh screen and after a
-    ///     death - and the frames its walk cycles run between. Left and right are separate runs of
-    ///     frames in the one sheet rather than one run flipped, so turning round means jumping
-    ///     between them.
-    /// </summary>
-    private const int BlobRestingFrame = 5;
-
-    /// <inheritdoc cref="BlobRestingFrame" />
-    private const int BlobWalkLeftFirstFrame = 0;
-
-    /// <inheritdoc cref="BlobRestingFrame" />
-    private const int BlobWalkLeftLastFrame = 3;
-
-    /// <inheritdoc cref="BlobRestingFrame" />
-    private const int BlobWalkRightFirstFrame = 7;
-
-    /// <inheritdoc cref="BlobRestingFrame" />
-    private const int BlobWalkRightLastFrame = 10;
-
-    /// <summary>
-    ///     Where a walk cycle is picked up when Blob turns round mid-stride, so the new direction
-    ///     starts from a matching pose instead of snapping back to the first frame.
-    /// </summary>
-    private const int BlobTurnToLeftFrame = 6;
-
-    /// <inheritdoc cref="BlobTurnToLeftFrame" />
-    private const int BlobTurnToRightFrame = 4;
-
-    /// <summary>
-    ///     How many logic frames each frame of a walk cycle is held for.
-    /// </summary>
-    private const int AnimationDelay = 2;
-
-    /// <summary>
     ///     How far Blob has to land from to break a breakable bridge. Anything shorter and the
     ///     bridge holds.
     /// </summary>
@@ -237,8 +203,8 @@ internal class Blob
 
         // Both of these loop forward with no yoyo except the left walk, which runs backwards through the
         // right walk's frames
-        _blobAnimLeft = Animation.Looping(BlobWalkLeftFirstFrame, BlobWalkLeftLastFrame, AnimationDelay, false);
-        _blobAnimRight = Animation.Looping(BlobWalkRightFirstFrame, BlobWalkRightLastFrame, AnimationDelay, true);
+        _blobAnimLeft = Animation.Looping(BlobWalkFrames.WalkLeftFirst, BlobWalkFrames.WalkLeftLast, BlobWalkFrames.Delay, false);
+        _blobAnimRight = Animation.Looping(BlobWalkFrames.WalkRightFirst, BlobWalkFrames.WalkRightLast, BlobWalkFrames.Delay, true);
 
         _inventory = new Inventory();
         _unstickProbe = new UnstickProbe(gameScreens.Collisions);
@@ -284,7 +250,7 @@ internal class Blob
     /// </summary>
     public int BlobHeight => _shuttle.BlobHeight;
 
-    public int BlobFrame { get; set; } = BlobRestingFrame;
+    public int BlobFrame { get; set; } = BlobWalkFrames.Resting;
 
     private int BlobHSpeed { get; } = BlobWalkSpeed;
 
@@ -464,7 +430,7 @@ internal class Blob
         {
             if (_blobsLastAnimDirection == Direction.Right)
             {
-                _blobAnimLeft.CurrentFrame = BlobFrame > BlobTurnToLeftFrame ? BlobTurnToLeftFrame : BlobFrame;
+                _blobAnimLeft.CurrentFrame = BlobWalkFrames.TurningLeftFrom(BlobFrame);
             }
             else
             {
@@ -500,7 +466,7 @@ internal class Blob
         {
             if (_blobsLastAnimDirection == Direction.Left)
             {
-                _blobAnimRight.CurrentFrame = BlobFrame < BlobTurnToRightFrame ? BlobTurnToRightFrame : BlobFrame;
+                _blobAnimRight.CurrentFrame = BlobWalkFrames.TurningRightFrom(BlobFrame);
             }
             else
             {
@@ -889,7 +855,7 @@ internal class Blob
         _screenDirectory.Current = GameScreenType.Teleporter;
         _screenDirectory.Teleporter.Reset();
         _blobXPos = toTheRight.MapXPosition * TileMetrics.TileWidth + BoothMetrics.BlobXOffset;
-        BlobFrame = BlobWalkRightFirstFrame;
+        BlobFrame = BlobWalkFrames.WalkRightFirst;
     }
 
     /// <summary>
@@ -1561,7 +1527,7 @@ internal class Blob
     public void Reset()
     {
         _blobEnergyDrainCounter = 0;
-        BlobFrame = BlobRestingFrame;
+        BlobFrame = BlobWalkFrames.Resting;
         BlobsState = BlobState.Normal;
 
         // Where he starts belongs to the map - the author marks the square the ship came down on -
