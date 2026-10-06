@@ -965,10 +965,7 @@ internal class Blob
     {
         bool changedScreens = false;
 
-        if (toTheLeft is null ||
-            !TunnelTiles.IsLeftMouth(toTheLeft.TileNumber) ||
-            toTheLeft.XPosition > 32 ||
-            toTheLeft.YPosition != 32)
+        if (!TunnelMouths.IntoALeftMouth(toTheLeft))
         {
             return changedScreens;
         }
@@ -993,10 +990,7 @@ internal class Blob
     {
         bool changedScreens = false;
 
-        if (toTheRight is null ||
-            !TunnelTiles.IsRightMouth(toTheRight.TileNumber) ||
-            toTheRight.XPosition < 32 ||
-            toTheRight.YPosition != 32)
+        if (!TunnelMouths.IntoARightMouth(toTheRight))
         {
             return changedScreens;
         }
