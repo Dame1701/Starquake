@@ -3,6 +3,7 @@
 // ---------------------------------------------------------
 // -
 using Starquake.Constants;
+using Starquake.Core;
 using Starquake.Tuning;
 
 namespace Starquake.ActiveSprites;
@@ -65,7 +66,7 @@ internal sealed class EnergyDrain
         if (!touchedByNasty)
         {
             _wasTouched = false;
-            Level = Math.Min(Level + FadeStep, ColourLevels.Full);
+            Level = Ramp.Up(Level, FadeStep, ColourLevels.Full);
 
             return;
         }
@@ -76,7 +77,7 @@ internal sealed class EnergyDrain
             _wasTouched = true;
         }
 
-        Level = Math.Max(Level - FadeStep, ColourLevels.None);
+        Level = Ramp.Down(Level, FadeStep, ColourLevels.None);
     }
 
     /// <summary>
