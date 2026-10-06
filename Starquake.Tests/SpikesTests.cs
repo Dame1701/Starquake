@@ -2,8 +2,8 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
+using Starquake.ActiveSprites;
 using Starquake.Core;
-using Starquake.Rules;
 using Starquake.Structure;
 using Xunit;
 

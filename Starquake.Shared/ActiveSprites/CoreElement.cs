@@ -8,7 +8,6 @@ using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Core;
 using Starquake.Particles;
-using Starquake.Rules;
 using Starquake.Sprites;
 using Starquake.Tuning;
 

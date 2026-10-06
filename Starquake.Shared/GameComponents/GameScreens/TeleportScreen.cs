@@ -13,7 +13,6 @@ using Starquake.Core;
 using Starquake.Display;
 using Starquake.Fonts;
 using Starquake.Input;
-using Starquake.Rules;
 using Starquake.Sprites;
 using Starquake.Structure;
 using Starquake.World;

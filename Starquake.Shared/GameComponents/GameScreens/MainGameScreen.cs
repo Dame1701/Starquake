@@ -11,7 +11,6 @@ using Starquake.Constants;
 using Starquake.Core;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
-using Starquake.Rules;
 using Starquake.Sounds;
 using Starquake.Sprites;
 using Starquake.Structure;

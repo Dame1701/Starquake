@@ -9,7 +9,6 @@ using Starquake.Core;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
 using Starquake.Input;
-using Starquake.Rules;
 
 namespace Starquake.GameComponents;
 

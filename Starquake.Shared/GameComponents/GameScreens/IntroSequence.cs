@@ -11,7 +11,6 @@ using Starquake.Core;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
 using Starquake.Particles;
-using Starquake.Rules;
 using Starquake.Sounds;
 using Starquake.Sprites;
 using Starquake.Tuning;

@@ -3,7 +3,7 @@
 // ---------------------------------------------------------
 // -
 using Starquake.Constants;
-using Starquake.Rules;
+using Starquake.Core;
 using Xunit;
 
 namespace Starquake.Tests;

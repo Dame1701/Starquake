@@ -4,7 +4,7 @@
 // -
 using Starquake.Constants;
 
-namespace Starquake.Rules;
+namespace Starquake.ActiveSprites;
 
 /// <summary>
 ///     Whether Blob has walked off an edge of the screen he is on, and which screen that puts him

@@ -5,7 +5,7 @@
 using Starquake.Constants;
 using Starquake.Core;
 
-namespace Starquake.Rules;
+namespace Starquake.ActiveSprites;
 
 /// <summary>
 ///     Whether Blob has walked far enough into a tunnel mouth for it to take him through to the next

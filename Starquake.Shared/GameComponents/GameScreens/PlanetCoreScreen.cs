@@ -12,7 +12,6 @@ using Starquake.Core;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Particles;
-using Starquake.Rules;
 using Starquake.SharedLibs;
 using Starquake.Sprites;
 using Starquake.Tuning;

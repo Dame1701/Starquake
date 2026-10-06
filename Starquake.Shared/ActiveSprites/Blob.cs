@@ -14,7 +14,6 @@ using Starquake.Engines.ScreenEffects;
 using Starquake.GameComponents;
 using Starquake.Input;
 using Starquake.Particles;
-using Starquake.Rules;
 using Starquake.Scoring;
 using Starquake.SharedLibs;
 using Starquake.Sounds;

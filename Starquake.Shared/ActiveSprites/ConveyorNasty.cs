@@ -9,7 +9,6 @@ using Starquake.ContentManagement;
 using Starquake.Core;
 using Starquake.Display;
 using Starquake.Particles;
-using Starquake.Rules;
 using Starquake.Sprites;
 using Starquake.Tuning;
 using Starquake.World;

@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-namespace Starquake.Rules;
+namespace Starquake.ActiveSprites;
 
 /// <summary>
 ///     How Blob's sprite sheet lays out his walk, and which frame a cycle is picked up at when he

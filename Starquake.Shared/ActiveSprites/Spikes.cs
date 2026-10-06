@@ -5,7 +5,7 @@
 
 using Starquake.Core;
 using Starquake.Structure;
-namespace Starquake.Rules;
+namespace Starquake.ActiveSprites;
 
 /// <summary>
 ///     Whether Blob is far enough into a spiked tile for its spikes to reach him.

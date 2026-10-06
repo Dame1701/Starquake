@@ -1,8 +1,9 @@
+using Starquake.Core;
 // ---------------------------------------------------------
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-namespace Starquake.Rules;
+namespace Starquake.ActiveSprites;
 
 /// <summary>
 ///     A value that travels from where it starts to where it is going, a step per logic frame, and

@@ -527,16 +527,47 @@ caller: `NastyHelpers` is `NastyColours` beside `Nasty`, `SpriteHelpers` is `Spr
 type declarations when this was first written down; seven pure rule classes were extracted into it
 over the following commits for want of a better home, and that made it two things.
 
-- **`Starquake.Rules`** - eight files: `ScreenEdges`, `ScreenCrossing`, `Spikes`, `TunnelMouths`,
-  `BoothEntry`, `BlobWalkFrames`, `Ramp`, `RampedValue`. Every one has tests, none has a mutable
-  field, and all of them decide something by arithmetic alone.
-- **`Starquake.Core`** - the other 41: nineteen enums, five delegates, eight records and structs,
-  an interface, and the small value objects. The leaf layer, named for being the leaf layer, with
+- **`Starquake.Core`** - 42 files: nineteen enums, five delegates, eight records and structs, an
+  interface, and the small value objects. The leaf layer, named for being the leaf layer, with
   `Constants` below it as the floor that depends on nothing at all.
+- **`Starquake.Rules`** - eight files, and **it did not survive the week.** See below.
 
 `Animation` was in the list for `Rules` and is in `Core` instead. It has two mutable fields and no
-tests, so it is a stateful sequencer rather than a rule, and putting it there would have made the
-namespace's claim false on its first day.
+tests, so it is a stateful sequencer rather than a rule.
+
+### `Rules` was `Helpers` again
+
+It held `ScreenEdges`, `ScreenCrossing`, `Spikes`, `TunnelMouths`, `BoothEntry`, `BlobWalkFrames`,
+`Ramp` and `RampedValue`, and the argument for it was that all eight are tested, hold no mutable
+state and decide something by arithmetic alone. All of that is true and none of it is a subject.
+`Rules` was a namespace for *things extracted from `Blob`* - which is exactly the diagnosis written
+one section above about `Helpers`, arrived at one commit later on a namespace created by the same
+hand.
+
+The call sites said so plainly. **Five of the eight had exactly one caller**, and a sixth had one
+too:
+
+| | callers |
+| --- | --- |
+| `Spikes`, `TunnelMouths`, `BoothEntry` | `Blob` |
+| `ScreenEdges`, `ScreenCrossing`, `BlobWalkFrames` | `Blob` |
+| `RampedValue` | `CoreElement` |
+| `Ramp` | nine files across five namespaces |
+
+So they went to their callers, which is the same rule `Helpers` was dissolved by: seven into
+`ActiveSprites`, beside `Blob` and `CoreElement`.
+
+`Ramp` is the exception and stays in `Core`, because it is the only one that is genuinely shared.
+It is animation maths - a fade up out of black, a corpse fading out and shrinking, a core element
+growing into place - and `Animations` is where it used to live. It cannot go back: `Animations`
+still reaches into `Display` for `Shockwave`, and `Display`'s `ArtworkCrossfade` and
+`ModeAnnouncement` both use `Ramp`, so returning it would rebuild one of the fourteen cycles this
+plan removed.
+
+**The rule that falls out of both dissolutions**: a leaf in a feature namespace is only a problem
+when the leaf is *shared*. `Ramp` had nine callers in five namespaces and had to come down to the
+floor. `BlobWalkFrames` has one caller, so beside that caller is where it belongs, and no amount of
+it being pure arithmetic makes a namespace of its own worth having.
 
 **The rename turned up something nothing had noticed: `Starquake.Structure` was two namespaces in
 two projects sharing a name.** `SharedLibs` declares nine types in it - `ActionTiles`,
