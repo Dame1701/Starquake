@@ -779,6 +779,11 @@ internal class Blob
     ///     happened. Each edge is different enough to be its own method: the two vertical ones have to
     ///     decide where he lands.
     /// </summary>
+    /// <summary>
+    ///     All four edges, in turn and without short-circuiting, because more than one can answer: a
+    ///     lift carrying Blob up while he walks off the left edge takes him a screen left and a
+    ///     screen up, and the top crossing is asked about the position the left one left him in.
+    /// </summary>
     private bool ChangeScreenIfOffEdge()
     {
         bool changedScreens = ChangeScreenOffLeftEdge();
@@ -792,33 +797,31 @@ internal class Blob
 
     private bool ChangeScreenOffLeftEdge()
     {
-        if (_blobXPos >= 0 || _gameScreens.ScreenNumber - 1 < 0)
+        if (ScreenEdges.OffLeft(_blobXPos, _blobYPos, BlobWidth, _gameScreens.ScreenWidth,
+                _gameScreens.ScreenNumber) is not { } crossing)
         {
             return false;
         }
 
-        _gameScreens.ScreenNumber--;
-        _blobXPos = _gameScreens.ScreenWidth - _resources
-            .GetSpriteCollection(_graphicsSet.Names.BlobSprites).SpriteWidth;
+        _gameScreens.ScreenNumber = crossing.ScreenNumber;
+        _blobXPos = crossing.XPos;
 
         RaiseScreenChangedToMainGame();
 
         return true;
     }
 
+    /// <inheritdoc cref="ChangeScreenOffLeftEdge" />
     private bool ChangeScreenOffRightEdge()
     {
-        int blobRightEdge = _blobXPos + _resources
-            .GetSpriteCollection(_graphicsSet.Names.BlobSprites).SpriteWidth;
-
-        if (blobRightEdge <= _gameScreens.ScreenWidth ||
-            _gameScreens.ScreenNumber + 1 > WorldMap.LastScreenNumber)
+        if (ScreenEdges.OffRight(_blobXPos, _blobYPos, BlobWidth, _gameScreens.ScreenWidth,
+                _gameScreens.ScreenNumber) is not { } crossing)
         {
             return false;
         }
 
-        _gameScreens.ScreenNumber++;
-        _blobXPos = 0;
+        _gameScreens.ScreenNumber = crossing.ScreenNumber;
+        _blobXPos = crossing.XPos;
 
         RaiseScreenChangedToMainGame();
 
@@ -828,16 +831,17 @@ internal class Blob
     /// <summary>
     ///     Going up, Blob has to be put down on something. On a shuttle he lands at the foot of the new
     ///     screen; on foot he is given a fresh jump platform to stand on, unless a tunnel lift is
-    ///     carrying him, in which case it keeps carrying him.
+    ///     carrying him, in which case it keeps carrying him. That is the one arrival
+    ///     <see cref="ScreenEdges" /> cannot work out, and the one it hands back unchanged.
     /// </summary>
     private bool ChangeScreenOffTopEdge()
     {
-        if (_blobYPos >= 0 || _gameScreens.ScreenNumber - WorldMap.ScreensAcross < 0)
+        if (ScreenEdges.OffTop(_blobXPos, _blobYPos, _gameScreens.ScreenNumber) is not { } crossing)
         {
             return false;
         }
 
-        _gameScreens.ScreenNumber -= WorldMap.ScreensAcross;
+        _gameScreens.ScreenNumber = crossing.ScreenNumber;
 
         RaiseScreenChangedToMainGame();
 
@@ -859,16 +863,17 @@ internal class Blob
         return true;
     }
 
+    /// <inheritdoc cref="ChangeScreenOffLeftEdge" />
     private bool ChangeScreenOffBottomEdge()
     {
-        if (_blobYPos + BlobHeight <= _gameScreens.ScreenHeight ||
-            _gameScreens.ScreenNumber + WorldMap.ScreensAcross > WorldMap.LastScreenNumber)
+        if (ScreenEdges.OffBottom(_blobXPos, _blobYPos, BlobHeight, _gameScreens.ScreenHeight,
+                _gameScreens.ScreenNumber) is not { } crossing)
         {
             return false;
         }
 
-        _gameScreens.ScreenNumber += WorldMap.ScreensAcross;
-        _blobYPos = 0;
+        _gameScreens.ScreenNumber = crossing.ScreenNumber;
+        _blobYPos = crossing.YPos;
 
         // He is falling onto the new screen, so the fall starts again from the top of it
         _fall.StartFallingAgain();
