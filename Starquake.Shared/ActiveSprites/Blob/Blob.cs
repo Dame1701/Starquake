@@ -52,13 +52,9 @@ internal class Blob
     private const int OverloadFlareAlpha = 150;
 
     /// <summary>
-    ///     How fast Blob reddens when a nasty is touching him and recovers when one is not, and
-    ///     how fast it fades back in after a teleport. Both are counted in colour channel levels a
-    ///     frame.
+    ///     How fast Blob fades back in after a teleport, in colour channel levels a frame. The
+    ///     drain's own step went with it to <see cref="EnergyDrain" />.
     /// </summary>
-    private const int EnergyDrainFadeStep = 16;
-
-    /// <inheritdoc cref="EnergyDrainFadeStep" />
     private const int TeleportFadeStep = 8;
 
     /// <summary>
@@ -97,6 +93,7 @@ internal class Blob
     private readonly IStandardParticleEffect _blobTeleporterBeam;
     private readonly BreakableBridges _breakableBridges;
     private readonly BlobEntryPoint _entryPoint = new();
+    private readonly EnergyDrain _drain = new();
     private readonly BlobFall _fall = new();
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsSet _graphicsSet;
@@ -112,18 +109,10 @@ internal class Blob
     private readonly UnstickProbe _unstickProbe;
 
 
-    /// <summary>
-    ///     The green and blue Blob has left, which is what the drain is drawn from. Full means
-    ///     unhurt and nought means a nasty has all of it - see
-    ///     <see cref="EnergyDrainSettings.DrainFrom" /> - so it starts full.
-    /// </summary>
-    private int _blobEnergyDrainCounter = ColourLevels.Full;
-
     private Guid _blobFallsSoundId;
 
 
     private Direction _blobsLastAnimDirection = Direction.None;
-    private bool _blobTouched;
 
     private Guid _blobTunnelLiftSoundId = Guid.Empty;
 
@@ -180,7 +169,6 @@ internal class Blob
             randomNumberGenerator,
             screenEffects);
         Control = new CustomControl(session.PlayerKeys, input);
-        _blobTouched = false;
         _teleportFadeLevel = ColourLevels.Full;
         _startBlobTeleporting = false;
         State = BlobState.Normal;
@@ -394,7 +382,7 @@ internal class Blob
 
         _blobJumpPlatformEngine.Update();
 
-        FadeEnergyDrainTint();
+        _drain.Step(TouchedByNasty);
         FadeInAfterTeleport();
 
         return changedScreens;
@@ -1023,11 +1011,6 @@ internal class Blob
     /// </summary>
     private int _overloadArcFrame;
 
-    /// <summary>
-    ///     Logic frames since the game began, for the flicker on the drain. Counted on the update
-    ///     and never in the draw, for the reason <see cref="ElectricSettings.FlickerAt" /> gives.
-    /// </summary>
-    private int _drainFrame;
 
     /// <summary>
     ///     The shader Blob burns with, pointed at the pose about to be drawn. The flicker is
@@ -1042,7 +1025,7 @@ internal class Blob
 
         overload.Parameters["SpriteRect"].SetValue(spriteRect);
         overload.Parameters["Charge"].SetValue(
-            OverloadSettings.ChargeFrom(_blobEnergyDrainCounter));
+            OverloadSettings.ChargeFrom(_drain.Level));
         overload.Parameters["Flicker"].SetValue(ElectricSettings.FlickerAt(_overloadFrame));
 
         overload.Parameters["EmberColour"].SetValue(OverloadSettings.EmberColour);
@@ -1259,43 +1242,6 @@ internal class Blob
     ///     The red wash that shows energy being drained. It runs down while a nasty is touching him and
     ///     back up once it stops, so a glancing touch shows as a flash rather than a step change.
     /// </summary>
-    private void FadeEnergyDrainTint()
-    {
-        _drainFrame++;
-
-        if (TouchedByNasty)
-        {
-            if (!_blobTouched)
-            {
-                _blobEnergyDrainCounter = ColourLevels.Full;
-                _blobTouched = true;
-            }
-
-            if (_blobEnergyDrainCounter > 0)
-            {
-                _blobEnergyDrainCounter -= EnergyDrainFadeStep;
-            }
-
-            if (_blobEnergyDrainCounter < 0)
-            {
-                _blobEnergyDrainCounter = 0;
-            }
-        }
-        else
-        {
-            if (_blobEnergyDrainCounter < ColourLevels.Full)
-            {
-                _blobEnergyDrainCounter += EnergyDrainFadeStep;
-            }
-
-            if (_blobEnergyDrainCounter > ColourLevels.Full)
-            {
-                _blobEnergyDrainCounter = ColourLevels.Full;
-            }
-
-            _blobTouched = false;
-        }
-    }
 
     /// <summary>
     ///     Blob as he walks about, reddening while a nasty has hold of his energy.
@@ -1310,7 +1256,7 @@ internal class Blob
     {
         SpriteCollection blobSprites = _resources.GetSpriteCollection(_graphicsSet.Names.BlobSprites);
 
-        bool draining = EnergyDrainSettings.IsDraining(_blobEnergyDrainCounter);
+        bool draining = _drain.Draining;
 
         blobSprites.Begin(BlendState.AlphaBlend, null, draining ? DrainShader(blobSprites) : null);
         blobSprites.DrawSprite(Frame,
@@ -1333,10 +1279,10 @@ internal class Blob
 
         drain.Parameters["SpriteRect"].SetValue(spriteRect);
         drain.Parameters["Drain"].SetValue(
-            EnergyDrainSettings.DrainFrom(_blobEnergyDrainCounter));
+            EnergyDrainSettings.DrainFrom(_drain.Level));
         drain.Parameters["DrainColour"].SetValue(EnergyDrainSettings.DrainColour);
         drain.Parameters["RimAmount"].SetValue(EnergyDrainSettings.CoronaAmount);
-        drain.Parameters["Flicker"].SetValue(ElectricSettings.FlickerAt(_drainFrame));
+        drain.Parameters["Flicker"].SetValue(ElectricSettings.FlickerAt(_drain.Frame));
 
         drain.Parameters["RimStep"].SetValue(new Vector2(
             EnergyDrainSettings.CoronaRadius / sprites.SpriteWidth * spriteRect.Z,
@@ -1530,7 +1476,7 @@ internal class Blob
     /// </summary>
     public void Reset()
     {
-        _blobEnergyDrainCounter = ColourLevels.Full;
+        _drain.Reset();
         Frame = BlobWalkFrames.Resting;
         State = BlobState.Normal;
 
