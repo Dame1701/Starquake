@@ -8,7 +8,13 @@
   line here and the projects keep naming only what they depend on.
 
   Avalonia is four packages plus Material.Icons.Avalonia, which is what holds the editor at
-  11.3 rather than the 11.2 it was generated against; they move together too.
+  11.3 rather than the 11.2 it was generated against; they move together too. 11.3.22 rather
+  than the 11.3.8 they sat on is the .NET 10 upgrade's doing, and not for a framework reason:
+  the SDK audits transitive packages by default from .NET 10, which turned up a high severity
+  advisory against Tmds.DBus.Protocol 0.21.2 - a package nothing here names, pulled in by
+  Avalonia.FreeDesktop. Avalonia fixed it themselves by moving to 0.21.3, so taking their patch
+  releases is the fix rather than pinning a package of theirs from here. The advisory predates
+  the upgrade; only the reporting of it is new.
 -->
 <Project>
 
@@ -28,11 +34,11 @@
     </ItemGroup>
 
     <ItemGroup Label="ScreenEditor">
-        <PackageVersion Include="Avalonia" Version="11.3.8"/>
-        <PackageVersion Include="Avalonia.Desktop" Version="11.3.8"/>
-        <PackageVersion Include="Avalonia.Diagnostics" Version="11.3.8"/>
-        <PackageVersion Include="Avalonia.Fonts.Inter" Version="11.3.8"/>
-        <PackageVersion Include="Avalonia.Themes.Fluent" Version="11.3.8"/>
+        <PackageVersion Include="Avalonia" Version="11.3.22"/>
+        <PackageVersion Include="Avalonia.Desktop" Version="11.3.22"/>
+        <PackageVersion Include="Avalonia.Diagnostics" Version="11.3.22"/>
+        <PackageVersion Include="Avalonia.Fonts.Inter" Version="11.3.22"/>
+        <PackageVersion Include="Avalonia.Themes.Fluent" Version="11.3.22"/>
         <PackageVersion Include="Material.Icons.Avalonia" Version="3.0.0-preview3.1"/>
     </ItemGroup>
 
