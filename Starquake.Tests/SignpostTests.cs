@@ -100,7 +100,7 @@ public class SignpostTests
 
         // Act
         var restored = MessagePackSerializer.Deserialize<GameScreenData>(
-            MessagePackSerializer.Serialize(screen));
+            MessagePackSerializer.Serialize(screen, ScreenDataSerializer.Options), ScreenDataSerializer.Options);
 
         // Assert
         Assert.Equal(499, restored.SignpostedScreen);
@@ -118,7 +118,7 @@ public class SignpostTests
         byte[] saved = MessagePackSerializer.ConvertFromJson("[null,[],\"PALMA\",null]");
 
         // Act
-        var restored = MessagePackSerializer.Deserialize<GameScreenData>(saved);
+        var restored = MessagePackSerializer.Deserialize<GameScreenData>(saved, ScreenDataSerializer.Options);
 
         // Assert
         Assert.Null(restored.SignpostedScreen);

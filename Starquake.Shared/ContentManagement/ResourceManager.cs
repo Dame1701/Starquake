@@ -218,10 +218,10 @@ internal class ResourceManager : StartableGameComponentBase
 
         _resources.Add(
             _dataDescriptions[0].ResourceName,
-            MessagePackSerializer.Deserialize<GameScreenData[]>(gameScreensData));
+            MessagePackSerializer.Deserialize<GameScreenData[]>(gameScreensData, ScreenDataSerializer.Options));
         _resources.Add(
             _dataDescriptions[1].ResourceName,
-            MessagePackSerializer.Deserialize<int[,,]>(collisionTilesData));
+            MessagePackSerializer.Deserialize<int[,,]>(collisionTilesData, ScreenDataSerializer.Options));
     }
 
     /// <summary>

@@ -42,8 +42,8 @@ internal static class ScreenDataFile
     {
         using FileStream stream = File.OpenRead(path);
 
-        GameScreenData[] screens = MessagePackSerializer.Deserialize<GameScreenData[]>(ReadBlob(stream));
-        int[,,] collisionMasks = MessagePackSerializer.Deserialize<int[,,]>(ReadBlob(stream));
+        GameScreenData[] screens = MessagePackSerializer.Deserialize<GameScreenData[]>(ReadBlob(stream), ScreenDataSerializer.Options);
+        int[,,] collisionMasks = MessagePackSerializer.Deserialize<int[,,]>(ReadBlob(stream), ScreenDataSerializer.Options);
 
         // Both of these count as unsaved changes, which is the point: they are only really in the
         // map once somebody saves it.
@@ -131,8 +131,8 @@ internal static class ScreenDataFile
     /// </summary>
     public static void Save(EditorDocument document, string path)
     {
-        byte[] screensBlob = MessagePackSerializer.Serialize(document.Screens);
-        byte[] collisionBlob = MessagePackSerializer.Serialize(document.CollisionMasks);
+        byte[] screensBlob = MessagePackSerializer.Serialize(document.Screens, ScreenDataSerializer.Options);
+        byte[] collisionBlob = MessagePackSerializer.Serialize(document.CollisionMasks, ScreenDataSerializer.Options);
 
         // Build the whole file before touching the old one, so that a failure part way through
         // serialising cannot leave a truncated map behind.

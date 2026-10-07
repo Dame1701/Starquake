@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Damien C Green. All rights reserved.
 // ---------------------------------------------------------
 // -
-using MessagePack.Formatters;
 using Microsoft.Xna.Framework.Content;
 using ProjectMercury;
 using ProjectMercury.Emitters;
@@ -16,11 +15,15 @@ namespace Starquake.ContentManagement;
 ///     the same ones reflection would have found, so the game takes one code path either way.
 /// </summary>
 /// <remarks>
-///     Two libraries name a type in a string and ask for it back. MonoGame reads the reader's name
-///     out of each <c>.xnb</c>, and MessagePack asks for a formatter by type. A JIT compiles whatever
-///     comes back; ILC can only emit code it saw at build time, so a generic the compiler never
-///     meets in source - <c>ReflectiveReader&lt;VariableFloat&gt;</c>, say - simply does not exist in
-///     the binary, and the load fails with "missing native code or metadata".
+///     MonoGame reads the name of each asset's reader out of the <c>.xnb</c> and asks for it back. A
+///     JIT compiles whatever comes back; ILC can only emit code it saw at build time, so a generic the
+///     compiler never meets in source - <c>ReflectiveReader&lt;VariableFloat&gt;</c>, say - simply does
+///     not exist in the binary, and the load fails with "missing native code or metadata".
+///     <para>
+///         The screen data has the same problem and answers it elsewhere: the formatters MessagePack
+///         would otherwise work out at runtime are named in <c>ScreenDataSerializer</c>, next to the
+///         types they are for.
+///     </para>
 ///     <para>
 ///         Naming every one of them here is what puts them in. The two heads' .csproj files also root
 ///         <c>MonoGame.Framework</c> and <c>ProjectMercury</c> against trimming - see
@@ -34,11 +37,7 @@ internal static class NativeAot
     ///     Call before any content is loaded. <see cref="GameHost" />'s constructor is the place; the
     ///     first <c>Content.Load</c> happens in <c>GameEngine</c>'s, one step later.
     /// </summary>
-    internal static void Register()
-    {
-        RegisterParticleEffectReaders();
-        RegisterCollisionMaskFormatter();
-    }
+    internal static void Register() => RegisterParticleEffectReaders();
 
     /// <summary>
     ///     The particle effects, and only those. Every other asset the game loads - textures, fonts,
@@ -90,17 +89,6 @@ internal static class NativeAot
         Register($"Microsoft.Xna.Framework.Content.ListReader`1[[{typeof(Modifier).AssemblyQualifiedName}]]",
             static () => new ListReader<Modifier>());
     }
-
-    /// <summary>
-    ///     The collision map. <c>GameScreenData</c> needs nothing - MessagePack's source generator
-    ///     writes a formatter for anything carrying <c>[MessagePackObject]</c>, which is why the
-    ///     screens themselves deserialise untouched - but the masks are a plain <c>int[,,]</c>, and
-    ///     that goes through <c>MakeGenericType</c> on a formatter nothing names in source.
-    /// </summary>
-    private static void RegisterCollisionMaskFormatter() =>
-        // Constructing it is the point: that is what puts the instantiation in the binary for
-        // MessagePack to find later. The instance itself is thrown away.
-        GC.KeepAlive(new ThreeDimensionalArrayFormatter<int>());
 
     /// <summary>
     ///     One reflectively-read type. The key is the string the content pipeline wrote into the

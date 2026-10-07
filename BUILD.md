@@ -139,15 +139,18 @@ by the head's package reference and the two flavours cannot share an output fold
 ### What had to be told to the compiler
 
 A JIT works out at runtime what ILC has to know at build time, and two libraries here ask for
-types by name. Three things answer it, and all three are in the repo already:
+types by name. Four things answer it, and all four are in the repo already:
 
 - **`Starquake.Shared/ContentManagement/NativeAot.cs`** names every content reader that is
   generic over a type ILC never meets in source. That is the particle effects and only those:
   Mercury's `.xnb` files are written by `IntermediateSerializer`, so each asks for a
   `ReflectiveReader<SomeMercuryType>`, and a generic instantiation nothing references cannot be
-  in the binary. It also constructs MessagePack's `ThreeDimensionalArrayFormatter<int>` for the
-  collision map, for the same reason. `GameHost`'s constructor calls it, on every build — on a
-  JIT build it registers the same readers reflection would have found and changes nothing.
+  in the binary. `GameHost`'s constructor calls it, on every build — on a JIT build it registers
+  the same readers reflection would have found and changes nothing.
+- **`SharedLibs/ScreenDataSerializer.cs`** does the same job for the screen data, naming the
+  three formatters MessagePack would otherwise work out from the type at runtime. The game, the
+  editor and the tests all pass its `Options`, so all three agree on the format by construction
+  rather than by each trusting a process-wide default.
 - **`Starquake.Shared.props` roots `MonoGame.Framework` and `ProjectMercury`** against the
   trimmer, which would otherwise delete the readers MonoGame looks up by string and the emitter
   properties `ReflectiveReader` reads reflectively. Rooting MonoGame costs about 4MB.
@@ -160,10 +163,41 @@ Neither the rooting nor the warning list is conditioned on `PublishAot`, and tha
 a publish profile is not read until the SDK's targets run, long after this file is imported, so
 the condition would be false on exactly the publish that needs it. Both are inert otherwise.
 
-**The symptom when something is missing** is a `NotSupportedException` at the first
+**The symptom when a content reader is missing** is a `NotSupportedException` at the first
 `Content.Load`, naming the type it could not build — ``'...ReflectiveReader`1[ProjectMercury.X]'
 is missing native code or metadata``. Add that type to `NativeAot.cs`. Nothing warns at build
 time, because nothing at build time knows what the `.xnb` files are going to ask for.
+
+**A missing formatter says so in both builds**, which is the reason the screen data's resolver is
+spelled out rather than left to MessagePack's default. `GetFormatterWithVerify` throws naming the
+type it could not resolve, and it throws the same way under the JIT — so a type added to
+`GameScreenData` that needs a formatter nobody named fails in front of whoever added it, instead
+of working all through development and breaking on the first AOT publish.
+
+### Those four warnings cannot be cleared
+
+Not by suppressing the right thing, not by updating the libraries, and not by passing explicit
+serialiser options — all three were tried. Expanded, the four roll-ups are 103 individual
+warnings: 90 in MessagePack's Reflection.Emit formatter machinery, 13 in MonoGame. Every one is
+either a path already answered above, a path the game cannot reach (`ReloadGraphicsAssets`, which
+`GameHost.LoadContent` deliberately throws on; `MultiArrayReader`, which no asset uses), or
+design-time only (`Design.VectorConversion`, the `TypeConverter`s a WinForms designer wants).
+
+What does not work, with the measurements:
+
+- **Newer libraries.** MessagePack 3.1.11 still ships `DynamicObjectTypeBuilder`, `DynamicAssembly`
+  and `System.Reflection.Emit`; MonoGame 3.8.5.1 still has `ContentTypeReaderManager` and
+  `ReflectiveReader`. Resolving a reader from a string in the `.xnb` *is* the XNA content format.
+  These are structural, not stale.
+- **Explicit serialiser options.** `MessagePackSerializer.Deserialize` has `options ??=
+  DefaultOptions` in its own body, and `DefaultOptions` reaches `StandardResolver` and every
+  dynamic resolver under it. Passing options changes which branch runs, not what is reachable, and
+  the trimmer reasons about reachability: 103 warnings before, 103 after, binary 16 bytes larger.
+  `ScreenDataSerializer` is kept for the other two reasons, not this one.
+
+Leave them visible rather than adding them to `NoWarn`. They are the signal that a dependency's
+reflection surface has changed, which is exactly when this page needs rereading. A normal
+`dotnet build` is still 0 warnings; these appear only on an AOT publish.
 
 ## Where the art lives
 

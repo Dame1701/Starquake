@@ -27,8 +27,8 @@ internal static class ShippedMap
 
         using FileStream stream = File.OpenRead(path);
 
-        return (MessagePackSerializer.Deserialize<GameScreenData[]>(ReadBlob(stream)),
-            MessagePackSerializer.Deserialize<int[,,]>(ReadBlob(stream)));
+        return (MessagePackSerializer.Deserialize<GameScreenData[]>(ReadBlob(stream), ScreenDataSerializer.Options),
+            MessagePackSerializer.Deserialize<int[,,]>(ReadBlob(stream), ScreenDataSerializer.Options));
     }
 
     /// <summary>

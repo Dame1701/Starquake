@@ -64,7 +64,7 @@ public class TeleportCodeTests
 
         // Act
         var restored = MessagePackSerializer.Deserialize<GameScreenData>(
-            MessagePackSerializer.Serialize(screen));
+            MessagePackSerializer.Serialize(screen, ScreenDataSerializer.Options), ScreenDataSerializer.Options);
 
         // Assert
         Assert.Equal("GROIN", restored.TeleportCode);
@@ -83,7 +83,7 @@ public class TeleportCodeTests
         byte[] saved = MessagePackSerializer.ConvertFromJson("[null,[]]");
 
         // Act
-        var restored = MessagePackSerializer.Deserialize<GameScreenData>(saved);
+        var restored = MessagePackSerializer.Deserialize<GameScreenData>(saved, ScreenDataSerializer.Options);
 
         // Assert
         Assert.Null(restored.TeleportCode);
