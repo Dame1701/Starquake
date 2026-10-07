@@ -122,13 +122,30 @@ The `Aot-win-x64` profile is correct configuration and it has never been run, be
 cannot cross-compile and this was set up on a Mac. Expect to find out on the first attempt, and
 expect it to be the one platform that needs more than the profile.
 
-The reason to doubt it is `MonoGame.Framework.WindowsDX`, which carries a framework reference to
-`Microsoft.WindowsDesktop.App.WindowsForms` and puts its game window up through
-`WinFormsGameWindow`. **Windows Forms is not supported under NativeAOT** - it is not trimmable,
-and the SDK does not even offer the AOT option to a project that sets `UseWindowsForms`. Nothing
-blocks this head, because the reference arrives transitively rather than through that property,
-so ILC will try; whether what comes out runs is the open question. WindowsDX also brings SharpDX,
-which is .NET Framework-era interop and has had no trimming work done to it.
+What makes it the interesting one is `MonoGame.Framework.WindowsDX`, which carries a framework
+reference to `Microsoft.WindowsDesktop.App.WindowsForms` and puts its game window up through
+`WinFormsGameWindow`. Microsoft does not list Windows Forms as supported under NativeAOT, and the
+SDK does not offer the AOT option to a project that sets `UseWindowsForms` - but that is a
+`ProjectCapability`, an IDE affordance, not a gate. Nothing blocks this head, and the reference
+arrives transitively rather than through that property in any case.
+
+The evidence is better than the documentation suggests, and none of it is proof:
+
+- **There is no check to fail.** The only three `PublishAot` errors in the SDK are about single
+  file, runtime packs and a missing runtime identifier. None mentions Windows Forms, WPF or
+  `Microsoft.WindowsDesktop.App`.
+- **Windows Forms is trimmed deliberately, not by accident.** `Microsoft.NET.Sdk.WindowsDesktop`
+  turns off binding, UI type editors, ActiveX, design-time features and MDI through feature
+  switches when `PublishTrimmed` is set, which `PublishAot` implies. That is maintained support,
+  not a dead end.
+- **Nothing in the chain emits IL.** `System.Windows.Forms.dll` is trim-annotated -
+  `RequiresUnreferencedCode`, `DynamicallyAccessedMembers`, `FeatureSwitchDefinition` - and
+  carries no `RequiresDynamicCode`. SharpDX, which WindowsDX also brings, has no trim annotations
+  at all, being 2016 vintage; but it is vtable interop rather than `Reflection.Emit`, which is the
+  thing an ahead-of-time compiler cannot answer.
+
+So expect warnings, expect this head to want more than the profile, and expect to find out by
+running it. What would settle it is one command on a Windows machine.
 
 If it does not come out working, the way round is a Windows head on **DesktopGL** rather than
 WindowsDX - SDL and OpenGL instead of WinForms and DirectX, the same flavour the Linux and macOS
