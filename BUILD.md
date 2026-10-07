@@ -8,14 +8,14 @@ target framework and MonoGame flavour, and adds whatever packaging that platform
 
 | Project | Platform | Target framework | MonoGame flavour |
 | --- | --- | --- | --- |
-| `Starquake.Shared` | all (the game itself, plus `Content/` and `Data/`) | `net9.0`, `net9.0-windows` | both, by target framework |
-| `Starquake.Linux` | Linux | `net9.0` | DesktopGL |
-| `Starquake.Mac` | macOS | `net9.0` | DesktopGL |
-| `Starquake.Windows` | Windows | `net9.0-windows` | WindowsDX |
+| `Starquake.Shared` | all (the game itself, plus `Content/` and `Data/`) | `net10.0`, `net10.0-windows` | both, by target framework |
+| `Starquake.Linux` | Linux | `net10.0` | DesktopGL |
+| `Starquake.Mac` | macOS | `net10.0` | DesktopGL |
+| `Starquake.Windows` | Windows | `net10.0-windows` | WindowsDX |
 | `ProjectMercury` | all (particle engine) | `net8.0`, `net8.0-windows` | both, by target framework |
 | `ProjectMercury.ContentPipeline` | build-time only (MGCB extension) | `net8.0` | DesktopGL |
-| `SharedLibs` | all (screen data structures and world constants) | `net9.0` | — |
-| `ScreenEditor` | all (Avalonia tool, not part of the game) | `net9.0` | — |
+| `SharedLibs` | all (screen data structures and world constants) | `net10.0` | — |
+| `ScreenEditor` | all (Avalonia tool, not part of the game) | `net10.0` | — |
 
 `Starquake.Shared` and `ProjectMercury` both multi-target a plain and a `-windows` framework.
 That is what lets one set of sources serve every platform: MonoGame ships a different flavour
@@ -27,7 +27,7 @@ Each head builds to an assembly named `Starquake`, so `Starquake.Shared.dll` plu
 `Starquake.dll` entry point is the normal shape of the output.
 
 `SharedLibs` has no MonoGame dependency, so there is nothing to multi-target for and a single
-`net9.0` build serves the game and the editor alike. As well as the screen data structures it
+`net10.0` build serves the game and the editor alike. As well as the screen data structures it
 holds the constants that describe the shape of the world — `TileMetrics`, `WorldMap`,
 `TunnelTiles`, `ActionTiles`, `MarkerTiles`, `LandingSite` and `TeleportCodes`. The editor has
 to agree with the game about every one of those, so they live in one place rather than being
@@ -51,7 +51,7 @@ Every project builds on any of the three platforms — the Windows head sets
 `EnableWindowsTargeting`, so it compiles on Linux and macOS even though it only runs on
 Windows.
 
-The macOS build also produces `Starquake.Mac/bin/<Config>/net9.0/Starquake.app`, ad-hoc
+The macOS build also produces `Starquake.Mac/bin/<Config>/net10.0/Starquake.app`, ad-hoc
 signed and ready to launch from Finder. The plain executable is written alongside it.
 
 Everything builds and runs natively on Apple Silicon — the game, and MGCB too. That is the
@@ -127,7 +127,7 @@ Four notes on that, each of which cost something to find:
 
 Wine covers the DesktopGL content build and does **not** cover the WindowsDX one, which fails
 with an unexplained `Unexpected error compiling`. So `Content.mgcb` is referenced conditionally:
-the `net9.0-windows` target framework builds content only on Windows.
+the `net10.0-windows` target framework builds content only on Windows.
 
 That target framework still compiles everywhere - `EnableWindowsTargeting` sees to that - it
 just ships no content off a Mac, which costs nothing because the Windows head cannot run there.
@@ -213,10 +213,10 @@ that race back.
 
 The `ParticleEffects/*.xml` assets are compiled by an MGCB extension,
 `ProjectMercury.ContentPipeline`, which drags `ProjectMercury` in with it so MGCB can resolve
-`ProjectMercury.ParticleEffect`. **MGCB is a `net8.0` application**, and a `net9.0` assembly
+`ProjectMercury.ParticleEffect`. **MGCB is a `net8.0` application**, and a `net10.0` assembly
 cannot be loaded into it — that is why those two projects target `net8.0` while the game
-targets `net9.0`. A `net9.0` game referencing a `net8.0` library is fine; the reverse is not.
-Retargeting either of them to `net9.0` produces a build that still "succeeds" while every
+targets `net10.0`. A `net10.0` game referencing a `net8.0` library is fine; the reverse is not.
+Retargeting either of them to `net10.0` produces a build that still "succeeds" while every
 particle effect silently fails to compile.
 
 `ProjectMercury.ContentPipeline` writes to a fixed `bin/mgcb/` folder rather than the usual
@@ -232,7 +232,7 @@ listed as a `ProjectReference` with `ReferenceOutputAssembly="false"` so that
 ## Writing platform-specific code
 
 Don't, if you can avoid it. When you can't, `Starquake.Shared` defines `WINDOWS` on its
-`net9.0-windows` target only, and that is the single supported escape hatch:
+`net10.0-windows` target only, and that is the single supported escape hatch:
 
 ```csharp
 #if WINDOWS
@@ -243,7 +243,7 @@ Don't, if you can avoid it. When you can't, `Starquake.Shared` defines `WINDOWS`
 Nothing uses it today. The one candidate is the commented-out F11 handler in
 `Starquake.Shared/Engines/GameEngine.cs`, which resized the window back to its default
 through `System.Windows.Forms.Form.FromHandle`. Reviving it also means adding
-`<UseWindowsForms>true</UseWindowsForms>` to the `net9.0-windows` target of
+`<UseWindowsForms>true</UseWindowsForms>` to the `net10.0-windows` target of
 `Starquake.Shared.csproj` and to `Starquake.Windows.csproj`.
 
 ## Adding a head
@@ -254,7 +254,7 @@ Create `Starquake.<Platform>/Starquake.<Platform>.csproj`:
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\Starquake.Shared\Starquake.Shared.props" />
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RollForward>Major</RollForward>
   </PropertyGroup>
   <ItemGroup>

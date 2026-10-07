@@ -4,8 +4,8 @@
 
   MonoGame ships a different flavour of MonoGame.Framework per platform and the flavours
   share an assembly identity, so they cannot meet in one output folder. Multi-targeting is
-  what lets a single set of sources hand each head the right one: net9.0 builds against
-  DesktopGL for the Linux and macOS heads, net9.0-windows against WindowsDX for the
+  what lets a single set of sources hand each head the right one: net10.0 builds against
+  DesktopGL for the Linux and macOS heads, net10.0-windows against WindowsDX for the
   Windows head.
 
   Program.cs is deliberately excluded: a .NET entry point has to be compiled into the
@@ -14,13 +14,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net9.0;net9.0-windows</TargetFrameworks>
+        <TargetFrameworks>net10.0;net10.0-windows</TargetFrameworks>
         <OutputType>Library</OutputType>
         <RootNamespace>Starquake</RootNamespace>
         <AssemblyName>Starquake.Shared</AssemblyName>
         <TieredCompilation>false</TieredCompilation>
         <Nullable>enable</Nullable>
-        <!-- Lets the net9.0-windows target build on Linux and macOS. -->
+        <!-- Lets the net10.0-windows target build on Linux and macOS. -->
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <!-- Content.mgcb is named explicitly below; don't glob for it as well. -->
         <EnableMGCBItems>false</EnableMGCBItems>
@@ -104,10 +104,10 @@
           nothing because the Windows head cannot run on a Mac anyway. See BUILD.md.
         -->
         <MonoGameContentReference Include="Content\Content.mgcb"
-                                  Condition="'$(TargetFramework)' != 'net9.0-windows' or '$(OS)' == 'Windows_NT'"/>
+                                  Condition="'$(TargetFramework)' != 'net10.0-windows' or '$(OS)' == 'Windows_NT'"/>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
         <PackageReference Include="MonoGame.Framework.DesktopGL"/>
     </ItemGroup>
 
@@ -117,11 +117,11 @@
       it on also means adding <UseWindowsForms>true</UseWindowsForms> here and in
       Starquake.Windows.
     -->
-    <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0-windows'">
+    <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
         <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
     </PropertyGroup>
 
-    <ItemGroup Condition="'$(TargetFramework)' == 'net9.0-windows'">
+    <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
         <PackageReference Include="MonoGame.Framework.WindowsDX"/>
     </ItemGroup>
 

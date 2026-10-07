@@ -2,7 +2,7 @@
     <Import Project="..\Starquake.Shared\Starquake.Shared.props"/>
 
     <PropertyGroup>
-        <TargetFramework>net9.0-windows</TargetFramework>
+        <TargetFramework>net10.0-windows</TargetFramework>
         <RollForward>Major</RollForward>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <ApplicationIcon>Starquake.ico</ApplicationIcon>

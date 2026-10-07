@@ -31,12 +31,12 @@ jobs:
       - name: Install .NET
         uses: actions/setup-dotnet@v4
         with:
-          # 8.0 as well as 9.0: MGCB is a net8.0 application and so are ProjectMercury and its
+          # 8.0 as well as 10.0: MGCB is a net8.0 application and so are ProjectMercury and its
           # content pipeline extension, which is why they target net8.0 while the game targets
-          # net9.0. See BUILD.md.
+          # net10.0. See BUILD.md.
           dotnet-version: |
             8.0.x
-            9.0.x
+            10.0.x
 
       - name: Restore
         run: dotnet restore Starquake.sln

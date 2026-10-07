@@ -3,9 +3,9 @@
   time (it has to resolve ProjectMercury.ParticleEffect to compile the ParticleEffects
   XML into .xnb).
 
-  That second consumer is why this targets net8.0 rather than net9.0 like the game: MGCB
-  is a net8.0 application, and a net9.0 assembly cannot be loaded into it. The game is
-  free to target net9.0 and reference this.
+  That second consumer is why this targets net8.0 rather than net10.0 like the game: MGCB
+  is a net8.0 application, and a net10.0 assembly cannot be loaded into it. The game is
+  free to target net10.0 and reference this.
 
   MonoGame ships a different flavour of MonoGame.Framework per platform and the flavours
   share an assembly identity, so they cannot meet in one output folder. Multi-targeting is

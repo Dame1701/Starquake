@@ -338,11 +338,12 @@ now has its own tests would be the worse trade.
 
 ### The test project
 
-`Starquake.Tests`, xunit, single-targeted at `net9.0` and referencing `Starquake.Shared`'s `net9.0`
-build. That pulls MonoGame DesktopGL into the test process, which is harmless headlessly because
-SDL is not loaded until something constructs a `Game` or a `GraphicsDevice`. A test that needs a
-`GraphicsDevice` does not belong in it. `RollForward=Major`, for the same reason the four heads set
-it — there is no 9.0 runtime installed on this machine.
+`Starquake.Tests`, xunit, single-targeted at `net10.0` and referencing `Starquake.Shared`'s
+`net10.0` build. That pulls MonoGame DesktopGL into the test process, which is harmless headlessly
+because SDL is not loaded until something constructs a `Game` or a `GraphicsDevice`. A test that
+needs a `GraphicsDevice` does not belong in it. `RollForward=Major`, for the same reason the four
+heads set it — a machine carrying only a newer runtime should still be able to run it. That was
+literal when this was written and the project was on `net9.0`: there was no 9.0 runtime here.
 
 It also covers `CollisionDetection`, the primitive every moving thing in the game is stepped by and
 the one the fire maths sits directly on. Those tests characterise what it currently decides rather

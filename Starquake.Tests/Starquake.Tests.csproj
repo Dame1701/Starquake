@@ -1,8 +1,8 @@
 ﻿<!--
   Unit tests for the parts of the game that are only maths.
 
-  Single-targeted at net9.0 while Starquake.Shared multi-targets, so a reference to it
-  resolves to the net9.0 build and brings MonoGame.Framework.DesktopGL along. That is fine
+  Single-targeted at net10.0 while Starquake.Shared multi-targets, so a reference to it
+  resolves to the net10.0 build and brings MonoGame.Framework.DesktopGL along. That is fine
   headlessly: the types the tests touch are plain managed structs, and SDL is only loaded
   when something constructs a Game or a GraphicsDevice, which no test does. A test that
   needs a GraphicsDevice does not belong here.
@@ -14,9 +14,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <!-- Same reason the heads set it: there is no 9.0 runtime installed here, and the
-             test host is an executable like any other. -->
+        <TargetFramework>net10.0</TargetFramework>
+        <!-- Same reason the heads set it: the test host is an executable like any other, and a
+             machine carrying only a newer runtime should still be able to run it. That was not
+             hypothetical before the move to net10.0 - there was no 9.0 runtime on this one. -->
         <RollForward>Major</RollForward>
         <RootNamespace>Starquake.Tests</RootNamespace>
         <Nullable>enable</Nullable>
