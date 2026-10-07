@@ -59,6 +59,112 @@ main reason this is on MonoGame 3.8.4: 3.8.2's content builder shipped x86_64-on
 natives (FreeImage, freetype) and could only be built by routing MGCB through an x64 .NET
 host under Rosetta.
 
+## Publishing ahead of time
+
+A NativeAOT publish compiles the game to machine code at build time and ships no .NET runtime
+at all: one native executable, no JIT, no `Starquake.dll`, nothing to install on the machine it
+runs on. There is one profile per platform, under each head's `Properties/PublishProfiles/`:
+
+```sh
+dotnet publish Starquake.Mac/Starquake.Mac.csproj -p:PublishProfile=Aot-osx-arm64   # or Aot-osx-x64
+dotnet publish Starquake.Linux/Starquake.Linux.csproj -p:PublishProfile=Aot-linux-x64
+dotnet publish Starquake.Windows\Starquake.Windows.csproj -p:PublishProfile=Aot-win-x64
+```
+
+Each writes to `<head>/bin/Publish/<rid>/`. The macOS ones also build `Starquake.app` around the
+published output — `CreateAotAppBundle`, a second copy of the bundling target, because MSBuild
+runs a target once per project instance and `dotnet publish` runs Build and Publish in the same
+one, so one target cannot see both output folders.
+
+**It is `publish`, not `build`.** `PublishAot` does nothing on `dotnet build`, which still
+produces ordinary IL assemblies — there is no AOT build configuration to select in an IDE, and
+nothing about a normal build changes. It is also not ReadyToRun: `PublishReadyToRun` is false
+here and stays false. These are different things, and NativeAOT is the one with no runtime.
+
+**It does not cross-compile.** ILC emits code for the machine it is told to target and then links
+it with the platform's own linker, so each profile has to be run on the platform it names: macOS
+needs the Xcode command line tools, Linux needs `clang` and the zlib headers, Windows needs the
+Visual Studio C++ build tools. Build for another OS and it stops before it starts, with
+`Cross-OS native compilation is not supported`. Windows is doubly so — that head's content is
+built by MGCB's WindowsDX platform, which already needs a Windows machine for the shader compiler.
+
+Another *architecture* on the same OS is a softer no: ILC will happily emit the code, and then the
+link fails, because the system linker only knows its own machine — `unrecognised emulation mode:
+aarch64linux` from an x86_64 box. That one is solvable by installing a cross-toolchain, where the
+cross-OS one is not. The simple reading is the right one: build each on its own machine.
+
+### What ships
+
+**Not a single file.** The executable holds all the managed code, and that is all it holds:
+
+| | macOS | Linux |
+| --- | --- | --- |
+| The game | `Starquake`, 9.9MB | `Starquake`, 10.3MB |
+| Native libraries | `libSDL2-2.0.0.dylib`, `libopenal.dylib` | `libSDL2-2.0.so.0`, `libopenal.so` |
+| `Content/` | 107MB of `.xnb` | same |
+| `Data/SQScreenData.dat` | 892KB, the map | same |
+
+So about 120MB in a folder, of which the executable is under a tenth. SDL and OpenAL are loaded by
+name at runtime rather than linked in, so they travel as files; the content is read off disk by
+`ContentManager` and a `FileStream`, so it travels too. The win is startup and having no runtime
+to install, not a smaller folder. The Windows head carries no native libraries at all - WindowsDX
+talks to DirectX, which is already on the machine - but see the caveat below.
+
+**MonoGame ships no SDL for `linux-arm64`.** `MonoGame.Library.SDL` carries natives for
+`linux-x64`, `osx` and `win-x64` only, so an arm64 Linux build links fine and comes out with
+`libopenal.so` and no `libSDL2`. `Aot-linux-arm64.pubxml` is there and it builds, but that
+machine has to supply SDL2 itself. This is not an AOT problem — a normal arm64 Linux build is
+short the same file.
+
+### Windows is wired up and unproven
+
+The `Aot-win-x64` profile is correct configuration and it has never been run, because NativeAOT
+cannot cross-compile and this was set up on a Mac. Expect to find out on the first attempt, and
+expect it to be the one platform that needs more than the profile.
+
+The reason to doubt it is `MonoGame.Framework.WindowsDX`, which carries a framework reference to
+`Microsoft.WindowsDesktop.App.WindowsForms` and puts its game window up through
+`WinFormsGameWindow`. **Windows Forms is not supported under NativeAOT** - it is not trimmable,
+and the SDK does not even offer the AOT option to a project that sets `UseWindowsForms`. Nothing
+blocks this head, because the reference arrives transitively rather than through that property,
+so ILC will try; whether what comes out runs is the open question. WindowsDX also brings SharpDX,
+which is .NET Framework-era interop and has had no trimming work done to it.
+
+If it does not come out working, the way round is a Windows head on **DesktopGL** rather than
+WindowsDX - SDL and OpenGL instead of WinForms and DirectX, the same flavour the Linux and macOS
+heads already use, and `MonoGame.Library.SDL` ships a `win-x64` native for exactly that. It is a
+new head (see "Adding a head"), not a change to this one, because the MonoGame flavour is chosen
+by the head's package reference and the two flavours cannot share an output folder.
+
+### What had to be told to the compiler
+
+A JIT works out at runtime what ILC has to know at build time, and two libraries here ask for
+types by name. Three things answer it, and all three are in the repo already:
+
+- **`Starquake.Shared/ContentManagement/NativeAot.cs`** names every content reader that is
+  generic over a type ILC never meets in source. That is the particle effects and only those:
+  Mercury's `.xnb` files are written by `IntermediateSerializer`, so each asks for a
+  `ReflectiveReader<SomeMercuryType>`, and a generic instantiation nothing references cannot be
+  in the binary. It also constructs MessagePack's `ThreeDimensionalArrayFormatter<int>` for the
+  collision map, for the same reason. `GameHost`'s constructor calls it, on every build — on a
+  JIT build it registers the same readers reflection would have found and changes nothing.
+- **`Starquake.Shared.props` roots `MonoGame.Framework` and `ProjectMercury`** against the
+  trimmer, which would otherwise delete the readers MonoGame looks up by string and the emitter
+  properties `ReflectiveReader` reads reflectively. Rooting MonoGame costs about 4MB.
+- **`WarningsNotAsErrors` lets `IL2104` and `IL3053` through.** Those are the roll-ups saying a
+  dependency produced trim or AOT warnings; MonoGame and MessagePack both do, it is their own
+  code, and `TreatWarningsAsErrors` would otherwise fail every publish. Warnings against files in
+  this solution are untouched and still fail the build.
+
+Neither the rooting nor the warning list is conditioned on `PublishAot`, and that is deliberate:
+a publish profile is not read until the SDK's targets run, long after this file is imported, so
+the condition would be false on exactly the publish that needs it. Both are inert otherwise.
+
+**The symptom when something is missing** is a `NotSupportedException` at the first
+`Content.Load`, naming the type it could not build — ``'...ReflectiveReader`1[ProjectMercury.X]'
+is missing native code or metadata``. Add that type to `NativeAot.cs`. Nothing warns at build
+time, because nothing at build time knows what the `.xnb` files are going to ask for.
+
 ## Where the art lives
 
 `Starquake.Shared/Content/` holds it, and `Content.mgcb` compiles it. There is one copy and
@@ -289,6 +395,19 @@ build - the copy into `bin/` is skipped and last time's copies are then swept aw
 or build with `-m:1`, which does not do it in six runs out of six. See PLAN.md 6.6 for the
 measurements and the candidate fixes, and note that `DisableIncrementalClean` has been tried and
 makes it worse.
+
+**`NETSDK1005 ... doesn't have a target for 'net8.0'`** means something restored with
+`TargetFramework` as a *global* property. It is a two-step failure and neither step names the
+other. `ProjectMercury` multi-targets `net8.0` and `net8.0-windows`; a global `TargetFramework`
+overrides that, so restore writes it an assets file holding only the one framework, and then
+`BuildContentPipelineExtension` asks for `net8.0` - which it is right to do - and finds nothing.
+The publish is blamed for a file it never touched.
+
+`dotnet restore` on its own repairs it, because without the property the project evaluates its own
+`TargetFrameworks` again. To stop it happening, do not put `<TargetFramework>` in a publish
+profile: an IDE publishes a profile by passing its properties on the command line, which makes
+every one of them global. None of the `Aot-*.pubxml` files names a target framework, and the
+comment at the top of each says why. Passing `-p:TargetFramework=` by hand does the same thing.
 
 **Content asset names use backslashes** (`"Graphics\\BootScreen2"`). MonoGame's
 `TitleContainer` normalises those to the platform separator, so they work on Linux and macOS

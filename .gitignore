@@ -187,6 +187,9 @@ publish/
 # but database connection strings (with potential passwords) will be unencrypted
 *.pubxml
 *.publishproj
+# The NativeAOT profiles are build configuration, not deploy settings - a runtime identifier and
+# a flag each, nothing to leak. They are part of how the game is published; see BUILD.md.
+!**/PublishProfiles/Aot-*.pubxml
 
 # Microsoft Azure Web App publish settings. Comment the next line if you want to
 # checkin your Azure Web App publish settings, but sensitive information contained

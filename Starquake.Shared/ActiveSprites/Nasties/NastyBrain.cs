@@ -236,7 +236,7 @@ internal class NastyBrain
         {
             NastyType.CoreGuardian => MoveType.DiagonalBouncing,
             NastyType.Spiky => MoveType.SpikeyMovement,
-            _ => (MoveType)_randomNumberGenerator.Next(0, Enum.GetValues(typeof(MoveType)).Length - 1)
+            _ => (MoveType)_randomNumberGenerator.Next(0, Enum.GetValues<MoveType>().Length - 1)
         };
     }
 
@@ -421,7 +421,7 @@ internal class NastyBrain
             // The first two move types are the ones that chase, so a nasty that is after Blob draws
             // only from those.
             ? (MoveType)_randomNumberGenerator.Next(0, 2)
-            : (MoveType)_randomNumberGenerator.Next(0, Enum.GetValues(typeof(MoveType)).Length - 1);
+            : (MoveType)_randomNumberGenerator.Next(0, Enum.GetValues<MoveType>().Length - 1);
 
         SetStartingDirection();
 

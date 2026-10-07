@@ -27,7 +27,8 @@
       Wrap the build output in a Starquake.app bundle so the game launches from Finder with
       the right icon and menu bar name. The plain executable is still produced alongside it.
     -->
-    <Target Name="CreateAppBundle" AfterTargets="Build" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+    <Target Name="CreateAppBundle" AfterTargets="Build"
+            Condition="$([MSBuild]::IsOSPlatform('OSX')) and '$(PublishAot)' != 'true'">
         <PropertyGroup>
             <AppBundleMacOSDir>$(AppBundleDir)/Contents/MacOS</AppBundleMacOSDir>
             <AppBundleResourcesDir>$(AppBundleDir)/Contents/Resources</AppBundleResourcesDir>
@@ -56,5 +57,45 @@
         <!-- Ad-hoc signature: unsigned bundles are killed on launch on Apple Silicon. -->
         <Exec Command="codesign --force --deep --sign - &quot;$(AppBundleDir)&quot;"/>
         <Message Text="Built $(AppBundleDir)" Importance="High"/>
+    </Target>
+
+    <!--
+      The same bundle again, around the publish output rather than the build output. A NativeAOT
+      publish writes one native executable and its two dylibs to PublishDir and never touches
+      bin/<Config>/<TFM>/, so the bundle CreateAppBundle makes is of the wrong thing entirely:
+      it would hold a Starquake.dll and no runtime, and launching it does nothing.
+
+      This is a second target rather than the first one parameterised because MSBuild runs a
+      target once per project instance, and `dotnet publish` runs Build and Publish in the same
+      one - so a single target cannot see both output folders. The only difference is where it
+      copies from.
+    -->
+    <Target Name="CreateAotAppBundle" AfterTargets="Publish"
+            Condition="'$(PublishAot)' == 'true' and $([MSBuild]::IsOSPlatform('OSX'))">
+        <PropertyGroup>
+            <AotAppBundleDir>$(PublishDir)Starquake.app</AotAppBundleDir>
+            <AotAppBundleMacOSDir>$(AotAppBundleDir)/Contents/MacOS</AotAppBundleMacOSDir>
+            <AotAppBundleResourcesDir>$(AotAppBundleDir)/Contents/Resources</AotAppBundleResourcesDir>
+        </PropertyGroup>
+
+        <ItemGroup>
+            <!-- The debug symbols are most of the publish folder and none of the game. -->
+            <AotAppBundleContent Include="$(PublishDir)Content\**\*.*"/>
+            <AotAppBundleBinary Include="$(PublishDir)**\*.*"
+                                Exclude="$(PublishDir)Starquake.app\**;$(PublishDir)Content\**;$(PublishDir)**\*.pdb;$(PublishDir)**\*.dbg;$(PublishDir)*.xml;$(PublishDir)**\*.dSYM\**"/>
+        </ItemGroup>
+
+        <MakeDir Directories="$(AotAppBundleMacOSDir);$(AotAppBundleResourcesDir)"/>
+        <Copy SourceFiles="@(AotAppBundleBinary)"
+              DestinationFiles="@(AotAppBundleBinary->'$(AotAppBundleMacOSDir)/%(RecursiveDir)%(Filename)%(Extension)')"
+              SkipUnchangedFiles="true"/>
+        <Copy SourceFiles="@(AotAppBundleContent)"
+              DestinationFiles="@(AotAppBundleContent->'$(AotAppBundleResourcesDir)/Content/%(RecursiveDir)%(Filename)%(Extension)')"
+              SkipUnchangedFiles="true"/>
+        <Copy SourceFiles="Info.plist" DestinationFolder="$(AotAppBundleDir)/Contents" SkipUnchangedFiles="true"/>
+        <Copy SourceFiles="Starquake.icns" DestinationFolder="$(AotAppBundleResourcesDir)" SkipUnchangedFiles="true"/>
+        <Exec Command="chmod +x &quot;$(AotAppBundleMacOSDir)/Starquake&quot;"/>
+        <Exec Command="codesign --force --deep --sign - &quot;$(AotAppBundleDir)&quot;"/>
+        <Message Text="Built $(AotAppBundleDir)" Importance="High"/>
     </Target>
 </Project>

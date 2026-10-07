@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
+using Starquake.ContentManagement;
 using Starquake.Core;
 using Starquake.Engines;
 using Starquake.Input;
@@ -56,6 +57,10 @@ public class GameHost : Game
 
     public GameHost()
     {
+        // Before anything is loaded, and before the graphics device exists. A normal build does not
+        // need it; a NativeAOT one cannot load a particle effect or the collision map without it.
+        NativeAot.Register();
+
         _graphics = new GraphicsDeviceManager(this);
         _graphics.SynchronizeWithVerticalRetrace = true;
         _graphics.PreferredBackBufferWidth = CompositionSize.Width;
