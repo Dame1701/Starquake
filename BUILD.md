@@ -145,7 +145,9 @@ The evidence is better than the documentation suggests, and none of it is proof:
   thing an ahead-of-time compiler cannot answer.
 
 So expect warnings, expect this head to want more than the profile, and expect to find out by
-running it. What would settle it is one command on a Windows machine.
+running it. **CI now asks on every push** - the `windows-aot` job publishes it on a Windows
+runner, and is `continue-on-error` so that an answer of "no" reports itself rather than turning
+`main` red for a build nobody ships yet. Drop that line the first time it passes.
 
 If it does not come out working, the way round is a Windows head on **DesktopGL** rather than
 WindowsDX - SDL and OpenGL instead of WinForms and DirectX, the same flavour the Linux and macOS
@@ -215,6 +217,87 @@ What does not work, with the measurements:
 Leave them visible rather than adding them to `NoWarn`. They are the signal that a dependency's
 reflection surface has changed, which is exactly when this page needs rereading. A normal
 `dotnet build` is still 0 warnings; these appear only on an AOT publish.
+
+## Distributing a build
+
+An ahead-of-time publish is the thing to hand to someone else: no runtime to install and no
+version to match. What it is not is a single file. Everything in "What ships" above has to travel
+together — on macOS that is what the `.app` bundle is for, and on the other two it is the folder.
+
+### macOS: it is signed, and that is not the same as being allowed to run
+
+`Starquake.app` is **ad-hoc signed** — `codesign --sign -`, which is what `CreateAotAppBundle`
+does. There are two separate gates here and the bundle passes only the first:
+
+- **Apple Silicon requires every arm64 binary to carry a signature.** Without one the kernel
+  refuses to start it. The ad-hoc signature satisfies this, which is the reason that `codesign`
+  line exists at all.
+- **Gatekeeper wants a Developer ID signature and a notarisation ticket.** An ad-hoc signature is
+  neither: `codesign -dvv` reports `Signature=adhoc` and `TeamIdentifier=not set`, and
+  `spctl -a -t exec Starquake.app` answers `rejected`.
+
+Gatekeeper's verdict is only enforced on files carrying the quarantine attribute, which is why
+this never shows up locally and bites the first person you send it to:
+
+| How it travels | Quarantined | Result |
+| --- | --- | --- |
+| USB stick, `scp`/`rsync`, a tarball over ssh, built on the machine | no | runs |
+| Browser download, AirDrop, Mail, Messages, Slack | yes | blocked |
+
+Tested both ways: a copy with the attribute set as Safari sets it does not launch — no window, no
+process. The same bundle without it runs from anywhere, including a folder with nothing else in
+it.
+
+**The fix for a recipient** is to strip the attribute:
+
+```sh
+xattr -dr com.apple.quarantine /path/to/Starquake.app
+```
+
+Or System Settings → Privacy & Security → "Open Anyway". Note that Control-clicking the app and
+choosing Open — the advice most of the internet still gives — **stopped working in macOS 15**;
+Apple removed that bypass, so it is one of those two or nothing.
+
+Doing it properly means an Apple Developer Program membership, a Developer ID Application
+certificate, the hardened runtime, `notarytool` and `stapler`. That costs money every year and is
+deliberately not done here. Worth knowing for whenever it is: because this build has no JIT, it
+needs none of the `allow-jit` or unsigned-executable-memory entitlements a normal .NET app has to
+ask the notary service for.
+
+### Windows
+
+The same shape — `Starquake.exe` and the content beside it, no native libraries because WindowsDX
+talks to DirectX, which is already there. Expect SmartScreen to object to an unsigned executable
+the same way Gatekeeper objects to an unsigned bundle, and for the same reason.
+
+That head's AOT publish has never produced a working build, because it has never produced any
+build: see "Windows is wired up and unproven". The `windows-aot` job in CI runs it on every push
+to find out, and is marked `continue-on-error` until it passes.
+
+### Linux
+
+`linux-x64` is complete and needs nothing installed: `libSDL2-2.0.so.0` and `libopenal.so` ship
+beside the executable.
+
+**`linux-arm64` ships without SDL**, because `MonoGame.Library.SDL` has no arm64 Linux native -
+it carries `linux-x64`, `osx` and `win-x64` only. The build links fine and comes out with
+`libopenal.so` and nothing else, and then says so plainly on launch:
+
+```
+System.Exception: Failed to load library: libSDL2-2.0.so.0
+   at MonoGame.Framework.Utilities.FuncLoader.LoadLibraryExt(String libname)
+   at Sdl..cctor()
+```
+
+The machine has to supply it. On Debian and Ubuntu that is one package:
+
+```sh
+sudo apt install libsdl2-2.0-0
+```
+
+With that in place the binary gets past SDL and on to the graphics device, which is as far as a
+headless container can demonstrate. This is not an AOT problem - a normal arm64 Linux build is
+short the same file.
 
 ## Where the art lives
 
@@ -358,6 +441,13 @@ Windows on every push to `main` and every pull request. `Directory.Build.props` 
 Every project builds on every platform, so one runner would prove the code compiles. There
 are three because the packaging does not travel: the `.app` bundle and its ad-hoc signature
 are a macOS-only target, and only a run on macOS builds them.
+
+Two jobs sit beside that matrix. `namespaces` reads source and nothing else, and is described
+where it is defined. `windows-aot` publishes the Windows head ahead of time, which is the one
+thing nobody has been able to try from a Mac - NativeAOT does not cross-compile - and it is
+`continue-on-error` because it is an open question rather than a promise. See "Windows is wired
+up and unproven". Nothing else about the AOT publishes is gated here: the macOS and Linux ones
+are known to work, and adding them would buy a few minutes of ILC per push to re-prove it.
 
 ## The content build and Project Mercury
 
