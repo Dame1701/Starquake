@@ -47,6 +47,35 @@ jobs:
       - name: Test
         run: dotnet test Starquake.Tests/Starquake.Tests.csproj --no-build
 
+  # The open question, asked on every push instead of never.
+  #
+  # The three AOT heads were set up on a Mac, and NativeAOT does not cross-compile, so the Windows
+  # one has never been run - see "Windows is wired up and unproven" in BUILD.md. MonoGame's
+  # WindowsDX flavour brings Windows Forms with it, which Microsoft does not list as supported
+  # under NativeAOT, and SharpDX, which predates trimming entirely. Nothing in the SDK blocks
+  # either; whether what comes out of ILC is a working executable is the thing nobody here knows.
+  #
+  # continue-on-error because it is an experiment and not yet a promise: a failure should report
+  # the answer, not turn main red for a build nobody ships yet. Turn it into a gate - drop that
+  # line - the first time it passes. Only the publish runs: a GitHub runner has no GPU, so
+  # launching the result would prove nothing beyond what the compile already did.
+  windows-aot:
+    runs-on: windows-latest
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Publish NativeAOT
+        run: dotnet publish Starquake.Windows/Starquake.Windows.csproj -p:PublishProfile=Aot-win-x64
+
   # A second gate the repository did not have. tools/namespace-cycles.py counts the namespaces in
   # Starquake.Shared that depend on each other both ways, and the count is zero. Nothing but this
   # keeps it there: C# has no rule against a namespace cycle - one assembly, so any type may
