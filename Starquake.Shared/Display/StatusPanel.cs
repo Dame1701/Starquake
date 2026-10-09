@@ -23,7 +23,11 @@ namespace Starquake.Display;
 ///     lived on a class named for a widget, which is why <c>Blob</c> read his own supplies off the
 ///     HUD. Those are <see cref="PlayerStats" /> now and this reads them to draw them.
 /// </remarks>
-internal class StatusPanel
+internal class StatusPanel(ResourceManager resources,
+    GraphicsSet graphicsSet,
+    ScreenDirectory screenDirectory,
+    Random randomNumberGenerator,
+    PlayerStats stats)
 {
     /// <summary>
     ///     The inventory strip: how far apart the slots are, and where the first one starts. The slot
@@ -99,14 +103,8 @@ internal class StatusPanel
     /// <inheritdoc cref="OverlayXPos" />
     private const int OverlayYPos = 26;
 
-    private readonly GraphicsSet _graphicsSet;
 
-
-    private readonly KeyScanner _inventoryScanner;
-    private readonly ResourceManager _resources;
-    private readonly ScreenDirectory _screenDirectory;
-
-    private readonly PlayerStats _stats;
+    private readonly KeyScanner _inventoryScanner = new(resources, graphicsSet, randomNumberGenerator, false);
 
     private Collectables[]? _blobsInventory;
     private int _slotToScan = -1;
@@ -121,24 +119,9 @@ internal class StatusPanel
     /// <inheritdoc cref="_slotIdentified" />
     private int _identifiedFrame;
 
-    public StatusPanel(
-        ResourceManager resources,
-        GraphicsSet graphicsSet,
-        ScreenDirectory screenDirectory,
-        Random randomNumberGenerator,
-        PlayerStats stats)
-    {
-        _resources = resources;
-        _graphicsSet = graphicsSet;
-        _screenDirectory = screenDirectory;
-        _stats = stats;
+    public int Width => resources.GetSpriteCollection(Assets.Graphics.StatusPanelGraphic).SpriteWidth;
 
-        _inventoryScanner = new KeyScanner(resources, graphicsSet, randomNumberGenerator, false);
-    }
-
-    public int Width => _resources.GetSpriteCollection(Assets.Graphics.StatusPanelGraphic).SpriteWidth;
-
-    public int Height => _resources.GetSpriteCollection(Assets.Graphics.StatusPanelGraphic).SpriteHeight;
+    public int Height => resources.GetSpriteCollection(Assets.Graphics.StatusPanelGraphic).SpriteHeight;
 
     /// <summary>
     ///     Steps the panel, and says what has to happen to Blob as a result. It is told what state he
@@ -162,9 +145,9 @@ internal class StatusPanel
 
             // Blob is only drained while he is walking the planet - a teleporter, a booth or a
             // pyramid is a safe place to stand. PlayerStats decides whether that has killed him.
-            if (_stats.DrainEnergy(energyMayDrain && _screenDirectory.Current == GameScreenType.MainGame))
+            if (stats.DrainEnergy(energyMayDrain && screenDirectory.Current == GameScreenType.MainGame))
             {
-                _stats.EnergyLevel = 0;
+                stats.EnergyLevel = 0;
                 instruction = BlobInstruction.Overload;
             }
 
@@ -185,7 +168,7 @@ internal class StatusPanel
             return BlobInstruction.None;
         }
 
-        return _stats.TakeALife() ? BlobInstruction.EndTheGame : BlobInstruction.Revive;
+        return stats.TakeALife() ? BlobInstruction.EndTheGame : BlobInstruction.Revive;
     }
 
     /// <summary>
@@ -226,12 +209,12 @@ internal class StatusPanel
         DrawInventory();
         DrawInventoryScanner();
 
-        DrawBar(Assets.Graphics.EnergyBar, EnergyBarYPos, _stats.EnergyLevel * EnergyBarScale);
-        DrawBar(Assets.Graphics.JumpBar, JumpBarYPos, _stats.Platforms * JumpBarScale);
-        DrawBar(Assets.Graphics.AmmoBar, AmmoBarYPos, _stats.FirePower * AmmoBarScale);
+        DrawBar(Assets.Graphics.EnergyBar, EnergyBarYPos, stats.EnergyLevel * EnergyBarScale);
+        DrawBar(Assets.Graphics.JumpBar, JumpBarYPos, stats.Platforms * JumpBarScale);
+        DrawBar(Assets.Graphics.AmmoBar, AmmoBarYPos, stats.FirePower * AmmoBarScale);
 
-        PanelNumbers.Draw(ScoreXPos, ScoreYPos, _stats.PlayerScore.ToString("000000"), _resources, Color.White);
-        PanelNumbers.Draw(LivesXPos, LivesYPos, _stats.BlobLives.ToString("00"), _resources, Color.White);
+        PanelNumbers.Draw(ScoreXPos, ScoreYPos, stats.PlayerScore.ToString("000000"), resources, Color.White);
+        PanelNumbers.Draw(LivesXPos, LivesYPos, stats.BlobLives.ToString("00"), resources, Color.White);
 
         DrawPanelGraphic(Assets.Graphics.StatusPanelOverlay, OverlayXPos, OverlayYPos);
     }
@@ -242,7 +225,7 @@ internal class StatusPanel
     /// </summary>
     private void DrawPanelGraphic(string assetName, int xPos = 0, int yPos = 0)
     {
-        SpriteCollection graphic = _resources.GetSpriteCollection(assetName);
+        SpriteCollection graphic = resources.GetSpriteCollection(assetName);
 
         graphic.Begin(BlendState.AlphaBlend);
         graphic.DrawSprite(0, xPos, yPos, Color.White);
@@ -256,7 +239,7 @@ internal class StatusPanel
     /// </summary>
     private void DrawBar(string assetName, int yPos, double level)
     {
-        SpriteCollection bar = _resources.GetSpriteCollection(assetName);
+        SpriteCollection bar = resources.GetSpriteCollection(assetName);
 
         bar.Begin(BlendState.AlphaBlend);
         bar.DrawSprite(0, BarXPos, yPos, (int)level, BarHeight, Color.White);
@@ -275,7 +258,7 @@ internal class StatusPanel
             return;
         }
 
-        SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
+        SpriteCollection pickups = resources.GetSpriteCollection(graphicsSet.Names.Pickups);
 
         pickups.Begin(BlendState.AlphaBlend);
 
@@ -287,7 +270,7 @@ internal class StatusPanel
                 InventorySlotSpacing * slot + InventoryNumberXPos,
                 InventoryNumberYPos,
                 (slot + 1).ToString(),
-                _resources,
+                resources,
                 holdingSomething ? Color.OrangeRed : Color.White);
 
             if (!holdingSomething || _slotToScan == slot)
@@ -330,7 +313,7 @@ internal class StatusPanel
         float pulse = CoreReplacementSettings.PulseAt(_identifiedFrame);
 
         SpriteCollection illuminated =
-            _resources.GetSpriteCollection(_graphicsSet.Names.PickupsIlluminated);
+            resources.GetSpriteCollection(graphicsSet.Names.PickupsIlluminated);
 
         illuminated.Begin(BlendState.Additive);
         illuminated.DrawSprite(

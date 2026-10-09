@@ -14,11 +14,6 @@ It does that on any monitor. Drawing and game logic are separate - the picture i
 so it stays smooth at whatever the display runs at, while the logic is stepped from a clock of its own at exactly
 fifty frames a second. A 60Hz panel, a 144Hz one or an odd 59 makes no difference to how fast Blob moves.
 
-This used to be a problem. The game was tied to the monitor's refresh, so it ran about 20% fast on the 60Hz
-displays nearly everything now defaults to, and the note here said the only fix would be to redraw every graphic
-so Blob moved in 6 steps instead of 8 - far too much work to contemplate. That turned out not to be the fix at
-all. Separating the two clocks solved it without touching a single graphic, and Blob still moves in 8 steps.
-
 Controls
 ========
 - Move Blob with the cursor keys.
@@ -36,10 +31,9 @@ Function keys
 =============
 These are live whatever the control scheme:
 
-- F8 switches the artwork between the redrawn graphics and the original 1985 set. The backdrops go with it;
-  the original set never had any.
+- F8 switches the artwork between the redrawn graphics and the original 1985 set (with a few enhancements)
 - F9 steps the CRT emulation on a notch, round four settings: CRT OFF, CRT SCANLINES, CRT PHOSPHOR and
-  CRT FULL TUBE. Each press adds one thing and the fourth takes the lot away.
+  CRT FULL TUBE. Each press cycles through the different modes.
 - F10 turns the backdrops on and off.
 - F12 switches between full-screen and windowed. The game pauses itself afterwards so you don't die while the
   window is still resizing.

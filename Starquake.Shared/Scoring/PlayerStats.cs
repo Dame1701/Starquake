@@ -62,7 +62,7 @@ internal class PlayerStats
     ///     The platforms Blob is given when he comes back, if he died with fewer, so that losing a life never
     ///     strands him somewhere he cannot climb out of.
     /// </summary>
-    private const int PlatformsOnRevival = 8;
+    private const int PlatformsOnRevival = 10;
 
     /// <summary>
     ///     What each power-up is worth. There are three sizes of each, plus a top-up that gives
