@@ -41,7 +41,7 @@
                  the screen data is read with a plain FileStream relative to it. -->
             <AppBundleContent Include="$(OutputPath)Content\**\*.*"/>
             <AppBundleBinary Include="$(OutputPath)**\*.*"
-                             Exclude="$(OutputPath)Starquake.app\**;$(OutputPath)Content\**"/>
+                             Exclude="$(OutputPath)Starquake.app\**;$(OutputPath)Content\**;$(OutputPath)**\.DS_Store"/>
         </ItemGroup>
 
         <MakeDir Directories="$(AppBundleMacOSDir);$(AppBundleResourcesDir)"/>
@@ -82,7 +82,7 @@
             <!-- The debug symbols are most of the publish folder and none of the game. -->
             <AotAppBundleContent Include="$(PublishDir)Content\**\*.*"/>
             <AotAppBundleBinary Include="$(PublishDir)**\*.*"
-                                Exclude="$(PublishDir)Starquake.app\**;$(PublishDir)Content\**;$(PublishDir)**\*.pdb;$(PublishDir)**\*.dbg;$(PublishDir)*.xml;$(PublishDir)**\*.dSYM\**"/>
+                                Exclude="$(PublishDir)Starquake.app\**;$(PublishDir)Content\**;$(PublishDir)**\*.pdb;$(PublishDir)**\*.dbg;$(PublishDir)*.xml;$(PublishDir)**\*.dSYM\**;$(PublishDir)**\.DS_Store"/>
         </ItemGroup>
 
         <MakeDir Directories="$(AotAppBundleMacOSDir);$(AotAppBundleResourcesDir)"/>
