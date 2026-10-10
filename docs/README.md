@@ -31,7 +31,10 @@ Every path in the page is relative, so it renders correctly at the project URL
 ## Updating content
 - Screenshots: replace `assets/screenshot-1.png` … `screenshot-6.png` (keep the names).
 - Screenshot titles: edit `shotLabels` in `scripts/app.dc.js`.
-- Download cards (version, package, size, accent colour): edit `downloads` in `scripts/app.dc.js`.
-- Download links: search `index.html` for `href="#"` inside the download cards and point them at your GitHub release files.
+- Download cards (packages, sizes, accent colour): edit `downloads` in `scripts/app.dc.js`. Each
+  entry names one headline build and the rest of that platform's builds as `alternates`; `asset` is
+  whatever follows the version in the published file name, and the file names and release URLs are
+  built from it. A new release means bumping `version` (and `repo`, if it ever moves) and the sizes —
+  the links in the markup need no editing.
 - Colours, type and spacing: the `:root` tokens at the top of `styles.css`.
 - Keep `scripts/support.js` in place — the page needs it.

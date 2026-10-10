@@ -625,6 +625,9 @@ img { display: block; }
   color: var(--t-300);
 }
 
+.download__footnote a { color: var(--t-100); text-decoration: underline; }
+.download__footnote a:hover { color: var(--lime); }
+
 /* ---------- Platform cards ----------
    --platform-accent is the only per-card value, set inline from the logic. */
 .platforms {
@@ -705,10 +708,45 @@ img { display: block; }
 .platform__row dd { margin: 0; }
 
 .platform__cta {
-  margin-top: auto;
   padding: 12px 20px;
   box-shadow: 4px 4px 0 #000;
 }
+
+/* The rest of the release for this platform, pinned to the foot of the card so
+   the lists line up across a row however many builds each one has. */
+.platform__alts {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 2px dashed #ffffff33;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.platform__alts-title {
+  color: var(--t-300);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.platform__alt-list {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.platform__alt {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.platform__alt-link { text-decoration: underline; }
+
+.platform__alt-size { color: var(--t-300); }
 
 /* ==========================================================================
    Footer

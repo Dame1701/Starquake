@@ -171,8 +171,8 @@
                 <div class="download__head">
                     <div class="download__kicker">Ready, player one?</div>
                     <h2 class="download__title">Download</h2>
-                    <p class="download__lede">Free to play. Lorem ipsum dolor sit amet — pick your platform and jump
-                        straight in.</p>
+                    <p class="download__lede">Free, and built ahead of time — there is no .NET runtime to install
+                        on any platform. Pick yours and jump straight in.</p>
                 </div>
 
                 <div class="platforms">
@@ -188,23 +188,37 @@
                             <dl class="platform__meta">
                                 <div class="platform__row">
                                     <dt>Version</dt>
-                                    <dd>v1.0.0</dd>
+                                    <dd>{{ version }}</dd>
                                 </div>
                                 <div class="platform__row">
                                     <dt>Package</dt>
-                                    <dd>{{ p.file }}</dd>
+                                    <dd>{{ p.package }}</dd>
                                 </div>
                                 <div class="platform__row">
                                     <dt>Size</dt>
                                     <dd>{{ p.size }}</dd>
                                 </div>
                             </dl>
-                            <a href="#" class="btn btn--primary platform__cta">Download for {{ p.name }}</a>
+                            <a href="{{ p.url }}" class="btn btn--primary platform__cta">Download for {{ p.name }}</a>
+                            <div class="platform__alts">
+                                <div class="platform__alts-title">Other builds</div>
+                                <ul class="platform__alt-list">
+                                    <sc-for list="{{ p.alternates }}" as="alt" hint-placeholder-count="2">
+                                        <li class="platform__alt">
+                                            <a href="{{ alt.url }}" class="platform__alt-link">{{ alt.label }}</a>
+                                            <span class="platform__alt-size">{{ alt.size }}</span>
+                                        </li>
+                                    </sc-for>
+                                </ul>
+                            </div>
                         </div>
                     </sc-for>
                 </div>
 
-                <div class="download__footnote">Checksums · Release notes · Older versions</div>
+                <div class="download__footnote">
+                    <a href="{{ releaseUrl }}">Release notes &amp; install help</a> ·
+                    <a href="{{ releasesUrl }}">All versions</a>
+                </div>
             </div>
         </section>
 
@@ -214,7 +228,7 @@
             <div class="footer__legal">Remake © 2026 Damien C Green | Original © 1985 Stephen Crow</div>
             <div class="footer__links">
                 <a href="#">Discord</a>
-                <a href="#">GitHub</a>
+                <a href="{{ repoUrl }}">GitHub</a>
                 <a href="#">Press kit</a>
             </div>
         </footer>

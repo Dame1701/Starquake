@@ -25,10 +25,51 @@ class Component extends DCLogic {
     "The Explorer Who Didn't Make It"
   ];
 
+  /* ---------- Downloads ----------
+     One release, eight assets. `asset` is the suffix after the version in each
+     published file name; the full name and URL are built from it in renderVals,
+     so a new release means bumping `version` and the sizes. */
+
+  version = '1.0.0';
+
+  repo = 'https://github.com/Dame1701/Starquake';
+
   downloads = [
-    { name: 'macOS',   req: 'macOS 12+ · Apple Silicon & Intel', file: '.dmg',              size: '84 MB', accent: '#2b3fe0' },
-    { name: 'Windows', req: 'Windows 10 / 11 · 64-bit',          file: '.exe installer',    size: '79 MB', accent: '#e0901f' },
-    { name: 'Linux',   req: 'x86_64 · most distros',             file: '.AppImage / .deb',  size: '81 MB', accent: '#28c0b0' }
+    {
+      name: 'macOS',
+      req: 'macOS 12+ · Apple Silicon & Intel',
+      accent: '#2b3fe0',
+      asset: 'osx-arm64.dmg',
+      package: 'Apple Silicon .dmg',
+      size: '41 MB',
+      alternates: [
+        { label: 'Intel .dmg', asset: 'osx-x64.dmg', size: '41 MB' }
+      ]
+    },
+    {
+      name: 'Windows',
+      req: 'Windows 10 / 11 · 64-bit',
+      accent: '#e0901f',
+      asset: 'win-x64-Setup.exe',
+      package: 'Installer .exe',
+      size: '33 MB',
+      alternates: [
+        { label: 'Portable .zip', asset: 'win-x64.zip', size: '39 MB' }
+      ]
+    },
+    {
+      name: 'Linux',
+      req: 'x86_64 & ARM64 · most distros',
+      accent: '#28c0b0',
+      asset: 'linux-x64.AppImage',
+      package: 'x86_64 .AppImage',
+      size: '38 MB',
+      alternates: [
+        { label: 'x86_64 .tar.gz',  asset: 'linux-x64.tar.gz',      size: '39 MB' },
+        { label: 'ARM64 .AppImage', asset: 'linux-arm64.AppImage',  size: '38 MB' },
+        { label: 'ARM64 .tar.gz',   asset: 'linux-arm64.tar.gz',    size: '38 MB' }
+      ]
+    }
   ];
 
   /* ---------- Lifecycle ---------- */
@@ -58,6 +99,11 @@ class Component extends DCLogic {
     if (/Win/i.test(ua)) return 'Windows';
     if (/Linux|X11/i.test(ua)) return 'Linux';
     return null;
+  }
+
+  /* The release URL of one asset, from the suffix recorded in `downloads`. */
+  assetUrl(asset) {
+    return `${this.repo}/releases/download/v${this.version}/Starquake-${this.version}-${asset}`;
   }
 
   step(delta) {
@@ -149,7 +195,13 @@ class Component extends DCLogic {
     const highlightOS = this.props.highlightOS ?? true;
     const platforms = this.downloads.map(p => {
       const recommended = highlightOS && p.name === os;
-      return { ...p, recommended, stateClass: recommended ? 'is-recommended' : '' };
+      return {
+        ...p,
+        url: this.assetUrl(p.asset),
+        alternates: p.alternates.map(a => ({ ...a, url: this.assetUrl(a.asset) })),
+        recommended,
+        stateClass: recommended ? 'is-recommended' : ''
+      };
     });
 
     const total = String(shots.length).padStart(2, '0');
@@ -162,6 +214,10 @@ class Component extends DCLogic {
       shotCounter: `${String(active + 1).padStart(2, '0')} / ${total}`,
 
       platforms,
+      version: `v${this.version}`,
+      repoUrl: this.repo,
+      releaseUrl: `${this.repo}/releases/tag/v${this.version}`,
+      releasesUrl: `${this.repo}/releases`,
 
       lightboxOpen: lightbox,
       openLightbox: () => this.setState({ lightbox: true }),
