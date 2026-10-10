@@ -18,8 +18,15 @@ assets/           hero art, comic panels, screenshots
 the page, which is how the runtime expects to find it.
 
 ## Publish
-1. Copy everything in this folder (including `.nojekyll`) into your repo root, or into a `/docs` folder.
-2. Repo → Settings → Pages → Deploy from branch → pick the branch and folder.
+GitHub Pages serves this folder as it stands: Settings → Pages → Deploy from branch → `main`,
+folder `/docs`.
+
+The folder is named `docs` rather than `website` because branch deployment offers exactly two
+choices of folder, `/` and `/docs`, and no way to name a third. Keep `.nojekyll` beside
+`index.html` so the files are served as they are instead of being run through Jekyll.
+
+Every path in the page is relative, so it renders correctly at the project URL
+(`https://dame1701.github.io/Starquake-Linux/`) as well as at an account root.
 
 ## Updating content
 - Screenshots: replace `assets/screenshot-1.png` … `screenshot-6.png` (keep the names).
