@@ -110,9 +110,14 @@
 
       It is a path in, not a second source of truth: nothing is committed, and a build with the
       property unset compiles the content from Content.mgcb exactly as before.
+
+      Every file, not just the .xnb. Most of the built content is .xnb and used to be all of it, but
+      a song is not: MGCB writes the music out as an .ogg beside a tiny .xnb that names it, and the
+      game reads the .ogg at play time. MGCB's own task copies whatever it finds in the output
+      folder, so this takes the same view of a folder handed in.
     -->
     <ItemGroup Condition="'$(PrebuiltContentDir)' != ''">
-        <Content Include="$(PrebuiltContentDir)\**\*.xnb">
+        <Content Include="$(PrebuiltContentDir)\**\*.*">
             <Link>Content\%(RecursiveDir)%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>

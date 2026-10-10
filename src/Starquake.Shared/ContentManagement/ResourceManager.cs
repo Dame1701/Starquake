@@ -28,6 +28,14 @@ internal class ResourceManager : StartableGameComponentBase
     private readonly List<DataDescription> _dataDescriptions;
     private readonly GraphicsDeviceManager _graphicsDeviceManager;
     private readonly GraphicsSet _graphicsSet;
+    private readonly List<MusicDescription> _musicDescriptions;
+
+    /// <summary>
+    ///     The one music engine, reached through <see cref="GetMusicEngine" /> by the game engine,
+    ///     which is the only thing that drives it.
+    /// </summary>
+    private readonly MusicEngine _musicEngine;
+
     private readonly ParticleEngine _particleEngine;
 
     private readonly Dictionary<string, object> _resources;
@@ -59,11 +67,13 @@ internal class ResourceManager : StartableGameComponentBase
         // use can corrupt its state into returning zero indefinitely, and a dozen collaborators draw
         // from the game's instance every frame.
         _soundEngine = new SoundEffectEngine(content);
+        _musicEngine = new MusicEngine(content);
 
         _spriteDescriptions = new List<SpriteDescription>();
         _animSpriteDescriptions = new List<AnimSpriteDescription>();
         _dataDescriptions = new List<DataDescription>();
         _soundDescriptions = new List<SoundDescription>();
+        _musicDescriptions = new List<MusicDescription>();
 
         _resources = new Dictionary<string, object>();
     }
@@ -141,7 +151,8 @@ internal class ResourceManager : StartableGameComponentBase
             _spriteDescriptions.Count +
             _dataDescriptions.Count +
             _animSpriteDescriptions.Count +
-            _soundDescriptions.Count;
+            _soundDescriptions.Count +
+            _musicDescriptions.Count;
 
         int componentsLoaded = 0;
 
@@ -152,6 +163,7 @@ internal class ResourceManager : StartableGameComponentBase
 
         LoadScreenData();
         LoadSoundResources(totalComponentsToLoad, ref componentsLoaded);
+        LoadMusicResources(totalComponentsToLoad, ref componentsLoaded);
 
         UpdateStatus(
             "Launching Game.....",
@@ -194,6 +206,17 @@ internal class ResourceManager : StartableGameComponentBase
             ReportProgress("sound effect", t.ResourceName, totalComponentsToLoad, componentsLoaded);
 
             _soundEngine.LoadSoundEffect(t);
+            componentsLoaded++;
+        }
+    }
+
+    private void LoadMusicResources(int totalComponentsToLoad, ref int componentsLoaded)
+    {
+        foreach (MusicDescription t in _musicDescriptions)
+        {
+            ReportProgress("music", t.Screen.ToString(), totalComponentsToLoad, componentsLoaded);
+
+            _musicEngine.LoadSong(t);
             componentsLoaded++;
         }
     }
@@ -279,6 +302,11 @@ internal class ResourceManager : StartableGameComponentBase
         _soundDescriptions.Add(new SoundDescription(soundName, soundPath, instanceType, maxInstances, killOnScreenChange));
     }
 
+    public void AddMusicResource(GameScreenType screen, string songPath)
+    {
+        _musicDescriptions.Add(new MusicDescription(screen, songPath));
+    }
+
     public SpriteCollection GetSpriteCollection(string name)
     {
         if (!_resources.TryGetValue(name, out object? resource))
@@ -336,6 +364,9 @@ internal class ResourceManager : StartableGameComponentBase
 
     public SoundEffectEngine GetSoundFxEngine()
         => _soundEngine;
+
+    public MusicEngine GetMusicEngine()
+        => _musicEngine;
 
     public object GetDataResource(string name)
     {

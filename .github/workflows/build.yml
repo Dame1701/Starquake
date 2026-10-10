@@ -213,12 +213,24 @@ jobs:
       # preserves the ad-hoc signature that Apple Silicon requires to start the binary at all, and
       # UDZO compression takes the 124MB bundle down to about 30MB - most of the content is .xnb,
       # which compresses hard.
+      #
+      # build-dmg.sh rather than hdiutil, because the window a .dmg opens into is worth more than
+      # one line of script: the app beside the Applications folder, an arrow between them, and the
+      # background art that says which way to drag. All of that lives in a .DS_Store that only
+      # Finder can write, so create-dmg drives a real Finder session on the mounted volume to
+      # produce it - which is why this needs a runner with a login session, as the GitHub-hosted
+      # macOS ones are.
       - name: Package (macOS)
         if: startsWith(matrix.rid, 'osx')
-        run: >
-          hdiutil create -volname Starquake
-          -srcfolder ${{ matrix.head }}/bin/Publish/${{ matrix.rid }}/Starquake.app
-          -ov -format UDZO "${{ github.workspace }}/Starquake-${{ needs.version.outputs.version }}-${{ matrix.rid }}.dmg"
+        env:
+          # create-dmg is a shell script with no dependencies, so the only slow part of installing
+          # it is Homebrew deciding to update itself first. Twice, once per Mac runner.
+          HOMEBREW_NO_AUTO_UPDATE: 1
+        run: |
+          brew install create-dmg
+          Starquake.Mac/dmg/build-dmg.sh \
+            "${{ matrix.head }}/bin/Publish/${{ matrix.rid }}/Starquake.app" \
+            "${{ github.workspace }}/Starquake-${{ needs.version.outputs.version }}-${{ matrix.rid }}.dmg"
 
       # Two things for Linux. The AppImage is the one to hand someone - a single executable file
       # that needs no install - and the tarball is the fallback, because AppImages want libfuse2

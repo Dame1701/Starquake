@@ -367,12 +367,33 @@ version to match. What `dotnet publish` leaves behind is not a single file, thou
 
 | Platform | Single file | Portable | Made by |
 | --- | --- | --- | --- |
-| macOS | `.dmg`, about 30MB | — | `hdiutil`, UDZO |
+| macOS | `.dmg`, about 30MB | — | `create-dmg`, UDZO, `Starquake.Mac/dmg/build-dmg.sh` |
 | Windows | `Setup.exe` | `.zip` | Inno Setup 6, `Starquake.Windows/Starquake.iss` |
 | Linux | `.AppImage` | `.tar.gz` | `appimagetool`, `Starquake.Linux/AppRun` + `.desktop` |
 
 The compression is worth noticing: 124MB of bundle becomes a 30MB `.dmg`, because `Content/` is
 almost all of it and `.xnb` compresses hard.
+
+### The macOS window
+
+A `.dmg` is a mounted volume, and what a player sees when they open one is a Finder window. Left
+to itself that is a single icon on grey, with nothing to suggest the app is meant to be copied to
+Applications rather than run from the mount — so `Starquake.Mac/dmg/build-dmg.sh` sets the window
+instead: 1000×480, the app on the left, the Applications folder on the right with an arrow drawn
+between them, a first-launch note beside them, and the game's own title screen behind it all.
+
+Window size, icon positions and the background picture all live in a `.DS_Store`, which only
+Finder knows how to write. There is no flag on `hdiutil` for any of it. `create-dmg` is the
+standard way round that: it mounts a writable image, drives a Finder session over AppleScript to
+arrange the window, and converts the result to a compressed read-only image. So the packaging step
+needs `brew install create-dmg` and a runner with a login session — which the GitHub-hosted macOS
+runners have.
+
+Two files have to agree: `build-dmg.sh` holds the icon coordinates, and `background.py` draws the
+picture around those same coordinates. The background is generated rather than drawn by hand —
+`python3 background.py [comic|title]` picks between the website's headline panel and the game's title screen
+headline panel as the backdrop, and needs `brew install librsvg`. The PNG it produces is committed,
+so a build does not need any of that.
 
 **Packaging is possible at all because the game writes nothing beside itself.** `HiScoreStore`
 writes to `ApplicationData` and `Screenshots` to the pictures folder, both by
@@ -492,6 +513,35 @@ no head consumes, and three `.fx` files the pipeline has never compiled.
 
 The layered originals were never in `Assets/` anyway. They are in
 `Starquake.Shared/Creation/Graphics/`, as `.psd` and `.rdw`.
+
+### Music is `.m4a` in, Ogg Vorbis out
+
+The five pieces of music in `Content/Music/` are `.m4a`, and nothing ships them. `SongProcessor`
+runs the FFmpeg that MonoGame's pipeline packages bring with it and transcodes each to Ogg
+Vorbis, so what lands in `Content/bin/` is a `.ogg` next to a 130-byte `.xnb` naming it. Every
+platform reads the same `.ogg`, which DesktopGL decodes itself, so there is nothing per-platform
+about any of it and no reason to convert the sources by hand. The transcode is also the only one:
+pre-converting the sources to `.ogg` would just add a lossy generation, because MGCB would
+re-encode them anyway.
+
+Three things about that are worth knowing before they look like mistakes:
+
+- **The importer is called `Mp3Importer` and the file is not an MP3.** None of MonoGame's four
+  audio importers claims `.m4a` - they are `.mp3`, `.ogg`, `.wav` and `.wma` - but all four are
+  the same thin wrapper that hands the file to FFmpeg, so the name is a misnomer rather than a
+  constraint and `Mp3Importer` reads these perfectly well. It is named explicitly in
+  `Content.mgcb`, which is the only reason it works: the extension is what the MGCB Editor
+  matches on when it picks an importer for a file being added, so adding these through the
+  editor rather than by hand is what would go wrong.
+- **`.m4a` says nothing about the codec inside.** Four of the five are AAC and
+  `gameover-song.m4a` is Opus, both in an MP4 container. It makes no difference - the importer
+  hands the file to FFmpeg either way and what comes out is Vorbis - but a codec check on these
+  files will not find one answer, and there is no need for it to.
+- **The built content is no longer all `.xnb`.** Anything copying built content has to take the
+  `.ogg` too or the music is missing at runtime with nothing said about it until a screen with
+  music comes up. MGCB's own build task already copies whatever it finds, and so does the macOS
+  app bundling; `PrebuiltContentDir` in `Starquake.Shared.csproj` - the seam CI hands content in
+  through - was `**\*.xnb` and is now `**\*.*` for this reason.
 
 ### Shaders need Wine on macOS and Linux
 

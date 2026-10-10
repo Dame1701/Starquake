@@ -1205,6 +1205,36 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/waterfall.png
 
+#begin Music/completed-game-song.m4a
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Music/completed-game-song.m4a
+
+#begin Music/computer-report-song.m4a
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Music/computer-report-song.m4a
+
+#begin Music/gameover-song.m4a
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Music/gameover-song.m4a
+
+#begin Music/hiscore-song.m4a
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Music/hiscore-song.m4a
+
+#begin Music/opening-game-song.m4a
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Music/opening-game-song.m4a
+
 #begin ParticleEffects/BasicSmokePlume.xml
 /importer:XmlImporter
 /processor:PassThroughProcessor

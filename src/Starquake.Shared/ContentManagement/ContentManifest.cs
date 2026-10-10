@@ -37,6 +37,7 @@ internal static class ContentManifest
         ParticleEffects(resources);
         AnimationTiles(resources);
         Sounds(resources);
+        Music(resources);
     }
 
     private static void SharedGraphics(ResourceManager resources)
@@ -261,5 +262,20 @@ internal static class ContentManifest
         resources.AddSoundResource(Assets.Sounds.LifePowerUp, "Sounds\\LifePowerUp", SoundEffectInstanceType.Multi, 2, false);
 
         resources.AddSoundResource(Assets.Sounds.BackgroundSound1, "Sounds\\BackgroundSound1", SoundEffectInstanceType.Single, 0, false);
+    }
+
+    /// <summary>
+    ///     The music, named by the screen each piece plays on rather than by a registered name. The
+    ///     five screens with a piece are the ones the game talks about itself on; the screens Blob is
+    ///     played on have none, and a screen missing from here is a screen that plays in silence.
+    ///     <para>In the order a player meets them, which is also the order the screens hand over in.</para>
+    /// </summary>
+    private static void Music(ResourceManager resources)
+    {
+        resources.AddMusicResource(GameScreenType.Options, "Music\\opening-game-song");
+        resources.AddMusicResource(GameScreenType.ComputerReport, "Music\\computer-report-song");
+        resources.AddMusicResource(GameScreenType.GameComplete, "Music\\completed-game-song");
+        resources.AddMusicResource(GameScreenType.GameOver, "Music\\gameover-song");
+        resources.AddMusicResource(GameScreenType.HiScores, "Music\\hiscore-song");
     }
 }

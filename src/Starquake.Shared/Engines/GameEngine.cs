@@ -779,6 +779,11 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
 
     private void UpdateRunningGame(GameTime gameTime)
     {
+        // Before the pause, and outside the screen's own update, because the music belongs to the
+        // screen rather than to what is happening on it: it follows a hand-over on the frame the
+        // hand-over happens, whichever of the screens made it.
+        ContentResourceManager.GetMusicEngine().FollowTheScreen(ScreenDirectory.Current);
+
         _hotkeys.Update();
 
         HandleTestModeKeys();
