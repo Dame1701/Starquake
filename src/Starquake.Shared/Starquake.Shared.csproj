@@ -1,12 +1,13 @@
 ﻿<!--
-  The game itself. Every platform builds from these sources; nothing here is allowed to be
-  platform-specific except behind an #if WINDOWS guard.
+  The game itself. Every platform builds from these sources, and none of them is
+  platform-specific.
 
-  MonoGame ships a different flavour of MonoGame.Framework per platform and the flavours
-  share an assembly identity, so they cannot meet in one output folder. Multi-targeting is
-  what lets a single set of sources hand each head the right one: net10.0 builds against
-  DesktopGL for the Linux and macOS heads, net10.0-windows against WindowsDX for the
-  Windows head.
+  One target framework and one MonoGame flavour, because every head is DesktopGL - Windows
+  included. This project used to multi-target net10.0 and net10.0-windows so that the Windows
+  head could have MonoGame.Framework.WindowsDX: the flavours share an assembly identity and
+  cannot meet in one output folder, so a second target framework was the only way to build
+  both. Moving Windows to DesktopGL removed the reason, and with it EnableWindowsTargeting,
+  the WINDOWS compilation symbol, and the conditional content build. See BUILD.md.
 
   Program.cs is deliberately excluded: a .NET entry point has to be compiled into the
   executable itself, so each head links that one file in. See Starquake.Shared.props.
@@ -14,14 +15,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net10.0;net10.0-windows</TargetFrameworks>
+        <TargetFramework>net10.0</TargetFramework>
         <OutputType>Library</OutputType>
         <RootNamespace>Starquake</RootNamespace>
         <AssemblyName>Starquake.Shared</AssemblyName>
         <TieredCompilation>false</TieredCompilation>
         <Nullable>enable</Nullable>
-        <!-- Lets the net10.0-windows target build on Linux and macOS. -->
-        <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <!-- Content.mgcb is named explicitly below; don't glob for it as well. -->
         <EnableMGCBItems>false</EnableMGCBItems>
         <!--
@@ -85,44 +84,23 @@
 
     <ItemGroup>
         <!--
-          The content is built here, once, rather than in each head. MGCB keys its output
-          folder off the .mgcb's own location and the platform, so two heads on the same
-          MonoGame platform (Linux and macOS are both DesktopGL) would otherwise race each
-          other writing the same .xnb files. The built content reaches each head's output
-          through the project reference.
-        -->
-        <!--
-          Shaders are the exception to "every project builds on every platform". MonoGame has no
-          shader compiler of its own: on Windows it uses the DirectX one that is already there,
-          and on macOS and Linux it runs that same Windows compiler under Wine. Wine covers the
-          DesktopGL build, which is what the Mac and Linux heads use, and does not cover the
-          WindowsDX one - so building the Windows platform's content on a Mac fails on the first
-          .fx it meets.
+          The content is built here, once, rather than in each head, and reaches each head's
+          output through the project reference. There is one set of .xnb for every platform now:
+          MGCB keys its output folder off the MonoGamePlatform that the MonoGame package sets,
+          and with DesktopGL everywhere that is a single DesktopGL folder all three heads share.
+          When WindowsDX was in the solution it was also a race to avoid - two heads on the same
+          platform writing the same files - which no longer arises.
 
-          So the Windows content is built on Windows. Everywhere else that target framework still
-          compiles - EnableWindowsTargeting sees to that - it simply ships no content, which costs
-          nothing because the Windows head cannot run on a Mac anyway. See BUILD.md.
+          Shaders need a compiler MonoGame does not ship. On Windows it uses the DirectX one
+          already on the machine; on macOS and Linux it runs that same Windows compiler under
+          Wine and wants MGFXC_WINE_PATH set. That is a requirement of the machine doing the
+          build, not of the platform being built for. See BUILD.md.
         -->
-        <MonoGameContentReference Include="Content\Content.mgcb"
-                                  Condition="'$(TargetFramework)' != 'net10.0-windows' or '$(OS)' == 'Windows_NT'"/>
+        <MonoGameContentReference Include="Content\Content.mgcb"/>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <ItemGroup>
         <PackageReference Include="MonoGame.Framework.DesktopGL"/>
-    </ItemGroup>
-
-    <!--
-      The escape hatch for Windows-only code. Nothing uses it today; the one candidate,
-      resizing the window back to its default in GameEngine.cs, is commented out. Turning
-      it on also means adding <UseWindowsForms>true</UseWindowsForms> here and in
-      Starquake.Windows.
-    -->
-    <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
-        <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
-    </PropertyGroup>
-
-    <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
-        <PackageReference Include="MonoGame.Framework.WindowsDX"/>
     </ItemGroup>
 
     <ItemGroup>

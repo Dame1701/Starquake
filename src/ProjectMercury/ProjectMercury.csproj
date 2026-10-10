@@ -7,16 +7,20 @@
   is a net8.0 application, and a net10.0 assembly cannot be loaded into it. The game is
   free to target net10.0 and reference this.
 
-  MonoGame ships a different flavour of MonoGame.Framework per platform and the flavours
-  share an assembly identity, so they cannot meet in one output folder. Multi-targeting is
-  what lets one set of sources hand each head the right one: net8.0 builds against
-  DesktopGL for the Linux and macOS heads, net8.0-windows against WindowsDX for the
-  Windows head.
+  One MonoGame flavour, DesktopGL, because that is what every head uses now. This used to
+  multi-target net8.0 and net8.0-windows so the Windows head could have WindowsDX; the
+  flavours share an assembly identity and cannot meet in one output folder, so a second
+  target framework was the only way to build both. Moving Windows to DesktopGL removed the
+  reason for it.
+
+  The 25 #if WINDOWS blocks through these sources are inert and always were: nothing here
+  has ever defined that symbol. They are upstream XNA-era guards around [Serializable] and
+  a Guard call, left as found.
 -->
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net8.0;net8.0-windows</TargetFrameworks>
+        <TargetFramework>net8.0</TargetFramework>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <ImplicitUsings>enable</ImplicitUsings>
         <!--
@@ -30,16 +34,10 @@
         <Nullable>disable</Nullable>
         <RootNamespace>ProjectMercury</RootNamespace>
         <AssemblyName>ProjectMercury</AssemblyName>
-        <!-- Lets the net8.0-windows target build on Linux and macOS. -->
-        <EnableWindowsTargeting>true</EnableWindowsTargeting>
     </PropertyGroup>
 
-    <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <ItemGroup>
         <PackageReference Include="MonoGame.Framework.DesktopGL" />
-    </ItemGroup>
-
-    <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-windows'">
-        <PackageReference Include="MonoGame.Framework.WindowsDX" />
     </ItemGroup>
 
 </Project>
