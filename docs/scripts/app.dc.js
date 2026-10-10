@@ -18,11 +18,11 @@ class Component extends DCLogic {
 
   shotLabels = [
     'The Crash Site',
-    'Crystal Caverns',
-    'The Core Chamber',
-    'Teleport Network',
-    'Lost Outpost',
-    'Deep Rock Tunnels'
+    'Flight Computer Report',
+    'Teleportal Code Entry',
+    'The Molecule Fields',
+    'Violet Stalactite Caves',
+    'Hall of the Idols'
   ];
 
   downloads = [
