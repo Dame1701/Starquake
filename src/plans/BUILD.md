@@ -290,6 +290,30 @@ Push anything else and nothing is released. The `version` job asks git whether t
 exists, which is what makes the whole thing idempotent - re-run the workflow, push a typo fix,
 re-run it a year later, and as long as the number has not moved there is no second release.
 
+### Trying it without publishing
+
+A lower version number is **not** a dry run. `0.9.0` on `main` with no `v0.9.0` tag publishes a
+real, public, "Latest" release exactly as `1.0.0` would; GitHub attaches no meaning to `0.x`.
+There are two real answers instead.
+
+**A dry run** builds all five platforms, packs every archive and publishes nothing. Actions tab →
+Build → *Run workflow*, and leave **"Build everything and publish nothing"** ticked - it defaults
+to on, so a manual run is safe unless it is deliberately made otherwise. It is the only way to
+exercise the whole pipeline against `main` without releasing, and the artifacts are downloadable
+from the run's summary page afterwards. A pull request does the same thing, because the version
+job only arms on `main`.
+
+**A pre-release** is for when it should be downloadable but not be the version everyone gets.
+Any version with a hyphen in it - `1.0.0-rc1`, semver's own convention - is published as a real
+Release with real assets, flagged as a pre-release and left out of "Latest". Dropping the suffix
+later and bumping to `1.0.0` then releases the final one beside it.
+
+| What you want | What to do | Result |
+| --- | --- | --- |
+| Prove the pipeline works | Run workflow, dry run ticked | Five builds, no Release |
+| Something testers can download | `<Version>1.0.0-rc1</Version>` | Release, flagged pre-release |
+| The actual thing | `<Version>1.0.0</Version>` | Release, marked Latest |
+
 ### Changing a version that is already published
 
 **Nothing is overwritten, and nothing silently replaces a release.** The tag is the record:
@@ -299,8 +323,29 @@ re-run it a year later, and as long as the number has not moved there is no seco
 - **Push again without changing the number** - no release. The tag already exists, the `version`
   job says so in the log, and the build still runs and still uploads plain artifacts.
 - **Move `<Version>` back to a number already released** - also no release, for the same reason.
-  It does not rebuild or replace the old one. If that is genuinely wanted, delete the tag and the
-  Release on GitHub first; a release is then produced from whatever is on `main` now.
+  It does not rebuild or replace the old one.
+
+### Deleting a release and making it again
+
+Yes, and there is one catch: **deleting the Release does not delete the tag**, and the tag is what
+the version job checks. Delete the Release alone and nothing will regenerate - the job keeps
+reporting "already released" against a tag with nothing on the end of it. Delete both:
+
+```sh
+gh release delete v1.0.0 --cleanup-tag --yes
+```
+
+With the tag gone the version is new again, and either of these publishes it afresh:
+
+- push anything to `main`, or
+- Actions → Build → *Run workflow* on `main` with the dry run **unticked**.
+
+It is a genuine rebuild, not a restore: every platform is compiled again and the new tag is
+created at whatever `main` points to now, which may not be the commit the deleted release was
+built from. That is usually what is wanted, and it is worth being clear that it is what happens.
+
+`--cleanup-tag` is the whole trick. Without it the leftover tag is the most confusing state this
+system has, because everything looks correct and nothing happens.
 
 Git does not overwrite a published release under any of these. A tag can be force-moved by hand
 (`git tag -f`, `git push --force`), and the Release that already exists keeps pointing at the

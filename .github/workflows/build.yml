@@ -19,6 +19,11 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Build everything and publish nothing'
+        type: boolean
+        default: true
 
 # Every path below is relative to the solution, which lives in src/ rather than at the root of
 # the repository. Set once here rather than per step: this applies to `run` steps only, which is
@@ -42,6 +47,7 @@ jobs:
     outputs:
       version: ${{ steps.read.outputs.version }}
       release: ${{ steps.read.outputs.release }}
+      prerelease: ${{ steps.read.outputs.prerelease }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -55,7 +61,21 @@ jobs:
           [ -n "$version" ] || { echo "No <Version> in Directory.Build.props"; exit 1; }
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-          if [ "${{ github.ref }}" != "refs/heads/main" ]; then
+          # Semver's own convention: a hyphen makes it a pre-release. 1.0.0-rc1 publishes a real
+          # Release with real assets, flagged as a pre-release and left out of "Latest", so it can
+          # go to people to try without displacing the version everyone else downloads.
+          case "$version" in
+            *-*) prerelease=true ;;
+            *)   prerelease=false ;;
+          esac
+          echo "prerelease=$prerelease" >> "$GITHUB_OUTPUT"
+
+          # The dry run is first because it overrides everything: it is the only way to exercise
+          # the whole pipeline on main without publishing.
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Dry run. Version $version builds on every platform and publishes nothing."
+          elif [ "${{ github.ref }}" != "refs/heads/main" ]; then
             echo "release=false" >> "$GITHUB_OUTPUT"
             echo "::notice::Version $version - not main, so nothing will be released."
           elif git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
@@ -63,7 +83,7 @@ jobs:
             echo "::notice::Version $version is already released as v$version. Bump <Version> to publish a new one."
           else
             echo "release=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::Version $version is new - this run will publish release v$version."
+            echo "::notice::Version $version is new - this run will publish release v$version (prerelease=$prerelease)."
           fi
 
   # A new cycle is one misfiled file, and this fails in about a second. No restore, no build, no
@@ -291,6 +311,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ needs.version.outputs.version }}
+          PRERELEASE: ${{ needs.version.outputs.prerelease }}
         run: |
           set -eu
           ls -la dist/
@@ -321,8 +342,11 @@ jobs:
           The arm64 AppImage carries its own SDL2; the arm64 tarball does not, and wants
           `sudo apt install libsdl2-2.0-0` before it will start.
           NOTES
+          flags=""
+          [ "$PRERELEASE" = "true" ] && flags="--prerelease"
+          # shellcheck disable=SC2086
           gh release create "v$VERSION" dist/* \
             --repo "${{ github.repository }}" \
             --target "${{ github.sha }}" \
             --title "Starquake $VERSION" \
-            --notes-file notes.md
+            --notes-file notes.md $flags
