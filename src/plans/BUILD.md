@@ -8,20 +8,26 @@ target framework and MonoGame flavour, and adds whatever packaging that platform
 
 | Project | Platform | Target framework | MonoGame flavour |
 | --- | --- | --- | --- |
-| `Starquake.Shared` | all (the game itself, plus `Content/` and `Data/`) | `net10.0`, `net10.0-windows` | both, by target framework |
+| `Starquake.Shared` | all (the game itself, plus `Content/` and `Data/`) | `net10.0` | DesktopGL |
 | `Starquake.Linux` | Linux | `net10.0` | DesktopGL |
 | `Starquake.Mac` | macOS | `net10.0` | DesktopGL |
-| `Starquake.Windows` | Windows | `net10.0-windows` | WindowsDX |
-| `ProjectMercury` | all (particle engine) | `net8.0`, `net8.0-windows` | both, by target framework |
+| `Starquake.Windows` | Windows | `net10.0` | DesktopGL |
+| `ProjectMercury` | all (particle engine) | `net8.0` | DesktopGL |
 | `ProjectMercury.ContentPipeline` | build-time only (MGCB extension) | `net8.0` | DesktopGL |
 | `SharedLibs` | all (screen data structures and world constants) | `net10.0` | — |
 | `ScreenEditor` | all (Avalonia tool, not part of the game) | `net10.0` | — |
 
-`Starquake.Shared` and `ProjectMercury` both multi-target a plain and a `-windows` framework.
-That is what lets one set of sources serve every platform: MonoGame ships a different flavour
-of `MonoGame.Framework` per platform and they all share an assembly identity, so two flavours
-cannot meet in one output folder. The plain target builds against DesktopGL for the Linux and
-macOS heads, the `-windows` one against WindowsDX for the Windows head.
+**One MonoGame flavour, one target framework, every platform.** That is new, and it is worth
+knowing what it replaced. `Starquake.Shared` and `ProjectMercury` used to multi-target a plain
+and a `-windows` framework, because MonoGame ships a different flavour of `MonoGame.Framework`
+per platform, they all share an assembly identity, and two flavours cannot meet in one output
+folder — so a second target framework was the only way to build DesktopGL for Linux and macOS
+and WindowsDX for Windows out of one set of sources.
+
+Moving the Windows head to DesktopGL removed the reason for all of it. Gone with it:
+`EnableWindowsTargeting` in three projects, the `MonoGame.Framework.WindowsDX` package, the
+`WINDOWS` compilation symbol, the conditional content build, and the race between two heads
+writing the same `.xnb`. See "The Windows head is DesktopGL" below for why.
 
 Each head builds to an assembly named `Starquake`, so `Starquake.Shared.dll` plus a small
 `Starquake.dll` entry point is the normal shape of the output.
@@ -47,9 +53,9 @@ dotnet build Starquake.Linux/Starquake.Linux.csproj     # Linux
 dotnet build Starquake.Windows/Starquake.Windows.csproj # Windows
 ```
 
-Every project builds on any of the three platforms — the Windows head sets
-`EnableWindowsTargeting`, so it compiles on Linux and macOS even though it only runs on
-Windows.
+Every project builds on any of the three platforms, and now builds its content there too.
+The Windows head needed `EnableWindowsTargeting` to compile off Windows while it was on
+`net10.0-windows`; on DesktopGL and `net10.0` it is an ordinary project like the other two.
 
 The macOS build also produces `Starquake.Mac/bin/<Config>/net10.0/Starquake.app`, ad-hoc
 signed and ready to launch from Finder. The plain executable is written alongside it.
@@ -81,34 +87,58 @@ produces ordinary IL assemblies — there is no AOT build configuration to selec
 nothing about a normal build changes. It is also not ReadyToRun: `PublishReadyToRun` is false
 here and stays false. These are different things, and NativeAOT is the one with no runtime.
 
-**It does not cross-compile.** ILC emits code for the machine it is told to target and then links
-it with the platform's own linker, so each profile has to be run on the platform it names: macOS
-needs the Xcode command line tools, Linux needs `clang` and the zlib headers, Windows needs the
-Visual Studio C++ build tools. Build for another OS and it stops before it starts, with
-`Cross-OS native compilation is not supported`. Windows is doubly so — that head's content is
-built by MGCB's WindowsDX platform, which already needs a Windows machine for the shader compiler.
+**It does not cross-compile between operating systems, and the reason is the linker, not ILC.**
+This page used to say a cross-OS attempt stops before it starts with `Cross-OS native compilation
+is not supported`. It does not. Told to target `linux-x64` from a Mac, ILC compiles the whole
+program and writes a perfectly good 48MB `ELF 64-bit LSB relocatable, x86-64` object file; what
+fails is the step after it, because macOS clang has no linker that targets Linux:
 
-Another *architecture* on the same OS is a softer no: ILC will happily emit the code, and then the
-link fails, because the system linker only knows its own machine — `unrecognised emulation mode:
-aarch64linux` from an x86_64 box. That one is solvable by installing a cross-toolchain, where the
-cross-OS one is not. The simple reading is the right one: build each on its own machine.
+```
+clang : error : invalid linker name in argument '-fuse-ld=bfd'
+```
+
+So each profile wants the platform's own toolchain: macOS the Xcode command line tools, Linux
+`clang` plus the zlib headers plus an `objcopy` or `llvm-objcopy` for the symbol stripping,
+Windows the Visual Studio C++ build tools. Miss the stripping tool and the publish dies at the
+very last step, after every bit of the compiling is done.
+
+Being a link failure rather than a refusal makes it the same *kind* of problem as
+cross-architecture, and solvable the same way — a cross-linker and a sysroot — rather than a
+wall. Not worth doing here: a runner on the right OS is free (see "CI"), and Docker runs Linux
+containers on a Mac.
+
+**Another architecture on the same OS varies by OS.** On Linux the link fails for the same reason
+in miniature, the system linker knowing only its own machine: `unrecognised emulation mode:
+aarch64linux` from an x86_64 box. **On macOS it simply works** — Xcode's clang carries both
+targets, so `Aot-osx-x64` builds on Apple Silicon and comes out `Mach-O 64-bit executable
+x86_64`, 10.4MB. Measured, not assumed. One Mac, and one macOS runner, covers both Mac targets.
 
 ### What ships
 
 **Not a single file.** The executable holds all the managed code, and that is all it holds:
 
-| | macOS | Linux |
-| --- | --- | --- |
-| The game | `Starquake`, 9.9MB | `Starquake`, 10.3MB |
-| Native libraries | `libSDL2-2.0.0.dylib`, `libopenal.dylib` | `libSDL2-2.0.so.0`, `libopenal.so` |
-| `Content/` | 107MB of `.xnb` | same |
-| `Data/SQScreenData.dat` | 892KB, the map | same |
+| | macOS | Linux | Windows |
+| --- | --- | --- | --- |
+| The game | `Starquake`, 9.9MB | `Starquake`, 10.3MB | `Starquake.exe` |
+| Native libraries | `libSDL2-2.0.0.dylib`, `libopenal.dylib` | `libSDL2-2.0.so.0`, `libopenal.so` | `SDL2.dll`, `openal.dll` |
+| `Content/` | 107MB of `.xnb` | same | same |
+| `Data/SQScreenData.dat` | 892KB, the map | same | same |
 
 So about 120MB in a folder, of which the executable is under a tenth. SDL and OpenAL are loaded by
 name at runtime rather than linked in, so they travel as files; the content is read off disk by
 `ContentManager` and a `FileStream`, so it travels too. The win is startup and having no runtime
-to install, not a smaller folder. The Windows head carries no native libraries at all - WindowsDX
-talks to DirectX, which is already on the machine - but see the caveat below.
+to install, not a smaller folder.
+
+**Windows carries native libraries now, and did not used to.** That row read "none" while the head
+was WindowsDX, which talks to DirectX and finds it already on the machine. On DesktopGL it loads
+SDL and OpenAL exactly as the other two do, and `MonoGame.Library.SDL` and `MonoGame.Library.OpenAL`
+both ship a `win-x64` native, so nothing has to be found on the player's machine.
+
+**Self-contained is not single-file**, on any of the three. `PublishSingleFile` is one of only three
+things the SDK refuses outright alongside `PublishAot`, and even if it did not, `Content/` is read
+off disk and SDL and OpenAL are opened by name at runtime - neither can live inside the executable.
+What travels is a folder, or on macOS the `.app` that wraps one. One file per platform means an
+archive: see "Distributing a build".
 
 **MonoGame ships no SDL for `linux-arm64`.** `MonoGame.Library.SDL` carries natives for
 `linux-x64`, `osx` and `win-x64` only, so an arm64 Linux build links fine and comes out with
@@ -116,46 +146,56 @@ talks to DirectX, which is already on the machine - but see the caveat below.
 machine has to supply SDL2 itself. This is not an AOT problem — a normal arm64 Linux build is
 short the same file.
 
-### Windows is wired up and unproven
+### The Windows head is DesktopGL
 
-The `Aot-win-x64` profile is correct configuration and it has never been run, because NativeAOT
-cannot cross-compile and this was set up on a Mac. Expect to find out on the first attempt, and
-expect it to be the one platform that needs more than the profile.
+It used to be WindowsDX, and that choice was retired for a reason that had nothing to do with
+preference: **the WindowsDX head could never have built its own content, on any machine.** MGCB's
+Windows platform rejects the shaders this game is written in, and says so plainly once you get a
+real error message out of it rather than the roll-up:
 
-What makes it the interesting one is `MonoGame.Framework.WindowsDX`, which carries a framework
-reference to `Microsoft.WindowsDesktop.App.WindowsForms` and puts its game window up through
-`WinFormsGameWindow`. Microsoft does not list Windows Forms as supported under NativeAOT, and the
-SDK does not offer the AOT option to a project that sets `UseWindowsForms` - but that is a
-`ProjectCapability`, an IDE affordance, not a gate. Nothing blocks this head, and the reference
-arrives transitively rather than through that property in any case.
+```
+Invalid profile ''. Pixel shader 'DrainTheColour' must be SM 4.0 level 9.1 or higher!
+Unexpected error compiling '.../Content/Shaders/Desaturate.fx'!
+```
 
-The evidence is better than the documentation suggests, and none of it is proof:
+All 21 shader passes here are `ps_2_0`, because `Content.mgcb` is built `/profile:Reach`. That
+check is MonoGame's own, on the managed side, and so is **independent of the operating system** -
+which means the advice this page used to give, "build the Windows content on Windows", would have
+failed in exactly the same way. It is very probably why the old `windows-aot` job never passed:
+it never reached ILC at all.
 
-- **There is no check to fail.** The only three `PublishAot` errors in the SDK are about single
-  file, runtime packs and a missing runtime identifier. None mentions Windows Forms, WPF or
-  `Microsoft.WindowsDesktop.App`.
-- **Windows Forms is trimmed deliberately, not by accident.** `Microsoft.NET.Sdk.WindowsDesktop`
-  turns off binding, UI type editors, ActiveX, design-time features and MDI through feature
-  switches when `PublishTrimmed` is set, which `PublishAot` implies. That is maintained support,
-  not a dead end.
-- **Nothing in the chain emits IL.** `System.Windows.Forms.dll` is trim-annotated -
-  `RequiresUnreferencedCode`, `DynamicallyAccessedMembers`, `FeatureSwitchDefinition` - and
-  carries no `RequiresDynamicCode`. SharpDX, which WindowsDX also brings, has no trim annotations
-  at all, being 2016 vintage; but it is vtable interop rather than `Reflection.Emit`, which is the
-  thing an ahead-of-time compiler cannot answer.
+Two other things fall out of the same investigation:
 
-So expect warnings, expect this head to want more than the profile, and expect to find out by
-running it. **CI now asks on every push** - the `windows-aot` job publishes it on a Windows
-runner, and is `continue-on-error` so that an answer of "no" reports itself rather than turning
-`main` red for a build nobody ships yet. Drop that line the first time it passes.
+- **Wine was never the problem.** This page used to call the WindowsDX content failure "an
+  unexplained `Unexpected error compiling`" and conclude that Wine covers DesktopGL and not
+  WindowsDX. It covers both: patch one shader to `ps_4_0_level_9_1` and `/platform:Windows`
+  compiles it on a Mac, under Wine, successfully.
+- **Moving the shaders up instead would have broken the other two heads.** DesktopGL refuses SM4
+  the other way round — `error X3523: DX9-style intrinsics are disabled when not in dx9
+  compatibility mode` — so one source serving both flavours needs MonoGame's `#if OPENGL` /
+  `PS_SHADERMODEL` preamble and 21 shaders of edits. That buys back a DirectX renderer nobody
+  asked for.
 
-If it does not come out working, the way round is a Windows head on **DesktopGL** rather than
-WindowsDX - SDL and OpenGL instead of WinForms and DirectX, the same flavour the Linux and macOS
-heads already use, and `MonoGame.Library.SDL` ships a `win-x64` native for exactly that. It is a
-new head (see "Adding a head"), not a change to this one, because the MonoGame flavour is chosen
-by the head's package reference and the two flavours cannot share an output folder.
+So DesktopGL, and the gains are not only the content build:
 
-### What had to be told to the compiler
+- The Windows head renders through the same SDL and OpenGL path as the Linux and macOS heads,
+  which is exercised every day, instead of one of its own.
+- The WinForms-and-SharpDX-under-NativeAOT question disappears. WindowsDX carries a framework
+  reference to `Microsoft.WindowsDesktop.App.WindowsForms` and puts its window up through
+  `WinFormsGameWindow`; Microsoft does not list Windows Forms as supported under NativeAOT, and
+  SharpDX is 2016 vintage with no trim annotations at all. Nothing in the SDK blocked it and
+  nobody here ever proved it either way. Now it is moot.
+- One content build serves every platform, which is what lets CI build it once.
+
+The head is `net10.0`, not `net10.0-windows`, and keeps its `app.manifest` and `ApplicationIcon`.
+It gains one thing: an embedded `Icon.bmp`. MonoGame's `SdlGameWindow` looks for that resource in
+the entry assembly and falls back to its own logo without it, where `WinFormsGameWindow` took the
+window icon from `ApplicationIcon` instead. `ApplicationIcon` still matters - it is what Explorer
+draws on `Starquake.exe` - but it is no longer what the window wears.
+
+**What is still unproven is the AOT publish**, not the configuration: NativeAOT does not
+cross-compile, so a Windows publish has never run from this Mac. The `publish` job in CI runs it
+on `windows-latest` on every push, and the first green run is the answer.### What had to be told to the compiler
 
 A JIT works out at runtime what ILC has to know at build time, and two libraries here ask for
 types by name. Four things answer it, and all four are in the repo already:
@@ -266,13 +306,17 @@ ask the notary service for.
 
 ### Windows
 
-The same shape — `Starquake.exe` and the content beside it, no native libraries because WindowsDX
-talks to DirectX, which is already there. Expect SmartScreen to object to an unsigned executable
-the same way Gatekeeper objects to an unsigned bundle, and for the same reason.
+`Starquake.exe` with the content beside it, plus `SDL2.dll` and `openal.dll` - which is a change
+from WindowsDX, where DirectX was already on the machine and the folder held no natives. Nothing
+has to be installed either way.
 
-That head's AOT publish has never produced a working build, because it has never produced any
-build: see "Windows is wired up and unproven". The `windows-aot` job in CI runs it on every push
-to find out, and is marked `continue-on-error` until it passes.
+Expect SmartScreen to object to an unsigned executable much as Gatekeeper objects to an unsigned
+bundle, and for the same reason. An Authenticode certificate is the answer and is deliberately
+not bought, same as the Apple one.
+
+The AOT publish itself is the one of the three that has never been run on a developer machine
+here, because NativeAOT does not cross-compile and this was all set up on a Mac. CI runs it on
+`windows-latest` on every push.
 
 ### Linux
 
@@ -363,15 +407,22 @@ Four notes on that, each of which cost something to find:
 - It wants `7z` (`brew install p7zip`) and pulls down about 450MB: Wine, a Windows .NET SDK for
   the prefix, and a Firefox 62 installer that `d3dcompiler_47.dll` is extracted out of.
 
-### Shaders are built for DesktopGL only on a Mac
+### Shaders are DesktopGL everywhere, and `ps_2_0` is why
 
-Wine covers the DesktopGL content build and does **not** cover the WindowsDX one, which fails
-with an unexplained `Unexpected error compiling`. So `Content.mgcb` is referenced conditionally:
-the `net10.0-windows` target framework builds content only on Windows.
+There is one content build now and it is `/platform:DesktopGL`, so Wine covers all of it and
+every platform gets the same `.xnb`. Nothing is conditional and nothing ships short of content.
 
-That target framework still compiles everywhere - `EnableWindowsTargeting` sees to that - it
-just ships no content off a Mac, which costs nothing because the Windows head cannot run there.
-**Build the Windows head's content on Windows.** There it needs no Wine at all.
+Wine was never the narrower half of this. It compiles the WindowsDX platform too - demonstrated,
+by patching a shader to `ps_4_0_level_9_1` and watching `/platform:Windows` succeed on a Mac. What
+blocked that platform was the shader profile: MGCB's Windows platform wants SM 4.0 level 9.1 or
+higher and every pass here is `ps_2_0`, a managed-side check that would have failed on Windows
+just the same. See "The Windows head is DesktopGL".
+
+Going the other way is not free either. `ps_4_0_level_9_1` is refused by the DesktopGL platform —
+`error X3523: DX9-style intrinsics are disabled when not in dx9 compatibility mode` — so the
+profile cannot simply be raised; one source serving both would need MonoGame's `#if OPENGL` /
+`PS_SHADERMODEL` preamble through all 21 passes. With one flavour left there is nothing to serve
+but DesktopGL, and `ps_2_0` is what Reach allows.
 
 Sixteen shaders are built, all of them `ps_2_0` because the profile is `Reach` and allows no higher:
 
@@ -434,20 +485,45 @@ entirely, at the cost of one `.xnb` per platform.
 
 ## CI
 
-`.github/workflows/build.yml` restores, builds and tests the solution on Ubuntu, macOS and
-Windows on every push to `main` and every pull request. `Directory.Build.props` sets
-`TreatWarningsAsErrors`, so a warning fails it.
+`.github/workflows/build.yml`, five jobs, and the shape of them is decided by the shader
+compiler. MonoGame has none of its own: Windows lends it the DirectX one, macOS and Linux run that
+same Windows compiler under Wine. Installing Wine on a runner is 450MB and, with Homebrew's wine
+casks disabled, fiddly - on two platforms out of three. So:
 
-Every project builds on every platform, so one runner would prove the code compiles. There
-are three because the packaging does not travel: the `.app` bundle and its ad-hoc signature
-are a macOS-only target, and only a run on macOS builds them.
+| Job | Runner | What it does |
+| --- | --- | --- |
+| `namespaces` | ubuntu | Counts namespace cycles in `Starquake.Shared`. No .NET, answers in a second. |
+| `build` | all three | Compiles the solution and runs the tests. |
+| `content` | windows | Builds the content once, uploads it as an artifact. |
+| `publish` | one per target | Five NativeAOT publishes, each on its own hardware. |
+| `release` | ubuntu | On a `v*` tag only: the archives become a GitHub Release. |
 
-Two jobs sit beside that matrix. `namespaces` reads source and nothing else, and is described
-where it is defined. `windows-aot` publishes the Windows head ahead of time, which is the one
-thing nobody has been able to try from a Mac - NativeAOT does not cross-compile - and it is
-`continue-on-error` because it is an open question rather than a promise. See "Windows is wired
-up and unproven". Nothing else about the AOT publishes is gated here: the macOS and Linux ones
-are known to work, and adding them would buy a few minutes of ILC per push to re-prove it.
+**`content` runs on Windows because Windows needs nothing installed to do it.** The output is
+`/platform:DesktopGL` and so is platform-independent - the same `.xnb` the Mac and Linux heads
+load - so which runner produced it does not matter to anything downstream. This is only possible
+because every head is DesktopGL; with WindowsDX there were two different content outputs and two
+runners would have needed Wine.
+
+**`publish` is a matrix of runners rather than five runs on one**, because NativeAOT does not
+cross-compile between operating systems. `osx-arm64` and `osx-x64` do share the one macOS runner,
+since Xcode's clang carries both targets. The Linux legs install `clang`, `zlib1g-dev` and
+`binutils` first; without `objcopy` the publish dies at the symbol stripping, after all the
+compiling is done.
+
+**`build` deliberately does not wait for `content`.** It passes `PrebuiltContentDir` pointed at an
+empty folder, which skips the content build outright, so a compile error reports in a couple of
+minutes rather than after MGCB has ground through 107MB of art. Nothing it does needs the content:
+the tests hand the sound engine a `ContentManager` with nothing in it on purpose, and this job
+never proved anything about the art, only about the code.
+
+`PrebuiltContentDir` is the seam all of this turns on - set it and `Starquake.Shared` copies
+`.xnb` from there instead of running MGCB. Nothing is committed and a local build with the
+property unset compiles the content from `Content.mgcb` exactly as before.
+
+**Tagging is the release process.** Push `v*` and the five archives become the assets on a
+Release, built by `gh` rather than a third-party action. macOS is packed with `ditto` because a
+plain zip does not preserve everything the ad-hoc signature covers, and Linux as `tar.gz` because
+zip does not record the executable bit. Every other push leaves plain artifacts, which expire.
 
 ## The content build and Project Mercury
 
@@ -478,20 +554,22 @@ listed as a `ProjectReference` with `ReferenceOutputAssembly="false"` so that
 
 ## Writing platform-specific code
 
-Don't, if you can avoid it. When you can't, `Starquake.Shared` defines `WINDOWS` on its
-`net10.0-windows` target only, and that is the single supported escape hatch:
+There is no escape hatch, and nothing needs one. Every head is DesktopGL on `net10.0`, so there
+is no `-windows` target framework to define a symbol on, and the `WINDOWS` symbol
+`Starquake.Shared` used to define on that target went with it.
 
-```csharp
-#if WINDOWS
-    // WinForms and anything else Windows-only goes here.
-#endif
-```
+Nothing ever used it. The one candidate was the commented-out F11 handler in
+`Starquake.Shared/Engines/GameEngine.cs`, which resized the window back to its default through
+`System.Windows.Forms.Form.FromHandle` - a WinForms call that only ever made sense under
+WindowsDX, and which SDL answers with `GameWindow` on all three platforms now.
 
-Nothing uses it today. The one candidate is the commented-out F11 handler in
-`Starquake.Shared/Engines/GameEngine.cs`, which resized the window back to its default
-through `System.Windows.Forms.Form.FromHandle`. Reviving it also means adding
-`<UseWindowsForms>true</UseWindowsForms>` to the `net10.0-windows` target of
-`Starquake.Shared.csproj` and to `Starquake.Windows.csproj`.
+`ProjectMercury` still has 25 `#if WINDOWS` blocks through its sources, and they are inert and
+always were: that project has never defined the symbol. They are upstream XNA-era guards around
+`[Serializable]` and one `Guard` call, left as found - it is a fork of 2009 code held to the
+compiler but not to our style.
+
+If a platform difference ever does turn up, prefer a runtime check -
+`OperatingSystem.IsWindows()` - over bringing a second target framework back.
 
 ## Adding a head
 
@@ -513,8 +591,9 @@ Create `Starquake.<Platform>/Starquake.<Platform>.csproj`:
 The props file supplies the reference to `Starquake.Shared` and the shared `Program.cs`. A
 head only picks its framework and flavour and adds its own packaging.
 
-If a head ever needs a target framework other than the two `Starquake.Shared` builds, add it
-to `<TargetFrameworks>` in `Starquake.Shared.csproj` first.
+A head that wants a framework other than the `net10.0` `Starquake.Shared` builds means changing
+that project to `<TargetFrameworks>` and multi-targeting it again. That was how the Windows head
+worked until it moved to DesktopGL, and the reasons it stopped are worth reading first.
 
 ## Gotchas
 
@@ -537,18 +616,17 @@ or build with `-m:1`, which does not do it in six runs out of six. See PLAN.md 6
 measurements and the candidate fixes, and note that `DisableIncrementalClean` has been tried and
 makes it worse.
 
-**`NETSDK1005 ... doesn't have a target for 'net8.0'`** means something restored with
-`TargetFramework` as a *global* property. It is a two-step failure and neither step names the
-other. `ProjectMercury` multi-targets `net8.0` and `net8.0-windows`; a global `TargetFramework`
-overrides that, so restore writes it an assets file holding only the one framework, and then
-`BuildContentPipelineExtension` asks for `net8.0` - which it is right to do - and finds nothing.
-The publish is blamed for a file it never touched.
+**Do not put `<TargetFramework>` in a publish profile.** An IDE publishes a profile by passing
+its properties on the command line, which makes every one of them a *global* property reaching
+every project in the graph - and a global `TargetFramework` overrides what each project chose for
+itself. None of the `Aot-*.pubxml` files names one, and each says so at the top.
 
-`dotnet restore` on its own repairs it, because without the property the project evaluates its own
-`TargetFrameworks` again. To stop it happening, do not put `<TargetFramework>` in a publish
-profile: an IDE publishes a profile by passing its properties on the command line, which makes
-every one of them global. None of the `Aot-*.pubxml` files names a target framework, and the
-comment at the top of each says why. Passing `-p:TargetFramework=` by hand does the same thing.
+This used to produce a failure that named nothing relevant - `NETSDK1005 ... doesn't have a target
+for 'net8.0'`, because `ProjectMercury` multi-targeted `net8.0` and `net8.0-windows` and the global
+property collapsed its assets file to one framework, after which `BuildContentPipelineExtension`
+asked for `net8.0` and found nothing. Nothing multi-targets any more, so that particular wreck
+cannot happen; `dotnet restore` on its own repaired it when it could. The rule stands regardless,
+because a global `TargetFramework` is wrong for other reasons.
 
 **Content asset names use backslashes** (`"Graphics\\BootScreen2"`). MonoGame's
 `TitleContainer` normalises those to the platform separator, so they work on Linux and macOS
