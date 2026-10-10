@@ -1,0 +1,778 @@
+/* ==========================================================================
+   Starquake — stylesheet
+   Extracted from the previously inline styles in index.html.
+   Organised as: design tokens → base/reset → shared components → sections,
+   top to bottom in the order the page renders them.
+
+   All styling lives here. The `style-hover` attributes that used to sit in the
+   markup are now real :hover rules, and the handful of values that genuinely
+   vary per item (a card's accent colour, a panel's tilt) come through CSS
+   custom properties rather than inline declarations.
+   ========================================================================== */
+
+/* ---------- Design tokens ---------- */
+:root {
+  /* palette */
+  --bg: #05040d;           /* page black, also text on light surfaces */
+  --ink: #e9e6f5;          /* body text */
+  --white: #ffffff;
+  --lime: #a6ff3d;         /* primary accent */
+  --pink: #ff3fd8;         /* secondary accent */
+  --blue: #2b3fe0;
+  --orange: #e0901f;
+  --teal: #28c0b0;
+  --yellow: #ffe94a;       /* comic caption boxes */
+
+  /* surfaces */
+  --panel: #1a1530;        /* raised card */
+  --panel-hi: #251d45;     /* raised card, highlighted */
+  --rock: #16111f;         /* rocky edge + top of the screenshots band */
+  --rock-deep: #0a0814;
+  --line: #1f1a33;
+
+  /* muted text ramp */
+  --t-100: #bdb7d6;
+  --t-300: #8d86aa;
+
+  /* fonts */
+  --font-display: 'Bangers', cursive;
+  --font-body: 'Chakra Petch', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+
+  /* the comic-book outline that nearly everything on the page wears */
+  --edge: 3px solid #000;
+  --edge-thick: 4px solid #000;
+
+  /* shared page rhythm */
+  --gutter: clamp(16px, 5vw, 64px);
+  --measure: 1280px;
+}
+
+/* ---------- Base / reset ---------- */
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--lime); text-decoration: none; }
+a:hover { color: var(--white); }
+
+img { display: block; }
+
+/* ---------- Page shell ---------- */
+.page {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Parallax star canvas, painted behind every section. */
+.starfield {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Sections sit above the starfield. */
+.hero,
+.intro,
+.story,
+.rock-edge,
+.screens,
+.download,
+.footer { position: relative; z-index: 1; }
+
+/* A centred content column with the page gutter. */
+.wrap {
+  max-width: var(--measure);
+  margin: 0 auto;
+}
+
+/* ==========================================================================
+   Shared components
+   ========================================================================== */
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 2px;
+  padding: 12px 28px;
+  border: var(--edge);
+  box-shadow: 5px 5px 0 #000;
+  text-align: center;
+}
+
+.btn--primary { background: var(--lime); color: var(--bg); }
+.btn--primary:hover { background: var(--white); color: var(--bg); }
+
+.btn--ghost { background: var(--panel); color: var(--white); }
+.btn--ghost:hover { background: var(--pink); color: var(--bg); }
+
+/* Compact nav-bar variant: picks up the nav's mono type instead of Bangers. */
+.btn--sm {
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  font-weight: 700;
+  padding: 10px 16px;
+  border-width: 2px;
+  box-shadow: 3px 3px 0 #000;
+}
+
+/* ---------- Eyebrows, tags and section headings ---------- */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+.eyebrow--pink { color: var(--pink); }
+.eyebrow--lime { color: var(--lime); }
+
+/* Stickered label: mono caps in a bordered, offset box. */
+.tag {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  background: var(--pink);
+  color: var(--bg);
+  padding: 6px 12px;
+  border: 2px solid #000;
+  box-shadow: 3px 3px 0 #000;
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.section-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(44px, 6vw, 80px);
+  letter-spacing: 2px;
+  line-height: 1;
+  color: var(--white);
+}
+
+.accent-lime { color: var(--lime); }
+
+/* ---------- Comic panel ----------
+   A framed image with a hard colour-offset shadow and a caption box.
+   --panel-accent sets the shadow colour, --tilt the rotation. */
+.panel {
+  margin: 0;
+  position: relative;
+  background: #000;
+  border: var(--edge-thick);
+  box-shadow: 8px 8px 0 var(--panel-accent, var(--blue)), 8px 8px 0 4px #000;
+  transform: rotate(var(--tilt, 0deg));
+}
+
+.panel--blue { --panel-accent: var(--blue); }
+.panel--lime { --panel-accent: var(--lime); }
+.panel--pink { --panel-accent: var(--pink); }
+.panel--orange { --panel-accent: var(--orange); }
+
+.panel--tilt-a { --tilt: -2deg; }
+.panel--tilt-b { --tilt: 1.5deg; }
+.panel--tilt-c { --tilt: -1deg; }
+.panel--tilt-d { --tilt: 2deg; }
+
+.panel__img {
+  width: 100%;
+  aspect-ratio: 1.88;
+  object-fit: cover;
+}
+
+.panel__caption {
+  position: absolute;
+  left: 12px;
+  max-width: 70%;
+  background: var(--yellow);
+  color: var(--bg);
+  border: var(--edge);
+  padding: 8px 12px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.panel__caption--top { top: 12px; }
+.panel__caption--bottom { bottom: 12px; }
+
+/* ==========================================================================
+   Nav
+   ========================================================================== */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px clamp(16px, 4vw, 48px);
+  background: linear-gradient(#05040dee, #05040d00);
+}
+
+.nav__brand {
+  font-family: var(--font-display);
+  font-size: 30px;
+  letter-spacing: 2px;
+  color: var(--lime);
+  text-shadow: 3px 3px 0 #000, -1px -1px 0 #000;
+}
+
+.nav__links {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 2.5vw, 32px);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.nav__link { color: var(--ink); }
+.nav__link:hover { color: var(--lime); }
+
+/* ==========================================================================
+   Hero
+   ========================================================================== */
+.hero__art {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero__img {
+  width: 100%;
+  aspect-ratio: 1376 / 768;
+  max-height: 88vh;
+  min-height: 360px;
+  object-fit: cover;
+  object-position: 40% 45%;
+}
+
+/* Fades the art into the page black at both edges. */
+.hero__fade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #05040d99 0%, #05040d00 18%, #05040d00 78%, #05040d 100%);
+}
+
+/* Pulled up so the wordmark overlaps the art. */
+.hero__body {
+  position: relative;
+  margin-top: clamp(-70px, -5vw, -30px);
+  padding: 0 var(--gutter) clamp(48px, 6vw, 80px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 18px;
+}
+
+.hero__tag { transform: rotate(-2deg); }
+
+.hero__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(72px, 15vw, 220px);
+  line-height: .82;
+  letter-spacing: clamp(2px, .6vw, 8px);
+  color: var(--lime);
+  -webkit-text-stroke: clamp(2px, .35vw, 5px) #000;
+  text-shadow:
+    clamp(5px, .8vw, 12px) clamp(5px, .8vw, 12px) 0 var(--pink),
+    clamp(8px, 1.2vw, 18px) clamp(8px, 1.2vw, 18px) 0 #000;
+}
+
+.hero__lede {
+  margin: 0;
+  max-width: 620px;
+  font-size: clamp(17px, 1.6vw, 21px);
+  line-height: 1.45;
+  color: var(--white);
+  text-shadow: 0 2px 12px #000;
+  text-wrap: pretty;
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+/* ==========================================================================
+   Intro / mission brief
+   ========================================================================== */
+.intro {
+  padding: clamp(72px, 10vw, 140px) var(--gutter) clamp(40px, 6vw, 80px);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+}
+
+.intro__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.intro__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(44px, 6vw, 80px);
+  line-height: .95;
+  letter-spacing: 2px;
+  color: var(--white);
+  text-wrap: balance;
+}
+
+.intro__body {
+  margin: 0;
+  max-width: 520px;
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--t-100);
+  text-wrap: pretty;
+}
+
+/* ---------- Stat cards ---------- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.stat {
+  --stat-ink: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 22px 16px;
+  background: var(--stat-bg);
+  color: var(--stat-ink);
+  border: var(--edge);
+  box-shadow: 5px 5px 0 #000;
+  transform: rotate(var(--tilt, 0deg)) translateY(var(--lift, 0));
+}
+
+.stat--blue { --stat-bg: var(--blue); --stat-ink: var(--white); --tilt: -1.5deg; }
+.stat--lime { --stat-bg: var(--lime); --tilt: 1deg; --lift: 14px; }
+.stat--pink { --stat-bg: var(--pink); --tilt: -.5deg; }
+
+.stat__num {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 5vw, 60px);
+  line-height: 1;
+}
+/* The blue card needs an outline to hold its white numeral. */
+.stat--blue .stat__num { -webkit-text-stroke: 1.5px #000; }
+
+.stat__label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   Story / comic
+   ========================================================================== */
+.story {
+  padding: clamp(40px, 6vw, 80px) var(--gutter) clamp(80px, 10vw, 140px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(64px, 9vw, 120px);
+}
+
+/* Panel and copy swap sides between chapters purely by source order. */
+.chapter {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+}
+
+.chapter__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.chapter__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(36px, 4.5vw, 60px);
+  line-height: .95;
+  letter-spacing: 2px;
+  color: var(--white);
+  text-wrap: balance;
+}
+
+.chapter__body {
+  margin: 0;
+  max-width: 500px;
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--t-100);
+  text-wrap: pretty;
+}
+
+/* ==========================================================================
+   Rocky divider between the story and the screenshots band
+   ========================================================================== */
+.rock-edge {
+  height: 70px;
+  background: var(--rock);
+  clip-path: polygon(
+    0 100%, 0 55%, 4% 30%, 8% 52%, 12% 18%, 17% 46%, 22% 26%, 26% 60%,
+    31% 34%, 36% 8%, 40% 40%, 45% 28%, 50% 58%, 54% 20%, 59% 44%, 63% 12%,
+    68% 38%, 72% 54%, 77% 22%, 81% 46%, 86% 16%, 90% 42%, 95% 26%, 100% 50%,
+    100% 100%
+  );
+}
+
+/* ==========================================================================
+   Screenshots
+   ========================================================================== */
+.screens {
+  background: linear-gradient(var(--rock), var(--rock-deep) 70%, #05040d00);
+  padding: clamp(40px, 6vw, 80px) var(--gutter) clamp(80px, 10vw, 140px);
+}
+
+.screens__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.screens__counter {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--t-100);
+}
+
+/* ---------- Featured shot ---------- */
+.shot-main {
+  all: unset;
+  cursor: zoom-in;
+  display: block;
+  position: relative;
+  background: #000;
+  border: var(--edge-thick);
+  box-shadow: 8px 8px 0 var(--lime), 8px 8px 0 4px #000;
+  overflow: hidden;
+}
+
+/* Slight overscale hides the frame's inner edge. */
+.shot-main__img {
+  width: 100%;
+  aspect-ratio: 2784 / 1888;
+  object-fit: cover;
+  transform: scale(1.045);
+}
+
+.shot-main__bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 12px;
+  padding: 20px;
+  background: linear-gradient(#00000000, #000000dd);
+}
+
+.shot-main__label {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3vw, 36px);
+  letter-spacing: 1.5px;
+  color: var(--white);
+}
+
+.shot-main__hint {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--lime);
+}
+
+/* ---------- Thumbnail strip ---------- */
+.shot-thumbs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+}
+
+.shot-thumb {
+  all: unset;
+  cursor: pointer;
+  display: block;
+  background: #000;
+  border: var(--edge);
+  overflow: hidden;
+  opacity: .55;
+  transition: opacity .2s, transform .2s;
+}
+
+.shot-thumb:hover {
+  opacity: 1;
+  transform: translateY(-3px);
+}
+
+.shot-thumb.is-active {
+  border-color: var(--lime);
+  opacity: 1;
+}
+
+.shot-thumb__img {
+  width: 100%;
+  aspect-ratio: 2784 / 1888;
+  object-fit: cover;
+  transform: scale(1.06);
+}
+
+/* ==========================================================================
+   Download
+   ========================================================================== */
+.download {
+  padding: clamp(60px, 8vw, 120px) var(--gutter) clamp(80px, 10vw, 140px);
+}
+
+.download__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.download__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+}
+
+.download__kicker {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3vw, 40px);
+  letter-spacing: 2px;
+  color: var(--lime);
+  -webkit-text-stroke: 1.5px #000;
+  text-shadow: 3px 3px 0 #000;
+  transform: rotate(-3deg);
+}
+
+.download__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(56px, 9vw, 128px);
+  line-height: .9;
+  letter-spacing: 3px;
+  color: var(--white);
+  -webkit-text-stroke: 2px #000;
+  text-shadow: 6px 6px 0 var(--pink), 9px 9px 0 #000;
+}
+
+.download__lede {
+  margin: 0;
+  max-width: 520px;
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--t-100);
+  text-wrap: pretty;
+}
+
+.download__footnote {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--t-300);
+}
+
+/* ---------- Platform cards ----------
+   --platform-accent is the only per-card value, set inline from the logic. */
+.platforms {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 24px;
+}
+
+.platform {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 28px;
+  background: var(--panel);
+  border: var(--edge-thick);
+  box-shadow: 8px 8px 0 var(--platform-accent, var(--blue)), 8px 8px 0 4px #000;
+}
+
+/* The card matching the visitor's OS. */
+.platform.is-recommended { background: var(--panel-hi); }
+
+.platform__badge {
+  position: absolute;
+  top: -16px;
+  right: 18px;
+  background: var(--pink);
+  color: var(--bg);
+  border: var(--edge);
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  transform: rotate(3deg);
+}
+
+.platform__id {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.platform__name {
+  font-family: var(--font-display);
+  font-size: 52px;
+  letter-spacing: 2px;
+  line-height: 1;
+  color: var(--white);
+}
+
+.platform__req {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--t-100);
+}
+
+.platform__meta {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 2px dashed #ffffff33;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.platform__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.platform__row dt { color: var(--t-300); }
+.platform__row dd { margin: 0; }
+
+.platform__cta {
+  margin-top: auto;
+  padding: 12px 20px;
+  box-shadow: 4px 4px 0 #000;
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 32px var(--gutter);
+  border-top: 2px solid var(--line);
+  background: #05040dcc;
+}
+
+.footer__brand {
+  font-family: var(--font-display);
+  font-size: 26px;
+  letter-spacing: 2px;
+  color: var(--lime);
+}
+
+.footer__legal {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--t-300);
+}
+
+.footer__links {
+  display: flex;
+  gap: 20px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   Lightbox
+   ========================================================================== */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 4vw, 56px);
+  background: #05040def;
+  cursor: zoom-out;
+}
+
+.lightbox__img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.lightbox__hint {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--white);
+}

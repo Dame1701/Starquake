@@ -1,0 +1,19 @@
+﻿// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
+using ProjectMercury;
+using Starquake.Core;
+
+namespace Starquake.Particles;
+
+internal interface IParticleEffect
+{
+    ParticleEffect Effect { get; }
+    bool EffectActive { get; }
+    event RaiseEffectComplete? ParticleEffectComplete;
+    void Stop();
+    void Reset();
+    void Draw();
+    void Draw(int screenFade);
+}

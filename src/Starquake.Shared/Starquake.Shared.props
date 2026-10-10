@@ -1,0 +1,74 @@
+﻿<!--
+  Boilerplate shared by every platform head.
+
+  A head is a thin .csproj that imports this file, picks its target framework and MonoGame
+  flavour, and adds whatever packaging that platform wants (an .app bundle on macOS, a
+  manifest and icon on Windows). The game itself is Starquake.Shared.csproj, which this
+  file adds a reference to. Nothing platform-specific belongs in here.
+
+  To add a head:
+    <Import Project="..\Starquake.Shared\Starquake.Shared.props" />
+    plus a TargetFramework and a PackageReference to that platform's MonoGame flavour.
+-->
+<Project>
+
+    <PropertyGroup>
+        <RootNamespace>Starquake</RootNamespace>
+        <AssemblyName>Starquake</AssemblyName>
+        <OutputType>WinExe</OutputType>
+        <PublishReadyToRun>false</PublishReadyToRun>
+        <TieredCompilation>false</TieredCompilation>
+        <StarquakeSharedDir>$(MSBuildThisFileDirectory)</StarquakeSharedDir>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!--
+          A .NET entry point has to be compiled into the executable itself, so this one file
+          is linked into each head rather than coming from Starquake.Shared.dll. It is still
+          a single source file: Starquake.Shared.csproj excludes it so it is never compiled
+          twice.
+        -->
+        <Compile Include="$(StarquakeSharedDir)Program.cs" Link="Program.cs"/>
+        <ProjectReference Include="$(StarquakeSharedDir)Starquake.Shared.csproj"/>
+    </ItemGroup>
+
+    <!--
+      NativeAOT. Off unless a publish asks for it - see the Aot-*.pubxml profiles next to each
+      head, and the "Publishing ahead of time" section of BUILD.md. Nothing here affects a normal
+      build, and the game's sources are the same either way: ContentManagement/NativeAot.cs names
+      the content readers ILC cannot infer, and it runs on a JIT build too, where it changes
+      nothing.
+
+      These two assemblies are rooted whole because trimming them breaks content loading in a way
+      no warning predicts. MonoGame reads the name of each asset's reader out of the .xnb and asks
+      for it by string, and ReflectiveReader goes on to read a particle emitter's properties the
+      same way; the trimmer sees neither, deletes both, and the first Content.Load dies on a null
+      reader. Rooting MonoGame.Framework costs about 4MB of the executable, which is nothing
+      against the content that ships beside it.
+
+      Neither block is conditioned on PublishAot, and it is worth saying why: this file is imported
+      at the top of a head, and a publish profile is not read until the SDK's targets run, so
+      PublishAot is still empty here even on the publish that sets it. Conditioning on it silently
+      does nothing. Both are inert on a normal build anyway - TrimmerRootAssembly is read only by
+      the trimmer, and the two warning codes below are only ever raised by it.
+    -->
+    <ItemGroup>
+        <TrimmerRootAssembly Include="MonoGame.Framework"/>
+        <TrimmerRootAssembly Include="ProjectMercury"/>
+    </ItemGroup>
+
+    <!--
+      The two roll-ups that say "this dependency produced warnings", and nothing finer. MonoGame
+      and MessagePack both reach for types by name in their own code, which is what the rooting
+      above and NativeAot.cs answer; the warnings are about their sources and cannot be fixed from
+      here. TreatWarningsAsErrors would otherwise fail every AOT publish on them.
+
+      They stay warnings rather than being suppressed, so they are still in the log. This does not
+      quieten our own code: a trimming or AOT warning from a file in this solution is reported
+      against that file with its own code, and is still an error.
+    -->
+    <PropertyGroup>
+        <WarningsNotAsErrors>$(WarningsNotAsErrors);IL2104;IL3053</WarningsNotAsErrors>
+    </PropertyGroup>
+
+</Project>

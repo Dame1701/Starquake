@@ -1,0 +1,62 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <!--
+          Run on whatever runtime is installed rather than insisting on a 9.x one. The game
+          heads get this from Starquake.Shared.props, which the editor does not import.
+        -->
+        <RollForward>Major</RollForward>
+        <Nullable>enable</Nullable>
+        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <RootNamespace>Starquake.ScreenEditor</RootNamespace>
+        <AssemblyName>ScreenEditor</AssemblyName>
+        <!--
+          The world map is filled a pixel at a time from a locked bitmap. Doing that through the
+          managed API would be a call per pixel across three hundred thousand of them every time a
+          tile is painted, which is the one place in the editor where that matters.
+        -->
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!--
+          The game's own typeface, linked out of the game's content rather than copied, so that the
+          editor draws a signpost's code in the face the game will write it in. MGCB bakes this same
+          .ttf into the two spritefonts the game loads; this is the only way to show those letter
+          shapes on an Avalonia canvas, which cannot read a spritefont.
+        -->
+        <AvaloniaResource Include="..\Starquake.Shared\Content\Fonts\elektora.ttf"
+                          Link="Fonts/elektora.ttf"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Avalonia"/>
+        <PackageReference Include="Avalonia.Desktop"/>
+        <PackageReference Include="Avalonia.Themes.Fluent"/>
+        <PackageReference Include="Avalonia.Fonts.Inter"/>
+        <!-- The toolbar's icons. Material.Icons.Avalonia needs Avalonia 11.3, which is why the
+             editor is on that rather than the 11.2 it was generated against. -->
+        <PackageReference Include="Material.Icons.Avalonia"/>
+        <!-- The screen data file is MessagePack; SharedLibs describes it, this reads and writes it. -->
+        <PackageReference Include="MessagePack"/>
+        <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+        <PackageReference Include="Avalonia.Diagnostics">
+            <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+            <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\SharedLibs\SharedLibs.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="Views\MainWindow.axaml.cs">
+            <DependentUpon>MainWindow.axaml</DependentUpon>
+            <SubType>Code</SubType>
+        </Compile>
+    </ItemGroup>
+</Project>

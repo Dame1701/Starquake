@@ -1,0 +1,310 @@
+﻿// ---------------------------------------------------------
+// Copyright (c) 2026 Damien C Green. All rights reserved.
+// ---------------------------------------------------------
+// -
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
+using Starquake.Constants;
+using Starquake.ContentManagement;
+using Starquake.Core;
+using Starquake.Engines.ScreenEffects;
+using Starquake.Fonts;
+using Starquake.Input;
+using Starquake.Sprites;
+
+namespace Starquake.GameComponents.PresentationScreens;
+
+internal class OptionsScreen : GameScreenBase, IGameScreen
+{
+
+    /// <summary>
+    ///     The four presets the player chooses between, which are the first four entries of
+    ///     <see cref="_options" />. The entries after them, define keys, start and quit, are not
+    ///     presets and are handled separately.
+    /// </summary>
+    private const int SelectableOptionCount = 4;
+
+    /// <summary>The only preset whose availability depends on the hardware.</summary>
+    private const int JoyPadOption = 0;
+
+    /// <summary>The preset to fall back on when the pad is pulled out: the cursor keys.</summary>
+    private const int DefaultOption = 1;
+    private readonly SpriteCollection _backgroundImage;
+    private readonly SpriteCollection _foregroundImage;
+    private readonly KeyDefiner _keyDefiner;
+    private readonly List<Option> _options;
+    private readonly GameSession _session;
+
+    private bool _definingKeys;
+
+    public OptionsScreen(
+        ResourceManager resources,
+        BitmapFont font,
+        GraphicsDeviceManager graphics,
+        PresentationSettings presentation,
+        ScreenEffectEngine screenEffects,
+        ScreenDirectory screenDirectory,
+        GameSession session,
+        ToggleKeys input)
+        : base(
+            resources,
+            font,
+            graphics,
+            presentation,
+            screenEffects,
+            screenDirectory,
+            input)
+    {
+        _session = session;
+
+        ScreenFade = 0;
+        ScreenFadeSpeed = 5;
+
+        _keyDefiner = new KeyDefiner(Resources, Font, Input);
+        _keyDefiner.KeyDefinitionComplete += KeyDefiner_KeyDefinitionComplete;
+
+        _backgroundImage = Resources.GetSpriteCollection(Assets.Graphics.OptionScreenBackground);
+        _foregroundImage = Resources.GetSpriteCollection(Assets.Graphics.OptionScreenForeground);
+
+        _options =
+        [
+            new Option("1", "Joypad", false, Color.White, !Input.GamePadState.IsConnected),
+            new Option("2", "Cursor Keys, Left Alt", true, Color.White),
+            new Option("3", "Keyboard . . O, P, A, Q, SP", false, Color.White),
+            new Option("4", "UDK Keyboard . . " + _keyDefiner.GetKeys(), false, Color.White),
+            new Option("5", "Define your own keys", false, Colours.GetXna4Colour(130, 130, ColourLevels.Full)),
+            new Option("0", "Start game", false, Colours.GetXna4Colour(130, 130, ColourLevels.Full)),
+            new Option("Q", "Quit to title screen", false, Color.White)
+        ];
+    }
+
+    public override void Update(GameTime gameTime)
+    {
+        if (_definingKeys)
+        {
+            _keyDefiner.Update();
+        }
+        else
+        {
+            FollowTheJoyPad();
+            HandleOptionKeys();
+            Font.Update();
+        }
+
+        base.Update(gameTime);
+    }
+
+    public void Draw()
+    {
+        ScreenEffects.SelectRenderViewPort(ViewPorts.EntireScreen);
+
+        _backgroundImage.Begin(BlendState.AlphaBlend);
+        _backgroundImage.DrawSprite(0, 0, 0, Colours.WhiteFadedTo((byte)ScreenFade));
+        _backgroundImage.End();
+
+        Font.Begin(BlendState.AlphaBlend);
+        if (!_definingKeys)
+        {
+            int optionXPos = 320;
+            int optionYPos = 260;
+
+            foreach (Option opt in _options)
+            {
+                if (opt.Unavailable)
+                {
+                    Font.WriteText(optionXPos, optionYPos, opt.ActivationKey + ".", 2, Colours.GetXna4Colour(100, 0, 0), (byte)ScreenFade);
+                    Font.WriteText(optionXPos + 50, optionYPos, opt.OptionText + " (not connected)", 2, Colours.GetXna4Colour(100, 0, 0), (byte)ScreenFade);
+                }
+                else
+                {
+                    if (opt.Selected)
+                    {
+                        Font.WriteText(optionXPos, optionYPos, opt.ActivationKey + ".", 2, (byte)ScreenFade);
+                        Font.WriteText(optionXPos + 50, optionYPos, opt.OptionText, 2, (byte)ScreenFade);
+                    }
+                    else
+                    {
+                        Font.WriteText(optionXPos, optionYPos, opt.ActivationKey + ".", 2, opt.Colour, (byte)ScreenFade);
+                        Font.WriteText(optionXPos + 50, optionYPos, opt.OptionText, 2, opt.Colour, (byte)ScreenFade);
+                    }
+                }
+
+                optionYPos += 50;
+            }
+        }
+        else
+        {
+            _keyDefiner.Draw(ScreenFade);
+        }
+
+        Font.WriteTextCentred(1280, 640, "Remake © 2026 Damien Green", 2, new Color(112, 155, 155), (byte)ScreenFade);
+
+        Font.End();
+
+        _foregroundImage.Begin(BlendState.AlphaBlend);
+        _foregroundImage.DrawSprite(0, 230, 120, Colours.WhiteFadedTo((byte)ScreenFade));
+        _foregroundImage.End();
+    }
+
+    private void KeyDefiner_KeyDefinitionComplete(object? sender, EventArgs e)
+    {
+        _options[3] = new Option("4", "UDK Keyboard . . " + _keyDefiner.GetKeys(), false, Color.White);
+
+        ClearSelectedOptions();
+        _options[3].Selected = true;
+
+        _definingKeys = false;
+    }
+
+    public void LoadContent()
+    {
+        Font.Flash = true;
+    }
+
+    /// <summary>
+    ///     A pad can be plugged in or pulled out while this screen is up, so the preset needing one
+    ///     reports every frame whether it is there, from the same snapshot everything else reads.
+    ///     Pulling the pad out while its preset is selected moves the selection back to the keyboard,
+    ///     because confirming it would leave the player with nothing bound at all.
+    /// </summary>
+    private void FollowTheJoyPad()
+    {
+        _options[JoyPadOption].Unavailable = !Input.GamePadState.IsConnected;
+
+        if (!_options[JoyPadOption].Unavailable || !_options[JoyPadOption].Selected)
+        {
+            return;
+        }
+
+        ClearSelectedOptions();
+        _options[DefaultOption].Selected = true;
+    }
+
+    /// <summary>
+    ///     0 confirms whatever is selected, 5 goes off to define keys by hand, and 1 to 4 pick one of
+    ///     the four presets.
+    /// </summary>
+    private void HandleOptionKeys()
+    {
+        Keys pressed = Input.GetPressedKey();
+
+        if (pressed == Keys.D0)
+        {
+            ConfirmSelectedOption();
+            return;
+        }
+
+        if (pressed == Keys.D5)
+        {
+            _definingKeys = true;
+            _keyDefiner.Reset();
+            Resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPickUp, 0.5f, false);
+            return;
+        }
+
+        // 1 to 4 pick the option of that number.
+        int option = pressed - Keys.D1;
+
+        if (option < 0 || option >= SelectableOptionCount ||
+            _options[option].Selected || _options[option].Unavailable)
+        {
+            return;
+        }
+
+        ClearSelectedOptions();
+        _options[option].Selected = true;
+        Resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPickUp, 0.5f, false);
+    }
+
+    /// <summary>
+    ///     Applies the selected preset and leaves for the report screen. With nothing selected the keys
+    ///     are left as they were.
+    /// </summary>
+    private void ConfirmSelectedOption()
+    {
+        for (int option = 0; option < SelectableOptionCount; option++)
+        {
+            if (!_options[option].Selected)
+            {
+                continue;
+            }
+
+            _session.PlayerKeys = KeysForOption(option);
+            break;
+        }
+
+        GraphicsDeviceManager.GraphicsDevice.Clear(Presentation.ScreenClearColour);
+        ScreenDirectory.Current = GameScreenType.ComputerReport;
+        ScreenDirectory.ComputerReport.PerformPostScreenChangeActions();
+    }
+
+    /// <summary>
+    ///     The four key presets, as object initialisers so the differences between them read down a
+    ///     column.
+    /// </summary>
+    private PlayerKeySet KeysForOption(int option)
+    {
+        return option switch
+        {
+            // Joypad: every movement key is unbound, so the pad is the only thing steering.
+            0 => new PlayerKeySet
+            {
+                Up = Keys.None,
+                Down = Keys.None,
+                Left = Keys.None,
+                Right = Keys.None,
+                Fire = Keys.None,
+                Pause = Keys.P,
+                Quit = Keys.Q
+            },
+            1 => new PlayerKeySet
+            {
+                Up = Keys.Up,
+                Down = Keys.Down,
+                Left = Keys.Left,
+                Right = Keys.Right,
+
+                // See GameSession for why this is Alt and not Ctrl.
+                Fire = Keys.LeftAlt,
+                Pause = Keys.P,
+                Quit = Keys.Q
+            },
+            // The original Spectrum layout.
+            2 => new PlayerKeySet
+            {
+                Up = Keys.Q,
+                Down = Keys.A,
+                Left = Keys.O,
+                Right = Keys.P,
+                Fire = Keys.Space,
+                Pause = Keys.S,
+                Quit = Keys.D
+            },
+            _ => new PlayerKeySet
+            {
+                Up = _keyDefiner.DefinedKeys[0],
+                Down = _keyDefiner.DefinedKeys[1],
+                Left = _keyDefiner.DefinedKeys[2],
+                Right = _keyDefiner.DefinedKeys[3],
+                Fire = _keyDefiner.DefinedKeys[4],
+                Pause = _keyDefiner.DefinedKeys[5],
+                Quit = _keyDefiner.DefinedKeys[6]
+            }
+        };
+    }
+
+    private void ClearSelectedOptions()
+    {
+        foreach (Option opt in _options)
+        {
+            opt.Selected = false;
+        }
+    }
+
+    public void PerformPostScreenChangeActions()
+    {
+        ScreenFade = 0;
+        ScreenFadeSpeed = 5;
+    }
+}

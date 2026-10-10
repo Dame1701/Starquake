@@ -1,0 +1,39 @@
+﻿<!--
+  Unit tests for the parts of the game that are only maths.
+
+  Single-targeted at net10.0 while Starquake.Shared multi-targets, so a reference to it
+  resolves to the net10.0 build and brings MonoGame.Framework.DesktopGL along. That is fine
+  headlessly: the types the tests touch are plain managed structs, and SDL is only loaded
+  when something constructs a Game or a GraphicsDevice, which no test does. A test that
+  needs a GraphicsDevice does not belong here.
+
+  The tests run in parallel, which is xunit's default. They used to be held serial by an
+  AssemblyInfo.cs that said why: CollisionDetection kept its intermediate values in static
+  fields, so two tests calling it at once could read each other's working. Those are locals.
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <!-- Same reason the heads set it: the test host is an executable like any other, and a
+             machine carrying only a newer runtime should still be able to run it. That was not
+             hypothetical before the move to net10.0 - there was no 9.0 runtime on this one. -->
+        <RollForward>Major</RollForward>
+        <RootNamespace>Starquake.Tests</RootNamespace>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk"/>
+        <PackageReference Include="xunit"/>
+        <PackageReference Include="xunit.runner.visualstudio"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Starquake.Shared\Starquake.Shared.csproj"/>
+        <ProjectReference Include="..\SharedLibs\SharedLibs.csproj"/>
+    </ItemGroup>
+
+</Project>

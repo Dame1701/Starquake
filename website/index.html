@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A remake of the 1985 classic Starquake. Download for macOS, Windows and Linux.">
+    <link rel="stylesheet" href="styles.css">
+    <script src="./scripts/support.js"></script>
+    <title>Starquake — the 1985 classic, rebuilt</title>
+</head>
+<body>
+<x-dc>
+    <helmet>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Chakra+Petch:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
+              rel="stylesheet">
+    </helmet>
+
+    <div class="page">
+
+        <!-- ============ STARFIELD ============ -->
+        <canvas ref="{{ canvasRef }}" class="starfield" aria-hidden="true"></canvas>
+
+        <!-- ============ NAV ============ -->
+        <nav class="nav">
+            <a href="#top" class="nav__brand">STARQUAKE</a>
+            <div class="nav__links">
+                <a href="#story" class="nav__link">Story</a>
+                <a href="#screens" class="nav__link">Screens</a>
+                <a href="#download" class="btn btn--primary btn--sm">Download</a>
+            </div>
+        </nav>
+
+        <!-- ============ HERO ============ -->
+        <header id="top" class="hero">
+            <div class="hero__art">
+                <img src="assets/hero.png" alt="Blob zaps a swarm of space bugs" class="hero__img">
+                <div class="hero__fade"></div>
+            </div>
+            <div class="hero__body">
+                <div class="tag hero__tag">The 1985 classic — rebuilt</div>
+                <h1 class="hero__title">STARQUAKE</h1>
+                <p class="hero__lede">From the great abyss of a black hole emerges a danger of awesome consequences.
+                    To the rescue: BLOB, hero of the moment.</p>
+                <div class="hero__actions">
+                    <a href="#download" class="btn btn--primary">Download free</a>
+                    <a href="#screens" class="btn btn--ghost">See it in action</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- ============ INTRO / MISSION BRIEF ============ -->
+        <section class="intro wrap">
+            <div class="intro__copy">
+                <div class="eyebrow eyebrow--pink">Mission brief</div>
+                <h2 class="intro__title">Rebuild the core.<br><span class="accent-lime">Save the planet.</span></h2>
+                <p class="intro__body">Message has just reached Earth of an unstable planet emerging from a black hole
+                    somewhere at the edge of the galaxy. If the core of this planet is not rebuilt it will implode,
+                    causing the whole universe to go “Ka Boomf!” — Strewth, a Starquake…</p>
+            </div>
+            <div class="stats">
+                <div class="stat stat--blue">
+                    <div class="stat__num">512</div>
+                    <div class="stat__label">Screens to explore</div>
+                </div>
+                <div class="stat stat--lime">
+                    <div class="stat__num">9</div>
+                    <div class="stat__label">Core pieces</div>
+                </div>
+                <div class="stat stat--pink">
+                    <div class="stat__num">1</div>
+                    <div class="stat__label">Brave blob</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ STORY / COMIC ============ -->
+        <section id="story" class="story wrap">
+            <div class="section-head">
+                <h2 class="section-title">The story so far…</h2>
+                <div class="eyebrow eyebrow--lime">Issue #1</div>
+            </div>
+
+            <div class="chapter">
+                <figure class="panel panel--blue panel--tilt-a">
+                    <img src="assets/comic-2.png" alt="Comic panel" class="panel__img">
+                    <figcaption class="panel__caption panel__caption--top">Somewhere at the edge of the galaxy…</figcaption>
+                </figure>
+                <div class="chapter__copy">
+                    <div class="eyebrow eyebrow--pink">Chapter 1</div>
+                    <h3 class="chapter__title">A danger of awesome consequences</h3>
+                    <p class="chapter__body">A planet so unstable that if its core is not rebuilt, the resulting
+                        explosion will render the Galaxy a lifeless wasteland.</p>
+                </div>
+            </div>
+
+            <div class="chapter">
+                <div class="chapter__copy">
+                    <div class="eyebrow eyebrow--pink">Chapter 2</div>
+                    <h3 class="chapter__title">But why Blob?</h3>
+                    <p class="chapter__body">’Cause of his mind-blowing hybrid capabilities? Or the artificial intellect
+                        of his anti-brain? Nope — ’cause all the other guys have pranged their spaceships.</p>
+                </div>
+                <figure class="panel panel--lime panel--tilt-b">
+                    <img src="assets/comic-1.png" alt="Comic panel" class="panel__img">
+                    <figcaption class="panel__caption panel__caption--bottom">Bio-Logically Operating Being. Hero of the moment.</figcaption>
+                </figure>
+            </div>
+
+            <div class="chapter">
+                <figure class="panel panel--pink panel--tilt-c">
+                    <img src="assets/comic-4.png" alt="Comic panel" class="panel__img">
+                    <figcaption class="panel__caption panel__caption--bottom">Golp — is he gonna succeed?</figcaption>
+                </figure>
+                <div class="chapter__copy">
+                    <div class="eyebrow eyebrow--pink">Chapter 3</div>
+                    <h3 class="chapter__title">Out to face danger he goes</h3>
+                    <p class="chapter__body">Trusty spaceship, flightboard computer and galaxy A-Z. Chosen not for his
+                        super intelligence, nor his fearlessness, nor his super powers — his is the only spaceship
+                        available.</p>
+                </div>
+            </div>
+
+            <div class="chapter">
+                <div class="chapter__copy">
+                    <div class="eyebrow eyebrow--pink">Chapter 4</div>
+                    <h3 class="chapter__title">Will he be in time?</h3>
+                    <p class="chapter__body">Will he even get there? Or will the universe and Blob go blip? Gosharooties,
+                        who knows — but all these and many more answers must be questioned before it’s too late!!!</p>
+                </div>
+                <figure class="panel panel--orange panel--tilt-d">
+                    <img src="assets/comic-3.png" alt="Comic panel" class="panel__img">
+                    <figcaption class="panel__caption panel__caption--top">He’d better — there’s no other chance for the world.</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- ============ ROCKY EDGE ============ -->
+        <div class="rock-edge" aria-hidden="true"></div>
+
+        <!-- ============ SCREENSHOTS ============ -->
+        <section id="screens" class="screens">
+            <div class="screens__inner wrap">
+                <div class="section-head">
+                    <h2 class="section-title">Screenshots</h2>
+                    <div class="screens__counter">{{ shotCounter }}</div>
+                </div>
+
+                <button onClick="{{ openLightbox }}" class="shot-main">
+                    <img src="{{ activeShot.src }}" alt="{{ activeShot.label }}" class="shot-main__img">
+                    <div class="shot-main__bar">
+                        <div class="shot-main__label">{{ activeShot.label }}</div>
+                        <div class="shot-main__hint">Click to enlarge</div>
+                    </div>
+                </button>
+
+                <div class="shot-thumbs">
+                    <sc-for list="{{ shots }}" as="shot" hint-placeholder-count="6">
+                        <button onClick="{{ shot.select }}" class="shot-thumb {{ shot.stateClass }}">
+                            <img src="{{ shot.src }}" alt="{{ shot.label }}" class="shot-thumb__img">
+                        </button>
+                    </sc-for>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ DOWNLOAD ============ -->
+        <section id="download" class="download">
+            <div class="download__inner wrap">
+                <div class="download__head">
+                    <div class="download__kicker">Ready, player one?</div>
+                    <h2 class="download__title">Download</h2>
+                    <p class="download__lede">Free to play. Lorem ipsum dolor sit amet — pick your platform and jump
+                        straight in.</p>
+                </div>
+
+                <div class="platforms">
+                    <sc-for list="{{ platforms }}" as="p" hint-placeholder-count="3">
+                        <div class="platform {{ p.stateClass }}" style="--platform-accent:{{ p.accent }};">
+                            <sc-if value="{{ p.recommended }}" hint-placeholder-val="{{ false }}">
+                                <div class="platform__badge">Your system</div>
+                            </sc-if>
+                            <div class="platform__id">
+                                <div class="platform__name">{{ p.name }}</div>
+                                <div class="platform__req">{{ p.req }}</div>
+                            </div>
+                            <dl class="platform__meta">
+                                <div class="platform__row">
+                                    <dt>Version</dt>
+                                    <dd>v1.0.0</dd>
+                                </div>
+                                <div class="platform__row">
+                                    <dt>Package</dt>
+                                    <dd>{{ p.file }}</dd>
+                                </div>
+                                <div class="platform__row">
+                                    <dt>Size</dt>
+                                    <dd>{{ p.size }}</dd>
+                                </div>
+                            </dl>
+                            <a href="#" class="btn btn--primary platform__cta">Download for {{ p.name }}</a>
+                        </div>
+                    </sc-for>
+                </div>
+
+                <div class="download__footnote">Checksums · Release notes · Older versions</div>
+            </div>
+        </section>
+
+        <!-- ============ FOOTER ============ -->
+        <footer class="footer">
+            <div class="footer__brand">STARQUAKE</div>
+            <div class="footer__legal">A fan remake of the 1985 original. Lorem ipsum © 2026.</div>
+            <div class="footer__links">
+                <a href="#">Discord</a>
+                <a href="#">GitHub</a>
+                <a href="#">Press kit</a>
+            </div>
+        </footer>
+
+        <!-- ============ LIGHTBOX ============ -->
+        <sc-if value="{{ lightboxOpen }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ closeLightbox }}" class="lightbox">
+                <img src="{{ activeShot.src }}" alt="{{ activeShot.label }}" class="lightbox__img">
+                <div class="lightbox__hint">ESC / CLICK TO CLOSE · ← →</div>
+            </div>
+        </sc-if>
+
+    </div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;starSpeed&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0,&quot;max&quot;:6,&quot;step&quot;:0.5,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Starfield&quot;},&quot;highlightOS&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Downloads&quot;}}"></script>
+<script>
+    // Component logic lives in scripts/app.dc.js. The runtime reads it from this
+    // data island's text content, so load it synchronously before boot (DOMContentLoaded).
+    (function () {
+        try {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'scripts/app.dc.js', false);
+            xhr.send();
+            if (xhr.status >= 200 && xhr.status < 300) {
+                document.querySelector('script[data-dc-script]').textContent = xhr.responseText;
+            }
+        } catch (e) {
+            console.error('Failed to load app.dc.js', e);
+        }
+    })();
+</script>
+</body>
+</html>

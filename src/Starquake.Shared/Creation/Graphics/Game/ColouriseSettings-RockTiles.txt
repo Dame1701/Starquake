@@ -1,0 +1,10 @@
+Set 1 - Blue: 167,205
+Set 2 - Pink: 205, 162
+Set 3 - Green: 81, 162
+Set 4 - Brown: 0, 66
+Set 5 - Gray: 0,0
+Set 6 - Orange: 25, 177
+Set 7 - Purple: 192,169
+Set 8 - Yellow: 38, 205
+Set 9 - Turquoise: 121,205
+Set 10 - Red: 0,205

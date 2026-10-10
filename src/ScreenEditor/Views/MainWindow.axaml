@@ -1,0 +1,523 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:Starquake.ScreenEditor.ViewModels"
+        xmlns:controls="using:Starquake.ScreenEditor.Controls"
+        xmlns:converters="using:Starquake.ScreenEditor.Converters"
+        xmlns:materialIcons="using:Material.Icons.Avalonia"
+        mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
+        x:Class="Starquake.ScreenEditor.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="{Binding Title}"
+        Width="1360" Height="880"
+        MinWidth="960" MinHeight="620">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+
+    <Window.Resources>
+        <converters:EnumMatchConverter x:Key="EnumMatch" />
+    </Window.Resources>
+
+    <!--
+        Both modifiers are bound throughout: this is a cross-platform tool and Cmd is what a Mac
+        expects, while Ctrl is what everywhere else expects.
+    -->
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Ctrl+N" Command="{Binding NewMapCommand}" />
+        <KeyBinding Gesture="Cmd+N" Command="{Binding NewMapCommand}" />
+        <KeyBinding Gesture="Ctrl+O" Command="{Binding OpenMapCommand}" />
+        <KeyBinding Gesture="Cmd+O" Command="{Binding OpenMapCommand}" />
+        <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveMapCommand}" />
+        <KeyBinding Gesture="Cmd+S" Command="{Binding SaveMapCommand}" />
+        <KeyBinding Gesture="Ctrl+Shift+S" Command="{Binding SaveMapAsCommand}" />
+        <KeyBinding Gesture="Cmd+Shift+S" Command="{Binding SaveMapAsCommand}" />
+        <KeyBinding Gesture="Ctrl+Z" Command="{Binding UndoCommand}" />
+        <KeyBinding Gesture="Cmd+Z" Command="{Binding UndoCommand}" />
+        <KeyBinding Gesture="Ctrl+Shift+Z" Command="{Binding RedoCommand}" />
+        <KeyBinding Gesture="Cmd+Shift+Z" Command="{Binding RedoCommand}" />
+        <KeyBinding Gesture="Ctrl+Y" Command="{Binding RedoCommand}" />
+        <KeyBinding Gesture="Ctrl+C" Command="{Binding CopyScreenCommand}" />
+        <KeyBinding Gesture="Cmd+C" Command="{Binding CopyScreenCommand}" />
+        <KeyBinding Gesture="Ctrl+V" Command="{Binding PasteScreenCommand}" />
+        <KeyBinding Gesture="Cmd+V" Command="{Binding PasteScreenCommand}" />
+    </Window.KeyBindings>
+
+    <DockPanel>
+
+        <Border DockPanel.Dock="Top" Classes="chrome" BorderThickness="0,0,0,1">
+            <Menu>
+                <MenuItem Header="_File">
+                    <MenuItem Header="New map" InputGesture="Ctrl+N" Command="{Binding NewMapCommand}" />
+                    <MenuItem Header="Open map…" InputGesture="Ctrl+O" Command="{Binding OpenMapCommand}" />
+                    <Separator />
+                    <MenuItem Header="Save" InputGesture="Ctrl+S" Command="{Binding SaveMapCommand}" />
+                    <MenuItem Header="Save as…" InputGesture="Ctrl+Shift+S" Command="{Binding SaveMapAsCommand}" />
+                    <Separator />
+                    <MenuItem Header="Open tile sheet…" Command="{Binding OpenTileSheetCommand}" />
+                    <Separator />
+                    <MenuItem Header="Exit" Command="{Binding ExitCommand}" />
+                </MenuItem>
+                <MenuItem Header="_Edit">
+                    <MenuItem Header="{Binding UndoDescription}" InputGesture="Ctrl+Z" Command="{Binding UndoCommand}" />
+                    <MenuItem Header="{Binding RedoDescription}" InputGesture="Ctrl+Shift+Z"
+                              Command="{Binding RedoCommand}" />
+                    <Separator />
+                    <MenuItem Header="Copy screen" InputGesture="Ctrl+C" Command="{Binding CopyScreenCommand}" />
+                    <MenuItem Header="Paste screen" InputGesture="Ctrl+V" Command="{Binding PasteScreenCommand}" />
+                    <Separator />
+                    <MenuItem Header="Fill screen with selected tile" Command="{Binding FillScreenCommand}" />
+                    <MenuItem Header="Clear screen" Command="{Binding ClearScreenCommand}" />
+                    <Separator />
+                    <MenuItem Header="Teleport code…" Command="{Binding EditTeleportCodeCommand}" />
+                </MenuItem>
+                <MenuItem Header="_View">
+                    <MenuItem Header="Tile grid" ToggleType="CheckBox" InputGesture="G"
+                              IsChecked="{Binding Session.View.ShowGrid, Mode=TwoWay}" />
+                    <MenuItem Header="Collision map" ToggleType="CheckBox" InputGesture="C"
+                              IsChecked="{Binding Session.View.ShowCollision, Mode=TwoWay}" />
+                    <MenuItem Header="Tile numbers" ToggleType="CheckBox" InputGesture="T"
+                              IsChecked="{Binding Session.View.ShowTileNumbers, Mode=TwoWay}" />
+                    <MenuItem Header="Neighbouring screens" ToggleType="CheckBox" InputGesture="N"
+                              IsChecked="{Binding Session.View.ShowNeighbours, Mode=TwoWay}" />
+                </MenuItem>
+                <MenuItem Header="_Help">
+                    <MenuItem Header="Keyboard shortcuts…" Command="{Binding ShowShortcutsCommand}" />
+                </MenuItem>
+            </Menu>
+        </Border>
+
+        <Border DockPanel.Dock="Top" Classes="chrome" BorderThickness="0,0,0,1" Padding="10,7">
+            <DockPanel>
+
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8"
+                            VerticalAlignment="Center">
+                    <TextBlock Classes="status" Text="Sheet" />
+                    <ComboBox ItemsSource="{Binding AvailableTileSheets}"
+                              SelectedItem="{Binding SelectedTileSheet, Mode=TwoWay}"
+                              MinWidth="150" FontSize="12">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:TileSheetChoice">
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+
+                    <Button Classes="icon" Command="{Binding SaveMapCommand}">
+                        <ToolTip.Tip>
+                            <ToolTip>
+                                <StackPanel MaxWidth="260" Spacing="2">
+                                    <TextBlock Classes="tipTitle" Text="Save" />
+                                    <TextBlock Classes="tipBody" Text="Write the map back over the game's screen data." />
+                                    <TextBlock Classes="tipKeys">
+                                        <Run Classes="tipKeysLabel" Text="Shortcut:" />
+                                        <Run Text="Ctrl+S" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </ToolTip.Tip>
+                        <materialIcons:MaterialIcon Width="19" Height="19" Kind="ContentSave" />
+                    </Button>
+
+                    <Button Classes="icon" Command="{Binding UndoCommand}">
+                        <ToolTip.Tip>
+                            <ToolTip>
+                                <StackPanel MaxWidth="260" Spacing="2">
+                                    <TextBlock Classes="tipTitle" Text="{Binding UndoDescription}" />
+                                    <TextBlock Classes="tipBody"
+                                               Text="Take back the last change. A whole brush stroke comes back in one step." />
+                                    <TextBlock Classes="tipKeys">
+                                        <Run Classes="tipKeysLabel" Text="Shortcut:" />
+                                        <Run Text="Ctrl+Z" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </ToolTip.Tip>
+                        <materialIcons:MaterialIcon Width="19" Height="19" Kind="Undo" />
+                    </Button>
+
+                    <Button Classes="icon" Command="{Binding RedoCommand}">
+                        <ToolTip.Tip>
+                            <ToolTip>
+                                <StackPanel MaxWidth="260" Spacing="2">
+                                    <TextBlock Classes="tipTitle" Text="{Binding RedoDescription}" />
+                                    <TextBlock Classes="tipBody" Text="Put back a change that was undone." />
+                                    <TextBlock Classes="tipKeys">
+                                        <Run Classes="tipKeysLabel" Text="Shortcut:" />
+                                        <Run Text="Ctrl+Shift+Z" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </ToolTip.Tip>
+                        <materialIcons:MaterialIcon Width="19" Height="19" Kind="Redo" />
+                    </Button>
+
+                    <Separator Classes="toolbar" />
+
+                    <RadioButton Classes="tool" GroupName="tool"
+                                 IsChecked="{Binding Session.Tool, Mode=TwoWay,
+                                             Converter={StaticResource EnumMatch}, ConverterParameter=Paint}">
+                        <ToolTip.Tip>
+                            <ToolTip>
+                                <StackPanel MaxWidth="260" Spacing="2">
+                                    <TextBlock Classes="tipTitle" Text="Paint" />
+                                    <TextBlock Classes="tipBody"
+                                               Text="Lay the selected tile down. Drag to paint a trail of them." />
+                                    <TextBlock Classes="tipKeys">
+                                        <Run Classes="tipKeysLabel" Text="Shortcut:" />
+                                        <Run Text="B" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </ToolTip.Tip>
+                        <materialIcons:MaterialIcon Width="19" Height="19" Kind="Brush" />
+                    </RadioButton>
+
+                    <RadioButton Classes="tool" GroupName="tool"
+                                 IsChecked="{Binding Session.Tool, Mode=TwoWay,
+                                             Converter={StaticResource EnumMatch}, ConverterParameter=Erase}">
+                        <ToolTip.Tip>
+                            <ToolTip>
+                                <StackPanel MaxWidth="260" Spacing="2">
+                                    <TextBlock Classes="tipTitle" Text="Erase" />
+                                    <TextBlock Classes="tipBody"
+                                               Text="Clear tiles back to empty. The right mouse button does this whichever tool is selected." />
+                                    <TextBlock Classes="tipKeys">
+                                        <Run Classes="tipKeysLabel" Text="Shortcut:" />
+                                        <Run Text="E" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </ToolTip.Tip>
+                        <materialIcons:MaterialIcon Width="19" Height="19" Kind="Eraser" />
+                    </RadioButton>
+
+                    <RadioButton Classes="tool" GroupName="tool"
+                                 IsChecked="{Binding Session.Tool, Mode=TwoWay,
+                                             Converter={StaticResource EnumMatch}, ConverterParameter=Fill}">
+                        <ToolTip.Tip>
+                            <ToolTip>
+                                <StackPanel MaxWidth="260" Spacing="2">
+                                    <TextBlock Classes="tipTitle" Text="Fill" />
+                                    <TextBlock Classes="tipBody"
+                                               Text="Flood the connected run of matching tiles with the selected one." />
+                                    <TextBlock Classes="tipKeys">
+                                        <Run Classes="tipKeysLabel" Text="Shortcut:" />
+                                        <Run Text="F" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </ToolTip.Tip>
+                        <materialIcons:MaterialIcon Width="19" Height="19" Kind="FormatColorFill" />
+                    </RadioButton>
+
+                    <RadioButton Classes="tool" GroupName="tool"
+                                 IsChecked="{Binding Session.Tool, Mode=TwoWay,
+                                             Converter={StaticResource EnumMatch}, ConverterParameter=Pick}">
+                        <ToolTip.Tip>
+                            <ToolTip>
+                                <StackPanel MaxWidth="260" Spacing="2">
+                                    <TextBlock Classes="tipTitle" Text="Pick" />
+                                    <TextBlock Classes="tipBody"
+                                               Text="Select the tile under the pointer so it can be painted elsewhere. Holding Alt does the same without leaving the current tool." />
+                                    <TextBlock Classes="tipKeys">
+                                        <Run Classes="tipKeysLabel" Text="Shortcut:" />
+                                        <Run Text="I" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </ToolTip.Tip>
+                        <materialIcons:MaterialIcon Width="19" Height="19" Kind="Eyedropper" />
+                    </RadioButton>
+
+                    <Separator Classes="toolbar" />
+
+                    <!--
+                        With the markers rather than with the tools, because that is what it is to the
+                        author: one position marked on the planet, like the blob's start point. It stays in
+                        the tool group because placing it is a click and a drag in pixels rather than
+                        something painted into a square - the grouping is what it does, the side of the
+                        divider is what it means.
+                    -->
+                    <RadioButton Classes="tool" GroupName="tool"
+                                 IsChecked="{Binding Session.Tool, Mode=TwoWay,
+                                             Converter={StaticResource EnumMatch}, ConverterParameter=Core}">
+                        <ToolTip.Tip>
+                            <ToolTip>
+                                <StackPanel MaxWidth="260" Spacing="2">
+                                    <TextBlock Classes="tipTitle" Text="Planet core" />
+                                    <TextBlock Classes="tipBody"
+                                               Text="Drag the core about. It is nine elements, one and a half tiles across by two down, and it is placed to 16 pixels rather than to the tile grid - so it does not snap like a tile. There is one on a planet, so placing it moves it." />
+                                </StackPanel>
+                            </ToolTip>
+                        </ToolTip.Tip>
+                        <materialIcons:MaterialIcon Width="19" Height="19" Kind="Atom" />
+                    </RadioButton>
+
+                    <!--
+                        The markers. Up here rather than in the palette because there is no artwork for
+                        any of them: in a palette they would be five identical boxes, and they would
+                        have cost the sheet a third of its height to say so. Generated from one table
+                        in the editor, which is also what the canvas draws on the square itself - so a
+                        button and the marker it paints cannot show different icons.
+                    -->
+                    <ItemsControl ItemsSource="{Binding Session.Markers}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="2" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:MarkerChoice">
+                                <RadioButton Classes="tool" GroupName="marker"
+                                             IsChecked="{Binding IsSelected, Mode=TwoWay}">
+                                    <ToolTip.Tip>
+                                        <ToolTip>
+                                            <StackPanel MaxWidth="260" Spacing="2">
+                                                <TextBlock Classes="tipTitle" Text="{Binding Title}" />
+                                                <TextBlock Classes="tipBody" Text="{Binding Description}" />
+                                            </StackPanel>
+                                        </ToolTip>
+                                    </ToolTip.Tip>
+                                    <materialIcons:MaterialIcon Width="19" Height="19" Kind="{Binding Icon}" />
+                                </RadioButton>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Separator Classes="toolbar" />
+
+                    <ToggleButton Classes="chip" IsChecked="{Binding Session.View.ShowGrid, Mode=TwoWay}">
+                        <ToolTip.Tip>
+                            <ToolTip>
+                                <StackPanel MaxWidth="260" Spacing="2">
+                                    <TextBlock Classes="tipTitle" Text="Tile grid" />
+                                    <TextBlock Classes="tipBody"
+                                               Text="Rule the screen into its eight by six tile positions." />
+                                    <TextBlock Classes="tipKeys">
+                                        <Run Classes="tipKeysLabel" Text="Shortcut:" />
+                                        <Run Text="G" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </ToolTip.Tip>
+                        <materialIcons:MaterialIcon Width="19" Height="19" Kind="Grid" />
+                    </ToggleButton>
+
+                    <ToggleButton Classes="chip" IsChecked="{Binding Session.View.ShowCollision, Mode=TwoWay}">
+                        <ToolTip.Tip>
+                            <ToolTip>
+                                <StackPanel MaxWidth="260" Spacing="2">
+                                    <TextBlock Classes="tipTitle" Text="Collision map" />
+                                    <TextBlock Classes="tipBody"
+                                               Text="Shade the parts of each tile the blob cannot walk through." />
+                                    <TextBlock Classes="tipKeys">
+                                        <Run Classes="tipKeysLabel" Text="Shortcut:" />
+                                        <Run Text="C" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </ToolTip.Tip>
+                        <materialIcons:MaterialIcon Width="19" Height="19" Kind="Wall" />
+                    </ToggleButton>
+
+                    <ToggleButton Classes="chip" IsChecked="{Binding Session.View.ShowTileNumbers, Mode=TwoWay}">
+                        <ToolTip.Tip>
+                            <ToolTip>
+                                <StackPanel MaxWidth="260" Spacing="2">
+                                    <TextBlock Classes="tipTitle" Text="Tile numbers" />
+                                    <TextBlock Classes="tipBody"
+                                               Text="Label each position with the tile painted there. Tiles the game treats specially are picked out in amber." />
+                                    <TextBlock Classes="tipKeys">
+                                        <Run Classes="tipKeysLabel" Text="Shortcut:" />
+                                        <Run Text="T" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </ToolTip.Tip>
+                        <materialIcons:MaterialIcon Width="19" Height="19" Kind="Numeric" />
+                    </ToggleButton>
+
+                    <ToggleButton Classes="chip" IsChecked="{Binding Session.View.ShowNeighbours, Mode=TwoWay}">
+                        <ToolTip.Tip>
+                            <ToolTip>
+                                <StackPanel MaxWidth="260" Spacing="2">
+                                    <TextBlock Classes="tipTitle" Text="Neighbouring screens" />
+                                    <TextBlock Classes="tipBody"
+                                               Text="Show a strip of the eight screens around this one, so scenery can be lined up across the join." />
+                                    <TextBlock Classes="tipKeys">
+                                        <Run Classes="tipKeysLabel" Text="Shortcut:" />
+                                        <Run Text="N" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </ToolTip>
+                        </ToolTip.Tip>
+                        <materialIcons:MaterialIcon Width="19" Height="19" Kind="ImageFilterCenterFocus" />
+                    </ToggleButton>
+
+                    <Separator Classes="toolbar" />
+
+                    <Button Classes="icon" Command="{Binding PreviousScreenCommand}"
+                            ToolTip.Tip="Previous screen">
+                        <materialIcons:MaterialIcon Width="19" Height="19" Kind="ChevronLeft" />
+                    </Button>
+                    <NumericUpDown Value="{Binding Session.CurrentScreen, Mode=TwoWay}"
+                                   Minimum="0" Maximum="511" Increment="1"
+                                   FormatString="0" ShowButtonSpinner="False"
+                                   Width="74" FontSize="12" Margin="2,0"
+                                   ToolTip.Tip="Screen number" />
+                    <Button Classes="icon" Command="{Binding NextScreenCommand}"
+                            ToolTip.Tip="Next screen">
+                        <materialIcons:MaterialIcon Width="19" Height="19" Kind="ChevronRight" />
+                    </Button>
+
+                </StackPanel>
+
+            </DockPanel>
+        </Border>
+
+        <Border DockPanel.Dock="Bottom" Classes="chrome" BorderThickness="0,1,0,0" Padding="12,6">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <TextBlock Grid.Column="0" Classes="status" Text="{Binding DocumentStatus}" />
+                <TextBlock Grid.Column="1" Classes="status statusStrong" Margin="16,0"
+                           Text="{Binding Session.View.HoverStatus}" />
+                <TextBlock Grid.Column="2" Classes="status accent" Text="{Binding Session.SelectedTileDescription}" />
+            </Grid>
+        </Border>
+
+        <Grid ColumnDefinitions="260,4,*,4,330">
+
+            <Border Grid.Column="0" Classes="panel" BorderThickness="0,0,1,0">
+                <DockPanel Margin="14">
+                    <TextBlock DockPanel.Dock="Top" Classes="header" Text="WORLD" />
+                    <TextBlock DockPanel.Dock="Bottom" Classes="status" TextWrapping="Wrap" Margin="0,10,0,0"
+                               Text="{Binding Session.ScreenDescription}" />
+
+                    <!--
+                        Only on a screen that has a booth, or that still has a code from one that was
+                        erased. It is the one thing about a screen that is not a tile, so it would
+                        otherwise be invisible until somebody went looking for it.
+                    -->
+                    <Border DockPanel.Dock="Bottom" Margin="0,14,0,0" Padding="11,9"
+                            BorderThickness="1" CornerRadius="5"
+                            BorderBrush="{DynamicResource EditorBorderBrush}"
+                            Background="{DynamicResource EditorBackgroundBrush}"
+                            IsVisible="{Binding Session.ShowTeleportPanel}">
+                        <StackPanel Spacing="6">
+                            <TextBlock Classes="header" Text="TELEPORT CODE" Margin="0" />
+                            <TextBlock Classes="accent" FontSize="25" FontWeight="SemiBold"
+                                       Text="{Binding Session.TeleportCodeDisplay}" />
+                            <TextBlock Classes="status" TextWrapping="Wrap"
+                                       Text="{Binding Session.TeleportCodeNote}" />
+                            <Button Classes="quiet" Content="Set code…" Margin="0,2,0,0"
+                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    Command="{Binding EditTeleportCodeCommand}" />
+                        </StackPanel>
+                    </Border>
+
+                    <!--
+                        Only on a screen with a signpost on it, or one still pointed somewhere by a
+                        sign that was erased. What a sign reads is not a tile number either, and the
+                        board the artwork draws is blank, so nothing else would show it.
+                    -->
+                    <Border DockPanel.Dock="Bottom" Margin="0,14,0,0" Padding="11,9"
+                            BorderThickness="1" CornerRadius="5"
+                            BorderBrush="{DynamicResource EditorBorderBrush}"
+                            Background="{DynamicResource EditorBackgroundBrush}"
+                            IsVisible="{Binding Session.ShowSignpostPanel}">
+                        <StackPanel Spacing="6">
+                            <TextBlock Classes="header" Text="SIGNPOST" Margin="0" />
+                            <TextBlock Classes="accent" FontSize="25" FontWeight="SemiBold"
+                                       Text="{Binding Session.SignpostCodeDisplay}" />
+                            <TextBlock Classes="status" TextWrapping="Wrap"
+                                       Text="{Binding Session.SignpostNote}" />
+                            <Button Classes="quiet" Content="Set sign…" Margin="0,2,0,0"
+                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    Command="{Binding EditSignpostCommand}" />
+                        </StackPanel>
+                    </Border>
+
+                    <!--
+                        Always on, unlike the teleport box: there is one landing site on the whole
+                        planet and a map without it does not start, so it is worth seeing from
+                        whichever screen is open rather than only from the one it is on.
+                    -->
+                    <Border DockPanel.Dock="Bottom" Margin="0,14,0,0" Padding="11,9"
+                            BorderThickness="1" CornerRadius="5"
+                            BorderBrush="{DynamicResource EditorBorderBrush}"
+                            Background="{DynamicResource EditorBackgroundBrush}">
+                        <StackPanel Spacing="6">
+                            <TextBlock Classes="header" Text="LANDING SITE" Margin="0" />
+                            <TextBlock Classes="accent" FontSize="15" FontWeight="SemiBold"
+                                       TextWrapping="Wrap"
+                                       Text="{Binding Session.Positions.LandingSiteDisplay}" />
+                            <TextBlock Classes="status" TextWrapping="Wrap"
+                                       Text="{Binding Session.Positions.LandingSiteNote}" />
+                            <Button Classes="quiet" Content="Go to screen" Margin="0,2,0,0"
+                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                    Command="{Binding GoToLandingSiteCommand}" />
+                        </StackPanel>
+                    </Border>
+
+                    <controls:WorldMapView Session="{Binding Session}" VerticalAlignment="Top"
+                                           ToolTip.Tip="Click or drag to go to a screen" />
+                </DockPanel>
+            </Border>
+
+            <GridSplitter Grid.Column="1" ResizeDirection="Columns" />
+
+            <Border Grid.Column="2" Background="{DynamicResource EditorBackgroundBrush}">
+                <controls:ScreenCanvas Session="{Binding Session}" Margin="14" />
+            </Border>
+
+            <GridSplitter Grid.Column="3" ResizeDirection="Columns" />
+
+            <Border Grid.Column="4" Classes="panel" BorderThickness="1,0,0,0">
+                <DockPanel Margin="14">
+
+                    <TextBlock DockPanel.Dock="Top" Classes="header" Text="TILES" />
+
+                    <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,10">
+                        <TextBox Grid.Column="0" Classes="search"
+                                 Watermark="Filter by number or name"
+                                 Text="{Binding Session.Palette.TileFilter, Mode=TwoWay}" />
+                        <ToggleButton Grid.Column="1" Classes="chip" Content="Used" Margin="6,0,0,0"
+                                      ToolTip.Tip="Show only the tiles this map actually uses"
+                                      IsChecked="{Binding Session.Palette.UsedTilesOnly, Mode=TwoWay}" />
+                    </Grid>
+
+                    <StackPanel DockPanel.Dock="Top">
+                        <TextBlock Classes="header" Text="RECENT" />
+                        <controls:TilePalette Session="{Binding Session}" Source="Recent" />
+                    </StackPanel>
+
+                    <StackPanel DockPanel.Dock="Bottom" Margin="0,14,0,0">
+                        <TextBlock Classes="header" Text="COLLISION" />
+                        <controls:CollisionMaskEditor Session="{Binding Session}"
+                                                      MaxWidth="208" HorizontalAlignment="Center" />
+                        <TextBlock Classes="status" TextWrapping="Wrap" Margin="0,8,0,0"
+                                   Text="Click a cell to make it solid. A mask belongs to the tile, so it changes every screen that uses it." />
+                    </StackPanel>
+
+                    <Border Margin="0,10,0,0" BorderThickness="1" CornerRadius="5"
+                            BorderBrush="{DynamicResource EditorBorderBrush}"
+                            Background="{DynamicResource EditorBackgroundBrush}">
+                        <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                            <controls:TilePalette Session="{Binding Session}" Source="Sheet"
+                                                  ToolTip.Tip="Ctrl and the wheel changes the tile size" />
+                        </ScrollViewer>
+                    </Border>
+
+                </DockPanel>
+            </Border>
+
+        </Grid>
+
+    </DockPanel>
+
+</Window>

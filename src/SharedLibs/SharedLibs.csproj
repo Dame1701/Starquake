@@ -1,0 +1,25 @@
+﻿<!--
+  Screen data structures shared by the game and the screen editor, along with the constants
+  that describe the shape of the world they hold - how big a tile is, how many of them make a
+  screen, how many screens make the planet, and which tile numbers the game treats specially.
+  The editor has to agree with the game about every one of those, so they live here rather
+  than being written down twice. Those files keep the Starquake.Constants and
+  Starquake.Structure namespaces they had in the game, so moving them cost the game nothing.
+
+  Unlike ProjectMercury this has no MonoGame dependency, so there is nothing to
+  multi-target for: a single net10.0 build serves every head and the editor.
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Starquake.SharedLibs</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="MessagePack"/>
+    </ItemGroup>
+
+</Project>

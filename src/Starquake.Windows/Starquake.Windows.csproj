@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="..\Starquake.Shared\Starquake.Shared.props"/>
+
+    <PropertyGroup>
+        <TargetFramework>net10.0-windows</TargetFramework>
+        <RollForward>Major</RollForward>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <ApplicationIcon>Starquake.ico</ApplicationIcon>
+        <!-- Lets this head build on Linux and macOS. It still only runs on Windows. -->
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="MonoGame.Framework.WindowsDX"/>
+    </ItemGroup>
+</Project>
