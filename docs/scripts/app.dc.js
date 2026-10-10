@@ -22,7 +22,7 @@ class Component extends DCLogic {
     'Teleportal Code Entry',
     'The Molecule Fields',
     'Violet Stalactite Caves',
-    'Hall of the Idols'
+    'The Explorer Who Didn't Make It'
   ];
 
   downloads = [
