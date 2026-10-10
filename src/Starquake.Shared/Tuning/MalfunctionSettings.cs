@@ -10,6 +10,7 @@ namespace Starquake.Tuning;
 /// <summary>
 ///     The flight computer's display failing, which is what the report it is printing says has
 ///     happened to it. Driven by <c>Shaders/Malfunction.fx</c>; see <c>ComputerReportScreen</c>.
+///     The music on that screen is bent by the same bursts: see <see cref="MusicPitchAt" />.
 /// </summary>
 /// <remarks>
 ///     A faint interference the whole time, with a burst every two seconds or so where the page
@@ -91,6 +92,37 @@ internal static class MalfunctionSettings
     private const float RollSpeed = 0.055f;
 
     /// <summary>
+    ///     How far flat the music is pulled at the height of a burst, where one would be an octave
+    ///     down. The playback speed goes with the pitch, so the piece drags as it sags.
+    /// </summary>
+    private const float PitchDive = 0.45f;
+
+    /// <summary>
+    ///     How far the pitch wanders either side of true the rest of the time, and how long a round
+    ///     trip takes. The sound's answer to <see cref="Idle" />. A piece playing perfectly steady
+    ///     between bursts is coming off a machine that works.
+    /// </summary>
+    private const float Flutter = 0.015f;
+
+    /// <inheritdoc cref="Flutter" />
+    private static readonly int FlutterPeriod = LogicClock.Seconds(1.7);
+
+    /// <summary>
+    ///     How loud the music is left at the height of a burst, and at the height of one that takes
+    ///     the vertical hold with it. Those are the worse fault, so they take more of the sound.
+    /// </summary>
+    private const float DuckedVolume = 0.4f;
+
+    /// <inheritdoc cref="DuckedVolume" />
+    private const float LostVolume = 0.08f;
+
+    /// <summary>
+    ///     How far towards one speaker the music is thrown at the height of a burst, where one would
+    ///     be entirely in it. <see cref="ChromaSplit" /> in sound.
+    /// </summary>
+    private const float PanSmear = 0.6f;
+
+    /// <summary>
     ///     How badly the computer is failing on a given frame, <see cref="Idle" /> between bursts
     ///     and one at the height of them.
     /// </summary>
@@ -143,6 +175,36 @@ internal static class MalfunctionSettings
     public static float PhaseAt(int logicFrame) => (float)(logicFrame * BandDrift);
 
     /// <summary>
+    ///     How far off true the music plays on a given frame, for a sound effect instance's pitch:
+    ///     flat through a burst and flickering either side of true between them.
+    /// </summary>
+    public static float MusicPitchAt(int logicFrame)
+        => Flutter * (float)Math.Sin(logicFrame * 2 * Math.PI / FlutterPeriod)
+           - PitchDive * FaultAt(logicFrame);
+
+    /// <summary>How loud the music is on a given frame, from nought to one.</summary>
+    public static float MusicVolumeAt(int logicFrame)
+    {
+        float duckedTo = TheHoldGoesDuring(BurstContaining(logicFrame)) ? LostVolume : DuckedVolume;
+
+        return 1f - (1f - duckedTo) * FaultAt(logicFrame);
+    }
+
+    /// <summary>
+    ///     Which speaker the music is thrown towards on a given frame, from minus one for the left
+    ///     to one for the right.
+    /// </summary>
+    public static float MusicPanAt(int logicFrame)
+        => PanSmear * FaultAt(logicFrame) * SideOfTheBurst(BurstContaining(logicFrame));
+
+    /// <summary>
+    ///     How far into a fault a frame is: nought between bursts and one at the height of them.
+    ///     <see cref="BreakupAt" /> with its floor taken off, which is what the sound wants. The
+    ///     floor is a texture on the picture, where music permanently flat and quiet is just wrong.
+    /// </summary>
+    private static float FaultAt(int logicFrame) => (BreakupAt(logicFrame) - Idle) / (1f - Idle);
+
+    /// <summary>
     ///     Which burst a frame belongs to: the one whose window it falls in, whether or not that
     ///     burst has started by then.
     /// </summary>
@@ -180,4 +242,14 @@ internal static class MalfunctionSettings
     ///     them, picked by the burst's own number so it is the same every time.
     /// </summary>
     private static bool TheHoldGoesDuring(int burst) => burst * 7919 % 100 < 32;
+
+    /// <summary>
+    ///     Which side a burst throws the sound: minus one for the left, one for the right. Picked by
+    ///     the burst's own number, so it is the same every time.
+    /// </summary>
+    /// <remarks>
+    ///     A different multiplier from <see cref="TheHoldGoesDuring" />. The same one would tie the
+    ///     two together and throw every rolling burst the same way.
+    /// </remarks>
+    private static int SideOfTheBurst(int burst) => burst * 104729 % 100 < 50 ? -1 : 1;
 }

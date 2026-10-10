@@ -24,7 +24,7 @@ internal class ComputerReportScreen : GameScreenBase, IGameScreen
 
     /// <summary>
     ///     How long the page has been on screen, in logic frames, which is the whole of what drives
-    ///     the malfunction. See <see cref="MalfunctionSettings" />.
+    ///     the malfunction, picture and music alike. See <see cref="MalfunctionSettings" />.
     /// </summary>
     private int _framesShown;
 
@@ -84,6 +84,8 @@ internal class ComputerReportScreen : GameScreenBase, IGameScreen
 
         _framesShown++;
 
+        BendTheMusic();
+
         base.Update(gameTime);
     }
 
@@ -140,6 +142,16 @@ internal class ComputerReportScreen : GameScreenBase, IGameScreen
         ScreenFade = 0;
         ScreenFadeSpeed = 5;
     }
+
+    /// <summary>
+    ///     The music failing with the display. Off the same frame as <see cref="Malfunctioning" />,
+    ///     so the piece sags and quietens as the page comes apart rather than near it.
+    /// </summary>
+    private void BendTheMusic()
+        => Resources.GetMusicEngine().Distort(
+            MalfunctionSettings.MusicPitchAt(_framesShown),
+            MalfunctionSettings.MusicVolumeAt(_framesShown),
+            MalfunctionSettings.MusicPanAt(_framesShown));
 
     /// <summary>
     ///     The display failing, set up for this frame. <c>Shaders/Malfunction.fx</c> does the work, and

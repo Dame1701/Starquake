@@ -32,7 +32,8 @@ internal class ResourceManager : StartableGameComponentBase
 
     /// <summary>
     ///     The one music engine, reached through <see cref="GetMusicEngine" /> by the game engine,
-    ///     which is the only thing that drives it.
+    ///     which starts and stops it, and by the computer report screen, which distorts its own
+    ///     piece.
     /// </summary>
     private readonly MusicEngine _musicEngine;
 
@@ -302,9 +303,9 @@ internal class ResourceManager : StartableGameComponentBase
         _soundDescriptions.Add(new SoundDescription(soundName, soundPath, instanceType, maxInstances, killOnScreenChange));
     }
 
-    public void AddMusicResource(GameScreenType screen, string songPath)
+    public void AddMusicResource(GameScreenType screen, string songPath, bool canBeDistorted = false)
     {
-        _musicDescriptions.Add(new MusicDescription(screen, songPath));
+        _musicDescriptions.Add(new MusicDescription(screen, songPath, canBeDistorted));
     }
 
     public SpriteCollection GetSpriteCollection(string name)

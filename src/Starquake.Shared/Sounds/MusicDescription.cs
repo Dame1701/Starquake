@@ -14,4 +14,9 @@ namespace Starquake.Sounds;
 ///         screen is the only name it needs, and a <see cref="GameScreenType" /> cannot be mistyped.
 ///     </para>
 /// </summary>
-internal sealed record MusicDescription(GameScreenType Screen, string FilePath);
+/// <param name="CanBeDistorted">
+///     Whether the screen bends the piece as it plays. Such a piece is played as a sound effect and
+///     has to be built as one, so this and <c>Content.mgcb</c> have to agree; see
+///     <c>MusicEngine.Distort</c>.
+/// </param>
+internal sealed record MusicDescription(GameScreenType Screen, string FilePath, bool CanBeDistorted = false);

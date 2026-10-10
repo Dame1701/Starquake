@@ -1213,8 +1213,8 @@
 
 #begin Music/computer-report-song.m4a
 /importer:Mp3Importer
-/processor:SongProcessor
-/processorParam:Quality=Best
+/processor:SoundEffectProcessor
+/processorParam:Quality=Medium
 /build:Music/computer-report-song.m4a
 
 #begin Music/gameover-song.m4a

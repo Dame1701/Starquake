@@ -273,7 +273,9 @@ internal static class ContentManifest
     private static void Music(ResourceManager resources)
     {
         resources.AddMusicResource(GameScreenType.Options, "Music\\opening-game-song");
-        resources.AddMusicResource(GameScreenType.ComputerReport, "Music\\computer-report-song");
+        // The one piece the game bends while it plays, which is why it is built as a sound effect
+        // rather than a song. See MusicEngine.Distort and MalfunctionSettings.
+        resources.AddMusicResource(GameScreenType.ComputerReport, "Music\\computer-report-song", true);
         resources.AddMusicResource(GameScreenType.GameComplete, "Music\\completed-game-song");
         resources.AddMusicResource(GameScreenType.GameOver, "Music\\gameover-song");
         resources.AddMusicResource(GameScreenType.HiScores, "Music\\hiscore-song");

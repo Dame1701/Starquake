@@ -157,6 +157,103 @@ public class MalfunctionSettingsTests
         }
     }
 
+    /// <summary>
+    ///     The sound fails with the picture. Between bursts the music plays, and every burst pulls
+    ///     it flat, quietens it and throws it to one side.
+    /// </summary>
+    [Fact]
+    public void TheMusic_WithinEveryBurst_SagsQuietensAndIsThrownToOneSide()
+    {
+        // Act / Assert
+        foreach ((int startsAt, int _) in BurstsOverAMinute())
+        {
+            Assert.True(MalfunctionSettings.MusicPitchAt(startsAt) < -0.3f,
+                $"the burst at frame {startsAt} left the music in tune");
+            Assert.True(MalfunctionSettings.MusicVolumeAt(startsAt) < 0.5f,
+                $"the burst at frame {startsAt} left the music at full volume");
+            Assert.True(Math.Abs(MalfunctionSettings.MusicPanAt(startsAt)) > 0.5f,
+                $"the burst at frame {startsAt} left the music centred");
+        }
+    }
+
+    /// <summary>
+    ///     What a sound effect instance accepts: a pitch and a pan of minus one to one, and a volume
+    ///     of nought to one. Anything outside throws when it is handed over.
+    /// </summary>
+    [Fact]
+    public void TheMusic_OverAMinute_StaysWithinWhatCanBeAskedOfAPiece()
+    {
+        // Act / Assert
+        for (int frame = 0; frame < AMinute; frame++)
+        {
+            Assert.InRange(MalfunctionSettings.MusicPitchAt(frame), -1f, 1f);
+            Assert.InRange(MalfunctionSettings.MusicVolumeAt(frame), 0f, 1f);
+            Assert.InRange(MalfunctionSettings.MusicPanAt(frame), -1f, 1f);
+        }
+    }
+
+    /// <summary>
+    ///     The report is read to music, so between bursts the piece plays at full volume, out of
+    ///     both speakers and close enough to true pitch that nobody hears it as the wrong recording.
+    /// </summary>
+    [Fact]
+    public void TheMusic_WhileTheDisplayIsQuiet_PlaysAsItWasWritten()
+    {
+        // Act / Assert
+        for (int frame = 0; frame < AMinute; frame++)
+        {
+            if (MalfunctionSettings.BreakupAt(frame) > MalfunctionSettings.Idle)
+            {
+                continue;
+            }
+
+            Assert.Equal(1f, MalfunctionSettings.MusicVolumeAt(frame));
+            Assert.Equal(0f, MalfunctionSettings.MusicPanAt(frame));
+            Assert.InRange(MalfunctionSettings.MusicPitchAt(frame), -0.02f, 0.02f);
+        }
+    }
+
+    /// <summary>
+    ///     Never quite true, the way the display is never quite steady. The pitch wanders either
+    ///     side of the note rather than sitting flat or sharp, which would only sound like the wrong
+    ///     speed.
+    /// </summary>
+    [Fact]
+    public void MusicPitchAt_WhileTheDisplayIsQuiet_NeverSettlesOnTheNote()
+    {
+        // Act
+        List<float> quietPitches = Enumerable
+            .Range(0, AMinute)
+            .Where(frame => MalfunctionSettings.BreakupAt(frame) <= MalfunctionSettings.Idle)
+            .Select(MalfunctionSettings.MusicPitchAt)
+            .ToList();
+
+        // Assert
+        Assert.Contains(quietPitches, pitch => pitch > 0.005f);
+        Assert.Contains(quietPitches, pitch => pitch < -0.005f);
+    }
+
+    /// <summary>
+    ///     Which way a burst throws the sound is not tied to whether it takes the vertical hold. Two
+    ///     faults that always arrive together read as one.
+    /// </summary>
+    [Fact]
+    public void MusicPanAt_OverAMinute_ThrowsBurstsBothWaysWhetherTheHoldGoesOrNot()
+    {
+        // Act
+        List<(float Pan, bool Rolled)> bursts = BurstsOverAMinute()
+            .Select(burst => (
+                MalfunctionSettings.MusicPanAt(burst.StartsAt),
+                Rolls(burst.StartsAt, burst.Frames)))
+            .ToList();
+
+        // Assert
+        Assert.Contains(bursts, burst => burst.Pan < 0f);
+        Assert.Contains(bursts, burst => burst.Pan > 0f);
+        Assert.Contains(bursts, burst => burst.Rolled && burst.Pan < 0f);
+        Assert.Contains(bursts, burst => burst.Rolled && burst.Pan > 0f);
+    }
+
     [Fact]
     public void PhaseAt_OverSuccessiveFrames_KeepsTheBandsTravellingOneWay()
     {
