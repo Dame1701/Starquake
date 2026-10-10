@@ -1,0 +1,10 @@
+#!/bin/sh
+# The AppImage entry point. AppRun is what the mounted image runs, and all it has to do is
+# start the game from inside the mount rather than from whatever directory the player was in.
+#
+# Program.cs pins the working directory to AppContext.BaseDirectory, so Content/ and Data/ are
+# found next to the binary without help from here. The mount is read-only and that is fine:
+# high scores go to ApplicationData and screenshots to the pictures folder, never beside the
+# executable.
+HERE="$(dirname "$(readlink -f "$0")")"
+exec "$HERE/Starquake" "$@"

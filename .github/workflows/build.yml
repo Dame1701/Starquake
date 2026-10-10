@@ -153,26 +153,54 @@ jobs:
           -p:PublishProfile=Aot-${{ matrix.rid }}
           -p:PrebuiltContentDir="${{ github.workspace }}/content"
 
-      # ditto rather than zip, because the .app carries an ad-hoc signature and plain zip does not
-      # preserve everything the signature covers. Apple Silicon refuses to start an unsigned arm64
-      # binary at all, so losing it in the archive would mean shipping a bundle that cannot run.
+      # A .dmg rather than a zip. It is the Mac-native way to hand someone an application, it
+      # preserves the ad-hoc signature that Apple Silicon requires to start the binary at all, and
+      # UDZO compression takes the 124MB bundle down to about 30MB - most of the content is .xnb,
+      # which compresses hard.
       - name: Package (macOS)
         if: startsWith(matrix.rid, 'osx')
         run: >
-          ditto -c -k --sequesterRsrc --keepParent
-          ${{ matrix.head }}/bin/Publish/${{ matrix.rid }}/Starquake.app
-          "${{ github.workspace }}/Starquake-${{ matrix.rid }}.zip"
+          hdiutil create -volname Starquake
+          -srcfolder ${{ matrix.head }}/bin/Publish/${{ matrix.rid }}/Starquake.app
+          -ov -format UDZO "${{ github.workspace }}/Starquake-${{ matrix.rid }}.dmg"
 
-      # tar, not zip: zip does not record the executable bit, and a Starquake without one is a
-      # file the player cannot start.
+      # Two things for Linux. The AppImage is the one to hand someone - a single executable file
+      # that needs no install - and the tarball is the fallback, because AppImages want libfuse2
+      # and Ubuntu has not shipped it by default since 22.04. (A player without it can still run
+      # the AppImage with --appimage-extract-and-run, which is also how this builds one.)
+      #
+      # tar, not zip, for the fallback: zip does not record the executable bit.
       - name: Package (Linux)
         if: startsWith(matrix.rid, 'linux')
-        run: >
-          tar -czf "${{ github.workspace }}/Starquake-${{ matrix.rid }}.tar.gz"
-          -C ${{ matrix.head }}/bin/Publish/${{ matrix.rid }}
-          --exclude='*.pdb' --exclude='*.dbg' .
+        run: |
+          set -eux
+          out="${{ matrix.head }}/bin/Publish/${{ matrix.rid }}"
+          tar -czf "${{ github.workspace }}/Starquake-${{ matrix.rid }}.tar.gz" \
+            -C "$out" --exclude='*.pdb' --exclude='*.dbg' .
 
-      # Compress-Archive has no exclude of its own, so the symbols go before the archive is made.
+          rm -rf AppDir && mkdir AppDir
+          tar -xzf "${{ github.workspace }}/Starquake-${{ matrix.rid }}.tar.gz" -C AppDir
+          cp Starquake.Linux/AppRun Starquake.Linux/starquake.desktop Starquake.Linux/Starquake.png AppDir/
+          chmod +x AppDir/AppRun AppDir/Starquake
+
+          # MonoGame.Library.SDL carries no arm64 Linux native, so that build arrives without one
+          # and dies on launch. An AppImage is allowed to bring its own, which is the one place
+          # this gap can be closed without asking the player to apt-get anything.
+          if [ ! -f AppDir/libSDL2-2.0.so.0 ]; then
+            sudo apt-get install -y libsdl2-2.0-0
+            cp "$(ldconfig -p | awk '/libSDL2-2.0.so.0/ {print $NF; exit}')" AppDir/
+          fi
+
+          arch="$(uname -m)"
+          wget -qO appimagetool \
+            "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${arch}.AppImage"
+          chmod +x appimagetool
+          ARCH="$arch" ./appimagetool --appimage-extract-and-run AppDir \
+            "${{ github.workspace }}/Starquake-${{ matrix.rid }}.AppImage"
+
+      # Two for Windows as well: the portable folder, and an installer for people who would rather
+      # double-click one thing. Compress-Archive has no exclude of its own, so the symbols go
+      # before the archive is made. Inno Setup is already on the runner.
       - name: Package (Windows)
         if: startsWith(matrix.rid, 'win')
         shell: pwsh
@@ -181,11 +209,22 @@ jobs:
           Remove-Item "$out/*.pdb" -ErrorAction SilentlyContinue
           Compress-Archive -Path "$out/*" -DestinationPath "${{ github.workspace }}/Starquake-${{ matrix.rid }}.zip"
 
+          # A tag is the only time there is a real version to stamp; every other run is a nightly.
+          $version = if ('${{ github.ref_type }}' -eq 'tag') { '${{ github.ref_name }}'.TrimStart('v') } else { '0.0.0' }
+          $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
+          if (-not (Test-Path $iscc)) { $iscc = 'iscc' }
+          & $iscc /Qp `
+            "/DPayloadDir=$((Resolve-Path $out).Path)" `
+            "/DAppVersion=$version" `
+            "/O${{ github.workspace }}" `
+            Starquake.Windows\Starquake.iss
+          if ($LASTEXITCODE -ne 0) { throw "ISCC failed with $LASTEXITCODE" }
+
       - name: Upload the build
         uses: actions/upload-artifact@v4
         with:
           name: Starquake-${{ matrix.rid }}
-          path: Starquake-${{ matrix.rid }}.*
+          path: Starquake-${{ matrix.rid }}*
           retention-days: 14
 
   # Tagging is the release process. Push a v* tag and the archives the publish job just built
@@ -214,18 +253,29 @@ jobs:
           cat > notes.md <<'NOTES'
           Built ahead of time: there is no .NET runtime to install on any platform.
 
-          Each download is a folder rather than a single file. The executable holds all of the
-          game's code, but `Content/` is read off disk and SDL2 and OpenAL are loaded by name at
-          runtime, so those have to travel beside it.
+          | Platform | Download | |
+          | --- | --- | --- |
+          | macOS (Apple Silicon) | `Starquake-osx-arm64.dmg` | Drag to Applications |
+          | macOS (Intel) | `Starquake-osx-x64.dmg` | Drag to Applications |
+          | Windows | `Starquake-win-x64-Setup.exe` | Installer, no administrator needed |
+          | | `Starquake-win-x64.zip` | Portable folder |
+          | Linux | `Starquake-linux-x64.AppImage` | `chmod +x` and run |
+          | | `Starquake-linux-x64.tar.gz` | Portable folder |
+          | Linux (ARM) | `Starquake-linux-arm64.AppImage` | `chmod +x` and run |
+          | | `Starquake-linux-arm64.tar.gz` | Portable folder |
 
-          **macOS** - the bundle is ad-hoc signed, which is what Apple Silicon requires to start
-          it at all, and is not what Gatekeeper wants. A download from a browser is quarantined,
-          so run `xattr -dr com.apple.quarantine Starquake.app` first, or use System Settings →
-          Privacy & Security → "Open Anyway". Control-clicking and choosing Open has not worked
-          since macOS 15.
+          **macOS** - the app is ad-hoc signed, which is what Apple Silicon requires to start it
+          at all, and is not what Gatekeeper wants. A download from a browser is quarantined, so
+          run `xattr -dr com.apple.quarantine /Applications/Starquake.app` after installing, or
+          use System Settings → Privacy & Security → "Open Anyway". Control-clicking and
+          choosing Open has not worked since macOS 15.
 
-          **Linux arm64** - ships without SDL2, because MonoGame has no arm64 Linux native to
-          ship. `sudo apt install libsdl2-2.0-0` before first launch. linux-x64 needs nothing.
+          **Windows** - SmartScreen will warn about an unsigned installer. More info → Run anyway.
+
+          **Linux** - the AppImage needs `libfuse2`, which Ubuntu has not shipped by default
+          since 22.04: `sudo apt install libfuse2`, or run it with `--appimage-extract-and-run`.
+          The arm64 AppImage carries its own SDL2; the arm64 tarball does not, and wants
+          `sudo apt install libsdl2-2.0-0` before it will start.
           NOTES
           gh release create "${{ github.ref_name }}" dist/* \
             --repo "${{ github.repository }}" \

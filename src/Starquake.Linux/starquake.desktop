@@ -1,0 +1,17 @@
+# The menu entry an AppImage is required to carry. appimagetool refuses to build without one,
+# and the desktop environment reads it to name and draw the application.
+#
+# Icon is a name, not a path: it refers to Starquake.png at the root of the AppDir, extension
+# left off as the freedesktop spec wants. Exec is likewise the binary's name rather than a path,
+# because AppRun is what actually starts the game and the AppImage mount point is not knowable
+# in advance.
+[Desktop Entry]
+Type=Application
+Name=Starquake
+GenericName=Platform Game
+Comment=Rebuild the planet's core before it tears itself apart
+Exec=Starquake
+Icon=Starquake
+Categories=Game;ArcadeGame;
+Keywords=platform;arcade;retro;
+Terminal=false

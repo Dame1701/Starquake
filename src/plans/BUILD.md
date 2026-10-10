@@ -261,8 +261,32 @@ reflection surface has changed, which is exactly when this page needs rereading.
 ## Distributing a build
 
 An ahead-of-time publish is the thing to hand to someone else: no runtime to install and no
-version to match. What it is not is a single file. Everything in "What ships" above has to travel
-together — on macOS that is what the `.app` bundle is for, and on the other two it is the folder.
+version to match. What `dotnet publish` leaves behind is not a single file, though — everything in
+"What ships" above has to travel together — so CI packs each one before it becomes a release asset.
+
+| Platform | Single file | Portable | Made by |
+| --- | --- | --- | --- |
+| macOS | `.dmg`, about 30MB | — | `hdiutil`, UDZO |
+| Windows | `Setup.exe` | `.zip` | Inno Setup 6, `Starquake.Windows/Starquake.iss` |
+| Linux | `.AppImage` | `.tar.gz` | `appimagetool`, `Starquake.Linux/AppRun` + `.desktop` |
+
+The compression is worth noticing: 124MB of bundle becomes a 30MB `.dmg`, because `Content/` is
+almost all of it and `.xnb` compresses hard.
+
+**Packaging is possible at all because the game writes nothing beside itself.** `HiScoreStore`
+writes to `ApplicationData` and `Screenshots` to the pictures folder, both by
+`Environment.GetFolderPath`. That is what lets an AppImage work from a read-only mount and lets
+the installer use the user's own Programs folder with `PrivilegesRequired=lowest`, so there is no
+UAC prompt. Anything that ever wants to write next to the executable breaks all three at once.
+
+**The AppImage carries its own SDL2 on arm64.** That is the one place the missing arm64 Linux
+native can be closed without asking the player to install anything: the packaging step copies the
+distro's `libSDL2-2.0.so.0` into the AppDir when the publish did not bring one. The arm64 tarball
+is still short of it.
+
+**AppImages want `libfuse2`**, which Ubuntu has not shipped by default since 22.04, so the tarball
+stays as the fallback. `--appimage-extract-and-run` is the other way round it, and is how CI runs
+`appimagetool` itself.
 
 ### macOS: it is signed, and that is not the same as being allowed to run
 
