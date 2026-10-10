@@ -44,6 +44,15 @@
                              Exclude="$(OutputPath)Starquake.app\**;$(OutputPath)Content\**;$(OutputPath)**\.DS_Store"/>
         </ItemGroup>
 
+        <!--
+          Deleted rather than copied over. Both copies below are additive and SkipUnchangedFiles
+          leaves what is already there alone, so a file from an earlier run - another
+          configuration's binary, or the apphost a non-AOT build leaves behind - survives every
+          later one and ships inside the bundle with nothing to say so. Deleting first means a
+          bundle holds what this run produced and only that.
+        -->
+        <RemoveDir Directories="$(AppBundleDir)"/>
+
         <MakeDir Directories="$(AppBundleMacOSDir);$(AppBundleResourcesDir)"/>
         <Copy SourceFiles="@(AppBundleBinary)"
               DestinationFiles="@(AppBundleBinary->'$(AppBundleMacOSDir)/%(RecursiveDir)%(Filename)%(Extension)')"
@@ -87,6 +96,15 @@
                                 Exclude="$(PublishDir)Starquake.app\**;$(PublishDir)Content\**;$(PublishDir)**\*.pdb;$(PublishDir)**\*.dbg;$(PublishDir)*.xml;$(PublishDir)**\*.dSYM\**;$(PublishDir)**\.DS_Store"/>
         </ItemGroup>
 
+        <!--
+          Deleted rather than copied over. Both copies below are additive and SkipUnchangedFiles
+          leaves what is already there alone, so a file from an earlier run - another
+          configuration's binary, or the apphost a non-AOT build leaves behind - survives every
+          later one and ships inside the bundle with nothing to say so. Deleting first means a
+          bundle holds what this run produced and only that.
+        -->
+        <RemoveDir Directories="$(AotAppBundleDir)"/>
+
         <MakeDir Directories="$(AotAppBundleMacOSDir);$(AotAppBundleResourcesDir)"/>
         <Copy SourceFiles="@(AotAppBundleBinary)"
               DestinationFiles="@(AotAppBundleBinary->'$(AotAppBundleMacOSDir)/%(RecursiveDir)%(Filename)%(Extension)')"
@@ -94,6 +112,22 @@
         <Copy SourceFiles="@(AotAppBundleContent)"
               DestinationFiles="@(AotAppBundleContent->'$(AotAppBundleResourcesDir)/Content/%(RecursiveDir)%(Filename)%(Extension)')"
               SkipUnchangedFiles="true"/>
+
+        <!--
+          The executable, taken from where ILC wrote it rather than from whatever the publish left
+          at the publish root.
+
+          Those are not always the same file. A publish run from an IDE has been seen to leave the
+          apphost there - the 120KB launcher stub a JIT build uses to find Starquake.dll - instead
+          of the native binary, and a bundle built around that starts, finds no managed assembly,
+          and exits without a word. The copy above would carry it in faithfully. NativeBinary is
+          what ILC actually produced, so this is the same answer however the publish was invoked,
+          and it overwrites whatever the glob brought in.
+        -->
+        <Error Condition="'$(NativeBinary)' == '' or !Exists('$(NativeBinary)')"
+               Text="A NativeAOT publish produced no native binary at '$(NativeBinary)'. Refusing to build an app bundle around the apphost, which would launch and do nothing."/>
+        <Copy SourceFiles="$(NativeBinary)" DestinationFolder="$(AotAppBundleMacOSDir)"/>
+
         <!-- As in CreateAppBundle: the version is substituted rather than copied. -->
         <Exec Command="sed 's/__VERSION__/$(Version)/g' &quot;$(MSBuildProjectDirectory)/Info.plist&quot; &gt; &quot;$(AotAppBundleDir)/Contents/Info.plist&quot;"/>
         <Copy SourceFiles="Starquake.icns" DestinationFolder="$(AotAppBundleResourcesDir)" SkipUnchangedFiles="true"/>

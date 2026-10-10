@@ -28,4 +28,45 @@
         </ItemGroup>
     </Target>
 
+    <!--
+      Publish into an empty folder.
+
+      `dotnet publish` copies into PublishDir and never clears it, and the five AOT profiles name
+      a PublishDir per runtime identifier with no configuration in it - so a Debug publish and a
+      Release publish write to the same folder and leave each other's files behind. What is
+      packaged is then whatever has accumulated rather than what this publish produced, and
+      nothing says so: on Linux and Windows the whole folder is archived as it stands, and on
+      macOS it is what the app bundle is built from.
+
+      Guarded on the path as well as on PublishAot, so this can only ever empty a bin/Publish
+      folder - never an output directory someone has pointed elsewhere.
+
+      CI is unaffected either way: a runner checks out into an empty workspace and publishes once.
+      This is for the machine that publishes twice.
+    -->
+    <Target Name="CleanAotPublishDir" BeforeTargets="PrepareForPublish"
+            Condition="'$(PublishAot)' == 'true' and $(PublishDir.Contains('bin/Publish'))">
+        <Message Text="Clearing $(PublishDir) before publishing" Importance="High"/>
+        <RemoveDir Directories="$(PublishDir)"/>
+    </Target>
+
+    <!--
+      Make sure what lands in PublishDir is the binary ILC produced.
+
+      A NativeAOT publish is supposed to put the native executable there, and from the command
+      line it does - but a publish driven from an IDE has been seen to leave the apphost instead,
+      the small launcher stub a JIT build uses to find the managed assembly. Nothing complains:
+      the file has the right name, the publish reports success, and the program starts and exits
+      without a word because there is no Starquake.dll beside it and no runtime to load one.
+
+      On macOS the app bundle takes its executable from NativeBinary directly and so is immune.
+      This is for Linux and Windows, where PublishDir is the deliverable - it is archived whole -
+      and there is no bundle to correct it. Copying over the top is a no-op when the publish got
+      it right, which from the command line it does.
+    -->
+    <Target Name="PublishTheNativeBinary" AfterTargets="Publish"
+            Condition="'$(PublishAot)' == 'true' and '$(NativeBinary)' != '' and Exists('$(NativeBinary)')">
+        <Copy SourceFiles="$(NativeBinary)" DestinationFolder="$(PublishDir)"/>
+    </Target>
+
 </Project>
