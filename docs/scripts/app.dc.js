@@ -59,13 +59,13 @@ class Component extends DCLogic {
     },
     {
       name: 'Linux',
-      req: 'x86_64 & ARM64 · most distros',
+      req: 'x64 & ARM64 · most distros',
       accent: '#28c0b0',
       asset: 'linux-x64.AppImage',
-      package: 'x86_64 .AppImage',
+      package: 'x64 .AppImage',
       size: '38 MB',
       alternates: [
-        { label: 'x86_64 .tar.gz',  asset: 'linux-x64.tar.gz',      size: '39 MB' },
+        { label: 'x64 .tar.gz',     asset: 'linux-x64.tar.gz',      size: '39 MB' },
         { label: 'ARM64 .AppImage', asset: 'linux-arm64.AppImage',  size: '38 MB' },
         { label: 'ARM64 .tar.gz',   asset: 'linux-arm64.tar.gz',    size: '38 MB' }
       ]
