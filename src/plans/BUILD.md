@@ -258,6 +258,62 @@ Leave them visible rather than adding them to `NoWarn`. They are the signal that
 reflection surface has changed, which is exactly when this page needs rereading. A normal
 `dotnet build` is still 0 warnings; these appear only on an AOT publish.
 
+## Versioning and releasing
+
+**`<Version>` in `Directory.Build.props` is the only place the number is written down, and
+bumping it is what publishes a release.** There is no tag to remember to push and no second
+number to keep in step.
+
+Before it existed there was no version at all. Three hardcoded `1.0.0`s - two keys in
+`Info.plist`, one in `app.manifest` - plus the SDK's implicit `1.0.0` behind the assemblies,
+none of them connected to any of the others, and no git tags. Now everything derives from the
+one property:
+
+| What | How it gets there |
+| --- | --- |
+| `AssemblyVersion`, `FileVersion`, `InformationalVersion` | The SDK, from `<Version>` |
+| `CFBundleShortVersionString`, `CFBundleVersion` | Both bundle targets `sed` it into `Info.plist` |
+| The installer's version | CI passes `/DAppVersion` to Inno Setup |
+| Every asset filename | `Starquake-<version>-<rid>.<ext>` |
+
+`app.manifest` is the one thing left out. Its `assemblyIdentity` version is a side-by-side
+identity rather than a displayed version - what Explorer shows on the `.exe` is `FileVersion`,
+which does come from `<Version>` - so there is nothing to gain by templating it.
+
+### What a bump does
+
+Push a commit to `main` that changes `<Version>` and CI releases it: the `version` job reads the
+number, finds no `v<version>` tag, and the `release` job builds every platform, creates the tag
+at that commit, and publishes a GitHub Release with the five archives attached.
+
+Push anything else and nothing is released. The `version` job asks git whether the tag already
+exists, which is what makes the whole thing idempotent - re-run the workflow, push a typo fix,
+re-run it a year later, and as long as the number has not moved there is no second release.
+
+### Changing a version that is already published
+
+**Nothing is overwritten, and nothing silently replaces a release.** The tag is the record:
+
+- **Bump to a number that has never shipped** - the normal path. A new tag, a new Release, and
+  every earlier one still sitting there with its own assets.
+- **Push again without changing the number** - no release. The tag already exists, the `version`
+  job says so in the log, and the build still runs and still uploads plain artifacts.
+- **Move `<Version>` back to a number already released** - also no release, for the same reason.
+  It does not rebuild or replace the old one. If that is genuinely wanted, delete the tag and the
+  Release on GitHub first; a release is then produced from whatever is on `main` now.
+
+Git does not overwrite a published release under any of these. A tag can be force-moved by hand
+(`git tag -f`, `git push --force`), and the Release that already exists keeps pointing at the
+commit it was built from while the tag moves out from under it - which is why nothing in CI ever
+does that.
+
+### Which number to bump
+
+Semantic versioning, and the game has no API, so read it as: patch for fixes, minor for new
+content or features, major for something that changes how the game is played or breaks saved
+high scores. The `.dmg`, `.AppImage` and `Setup.exe` all carry the number in their filename, so
+whatever is chosen is what a player sees in their downloads folder.
+
 ## Distributing a build
 
 An ahead-of-time publish is the thing to hand to someone else: no runtime to install and no

@@ -16,6 +16,22 @@
 <Project>
 
     <PropertyGroup>
+        <!--
+          The version, and the only place it is written down.
+
+          Everything else derives from it: AssemblyVersion, FileVersion and
+          InformationalVersion come from here through the SDK, the macOS bundle targets
+          substitute it into Info.plist, and CI stamps it into the installer and every
+          asset filename. Before this existed there was no version at all - three
+          hand-maintained 1.0.0s in Info.plist and app.manifest, and the SDK's implicit
+          1.0.0 behind the assemblies, none of them connected to any of the others.
+
+          Bumping it is what publishes a release. CI reads it on every push to main and,
+          if no v&lt;version&gt; tag exists yet, builds every platform, creates the tag and
+          publishes the GitHub Release. So a bump is a release and nothing else is: see
+          the Versioning section of plans/BUILD.md before changing it.
+        -->
+        <Version>1.0.0</Version>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <!--

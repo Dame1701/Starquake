@@ -51,7 +51,9 @@
         <Copy SourceFiles="@(AppBundleContent)"
               DestinationFiles="@(AppBundleContent->'$(AppBundleResourcesDir)/Content/%(RecursiveDir)%(Filename)%(Extension)')"
               SkipUnchangedFiles="true"/>
-        <Copy SourceFiles="Info.plist" DestinationFolder="$(AppBundleDir)/Contents" SkipUnchangedFiles="true"/>
+        <!-- sed rather than Copy, to put <Version> into CFBundleShortVersionString and
+             CFBundleVersion. This target is macOS-only, so sed is always there. -->
+        <Exec Command="sed 's/__VERSION__/$(Version)/g' &quot;$(MSBuildProjectDirectory)/Info.plist&quot; &gt; &quot;$(AppBundleDir)/Contents/Info.plist&quot;"/>
         <Copy SourceFiles="Starquake.icns" DestinationFolder="$(AppBundleResourcesDir)" SkipUnchangedFiles="true"/>
         <Exec Command="chmod +x &quot;$(AppBundleMacOSDir)/Starquake&quot;"/>
         <!-- Ad-hoc signature: unsigned bundles are killed on launch on Apple Silicon. -->
@@ -92,7 +94,8 @@
         <Copy SourceFiles="@(AotAppBundleContent)"
               DestinationFiles="@(AotAppBundleContent->'$(AotAppBundleResourcesDir)/Content/%(RecursiveDir)%(Filename)%(Extension)')"
               SkipUnchangedFiles="true"/>
-        <Copy SourceFiles="Info.plist" DestinationFolder="$(AotAppBundleDir)/Contents" SkipUnchangedFiles="true"/>
+        <!-- As in CreateAppBundle: the version is substituted rather than copied. -->
+        <Exec Command="sed 's/__VERSION__/$(Version)/g' &quot;$(MSBuildProjectDirectory)/Info.plist&quot; &gt; &quot;$(AotAppBundleDir)/Contents/Info.plist&quot;"/>
         <Copy SourceFiles="Starquake.icns" DestinationFolder="$(AotAppBundleResourcesDir)" SkipUnchangedFiles="true"/>
         <Exec Command="chmod +x &quot;$(AotAppBundleMacOSDir)/Starquake&quot;"/>
         <Exec Command="codesign --force --deep --sign - &quot;$(AotAppBundleDir)&quot;"/>
