@@ -21,39 +21,38 @@ namespace Starquake.GameComponents.GameScreens;
 internal class CheopsScreen : IGameScreen
 {
     /// <summary>
-    ///     The value <see cref="_itemToSwap" /> holds while no inventory slot has been picked yet. It
-    ///     is a slot index everywhere else, and no inventory is anywhere near this long.
+    ///     What <see cref="_itemToSwap" /> holds while no inventory slot has been picked. It is a slot
+    ///     index everywhere else, and no inventory is anywhere near this long.
     /// </summary>
     private const int NoItemSelected = 255;
 
     /// <summary>
-    ///     How many elements the pyramid puts on offer, which is also how many number keys pick one.
-    ///     The artwork counts them out as "1." to "5." across the screen, so the number is a fact
-    ///     about the picture as much as about the choice.
+    ///     How many elements the pyramid offers, and so how many number keys pick one. The artwork
+    ///     counts them out as "1." to "5." across the screen, so this is a fact about the picture as
+    ///     much as the choice.
     /// </summary>
     private const int ElementsOnOffer = 5;
 
     /// <summary>
-    ///     How long the result is left on screen before the game moves on, in logic frames - one
-    ///     second. It was a DateTime compared against DateTime.Now, which is local time: a DST step
-    ///     or an NTP correction landing in that second turned the pause into an hour.
+    ///     How long the result is left on screen before the game moves on, in logic frames. One
+    ///     second.
     /// </summary>
+    /// <remarks>
+    ///     Counted in frames rather than against <c>DateTime.Now</c>, which is local time: a DST step
+    ///     or an NTP correction landing in that second would turn the pause into an hour.
+    /// </remarks>
     private const int ScreenReadWaitFrames = LogicClock.FramesPerSecond;
 
-    /// <summary>
-    ///     What <see cref="_screenReadWaitFrames" /> holds before the pause has started.
-    /// </summary>
+    /// <summary>What <see cref="_screenReadWaitFrames" /> holds before the pause has started.</summary>
     private const int ScreenReadNotWaiting = -1;
 
     /// <summary>
     ///     How many digits the pyramid asks for, and so how many scanners it shows. The world
-    ///     generator draws pyramid codes from 10 to 99, which is the same two.
+    ///     generator draws pyramid codes from 10 to 99, which is the same two digits.
     /// </summary>
     private const int DigitsInCode = 2;
 
-    /// <summary>
-    ///     The key that takes each offered element, in the order they are drawn.
-    /// </summary>
+    /// <summary>The key that takes each offered element, in the order they are drawn.</summary>
     private static readonly Keys[] SelectionKeys = [Keys.D1, Keys.D2, Keys.D3, Keys.D4, Keys.D5];
     private readonly KeyScanner[] _accessCodes;
 
@@ -78,7 +77,7 @@ internal class CheopsScreen : IGameScreen
 
     /// <summary>
     ///     Which slot each scanner reads, and whether the pyramid is satisfied. Replaced whole by
-    ///     <see cref="CheckInventoryAgainstCode" /> rather than written into a digit at a time.
+    ///     <see cref="CheckInventoryAgainstCode" /> rather than written a digit at a time.
     /// </summary>
     private AccessCodeScan _scan = new([], false);
     private int _screenReadWaitFrames = ScreenReadNotWaiting;
@@ -199,9 +198,7 @@ internal class CheopsScreen : IGameScreen
     private void ReadAccessCode()
         => _accessCode = AccessCodeLock.Digits(_gameScreens.CurrentGameScreenData.CheopsAccessCode, DigitsInCode);
 
-    /// <summary>
-    ///     Scan Blob's inventory to see if he is carrying the right stuff.
-    /// </summary>
+    /// <summary>Checks Blob's inventory against the code.</summary>
     private void CheckInventoryAgainstCode()
     {
         _scan = AccessCodeLock.Scan(_blob.Carrying, _accessCode);
@@ -213,8 +210,8 @@ internal class CheopsScreen : IGameScreen
     }
 
     /// <summary>
-    ///     Picks at random from whatever Blob is carrying that is not his access card or key. If that is
-    ///     nothing at all he has to give up the key, or the card if he has no key.
+    ///     Picks at random from whatever Blob carries that is not his access card or key. With nothing
+    ///     else to give, he gives up the key, or the card if he has no key.
     /// </summary>
     private void ChooseItemToSwap()
     {
@@ -249,9 +246,8 @@ internal class CheopsScreen : IGameScreen
     }
 
     /// <summary>
-    ///     Which slot Blob is carrying one particular thing in, or <see cref="NoItemSelected" /> if he
-    ///     is not carrying it. The last such slot rather than the first, as the two loops this
-    ///     replaced both were - they kept overwriting their answer rather than stopping.
+    ///     Which slot Blob carries one particular thing in, or <see cref="NoItemSelected" /> if he is
+    ///     not carrying it. Deliberately the last such slot rather than the first.
     /// </summary>
     private int LastSlotHolding(Collectables item)
     {
@@ -269,15 +265,15 @@ internal class CheopsScreen : IGameScreen
     }
 
     /// <summary>
-    ///     Five to choose from: one the pyramid actually wants, and the item Blob would be giving up.
+    ///     Five to choose from: one the pyramid actually wants, plus the item Blob would give up.
     /// </summary>
     private void ChooseElementsOnOffer()
     {
         {
             _itemsToSelect = new InteractiveItem[ElementsOnOffer];
 
-            // There is always one, because a core with nothing left to replace has already ended the
-            // game before the pyramid can be reached.
+            // There is always one: a core with nothing left to replace has already ended the game
+            // before the pyramid can be reached.
             List<CoreElement> activeElements = _elements.GetActiveElements();
             int coreElementSlot = -1;
             int coreElement = 0;
@@ -288,7 +284,7 @@ internal class CheopsScreen : IGameScreen
                 coreElement = activeElements[_randomNumberGenerator.Next(0, activeElements.Count)].CurrentElement;
             }
 
-            // The item to swap takes the first slot the core element did not
+            // The item to swap takes the first slot the core element did not.
             int swapItemSlot = coreElementSlot == 0 ? 1 : 0;
 
             for (int a = 0; a < ElementsOnOffer; a++)
@@ -310,15 +306,14 @@ internal class CheopsScreen : IGameScreen
     }
 
     /// <summary>
-    ///     The swap itself, once the player has pressed one of the five number keys: the chosen
-    ///     element replaces what Blob was giving up, the pyramid is spent, and the game resumes.
+    ///     The swap itself, once one of the five number keys is pressed: the chosen element replaces
+    ///     what Blob gives up, the pyramid is spent, and the game resumes.
     /// </summary>
     /// <remarks>
-    ///     This was five copies of the same seven lines inside <see cref="DrawElementSelection" />,
-    ///     one per key. Reading the keyboard and handing the screen over from a draw meant the swap
-    ///     was attempted once per drawn frame rather than once per logic frame - nearly three times
-    ///     a frame at 144Hz - and went on being attempted while the game was paused, because
-    ///     <c>Draw</c> does not stop when <c>Update</c> does.
+    ///     Reading the keyboard and handing the screen over belong on the logic clock. From a draw the
+    ///     swap would be attempted once per drawn frame, nearly three times a frame at 144Hz, and
+    ///     would carry on while the game was paused, because <c>Draw</c> does not stop when
+    ///     <c>Update</c> does.
     /// </remarks>
     private void TakeChosenElement()
     {
@@ -343,14 +338,13 @@ internal class CheopsScreen : IGameScreen
 
     /// <summary>
     ///     The pyramid's verdict, once both scanners have read: the sound, and the start of the wait
-    ///     that moves the screen on. Done last so the wait is a whole
-    ///     <see cref="ScreenReadWaitFrames" /> long rather than one frame short of it.
+    ///     that moves the screen on. Done last, so the wait is a whole
+    ///     <see cref="ScreenReadWaitFrames" /> rather than one frame short.
     /// </summary>
     /// <remarks>
-    ///     This was <see cref="DrawElementsOnOffer" />'s job, which meant the sound was asked for once
-    ///     per drawn frame and needed a latch to stop it playing sixty times a second. Both belong on
-    ///     the logic clock: the wait is counted in logic frames, so starting it from a draw tied the
-    ///     length of the pause to the display's refresh rate.
+    ///     Both belong on the logic clock. From a draw the sound is asked for once per drawn frame and
+    ///     needs a latch to stop it playing sixty times a second, and the wait, counted in logic
+    ///     frames, would have its length tied to the display's refresh rate.
     /// </remarks>
     private void AnnounceScanResult()
     {
@@ -384,9 +378,7 @@ internal class CheopsScreen : IGameScreen
         }
     }
 
-    /// <summary>
-    ///     What the pyramid is holding, before the player has picked anything to swap for it.
-    /// </summary>
+    /// <summary>What the pyramid holds, before anything has been picked to swap for it.</summary>
     private void DrawElementsOnOffer()
     {
         {
@@ -441,9 +433,7 @@ internal class CheopsScreen : IGameScreen
         }
     }
 
-    /// <summary>
-    ///     The five inventory slots the player chooses from once a swap has been started.
-    /// </summary>
+    /// <summary>The five inventory slots chosen from once a swap has started.</summary>
     private void DrawElementSelection()
     {
         _font.Begin(BlendState.AlphaBlend);

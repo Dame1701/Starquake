@@ -20,14 +20,13 @@ namespace Starquake.Engines;
 ///     numeric keypad steps between screens.
 /// </summary>
 /// <remarks>
-///     Nothing in a release build constructs this or calls it. <c>GameEngine</c> builds it and steps
-///     it from two <see cref="System.Diagnostics.ConditionalAttribute" /> methods, which removes the
-///     calls rather than leaving a branch that is never taken, so a release has no path to any of
-///     this at all.
+///     Nothing in a release build constructs or calls this. <c>GameEngine</c> builds and steps it
+///     from two <see cref="System.Diagnostics.ConditionalAttribute" /> methods, which removes the
+///     calls rather than leaving a branch never taken, so a release has no path to any of it.
 ///     <para>
-///         The keys that are not debug keys are <see cref="GlobalHotkeys" />' and stay live in both:
-///         F8 swaps the artwork, F9 steps the cathode ray tube on a notch, F10 the backdrops,
-///         F12 fullscreen, and the player's own pause and quit keys.
+///         The keys that are not debug keys belong to <see cref="GlobalHotkeys" /> and stay live in
+///         both builds: F8 swaps the artwork, F9 steps the cathode ray tube, F10 the backdrops, F12
+///         fullscreen, plus the player's own pause and quit keys.
 ///     </para>
 /// </remarks>
 internal class TestModeKeys(
@@ -40,8 +39,8 @@ internal class TestModeKeys(
     CoreElements coreElements)
 {
     /// <summary>
-    ///     Test-mode cheats: how many lives F2 hands back, and how long the screen-stepping keys wait
-    ///     between screens so that holding one down steps rather than races.
+    ///     How many lives F2 hands back, and how long the screen-stepping keys wait between screens so
+    ///     holding one down steps rather than races.
     /// </summary>
     private const int TestModeLivesRestored = 5;
 
@@ -51,8 +50,8 @@ internal class TestModeKeys(
     /// <summary>
     ///     Frames still to wait before the keypad may step again. Counted down rather than slept
     ///     through: this runs inside <c>GameHost</c>'s fixed-timestep loop, so blocking the thread
-    ///     here stops the whole game - draw and sound included - and then leaves the loop a backlog
-    ///     to fast-forward through.
+    ///     stops the whole game, draw and sound included, and leaves the loop a backlog to
+    ///     fast-forward through.
     /// </summary>
     private int _framesUntilNextStep;
 
@@ -82,9 +81,9 @@ internal class TestModeKeys(
             HandOverACoreElement();
         }
 
-        // F7 rather than the F5 that would have followed F4: macOS takes F5 and F6 for itself and
-        // the game never sees them, with the function keys set to be function keys and no shortcut
-        // of the user's own on either. F7 arrives, as F8 to F12 do.
+        // F7 rather than the F5 that would follow F4. macOS takes F5 and F6 for itself and the game
+        // never sees them, even with the function keys set to be function keys and no shortcut of the
+        // user's own on either. F7 arrives, as F8 to F12 do.
         if (input.GetPressedKey() == Keys.F7)
         {
             HandOverTheWayIn();
@@ -97,14 +96,14 @@ internal class TestModeKeys(
     }
 
     /// <summary>
-    ///     Puts one core element the core is still missing into an empty slot of Blob's inventory,
-    ///     so the replacement sequence can be reached without first finding nine of them on the
-    ///     planet. Press it four times to fill him up, then walk into the core.
+    ///     Puts one core element the core is still missing into an empty inventory slot, so the
+    ///     replacement sequence can be reached without finding nine of them on the planet. Press four
+    ///     times to fill Blob up, then walk into the core.
     /// </summary>
     /// <remarks>
-    ///     Never an element he is already carrying. The core matches every inventory slot against
-    ///     every element it wants, so two copies of one would queue that element twice - scoring
-    ///     it twice and starting its replacement a second time while the first was still running.
+    ///     Never an element Blob already carries. The core matches every inventory slot against every
+    ///     element it wants, so two copies of one would queue that element twice, scoring it twice and
+    ///     starting its replacement again while the first was still running.
     /// </remarks>
     private void HandOverACoreElement()
     {
@@ -122,16 +121,14 @@ internal class TestModeKeys(
     }
 
     /// <summary>
-    ///     Puts the key and the access card into Blob's hands, so that the two things the planet
-    ///     locks - the force field across a key door, and the booth that asks for a code - can be
-    ///     reached without first hunting down the one of each the world holds.
+    ///     Puts the key and the access card into Blob's hands, so the two things the planet locks, the
+    ///     force field across a key door and the booth that asks for a code, can be reached without
+    ///     hunting down the one of each the world holds.
     /// </summary>
     /// <remarks>
-    ///     Either may already be there: the pair is handed over one at a time and each is skipped
-    ///     if he has it, so pressing this twice does not fill two more slots with a second key and
-    ///     a second card. The core refuses duplicates for a reason - see
-    ///     <see cref="WantedElementNotYetCarried" /> - and while these two are not core elements,
-    ///     a slot spent on a duplicate is a slot he cannot carry an element in.
+    ///     Either may already be there. The pair is handed over one at a time and each is skipped if
+    ///     Blob has it, so pressing twice does not fill two more slots with a second key and card. A
+    ///     slot spent on a duplicate is a slot that cannot carry an element.
     /// </remarks>
     private void HandOverTheWayIn()
     {
@@ -150,14 +147,12 @@ internal class TestModeKeys(
 
     /// <summary>
     ///     Where an item the key hands over should go, or null when it should not be handed over at
-    ///     all - because Blob is already carrying one, or because he has no room for it.
+    ///     all, either because Blob already carries one or because he has no room.
     /// </summary>
     public static int? SlotFor(Collectables[] carried, Collectables item)
         => carried.Contains(item) ? null : FirstEmptySlot(carried);
 
-    /// <summary>
-    ///     The first slot of the inventory holding nothing, or null when Blob is full.
-    /// </summary>
+    /// <summary>The first empty inventory slot, or null when Blob is full.</summary>
     public static int? FirstEmptySlot(Collectables[] carried)
     {
         for (int slot = 0; slot < carried.Length; slot++)
@@ -172,13 +167,13 @@ internal class TestModeKeys(
     }
 
     /// <summary>
-    ///     An element the core is still missing that Blob has not already got, or null when there
-    ///     is no such thing - every one it wants is either already in his hands or already in it.
+    ///     An element the core is still missing that Blob does not already carry, or null when every
+    ///     one it wants is either in his hands or already in it.
     /// </summary>
     /// <remarks>
-    ///     Takes the element numbers rather than the <c>CoreElements</c> they came off, so the one
-    ///     rule in here can be checked without a content pipeline - building a real set of them
-    ///     needs a resource manager, and a resource manager needs the game's content.
+    ///     Takes the element numbers rather than the <c>CoreElements</c> they came off, so the rule
+    ///     can be checked without a content pipeline: building a real set needs a resource manager,
+    ///     and that needs the game's content.
     /// </remarks>
     public static int? WantedElementNotYetCarried(IEnumerable<int> wanted, Collectables[] carried)
     {
@@ -198,17 +193,16 @@ internal class TestModeKeys(
     ///     NumPad2 a row up and down. Held keys combine, so 4 and 8 together step diagonally.
     /// </summary>
     /// <remarks>
-    ///     The keys are resolved into one destination and applied once. Applying them one at a time
-    ///     walked the map through an intermediate screen, and arriving somewhere is not free here -
-    ///     <c>PerformPostScreenChangeActions</c> marks a screen visited and scores it, and hands over
-    ///     to the core screen if that is where it has landed. Stepping left and up from 200 passed
-    ///     through 199 to reach 183, so it scored a screen nobody had been on and handed over to the
-    ///     core on the way past.
+    ///     The keys are resolved into one destination and applied once. Arriving somewhere is not
+    ///     free: <c>PerformPostScreenChangeActions</c> marks a screen visited, scores it, and hands
+    ///     over to the core screen if that is where it landed. Applying the keys one at a time walks
+    ///     through an intermediate screen, so stepping left and up from 200 passes through 199 and
+    ///     scores a screen nobody visited while handing over to the core on the way past.
     ///     <para>
-    ///         Working in rows and columns rather than in the flat screen index is what keeps a step
-    ///         on an edge from wrapping onto the row above or below. The index alone cannot tell the
-    ///         difference: screen 16 is the first of row 1, and one to the left of it is 15, which is
-    ///         the last of row 0 rather than anywhere next to it.
+    ///         Working in rows and columns rather than the flat screen index is what stops a step on
+    ///         an edge wrapping onto the row above or below. The index alone cannot tell: screen 16 is
+    ///         the first of row 1, and one to its left is 15, the last of row 0 rather than anywhere
+    ///         next to it.
     ///     </para>
     /// </remarks>
     private void StepBetweenScreens()

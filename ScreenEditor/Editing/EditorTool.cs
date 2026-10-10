@@ -8,42 +8,30 @@ namespace Starquake.ScreenEditor.Editing;
 ///     What a click on the screen being edited does.
 /// </summary>
 /// <remarks>
-///     The pointer's other buttons and the modifier keys reach the same tools without leaving the
-///     one that is selected - the right button always erases and Alt always picks - because reaching
-///     for the toolbar to rub out one tile and again to carry on painting is the sort of thing that
-///     makes an editor tiring to use.
+///     The right button always erases and Alt always picks, whichever tool is selected. Reaching for
+///     the toolbar to rub out one tile and again to resume painting makes an editor tiring to use.
 /// </remarks>
 internal enum EditorTool
 {
 
-    /// <summary>
-    ///     Lays the selected tile down, and keeps laying it down while the pointer is dragged.
-    /// </summary>
+    /// <summary>Lays the selected tile down, and keeps doing so while the pointer is dragged.</summary>
     Paint,
 
-    /// <summary>
-    ///     Clears tiles back to empty.
-    /// </summary>
+    /// <summary>Clears tiles back to empty.</summary>
     Erase,
 
-    /// <summary>
-    ///     Floods the run of matching tiles the pointer is over with the selected tile.
-    /// </summary>
+    /// <summary>Floods the run of matching tiles under the pointer with the selected tile.</summary>
     Fill,
 
-    /// <summary>
-    ///     Selects whatever tile the pointer is over, so it can be painted elsewhere.
-    /// </summary>
+    /// <summary>Selects the tile under the pointer, so it can be painted elsewhere.</summary>
     Pick,
 
-    /// <summary>
-    ///     Puts the planet core where the pointer is, and drags it about.
-    /// </summary>
+    /// <summary>Puts the planet core where the pointer is, and drags it about.</summary>
     /// <remarks>
-    ///     The one tool that does not work on the tile grid. The core is a position rather than a tile -
-    ///     it is one and a half tiles across and has never been tile-aligned - so this places it at
-    ///     <see cref="Starquake.Structure.CoreSite.PositionStep" /> resolution instead, and there is one
-    ///     core on a planet so placing it anywhere moves it from wherever it was.
+    ///     The only tool that does not work on the tile grid. The core is one and a half tiles across
+    ///     and not tile-aligned, so it is placed at
+    ///     <see cref="Starquake.Structure.CoreSite.PositionStep" /> resolution. A planet has one core,
+    ///     so placing it anywhere moves it from wherever it was.
     /// </remarks>
     Core
 }

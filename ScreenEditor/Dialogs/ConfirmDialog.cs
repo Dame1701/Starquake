@@ -10,9 +10,7 @@ using Starquake.ScreenEditor.Styles;
 
 namespace Starquake.ScreenEditor.Dialogs;
 
-/// <summary>
-///     What somebody chose when asked about unsaved work.
-/// </summary>
+/// <summary>What somebody chose when asked about unsaved work.</summary>
 internal enum ConfirmChoice
 {
     Save,
@@ -25,10 +23,10 @@ internal enum ConfirmChoice
 ///     saving.
 /// </summary>
 /// <remarks>
-///     Avalonia has no message box of its own, so this is built here rather than by taking on a
-///     dependency for it. The unsaved-work form is deliberately a three way choice: losing an
-///     afternoon of map work to a stray Cmd+W would be the single worst thing this tool could do.
-///     A warning has nothing to discard, so it offers two.
+///     Avalonia has no message box, so this is built here rather than taking a dependency for one.
+///     The unsaved-work form offers three choices, because losing an afternoon of map work to a
+///     stray Cmd+W is the worst thing this tool could do. A warning has nothing to discard, so it
+///     offers two.
 /// </remarks>
 internal sealed class ConfirmDialog : Window
 {
@@ -80,9 +78,7 @@ internal sealed class ConfirmDialog : Window
         };
     }
 
-    /// <summary>
-    ///     Asks what to do about work that has not been saved.
-    /// </summary>
+    /// <summary>Asks what to do about work that has not been saved.</summary>
     public static Task<ConfirmChoice> AskAsync(Window owner, string message)
     {
         var dialog = new ConfirmDialog(message, true, "Save");
@@ -91,9 +87,8 @@ internal sealed class ConfirmDialog : Window
     }
 
     /// <summary>
-    ///     Warns about something and asks whether to go ahead regardless. There is nothing to discard
-    ///     here - the choice is between saving as things are and going back to fix them - so it is the
-    ///     same window with one button fewer.
+    ///     Warns about something and asks whether to go ahead. The choice is between saving as things
+    ///     are and going back to fix them, so it is the same window with one button fewer.
     /// </summary>
     public static async Task<bool> WarnAsync(Window owner, string message)
     {

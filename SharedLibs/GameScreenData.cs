@@ -25,40 +25,34 @@ public sealed class GameScreenData
             }
         }
     }
-    // Not nullable: every consumer indexes these straight off, and none of them checks.
-    // An unpopulated screen is an empty one, not a null one. PickUps and PowerUp below stay
-    // nullable, because there null genuinely means the screen has none.
+    // Not nullable: every consumer indexes straight into this without checking. An unpopulated
+    // screen is an empty one, not a null one.
     [Key(0)]
     public ScreenTile[,] ScreenTiles { get; set; } = new ScreenTile[0, 0];
 
-    // Key 1 was the collision map. The screen editor only ever wrote an empty list and the game
-    // threw whatever was there away and built its own, so it came off the record rather than
-    // staying as a field nothing filled in. The number is left unused so the keys below keep theirs
-    // and the shipped file still reads.
+    // Key 1 is deliberately unused. Reusing it would shift the keys below and stop the shipped
+    // data file reading.
 
     /// <summary>
-    ///     The destination code that reaches the teleport booth on this screen, or null for a screen
-    ///     with no booth on it. Unlike the access codes below this is part of the map rather than
-    ///     drawn afresh each game, because it is something the screen editor authors - see
+    ///     The code that reaches this screen's teleport booth, or null if it has no booth. Authored
+    ///     in the screen editor, so it is saved with the map rather than generated each game. See
     ///     <see cref="Starquake.Structure.TeleportCodes" />.
     /// </summary>
     [Key(2)]
     public string? TeleportCode { get; set; }
 
     /// <summary>
-    ///     Where the planet core sits on this screen, or null for the 511 screens that do not carry it.
-    ///     Part of the map for the same reason the teleport code is - the screen editor authors it - and
-    ///     a position rather than a marker tile because the core does not fit the tile grid. See
-    ///     <see cref="Starquake.Structure.CoreSite" />.
+    ///     Where the planet core sits on this screen, or null for the 511 screens without it.
+    ///     A pixel position rather than a marker tile, because the core does not fit the tile grid.
+    ///     See <see cref="Starquake.Structure.CoreSite" />.
     /// </summary>
     [Key(3)]
     public CorePlacement? Core { get; set; }
 
     /// <summary>
-    ///     The screen whose teleport code the signpost on this screen spells out, or null for a
-    ///     screen with no signpost on it. Authored in the screen editor like the two above, and a
-    ///     screen number rather than the code itself so that renaming a code moves every sign that
-    ///     points at it - see <see cref="Starquake.Structure.Signposts" />.
+    ///     The screen whose teleport code this screen's signpost spells out, or null if it has no
+    ///     signpost. A screen number rather than the code itself, so changing a code updates every
+    ///     sign pointing at it. See <see cref="Starquake.Structure.Signposts" />.
     /// </summary>
     [Key(4)]
     public int? SignpostedScreen { get; set; }

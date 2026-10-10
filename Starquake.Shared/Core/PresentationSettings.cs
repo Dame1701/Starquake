@@ -9,23 +9,24 @@ namespace Starquake.Core;
 
 /// <summary>
 ///     How the composed picture is put on the screen: the transform that scales it onto the back
-///     buffer, the colours behind it, and where on it the game's own screens sit.
+///     buffer, the colours behind it, and where the game's own screens sit on it.
 ///     <para>
-///         Not a service - there is nothing to ask it to do but recalculate the transform. It is
-///         the state that used to be seven loose fields on the engine, read by the fourteen places
-///         that draw and written by the four that change what the picture looks like.
+///         State rather than a service. There is nothing to ask it to do but recalculate the
+///         transform.
 ///     </para>
 /// </summary>
 internal sealed class PresentationSettings
 {
     /// <summary>
-    ///     The game is composed at a fixed <see cref="CompositionSize.Width" /> by
-    ///     <see cref="CompositionSize.Height" /> and only scaled onto the back buffer as the very
-    ///     last step, so nothing in the game has to know or care whether it is in a small window,
-    ///     a dragged-out one, or fullscreen on a 6K display. The scale is uniform so the picture
-    ///     is never stretched, and whatever is left over becomes an even border - top and bottom,
-    ///     or left and right. Recalculated every frame rather than hung off a resize event, so a
-    ///     fullscreen toggle, a window drag and a change of display all just work.
+    ///     Scales the composition onto the back buffer, as the last step before presenting. The game
+    ///     is composed at a fixed <see cref="CompositionSize.Width" /> by
+    ///     <see cref="CompositionSize.Height" />, so nothing in it needs to know whether it is in a
+    ///     small window or fullscreen on a 6K display.
+    ///     <para>
+    ///         The scale is uniform, so the picture is never stretched and what is left over becomes
+    ///         an even border. Recalculated every frame rather than hung off a resize event, so a
+    ///         fullscreen toggle, a window drag and a change of display all work.
+    ///     </para>
     /// </summary>
     public Matrix Transform { get; private set; } = Matrix.Identity;
 
@@ -36,22 +37,22 @@ internal sealed class PresentationSettings
     public Color ScreenClearColour { get; set; } = Color.Black;
 
     /// <summary>
-    ///     Whether the backdrops behind the tile layers are drawn at all. The original graphics
-    ///     have none, and F10 turns them off by hand.
+    ///     Whether the backdrops behind the tile layers are drawn. The original graphics have none,
+    ///     and F10 turns them off by hand.
     /// </summary>
     public bool DrawBackgrounds { get; set; } = true;
 
     /// <summary>
     ///     How much of a cathode ray tube the finished picture is put through. Stepped by F9, and
-    ///     <see cref="CrtMode.Scanlines" /> to start with because that is what the game has always
-    ///     looked like.
+    ///     starting at <see cref="CrtMode.Scanlines" /> because that is how the game has always
+    ///     looked.
     /// </summary>
     public CrtMode CrtMode { get; set; } = CrtMode.Scanlines;
 
     /// <summary>
-    ///     Where the game's own screens are placed within the composition, which is not the whole
-    ///     of it - the status panel takes the top, and the screen is centred in what is left. The
-    ///     teleport screen moves these while it plays and puts them back afterwards.
+    ///     Where the game's own screens sit within the composition, which is not the whole of it:
+    ///     the status panel takes the top and the screen is centred in what is left. The teleport
+    ///     screen moves these while it plays and puts them back afterwards.
     /// </summary>
     public int ScreenXOffset { get; set; }
 
@@ -59,9 +60,8 @@ internal sealed class PresentationSettings
     public int ScreenYOffset { get; set; }
 
     /// <summary>
-    ///     Works out the scale and border for a back buffer of the given size. Pure arithmetic on
-    ///     two numbers, kept apart from <see cref="Recalculate" /> so it can be checked without a
-    ///     graphics device.
+    ///     Works out the scale and border for a back buffer of the given size. Kept apart from
+    ///     <see cref="Recalculate" /> so the arithmetic can be checked without a graphics device.
     /// </summary>
     public static Matrix TransformFor(int backBufferWidth, int backBufferHeight)
     {
@@ -77,9 +77,7 @@ internal sealed class PresentationSettings
             Matrix.CreateTranslation(borderX, borderY, 0f);
     }
 
-    /// <summary>
-    ///     Points <see cref="Transform" /> at a back buffer of the given size.
-    /// </summary>
+    /// <summary>Points <see cref="Transform" /> at a back buffer of the given size.</summary>
     public void Recalculate(int backBufferWidth, int backBufferHeight)
         => Transform = TransformFor(backBufferWidth, backBufferHeight);
 }

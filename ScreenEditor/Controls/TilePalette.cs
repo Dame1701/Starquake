@@ -26,8 +26,8 @@ internal enum TilePaletteSource
     Sheet,
 
     /// <summary>
-    ///     The tiles reached for most recently, in one row. A screen is usually built from a handful
-    ///     of tiles, so having those to hand saves finding them in the sheet over and over.
+    ///     The tiles used most recently, in one row. A screen is usually built from a handful of
+    ///     tiles, so keeping those to hand saves finding them in the sheet repeatedly.
     /// </summary>
     Recent
 }
@@ -36,21 +36,19 @@ internal enum TilePaletteSource
 ///     The tiles available to paint with, drawn from the sheet itself.
 /// </summary>
 /// <remarks>
-///     Drawn rather than built from controls because there are several hundred tiles and each is a
-///     single image with a couple of marks on it; four hundred templated list items to achieve the
-///     same thing would cost far more than it is worth.
+///     Drawn directly rather than built from controls. There are several hundred tiles and each is
+///     one image with a couple of marks on it, so templated list items would cost far more than they
+///     are worth.
 /// </remarks>
 internal sealed class TilePalette : Control
 {
 
-    /// <summary>
-    ///     The space between tiles, which is also the space around the outside.
-    /// </summary>
+    /// <summary>The space between tiles, which is also the space around the outside.</summary>
     private const double Gap = 6;
 
     /// <summary>
-    ///     How wide a tile is drawn in the recent row. Fixed, because the row is meant to stay the
-    ///     same height whatever the sheet is being shown at.
+    ///     How wide a tile is drawn in the recent row. Fixed, so the row keeps its height whatever
+    ///     zoom the sheet is shown at.
     /// </summary>
     private const double RecentTileWidth = 56;
 
@@ -108,7 +106,7 @@ internal sealed class TilePalette : Control
         IReadOnlyList<int> tiles = Tiles;
         int columns = ColumnsFor(Bounds.Width);
 
-        // The recent row is one row: anything past the end of it is older than the space allows.
+        // The recent list is a single row, so anything past its end does not fit.
         int count = Source == TilePaletteSource.Recent ? Math.Min(tiles.Count, columns) : tiles.Count;
 
         for (int index = 0; index < count; index++)
@@ -182,9 +180,8 @@ internal sealed class TilePalette : Control
             return;
         }
 
-        // Picking a tile is almost always the prelude to painting with it, and the session puts the
-        // brush back in hand for us - choosing something to lay down is what selects the brush now, so
-        // asserting it a second time here would be the same rule in two places.
+        // The session already switches to the brush when a tile is chosen, so doing it here too
+        // would put the same rule in two places.
         session.SelectedTile = tile;
 
         e.Handled = true;
@@ -228,8 +225,8 @@ internal sealed class TilePalette : Control
     {
         base.OnPointerWheelChanged(e);
 
-        // Ctrl and the wheel resizes the tiles, which is how every other program that shows a grid
-        // of images behaves. Without Ctrl the wheel is left alone so the list still scrolls.
+        // Ctrl and the wheel resizes the tiles. Without Ctrl the wheel is left alone so the list
+        // still scrolls.
         if (Source != TilePaletteSource.Sheet || !e.KeyModifiers.HasFlag(KeyModifiers.Control) || Session is null)
         {
             return;
@@ -241,7 +238,7 @@ internal sealed class TilePalette : Control
 
     private static void DrawSpecialMarker(DrawingContext context, Rect destination)
     {
-        // A tile the game gives a meaning to looks like any other in the sheet, so it gets a mark.
+        // A tile the game gives a meaning to looks like any other, so it gets a mark.
         var centre = new Point(destination.Right - 7, destination.Y + 7);
 
         context.DrawEllipse(new SolidColorBrush(EditorColours.Void, 0.7), null, centre, 5, 5);
@@ -304,8 +301,7 @@ internal sealed class TilePalette : Control
             return -1;
         }
 
-        // The gaps between tiles are not part of any tile, so a click that lands in one selects
-        // nothing rather than the tile above and to the left of it.
+        // The gaps between tiles belong to no tile, so a click landing in one selects nothing.
         return TileRect(index, columns).Contains(position) ? tiles[index] : -1;
     }
 

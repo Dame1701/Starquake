@@ -55,9 +55,7 @@ public class CoreReplacementSettingsTests
         Assert.True(ratios.Distinct().Count() > 15, "the shake traced a line");
     }
 
-    /// <summary>
-    ///     It rattles in its slot - it must not wander out of it however long the core takes.
-    /// </summary>
+    /// <summary>It rattles in its slot, and must not wander out of it however long the core takes.</summary>
     [Fact]
     public void ShakeAt_HoweverLongItRuns_StaysInItsSlot()
     {
@@ -74,7 +72,7 @@ public class CoreReplacementSettingsTests
 
     /// <summary>
     ///     The room has to end up exactly as it would have been drawn. A strength that never quite
-    ///     reached nought would leave the core room permanently wrung a fraction out of true.
+    ///     reached zero would leave the core room permanently wrung a fraction out of true.
     /// </summary>
     [Fact]
     public void SurgeStrengthAt_OnceItHasPassed_IsTheRoomUntouched()

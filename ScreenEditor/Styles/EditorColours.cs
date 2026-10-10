@@ -10,23 +10,23 @@ namespace Starquake.ScreenEditor.Styles;
 ///     The editor's palette, in one place.
 /// </summary>
 /// <remarks>
-///     The editing surfaces are drawn by hand rather than built out of controls, so their colours
-///     cannot come from a style the way the window chrome's do. Both sides read them from here - the
-///     drawing code directly, the XAML through <c>x:Static</c> - so that the chrome and the canvas
-///     cannot drift apart.
+///     The editing surfaces are drawn by hand rather than built from controls, so their colours
+///     cannot come from a style the way the window chrome's do. Both read them from here, the drawing
+///     code directly and the XAML through <c>x:Static</c>, so the chrome and the canvas cannot drift
+///     apart.
 /// </remarks>
 internal static class EditorColours
 {
 
     /// <summary>
-    ///     The empty space a screen is drawn on. Deliberately not black: the artwork has plenty of
-    ///     black in it, and a tile that happens to be dark should still read as a tile.
+    ///     The empty space a screen is drawn on. Not black on purpose: the artwork has plenty of
+    ///     black in it, and a dark tile should still read as a tile.
     /// </summary>
     public static readonly Color Void = Color.FromRgb(0x0B, 0x0D, 0x10);
 
     /// <summary>
-    ///     The lighter square of the chequer that fills a tile position with nothing in it, so that an
-    ///     unpainted part of a screen cannot be mistaken for a dark piece of scenery.
+    ///     The lighter square of the chequer filling an empty tile position, so an unpainted part of a
+    ///     screen cannot be mistaken for dark scenery.
     /// </summary>
     private static readonly Color VoidChequer = Color.FromRgb(0x14, 0x17, 0x1C);
 
@@ -43,23 +43,20 @@ internal static class EditorColours
     public static readonly Color Muted = Color.FromRgb(0x8A, 0x92, 0x9E);
 
     /// <summary>
-    ///     The highlight colour. Amber sits apart from anything in the tile artwork, which is what a
-    ///     selection marker has to do to be visible over every tile in the sheet.
+    ///     The highlight colour. Amber appears nowhere in the tile artwork, so a selection stays
+    ///     visible over every tile in the sheet.
     /// </summary>
     public static readonly Color Accent = Color.FromRgb(0xFF, 0xB4, 0x3C);
 
     public static readonly Color AccentDim = Color.FromRgb(0x6B, 0x4C, 0x18);
 
     /// <summary>
-    ///     The tiles the game never draws, which the editor stands in for with a marker of its own.
-    ///     A cool grey-blue, chosen to sit back behind the artwork rather than compete with it - the
-    ///     opposite of the flat magenta the tile sheet holds for them.
+    ///     The editor's stand-in panels for tiles the game never draws. A cool grey-blue, which sits
+    ///     back behind the artwork instead of competing with it like the sheet's flat magenta.
     /// </summary>
     public static readonly Color Marker = Color.FromRgb(0x7F, 0x9A, 0xC4);
 
-    /// <summary>
-    ///     Solid parts of a tile, when the collision overlay is on.
-    /// </summary>
+    /// <summary>Solid parts of a tile, when the collision overlay is on.</summary>
     private static readonly Color Collision = Color.FromRgb(0xFF, 0x4D, 0x5E);
 
     public static readonly IBrush VoidBrush = new SolidColorBrush(Void);
@@ -76,13 +73,11 @@ internal static class EditorColours
 
     public static readonly IBrush HoverBrush = new SolidColorBrush(Colors.White, 0.14);
 
-    /// <summary>
-    ///     Grid lines. Faint enough to read a screen through, strong enough to count tiles by.
-    /// </summary>
+    /// <summary>Grid lines. Faint enough to read a screen through, strong enough to count by.</summary>
     public static readonly IPen GridPen = new Pen(new SolidColorBrush(Colors.White, 0.13));
 
     /// <summary>
-    ///     The finer grid the collision map is tested on, shown only while that overlay is up.
+    ///     The finer grid collision is tested on, shown only while that overlay is up.
     /// </summary>
     public static readonly IPen CollisionGridPen = new Pen(new SolidColorBrush(Collision, 0.25));
 
@@ -91,8 +86,8 @@ internal static class EditorColours
     public static readonly IPen BorderPen = new Pen(new SolidColorBrush(Border));
 
     /// <summary>
-    ///     The edge of the screen being edited, drawn over the dimmed neighbours so that it is obvious
-    ///     which of the tiles on show can actually be painted on.
+    ///     The edge of the screen being edited, drawn over the dimmed neighbours so it is clear which
+    ///     tiles on show can be painted on.
     /// </summary>
     public static readonly IPen ScreenEdgePen = new Pen(new SolidColorBrush(Colors.White, 0.55), 1.5);
 }

@@ -18,17 +18,14 @@ namespace Starquake.ScreenEditor.Controls;
 ///     The selected tile shown large, with its collision cells marked and clickable.
 /// </summary>
 /// <remarks>
-///     Collision belongs to a tile <i>image</i>, not to a position on a screen: the game tests Blob
-///     against a mask attached to the tile number, so making the top of a platform solid here
-///     makes it solid everywhere that platform has ever been painted. That is worth knowing before
-///     clicking, which is why the panel says so rather than leaving it to be discovered.
+///     A mask belongs to a tile <i>image</i>, not to a position on a screen. Making the top of a
+///     platform solid here makes it solid everywhere that platform is painted, so the panel says so
+///     on screen rather than leaving it to be discovered.
 /// </remarks>
 internal sealed class CollisionMaskEditor : Control
 {
 
-    /// <summary>
-    ///     Room under the tile for the line naming it.
-    /// </summary>
+    /// <summary>Room under the tile for the line naming it.</summary>
     private const double CaptionHeight = 22;
 
     public static readonly StyledProperty<EditorSession?> SessionProperty =
@@ -66,8 +63,8 @@ internal sealed class CollisionMaskEditor : Control
             return;
         }
 
-        // A marker is not a tile on the sheet, so there is no mask to show for one and nothing here
-        // would do anything. Saying so beats an empty box that looks like something failed to load.
+        // A marker is not a tile on the sheet, so it has no mask. Say so rather than showing an
+        // empty box that looks like a failed load.
         if (TileCatalogue.IsMarker(session.SelectedTile))
         {
             DrawNote(context, "A marker has no collision - Blob walks through it.");
@@ -197,9 +194,7 @@ internal sealed class CollisionMaskEditor : Control
         return new Rect(Math.Floor((Bounds.Width - width) / 2), 0, Math.Floor(width), Math.Floor(height));
     }
 
-    /// <summary>
-    ///     A line of explanation in place of the grid, for a selection there is no mask to show for.
-    /// </summary>
+    /// <summary>Draws a line of explanation in place of the grid, for a selection with no mask.</summary>
     private void DrawNote(DrawingContext context, string note)
     {
         var text = new FormattedText(

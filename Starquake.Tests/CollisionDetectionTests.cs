@@ -10,10 +10,10 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     <see cref="CollisionDetection" /> is the primitive every moving thing in the game is
-///     stepped by, so these pin what it currently decides rather than what a rectangle overlap
-///     test ideally would. The two differ: it compares centre distances with truncating integer
-///     division, so boxes of odd size can overlap by a pixel and not be counted as touching.
+///     <see cref="CollisionDetection" /> is the primitive every moving thing in the game is stepped
+///     by, so these pin what it decides rather than what a rectangle overlap test would. The two are
+///     not the same. It compares centre distances with truncating integer division, so boxes of odd
+///     size can overlap by a pixel and still not count as touching.
 /// </summary>
 public class CollisionDetectionTests
 {
@@ -97,11 +97,10 @@ public class CollisionDetectionTests
         Assert.False(collided);
     }
 
-    // Internal rather than public, here and in the theories below that take one. The parameter
-    // is one of the game's own types, and those are internal now - this project only sees them
-    // through InternalsVisibleTo, which is not enough to let a public signature here name one.
-    // Dropping to internal costs nothing: xunit requires the test class to be public, not its
-    // test methods, so these are still found and still run.
+    // Internal rather than public, here and in every theory below that takes a Direction. The
+    // game's types are internal and this project only sees them through InternalsVisibleTo, which
+    // is not enough to let a public signature name one. It costs nothing: xunit requires the test
+    // class to be public, not its test methods.
     [Theory]
     [InlineData(Direction.Up)]
     [InlineData(Direction.Down)]
@@ -189,9 +188,7 @@ public class CollisionDetectionTests
 
         public const int Velocity = 8;
 
-        /// <summary>
-        ///     Far enough that nothing the tests do brings the two boxes near each other.
-        /// </summary>
+        /// <summary>Far enough that nothing the tests do brings the two boxes near each other.</summary>
         public const int WellClear = 100;
 
         /// <summary>

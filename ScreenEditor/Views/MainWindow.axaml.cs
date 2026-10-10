@@ -42,8 +42,8 @@ internal partial class MainWindow : Window
     /// </summary>
     /// <remarks>
     ///     A key binding fires wherever the focus is, which would make the tile filter box impossible
-    ///     to type in. Everything with a modifier is bound in the markup; these are the plain letters,
-    ///     and they stand aside while text is being entered.
+    ///     to type in. These are the plain letters, and they stand aside while text is being entered.
+    ///     Anything with a modifier is bound in the markup.
     /// </remarks>
     protected override void OnKeyDown(KeyEventArgs e)
     {
@@ -99,8 +99,7 @@ internal partial class MainWindow : Window
 
     /// <summary>
     ///     Holds the window open long enough to ask about unsaved work. The prompt is asynchronous and
-    ///     closing is not, so the first attempt is always cancelled and closing again is what actually
-    ///     shuts the window.
+    ///     closing is not, so the first attempt is always cancelled and a second one does the closing.
     /// </summary>
     protected override void OnClosing(WindowClosingEventArgs e)
     {

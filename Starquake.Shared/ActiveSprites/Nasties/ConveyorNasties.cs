@@ -13,8 +13,8 @@ using Starquake.World;
 namespace Starquake.ActiveSprites;
 
 /// <param name="onNastyExploded">
-///     Told when one of these blows itself apart, and handed on to each of them. Every one of them
-///     raises it: a nasty on a rail is a machine, and all of them go off when they are shot.
+///     Called when one of these blows apart, and handed on to each of them. A nasty on a rail is a
+///     machine, so all of them explode when shot.
 /// </param>
 internal class ConveyorNasties(ResourceManager resources,
     GameScreenCollection gameScreens,
@@ -23,14 +23,12 @@ internal class ConveyorNasties(ResourceManager resources,
     Action onNastyExploded)
 {
     /// <summary>
-    ///     How far Blob's box is pulled in each side before a touch counts, so that passing close by a
+    ///     How far Blob's box is pulled in each side before a touch counts, so passing close by a
     ///     nasty is not the same as walking into one.
     /// </summary>
     private const int BlobBoxInset = 8;
 
-    /// <summary>
-    ///     The size of Blob's shot, for testing it against a nasty.
-    /// </summary>
+    /// <summary>The size of Blob's shot, for testing it against a nasty.</summary>
     private const int FireWidth = TileMetrics.CollisionCellWidth;
 
     /// <inheritdoc cref="FireWidth" />
@@ -38,13 +36,13 @@ internal class ConveyorNasties(ResourceManager resources,
 
     /// <summary>
     ///     How many conveyor nasties exist at once. Three is the most any screen asks for, and they
-    ///     are re-used from screen to screen rather than built again.
+    ///     are reused from screen to screen rather than rebuilt.
     /// </summary>
     private const int ConveyorNastyCount = 3;
 
     /// <summary>
-    ///     How fast a nasty may be set running, in pixels a frame. The upper bound is exclusive, as
-    ///     <see cref="Random.Next(int,int)" /> takes it, so a nasty runs at one or at two.
+    ///     How fast a nasty may be set running, in pixels a frame. The upper bound is exclusive, the
+    ///     way <see cref="Random.Next(int,int)" /> takes it, so a nasty runs at one or two.
     /// </summary>
     private const int SlowestMoveSpeed = 1;
 
@@ -75,9 +73,8 @@ internal class ConveyorNasties(ResourceManager resources,
     }
 
     /// <summary>
-    ///     Puts the three nasties where the new screen's markers ask for them. Every one is switched
-    ///     off first, so a screen that asks for fewer than the last one leaves the rest idle rather
-    ///     than running where they were.
+    ///     Puts the nasties where the new screen's markers ask for them. All are switched off first,
+    ///     so a screen asking for fewer than the last leaves the rest idle rather than still running.
     /// </summary>
     public void PerformPostChangeScreenActions()
     {
@@ -95,9 +92,8 @@ internal class ConveyorNasties(ResourceManager resources,
     }
 
     /// <summary>
-    ///     Starts one nasty running along the rail it has been marked onto, at a speed drawn at
-    ///     random. The faster it runs the sooner its legs come round, so the animation delay is read
-    ///     off the speed rather than drawn separately.
+    ///     Starts one nasty running along the rail it is marked onto, at a random speed. The
+    ///     animation delay is derived from the speed, so faster legs come round sooner.
     /// </summary>
     private void PlaceOnRail(ConveyorNasty nasty, Point rail)
     {
@@ -110,12 +106,10 @@ internal class ConveyorNasties(ResourceManager resources,
         nasty.Initialise();
     }
 
-    /// <summary>
-    ///     How long each frame of the walk is held for at a given speed.
-    /// </summary>
+    /// <summary>How long each frame of the walk is held for at a given speed.</summary>
     /// <remarks>
-    ///     Only one and two are ever drawn, so the third rung is unreachable - it was in the chain of
-    ///     comparisons this replaced too, and is kept so the ladder still reads as a ladder.
+    ///     Only speeds of one and two are ever drawn, so the third rung is unreachable. It stays so
+    ///     the ladder still reads as a ladder.
     /// </remarks>
     private static int AnimationDelayFor(int moveSpeed)
         => moveSpeed switch
@@ -142,10 +136,9 @@ internal class ConveyorNasties(ResourceManager resources,
     }
 
     /// <summary>
-    ///     Blob's box is pulled in by eight pixels each side and lifted onto the rail the nasties run
-    ///     along, so that walking under one is not counted as being hit by it. Blob is held directly
-    ///     rather than reached for, so the touch animation is a call; the event is what tells the
-    ///     status panel.
+    ///     Tests Blob against the nasties. Blob's box is pulled in each side and lifted onto the
+    ///     rail, so walking under one does not count as being hit. The touch animation is a direct
+    ///     call; the event is what tells the status panel.
     /// </summary>
     private void TouchBlob(ConveyorNasty nasty)
     {

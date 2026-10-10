@@ -10,18 +10,15 @@ namespace Starquake.Core;
 /// <summary>
 ///     How the game is being played: whether it is paused, and the keys it is played with.
 ///     <para>
-///         Neither is plain state. Setting the pause has to start and stop the background rumble,
-///         and setting the keys has to hand them to Blob's control and choose keyboard against
-///         joypad - and neither the sound engine nor Blob exists when a session is first made.
-///         So the session holds the state and raises <see cref="OnPausedChanged" /> and
-///         <see cref="OnPlayerKeysChanged" />, and the engine, the one thing that knows about both,
-///         acts on them. That is the shape the nasties and the electricity engine already use to
-///         report back.
+///         Neither is plain state. Setting the pause starts and stops the background rumble, and
+///         setting the keys hands them to Blob's control and chooses keyboard against joypad, but
+///         neither the sound engine nor Blob exists when a session is made. So the session holds the
+///         state and raises <see cref="OnPausedChanged" /> and <see cref="OnPlayerKeysChanged" />,
+///         and the engine, which knows about both, acts on them.
 ///     </para>
 ///     <para>
-///         <c>StatusPanel</c> is deliberately not here, though it is the third of the members the
-///         plan grouped as the session. It needs the engine to construct, so holding it would make
-///         this untestable - and it would only be re-homing a reference, which narrows nothing.
+///         <c>StatusPanel</c> is deliberately not here. It needs the engine to construct, so holding
+///         it would make this untestable.
 ///     </para>
 /// </summary>
 internal sealed class GameSession
@@ -35,16 +32,15 @@ internal sealed class GameSession
         Left = Keys.Left,
         Right = Keys.Right,
 
-        // Alt rather than Ctrl, which macOS reserves: Ctrl with any arrow key is a Mission Control
-        // shortcut - the two space switches, Mission Control itself and App Expose - and the window
-        // server takes those before the game is given the key. Firing while moving is the ordinary
-        // thing to be doing, so the authentic Ctrl-to-fire made the default scheme unplayable there.
+        // Alt rather than Ctrl, which macOS reserves. Ctrl with any arrow key is a Mission Control
+        // shortcut and the window server takes it before the game sees the key. Firing while moving
+        // is ordinary, so the authentic Ctrl-to-fire makes the default scheme unplayable there.
         Fire = Keys.LeftAlt
     };
 
     /// <summary>
-    ///     Whether play is suspended. Blob and the nasties stop stepping, and the paused banner
-    ///     is drawn over the game.
+    ///     Whether play is suspended. Blob and the nasties stop stepping and the paused banner is
+    ///     drawn over the game.
     /// </summary>
     public bool Paused
     {
@@ -57,8 +53,7 @@ internal sealed class GameSession
     }
 
     /// <summary>
-    ///     The keys the game is being played with. Starts on the cursor keys with left control to
-    ///     fire, which is one of the four layouts the options screen offers.
+    ///     The keys the game is played with. Starts on the cursor keys with left Alt to fire.
     /// </summary>
     public PlayerKeySet PlayerKeys
     {
@@ -71,14 +66,14 @@ internal sealed class GameSession
     }
 
     /// <summary>
-    ///     Raised whenever <see cref="Paused" /> is set, with the value it was set to. The engine
-    ///     answers it by stopping and restarting the periodic background sounds.
+    ///     Raised when <see cref="Paused" /> is set, with the value it was set to. The engine answers
+    ///     by stopping and restarting the periodic background sounds.
     /// </summary>
     public event Action<bool>? OnPausedChanged;
 
     /// <summary>
-    ///     Raised whenever <see cref="PlayerKeys" /> is set, with the new set. The engine answers it
-    ///     by handing the set to Blob's control and deciding keyboard against joypad.
+    ///     Raised when <see cref="PlayerKeys" /> is set, with the new set. The engine answers by
+    ///     handing it to Blob's control and deciding keyboard against joypad.
     /// </summary>
     public event Action<PlayerKeySet>? OnPlayerKeysChanged;
 }

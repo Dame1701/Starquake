@@ -11,34 +11,30 @@ namespace Starquake.GameComponents;
 /// <summary>
 ///     Which of the game's screens is being played, and where to find any of the others.
 ///     <para>
-///         "Screen" means two unrelated things in this game and they used to sit side by side on
-///         the engine under near-identical names. <c>GameScreens</c> is the planet - two hundred
-///         and fifty-six screens of tiles Blob walks around. This is the other one: the mode
-///         the game is in, one of <see cref="GameScreenType" />, and the component that draws it.
-///         Eleven classes want the planet, five want this, and eight want both, which is why they
-///         are two objects rather than the one the plan expected.
+///         "Screen" means two unrelated things in this game. <c>GameScreens</c> is the planet, 256
+///         screens of tiles Blob walks around. This is the other: the mode the game is in, one of
+///         <see cref="GameScreenType" />, and the component that draws it. They are two objects
+///         because most classes want one or the other rather than both.
 ///     </para>
 ///     <para>
-///         Switching screen is an assignment to <see cref="Current" /> from whichever screen has
-///         decided it is finished - twenty-four places do it. Nothing here acts on the change; the
-///         engine reads <see cref="CurrentScreen" /> each frame and updates and draws whatever it
-///         names.
+///         Switching screen is an assignment to <see cref="Current" /> from whichever screen decides
+///         it is finished. Nothing here acts on the change: the engine reads
+///         <see cref="CurrentScreen" /> each frame and updates and draws whatever it names.
 ///     </para>
 ///     <para>
-///         The ten properties below are the other half of the job, and they are typed. A screen
-///         handing over always names the one screen it is handing to, and what it then says to it is
-///         particular to that screen - the main game screen's fade level, the high score screen's
-///         score to type a name against, the access booth's door to put Blob through. A single
-///         <c>Get</c> returning <see cref="IGameScreen" /> made all of that have to fit one
-///         interface, which is how eleven empty and throwing members ended up on screens that have
-///         no such thing. There is no cast anywhere now; the screens arrive typed and leave typed.
+///         The ten properties below are typed, and deliberately so. A screen handing over names the
+///         one screen it hands to, and what it says to it is particular to that screen: the main game
+///         screen's fade level, the high score screen's score to type a name against, the access
+///         booth's door to put Blob through. A single <c>Get</c> returning <see cref="IGameScreen" />
+///         would force all of that onto one interface, which is how empty and throwing members end up
+///         on screens that have no such thing. Nothing casts.
 ///     </para>
 /// </summary>
 internal sealed class ScreenDirectory
 {
     /// <summary>
-    ///     The screens Blob is on the planet for. Everything else - the options, the high scores,
-    ///     the game over screen - is the game talking about itself rather than being played.
+    ///     The screens Blob is on the planet for. Everything else, such as the options, the high
+    ///     scores and the game over screen, is the game talking about itself rather than being played.
     /// </summary>
     private static readonly GameScreenType[] InPlayScreens =
     [
@@ -62,24 +58,20 @@ internal sealed class ScreenDirectory
     private PlanetCoreScreen? _planetCore;
     private TeleportScreen? _teleporter;
 
-    /// <summary>
-    ///     The screen being played. Starts on the options screen, which is what the game boots
-    ///     into.
-    /// </summary>
+    /// <summary>The screen being played. Starts on the options screen, which the game boots into.</summary>
     public GameScreenType Current { get; set; } = GameScreenType.Options;
 
     /// <summary>
-    ///     The component that draws the screen being played, or null if <see cref="Current" /> has
-    ///     no component registered for it. Null rather than a throw because the engine's update and
-    ///     draw run every frame regardless of what <see cref="Current" /> has been set to, and have
-    ///     always simply skipped a screen they could not find.
+    ///     The component that draws the screen being played, or null if <see cref="Current" /> has no
+    ///     component registered. Null rather than a throw, because the engine's update and draw run
+    ///     every frame whatever <see cref="Current" /> is set to and simply skip a screen they cannot
+    ///     find.
     /// </summary>
     public IGameScreen? CurrentScreen => _screens.GetValueOrDefault(Current);
 
     /// <summary>
-    ///     Whether the game is being played rather than talking about itself. The status panel is
-    ///     drawn and updated while it is, the global hotkeys act only while it is, and the drain on
-    ///     Blob's energy runs only while it is.
+    ///     Whether the game is being played rather than talking about itself. The status panel is drawn
+    ///     and updated only while it is, as are the global hotkeys and the drain on Blob's energy.
     /// </summary>
     public bool InPlay => Array.IndexOf(InPlayScreens, Current) >= 0;
 
@@ -104,13 +96,12 @@ internal sealed class ScreenDirectory
     public TeleportScreen Teleporter => Registered(_teleporter, GameScreenType.Teleporter);
 
     /// <summary>
-    ///     Registers the component that draws one screen. This is the primitive the ten typed
-    ///     overloads below go through; they add the screen exactly as this does and additionally
-    ///     record it under its own type, so that the screens handing over to it get it back typed.
+    ///     Registers the component that draws one screen. The primitive the ten typed overloads below
+    ///     go through: they add the screen exactly as this does and also record it under its own type,
+    ///     so screens handing over to it get it back typed.
     ///     <para>
-    ///         Registering the same screen twice throws, as the dictionary underneath always did -
-    ///         two components claiming one screen means one of them would never be drawn and
-    ///         nothing would say so.
+    ///         Registering the same screen twice throws. Two components claiming one screen means one
+    ///         of them would never be drawn and nothing would say so.
     ///     </para>
     /// </summary>
     public void Add(GameScreenType gameScreen, IGameScreen screen) => _screens.Add(gameScreen, screen);
@@ -146,18 +137,16 @@ internal sealed class ScreenDirectory
     public void Add(TeleportScreen screen) => _teleporter = Added(GameScreenType.Teleporter, screen);
 
     /// <summary>
-    ///     Throws rather than returning null: a screen asking for another by name has no way to
-    ///     carry on without it, and the alternative is a null dereference somewhere further away
-    ///     from the mistake. This is the same contract the old <c>Get</c> had, kept because the
-    ///     engine relies on it.
+    ///     Throws rather than returning null. A screen asking for another by name cannot carry on
+    ///     without it, and the alternative is a null dereference further from the mistake.
     /// </summary>
     private static TScreen Registered<TScreen>(TScreen? screen, GameScreenType gameScreen)
         where TScreen : class, IGameScreen
         => screen ?? throw new InvalidOperationException($"There is no '{gameScreen}' screen.");
 
     /// <summary>
-    ///     Registers a screen and hands it straight back, so that a typed overload can record it in
-    ///     its own field only once the duplicate check has passed.
+    ///     Registers a screen and hands it straight back, so a typed overload records it in its own
+    ///     field only once the duplicate check has passed.
     /// </summary>
     private TScreen Added<TScreen>(GameScreenType gameScreen, TScreen screen)
         where TScreen : class, IGameScreen

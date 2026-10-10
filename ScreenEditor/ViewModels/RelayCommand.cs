@@ -6,14 +6,12 @@ using System.Windows.Input;
 
 namespace Starquake.ScreenEditor.ViewModels;
 
-/// <summary>
-///     A command that runs a delegate.
-/// </summary>
+/// <summary>A command that runs a delegate.</summary>
 /// <remarks>
-///     The editor's commands are all "do this now, and be greyed out when it makes no sense", which
-///     is little enough that wiring each one up as an observable would be more machinery than the
-///     job needs. <see cref="RaiseCanExecuteChanged" /> is called from the one place that knows when
-///     anything has changed - the session - rather than from each command separately.
+///     Every command in the editor does something now and greys out when that makes no sense, which
+///     is too little to justify wiring each one up as an observable. The session calls
+///     <see cref="RaiseCanExecuteChanged" />, because it is the one place that knows when anything
+///     has changed.
 /// </remarks>
 internal sealed class RelayCommand : ICommand
 {

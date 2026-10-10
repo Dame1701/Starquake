@@ -5,14 +5,13 @@
 namespace Starquake.ActiveSprites;
 
 /// <summary>
-///     What a shot is doing. It leaves straight up, down, left or right, and the first thing it
-///     hits sends it off diagonally one way or the other rather than stopping it, so this says
-///     which of the three it is currently on.
+///     Which of its three courses a shot is on. It leaves straight up, down, left or right, and the
+///     first thing it hits sends it off diagonally one way or the other rather than stopping it.
 /// </summary>
 /// <remarks>
-///     The numbers are load-bearing: a deflection is chosen with one call to the shared random
-///     number generator over the range <see cref="Left" /> to <see cref="Right" />, so they have
-///     to stay adjacent and <see cref="None" /> has to stay outside that range.
+///     The numbers are load-bearing. A deflection is chosen with one call to the shared random number
+///     generator over the range <see cref="Left" /> to <see cref="Right" />, so those two must stay
+///     adjacent and <see cref="None" /> must stay outside the range.
 /// </remarks>
 internal enum FireDeflection
 {

@@ -15,18 +15,15 @@ namespace Starquake.Tests;
 ///     <see cref="IFireSurroundings" /> cover where it goes once it is flying.
 /// </summary>
 /// <remarks>
-///     Only the rules that are pure arithmetic are covered, and that is the honest limit of the
-///     extraction: the rest of <see cref="BlobWeapon" /> pulls two particle effects and a sprite
-///     sheet out of the resource manager before it exists, so the class cannot be constructed
-///     without the content pipeline. The plan for this stage claimed otherwise - see
-///     <c>GODCLASSES.md</c>.
+///     Only the rules that are pure arithmetic are covered. The rest of
+///     <see cref="BlobWeapon" /> pulls two particle effects and a sprite sheet out of the resource
+///     manager before it exists, so the class cannot be constructed without the content pipeline.
 /// </remarks>
 public class BlobWeaponTests
 {
-    // The theories below name Direction, which is internal to Starquake.Shared and reaches here only
-    // through InternalsVisibleTo - not enough to let a public signature name one. xunit requires the
-    // test class to be public, not its methods, so dropping those to internal costs nothing. Same
-    // reasoning as BlobFireTests.
+    // The theories below name Direction, which is internal to Starquake.Shared and reaches here
+    // only through InternalsVisibleTo, which is not enough to let a public signature name one.
+    // xunit requires the test class to be public, not its methods, so internal costs nothing.
     [Theory]
     [InlineData(Direction.Up)]
     [InlineData(Direction.Down)]
@@ -54,7 +51,7 @@ public class BlobWeaponTests
     }
 
     /// <summary>
-    ///     The reason the last direction is carried rather than recomputed: Blob standing still has no
+    ///     Why the last direction is carried rather than recomputed. Blob standing still has no
     ///     direction of travel, and he has to fire somewhere.
     /// </summary>
     [Theory]
@@ -71,9 +68,9 @@ public class BlobWeaponTests
     }
 
     /// <summary>
-    ///     Worth pinning because it looks like an oversight and is not reachable in play: the shuttle arm
-    ///     takes the direction of travel whatever it is, and Blob on a shuttle that is not moving has
-    ///     already been given a direction by the frame he got on.
+    ///     This looks like an oversight and cannot be reached in play. The shuttle arm takes the
+    ///     direction of travel whatever it is, and Blob on a shuttle that is not moving was already
+    ///     given a direction by the frame he got on.
     /// </summary>
     [Fact]
     public void DirectionOfShot_OnTheShuttleAndNotMoving_TakesTheDirectionOfTravelAnyway()

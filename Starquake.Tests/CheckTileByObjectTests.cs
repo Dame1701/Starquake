@@ -12,28 +12,26 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     Which tile a probe reports when it covers more than one, which is the only part of the
-///     collision rework that changes how the game plays.
+///     Which tile a probe reports when it covers more than one. The map answers with the nearest,
+///     where <see cref="ReferenceCollisionMap" /> answers with the first in scan order.
 /// </summary>
 /// <remarks>
-///     Everything a probe is for goes through one of five decisions in <c>Blob</c> - the two tunnel
-///     mouths, the two sides of an access booth, and the teleporter - and each of them re-checks
-///     the tile's identity and where Blob stands inside it before acting. So the question worth
-///     asking is not whether the probe reports a different tile, which it does in well over a
-///     million places, but whether any of those five decisions comes out differently. Those are
-///     measured here against <see cref="ReferenceCollisionMap" />, which still scans top-left
-///     first, over every pixel position on every shipped screen that has one of those tiles on it.
+///     Everything a probe is for goes through one of five decisions in <c>Blob</c>: the two tunnel
+///     mouths, the two sides of an access booth, and the teleporter. Each of them re-checks the
+///     tile's identity and where Blob stands inside it before acting. So the question worth asking
+///     is not whether the probe reports a different tile, which it does in well over a million
+///     places, but whether any of those five decisions comes out differently. These measure that
+///     against the reference, over every pixel position on every shipped screen carrying one of
+///     those tiles.
 ///     <para>
-///         The answer is that the change is additive: nothing that could be entered before stops
-///         being enterable, and what is gained is an eight-pixel band at eighteen places where
-///         entry was impossible. See <see cref="TheDeadZone" /> for why the band is eight pixels.
+///         The difference is additive. Nothing enterable under the reference stops being enterable,
+///         and what is gained is an 8-pixel band at 18 places where entry was impossible. See
+///         <see cref="TheDeadZone" /> for why the band is 8 pixels.
 ///     </para>
 /// </remarks>
 public class CheckTileByObjectTests
 {
-    /// <summary>
-    ///     Blob's walking speed, which is what the probes are stretched by, and his size.
-    /// </summary>
+    /// <summary>Blob's walking speed, which is what the probes are stretched by, and his size.</summary>
     private const int Velocity = 8;
 
     private const int BlobSize = 64;
@@ -45,10 +43,10 @@ public class CheckTileByObjectTests
     private const int TriggerYPosition = 32;
 
     /// <summary>
-    ///     What the change is worth, in pixels of Blob's travel, at each of the places it reaches.
-    ///     The probe going left runs from eight pixels behind him, so it reaches into the tile on
-    ///     his left exactly while he stands in the first eight pixels of his own - and for those
-    ///     eight pixels that neighbour used to answer in place of the mouth he was standing in.
+    ///     What the difference is worth, in pixels of Blob's travel, at each place it reaches. The
+    ///     probe going left runs from 8 pixels behind him, so it reaches into the tile on his left
+    ///     exactly while he stands in the first 8 pixels of his own. Over those 8 pixels the
+    ///     reference answers with that neighbour instead of the mouth he is standing in.
     /// </summary>
     private const int TheDeadZone = Velocity;
 
@@ -87,8 +85,8 @@ public class CheckTileByObjectTests
     }
 
     /// <summary>
-    ///     The shape of the defect, written out rather than hunted for: a left-hand tunnel mouth
-    ///     with scenery beside it, and Blob standing in the first few pixels of the mouth.
+    ///     The case written out rather than hunted for. A left-hand tunnel mouth with scenery beside
+    ///     it, and Blob standing in the first few pixels of the mouth.
     /// </summary>
     [Theory]
     [InlineData(0)]
@@ -144,10 +142,9 @@ public class CheckTileByObjectTests
     }
 
     /// <summary>
-    ///     A marker is a position the author noted rather than scenery, and <c>Rebuild</c> has
-    ///     always passed over them. This did not, so one dropped beside a tunnel mouth answered in
-    ///     its place - and because every caller then checks the tile's identity, the tunnel simply
-    ///     stopped working with nothing to show for it.
+    ///     A marker is a position the author noted rather than scenery, and both <c>Rebuild</c> and
+    ///     this pass over them. A marker that answered in a tunnel mouth's place would fail every
+    ///     caller's identity check, and the tunnel would stop working with nothing to show for it.
     /// </summary>
     [Fact]
     public void AMarkerBesideATunnelMouth_IsPassedOverRatherThanReportedInItsPlace()

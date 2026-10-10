@@ -52,7 +52,7 @@ internal static class Overlays
     private const int TextScale = 2;
 
     /// <summary>
-    ///     The banner's colours: a dark red border over an almost black panel, both left slightly
+    ///     The banner's colours: a dark red border over an almost black panel, both slightly
     ///     see-through so the paused game still shows behind them.
     /// </summary>
     private const int BorderRed = 100;

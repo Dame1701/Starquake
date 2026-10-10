@@ -19,9 +19,8 @@ namespace Starquake.Display;
 ///     inventory slots with their scanner.
 /// </summary>
 /// <remarks>
-///     It used to own all of that as well as draw it - every scoring and power-up rule in the game
-///     lived on a class named for a widget, which is why <c>Blob</c> read his own supplies off the
-///     HUD. Those are <see cref="PlayerStats" /> now and this reads them to draw them.
+///     Draws only. The scoring and power-up rules, and the supplies themselves, belong to
+///     <see cref="PlayerStats" />, which this reads.
 /// </remarks>
 internal class StatusPanel(ResourceManager resources,
     GraphicsSet graphicsSet,
@@ -30,8 +29,8 @@ internal class StatusPanel(ResourceManager resources,
     PlayerStats stats)
 {
     /// <summary>
-    ///     The inventory strip: how far apart the slots are, and where the first one starts. The slot
-    ///     number, the item in it, and the scanner that sweeps it are each drawn at their own offset
+    ///     The inventory strip: how far apart the slots are and where the first starts. The slot
+    ///     number, the item in it and the scanner sweeping it are each drawn at their own offset
     ///     within the slot.
     /// </summary>
     private const int InventorySlotSpacing = 78;
@@ -56,7 +55,7 @@ internal class StatusPanel(ResourceManager resources,
 
     /// <summary>
     ///     The three supply bars. They share a left edge and a height, and each is scaled from its
-    ///     supply by however much of the bar one unit of it is worth.
+    ///     supply by how much of the bar one unit is worth.
     /// </summary>
     private const int BarXPos = 408;
 
@@ -81,9 +80,7 @@ internal class StatusPanel(ResourceManager resources,
     /// <inheritdoc cref="BarXPos" />
     private const int AmmoBarScale = 2;
 
-    /// <summary>
-    ///     Where the score and the lives remaining are printed.
-    /// </summary>
+    /// <summary>Where the score and the lives remaining are printed.</summary>
     private const int ScoreXPos = 39;
 
     /// <inheritdoc cref="ScoreXPos" />
@@ -95,9 +92,7 @@ internal class StatusPanel(ResourceManager resources,
     /// <inheritdoc cref="ScoreXPos" />
     private const int LivesYPos = 113;
 
-    /// <summary>
-    ///     Where the overlay sits. The only panel graphic not drawn at the origin.
-    /// </summary>
+    /// <summary>Where the overlay sits. The only panel graphic not drawn at the origin.</summary>
     private const int OverlayXPos = 22;
 
     /// <inheritdoc cref="OverlayXPos" />
@@ -111,8 +106,8 @@ internal class StatusPanel(ResourceManager resources,
 
     /// <summary>
     ///     The slot the core has picked out, or -1 for none. Drawn glowing and shaking, so a match
-    ///     is shown at both ends - in Blob's hands and in the core - rather than a part simply
-    ///     vanishing from one and appearing in the other.
+    ///     shows at both ends, in Blob's hands and in the core, rather than a part vanishing from one
+    ///     and appearing in the other.
     /// </summary>
     private int _slotIdentified = -1;
 
@@ -124,16 +119,13 @@ internal class StatusPanel(ResourceManager resources,
     public int Height => resources.GetSpriteCollection(Assets.Graphics.StatusPanelGraphic).SpriteHeight;
 
     /// <summary>
-    ///     Steps the panel, and says what has to happen to Blob as a result. It is told what state he
-    ///     is in and whether the intro is at a point where energy should drain, because the panel is
-    ///     built before he is: Blob needs the panel to read his supplies from, so the panel cannot
-    ///     hold him.
+    ///     Steps the panel and says what must happen to Blob as a result. It is told Blob's state and
+    ///     whether the intro is at a point where energy should drain, because the panel is built
+    ///     first: Blob reads his supplies from the panel, so the panel cannot hold Blob.
     /// </summary>
     /// <remarks>
-    ///     It used to take Blob per call and act on him - call <c>Kill</c>, assign
-    ///     <c>State</c>. That is safe to construct in either order, which was the point, but it
-    ///     still named a type from <c>ActiveSprites</c>. See <see cref="BlobInstruction" />; the
-    ///     engine calls this holding both and applies the answer.
+    ///     Returns a <see cref="BlobInstruction" /> rather than acting on Blob, so this names no type
+    ///     from <c>ActiveSprites</c>. The engine holds both and applies the answer.
     /// </remarks>
     public BlobInstruction Update(Collectables[] blobsInventory, BlobState blobsState, bool energyMayDrain)
     {
@@ -143,8 +135,8 @@ internal class StatusPanel(ResourceManager resources,
 
             BlobInstruction instruction = BlobInstruction.None;
 
-            // Blob is only drained while he is walking the planet - a teleporter, a booth or a
-            // pyramid is a safe place to stand. PlayerStats decides whether that has killed him.
+            // Blob is only drained while walking the planet. A teleporter, a booth or a pyramid is a
+            // safe place to stand. PlayerStats decides whether the drain has killed him.
             if (stats.DrainEnergy(energyMayDrain && screenDirectory.Current == GameScreenType.MainGame))
             {
                 stats.EnergyLevel = 0;
@@ -172,7 +164,7 @@ internal class StatusPanel(ResourceManager resources,
     }
 
     /// <summary>
-    ///     Says which inventory slot the core is drawing a part out of, or -1 once it is not.
+    ///     Says which inventory slot the core is drawing a part out of, or -1 when it is not.
     /// </summary>
     public void IdentifySlot(int slotNo)
     {
@@ -220,8 +212,8 @@ internal class StatusPanel(ResourceManager resources,
     }
 
     /// <summary>
-    ///     The panel's own artwork: the backdrop everything else is drawn on, and the overlay that
-    ///     goes over the finished panel.
+    ///     The panel's own artwork: the backdrop everything else is drawn on, and the overlay laid
+    ///     over the finished panel.
     /// </summary>
     private void DrawPanelGraphic(string assetName, int xPos = 0, int yPos = 0)
     {
@@ -234,8 +226,8 @@ internal class StatusPanel(ResourceManager resources,
 
     /// <summary>
     ///     One of the three bars down the middle of the panel. Each is a single sprite stretched to
-    ///     the level it is showing, so all that differs between them is the artwork, the row it sits
-    ///     on, and how many pixels one unit of it is worth.
+    ///     the level it shows, so they differ only in artwork, the row they sit on, and how many
+    ///     pixels one unit is worth.
     /// </summary>
     private void DrawBar(string assetName, int yPos, double level)
     {
@@ -247,9 +239,9 @@ internal class StatusPanel(ResourceManager resources,
     }
 
     /// <summary>
-    ///     The inventory slots, each numbered above. A slot with something in it has its number in
-    ///     orange and the item drawn below it; an empty one has a white number and nothing else. The
-    ///     slot being scanned is left out, because <see cref="DrawInventoryScanner" /> draws that one.
+    ///     The inventory slots, each numbered above. A full slot has its number in orange with the
+    ///     item below; an empty one has a white number and nothing else. The slot being scanned is
+    ///     left out, because <see cref="DrawInventoryScanner" /> draws that one.
     /// </summary>
     private void DrawInventory()
     {
@@ -278,7 +270,7 @@ internal class StatusPanel(ResourceManager resources,
                 continue;
             }
 
-            // The one the core has picked out rattles and glows where the others sit still.
+            // The slot the core has picked out rattles and glows while the others sit still.
             Vector2 shake = slot == _slotIdentified
                 ? CoreReplacementSettings.ShakeAt(_identifiedFrame)
                 : Vector2.Zero;
@@ -296,8 +288,8 @@ internal class StatusPanel(ResourceManager resources,
     }
 
     /// <summary>
-    ///     The light rising and falling on the part the core is drawing out, over the plain
-    ///     artwork so the pulse is light on it rather than a tint of it.
+    ///     The light rising and falling on the part the core is drawing out, laid over the plain
+    ///     artwork so the pulse reads as light on the part rather than a tint of it.
     /// </summary>
     private void DrawIdentifiedSlotGlow()
     {
@@ -326,7 +318,7 @@ internal class StatusPanel(ResourceManager resources,
     }
 
     /// <summary>
-    ///     The scan line running down the one slot a door is reading, drawn in place of the item.
+    ///     The scan line running down the slot a door is reading, drawn in place of the item.
     /// </summary>
     private void DrawInventoryScanner()
     {

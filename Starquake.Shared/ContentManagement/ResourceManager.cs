@@ -17,8 +17,8 @@ namespace Starquake.ContentManagement;
 internal class ResourceManager : StartableGameComponentBase
 {
     /// <summary>
-    ///     The percentage reported once everything has loaded, and how long the "Launching Game" message
-    ///     is left up before the game takes over - long enough to be read rather than flash past.
+    ///     The percentage reported once everything has loaded, and how long the "Launching Game"
+    ///     message stays up before the game takes over. Long enough to read rather than flash past.
     /// </summary>
     private const int FullyLoadedPercent = 100;
 
@@ -54,10 +54,10 @@ internal class ResourceManager : StartableGameComponentBase
 
         _particleEngine = new ParticleEngine(content, graphics, graphicsSet);
         _animTiles = new AnimTiles();
-        // Random.Shared rather than the game's own generator: the delay between background
-        // rumbles is drawn on a thread pool timer callback, and System.Random is not thread-safe -
-        // concurrent use can corrupt its state so that it returns zero indefinitely, and about a
-        // dozen collaborators draw from the game's instance every frame.
+        // Random.Shared rather than the game's own generator. The delay between background rumbles
+        // is drawn on a thread pool timer callback, and System.Random is not thread-safe: concurrent
+        // use can corrupt its state into returning zero indefinitely, and a dozen collaborators draw
+        // from the game's instance every frame.
         _soundEngine = new SoundEffectEngine(content);
 
         _spriteDescriptions = new List<SpriteDescription>();
@@ -69,17 +69,16 @@ internal class ResourceManager : StartableGameComponentBase
     }
 
     /// <summary>
-    ///     Starts loading everything that has been registered, on a background thread, and returns
-    ///     at once. The caller keeps drawing the loading screen and watches <c>Status</c> for
+    ///     Starts loading everything registered, on a background thread, and returns at once. The
+    ///     caller keeps drawing the loading screen and watches <c>Status</c> for
     ///     <see cref="GameEngineStatus.ContentLoaded" />.
     ///     <para>
-    ///         Loading off the main thread is safe here because MonoGame marshals the graphics work
-    ///         back for us: <c>Texture2D</c> does its GL calls through
-    ///         <c>Threading.BlockOnUIThread</c>, and the queue that feeds is pumped once per
-    ///         iteration of the platform's run loop - which keeps turning, because the main thread
-    ///         is busy animating the loading screen rather than waiting for this. The one graphics
-    ///         call MonoGame does <em>not</em> marshal, constructing a <c>SpriteBatch</c>, is
-    ///         deferred to the first draw - see <c>SpriteCollection.Sprites</c>.
+    ///         Loading off the main thread is safe because MonoGame marshals the graphics work back:
+    ///         <c>Texture2D</c> makes its GL calls through <c>Threading.BlockOnUIThread</c>, and that
+    ///         queue is pumped once per iteration of the platform's run loop, which keeps turning
+    ///         because the main thread is animating the loading screen rather than waiting here. The
+    ///         one graphics call MonoGame does <em>not</em> marshal, constructing a
+    ///         <c>SpriteBatch</c>, is deferred to the first draw. See <c>SpriteCollection.Sprites</c>.
     ///     </para>
     /// </summary>
     public void LoadContent()
@@ -102,10 +101,8 @@ internal class ResourceManager : StartableGameComponentBase
         }
         catch (Exception exception)
         {
-            // The BackgroundWorker this replaced put the exception in RunWorkerCompletedEventArgs
-            // and nothing ever looked at it, so a failure to load left the game running on missing
-            // content and failing somewhere else entirely. Rethrowing on the main thread means a
-            // missing file says so, at the point it went wrong.
+            // Rethrown on the main thread so a missing file says so at the point it went wrong,
+            // rather than leaving the game running on missing content and failing elsewhere.
             _loadFailure = exception;
 
             return;
@@ -119,7 +116,7 @@ internal class ResourceManager : StartableGameComponentBase
 
     /// <summary>
     ///     Rethrows anything the background load threw, on whichever thread asks. Called from the
-    ///     game's update so a load failure surfaces in the loop rather than vanishing.
+    ///     game's update, so a load failure surfaces in the loop rather than vanishing.
     /// </summary>
     public void ThrowIfLoadFailed()
     {

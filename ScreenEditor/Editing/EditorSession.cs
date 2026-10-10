@@ -16,15 +16,15 @@ namespace Starquake.ScreenEditor.Editing;
 /// </summary>
 /// <remarks>
 ///     The views are custom drawn rather than composed from controls, so they need to know when to
-///     repaint rather than which property changed. Each one takes a session and listens to it; this
-///     class is the single place that decides what counts as a change worth repainting for.
+///     repaint rather than which property changed. Each takes a session and listens to it, and this
+///     class is the one place deciding what counts as a change worth repainting for.
 /// </remarks>
 internal sealed class EditorSession : ViewModelBase
 {
 
     /// <summary>
-    ///     How many recently used tiles to keep to hand. Enough to cover the handful a screen is
-    ///     usually built from, short enough to stay a glance rather than a search.
+    ///     How many recently used tiles to keep to hand. Enough for the handful a screen is usually
+    ///     built from, few enough to stay a glance rather than a search.
     /// </summary>
     private int[]? _clipboard;
 
@@ -54,29 +54,26 @@ internal sealed class EditorSession : ViewModelBase
         Palette = new TilePaletteState(Document, Invalidate);
     }
 
-    /// <summary>
-    ///     The markers the toolbar offers, in the order it offers them.
-    /// </summary>
+    /// <summary>The markers the toolbar offers, in the order it offers them.</summary>
     public IReadOnlyList<MarkerChoice> Markers { get; }
 
     public UndoStack Undo { get; } = new();
 
     /// <summary>
-    ///     What the editor shows over and around the screen, and how large the palette draws. Preferences
-    ///     about looking rather than anything about the map, which is why they are their own object.
+    ///     What the editor shows over and around the screen, and how large the palette draws. Kept
+    ///     separate because these are preferences about viewing, not about the map.
     /// </summary>
     public CanvasViewOptions View { get; }
 
     /// <summary>
-    ///     The positions the author marks once for the whole planet, and what is wrong with them. Cached
-    ///     rather than asked for, because finding a marker means walking all 512 screens.
+    ///     The positions the author marks once for the whole planet, and what is wrong with them.
+    ///     Cached, because finding a marker means walking all 512 screens.
     /// </summary>
     public AuthoredPositions Positions { get; }
 
     /// <summary>
-    ///     Which of the sheet's tiles the palette offers, and the row of the ones most recently reached
-    ///     for. Narrowing down over four hundred tiles is the palette's own business - see
-    ///     <see cref="TilePaletteState" />.
+    ///     Which of the sheet's tiles the palette offers, and the row of recently used ones.
+    ///     Narrowing over 400 tiles down is <see cref="TilePaletteState" />'s own business.
     /// </summary>
     public TilePaletteState Palette { get; }
 
@@ -89,10 +86,9 @@ internal sealed class EditorSession : ViewModelBase
     }
 
     /// <summary>
-    ///     The marker in hand, or null when what is in hand is an ordinary tile. Markers are picked from
-    ///     the toolbar rather than the palette - there is no artwork to show for one, so a row of them
-    ///     among four hundred pieces of scenery would be a row of identical boxes - and this is what
-    ///     those buttons bind to.
+    ///     The marker in hand, or null when an ordinary tile is in hand. The toolbar buttons bind to
+    ///     this: markers have no artwork, so among 400 pieces of scenery they would be a row of
+    ///     identical boxes in the palette.
     /// </summary>
     public MarkerTile? SelectedMarker
     {
@@ -130,8 +126,8 @@ internal sealed class EditorSession : ViewModelBase
     public int ScreenRow => _currentScreen / WorldMap.ScreensAcross;
 
     /// <summary>
-    ///     The current screen as a person would say it: its number, where it sits on the map, and
-    ///     whether the game gives it any special meaning.
+    ///     The current screen described in words: its number, where it sits on the map, and any
+    ///     special meaning the game gives it.
     /// </summary>
     public string ScreenDescription
     {
@@ -149,18 +145,16 @@ internal sealed class EditorSession : ViewModelBase
                 description += "  ·  Blob starts here";
             }
 
-            // The core's doorstep is worth saying wherever it is, because the screen it sits on is kept
-            // running while Blob stands there and has its nasties switched off - neither of which
-            // anything on the screen would show.
+            // Worth saying wherever the core exit is: its screen keeps the core running and has its
+            // nasties switched off, and nothing on the screen itself shows either.
             if (Positions.CoreExit?.ScreenNumber == _currentScreen)
             {
                 description += "  ·  Blob leaves the core here";
             }
 
-            // A booth with no code is not an error - a half built screen is allowed - but it is
-            // worth saying, because nothing else on the screen would show it. A code on a screen
-            // with no booth is worth saying for the opposite reason: the game will still send
-            // somebody here, and there will be no booth for them to arrive in.
+            // A booth with no code is allowed on a half built screen, but nothing else would show
+            // it. A code with no booth matters more: the game will still send somebody here, and
+            // there will be no booth for them to arrive in.
             if (CurrentScreenHasTeleportBooth)
             {
                 return description + "  ·  teleport code " + (CurrentTeleportCode ?? "not set");
@@ -172,55 +166,49 @@ internal sealed class EditorSession : ViewModelBase
         }
     }
 
-    /// <summary>
-    ///     The destination code that reaches the screen being edited, or null if it has none.
-    /// </summary>
+    /// <summary>The code that reaches the screen being edited, or null if it has none.</summary>
     public string? CurrentTeleportCode => Document.GetTeleportCode(_currentScreen);
 
     /// <summary>
-    ///     Whether the screen being edited has a teleport booth on it, and so is a screen a code can
-    ///     reach.
+    ///     Whether the screen being edited has a teleport booth, and so can be reached by a code.
     /// </summary>
     public bool CurrentScreenHasTeleportBooth => Document.HasTeleportBooth(_currentScreen);
 
     /// <summary>
-    ///     Whether the teleport box has anything to show: the screen has a booth on it, or it has a
-    ///     code left behind by a booth that was erased.
+    ///     Whether the teleport box has anything to show. True when the screen has a booth, or has a
+    ///     code left behind by an erased booth.
     /// </summary>
     public bool ShowTeleportPanel => CurrentScreenHasTeleportBooth || CurrentTeleportCode is not null;
 
     /// <summary>
-    ///     The code as the box shows it, which has to read as something even when there is none.
+    ///     The code as the box shows it. Has to read as something even when there is no code.
     /// </summary>
     public string TeleportCodeDisplay => CurrentTeleportCode ?? "NOT SET";
 
-    /// <summary>
-    ///     Whether the screen being edited has a signpost on it to write a code across.
-    /// </summary>
+    /// <summary>Whether the screen being edited has a signpost to write a code across.</summary>
     public bool CurrentScreenHasSignpost => Document.HasSignpost(_currentScreen);
 
     /// <summary>
-    ///     The screen the signposts on the screen being edited are pointed at, or null if they have
-    ///     not been pointed at one.
+    ///     The screen this screen's signposts are pointed at, or null if they are not pointed
+    ///     anywhere.
     /// </summary>
     public int? CurrentSignpostedScreen => Document.GetSignpostedScreen(_currentScreen);
 
     /// <summary>
-    ///     Whether the signpost box has anything to show: a sign on the screen, or a screen still
-    ///     pointed at by a sign that has been erased.
+    ///     Whether the signpost box has anything to show. True when the screen has a sign, or is
+    ///     still pointed at by one that has been erased.
     /// </summary>
     public bool ShowSignpostPanel => CurrentScreenHasSignpost || CurrentSignpostedScreen is not null;
 
     /// <summary>
-    ///     The code the signs on this screen read, as the box shows it. A sign is drawn blank when
-    ///     there is none, so the box has to say what the canvas cannot.
+    ///     The code this screen's signs read, as the box shows it. A sign with no code is drawn
+    ///     blank, so the box has to say what the canvas cannot.
     /// </summary>
     public string SignpostCodeDisplay => Document.GetSignpostCode(_currentScreen) ?? "BLANK";
 
     /// <summary>
-    ///     What the box says underneath the sign's code. The three things worth saying are a sign
-    ///     with nothing on it, a sign pointed at a screen whose code has since been taken away, and a
-    ///     sign that is doing its job.
+    ///     The line under the sign's code. Covers three cases: a sign with nothing on it, a sign
+    ///     pointed at a screen whose code has been removed, and a sign doing its job.
     /// </summary>
     public string SignpostNote
     {
@@ -243,9 +231,8 @@ internal sealed class EditorSession : ViewModelBase
     }
 
     /// <summary>
-    ///     What the box says underneath the code. All three cases are worth a sentence: a booth
-    ///     nothing can reach yet, a booth that can be reached, and a code with no booth left to
-    ///     arrive in.
+    ///     The line under the teleport code. Covers three cases: a booth nothing can reach yet, a
+    ///     booth that can be reached, and a code with no booth left to arrive in.
     /// </summary>
     public string TeleportCodeNote
     {
@@ -282,9 +269,8 @@ internal sealed class EditorSession : ViewModelBase
                 choice.NotifySelectionChanged();
             }
 
-            // Choosing something to lay down is the prelude to laying it down, so it puts the brush
-            // back in hand. Fill is left alone because flooding with a tile just chosen is a reasonable
-            // thing to want - but not with a marker, which Fill never holds.
+            // Choosing something to lay down puts the brush back in hand. Fill is left alone,
+            // because flooding with a tile just chosen is reasonable. Fill never holds a marker.
             if (value != EditorDocument.EmptyTile &&
                 (MarkerTiles.Contains(value) || _tool is EditorTool.Erase or EditorTool.Pick or EditorTool.Core))
             {
@@ -310,55 +296,49 @@ internal sealed class EditorSession : ViewModelBase
     }
 
     /// <summary>
-    ///     What goes back in hand when the brush is picked up with nothing in it: the last ordinary tile
-    ///     the author had, or the first of the sheet if they have not reached for one yet - which is also
-    ///     what a session opens with.
+    ///     What goes back in hand when the brush is picked up empty: the last ordinary tile used, or
+    ///     the first of the sheet if none has been. A session opens with the same thing.
     /// </summary>
     /// <remarks>
-    ///     The palette's recent row never holds a marker or an empty tile, so its head is an ordinary
-    ///     tile by construction - see <see cref="TilePaletteState.Remember" />.
+    ///     The palette's recent row never holds a marker or an empty tile, so its head is always an
+    ///     ordinary tile. See <see cref="TilePaletteState.Remember" />.
     /// </remarks>
     private int LastOrdinaryTile => Palette.RecentTiles.Count > 0 ? Palette.RecentTiles[0] : 0;
 
 
-    /// <summary>
-    ///     What the pointer is currently over, for the status bar.
-    /// </summary>
+    /// <summary>What the pointer is currently over, for the status bar.</summary>
     public bool CanPaste => _clipboard is not null;
 
     /// <summary>
-    ///     What should be in hand for a given tool. The swatch lit in the palette and the marker button
-    ///     lit on the toolbar both mean "this is what would be laid down", so a tool that lays nothing
-    ///     down must leave them dark, and a tool that lays something down must have something to lay.
+    ///     What should be in hand for a given tool. A lit palette swatch or marker button means "this
+    ///     is what would be laid down", so a tool that lays nothing must leave them dark and a tool
+    ///     that lays something must have something to lay.
     /// </summary>
     private int WhatGoesInHandFor(EditorTool tool)
         => tool switch
         {
-            // Nothing. The rubber ignores what is in hand, the dropper is about to replace it, and the
-            // core is placed by position rather than as a tile.
+            // Nothing: the rubber ignores what is in hand, the dropper is about to replace it, and
+            // the core is placed by position rather than as a tile.
             EditorTool.Erase or EditorTool.Pick or EditorTool.Core => EditorDocument.EmptyTile,
 
-            // Something, or the brush paints holes. Picking it up after erasing brings back the tile
-            // that was in hand before rather than leaving it empty.
+            // Something, or the brush paints holes. Picking it up after erasing restores the tile
+            // that was in hand before.
             EditorTool.Paint when _selectedTile == EditorDocument.EmptyTile => LastOrdinaryTile,
 
-            // Something, and never a marker: a marker is a position the author marks, so flooding a
-            // screen with "this is where Blob starts" is not a thing anyone wants.
+            // Something, and never a marker. A marker is a single authored position, so flooding a
+            // screen with one makes no sense.
             EditorTool.Fill when _selectedTile == EditorDocument.EmptyTile || SelectedMarker is not null
                 => LastOrdinaryTile,
 
             _ => _selectedTile
         };
 
-    /// <summary>
-    ///     Raised when a view's picture of the map is no longer accurate and needs drawing again.
-    /// </summary>
+    /// <summary>Raised when a view's picture of the map is stale and needs drawing again.</summary>
     public event EventHandler? Invalidated;
 
     /// <summary>
-    ///     Raised when a teleport booth has been shift-clicked, asking for its code to be set. The
-    ///     session has no way to put a dialog up itself, so the window does that and comes back
-    ///     through <see cref="SetTeleportCode" />.
+    ///     Raised when a teleport booth is shift-clicked to set its code. The session cannot show a
+    ///     dialog, so the window does and comes back through <see cref="SetTeleportCode" />.
     /// </summary>
     public event EventHandler? TeleportCodeRequested;
 
@@ -393,14 +373,13 @@ internal sealed class EditorSession : ViewModelBase
 
         Document.EnsureCollisionCapacity(sheet.TileCount);
 
-        // A marker survives a change of sheet: it is not on one, so having it in hand says nothing
-        // about which artwork is loaded.
+        // A marker survives a change of sheet, because it is not on one.
         if (!sheet.Contains(_selectedTile) && !MarkerTiles.Contains(_selectedTile))
         {
             SelectedTile = 0;
         }
 
-        // Seed the recent row so that it is never an empty strip waiting for its first tile.
+        // Seed the recent row so it is never an empty strip waiting for its first tile.
         Palette.Remember(_selectedTile);
 
         Palette.Rebind(sheet, Document);
@@ -411,9 +390,8 @@ internal sealed class EditorSession : ViewModelBase
     private void Invalidate() => Invalidated?.Invoke(this, EventArgs.Empty);
 
     /// <summary>
-    ///     Applies the given tool at a tile position on the current screen, recording whatever it does
-    ///     so that it can be undone. Callers are expected to have opened a batch on the undo stack for
-    ///     the whole gesture.
+    ///     Applies a tool at a tile position on the current screen, recording what it does so it can
+    ///     be undone. The caller must have opened a batch on the undo stack for the whole gesture.
     /// </summary>
     public void ApplyTool(EditorTool tool, int x, int y)
     {
@@ -436,7 +414,7 @@ internal sealed class EditorSession : ViewModelBase
                 break;
 
             case EditorTool.Core:
-                // Handled by the canvas, which has the pointer in pixels rather than in tiles.
+                // Handled by the canvas, which has the pointer in pixels rather than tiles.
                 break;
         }
     }
@@ -456,9 +434,9 @@ internal sealed class EditorSession : ViewModelBase
     }
 
     /// <summary>
-    ///     Clears the one already on the map before a marker there should only be one of is laid down
-    ///     somewhere else, so that painting it reads as moving it. Two start positions would leave the
-    ///     game picking one of them, which is worse than either answer.
+    ///     Clears an existing one-per-map marker before the same marker is laid down elsewhere, so
+    ///     painting it reads as moving it. Two start positions would leave the game picking one,
+    ///     which is worse than either answer.
     /// </summary>
     private void TakeAwayMarkerElsewhere(int tileImage, int x, int y)
     {
@@ -479,8 +457,8 @@ internal sealed class EditorSession : ViewModelBase
     }
 
     /// <summary>
-    ///     Replaces the connected run of identical tiles the given position is part of. Screens are
-    ///     small, so this is the plain four-way flood rather than anything clever.
+    ///     Replaces the connected run of identical tiles a position belongs to. A plain four-way
+    ///     flood, because screens are small.
     /// </summary>
     private void FloodFill(int x, int y, int tileImage)
     {
@@ -514,8 +492,8 @@ internal sealed class EditorSession : ViewModelBase
     }
 
     /// <summary>
-    ///     Puts the planet core where the pointer is, given a position in screen pixels. Rounded to the
-    ///     step the core is placed on and held inside the screen, so the whole of it stays visible.
+    ///     Puts the planet core at a position given in screen pixels. Rounded to the core's placement
+    ///     step and clamped inside the screen, so all of it stays visible.
     /// </summary>
     public void PlaceCore(int xPos, int yPos)
     {
@@ -547,9 +525,8 @@ internal sealed class EditorSession : ViewModelBase
     public void RequestSignpostEdit() => SignpostRequested?.Invoke(this, EventArgs.Empty);
 
     /// <summary>
-    ///     Gives the screen being edited a destination code, or takes its code away when passed null.
-    ///     What is stored is the normalised code, so that it is what the booth matches against rather
-    ///     than however it happened to be typed.
+    ///     Gives the screen being edited a destination code, or removes its code when passed null.
+    ///     Stores the normalised form, which is what the booth matches against.
     /// </summary>
     public void SetTeleportCode(string? code)
     {
@@ -570,9 +547,8 @@ internal sealed class EditorSession : ViewModelBase
     }
 
     /// <summary>
-    ///     Points the signposts on the screen being edited at a screen, or leaves them blank when
-    ///     passed null. What is stored is the screen rather than its code, so a code renamed later
-    ///     renames what the sign reads with it.
+    ///     Points this screen's signposts at a screen, or leaves them blank when passed null. Stores
+    ///     the screen rather than its code, so changing that code changes what the sign reads.
     /// </summary>
     public void SetSignpostedScreen(int? signposted)
     {
@@ -587,9 +563,9 @@ internal sealed class EditorSession : ViewModelBase
     }
 
     /// <summary>
-    ///     What is wrong with a code somebody is typing, or null if nothing is. The booth's keypad can
-    ///     only spell five letters, and a code that already belongs to another screen would leave one
-    ///     of the two unreachable.
+    ///     What is wrong with a code being typed, or null if nothing is. The booth's keypad can only
+    ///     spell five letters, and a code already used by another screen would leave one of the two
+    ///     unreachable.
     /// </summary>
     public string? DescribeTeleportCodeProblem(string code)
     {
@@ -636,8 +612,8 @@ internal sealed class EditorSession : ViewModelBase
     }
 
     /// <summary>
-    ///     Paints the whole of the current screen with the selected tile, which is the quickest way to
-    ///     start a screen that is mostly one piece of scenery.
+    ///     Paints the whole current screen with the selected tile. The quickest way to start a screen
+    ///     that is mostly one piece of scenery.
     /// </summary>
     public void FloodScreen()
     {
@@ -648,9 +624,9 @@ internal sealed class EditorSession : ViewModelBase
     }
 
     /// <summary>
-    ///     Steps to the screen that lies in the given direction. The map is a grid of screen numbers
-    ///     rather than a scrolling world, so moving down is a whole row's worth of numbers and moving
-    ///     off one edge would land on the other - which is why this stops at the edges instead.
+    ///     Steps to the screen in the given direction. The map is a grid of screen numbers, so moving
+    ///     down is a whole row's worth of numbers. Moving off one edge would land on the other, so
+    ///     this stops at the edges instead.
     /// </summary>
     public void MoveScreen(int columns, int rows)
     {
@@ -702,16 +678,16 @@ internal sealed class EditorSession : ViewModelBase
     private void OnTileChanged(int screen, int x, int y)
     {
 
-        // A booth can have just been painted or erased, which changes what the teleport box has to
-        // say about the screen - including whether it is there at all.
+        // A booth may have just been painted or erased, which changes what the teleport box says,
+        // including whether it appears at all.
         RaiseTeleportPropertiesChanged();
 
-        // So can either half of the landing site, and that is worth a walk of the map: both are
-        // described wherever they are, not only on the screen they sit on.
+        // So may either half of the landing site, which is worth a walk of the map because both are
+        // described wherever they are, not only on their own screen.
         FindAuthoredPositions();
 
-        // Painting can have added a tile to what the map uses or taken the last of one away. The
-        // palette redraws itself if it is showing that, and says so - otherwise this does.
+        // Painting may have added a tile to the set the map uses, or removed the last of one. The
+        // palette redraws itself when it is showing that set; otherwise this does.
         if (!Palette.MapChanged())
         {
             Invalidate();
@@ -739,9 +715,8 @@ internal sealed class EditorSession : ViewModelBase
     }
 
     /// <summary>
-    ///     Announces everything that is worked out from the current screen's teleport code and from
-    ///     the signpost that may be standing on it. None of it has a backing field to set, so there
-    ///     is nothing to compare and nothing to skip.
+    ///     Announces everything derived from the current screen's teleport code and signpost. None of
+    ///     it has a backing field, so there is nothing to compare against and nothing to skip.
     /// </summary>
     private void RaiseTeleportPropertiesChanged()
     {
@@ -759,15 +734,13 @@ internal sealed class EditorSession : ViewModelBase
     }
 
     /// <summary>
-    ///     Reads the authored positions off the map again - the landing site and the core's doorstep.
-    ///     Called after any tile edit, which is more often than it is strictly needed - but an edit is a
-    ///     keystroke's worth of work and this is a few walks of an array, against having to work out
-    ///     which edits could have moved a marker.
+    ///     Reads the authored positions back out of the map and announces the screen description.
     /// </summary>
-    /// <summary>
-    ///     Reads the authored positions back out of the map, and announces the one thing the session says
-    ///     about them itself: the description of the screen being edited, which names what is on it.
-    /// </summary>
+    /// <remarks>
+    ///     Called after any tile edit, which is more often than strictly needed. An edit is a
+    ///     keystroke's worth of work and this is a few walks of an array, which is cheaper than
+    ///     working out which edits could have moved a marker.
+    /// </remarks>
     private void FindAuthoredPositions()
     {
         Positions.Refresh(Document);

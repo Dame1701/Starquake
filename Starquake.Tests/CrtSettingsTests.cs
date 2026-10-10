@@ -14,11 +14,10 @@ namespace Starquake.Tests;
 ///     at it, but the numbers it is driven by are ordinary sums and this is where they are held.
 /// </summary>
 /// <remarks>
-///     The one that matters is <see cref="CrtSettings.ScanlinePeriodFor" />. The overlay this
-///     replaced was a two-pixel pattern scaled by a fraction, and that is what made it a grey wash
-///     with a beat running through it; a period that is always a whole number of output pixels is
-///     the whole of the fix, and a regression there would look like the bug coming back rather
-///     than like anything failing.
+///     The one that matters is <see cref="CrtSettings.ScanlinePeriodFor" />. A two-pixel pattern
+///     scaled by a fraction comes out as a grey wash with a beat running through it, so the period
+///     has to be a whole number of output pixels. A regression there looks like a bad-looking
+///     picture rather than like anything failing.
 /// </remarks>
 public class CrtSettingsTests
 {
@@ -39,9 +38,9 @@ public class CrtSettingsTests
     }
 
     /// <summary>
-    ///     Every mode is reachable and the cycle closes, whichever one it is started from. Worth
-    ///     pinning separately: a mode added to the enum and forgotten here would be a step the key
-    ///     could never reach.
+    ///     Every mode is reachable and the cycle closes, whichever one it is started from. A mode
+    ///     added to the enum and forgotten in <see cref="CrtSettings.Next" /> would be a step the
+    ///     key could never reach.
     /// </summary>
     [Fact]
     public void Next_FromAnyMode_ReachesEveryOtherModeAndComesBack()
@@ -65,8 +64,7 @@ public class CrtSettingsTests
     }
 
     /// <summary>
-    ///     The scales the game actually runs at, none of which is a whole number - which is the
-    ///     reason the bitmap could not be kept.
+    ///     The scales the game actually runs at, none of which is a whole number.
     /// </summary>
     [Theory]
     [InlineData(1.0f, 2)]

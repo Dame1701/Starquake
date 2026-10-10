@@ -26,8 +26,8 @@ public class OverloadSettingsTests
     }
 
     /// <summary>
-    ///     A charge outside nought to one would push the heat ramp off either end of itself, so a
-    ///     drain counter that has not been clamped cannot take the colour with it.
+    ///     A charge outside zero to one would push the heat ramp off either end of itself, so an
+    ///     unclamped drain counter must not be able to take the colour with it.
     /// </summary>
     [Theory]
     [InlineData(-30)]
@@ -85,9 +85,9 @@ public class OverloadSettingsTests
     }
 
     /// <summary>
-    ///     A shake that traced a line rather than scattering would read as him sliding about. The
-    ///     two axes run at rates that do not divide one another and are offset, so the ratio
-    ///     between them has to keep changing.
+    ///     A shake that traced a line rather than scattering would read as Blob sliding about. The
+    ///     two axes run at offset rates that do not divide one another, so the ratio between them
+    ///     has to keep changing.
     /// </summary>
     [Fact]
     public void ShakeAt_OverSuccessiveFrames_MovesOnBothAxesIndependently()

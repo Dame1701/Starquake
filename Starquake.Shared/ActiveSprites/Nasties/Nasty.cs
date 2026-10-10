@@ -19,17 +19,15 @@ namespace Starquake.ActiveSprites;
 internal class Nasty
 {
 
-    /// <summary>
-    ///     How long a nasty takes to be born, in logic frames.
-    /// </summary>
+    /// <summary>How long a nasty takes to be born, in logic frames.</summary>
     private const int BirthPeriod = 60;
 
     /// <inheritdoc cref="NastyTypeDraw" />
     private const int NastyTypeDrawRange = 16;
 
     /// <summary>
-    ///     The nasty's walk cycle. It plays back and forth rather than looping, which is what gives
-    ///     the legs their scuttle.
+    ///     The nasty's walk cycle. It plays back and forth rather than looping, which gives the legs
+    ///     their scuttle.
     /// </summary>
     private const int NastyLastFrame = 3;
 
@@ -37,14 +35,14 @@ internal class Nasty
     private const int NastyAnimationDelay = 4;
 
     /// <summary>
-    ///     How many frames of the sprite sheet each kind of nasty occupies, which is what turns a
+    ///     How many sprite sheet frames each kind of nasty occupies, which turns a
     ///     <see cref="NastyType" /> into the first sprite of its walk cycle.
     /// </summary>
     private const int FramesPerNasty = 4;
 
     /// <summary>
-    ///     How fast the nasty spins as it materialises, and how fast it is still spinning by the time
-    ///     it has finished. It slows from the one to the other over the second half of the birth.
+    ///     How fast the nasty spins as it materialises, and how fast it is still spinning at the end.
+    ///     It slows from the first to the second over the back half of the birth.
     /// </summary>
     private const float BirthStartRotateSpeed = 8.0f;
 
@@ -55,76 +53,67 @@ internal class Nasty
     private const float BirthEndRotateSpeed = 16f;
 
     /// <summary>
-    ///     The longest the birth will keep spinning past <see cref="BirthPeriod" /> waiting to come
-    ///     to rest upright. One revolution at the speed the spin settles to is about twenty-four
-    ///     frames, so this is a little over a full turn - long enough that the nasty normally does
-    ///     land square, short enough that it is not left spinning if it never gets the chance to.
+    ///     The longest a birth keeps spinning past <see cref="BirthPeriod" /> waiting to come to rest
+    ///     upright. A revolution at the settling speed takes about 24 frames, so this is a little
+    ///     over one full turn: long enough to normally land square, short enough not to spin forever.
     /// </summary>
     private const int BirthSpinOutLimit = 30;
 
     /// <summary>
-    ///     The colours only fade in over the back half of the birth, so both fades count up at twice
-    ///     the rate the birth itself runs at.
+    ///     The colours fade in over the back half of the birth only, so both fades count up at twice
+    ///     the birth's own rate.
     /// </summary>
     private const int BirthColourFadeHalf = 2;
 
     /// <summary>
-    ///     How long a nasty lies dead before it is allowed to come back, and the longest it then
-    ///     waits before doing so. A nasty is never gone for good - it is only ever biding its time.
+    ///     How long a nasty lies dead before it may come back, and the longest it then waits before
+    ///     doing so. A nasty is never gone for good.
     /// </summary>
     private const int DeadPauseFrames = 50;
 
     /// <summary>
-    ///     The longest a nasty that has been killed stays away before it is conceived again, in
-    ///     logic frames - ten seconds, rolled fresh each death, so a room Blob has cleared stays
-    ///     cleared for a while and the one he killed does not walk straight back into his fire.
+    ///     The longest a killed nasty stays away before being conceived again, in logic frames. Ten
+    ///     seconds, rolled fresh on each death, so a room Blob has cleared stays cleared for a while
+    ///     and the nasty he killed does not walk straight back into his fire.
     /// </summary>
     /// <remarks>
-    ///     This was being set and then thrown away. Both deaths set it and moved the nasty to
-    ///     <see cref="NastyState.PreConception" />; <see cref="BeginConception" /> ran on the very
-    ///     next frame and overwrote it with <see cref="LongestWaitToFirstAppear" /> before
-    ///     anything had read it, so every nasty came back inside a second and a quarter however
-    ///     this was set. The wait is armed where the reason for it is known now, and
-    ///     <see cref="BeginConception" /> leaves it alone.
+    ///     Armed at the death, where the reason for the wait is known. <see cref="BeginConception" />
+    ///     must leave it alone, or every nasty comes back inside
+    ///     <see cref="LongestWaitToFirstAppear" /> instead.
     /// </remarks>
     private const int LongestWaitToComeBack = 500;
 
     /// <summary>
-    ///     The longest one waits when it is the screen being populated rather than a death, in
-    ///     logic frames - a second and a bit at the outside. Walking into a room should fill it,
-    ///     not leave Blob standing in an empty one wondering whether the game has stopped.
+    ///     The longest a nasty waits when a screen is being populated rather than after a death, in
+    ///     logic frames. Just over a second, so walking into a room fills it rather than leaving Blob
+    ///     standing in an empty one.
     /// </summary>
     private const int LongestWaitToFirstAppear = 60;
 
     /// <summary>
-    ///     How fast a creature's corpse goes, and with it how fast the splat dissolve runs: the
-    ///     shader is driven by what is left of this fade, so the two are one countdown rather
-    ///     than two. Eighty a frame against a full level of 255 is four frames, an eyeblink at
-    ///     fifty a second - which is the point. The splat used to take three seconds, then one
-    ///     and a half, and is now under a second end to end including its debris.
+    ///     How fast a creature's corpse goes, and with it the splat dissolve. The shader reads what
+    ///     is left of this fade, so the two are one countdown rather than two. Eighty a frame against
+    ///     a full level of 255 is four frames, which is an eyeblink at fifty a second.
     /// </summary>
     private const int CreatureFadeStep = 80;
 
     /// <summary>
-    ///     How quickly a creature's corpse draws in as it goes. A ramp it never reaches the end
-    ///     of: the body is drawn only while something of the fade is left, which is four frames,
-    ///     and the scale has come down by about a tenth by then. So this sets how fast the body
-    ///     is pulling in rather than how long it takes to go.
+    ///     How quickly a creature's corpse draws in as it goes. A ramp that never reaches its end:
+    ///     the body is only drawn while some of the fade is left, which is four frames, by which
+    ///     point the scale has come down about a tenth. So this sets the rate, not the duration.
     /// </summary>
     private const float CreatureShrinkStep = 0.04f;
 
     /// <summary>
-    ///     How fast a creature's corpse spins as it goes, in degrees a logic frame. Doubled along
-    ///     with everything else about the splat, so the body whips round rather than turning
-    ///     sedately while its own debris is already across the room.
+    ///     How fast a creature's corpse spins as it goes, in degrees a logic frame. Fast enough that
+    ///     the body whips round rather than turning sedately while its debris is already across the
+    ///     room.
     /// </summary>
     private const float CreatureSpinSpeed = 32f;
 
     /// <summary>
     ///     Which of the two sets of numbers this nasty's death runs on. A machine's wreck lasts
-    ///     thirteen frames and a creature's four, so these cannot be one constant - and they were
-    ///     one, which is what made a spiky nasty vanish the instant it was shot while a conveyor
-    ///     nasty lay in its explosion.
+    ///     thirteen frames and a creature's four, so one constant cannot serve both.
     /// </summary>
     private int DeathFadeStep => IsMechanical ? MachineDeathSettings.FadeStep : CreatureFadeStep;
 
@@ -133,10 +122,8 @@ internal class Nasty
 
     /// <inheritdoc cref="DeathFadeStep" />
     /// <remarks>
-    ///     A machine's wreck does not turn at all, the way the conveyor nasty's never has: it is
-    ///     sitting in a fire, not tumbling through the air. It used to turn at sixteen degrees a
-    ///     frame, which over the quarter second it now lies there was most of a half revolution
-    ///     of a thing that plainly is not falling.
+    ///     A machine's wreck does not turn at all, matching the conveyor nasty's. It is sitting in a
+    ///     fire, not tumbling through the air.
     /// </remarks>
     private float DeathRotateSpeed => IsMechanical ? NoSpin : CreatureSpinSpeed;
 
@@ -154,8 +141,8 @@ internal class Nasty
     private const float FullTurn = 360f;
 
     /// <summary>
-    ///     The colours the different nasties are tinted: grey for one that has been shot, red for a
-    ///     spiky one, green for a conveyor one.
+    ///     The tints: grey for a nasty that has been shot, red for a spiky one, green for a conveyor
+    ///     one.
     /// </summary>
     private const int ShotNastyGrey = 50;
 
@@ -163,9 +150,9 @@ internal class Nasty
     private const int ConveyorNastyGreen = 100;
 
     /// <summary>
-    ///     The sixteen draws a random nasty is picked from, in the order the chain of comparisons
-    ///     this replaced tested them in. Fifteen kinds walk the planet; Bird is at both ends of the
-    ///     table and Spiky takes the last draw, so those two come up twice as often as the others.
+    ///     The sixteen draws a random nasty is picked from. Fifteen kinds walk the planet; Bird
+    ///     appears at both ends of the table and Spiky takes the last draw, so those two come up
+    ///     twice as often as the rest.
     /// </summary>
     private static readonly NastyType[] NastyTypeDraw =
     [
@@ -192,8 +179,8 @@ internal class Nasty
 
     private readonly Animation _nastyAnim;
     /// <summary>
-    ///     Told when this nasty blows itself apart, so the picture can be knocked about. A callback
-    ///     rather than the thing that shakes it, which a nasty has no business holding.
+    ///     Called when this nasty blows apart, so the picture can be shaken. A callback rather than
+    ///     the thing that does the shaking, which a nasty has no business holding.
     /// </summary>
     private readonly Action _onExploded;
 
@@ -210,8 +197,8 @@ internal class Nasty
     private readonly ResourceManager _resources;
 
     /// <summary>
-    ///     The ring a machine throws as it goes off. Only the machines have one - a creature
-    ///     coming apart is wet rather than loud, and the splat is the whole of what it does.
+    ///     The ring a machine throws as it goes off. Only machines have one: a creature coming apart
+    ///     is wet rather than loud, and its splat is the whole of it.
     /// </summary>
     private readonly Shockwave _shockwave;
 
@@ -231,9 +218,8 @@ internal class Nasty
     private float _deathScale = 1f;
 
     /// <summary>
-    ///     How long a dead nasty has been lying there. Every nasty regenerates after a random wait -
-    ///     the comment that used to sit here said they "usually disappear for good but there is a
-    ///     small chance they'll regenerate", which is the opposite of what the code does.
+    ///     How long a dead nasty has been lying there. Every nasty regenerates after a random wait;
+    ///     none is ever gone for good.
     /// </summary>
     private int _nastyDeadPauseCounter;
 
@@ -242,10 +228,9 @@ internal class Nasty
     private NastyType _nastyType;
 
     /// <summary>
-    ///     Which way round this nasty is drawn, in degrees. The angle used to live on this nasty's
-    ///     cloned sprite sheet, advanced once per draw batch - so the spin ran at the display's refresh
-    ///     rate rather than the logic clock. It is not carried across a screen swap, which is the same
-    ///     as it was: the clones belong to the nasty, and a swap resets a birth or a death anyway.
+    ///     Which way round this nasty is drawn, in degrees. Advanced on the logic clock rather than
+    ///     per draw batch, so the spin does not follow the display's refresh rate. Not carried across
+    ///     a screen swap, since a swap resets a birth or a death anyway.
     /// </summary>
     private float _rotation;
 
@@ -309,16 +294,15 @@ internal class Nasty
                 ParticleEffectType.Triggered, null);
         _nastyDiesType2.ParticleEffectComplete += NastyDies_ParticleEffectComplete;
 
-        // The beam Blob teleports on, borrowed: a nasty arriving is the same idea, and reusing it
-        // costs no content at all.
+        // Blob's teleport beam, reused. A nasty arriving is the same idea and costs no new content.
         _nastyArrives =
             (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.BeamMeUpSmall,
                 ParticleEffectType.Triggered, null);
     }
 
     /// <summary>
-    ///     Where this nasty is going and how it decided to. Everything to do with movement lives
-    ///     there; this class is its lifecycle and its picture.
+    ///     Where this nasty is going and how it decided. All movement lives there; this class holds
+    ///     the lifecycle and the picture.
     /// </summary>
     public NastyBrain Movement { get; }
 
@@ -337,8 +321,8 @@ internal class Nasty
     public bool Smoking { get; set; }
 
     /// <summary>
-    ///     Where the nasty is. Held by <see cref="Movement" />, which is the only thing that changes
-    ///     it, and forwarded here because everything that draws or tests a nasty asks the nasty.
+    ///     Where the nasty is. Held by <see cref="Movement" />, the only thing that changes it, and
+    ///     forwarded here because everything that draws or tests a nasty asks the nasty.
     /// </summary>
     public int XPos
     {
@@ -364,51 +348,43 @@ internal class Nasty
     }
 
     /// <summary>
-    ///     Takes a snapshot of another nasty, which is how leaving a screen works: twice the number of
-    ///     nasties needed are kept, and the set being left is copied into the spare half in case Blob
-    ///     comes back to it.
+    ///     Takes a snapshot of another nasty. Twice the number of nasties needed are kept, and the set
+    ///     being left is copied into the spare half in case Blob comes back.
     /// </summary>
     /// <remarks>
-    ///     The movement half used to be seventeen assignments here, two of them written twice, out of a
-    ///     class with about thirty-five fields - so anything added to the class afterwards was silently
-    ///     dropped at every screen change and nothing said so. It is one assignment of a record struct
-    ///     now, and what is inside that struct is the answer to which movement state carries.
+    ///     Movement is one assignment of a record struct, so what carries is decided by what
+    ///     <see cref="NastyMovementState" /> declares.
     ///     <para>
-    ///         The lifecycle half is the list below, and the rule it follows is that a counter carries
-    ///         only if a state the snapshot can be restored into reads it before setting it. Working
-    ///         through the five states a snapshot can hold:
+    ///         The lifecycle half is the list below. The rule is that a counter carries only if a
+    ///         state the snapshot can be restored into reads it before setting it:
     ///     </para>
     ///     <list type="bullet">
     ///         <item>
     ///             <see cref="NastyState.Conception" /> reads <c>_conceptionWaitCounter</c> in
-    ///             <see cref="WaitToBeBorn" /> without setting it, so that one has to carry. It did not,
-    ///             and a nasty part way through waiting to appear came back from a screen with whatever
-    ///             count the spare happened to hold - nought, usually, which made it appear at once.
+    ///             <see cref="WaitToBeBorn" /> without setting it, so that one must carry. Without it
+    ///             a nasty part way through waiting appears the moment Blob returns.
     ///         </item>
     ///         <item>
-    ///             <see cref="NastyState.Birth" /> is turned into <see cref="NastyState.Normal" /> below,
-    ///             so the five birth counters are never read from a snapshot. They are also all set
-    ///             together in <see cref="WaitToBeBorn" /> on the frame a birth begins.
+    ///             <see cref="NastyState.Birth" /> becomes <see cref="NastyState.Normal" /> below, so
+    ///             the five birth counters are never read from a snapshot. They are all set together
+    ///             in <see cref="WaitToBeBorn" /> on the frame a birth begins.
     ///         </item>
     ///         <item>
-    ///             <see cref="NastyState.Dead" /> cannot be in a snapshot at all: <c>Nasties</c> turns a
-    ///             dead or shot nasty into <see cref="NastyState.PreConception" /> before copying it, so
-    ///             a screen is never returned to empty. The death values are set in
-    ///             <see cref="StartDying" /> anyway. <c>_nastyDeadPauseCounter</c> is carried regardless,
-    ///             so that this method is a complete snapshot on its own terms rather than on the
-    ///             caller's.
+    ///             <see cref="NastyState.Dead" /> never appears in a snapshot, because <c>Nasties</c>
+    ///             turns a dead or shot nasty into <see cref="NastyState.PreConception" /> before
+    ///             copying, so a screen is never returned to empty.
+    ///             <c>_nastyDeadPauseCounter</c> carries anyway, which keeps this a complete snapshot
+    ///             on its own terms rather than the caller's.
     ///         </item>
     ///         <item>
-    ///             <see cref="NastyState.PreConception" /> settles what kind it will be in
-    ///             <see cref="BeginConception" />, but its wait was armed on the way into that state
-    ///             and is carried above - a nasty stored part way through one is still part way
-    ///             through it when Blob comes back. <see cref="NastyState.Disabled" /> reads nothing.
+    ///             <see cref="NastyState.PreConception" /> settles its kind in
+    ///             <see cref="BeginConception" />, and its wait was armed on the way into that state
+    ///             and carries above. <see cref="NastyState.Disabled" /> reads nothing.
     ///         </item>
     ///     </list>
     ///     <para>
-    ///         <c>_rotation</c> is deliberately not carried. It is only ever drawn with, and a restored
-    ///         nasty starting at the angle the spare was left at looks no different from one starting at
-    ///         the angle it had - there is nothing to be right about.
+    ///         <c>_rotation</c> is deliberately not carried. It is only ever drawn with, so a restored
+    ///         nasty starting at the spare's angle looks no different.
     ///     </para>
     /// </remarks>
     public void CopyFromSource(Nasty copySource)
@@ -435,8 +411,8 @@ internal class Nasty
     ///     screen offers nowhere.
     /// </summary>
     /// <remarks>
-    ///     Nowhere used to be reported as <c>Point(0, 0)</c>, which a real location can never be -
-    ///     every one of them is offset by half a sprite - but which reads like one at the call site.
+    ///     Null rather than <c>Point(0, 0)</c>, which no real location can be, since every one is
+    ///     offset by half a sprite, but which reads like one at the call site.
     /// </remarks>
     private Point? GetNastySpawnLocation()
     {
@@ -476,13 +452,13 @@ internal class Nasty
     }
 
     /// <summary>
-    ///     Sends this nasty away to be conceived again, and arms the wait before it is.
+    ///     Sends this nasty away to be conceived again, arming the wait on the way.
     /// </summary>
     /// <remarks>
-    ///     The only way into <see cref="NastyState.PreConception" />, because the wait has to be
-    ///     armed on the way in: the state carries no record of why it was entered, and the two
-    ///     reasons want waits an order apart. <see cref="CopyFromSource" /> carries the counter,
-    ///     so a nasty stored while waiting is still waiting when Blob comes back to it.
+    ///     The only way into <see cref="NastyState.PreConception" />. The wait must be armed here,
+    ///     because the state keeps no record of why it was entered and the two reasons want waits an
+    ///     order apart. <see cref="CopyFromSource" /> carries the counter, so a nasty stored while
+    ///     waiting is still waiting when Blob comes back.
     /// </remarks>
     /// <param name="longestWait">The longest it may wait, in logic frames. Rolled against.</param>
     private void AwaitConception(int longestWait)
@@ -492,9 +468,9 @@ internal class Nasty
     }
 
     /// <summary>
-    ///     Sends this nasty away to be conceived as one of a screen's own, rather than because it
-    ///     was killed - so it is back almost at once. For <c>Nasties</c>, which populates a screen
-    ///     by putting every nasty on it through here.
+    ///     Sends this nasty away to be conceived as one of a screen's own rather than after being
+    ///     killed, so it returns almost at once. <c>Nasties</c> populates a screen by putting every
+    ///     nasty through here.
     /// </summary>
     public void AwaitFirstAppearance() => AwaitConception(LongestWaitToFirstAppear);
 
@@ -504,9 +480,8 @@ internal class Nasty
     ///     as often as the rest.
     /// </summary>
     /// <remarks>
-    ///     This was a chain of fifteen comparisons against the draw, in an order that is not the
-    ///     enum's. The order is the point - it is what gives Bird its second entry - so it is a table
-    ///     now rather than a chain, and the duplicate is visible in it.
+    ///     A table rather than a chain of comparisons, because the order is the point: it is what
+    ///     gives Bird its second entry, and a table makes the duplicate visible.
     /// </remarks>
     public static NastyType GetRandomNastyType(Random randomNumberGenerator)
         => NastyTypeDraw[randomNumberGenerator.Next(0, NastyTypeDrawRange)];
@@ -560,15 +535,14 @@ internal class Nasty
     }
 
     /// <summary>
-    ///     Picks how long this nasty waits to be conceived, and what kind of nasty it is going to be
-    ///     when it gets there.
+    ///     What a nasty settles before it is born: which kind it will be, and where its movement
+    ///     starts from.
     /// </summary>
-    /// <summary>
-    ///     What a nasty settles before it is born: what kind it will be, and where its movement
-    ///     starts from. The wait is not set here - it was armed by whatever sent the nasty to
+    /// <remarks>
+    ///     The wait is not set here. It was armed by whatever sent the nasty to
     ///     <see cref="NastyState.PreConception" />, which is the only thing that knows how long it
     ///     should be.
-    /// </summary>
+    /// </remarks>
     private void BeginConception()
     {
         NastyState = NastyState.Conception;
@@ -589,11 +563,9 @@ internal class Nasty
         }
         else
         {
-            // Where it is going has to be settled before anything announces that it is going: a
-            // screen with nowhere to put it disables it instead, and the appear sound, the first
-            // movement and the birth counters all belong to a nasty that is actually being born.
-            // This used to set Disabled and then overwrite it with Birth on the next line, so a
-            // nasty with nowhere to go was born at whatever position it last held.
+            // Where it is going must be settled before anything announces that it is going. A screen
+            // with nowhere to put it disables it instead, and the appear sound, the first movement
+            // and the birth counters all belong to a nasty that is really being born.
             Point? newPosition = GetNastySpawnLocation();
 
             if (newPosition == null)
@@ -640,8 +612,8 @@ internal class Nasty
                                       BirthColourFadeHalf)); // We only have half the time to do the colour fade in 
         }
 
-        // The colour and the slowing of the spin both start half way through, so a nasty arrives
-        // grey and spinning and settles into its own colours.
+        // Colour and the slowing of the spin both start half way through, so a nasty arrives grey
+        // and spinning and settles into its own colours.
         if (_birthTimer > BirthPeriod / BirthColourFadeHalf)
         {
             if (_birthColourLevel < ColourLevels.Full)
@@ -669,16 +641,9 @@ internal class Nasty
 
         if (_birthTimer > BirthPeriod)
         {
-            // The nasty prefers to stop spinning square, but it must stop either way.
-            //
-            // This used to end the birth only on a frame where the rotation read exactly zero, and
-            // zero is read for a single frame in every revolution - the wrap assigns the literal,
-            // and the settled speed does not divide 360. The angle was also advanced on the draw
-            // path while this ran on the update path, so a frame drawn without an update spun it
-            // past zero with nobody watching, and a missed frame cost a whole further revolution.
-            // That is the nasty that span and never stabilised. The angle is now advanced by this
-            // nasty's own update, so the two cannot drift apart, and the test is a range rather
-            // than an equality. The spin-out limit stays as the backstop.
+            // The nasty prefers to stop spinning square, but it must stop either way. The test is a
+            // range rather than an equality: the settled speed does not divide 360, so an exact zero
+            // can be stepped straight over. BirthSpinOutLimit is the backstop.
             if (_rotation < _birthRotateSpeed ||
                 _birthTimer > BirthPeriod + BirthSpinOutLimit)
             {
@@ -692,9 +657,7 @@ internal class Nasty
 
     /// <summary>
     ///     Whether this nasty is a machine rather than a creature. Machines explode and creatures
-    ///     come apart, and the two were decided separately until the death shader needed the same
-    ///     answer the particles were already taking - so it is one property now and the two cannot
-    ///     disagree about any nasty.
+    ///     come apart. One property, so the death shader and the particles cannot disagree.
     /// </summary>
     private bool IsMechanical => _nastyType is NastyType.Spiky or NastyType.Conveyor;
 
@@ -705,17 +668,16 @@ internal class Nasty
 
         if (IsMechanical)
         {
-            // Square, and staying square. The spin is nought for a machine, but the birth leaves
-            // a few degrees on the clock - it ends when the angle is merely near zero, and its
-            // backstop can end it anywhere at all - and the death is the only thing that draws
-            // this nasty with its angle.
+            // Square, and staying square. A machine's death spin is nought, but the birth can leave
+            // a few degrees on the clock, since it ends when the angle is merely near zero and its
+            // backstop can end it anywhere.
             _rotation = 0f;
 
             _nastyDies.Start();
             _shockwave.Trigger(XPos + SpriteMetrics.HalfSpriteWidth, YPos + SpriteMetrics.HalfSpriteHeight);
 
-            // Only the machines. A creature coming apart is wet rather than loud, and a jolt on
-            // every nasty Blob shoots would have the picture moving most of the time.
+            // Only the machines. A creature coming apart is wet rather than loud, and jolting on
+            // every nasty shot would keep the picture moving most of the time.
             _onExploded();
         }
         else
@@ -758,8 +720,8 @@ internal class Nasty
     }
 
     /// <summary>
-    ///     Both death effects, whichever this nasty actually started - the explosion for a spiky or
-    ///     conveyor nasty, the splat for any of the others. Updating the idle one costs nothing and
+    ///     Steps both death effects, whichever this nasty actually started: the explosion for a
+    ///     spiky or conveyor nasty, the splat for the others. Updating the idle one costs nothing and
     ///     saves asking which is running.
     /// </summary>
     private void UpdateDeathEffects(GameTime gameTime)
@@ -772,8 +734,8 @@ internal class Nasty
     }
 
     /// <summary>
-    ///     A nasty is only animated once it is fully real - or a quarter of the way through being born,
-    ///     which is where its legs start showing.
+    ///     A nasty is animated once fully real, or a quarter of the way through being born, which is
+    ///     where its legs start showing.
     /// </summary>
     private bool ShouldAnimate()
     {
@@ -798,8 +760,8 @@ internal class Nasty
 
     public void PerformPostChangeScreenActions()
     {
-        // Stopped rather than left running, or the particles still in the air would be drawn over
-        // the screen Blob has just walked onto.
+        // Stopped rather than left running, or particles still in the air would be drawn over the
+        // screen Blob has just walked onto.
         _nastyDies.Stop();
         _nastyDiesType2.Stop();
         _nastyArrives.Stop();
@@ -848,9 +810,9 @@ internal class Nasty
     }
 
     /// <summary>
-    ///     One logic frame of spin. Which speed applies is decided by what this nasty is doing, which
-    ///     is the same thing that decides which of the four draw methods runs - the guardian rocks,
-    ///     a nasty being born spins down to square, a corpse spins away, and a live nasty is still.
+    ///     One logic frame of spin. The speed follows what this nasty is doing, the same thing that
+    ///     decides which of the four draw methods runs: the guardian rocks, a nasty being born spins
+    ///     down to square, a corpse spins away, and a live nasty is still.
     /// </summary>
     private void AdvanceRotation()
     {
@@ -886,8 +848,8 @@ internal class Nasty
     }
 
     /// <summary>
-    ///     The shader that eats an organic corpse away, pointed at this nasty: its own square of
-    ///     the sheet, how far gone it is, and the colour it splatters.
+    ///     The shader that eats an organic corpse away, pointed at this nasty: its own square of the
+    ///     sheet, how far gone it is, and the colour it splatters.
     /// </summary>
     private Effect ComeApartShader(int frame)
     {
@@ -906,16 +868,15 @@ internal class Nasty
     }
 
     /// <summary>
-    ///     A nasty materialises spinning and part-coloured, so it is drawn at its own scale and rotation
-    ///     rather than the walk cycle's.
+    ///     A nasty materialises spinning and part-coloured, so it is drawn at its own scale and
+    ///     rotation rather than the walk cycle's.
     /// </summary>
     /// <remarks>
-    ///     The spin, the growth and the blue it arrives on are all the tint and the transform, and
-    ///     are unchanged. What the shader adds is the two things a sprite batch cannot do by
-    ///     itself: a line sweeping down the sprite with the nasty left behind it, and the three
-    ///     colour channels pulled apart and converging. It is handed this sprite's own rectangle
-    ///     in the sheet, because everything it samples has to be kept inside it - the nasty's
-    ///     neighbours are the next frames along.
+    ///     The spin, the growth and the blue it arrives on are the tint and the transform. The shader
+    ///     adds the two things a sprite batch cannot: a line sweeping down the sprite leaving the
+    ///     nasty behind it, and the three colour channels pulled apart and converging. It is given
+    ///     this sprite's own rectangle in the sheet, because everything it samples must stay inside
+    ///     it: the nasty's neighbours are the next frames along.
     /// </remarks>
     private void DrawBirth(int nastyImage, int screenFade)
     {
@@ -929,8 +890,8 @@ internal class Nasty
         materialise.Parameters["Progress"].SetValue(
             MaterialiseSettings.ProgressThrough(_birthTimer, BirthPeriod));
 
-        // The spread is a fraction of the sprite and the shader samples in sheet coordinates, so
-        // it is handed over already scaled by how much of the sheet this sprite takes up.
+        // The spread is a fraction of the sprite but the shader samples in sheet coordinates, so it
+        // is scaled by how much of the sheet this sprite takes up.
         materialise.Parameters["ChromaticSpread"].SetValue(
             new Vector2(MaterialiseSettings.ChromaticSpread * spriteRect.Z, 0f));
         materialise.Parameters["ScanSoftness"].SetValue(MaterialiseSettings.ScanSoftness);
@@ -938,8 +899,8 @@ internal class Nasty
         materialise.Parameters["BandColour"].SetValue(MaterialiseSettings.BandColour);
         materialise.Parameters["BandBrightness"].SetValue(MaterialiseSettings.BandBrightness);
 
-        // The sprite's own spin, handed over so the shader can take it back out and sweep down the
-        // screen rather than down the nasty.
+        // The sprite's own spin, so the shader can take it back out and sweep down the screen rather
+        // than down the nasty.
         float spin = MathHelper.ToRadians(_rotation);
 
         materialise.Parameters["SpinSineCosine"].SetValue(
@@ -957,8 +918,8 @@ internal class Nasty
     }
 
     /// <summary>
-    ///     A nasty going about its business. One that has been shot but not yet killed is smoking,
-    ///     which is drawn as the same frame three times over in additive red and green.
+    ///     A nasty going about its business. One shot but not yet killed is smoking, drawn as the
+    ///     same frame three times over in additive red and green.
     /// </summary>
     private void DrawLiveNasty(int nastyImage, int screenFade)
     {
@@ -987,9 +948,8 @@ internal class Nasty
     /// </summary>
     private void DrawDeath(int nastyImage, int screenFade)
     {
-        // Under the explosion, so the flames and sparks come out of the ring rather than
-        // through it.
-        _shockwave.Draw(screenFade);
+        // Under the explosion, so the flames and sparks come out of the ring rather than through it.
+_shockwave.Draw(screenFade);
 
         _nastyDies.Draw();
         _nastyDiesType2.Draw();
@@ -998,9 +958,9 @@ internal class Nasty
         {
             int frame = nastyImage + _nastyAnim.CurrentFrame;
 
-            // A machine's corpse fades out whole, as it always has. A creature's is eaten away
-            // from its edges by the shader instead, so it is drawn at full strength and the
-            // dissolve does the disappearing - fading it as well would mute the one for the other.
+            // A machine's corpse fades out whole. A creature's is eaten away from its edges by the
+            // shader instead, so it is drawn at full strength and the dissolve does the
+            // disappearing. Fading it as well would mute one against the other.
             Effect? splat = IsMechanical ? null : ComeApartShader(frame);
 
             byte fade = splat is null

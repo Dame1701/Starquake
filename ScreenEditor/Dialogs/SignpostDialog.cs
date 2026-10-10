@@ -13,8 +13,8 @@ using Starquake.ScreenEditor.Styles;
 namespace Starquake.ScreenEditor.Dialogs;
 
 /// <summary>
-///     What somebody chose for a screen's signpost. A null <see cref="Screen" /> is a sign left
-///     blank, which is different from the dialog being cancelled - that comes back as no choice.
+///     What somebody chose for a screen's signpost. A null <see cref="Screen" /> means the sign was
+///     left blank. Cancelling the dialog comes back as no choice at all.
 /// </summary>
 internal sealed record SignpostChoice(int? Screen);
 
@@ -22,10 +22,9 @@ internal sealed record SignpostChoice(int? Screen);
 ///     Points the signposts on a screen at the teleporter whose code they are to spell out.
 /// </summary>
 /// <remarks>
-///     A sign is only ever pointed at a teleporter that already exists, so this offers the codes on
-///     the map rather than a box to type one into. Typing one would let a sign advertise a code no
-///     booth answers to, which is a dead end the player cannot tell from a live one until they have
-///     walked to a booth and typed it in.
+///     Offers the codes already on the map rather than a box to type one into. A typed code could
+///     advertise a destination no booth answers to, and the player cannot tell that dead end from a
+///     live one until they have walked to a booth and entered it.
 /// </remarks>
 internal sealed class SignpostDialog : Window
 {
@@ -80,8 +79,8 @@ internal sealed class SignpostDialog : Window
 
         buttons.Children.Add(CreateButton("Cancel", null));
 
-        // Only offered when there is something to take off, so that the one destructive button here
-        // is never the obvious thing to press on a sign that is still blank.
+        // Only offered when there is something to remove, so the destructive button is never the
+        // obvious thing to press on a sign that is still blank.
         if (existing is not null)
         {
             buttons.Children.Add(CreateButton("Leave blank", new SignpostChoice(null)));
@@ -114,8 +113,7 @@ internal sealed class SignpostDialog : Window
     }
 
     /// <summary>
-    ///     Asks which teleporter the sign points at, coming back with null if the dialog was
-    ///     cancelled.
+    ///     Asks which teleporter the sign points at. Returns null if the dialog was cancelled.
     /// </summary>
     public static Task<SignpostChoice?> AskAsync(
         Window owner,
@@ -129,8 +127,8 @@ internal sealed class SignpostDialog : Window
     }
 
     /// <summary>
-    ///     Opens with whichever teleporter the sign already names in view, so that a map with a
-    ///     hundred codes on it does not have to be scrolled to see what the sign says now.
+    ///     Scrolls the teleporter the sign already names into view, so a map with a hundred codes on
+    ///     it does not have to be scrolled by hand.
     /// </summary>
     protected override void OnOpened(EventArgs e)
     {
@@ -145,8 +143,8 @@ internal sealed class SignpostDialog : Window
     }
 
     /// <summary>
-    ///     Closing with nothing chosen would be the cancel button by another name, so a dialog with
-    ///     no selection stays open.
+    ///     Keeps the dialog open when nothing is selected. Closing with no choice would just be the
+    ///     cancel button by another name.
     /// </summary>
     private void Accept()
     {

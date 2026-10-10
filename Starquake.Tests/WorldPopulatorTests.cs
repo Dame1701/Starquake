@@ -13,11 +13,9 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     The scatter that makes every game of Starquake a different game on the same map. None of this
-///     could be tested before two things happened: the generator stopped building its own
-///     <see cref="Random" /> from the clock, so a world became reproducible from a seed, and
-///     <see cref="WorldPopulator" /> came out of <c>GameScreenCollection</c>, so reaching it stopped
-///     meaning loading the game's content.
+///     The scatter that makes every game of Starquake a different game on the same map. It is handed
+///     its <see cref="Random" /> rather than building one from the clock, so a world is reproducible
+///     from its seed and these can say what a given seed produces.
 /// </summary>
 public class WorldPopulatorTests
 {
@@ -122,10 +120,9 @@ public class WorldPopulatorTests
     }
 
     /// <summary>
-    ///     The random scatter still never rolls either item: the type draw stops one short of
-    ///     <see cref="Collectables.AccessCard" /> (28) and <see cref="Collectables.Key" /> (29). They are
-    ///     placed deliberately instead, which is what guarantees exactly one of each rather than however
-    ///     many a dice roll happened to produce.
+    ///     The random scatter never rolls either item, because the type draw stops one short of
+    ///     <see cref="Collectables.AccessCard" /> (28) and <see cref="Collectables.Key" /> (29).
+    ///     They are placed deliberately instead, which is what guarantees exactly one of each.
     /// </summary>
     [Fact]
     public void Populate_PlacesExactlyOneKeyAndOneAccessCard()
@@ -144,8 +141,8 @@ public class WorldPopulatorTests
     }
 
     /// <summary>
-    ///     The rule that keeps the game winnable: neither item may be put anywhere that can only be
-    ///     reached by passing the very gate it opens.
+    ///     The rule that keeps the game winnable. Neither item may be put anywhere that can only be
+    ///     reached by passing the gate it opens.
     /// </summary>
     [Theory]
     [InlineData(1)]
@@ -166,8 +163,8 @@ public class WorldPopulatorTests
     }
 
     /// <summary>
-    ///     Neither item is dropped on top of something already lying there - a power-up, a pyramid, or a
-    ///     pick-up, which is what a core element is.
+    ///     Neither item is dropped on top of something already lying there: a power-up, a pyramid,
+    ///     or a pick-up, which is what a core element is.
     /// </summary>
     [Fact]
     public void Populate_PutsNeitherItemOnASquareSomethingElseIsOn()

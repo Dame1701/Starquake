@@ -88,8 +88,8 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
                 if (Input.GetPressedKey() == Keys.Enter)
                 {
                     // The entry has been in the table since PerformPostScreenChangeActions and the
-                    // letters have been typed into it in place, so this is the first moment there
-                    // is a finished table worth keeping.
+                    // letters typed into it in place, so this is the first moment there is a finished
+                    // table worth keeping.
                     _gotHighScore = false;
                     _hiScoreList.Save();
                 }
@@ -146,13 +146,9 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
     }
 
     /// <summary>
-    ///     Called once this screen has been handed control, with the score it needs.
-    ///     <para>
-    ///         This took a <c>ScreenChange</c> and threw an <see cref="ArgumentException" /> for any
-    ///         case but <c>FinalScore</c>, because the signature had to suit all nine other screens
-    ///         too. The game over screen is the only way onto this one and always had a score to
-    ///         pass, so the throw stood for a mistake nobody could make; it now cannot be written.
-    ///     </para>
+    ///     Called once this screen has been handed control, with the score it needs. Typed, so there
+    ///     is no case to reject: the game over screen is the only way onto this one and always has a
+    ///     score to pass.
     /// </summary>
     /// <param name="playersScore">
     ///     The score the player has just finished with, for a name to be typed against it.

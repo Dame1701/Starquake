@@ -18,17 +18,15 @@ namespace Starquake.ActiveSprites;
 internal class JumpPlatform
 {
     /// <summary>
-    ///     How long a platform lasts, counted down in logic frames, and the point in that life at
-    ///     which it starts coming apart - half way, so it stands whole long enough to be used.
+    ///     How long a platform lasts in logic frames, and when it starts coming apart. Half way, so
+    ///     it stands whole long enough to be used.
     /// </summary>
     private const int PlatformLifetime = 100;
 
     /// <inheritdoc cref="PlatformLifetime" />
     private const int DissolveStartsAt = PlatformLifetime / 2;
 
-    /// <summary>
-    ///     How many pixels are rubbed out each frame once it starts going.
-    /// </summary>
+    /// <summary>How many pixels are rubbed out each frame once it starts dissolving.</summary>
     private const int PixelsDissolvedPerFrame = 50;
 
     private readonly GraphicsDeviceManager _graphicsDeviceManager;
@@ -40,10 +38,7 @@ internal class JumpPlatform
 
     private readonly RenderTarget2D _renderTarget;
 
-    /// <summary>
-    ///     Held for the dissolve's shader. The sprites are taken at construction and kept, so this
-    ///     was not needed until something had to be fetched every frame.
-    /// </summary>
+    /// <summary>Held for the dissolve's shader, which is fetched every frame.</summary>
     private readonly ResourceManager _resources;
     private readonly ScreenEffectEngine _screenEffects;
     private readonly SpriteBatch _textureDrawer;
@@ -95,8 +90,8 @@ internal class JumpPlatform
 
     /// <summary>
     ///     Which screen this platform was laid on. Its cells belong to that screen's collision map
-    ///     and no other, so it has to be remembered rather than taken as wherever Blob is now -
-    ///     he can have crossed to the next screen while the platform is still dissolving.
+    ///     alone, and Blob may cross to the next screen while it is still dissolving, so it cannot be
+    ///     taken as wherever Blob is now.
     /// </summary>
     public int ScreenNumber { get; set; }
 
@@ -129,8 +124,8 @@ internal class JumpPlatform
     {
         if (PlatformActive)
         {
-            // It stands whole for the first half of its life and only then starts coming apart, so
-            // Blob has a moment to use it before it is visibly going.
+            // Whole for the first half of its life, so Blob has a moment to use it before it is
+            // visibly going.
             if (_dissolveTime < DissolveStartsAt)
             {
                 for (int a = 0; a < PixelsDissolvedPerFrame; a++)
@@ -164,9 +159,9 @@ internal class JumpPlatform
     }
 
     /// <summary>
-    ///     Draws the platform into a render target of its own, with the pixels the dissolve has eaten
-    ///     left transparent. A render target is a texture rather than a place on the screen, so the
-    ///     sprite goes down at the origin and is put in position when the texture itself is drawn.
+    ///     Draws the platform into its own render target, leaving the dissolved pixels transparent.
+    ///     A render target is a texture rather than a place on the screen, so the sprite goes down at
+    ///     the origin and is positioned when the texture itself is drawn.
     /// </summary>
     private void ComposeDissolvingPlatform()
     {
@@ -181,10 +176,10 @@ internal class JumpPlatform
     }
 
     /// <summary>
-    ///     The shader that lights the edges the dissolve has opened. Handed the size of one texel
-    ///     because it has to look at what is next to each one, and the render target is one to one
-    ///     with the sprite - so unlike the game's other sprite shaders there is no sheet to stray
-    ///     into and no rectangle to clamp against.
+    ///     The shader that lights the edges the dissolve has opened. It is given one texel's size
+    ///     because it looks at neighbouring texels. The render target is one to one with the sprite,
+    ///     so unlike the game's other sprite shaders there is no sheet to stray into and nothing to
+    ///     clamp against.
     /// </summary>
     private Effect DissolveShader()
     {
@@ -205,7 +200,7 @@ internal class JumpPlatform
     }
 
     /// <summary>
-    ///     Puts the composed texture on the screen, rotated about its own centre - which is why the
+    ///     Puts the composed texture on the screen, rotated about its own centre. That is why the
     ///     position is offset by half the sprite as well as the origin being set to it.
     /// </summary>
     private void DrawComposedPlatform()

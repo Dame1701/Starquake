@@ -10,14 +10,13 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     The three spiked tiles and how far each of them reaches. Seven numbers decide three hitboxes,
-///     and all seven were private constants of <c>Blob</c> beside a private static method - pure
-///     already, and unreachable only because of where it lived.
+///     The three spiked tiles and how far each of them reaches. Seven numbers decide three
+///     hitboxes.
 /// </summary>
 /// <remarks>
 ///     Positions are Blob's relative to the tile, so a negative one means the tile starts before he
-///     does. The tests name the edges rather than guessing at the middle: a hitbox is only ever
-///     wrong at its boundary.
+///     does. The tests name the edges rather than guessing at the middle, because a hitbox is only
+///     ever wrong at its boundary.
 /// </remarks>
 public class SpikesTests
 {
@@ -47,8 +46,8 @@ public class SpikesTests
         => Assert.Equal(caught, Spikes.HaveGotHim(At(ActionTiles.Spike2, xPos, 0)));
 
     /// <summary>
-    ///     It reaches a little above the top of its own tile - the artwork stands proud of it - and
-    ///     has no bottom edge at all, because Blob cannot be below a tile he is intersecting.
+    ///     It reaches a little above the top of its own tile, where the artwork stands proud of it,
+    ///     and has no bottom edge at all, because Blob cannot be below a tile he is intersecting.
     /// </summary>
     [Theory]
     [InlineData(-8, false)]
@@ -60,7 +59,7 @@ public class SpikesTests
     // --- the spike mounted on the right-hand wall ------------------------------------------------
 
     /// <summary>
-    ///     The wall spike is the odd one out: it is measured down the tile rather than across it,
+    ///     The wall spike is the odd one out. It is measured down the tile rather than across it,
     ///     and it has a bottom edge where the other two have none. Walk under it and it misses.
     /// </summary>
     [Theory]
@@ -72,7 +71,7 @@ public class SpikesTests
         => Assert.Equal(caught, Spikes.HaveGotHim(At(ActionTiles.Spike1, 17, yPos)));
 
     /// <summary>
-    ///     And Blob has to have got into the tile before the wall it is mounted on can touch him -
+    ///     Blob has to have got into the tile before the wall it is mounted on can touch him. It is
     ///     the one reach of the three that is not centred on the tile.
     /// </summary>
     [Theory]
@@ -84,9 +83,9 @@ public class SpikesTests
     // --- the broken glass on the floor -----------------------------------------------------------
 
     /// <summary>
-    ///     Broken glass lies flat, so it is the central spike's width with a shallower reach up: -16
-    ///     against the spike's -8. Standing a dozen pixels above a spike is a miss and above glass
-    ///     is a hit, which is the one place these two differ.
+    ///     Broken glass lies flat, so it is the central spike's width with a shallower reach up:
+    ///     -16 against the spike's -8. Standing a dozen pixels above a spike is a miss and above
+    ///     glass is a hit, which is the one place the two differ.
     /// </summary>
     [Theory]
     [InlineData(-16, false)]

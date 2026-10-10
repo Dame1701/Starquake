@@ -18,8 +18,7 @@ internal class BlobDeath
 {
     /// <summary>
     ///     The six fragment sprites Blob comes apart into. Deliberately not a straight run: the
-    ///     repeated 1 and the gap before 5 are the artwork as it is, not a mistake to be tidied into
-    ///     0 to 5.
+    ///     repeated 1 and the gap before 5 match the artwork and must not be tidied into 0 to 5.
     /// </summary>
     private static readonly int[] FragmentSpriteNumbers = [0, 1, 1, 2, 3, 5];
 
@@ -31,8 +30,8 @@ internal class BlobDeath
     private readonly ResourceManager _resources;
 
     /// <summary>
-    ///     The ring thrown out at the moment he comes apart. One for the whole death rather than
-    ///     one per fragment: six rings from six fragments would be a smear rather than a blast.
+    ///     The ring thrown out as Blob comes apart. One for the whole death rather than one per
+    ///     fragment, because six rings would read as a smear rather than a blast.
     /// </summary>
     private readonly Shockwave _shockwave;
 
@@ -84,8 +83,8 @@ internal class BlobDeath
         }
     }
 
-    // True while anything still needs updating or drawing. The fragments' particles outlive
-    // the bounce itself, so this stays set for as long as the tail takes to fade
+    // True while anything still needs updating or drawing. The fragments' particles outlast the
+    // bounce itself, so this stays set until the tail has faded.
     public bool Active
     {
         get
@@ -98,10 +97,9 @@ internal class BlobDeath
                 }
             }
 
-            // The shockwave is deliberately not counted. This is what holds Blob dead until the
-            // death has finished playing, and the ring is a little over half a second against the
-            // fragments' one to two - so it can never be the last thing still running, and
-            // counting it could only ever hold him dead for longer than his death lasts.
+            // The shockwave is deliberately not counted. This holds Blob dead until the death has
+            // finished playing, and the ring is shorter than the fragments, so counting it could
+            // only ever hold him dead longer than the death lasts.
             return _blobFragmentBounceSparks is { EffectActive: true };
         }
     }
@@ -111,7 +109,7 @@ internal class BlobDeath
         _blobFragmentBounceSparks = (IPositionalTriggerParticleEffect)_resources
             .GetParticleEffectInstance(Assets.Effects.FireSparks, ParticleEffectType.TriggeredMultiLocationTimed, null);
 
-        // Each fragment needs its own explosion emitter, but they all spark off the one effect
+        // Each fragment needs its own explosion emitter, but all of them share one effect.
         _bouncingParticles.Clear();
         foreach (int fragmentSpriteNumber in FragmentSpriteNumbers)
         {
@@ -125,9 +123,9 @@ internal class BlobDeath
     }
 
     /// <remarks>
-    ///     Both of Blob's deaths come through here - the overload he builds up to and the instant
-    ///     one a spike or a gate gives him - because an instant death is an overload that begins
-    ///     already exploded. So the shockwave is started once, here, and belongs to both.
+    ///     Both of Blob's deaths come through here, the slow overload and the instant one a spike or
+    ///     gate gives, because an instant death is an overload that begins already exploded. The
+    ///     shockwave is started once here and belongs to both.
     /// </remarks>
     public void Trigger(int effectXPosition, int effectYPosition, bool drawBlobParts, int effectMinDuration = 50,
         int effectMaxDuration = 100)
@@ -136,8 +134,8 @@ internal class BlobDeath
 
         _shockwave.Trigger(effectXPosition, effectYPosition);
 
-        // One turn for the whole star, so the parts stay evenly spread around it but the burst is
-        // not in the same attitude every time Blob dies.
+        // One turn for the whole star, so the parts stay evenly spread but the burst is not in the
+        // same attitude every time Blob dies.
         double spin = _randomNumberGenerator.NextDouble() * 2 * Math.PI;
 
         for (int point = 0; point < _bouncingParticles.Count; point++)
@@ -149,14 +147,13 @@ internal class BlobDeath
     }
 
     /// <summary>
-    ///     Stops the whole thing dead: the fragments, the particles still in the air behind them,
-    ///     and the shockwave.
+    ///     Stops everything dead: the fragments, the particles still in the air behind them, and the
+    ///     shockwave.
     /// </summary>
     /// <remarks>
-    ///     This used to reset only the bounces, which left every emitter still holding its
-    ///     particles - so <see cref="Active" /> stayed true on their account and the clangs carried
-    ///     on being struck. The intro's crash is the one caller that needs it to mean stop, and it
-    ///     needs it to mean stop completely.
+    ///     It must clear the emitters too, not just the bounces, or <see cref="Active" /> stays true
+    ///     on the particles' account and the clangs carry on. The intro's crash is the one caller,
+    ///     and it needs this to mean stop completely.
     /// </remarks>
     public void Reset()
     {
@@ -196,8 +193,8 @@ internal class BlobDeath
 
     public void Draw(int screenFade)
     {
-        // Under the fragments, so they come out of it rather than through it. Drawn for both sets
-        // of artwork: the ring is the blast and not a piece of the redrawn look.
+        // Under the fragments, so they come out of it rather than through it. Drawn for both sets of
+        // artwork, because the ring is the blast rather than part of the redrawn look.
         _shockwave.Draw(screenFade);
 
         if (_graphicsSet.IsOriginal)

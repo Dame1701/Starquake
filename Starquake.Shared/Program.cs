@@ -6,15 +6,13 @@ namespace Starquake;
 
 internal static class Program
 {
-    /// <summary>
-    ///     The main entry point for the application.
-    /// </summary>
+    /// <summary>The main entry point for the application.</summary>
     [STAThread]
     private static void Main()
     {
-        // Content and the screen data are opened relative to the working directory, which
-        // isn't the output folder when the game is launched from anywhere other than that
-        // folder -- from Finder, for instance, where a .app bundle starts at "/".
+        // Content and the screen data are opened relative to the working directory, which is not the
+        // output folder when the game is launched from elsewhere. From Finder, for instance, a .app
+        // bundle starts at "/".
         Environment.CurrentDirectory = AppContext.BaseDirectory;
 
         using var game = new GameHost();

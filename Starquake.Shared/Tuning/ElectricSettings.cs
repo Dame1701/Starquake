@@ -13,9 +13,9 @@ namespace Starquake.Tuning;
 ///     over.
 /// </summary>
 /// <remarks>
-///     The arcs and the node and gate lights were already drawn additively out of an animated
-///     strip, and that has not changed. What the shader adds is a white-hot centre, a halo
-///     spreading out of it, and a brightness that is never quite the same two frames running.
+///     The arcs and the node and gate lights are drawn additively out of an animated strip. What the
+///     shader adds is a white-hot centre, a halo spreading out of it, and a brightness that is never
+///     quite the same two frames running.
 /// </remarks>
 internal static class ElectricSettings
 {
@@ -26,22 +26,21 @@ internal static class ElectricSettings
     public const float GlowAmount = 1.1f;
 
     /// <summary>
-    ///     How sharply the white centre takes over from the coloured halo. Higher keeps the white
-    ///     to the very middle of the spark.
-    /// </summary>
-    /// <summary>
-    ///     Where a filament starts, as an intensity. Measured from the artwork rather than chosen:
-    ///     the band sits almost flat at 0.89 and only its strands reach 0.97 and above, so a
-    ///     threshold under that whitens the whole band evenly and the strands stop being visible
-    ///     at all.
+    ///     Where a filament starts, as an intensity. Measured off the artwork rather than chosen:
+    ///     the band sits almost flat at 0.89 and only its strands reach 0.97 and above, so any
+    ///     threshold below that whitens the whole band evenly and the strands stop showing at all.
     /// </summary>
     public const float CoreThreshold = 0.91f;
 
+    /// <summary>
+    ///     How sharply the white centre takes over from the coloured halo. Higher keeps the white to
+    ///     the very middle of the spark.
+    /// </summary>
     public const float CoreSharpness = 1.2f;
 
     /// <summary>
-    ///     How much white is laid into the hot middle of the spark, on top of the artwork rather
-    ///     than in place of it.
+    ///     How much white is laid into the hot middle of the spark, on top of the artwork rather than
+    ///     in place of it.
     /// </summary>
     public const float CoreBoost = 0.8f;
 
@@ -49,15 +48,15 @@ internal static class ElectricSettings
     public static Vector3 CoreColour => new(1f, 1f, 1f);
 
     /// <summary>
-    ///     What the halo glows. The cyan the lights are already drawn in, so the spread looks like
-    ///     more of the same light rather than a second one.
+    ///     What the halo glows. The cyan the lights already use, so the spread looks like more of the
+    ///     same light rather than a second one.
     /// </summary>
     public static Vector3 HaloColour => new(0.35f, 0.8f, 1f);
 
     /// <summary>
-    ///     Points the burning shader at one sprite. Shared because the node and gate arcs are not
-    ///     the only electricity in the game any more - Blob throws beams of it as he comes apart,
-    ///     and the two should burn alike rather than each setting the parameters its own way.
+    ///     Points the burning shader at one sprite. Shared, because Blob throws beams of electricity
+    ///     as he comes apart and those should burn like the node and gate arcs rather than each
+    ///     setting the parameters its own way.
     /// </summary>
     /// <remarks>
     ///     <paramref name="logicFrame" /> drives the flicker and is a logic frame rather than a
@@ -72,8 +71,8 @@ internal static class ElectricSettings
     {
         electric.Parameters["SpriteRect"].SetValue(spriteRect);
 
-        // The reach is given in the sprite's own pixels and the shader samples the whole sheet, so
-        // it is handed over already scaled into that.
+        // The reach is given in the sprite's own pixels but the shader samples the whole sheet, so
+        // it is scaled before being handed over.
         electric.Parameters["GlowStep"].SetValue(new Vector2(
             GlowRadius / spriteWidth * spriteRect.Z,
             GlowRadius / spriteHeight * spriteRect.W));
@@ -92,18 +91,16 @@ internal static class ElectricSettings
     /// <summary>How far either side of its usual brightness the arc wanders.</summary>
     private const double FlickerSwing = 0.3;
 
-    /// <summary>
-    ///     How bright the arc burns on a given logic frame.
-    /// </summary>
+    /// <summary>How bright the arc burns on a given logic frame.</summary>
     /// <remarks>
-    ///     Two sines at rates that do not divide one another, so it never repeats on any period
-    ///     short enough to be noticed as a loop, and no random number generator has to be threaded
-    ///     through the draw to get there. It is a function of the frame and nothing else, so it is
-    ///     the same on every machine and can be checked without running the game.
+    ///     Two sines at rates that do not divide one another, so it never repeats on a period short
+    ///     enough to notice and no random number generator has to be threaded through the draw. A
+    ///     function of the frame alone, so it is identical on every machine and can be checked
+    ///     without running the game.
     ///     <para>
     ///         Taken from the logic clock rather than the drawn one. <c>GameHost</c> draws once per
     ///         vertical retrace, so a flicker counted in drawn frames would crackle faster on a
-    ///         better monitor - which is the defect class <c>GODCLASSES.md</c> lists ten of.
+    ///         better monitor. <c>GODCLASSES.md</c> lists the other places this applies.
     ///     </para>
     /// </remarks>
     public static float FlickerAt(int logicFrame)

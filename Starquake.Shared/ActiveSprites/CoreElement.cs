@@ -16,9 +16,9 @@ namespace Starquake.ActiveSprites;
 internal class CoreElement
 {
     /// <summary>
-    ///     How an element being put back is animated: the one Blob is carrying shrinks from three
-    ///     times size down to normal while the replacement grows up to it, and the swap is treated as
-    ///     finished once the incoming one is all but full size.
+    ///     How a replacement is animated. The element Blob is carrying shrinks from three times size
+    ///     down to normal while the incoming one grows up to it, and the swap counts as finished once
+    ///     the incoming one is all but full size.
     /// </summary>
     private const float ElementShrinkFrom = 3;
 
@@ -34,14 +34,11 @@ internal class CoreElement
     /// <inheritdoc cref="ElementShrinkFrom" />
     private const double ElementGrownEnough = 0.95;
 
-    /// <summary>
-    ///     How long the core's replacement effect runs for.
-    /// </summary>
+    /// <summary>How long the core's replacement effect runs for.</summary>
     private const int ReplacementEffectMilliseconds = 200;
 
     /// <summary>
-    ///     How fast an element fades out once it has been put back, and how fast the flash that goes
-    ///     with it clears.
+    ///     How fast an element fades out once put back, and how fast the flash with it clears.
     /// </summary>
     private const int ElementFadeStep = 8;
 
@@ -63,7 +60,7 @@ internal class CoreElement
     private bool _elementReplacementStarted;
 
     /// <summary>
-    ///     Logic frames this part has been picked out for, which drives its glow and its shake.
+    ///     Logic frames this part has been picked out for, which drives its glow and shake.
     /// </summary>
     private int _identifiedFrame;
 
@@ -114,10 +111,10 @@ internal class CoreElement
     public event RaiseEffectComplete? OnCoreElementReplaced;
 
     /// <summary>
-    ///     Raised the moment the incoming part reaches full size, which is when it has visibly
-    ///     landed. <see cref="OnCoreElementReplaced" /> is a fifth of a second later - it waits for
-    ///     the burst that goes off at the landing to finish - so anything that should feel like
-    ///     part of the landing itself has to hang off this one or it reads as a separate event.
+    ///     Raised the moment the incoming part reaches full size, which is when it visibly lands.
+    ///     <see cref="OnCoreElementReplaced" /> comes a fifth of a second later, after the burst at
+    ///     the landing finishes, so anything that should feel part of the landing must hang off this
+    ///     one instead.
     /// </summary>
     public event RaiseEffectComplete? OnCoreElementLanded;
 
@@ -137,9 +134,9 @@ internal class CoreElement
     }
 
     /// <summary>
-    ///     One logic frame of this element. The position is passed in because the replacement effect is
-    ///     emitted from the element's centre - drawing used to latch it into a field for this to read,
-    ///     which left the effect playing at wherever the element was last drawn.
+    ///     One logic frame of this element. The position is passed in because the replacement effect
+    ///     is emitted from the element's centre, and the update path must not depend on where drawing
+    ///     last put it.
     /// </summary>
     public void Update(GameTime gameTime, int xPos, int yPos)
     {
@@ -160,8 +157,8 @@ internal class CoreElement
         {
             if (_elementReplacementStarted)
             {
-                // The one being given up shrinks away as the new one grows in, so the two run
-                // together rather than one after the other.
+                // The outgoing element shrinks as the incoming one grows, so the two run together
+                // rather than one after the other.
                 _currentElementDownScaler.Update();
                 _finalElementUpScaler.Update();
                 if (_finalElementUpScaler.Value > ElementGrownEnough)
@@ -184,9 +181,9 @@ internal class CoreElement
             _coreReplacementEffect.Update(_xPos + SpriteMetrics.HalfSpriteWidth, _yPos + SpriteMetrics.HalfSpriteHeight, gameTime);
         }
 
-        // Latched at the end of the first logic frame of the replacement, so everything above starts
-        // on the second one. Drawing used to set it, at the same point in the frame but on the draw
-        // path - which made a logic gate wait on a frame having been drawn.
+        // Latched at the end of the replacement's first logic frame, so everything above starts on
+        // the second. Set here rather than while drawing, so no logic gate waits on a frame having
+        // been drawn.
         if (ElementState == CoreElementState.Replacing)
         {
             _elementReplacementStarted = true;
@@ -213,9 +210,9 @@ internal class CoreElement
     }
 
     /// <summary>
-    ///     The part the core has picked out, shaking in its slot with the light rising and falling
-    ///     on it. The illuminated artwork over the plain, so the pulse is the core worrying at it
-    ///     rather than a tint laid on top.
+    ///     The part the core has picked out, shaking in its slot as the light rises and falls on it.
+    ///     The illuminated artwork is drawn over the plain, so the pulse looks like the core working
+    ///     at the part rather than a tint laid on top.
     /// </summary>
     private void DrawIdentified(int xPos, int yPos)
     {
@@ -241,15 +238,10 @@ internal class CoreElement
         illuminated.End();
     }
 
-    /// <summary>
-    ///     One element of the core as it stands in the room.
-    /// </summary>
+    /// <summary>One element of the core as it stands in the room.</summary>
     /// <remarks>
-    ///     This took a flag saying whether any element was being replaced, and drew every other one
-    ///     at an alpha of fifty when it was - so for the whole of a replacement the rest of the
-    ///     core all but vanished. That was of a piece with the room switching off its own energy
-    ///     for a replacement, which it no longer does: the core is a machine being repaired and
-    ///     should be visible while it is.
+    ///     Drawn at full opacity during another element's replacement. The core is a machine being
+    ///     repaired and should stay visible while it is.
     /// </remarks>
     public void Draw(int xPos, int yPos)
     {

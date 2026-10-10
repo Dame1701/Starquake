@@ -12,30 +12,23 @@ namespace Starquake.Structure;
 ///     written.
 /// </summary>
 /// <remarks>
+///     A sign is <see cref="ActionTiles.TeleportSignpost" />, painted on whichever screen the player
+///     should read it from. The artwork's board is blank and the game writes the code across it, so
+///     one tile serves every sign on the planet.
 ///     <para>
-///         A code is no use to somebody who has not been told it, and the planet tells it on a
-///         signpost - <see cref="ActionTiles.TeleportSignpost" />, painted on whichever screen the
-///         player is meant to read it from. The board the artwork draws is blank and the game writes
-///         the code across it, so one tile serves every sign on the planet rather than one tile per
-///         code having to be drawn.
-///     </para>
-///     <para>
-///         A sign names the screen it advertises rather than the code itself - see
-///         <see cref="GameScreenData.SignpostedScreen" />. A code belongs to the screen it reaches
-///         and can be changed there, so a sign holding a copy of one would go stale the moment it
-///         was; a screen number cannot, which is why that is what is stored and the code is looked
-///         up afresh every time the sign is drawn.
+///         A sign stores the screen it advertises, not the code itself
+///         (<see cref="GameScreenData.SignpostedScreen" />). Codes can be changed on the screen they
+///         belong to, so a stored copy would go stale; the code is looked up each time the sign is
+///         drawn.
 ///     </para>
 /// </remarks>
 public static class Signposts
 {
 
     /// <summary>
-    ///     The box the code is written in, in pixels from the top left of the tile the sign is
-    ///     painted on. Measured off the board in the artwork: the text is centred across
-    ///     <see cref="TextLeft" /> to <see cref="TextWidth" /> and its capitals fill
-    ///     <see cref="TextHeight" />, which is what keeps a five letter code on the board rather
-    ///     than over the frame around it.
+    ///     The box the code is written in, in pixels from the top left of the sign's tile. Measured
+    ///     off the board in the artwork, so a five letter code lands on the board rather than over
+    ///     the frame around it.
     /// </summary>
     public const int TextLeft = 24;
 
@@ -49,8 +42,8 @@ public static class Signposts
     public const int TextHeight = 14;
 
     /// <summary>
-    ///     Whether there is a signpost on a screen. The editor asks so that it can offer the sign a
-    ///     code; the game does not, because it is already walking the tiles to draw them.
+    ///     Whether a screen has a signpost on it. Only the editor asks, so it can offer the sign a
+    ///     code; the game is already walking the tiles to draw them.
     /// </summary>
     public static bool StandOn(GameScreenData screen)
     {
@@ -69,10 +62,9 @@ public static class Signposts
     }
 
     /// <summary>
-    ///     What the signs on a screen read, or null if there is nothing for them to say: a sign that
-    ///     has not been pointed at a screen yet, or one pointed at a screen whose code has since been
-    ///     taken away. A blank board is the right answer to both - it is what the artwork draws, and
-    ///     a sign that named a code no booth answers to would be worse than one that names none.
+    ///     What the signs on a screen read, or null if they have nothing to say. Null covers a sign
+    ///     not yet pointed at a screen and one pointed at a screen whose code has been removed. Both
+    ///     leave the board blank, which is better than naming a code no booth answers to.
     /// </summary>
     public static string? CodeShownOn(GameScreenData[] screens, int screen)
     {

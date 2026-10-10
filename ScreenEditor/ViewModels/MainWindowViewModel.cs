@@ -51,24 +51,24 @@ internal class MainWindowViewModel : ViewModelBase
         PreviousScreenCommand = Register(new RelayCommand(() => Session.CurrentScreen--));
         NextScreenCommand = Register(new RelayCommand(() => Session.CurrentScreen++));
 
-        // Only once there is somewhere to go. The start position decides, because that is the screen
-        // the game opens on even when the wreck has been left on another one.
+        // Only once there is somewhere to go. The start position decides, because the game opens on
+        // its screen even if the wreck was left on another.
         GoToLandingSiteCommand = Register(new RelayCommand(
             () => Session.CurrentScreen = Session.Positions.BlobStart!.Value.ScreenNumber,
             () => Session.Positions.BlobStart is not null));
 
-        // Offered for a screen with a booth on it, and for one that has a code without a booth, so
-        // that a code left behind by an erased booth can still be taken away.
+        // Offered for a screen with a booth, and for one with a code but no booth, so a code left
+        // behind by an erased booth can still be removed.
         EditTeleportCodeCommand = Register(new RelayCommand(
             EditTeleportCodeAsync,
             () => Session.CurrentScreenHasTeleportBooth || Session.CurrentTeleportCode is not null));
 
-        // Shift-clicking a booth on the canvas asks for the same dialog. The session cannot put one
-        // up itself, so it says it was asked and this answers.
+        // Shift-clicking a booth on the canvas asks for the same dialog. The session cannot show one
+        // itself, so it raises a request and this answers it.
         Session.TeleportCodeRequested += (_, _) => EditTeleportCodeCommand.Execute(null);
 
-        // Offered for a screen with a sign on it, and for one still pointed somewhere by a sign that
-        // was erased, so that what the erased sign said can still be taken off the screen.
+        // Offered for a screen with a sign, and for one still pointed somewhere by an erased sign,
+        // so what that sign said can still be removed.
         EditSignpostCommand = Register(new RelayCommand(
             EditSignpostAsync,
             () => Session.CurrentScreenHasSignpost || Session.CurrentSignpostedScreen is not null));
@@ -112,24 +112,18 @@ internal class MainWindowViewModel : ViewModelBase
 
     public RelayCommand NextScreenCommand { get; }
 
-    /// <summary>
-    ///     Sets the destination code of the teleport booth on the screen being edited.
-    /// </summary>
+    /// <summary>Sets the code of the teleport booth on the screen being edited.</summary>
     public RelayCommand EditTeleportCodeCommand { get; }
 
-    /// <summary>
-    ///     Points the signposts on the screen being edited at the teleporter they advertise.
-    /// </summary>
+    /// <summary>Points this screen's signposts at the teleporter they advertise.</summary>
     public RelayCommand EditSignpostCommand { get; }
 
-    /// <summary>
-    ///     Goes to the screen a new game opens on.
-    /// </summary>
+    /// <summary>Goes to the screen a new game opens on.</summary>
     public RelayCommand GoToLandingSiteCommand { get; }
 
     /// <summary>
-    ///     The tile sheets found in the checkout, offered on the File menu so that switching between
-    ///     the redrawn artwork and the Spectrum original is two clicks rather than a file dialog.
+    ///     The tile sheets found in the checkout, offered on the File menu so switching between the
+    ///     redrawn artwork and the Spectrum original takes two clicks rather than a file dialog.
     /// </summary>
     public IReadOnlyList<TileSheetChoice> AvailableTileSheets { get; } =
         GameContent.TileSheetPaths
@@ -137,7 +131,7 @@ internal class MainWindowViewModel : ViewModelBase
             .ToArray();
 
     /// <summary>
-    ///     Which of the found sheets the map is being drawn with. Setting it loads that sheet, so the
+    ///     Which of the found sheets the map is drawn with. Setting it loads that sheet, so the
     ///     toolbar's picker needs no command of its own.
     /// </summary>
     public TileSheetChoice? SelectedTileSheet
@@ -176,8 +170,8 @@ internal class MainWindowViewModel : ViewModelBase
     public string RedoDescription => Session.Undo.RedoDescription;
 
     /// <summary>
-    ///     Where the map came from, or what went wrong trying to open it. Shown in the status bar,
-    ///     which is the right amount of noise for something that is usually just reassurance.
+    ///     Where the map came from, or what went wrong opening it. Shown in the status bar, since it
+    ///     is usually just reassurance.
     /// </summary>
     public string DocumentStatus
     {
@@ -201,8 +195,8 @@ internal class MainWindowViewModel : ViewModelBase
     };
 
     /// <summary>
-    ///     Opens whatever the checkout has to offer, so that the editor comes up ready to work rather
-    ///     than empty. Anything missing is simply not loaded; the File menu covers that case.
+    ///     Opens whatever the checkout offers, so the editor comes up ready to work rather than
+    ///     empty. Anything missing is just not loaded, and the File menu covers that case.
     /// </summary>
     public void LoadStartingContent()
     {
@@ -217,10 +211,8 @@ internal class MainWindowViewModel : ViewModelBase
 
     public void AttachOwner(Window owner) => _owner = owner;
 
-    /// <summary>
-    ///     Asks about unsaved work before the window goes away. Returns whether closing should go
-    ///     ahead.
-    /// </summary>
+    /// <summary>Asks about unsaved work before the window closes.</summary>
+    /// <returns>Whether closing should go ahead.</returns>
     public async Task<bool> ConfirmCloseAsync()
     {
         if (!Session.Document.IsDirty || _owner is null)
@@ -242,7 +234,7 @@ internal class MainWindowViewModel : ViewModelBase
 
     /// <summary>
     ///     Asks for a code for the current screen and gives it to the session. Nothing happens if the
-    ///     dialog is cancelled; a code of null is the booth deliberately left without one.
+    ///     dialog is cancelled. A null code means the booth was deliberately left without one.
     /// </summary>
     private async Task EditTeleportCodeAsync()
     {
@@ -264,8 +256,8 @@ internal class MainWindowViewModel : ViewModelBase
     }
 
     /// <summary>
-    ///     Asks which teleporter the signs on the current screen point at. Nothing happens if the
-    ///     dialog is cancelled; a screen of null is a sign deliberately left blank.
+    ///     Asks which teleporter the current screen's signs point at. Nothing happens if the dialog
+    ///     is cancelled. A null screen means the sign was deliberately left blank.
     /// </summary>
     private async Task EditSignpostAsync()
     {
@@ -359,10 +351,10 @@ internal class MainWindowViewModel : ViewModelBase
     }
 
     /// <summary>
-    ///     Says so when the map is about to be written without a landing site the game can use, and
-    ///     lets it be written anyway. Half an authored screen is a normal thing to stop for the day
-    ///     on, so this is a word of warning rather than a refusal - but it is worth the word, because
-    ///     a map with no start position is one the game will quietly open somewhere else entirely.
+    ///     Warns when the map is about to be saved without a usable landing site, and allows it
+    ///     anyway. Stopping for the day half way through a screen is normal, so this is a warning
+    ///     rather than a refusal. It is worth warning about, because a map with no start position
+    ///     opens the game somewhere else entirely.
     /// </summary>
     private async Task<bool> ConfirmLandingSiteAsync()
     {
@@ -468,7 +460,5 @@ internal class MainWindowViewModel : ViewModelBase
     }
 }
 
-/// <summary>
-///     A tile sheet the editor found for itself, ready to be put on a menu.
-/// </summary>
+/// <summary>A tile sheet the editor found for itself, ready to put on a menu.</summary>
 internal sealed record TileSheetChoice(string Name, string Path);

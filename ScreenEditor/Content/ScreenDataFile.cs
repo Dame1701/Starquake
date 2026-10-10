@@ -13,23 +13,22 @@ namespace Starquake.ScreenEditor.Content;
 ///     Reading and writing SQScreenData.dat, the file the game loads the planet from.
 /// </summary>
 /// <remarks>
-///     The format is two MessagePack blobs, each preceded by its length as a four byte integer: the
-///     array of screens first, then the collision masks. It is not self-describing, so the editor
-///     has to write it back exactly as the game's reader expects rather than in whatever shape is
-///     convenient.
+///     The format is two MessagePack blobs, each preceded by its length as a four byte integer:
+///     the screens first, then the collision masks. It is not self-describing, so the editor must
+///     write it back in exactly the shape the game's reader expects.
 /// </remarks>
 internal static class ScreenDataFile
 {
 
     /// <summary>
     ///     The name the game looks for. Offered as the default when saving a map that has never been
-    ///     written, so that a new map lands somewhere the game can actually load it from.
+    ///     written, so a new map lands somewhere the game can load it from.
     /// </summary>
     public const string DefaultFileName = "SQScreenData.dat";
 
     /// <summary>
-    ///     The tile numbers the three oldest markers used to be painted as, and the markers they are
-    ///     now - see <see cref="MoveMarkersOutOfTheSheet" />.
+    ///     Old tile numbers mapped to the markers they are now. See
+    ///     <see cref="MoveMarkersOutOfTheSheet" />.
     /// </summary>
     private static readonly Dictionary<int, int> RenumberedMarkers = new()
     {
@@ -45,8 +44,7 @@ internal static class ScreenDataFile
         GameScreenData[] screens = MessagePackSerializer.Deserialize<GameScreenData[]>(ReadBlob(stream), ScreenDataSerializer.Options);
         int[,,] collisionMasks = MessagePackSerializer.Deserialize<int[,,]>(ReadBlob(stream), ScreenDataSerializer.Options);
 
-        // Both of these count as unsaved changes, which is the point: they are only really in the
-        // map once somebody saves it.
+        // Both count as unsaved changes: they only reach the map once somebody saves it.
         bool migrated = MoveMarkersOutOfTheSheet(screens);
         bool seeded = SeedOriginalTeleportCodes(screens);
 
@@ -58,14 +56,12 @@ internal static class ScreenDataFile
     }
 
     /// <summary>
-    ///     Renumbers the markers of a map saved while they were still tile numbers on the sheet.
+    ///     Renumbers markers stored as tile sheet slots 390, 391 and 392 to their
+    ///     <see cref="MarkerTile" /> numbers.
     /// </summary>
     /// <remarks>
-    ///     The three oldest markers were painted as 390, 391 and 392 - slots on the tile sheet, with
-    ///     placeholder artwork that only the editor ever showed. They are <see cref="MarkerTile" />
-    ///     numbers now, clear of the sheet, which frees those three slots to be drawn on and used as
-    ///     ordinary scenery. A map opened from before that move still says 390, and this is what puts
-    ///     it right; without it the game would read those squares as whatever gets painted there next.
+    ///     Those three slots are ordinary scenery now. Without this, an old map's markers would be
+    ///     read as whatever artwork gets painted into the slots next.
     /// </remarks>
     private static bool MoveMarkersOutOfTheSheet(GameScreenData[] screens)
     {
@@ -87,9 +83,9 @@ internal static class ScreenDataFile
     }
 
     /// <summary>
-    ///     Fills in the codes the game used to have written into it, for a map saved before they were
-    ///     part of it. Only a screen that has a booth and no code of its own is touched, so this can
-    ///     neither overwrite a code somebody set nor invent a destination that cannot be arrived at.
+    ///     Fills in <see cref="TeleportCodes.Original" /> for a map with no codes stored. Only
+    ///     touches screens that have a booth and no code, so it cannot overwrite an authored code or
+    ///     invent an unreachable destination.
     /// </summary>
     private static bool SeedOriginalTeleportCodes(GameScreenData[] screens)
     {
@@ -125,17 +121,17 @@ internal static class ScreenDataFile
     }
 
     /// <summary>
-    ///     Writes the map out, keeping one generation of backup. The game reads this file on every
-    ///     launch and there is only one copy of it in the repository, so a save that goes wrong
-    ///     should cost a rename to put right rather than a trip to source control.
+    ///     Writes the map out, keeping one generation of backup. There is only one copy of this file
+    ///     in the repository, so a bad save should cost a rename to undo rather than a trip to source
+    ///     control.
     /// </summary>
     public static void Save(EditorDocument document, string path)
     {
         byte[] screensBlob = MessagePackSerializer.Serialize(document.Screens, ScreenDataSerializer.Options);
         byte[] collisionBlob = MessagePackSerializer.Serialize(document.CollisionMasks, ScreenDataSerializer.Options);
 
-        // Build the whole file before touching the old one, so that a failure part way through
-        // serialising cannot leave a truncated map behind.
+        // Build the whole file before touching the old one, so a failure part way through cannot
+        // leave a truncated map behind.
         string temporaryPath = path + ".tmp";
 
         using (FileStream stream = File.Create(temporaryPath))

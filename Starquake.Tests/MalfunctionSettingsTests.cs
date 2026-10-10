@@ -10,12 +10,12 @@ namespace Starquake.Tests;
 
 /// <summary>
 ///     The flight computer's display failing. How badly it breaks up can only be judged by looking
-///     at it; what is held here is the timing and the shape of a burst, which are functions of the
+///     at it. What is held here is the timing and the shape of a burst, which are functions of the
 ///     frame.
 /// </summary>
 public class MalfunctionSettingsTests
 {
-    /// <summary>A minute at fifty hertz, which is a good deal longer than anybody reads the page.</summary>
+    /// <summary>A minute, which is a good deal longer than anybody reads the page for.</summary>
     private const int AMinute = 60 * LogicClock.FramesPerSecond;
 
     /// <summary>
@@ -41,8 +41,8 @@ public class MalfunctionSettingsTests
     }
 
     /// <summary>
-    ///     Never nought. A display that is perfectly steady between bursts reads as a working set
-    ///     with something being done to it, rather than as one that is going.
+    ///     Never zero. A display that is perfectly steady between bursts reads as a working set with
+    ///     something being done to it, rather than as one that is going.
     /// </summary>
     [Fact]
     public void BreakupAt_OverAMinute_NeverSettlesAndNeverOverruns()
@@ -55,9 +55,9 @@ public class MalfunctionSettingsTests
     }
 
     /// <summary>
-    ///     A signal does not ease in and out. Every burst should reach full, hold there, and then
-    ///     fall away without going back up - which is what makes it read as the picture being lost
-    ///     and recovered rather than dissolved into something.
+    ///     A signal does not ease in and out. Every burst reaches full, holds there, and then falls
+    ///     away without going back up, which is what makes it read as the picture being lost and
+    ///     recovered rather than dissolved into something.
     /// </summary>
     [Fact]
     public void BreakupAt_WithinEveryBurst_ReachesFullAndThenOnlyFalls()
@@ -78,9 +78,9 @@ public class MalfunctionSettingsTests
     }
 
     /// <summary>
-    ///     Long enough to be read as the page coming apart and short enough that the report is
-    ///     legible again straight after, and the same length every time: a burst whose length
-    ///     wandered would be the fault changing its character rather than recurring.
+    ///     Long enough to read as the page coming apart, short enough that the report is legible
+    ///     again straight after, and the same length every time. A burst whose length wandered would
+    ///     be the fault changing its character rather than recurring.
     /// </summary>
     [Fact]
     public void BreakupAt_EveryBurst_LastsAboutAThirdOfASecond()

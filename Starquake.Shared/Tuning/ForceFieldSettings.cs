@@ -13,31 +13,26 @@ namespace Starquake.Tuning;
 ///     <c>ScreenRenderer.AnimateForceField</c> for where it is handed over.
 /// </summary>
 /// <remarks>
-///     The door used to be particles and nothing else, and it said whether Blob could pass by
-///     turning from red to green the instant he picked the key up - from anywhere on the planet,
-///     and with nothing happening at the door itself. A colour is a poor way to say it twice over:
-///     it is the one difference a player may be unable to see, and it is not what a door does. A
-///     door opens.
+///     The field is drawn from a single number, how far open the door is, and everything else is read
+///     off it: the colour crossfades, the sheet of light draws back onto the jambs to leave the gap
+///     clear, and the particle core thins out with it. The number is eased rather than set, so the
+///     change reads as something happening rather than something that has happened.
 ///     <para>
-///         So the state the field is drawn in is a single number, how far open it is, and
-///         everything else is read off it: the colour crossfades, the sheet of light draws back
-///         onto the jambs leaving the gap clear, and the particle core down the middle thins out
-///         with it. The number is eased rather than set, so the change is something that happens
-///         rather than something that has happened.
+///         A door opening is not the same as a door being passable, and saying it with colour alone
+///         is the one difference a player may be unable to see.
 ///     </para>
 ///     <para>
-///         None of it touches whether he can walk through. The cells flip on
-///         <c>Collectables.Key</c> exactly as they did - see <c>UpdateKeyLockDoor</c> - so a door
-///         caught halfway through opening is already passable and this is light alone.
+///         None of this touches whether Blob can walk through. The cells flip on
+///         <c>Collectables.Key</c>, so a door caught halfway through opening is already passable and
+///         this is light alone.
 ///     </para>
 /// </remarks>
 internal static class ForceFieldSettings
 {
     /// <summary>
-    ///     What a door that will not let Blob through burns, and what one that will burns. Hot red
-    ///     and a green leaning towards the cyan the rest of the game's energy is drawn in, rather
-    ///     than the flat primaries the particles used: these are added over the room behind them,
-    ///     and a flat green added to anything comes out as a wash.
+    ///     What a door burns when it will not let Blob through, and when it will. Hot red and a green
+    ///     leaning towards the cyan the rest of the game's energy uses, rather than flat primaries:
+    ///     these are added over the room behind them, and a flat green added to anything washes out.
     /// </summary>
     public static Vector3 LockedColour => new(1f, 0.13f, 0.08f);
 
@@ -45,9 +40,9 @@ internal static class ForceFieldSettings
     public static Vector3 OpenColour => new(0.15f, 1f, 0.4f);
 
     /// <summary>
-    ///     How far the sheet of light is pulled back onto the jambs, shut and open. Under one
-    ///     leaves it lit all the way across the gap; over one empties the middle, which is what
-    ///     makes an open door something Blob can plainly walk through rather than a green wall.
+    ///     How far the sheet of light is pulled back onto the jambs, shut and open. Under one leaves
+    ///     it lit across the whole gap; over one empties the middle, which is what makes an open door
+    ///     plainly walkable rather than a green wall.
     /// </summary>
     public const float ShutDrawBack = 0.45f;
 
@@ -55,11 +50,10 @@ internal static class ForceFieldSettings
     public const float OpenDrawBack = 1.7f;
 
     /// <summary>
-    ///     How hard the field burns, shut and open. Short of full on both counts, because the alpha
-    ///     is taken from the same number: a field that burns at one is opaque, and a wall of solid
-    ///     colour across a doorway reads as a painted rectangle rather than as light holding Blob
-    ///     back. The room has to show through it. An open door is quieter again: it is holding
-    ///     nothing back.
+    ///     How hard the field burns, shut and open. Short of full in both cases, because the alpha
+    ///     comes from the same number: a field burning at one is opaque, and solid colour across a
+    ///     doorway reads as a painted rectangle rather than light holding Blob back. The room has to
+    ///     show through. An open door is quieter again, holding nothing back.
     /// </summary>
     public const float ShutIntensity = 0.55f;
 
@@ -67,15 +61,14 @@ internal static class ForceFieldSettings
     public const float OpenIntensity = 0.5f;
 
     /// <summary>
-    ///     How closely the bands travelling up the gap are spaced, in radians over its height. This
-    ///     is about four of them down the door's ninety-six pixels.
+    ///     How closely the bands travelling up the gap are spaced, in radians over its height. About
+    ///     four of them down the door's ninety-six pixels.
     /// </summary>
     public const float Frequency = 26f;
 
     /// <summary>
-    ///     How far those bands travel in a frame. Counted in logic frames rather than drawn ones,
-    ///     so the field moves at the same rate whatever the display is doing - the defect class
-    ///     <c>ElectricSettings.FlickerAt</c> has the note about.
+    ///     How far those bands travel in a frame. Counted in logic frames rather than drawn ones, so
+    ///     the field moves at the same rate whatever the display is doing.
     /// </summary>
     private const float PhasePerFrame = 0.11f;
 
@@ -89,15 +82,15 @@ internal static class ForceFieldSettings
     private const float ScanWidth = 0.1f;
 
     /// <summary>
-    ///     How hard the jambs burn. They are lit whatever the sheet between them is doing, so an
-    ///     open door still reads as a door rather than as a hole somebody has taken the wall out of.
+    ///     How hard the jambs burn. They stay lit whatever the sheet between them is doing, so an
+    ///     open door still reads as a door rather than a hole in the wall.
     /// </summary>
     public const float PostGlow = 0.55f;
 
     /// <summary>
-    ///     The burst at the moment a door gives way, and how much of it is left a frame later. The
-    ///     decay is a multiply rather than a count, so it is gone in about a fifth of a second
-    ///     without a second number saying when.
+    ///     The burst at the moment a door gives way, and how much is left a frame later. The decay is
+    ///     a multiply rather than a count, so it is gone in about a fifth of a second without a
+    ///     second number saying when.
     /// </summary>
     private const float FlashPeak = 1.6f;
 
@@ -105,14 +98,14 @@ internal static class ForceFieldSettings
     private const float FlashLeftPerFrame = 0.8f;
 
     /// <summary>
-    ///     Below this the flash is spent, and is snapped to nothing rather than left decaying
-    ///     towards it for ever.
+    ///     Below this the flash is spent and snaps to nothing, rather than decaying towards it
+    ///     forever.
     /// </summary>
     private const float FlashSpent = 0.01f;
 
     /// <summary>
-    ///     How long a door takes to open or to shut again, in frames. Short - it is a door being
-    ///     told to open, not a drawbridge - but long enough to be seen happening.
+    ///     How long a door takes to open or shut again, in frames. Short, because it is a door rather
+    ///     than a drawbridge, but long enough to be seen happening.
     /// </summary>
     private static readonly int OpeningFrames = LogicClock.Seconds(0.35);
 
@@ -121,9 +114,8 @@ internal static class ForceFieldSettings
     ///     harder it burns when he is right up against it.
     /// </summary>
     /// <remarks>
-    ///     Measured from his own square rather than from the corner the planet is told, because the
-    ///     corner is a quarter of a screen's width away from the side of him that is doing the
-    ///     leaning.
+    ///     Measured from Blob's own square rather than the corner the planet is told, which is a
+    ///     quarter of a screen's width from the side actually doing the leaning.
     /// </remarks>
     private const int BraceReach = 72;
 
@@ -131,16 +123,14 @@ internal static class ForceFieldSettings
     private const float BraceBoost = 0.7f;
 
     /// <summary>
-    ///     How far along the way to being open or shut a door is after another frame. Linear: a
-    ///     door is machinery and does not need easing in and out of its own travel.
+    ///     How far towards open or shut a door is after another frame. Linear, because a door is
+    ///     machinery and needs no easing in and out of its own travel.
     /// </summary>
     public static float OpennessAfter(float openness, bool open)
         => MathHelper.Clamp(
             openness + (open ? 1f : -1f) / OpeningFrames, 0f, 1f);
 
-    /// <summary>
-    ///     What is left of the opening flash after another frame.
-    /// </summary>
+    /// <summary>What is left of the opening flash after another frame.</summary>
     public static float FlashAfter(float flash)
     {
         float left = flash * FlashLeftPerFrame;
@@ -154,9 +144,7 @@ internal static class ForceFieldSettings
     /// <inheritdoc cref="PhasePerFrame" />
     public static float PhaseAt(int logicFrame) => logicFrame * PhasePerFrame;
 
-    /// <summary>
-    ///     Where the scanner has got to down the gap, as a fraction of its height.
-    /// </summary>
+    /// <summary>How far the scanner has travelled down the gap, as a fraction of its height.</summary>
     public static float ScanAt(int logicFrame)
         => logicFrame % ScanFrames / (float)ScanFrames;
 
@@ -174,9 +162,9 @@ internal static class ForceFieldSettings
         => MathHelper.Lerp(ShutDrawBack, OpenDrawBack, openness);
 
     /// <summary>
-    ///     How hard the field burns this frame: its settled brightness for how open it is, the
-    ///     flicker the rest of the game's electricity shares, and the bracing against Blob leaning
-    ///     on it. All three are worked out here rather than per pixel - see <c>BUILD.md</c>.
+    ///     How hard the field burns this frame: the settled brightness for how open it is, the
+    ///     flicker shared with the rest of the game's electricity, and the bracing against Blob
+    ///     leaning on it. All three are worked out here rather than per pixel.
     /// </summary>
     public static float IntensityAt(float openness, float brace, int logicFrame)
         => MathHelper.Lerp(ShutIntensity, OpenIntensity, openness)
@@ -184,15 +172,14 @@ internal static class ForceFieldSettings
            * (1f + brace * BraceBoost * (1f - openness));
 
     /// <summary>
-    ///     How hard Blob is leaning on the door, from nothing at <see cref="BraceReach" /> away to
-    ///     one when he is in the gap. The corner he is given by is the corner of his square, so the
-    ///     square is what the distance is measured to.
+    ///     How hard Blob is leaning on the door, from nothing at <see cref="BraceReach" /> away to one
+    ///     when he is in the gap. Measured to Blob's square, because that is what the position given
+    ///     is a corner of.
     /// </summary>
     /// <remarks>
-    ///     A box distance rather than a true one - the furthest of the two axes - because the
-    ///     doorway is a box and the measurement wanted is how far outside it he is. It costs no
-    ///     square root, and the difference between the two at a corner is not something a
-    ///     brightness shows.
+    ///     A box distance, the furthest of the two axes, rather than a true one. The doorway is a box
+    ///     and what is wanted is how far outside it Blob is. It costs no square root, and the
+    ///     difference at a corner is not something a brightness shows.
     /// </remarks>
     public static float BraceAgainst(Rectangle doorway, int blobXPos, int blobYPos)
     {

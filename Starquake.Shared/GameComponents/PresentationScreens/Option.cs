@@ -14,8 +14,8 @@ internal class Option(string activationKey, string optionText, bool selected, Co
     public bool Selected = selected;
 
     /// <summary>
-    ///     Whether the option can be chosen. Only the joypad preset ever changes after construction, and
-    ///     it changes whenever a pad is plugged in or pulled out while the screen is up.
+    ///     Whether the option can be chosen. Only the joypad preset changes after construction, and it
+    ///     changes whenever a pad is plugged in or pulled out while the screen is up.
     /// </summary>
     public bool Unavailable = unavailable;
 }

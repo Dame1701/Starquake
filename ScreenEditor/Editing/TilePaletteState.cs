@@ -11,20 +11,19 @@ using Starquake.Structure;
 namespace Starquake.ScreenEditor.Editing;
 
 /// <summary>
-///     Which of the sheet's tiles the palette offers, and the short row of the ones most recently
-///     reached for. A sheet is over four hundred tiles, so finding one by eye needs narrowing down.
+///     Which of the sheet's tiles the palette offers, and the short row of recently used ones. A
+///     sheet holds over 400 tiles, so finding one by eye needs narrowing down.
 /// </summary>
 /// <remarks>
-///     The sheet and the map are handed over rather than reached for. Both change - a different sheet is
-///     loaded, a different map opened - but each changes in exactly one place, so
-///     <see cref="Rebind" /> is called from those two and this holds what it was given. That is why there
-///     is no reference back to the session here.
+///     The sheet and the map are passed in rather than reached for. Each is replaced in exactly one
+///     place, which calls <see cref="Rebind" />, so this holds what it was given and needs no
+///     reference back to the session.
 /// </remarks>
 internal sealed class TilePaletteState : ViewModelBase
 {
     /// <summary>
-    ///     How many tiles the recently-used row remembers. Enough to hold the handful being worked with
-    ///     and short enough to stay one row.
+    ///     How many tiles the recently-used row remembers. Enough for the handful in use, few enough
+    ///     to stay one row.
     /// </summary>
     private const int RecentTileCount = 8;
 
@@ -39,8 +38,8 @@ internal sealed class TilePaletteState : ViewModelBase
     private TileSheet? _sheet;
 
     /// <summary>
-    ///     Every tile number any screen uses, worked out once and kept until the map changes. Walking 512
-    ///     screens on every repaint of the palette would be felt.
+    ///     Every tile number any screen uses, worked out once and kept until the map changes. Walking
+    ///     512 screens on every palette repaint would be noticeable.
     /// </summary>
     private HashSet<int>? _tilesInUse;
 
@@ -55,15 +54,14 @@ internal sealed class TilePaletteState : ViewModelBase
     }
 
     /// <summary>
-    ///     The tiles most recently picked out of the sheet, newest first. Markers never appear here: each
-    ///     has a button of its own on the toolbar, so it was never hunted down - which is the only thing
-    ///     this row is for.
+    ///     The tiles most recently picked out of the sheet, newest first. Markers never appear here,
+    ///     because each has its own toolbar button and so was never hunted down in the sheet.
     /// </summary>
     public IReadOnlyList<int> RecentTiles => _recentTiles;
 
     /// <summary>
-    ///     Narrows the palette to tiles whose number or name matches. Typing "tunnel" to find the
-    ///     tunnel mouths beats scrolling to the bottom of the sheet and counting.
+    ///     Narrows the palette to tiles whose number or name matches. Typing "tunnel" finds the
+    ///     tunnel mouths without scrolling to the bottom of the sheet and counting.
     /// </summary>
     public string TileFilter
     {
@@ -76,8 +74,8 @@ internal sealed class TilePaletteState : ViewModelBase
     }
 
     /// <summary>
-    ///     Hides tiles that no screen uses. The sheet holds a fair number the finished map never reaches
-    ///     for, and hiding them makes what the map is built from obvious.
+    ///     Hides tiles no screen uses. The sheet holds a fair number the finished map never touches,
+    ///     and hiding them shows what the map is actually built from.
     /// </summary>
     public bool UsedTilesOnly
     {
@@ -89,9 +87,7 @@ internal sealed class TilePaletteState : ViewModelBase
         }
     }
 
-    /// <summary>
-    ///     The tiles the palette draws, in sheet order.
-    /// </summary>
+    /// <summary>The tiles the palette draws, in sheet order.</summary>
     public IReadOnlyList<int> VisibleTiles
     {
         get => _visibleTiles;
@@ -99,7 +95,8 @@ internal sealed class TilePaletteState : ViewModelBase
     }
 
     /// <summary>
-    ///     Points the palette at a sheet and a map. Called when either is replaced, and once on opening.
+    ///     Points the palette at a sheet and a map. Called when either is replaced, and once on
+    ///     opening.
     /// </summary>
     public void Rebind(TileSheet? sheet, EditorDocument document)
     {
@@ -111,12 +108,12 @@ internal sealed class TilePaletteState : ViewModelBase
     }
 
     /// <summary>
-    ///     Says that the map's contents have changed, so what it uses has to be counted again. Separate
-    ///     from <see cref="Rebind" /> because a tile being painted does not replace the map.
+    ///     Reports that the map's contents changed, so the tiles it uses must be counted again.
+    ///     Separate from <see cref="Rebind" /> because painting a tile does not replace the map.
     /// </summary>
     /// <returns>
-    ///     Whether the palette redrew itself, which it only does when it is showing what the map uses -
-    ///     otherwise what the map holds makes no difference to what is offered.
+    ///     Whether the palette redrew. It only does so when showing the tiles the map uses, since
+    ///     otherwise the map's contents make no difference to what is offered.
     /// </returns>
     public bool MapChanged()
     {
@@ -132,13 +129,10 @@ internal sealed class TilePaletteState : ViewModelBase
         return true;
     }
 
-    /// <summary>
-    ///     Puts a tile at the head of the recently-used row.
-    /// </summary>
+    /// <summary>Puts a tile at the head of the recently-used row.</summary>
     public void Remember(int tileImage)
     {
-        // A marker has a button of its own on the toolbar, so it is never something that had to be
-        // hunted down in the sheet - which is the only thing this row is for.
+        // A marker has its own toolbar button, so it was never hunted down in the sheet.
         if (tileImage < 0 || MarkerTiles.Contains(tileImage))
         {
             return;

@@ -12,14 +12,12 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     How a nasty decides where to go. Fourteen behaviours that were 630 lines of a class which
-///     also draws itself, so none of this could be reached without a graphics device.
+///     How a nasty decides where to go. Fourteen behaviours, none of which needs a graphics device.
 /// </summary>
 /// <remarks>
-///     The payoff this split was for is <see cref="Step_AChasingNastyWalledIn_GivesUpChasing" />:
-///     "nasties get stuck" is a thing that happens, which is why <c>ReleaseAttractionIfStuck</c> and
-///     the stuck counter exist at all, and it is now reproducible in a test rather than only in a
-///     game.
+///     The one worth knowing about is <see cref="Step_AChasingNastyWalledIn_GivesUpChasing" />.
+///     Nasties getting stuck is a thing that happens in play, which is why
+///     <c>ReleaseAttractionIfStuck</c> and the stuck counter exist at all.
 /// </remarks>
 public class NastyBrainTests
 {

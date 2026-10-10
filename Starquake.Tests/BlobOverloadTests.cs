@@ -12,20 +12,18 @@ namespace Starquake.Tests;
 
 /// <summary>
 ///     How Blob comes apart: the alarm that sounds when he runs out of energy, the swell and shrink,
-///     and the flare drawn over it. All of it was inside <c>Blob</c>, so none of it could be reached - the
-///     only way to see a death was to play one.
+///     and the flare drawn over it.
 /// </summary>
 /// <remarks>
-///     This needs nothing at all to construct, which is why it is the most thoroughly covered of the five
-///     pieces taken out of Blob. The explosion's sound, its fragments and putting Blob back where
-///     he came from stayed behind, and each of those is the reason: all three need something the shape of
-///     a death has no business holding.
+///     <see cref="BlobOverload" /> needs nothing at all to construct, so all of this is reachable.
+///     The explosion's sound, its fragments and putting Blob back where he came from are the
+///     caller's, because each of those needs something the shape of a death has no business holding.
 /// </remarks>
 public class BlobOverloadTests
 {
     /// <summary>
-    ///     Running out of energy is the one death with a warning. Everything else - spikes, electricity, a
-    ///     nasty - begins already exploded, and that is the whole mechanism by which the alarm is skipped.
+    ///     Running out of energy is the one death with a warning. Spikes, electricity and a nasty
+    ///     all begin already exploded, which is how the alarm is skipped.
     /// </summary>
     [Fact]
     public void Begin_WithTheAlarm_SoundsItAndDoesNotExplodeYet()
@@ -56,8 +54,8 @@ public class BlobOverloadTests
     }
 
     /// <summary>
-    ///     The sound is asked for on the frame the count reads one, which is the frame after the death -
-    ///     the count is advanced at the end of a frame, so it reads nought on the first.
+    ///     The sound is asked for on the frame the count reads one, which is the frame after the
+    ///     death. The count is advanced at the end of a frame, so it reads zero on the first.
     /// </summary>
     [Fact]
     public void AlarmJustStarted_IsTrueOnTheSecondFrameOnly()
@@ -101,8 +99,8 @@ public class BlobOverloadTests
     }
 
     /// <summary>
-    ///     He flickers through the alarm rather than being drawn solidly, which is what makes it read as a
-    ///     warning.
+    ///     He flickers through the alarm rather than being drawn solidly, which is what makes it
+    ///     read as a warning.
     /// </summary>
     [Fact]
     public void Visible_ThroughTheAlarm_AlternatesEveryFrame()
@@ -149,10 +147,9 @@ public class BlobOverloadTests
     }
 
     /// <summary>
-    ///     He swells as the cracks open, rather than being held still and then bursting. The two
-    ///     run off the same count, so by the time he is at his widest he is also at his most
-    ///     broken - which is what makes it read as one thing coming apart instead of two things
-    ///     one after the other.
+    ///     He swells as the cracks open, rather than being held still and then bursting. The two run
+    ///     off the same count, so by the time he is at his widest he is also at his most broken.
+    ///     That is what makes it read as one thing coming apart instead of two in a row.
     /// </summary>
     [Fact]
     public void Swell_WhileTheCracksOpen_GrowsInStepWithThem()

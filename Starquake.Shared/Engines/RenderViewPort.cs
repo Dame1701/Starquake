@@ -15,10 +15,9 @@ internal class RenderViewPort(GraphicsDeviceManager graphics, string name, int x
 
     /// <summary>
     ///     A pixel shader to put this view port through when it is composed, or null for the plain
-    ///     path. Set by whatever drew into it and cleared alongside <see cref="Active" /> once it
-    ///     has been composed, so it lasts the one frame it was asked for - a page that wants a
-    ///     shader has to say so on every frame it wants it, the same way it has to draw itself on
-    ///     every frame it is on screen.
+    ///     path. Set by whatever drew into it and cleared alongside <see cref="Active" /> once
+    ///     composed, so it lasts the one frame it was asked for. A page wanting a shader must say so
+    ///     every frame, the same way it must draw itself every frame it is on screen.
     /// </summary>
     public Effect? ComposeThrough { get; set; }
 

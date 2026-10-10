@@ -9,10 +9,8 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     Blob's ship falling onto the crash site. This was seven of <c>IntroSequence</c>'s mutable
-///     fields and eight lines in the middle of it, and could not be reached by a test there: the
-///     class needs a resource manager, a graphics set, a screen collection and a particle engine to
-///     build. The fall itself needs the crash site and nothing else.
+///     Blob's ship falling onto the crash site. The fall needs the crash site and nothing else, so
+///     none of this needs the intro sequence that plays it.
 /// </summary>
 public class ShipDescentTests
 {
@@ -38,8 +36,8 @@ public class ShipDescentTests
     }
 
     /// <summary>
-    ///     The drop starts from a standstill, so the very first frame slides the ship sideways and
-    ///     does not lower it at all. That is what makes the path bend rather than run straight from
+    ///     The drop starts from a standstill, so the first frame slides the ship sideways and does
+    ///     not lower it at all. That is what bends the path, rather than running it straight from
     ///     the corner to the crash site.
     /// </summary>
     [Fact]

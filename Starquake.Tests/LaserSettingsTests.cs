@@ -8,8 +8,8 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     The one rule behind Blob's shot that is not a matter of looking at it: a shuttle pad's fire
-///     is the powered one, and what he has in his own hands is weaker in every respect.
+///     The one rule behind Blob's shot that is not just a matter of looking at it. A shuttle pad's
+///     fire is the powered one, and what Blob has in his own hands is weaker in every respect.
 /// </summary>
 public class LaserSettingsTests
 {
@@ -27,8 +27,8 @@ public class LaserSettingsTests
     }
 
     /// <summary>
-    ///     Weaker, but still there. A beam rounded down to nothing would leave firing on foot
-    ///     looking broken rather than looking weak.
+    ///     Weaker, but still there. A beam rounded down to nothing makes firing on foot look broken
+    ///     rather than weak.
     /// </summary>
     [Fact]
     public void BeamFor_OffTheShuttle_IsStillABeam()
@@ -43,8 +43,8 @@ public class LaserSettingsTests
     }
 
     /// <summary>
-    ///     The beam is the light of the shot, and the shot is thirty-two long. Much longer than
-    ///     that and it reads as a bar flying along beside him rather than as the shot burning.
+    ///     The beam is the light of the shot, and the shot is 32 long. Much longer than that and it
+    ///     reads as a bar flying along beside Blob rather than as the shot burning.
     /// </summary>
     [Fact]
     public void BeamFor_EitherWay_IsNotMuchLongerThanTheShotItself()
@@ -54,9 +54,7 @@ public class LaserSettingsTests
         Assert.InRange(LaserSettings.BeamFor(false).Length, 8, 64);
     }
 
-    /// <summary>
-    ///     It is a beam and not a slab: longer than it is thick, however it is being fired.
-    /// </summary>
+    /// <summary>A beam, not a slab: longer than it is thick, however it is fired.</summary>
     [Theory]
     [InlineData(true)]
     [InlineData(false)]

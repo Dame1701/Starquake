@@ -10,26 +10,23 @@ namespace Starquake.Structure;
 ///     What a teleport destination code may be, and the codes the planet shipped with.
 /// </summary>
 /// <remarks>
-///     <para>
-///         A code belongs to the screen it reaches rather than to the booth it is typed into, so it
-///         is stored on the screen - see <see cref="GameScreenData.TeleportCode" /> - and authored in
-///         the screen editor. The game only ever looks one up; everything that decides what a code
-///         may be lives here, because the editor is the only thing that makes one.
-///     </para>
+///     A code belongs to the screen it reaches, not the booth it is typed into, so it is stored on
+///     the screen (<see cref="GameScreenData.TeleportCode" />) and authored in the screen editor. The
+///     game only looks codes up. The rules for what a code may be live here because the editor is the
+///     only thing that creates one.
 /// </remarks>
 public static class TeleportCodes
 {
 
     /// <summary>
-    ///     How many letters a code has. The booth's display has five slots and teleports the moment
-    ///     the fifth is filled, so this is a fact about the artwork rather than a limit chosen here.
+    ///     How many letters a code has. Fixed by the artwork: the booth's display has five slots and
+    ///     teleports as soon as the fifth is filled.
     /// </summary>
     public const int CodeLength = 5;
 
     /// <summary>
-    ///     The codes the game had written into it before they were part of the map, keyed by the
-    ///     screen each one reaches. The editor fills these in for a map saved before codes were
-    ///     stored, so that opening an older file does not quietly leave every teleporter dead.
+    ///     The fallback codes, keyed by the screen each one reaches. The editor fills these in for a
+    ///     map with no codes stored, so opening an older file does not leave every teleporter dead.
     /// </summary>
     public static readonly IReadOnlyDictionary<int, string> Original = new Dictionary<int, string>
     {
@@ -51,17 +48,16 @@ public static class TeleportCodes
     };
 
     /// <summary>
-    ///     Whether a code is one the booth could actually be made to spell. Its keypad has the
-    ///     twenty-six letters and nothing else on it, and five slots to put them in, so a code that
-    ///     is any other length or holds anything else can never be entered.
+    ///     Whether the booth could actually be made to spell this code. Its keypad holds the 26
+    ///     letters and nothing else, in five slots, so any other length or character can never be
+    ///     entered.
     /// </summary>
     public static bool IsWellFormed(string? code)
         => code is { Length: CodeLength } && code.All(char.IsAsciiLetter);
 
     /// <summary>
-    ///     A code in the one form it is stored in. The booth's keypad has no case to it and the code
-    ///     it spells out on screen is upper case, so that is the form the editor keeps a code in and
-    ///     the form the booth's monitor shows it back in.
+    ///     Puts a code in the single form it is stored in. The booth's keypad is caseless and its
+    ///     monitor shows codes in upper case, so that is what the editor saves.
     /// </summary>
     public static string Normalise(string code)
         => code.Trim().ToUpperInvariant();

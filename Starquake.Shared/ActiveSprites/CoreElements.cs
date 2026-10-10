@@ -16,22 +16,17 @@ internal class CoreElements
 {
 
     /// <summary>
-    ///     The core is a three by three block of elements sitting in the middle of the core room.
-    ///     Each element is drawn a sprite apart, and the whole block starts here.
-    /// </summary>
-    /// <summary>
-    ///     How many elements the core is across and down. Read from <see cref="CoreSite" /> rather than
-    ///     said again here, because the screen editor outlines the same area and the two must agree.
-    ///     Where the core sits is no longer here at all: it is on the map, and is passed in.
+    ///     How many elements the core is across and down. Each is drawn a sprite apart, making a
+    ///     three by three block. Read from <see cref="CoreSite" /> rather than restated, because the
+    ///     screen editor outlines the same area and the two must agree. Where the core sits comes
+    ///     from the map instead.
     /// </summary>
     private const int CoreGridAcross = CoreSite.SpritesAcross;
 
     /// <inheritdoc cref="CoreGridAcross" />
     private const int CoreGridDown = CoreSite.SpritesDown;
 
-    /// <summary>
-    ///     What finishing the core is worth.
-    /// </summary>
+    /// <summary>What finishing the core is worth.</summary>
     private const int ScoreForCompletingCore = 10000;
     private readonly GraphicsSet _graphicsSet;
     private readonly Random _randomNumberGenerator;
@@ -55,9 +50,8 @@ internal class CoreElements
     public CoreElement[] Elements { get; }
 
     /// <summary>
-    ///     Which slot is being filled right now, or null when none is. The core's own energy reads
-    ///     this to gather on the element going in - the room used to switch off for a replacement
-    ///     rather than respond to one, so there was nothing that needed to know.
+    ///     Which slot is being filled, or null when none is. The core's energy reads this so it can
+    ///     gather on the element going in.
     /// </summary>
     public int? SlotBeingFilled
     {
@@ -101,8 +95,8 @@ internal class CoreElements
     }
 
     /// <summary>
-    ///     Picks a part out as the one the core is about to take, so it glows and shakes in its
-    ///     slot before anything happens to it.
+    ///     Picks out the part the core is about to take, so it glows and shakes in its slot before
+    ///     anything happens to it.
     /// </summary>
     public void IdentifyElement(int elementNoToReplace)
     {
@@ -118,9 +112,9 @@ internal class CoreElements
     }
 
     /// <summary>
-    ///     Which slot the core has picked out, or null when it has not. Separate from
-    ///     <see cref="SlotBeingFilled" /> because the room answers the two differently - it gathers
-    ///     on the one it is about to take and bears down on the one going in.
+    ///     Which slot the core has picked out, or null when none. Separate from
+    ///     <see cref="SlotBeingFilled" /> because the room reacts to the two differently: it gathers
+    ///     on the slot about to be taken and bears down on the one being filled.
     /// </summary>
     public int? SlotIdentified
     {
@@ -169,8 +163,7 @@ internal class CoreElements
 
     /// <summary>
     ///     Which parts the core is still asking for, as the pick-up numbers they are collected as.
-    ///     Two callers wanted exactly this and each turned <see cref="GetActiveElements" /> into it
-    ///     themselves - the planet to tell the populator what to scatter, and the test-mode key that
+    ///     Used by the planet to tell the populator what to scatter, and by the test-mode key that
     ///     hands over a part Blob is not already carrying.
     /// </summary>
     public List<int> ElementsWanted()
@@ -187,7 +180,7 @@ internal class CoreElements
 
     /// <summary>
     ///     A fresh set of nine elements for the core to be missing, drawn without repeats so no two
-    ///     of them ask for the same thing.
+    ///     slots ask for the same thing.
     /// </summary>
     public void Reset()
     {

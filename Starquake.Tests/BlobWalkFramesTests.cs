@@ -9,19 +9,19 @@ namespace Starquake.Tests;
 
 /// <summary>
 ///     Blob's walk, and the pose he picks it up at when he turns round mid-stride. Two comparisons
-///     and eight numbers, all of which were private to <c>Blob</c>.
+///     and eight numbers.
 /// </summary>
 /// <remarks>
-///     Half of these pin the sheet's layout rather than the rule, which is the point: the rule only
-///     produces a matching pose because each transition frame sits immediately beside the run it is
-///     turning away from. Renumbering the sheet would not fail to compile and would not look wrong
+///     Half of these pin the sheet's layout rather than the rule, and that is deliberate. The rule
+///     only produces a matching pose because each transition frame sits immediately beside the run
+///     it is turning away from. Renumbering the sheet would still compile and would not look wrong
 ///     in a diff.
 /// </remarks>
 public class BlobWalkFramesTests
 {
     /// <summary>
-    ///     The layout the turn rule depends on: left run, turn-to-right, resting, turn-to-left,
-    ///     right run, in that order and with no gaps and no overlap.
+    ///     The layout the turn rule depends on. Left run, turn-to-right, resting, turn-to-left,
+    ///     right run, in that order, with no gaps and no overlap.
     /// </summary>
     [Fact]
     public void TheSheet_IsLaidOutAsElevenFramesInOneRun()
@@ -57,7 +57,7 @@ public class BlobWalkFramesTests
 
     /// <summary>
     ///     Coming out of the right-hand run, every frame of it drops back to the one transition pose
-    ///     rather than to the start of the left run - which is the whole point of the rule.
+    ///     rather than to the start of the left run. That is the whole point of the rule.
     /// </summary>
     [Theory]
     [InlineData(7)]

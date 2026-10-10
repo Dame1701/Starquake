@@ -14,14 +14,10 @@ internal static class NastyColours
     private static readonly Color White = new(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full);
 
     /// <summary>
-    ///     What each kind of nasty splatters. Half of them throw white splodges and half throw a colour
-    ///     of their own, which is the only pattern in it - the rest is a painter's choice per nasty, and
-    ///     so it is a table rather than a rule.
+    ///     What each kind of nasty splatters. Half throw white splodges and half throw a colour of
+    ///     their own, and beyond that it is a choice per nasty, so a table rather than a rule.
     /// </summary>
-    /// <remarks>
-    ///     Scorpion and Helicopter share a set. That is how it was written, and whether it is deliberate
-    ///     or a copy-and-paste is not something this refactor can tell.
-    /// </remarks>
+    /// <remarks>Scorpion and Helicopter share a set.</remarks>
     private static readonly Dictionary<NastyType, SplatColours> SplatColoursByNasty = new()
     {
         [NastyType.FriedEgg] = new SplatColours(new Color(125, 62, 62), new Color(0, 182, 0), White),
@@ -41,9 +37,9 @@ internal static class NastyColours
     };
 
     /// <summary>
-    ///     What the wet rim glows as an organic nasty comes apart - the same colour it throws from
-    ///     its left side, so the shader and the particles over it agree. White for anything not in
-    ///     the table, which is every mechanical nasty and so never asks.
+    ///     What the wet rim glows as an organic nasty comes apart. The same colour it throws from its
+    ///     left side, so the shader and the particles over it agree. White for anything not in the
+    ///     table, which is every mechanical nasty and so never asked for.
     /// </summary>
     public static Vector3 SplatColourFor(NastyType nastyType)
         => SplatColoursByNasty.TryGetValue(nastyType, out SplatColours colours)
@@ -57,16 +53,15 @@ internal static class NastyColours
             return;
         }
 
-        // The names the effect's content file gives these, now that a deep copy keeps them rather
-        // than prefixing every one with "Copy of".
+        // The names the effect's content file gives these.
         effect["Left Splat"].ReleaseColour.Value = colours.LeftSplat.ToVector3();
         effect["Right Splat"].ReleaseColour.Value = colours.RightSplat.ToVector3();
         effect["Splodges"].ReleaseColour.Value = colours.Splodges.ToVector3();
     }
 
     /// <summary>
-    ///     The colours a nasty splatters when it dies: one for each of the two side splats and one for
-    ///     the shower of splodges between them.
+    ///     The colours a nasty splatters when it dies: one for each side splat, and one for the
+    ///     shower of splodges between them.
     /// </summary>
     private readonly record struct SplatColours(Color LeftSplat, Color RightSplat, Color Splodges);
 }

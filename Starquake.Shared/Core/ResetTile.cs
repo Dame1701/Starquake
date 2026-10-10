@@ -5,7 +5,7 @@
 namespace Starquake.Core;
 
 /// <summary>
-///     A tile that was changed as Blob passed - a bridge broken, a shuttle pad taken - and the
-///     screen it is on, so it can be put back when the game restarts.
+///     A tile changed as Blob passed, such as a broken bridge or a taken shuttle pad, and the screen
+///     it is on, so it can be put back when the game restarts.
 /// </summary>
 internal sealed record ResetTile(TileDetected TileToReset, int ScreenNumber);

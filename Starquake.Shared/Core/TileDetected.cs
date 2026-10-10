@@ -5,8 +5,8 @@
 namespace Starquake.Core;
 
 /// <summary>
-///     A tile something has been found standing on or about to walk into, and where it met it.
-///     <see cref="XPosition" /> and <see cref="YPosition" /> are where inside the tile that was;
+///     A tile something is standing on or about to walk into, and where it met it.
+///     <see cref="XPosition" /> and <see cref="YPosition" /> are the position inside the tile;
 ///     <see cref="MapXPosition" /> and <see cref="MapYPosition" /> are which tile of the screen's
 ///     grid it is.
 /// </summary>

@@ -12,9 +12,8 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     The map Blob and the nasties are stepped against. This is the thing most likely to break
-///     when level data changes, and until <see cref="ScreenCollisionMap" /> came out of
-///     <c>GameScreenCollection</c> none of it could be reached without loading the game's content.
+///     The map Blob and the nasties are stepped against, and the thing most likely to break when
+///     level data changes.
 /// </summary>
 /// <remarks>
 ///     The screens here are built by hand rather than read from <c>SQScreenData.dat</c>, so a test

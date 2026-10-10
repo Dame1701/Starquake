@@ -12,9 +12,8 @@ using Starquake.Structure;
 namespace Starquake.ScreenEditor.Dialogs;
 
 /// <summary>
-///     What somebody chose for a screen's teleport code. A null <see cref="Code" /> is the booth
-///     left with no code at all, which is different from the dialog being cancelled - that comes
-///     back as no choice.
+///     What somebody chose for a screen's teleport code. A null <see cref="Code" /> means the booth
+///     was left with no code. Cancelling the dialog comes back as no choice at all.
 /// </summary>
 internal sealed record TeleportCodeChoice(string? Code);
 
@@ -22,10 +21,9 @@ internal sealed record TeleportCodeChoice(string? Code);
 ///     Sets the destination code of one screen's teleport booth.
 /// </summary>
 /// <remarks>
-///     The code is what has to be typed into any other booth on the planet to arrive at this screen,
-///     so the two things worth saying while it is being typed are whether the booth could spell it at
-///     all and whether another screen already answers to it. Both are the session's to answer - it is
-///     the one holding the map - so this takes a function and reports whatever comes back.
+///     While a code is being typed, two things are worth reporting: whether a booth could spell it at
+///     all, and whether another screen already answers to it. Only the session holds the map, so it
+///     is passed in as a function and this reports whatever comes back.
 /// </remarks>
 internal sealed class TeleportCodeDialog : Window
 {
@@ -66,9 +64,9 @@ internal sealed class TeleportCodeDialog : Window
             FontSize = 12,
             TextWrapping = TextWrapping.Wrap,
             Margin = new Thickness(0, 8, 0, 0),
-            // Held open whether there is a problem to report or not: the window sizes itself to its
-            // content, and a line that comes and goes while somebody is typing takes the buttons
-            // with it.
+            // Kept in place whether or not there is a problem to report. The window sizes itself to
+            // its content, so a line that appears and disappears would move the buttons while
+            // somebody is typing.
             MinHeight = 18
         };
 
@@ -96,8 +94,8 @@ internal sealed class TeleportCodeDialog : Window
 
         buttons.Children.Add(CreateButton("Cancel", null));
 
-        // Only offered when there is something to remove, so that the one destructive button here is
-        // never the obvious thing to press on a booth that has no code yet.
+        // Only offered when there is something to remove, so the destructive button is never the
+        // obvious thing to press on a booth that has no code yet.
         if (existing is not null)
         {
             buttons.Children.Add(CreateButton("Remove", new TeleportCodeChoice(null)));
@@ -125,9 +123,7 @@ internal sealed class TeleportCodeDialog : Window
         KeepUpperCase();
     }
 
-    /// <summary>
-    ///     Asks for a code, coming back with null if the dialog was cancelled.
-    /// </summary>
+    /// <summary>Asks for a code. Returns null if the dialog was cancelled.</summary>
     public static Task<TeleportCodeChoice?> AskAsync(
         Window owner,
         int screen,
@@ -140,8 +136,8 @@ internal sealed class TeleportCodeDialog : Window
     }
 
     /// <summary>
-    ///     Opens with whatever code the booth already had selected, so that typing a new one over it
-    ///     needs no clearing out first.
+    ///     Selects the booth's existing code on opening, so typing a new one replaces it without
+    ///     clearing first.
     /// </summary>
     protected override void OnOpened(EventArgs e)
     {
@@ -166,9 +162,8 @@ internal sealed class TeleportCodeDialog : Window
     }
 
     /// <summary>
-    ///     Holds what is being typed in upper case, which is how a code is stored and how the booth
-    ///     spells it out on its monitor. Assigning the text moves the caret to the end, so where it
-    ///     was is put back.
+    ///     Forces what is being typed to upper case, which is how a code is stored and shown.
+    ///     Assigning the text moves the caret to the end, so its position is restored afterwards.
     /// </summary>
     private void KeepUpperCase()
     {

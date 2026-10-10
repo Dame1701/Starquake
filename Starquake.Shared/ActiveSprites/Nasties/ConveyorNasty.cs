@@ -30,9 +30,8 @@ internal class ConveyorNasty
     private readonly GameScreenCollection _gameScreens;
 
     /// <summary>
-    ///     Told when this nasty blows itself apart, so the picture can be knocked about. A callback
-    ///     rather than the thing that shakes it, which a nasty has no business holding - the same
-    ///     trade <c>Nasty</c> makes.
+    ///     Called when this nasty blows apart, so the picture can be shaken. A callback rather than
+    ///     the thing that does the shaking, which a nasty has no business holding.
     /// </summary>
     private readonly Action _onExploded;
 
@@ -40,8 +39,8 @@ internal class ConveyorNasty
     private readonly Random _randomNumberGenerator;
 
     /// <summary>
-    ///     The ring it throws as it goes off - the same blast a spiky nasty makes, because these
-    ///     two are the machines and they go off the same way.
+    ///     The ring it throws as it goes off. The same blast a spiky nasty makes, because both are
+    ///     machines and explode the same way.
     /// </summary>
     private readonly Shockwave _shockwave;
 
@@ -181,10 +180,8 @@ internal class ConveyorNasty
             _conveyorNastyDies.Start();
             _shockwave.Trigger(XLocation + SpriteMetrics.HalfSpriteWidth, YLocation + SpriteMetrics.SpriteHeight);
 
-            // One of these is a machine and goes off like one - the same explosion the spiky
-            // nasties throw, out of the same effect. It was the only thing in the game that blew
-            // up without the picture moving: the jolt is Nasty's, and this is not one of those,
-            // so it never reached a nasty on a rail.
+            // A machine, so it explodes like one, using the same effect the spiky nasties throw.
+            // The jolt is raised through the callback, since this is not a Nasty.
             _onExploded();
 
             NastyState = NastyState.Dead;
@@ -198,8 +195,7 @@ internal class ConveyorNasty
 
     /// <summary>
     ///     The corpse fading and shrinking away under the explosion. One logic frame's worth, so it
-    ///     takes the same time on every machine - it used to be done while drawing, which tied it to
-    ///     the display's refresh rate.
+    ///     takes the same time on every machine rather than following the display's refresh rate.
     /// </summary>
     private void FadeAndShrinkTheCorpse()
     {

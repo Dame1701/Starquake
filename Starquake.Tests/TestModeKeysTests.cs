@@ -11,7 +11,7 @@ namespace Starquake.Tests;
 /// <summary>
 ///     F4's two rules - which slot a handed-over core element goes into, and which element it is -
 ///     and F7's one, which is that it hands over nothing Blob already has. The keys themselves need
-///     a keyboard and a running game; these are the parts that do not.
+///     a keyboard and a running game. These are the parts that do not.
 /// </summary>
 public class TestModeKeysTests
 {
@@ -29,8 +29,8 @@ public class TestModeKeysTests
     }
 
     /// <summary>
-    ///     A full inventory has to answer null rather than nought, or the key would overwrite
-    ///     whatever Blob was carrying in his first slot.
+    ///     A full inventory has to answer null rather than zero, or the key would overwrite whatever
+    ///     Blob was carrying in his first slot.
     /// </summary>
     [Fact]
     public void FirstEmptySlot_WhenHeIsFull_IsNothingAtAll()
@@ -55,9 +55,9 @@ public class TestModeKeysTests
     }
 
     /// <summary>
-    ///     F7 hands over the key and the access card, and may be pressed again - to top Blob up
-    ///     after the booth has taken his card, say. Pressing it while he already has one must not
-    ///     spend a second slot on a duplicate: he has four, and the core wants all of them.
+    ///     F7 hands over the key and the access card, and may be pressed again to top Blob up after
+    ///     a booth has taken his card. Pressing it while he already has one must not spend a second
+    ///     slot on a duplicate. He has four slots, and the core wants all of them.
     /// </summary>
     [Fact]
     public void SlotFor_SomethingHeIsAlreadyCarrying_IsNothingAtAll()

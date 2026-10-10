@@ -15,27 +15,24 @@ using Starquake.World;
 
 namespace Starquake.ActiveSprites;
 
-// This wraps multiple nasties
 internal class Nasties
 {
 
     /// <summary>
-    ///     A nasty parked this far off screen is one that has not been given a home yet, so it is
-    ///     skipped rather than drawn or tested.
+    ///     A nasty parked this far off screen has not been given a home yet, so it is skipped rather
+    ///     than drawn or tested.
     /// </summary>
     private const int UnplacedNastyPosition = -1000;
 
-    /// <summary>
-    ///     The size of Blob's shot, for testing it against a nasty.
-    /// </summary>
+    /// <summary>The size of Blob's shot, for testing it against a nasty.</summary>
     private const int FireWidth = TileMetrics.CollisionCellWidth;
 
     /// <inheritdoc cref="FireWidth" />
     private const int FireHeight = TileMetrics.CollisionCellHeight;
 
     /// <summary>
-    ///     The reach of an electricity node's arc, which spans a whole tile across but only a
-    ///     collision cell down.
+    ///     The reach of an electricity node's arc: a whole tile across, but only a collision cell
+    ///     down.
     /// </summary>
     private const int ElectricityArcWidth = TileMetrics.TileWidth;
 
@@ -45,6 +42,7 @@ internal class Nasties
     /// <summary>
     ///     One screen in this many is populated with a single kind of nasty instead of a mixture.
     /// </summary>
+    /// <remarks>It makes some rooms feel as though they belong to something.</remarks>
     private const int SameNastyScreenOdds = 4;
     private readonly Blob _blob;
     private readonly ConveyorNasties _conveyorNasties;
@@ -61,8 +59,8 @@ internal class Nasties
     private int _previousScreenVisited;
 
     /// <summary>
-    ///     Told when one of these blows itself apart, and handed on to each of them. Only the
-    ///     mechanical ones ever raise it.
+    ///     Called when one of these blows apart, and handed on to each of them. Only the mechanical
+    ///     ones ever raise it.
     /// </summary>
     private readonly Action _onNastyExploded;
 
@@ -100,7 +98,7 @@ internal class Nasties
     public void LoadContent()
     {
         // Twice as many as a screen holds, so the ones being left behind can stay as they are while
-        // the next screen's are set up.
+        // the next screen's are set up. See PerformPostChangeScreenActions.
         _nasties.Clear();
         for (int a = 0; a < _nastyCount * 2; a++)
         {
@@ -136,8 +134,8 @@ internal class Nasties
             return;
         }
 
-        // Cleared each frame and set again by whichever nasty is touching him, so letting go of Blob
-        // needs no event of its own.
+        // Cleared each frame and set again by whichever nasty is touching Blob, so letting go needs
+        // no event of its own.
         _blob.TouchedByNasty = false;
 
         if (_input.KeyboardState.IsKeyDown(Keys.R))
@@ -148,8 +146,8 @@ internal class Nasties
             }
         }
 
-        // Only the first nasty touching Blob drains his energy - all of them at once is too quick
-        // and unfair
+        // Only the first nasty touching Blob drains energy. All of them at once is too quick to be
+        // fair.
         bool nastyInteractingWithBlob = false;
         int nastySpawnedCounter = 0;
 
@@ -160,8 +158,8 @@ internal class Nasties
                 nastySpawnedCounter++;
             }
 
-            // A nasty parked off the map has not been given a place on this screen, so there is
-            // nothing to update - see UnplacedNastyPosition.
+            // A nasty parked off the map has no place on this screen, so there is nothing to
+            // update. See UnplacedNastyPosition.
             if (_nasties[a].XPos <= UnplacedNastyPosition ||
                 _nasties[a].YPos <= UnplacedNastyPosition)
             {
@@ -184,8 +182,8 @@ internal class Nasties
     }
 
     /// <summary>
-    ///     Blob's box is pulled in by eight pixels all round so that a near miss is not counted as a
-    ///     touch. Only the first nasty to make contact in a frame raises the event.
+    ///     Tests Blob against the nasties. Blob's box is pulled in all round so a near miss does not
+    ///     count as a touch, and only the first nasty to make contact in a frame raises the event.
     /// </summary>
     private void TouchBlob(int a, ref bool nastyInteractingWithBlob)
     {
@@ -315,9 +313,9 @@ internal class Nasties
     }
 
     /// <summary>
-    ///     Hands the screen's nasties over on a screen change. Walking back the way you came gets the
-    ///     same nasties you left, kept in the second half of the array; going anywhere else gets a
-    ///     fresh batch and puts the ones you left behind into that half.
+    ///     Hands the screen's nasties over on a screen change. Walking back the way you came returns
+    ///     the nasties you left, held in the second half of the array. Going anywhere else creates a
+    ///     fresh batch and moves the ones left behind into that half.
     /// </summary>
     public void PerformPostChangeScreenActions()
     {
@@ -349,9 +347,9 @@ internal class Nasties
     }
 
     /// <summary>
-    ///     Saves the nasties of the screen being left into the second half of the array, where they
-    ///     wait in case Blob comes straight back. Any that were dead are revived first, so a screen
-    ///     is never returned to empty.
+    ///     Saves the departing screen's nasties into the second half of the array, where they wait in
+    ///     case Blob comes straight back. Dead ones are revived first, so a screen is never returned
+    ///     to empty.
     /// </summary>
     private void StoreNastiesFromScreenWeLeft()
     {
@@ -359,9 +357,8 @@ internal class Nasties
         {
             if (_nasties[a].NastyState is NastyState.Dead or NastyState.Shot)
             {
-                // The short wait, not the long one a death would take: this is a screen being put
-                // away, and Blob walking back into it should find it populated rather than find
-                // the nasty he killed still serving out its ten seconds.
+                // The short wait rather than the long one a death takes. Blob walking straight back
+                // in should find the screen populated, not a killed nasty still serving its time.
                 _nasties[a].AwaitFirstAppearance();
             }
 
@@ -370,8 +367,8 @@ internal class Nasties
     }
 
     /// <summary>
-    ///     A new screen's worth of nasties. One screen in four is populated with a single kind rather
-    ///     than a mixture, which is what makes some rooms feel like they belong to something.
+    ///     A new screen's worth of nasties. See <see cref="SameNastyScreenOdds" /> for the chance of
+    ///     a screen getting one kind rather than a mixture.
     /// </summary>
     private void CreateFreshNasties()
     {
@@ -397,8 +394,8 @@ internal class Nasties
     }
 
     /// <summary>
-    ///     A conveyor nasty takes the place of an ordinary one rather than adding to the count, so the
-    ///     first few are switched off.
+    ///     A conveyor nasty replaces an ordinary one rather than adding to the count, so the first
+    ///     few ordinary ones are switched off.
     /// </summary>
     private void DisableNastiesDisplacedByConveyorNasties()
     {

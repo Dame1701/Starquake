@@ -13,15 +13,15 @@ namespace Starquake.ActiveSprites;
 internal static class SpriteOffsets
 {
     /// <summary>
-    ///     Gets a collision offset point for particles based on the direction a sprite is moving, assumes sprite is drawn from
-    ///     top left
+    ///     Where to emit particles from, given the direction a sprite is moving. Assumes the sprite is
+    ///     drawn from its top left.
     /// </summary>
-    /// <param name="direction">Direction the sprite is moving in</param>
-    /// <param name="spriteWidth">Width of the sprite in pixels</param>
-    /// <param name="spriteHeight">Height of the sprite in pixels</param>
+    /// <param name="direction">The direction the sprite is moving in.</param>
+    /// <param name="spriteWidth">The sprite's width in pixels.</param>
+    /// <param name="spriteHeight">The sprite's height in pixels.</param>
     /// <returns>
-    ///     The offset from the sprite's top left corner to the edge or corner it is leading with, or its centre when
-    ///     <see cref="Direction.None" />.
+    ///     The offset from the sprite's top left to the edge or corner it leads with, or its centre
+    ///     for <see cref="Direction.None" />.
     /// </returns>
     public static Point GetSpriteLocationOffset(Direction direction, int spriteWidth, int spriteHeight)
     {
@@ -38,6 +38,6 @@ internal static class SpriteOffsets
             _ => new Point(spriteWidth / 2, spriteHeight / 2)
         };
 
-        // No direction asked for, so the middle of the sprite.
+        // No direction, so the middle of the sprite.
     }
 }

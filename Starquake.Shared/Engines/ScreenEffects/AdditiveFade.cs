@@ -73,7 +73,7 @@ internal class AdditiveFade : ScreenEffectBase
 
         renderer.End();
 
-        // The fade drew the picture itself, so the plain renderer has nothing to add.
+        // The fade drew the picture itself, so the plain renderer has nothing to do.
         return false;
     }
 

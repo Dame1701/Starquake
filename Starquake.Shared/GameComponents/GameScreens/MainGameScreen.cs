@@ -25,8 +25,8 @@ namespace Starquake.GameComponents.GameScreens;
 /// </summary>
 /// <remarks>
 ///     Not a <c>GameScreenBase</c>, which is for the five full-screen pages of text. This is the only
-///     other screen that fades itself up, which makes it look like a sixth of those - see that class for
-///     why it is not, and <see cref="Ramp.Up(int,int,int)" /> for the four lines the two genuinely shared.
+///     other screen that fades itself up, which makes it look like a sixth of those; see that class
+///     for why it is not.
 /// </remarks>
 internal class MainGameScreen : IGameScreen
 {
@@ -35,44 +35,37 @@ internal class MainGameScreen : IGameScreen
     /// </summary>
     private const int ScreenFadeUpSpeed = 32;
 
-    /// <summary>
-    ///     What reaching the planet core is worth.
-    /// </summary>
+    /// <summary>What reaching the planet core is worth.</summary>
     private const int ScoreForReachingCore = 250;
 
-    /// <summary>
-    ///     The stock of platforms and shots the test-mode cheat key hands over.
-    /// </summary>
+    /// <summary>The stock of platforms and shots the test-mode cheat key hands over.</summary>
     private const int TestModeSuppliesRestored = 60;
 
     /// <summary>
-    ///     How far the backdrop is slid sideways per column of the map, so that walking east across a
-    ///     row of screens pans the sky behind them rather than repeating it.
+    ///     How far the backdrop slides sideways per column of the map, so walking east across a row of
+    ///     screens pans the sky behind them rather than repeating it.
     /// </summary>
     private const int BackgroundParallaxStep = 16;
 
-    /// <summary>
-    ///     How strongly the backdrop is tinted in behind the screen.
-    /// </summary>
+    /// <summary>How strongly the backdrop is tinted in behind the screen.</summary>
     private const int BackgroundOpacity = 150;
 
     /// <summary>
-    ///     The starfield behind the planet. Half the planet's parallax, because it is meant to read as
-    ///     further away.
+    ///     The starfield behind the planet. Half the planet's parallax, so it reads as further away.
     /// </summary>
     private const int StarfieldParallaxStep = BackgroundParallaxStep / 2;
 
     /// <summary>
-    ///     How much of the starfield's own painted alpha comes through. It has little to spare - the
-    ///     artwork peaks at about an eighth of full and covers well under one percent of the sheet - so
-    ///     this is a gentle knock back rather than the planet's, and there is not much room below it
-    ///     before the stars stop being there at all.
+    ///     How much of the starfield's own painted alpha comes through. It has little to spare: the
+    ///     artwork peaks at about an eighth of full and covers well under one percent of the sheet, so
+    ///     this is a gentler knock back than the planet's and there is not much room below it before
+    ///     the stars disappear.
     /// </summary>
     private const int StarfieldOpacity = 180;
 
     /// <summary>
-    ///     The colour animations the access booth tiles are given, and how long each runs for. Green
-    ///     for a booth Blob has the code for, red for one he has not.
+    ///     The colour animations the access booth tiles are given, and how long each runs. Green for a
+    ///     booth Blob has the code for, red for one he has not.
     /// </summary>
     private const int TeleporterAnimationLoops = 1;
 
@@ -88,6 +81,10 @@ internal class MainGameScreen : IGameScreen
 
     private readonly RunningGame _game;
 
+    /// <summary>
+    ///     The occasional rumble. It starts itself at random, always runs once as the intro sequence
+    ///     hands over, and is suppressed while a screen effect owns the viewport.
+    /// </summary>
     private readonly ScreenShake _shake = new();
 
     private int _framesPlayed;
@@ -111,26 +108,25 @@ internal class MainGameScreen : IGameScreen
     public int ScreenFade { get; set; }
 
     /// <summary>
-    ///     Whether Blob is under the player's control. The intro sequence flies over the same
-    ///     screen before handing it over, and four separate blocks of this update used to spell that
-    ///     test out.
+    ///     Whether Blob is under the player's control. The intro sequence flies over the same screen
+    ///     before handing it over, so being on this screen is not enough.
     /// </summary>
     private bool GameIsInPlay =>
         !_game.IntroSequence.SequenceRunning ||
         _game.IntroSequence.SequenceStage == IntroSequenceStage.EndPause;
 
     /// <summary>
-    ///     Whether Blob's death is still playing out. Blob is revived the frame after he reaches
-    ///     <see cref="BlobState.Dead" />, so the animation's own state has to keep the routine alive
-    ///     while the explosion fades out - which is why this asks it as well as asking Blob.
+    ///     Whether Blob's death is still playing out. Blob is revived the frame after reaching
+    ///     <see cref="BlobState.Dead" />, so the animation's own state keeps the routine alive while
+    ///     the explosion fades, which is why this asks it as well as Blob.
     /// </summary>
     private bool DeathRoutineRunning
         => _game.Player.State is BlobState.Dead or BlobState.Dying or BlobState.Overloading ||
            _game.BlobKiller.Active;
 
     /// <summary>
-    ///     Whether the world is on screen at all. It is hidden while the intro sequence's caption
-    ///     fades in and out over it.
+    ///     Whether the world is on screen at all. Hidden while the intro sequence's caption fades in
+    ///     and out over it.
     /// </summary>
     private bool WorldIsVisible =>
         _game.IntroSequence.SequenceStage != IntroSequenceStage.CaptionFadeUp &&
@@ -215,7 +211,7 @@ internal class MainGameScreen : IGameScreen
             }
 
             // Last, so Blob's sparks are in front of the shadows down the screen exits rather than
-            // under them.
+            // behind them.
             _game.Player.DrawUpper(ScreenFade);
         }
 
@@ -261,7 +257,7 @@ internal class MainGameScreen : IGameScreen
 
         FloodOllysScreen();
 
-        // Walking onto the screen that carries the core hands over to the core screen entirely. Which
+        // Walking onto the screen carrying the core hands over to the core screen entirely. Which
         // screen that is comes off the map.
         if (_game.GameScreens.ScreenNumber == _game.GameScreens.CoreSite.ScreenNumber)
         {
@@ -273,15 +269,15 @@ internal class MainGameScreen : IGameScreen
             ScreenFadeSpeed = 16;
             _game.Player.TriggerTeleportedAnimation();
 
-            // The room arrives unsettled and shivers itself straight. Blob is not held still for
-            // it - he has just got here and should be able to walk.
+            // The room arrives unsettled and shivers itself straight. Blob is not held still for it,
+            // having just arrived and wanting to walk.
             _context.ScreenEffects.ExecuteScreenEffect(
                 ScreenEffectType.TeleportArrival, -1, TeleportArrivalSettings.Frames, false);
             _game.GameScreens.ColourAnimations.Start((int)ActionTiles.TeleportBooth, TeleporterAnimationLoops); // Animate the teleporter colour
         }
 
         // Flash the booth green or red to say whether the code was taken. Only AccessBoothScreen
-        // sends this, so the triggering screen no longer has to be checked as well.
+        // sends this, so the triggering screen does not need checking as well.
         if (change is ScreenChange.AccessCode(var accepted))
         {
             Color flash = accepted ? new Color(0, ColourLevels.Full, 0) : new Color(ColourLevels.Full, 0, 0);
@@ -295,16 +291,14 @@ internal class MainGameScreen : IGameScreen
     }
 
     /// <summary>
-    ///     How long this game has been going, counted in logic frames rather than off the clock so
-    ///     that it measures time the game actually ran for - a stall, a breakpoint or a DST step
-    ///     does not lengthen it.
+    ///     How long this game has been going, counted in logic frames rather than off the clock, so it
+    ///     measures time the game actually ran for. A stall, a breakpoint or a DST step does not
+    ///     lengthen it.
     /// </summary>
     public TimeSpan GetPlayTime()
         => TimeSpan.FromSeconds((double)_framesPlayed / LogicClock.FramesPerSecond);
 
-    /// <summary>
-    ///     Points for reaching a screen for the first time, once per screen for the whole game.
-    /// </summary>
+    /// <summary>Points for reaching a screen for the first time, once per screen per game.</summary>
     private void ScoreFirstVisitToThisScreen()
     {
         if (_game.GameScreens.CurrentGameScreenData.ScreenVisited)
@@ -321,11 +315,9 @@ internal class MainGameScreen : IGameScreen
     ///     set that has gone has to take one from the set that has arrived.
     /// </summary>
     /// <remarks>
-    ///     This used to set the screen fade to nought as well, which blacked the picture out and
-    ///     ramped it back up over about four tenths of a second - the swap was a blink. The
-    ///     transition is <c>ArtworkCrossfade</c>'s now, and it dissolves one set into the other,
-    ///     which needs the arriving picture at full strength rather than climbing out of black
-    ///     underneath the one being held.
+    ///     The screen fade is deliberately left alone. <c>ArtworkCrossfade</c> owns the transition and
+    ///     dissolves one set into the other, which needs the arriving picture at full strength rather
+    ///     than climbing out of black underneath the one being held.
     /// </remarks>
     public void SpritesChanged()
         => _game.TunnelLiftArrows.PerformPostChangeScreenActions();
@@ -333,8 +325,8 @@ internal class MainGameScreen : IGameScreen
     public void LoadContent() => _game.Nasties.LoadContent();
 
     /// <summary>
-    ///     A new game: the clock, the score, the core, the planet and everything on it back to how
-    ///     they start.
+    ///     A new game: the clock, the score, the core, the planet and everything on it back to how they
+    ///     start.
     /// </summary>
     public void Reset()
     {
@@ -351,10 +343,9 @@ internal class MainGameScreen : IGameScreen
     }
 
     /// <summary>
-    ///     The player's quit key gives up the current game and goes to the game over screen. It
-    ///     lived in <see cref="HandleTestModeKeys" /> under a comment calling it a test, which meant
-    ///     a key the options screen offers in all four layouts only worked while the debug keys
-    ///     were compiled in.
+    ///     The player's quit key gives up the current game and goes to the game over screen. Not a
+    ///     debug key: the options screen offers it in all four layouts, so it must work in a release
+    ///     build.
     /// </summary>
     private void QuitToGameOverIfAsked()
     {
@@ -368,15 +359,15 @@ internal class MainGameScreen : IGameScreen
     }
 
     /// <summary>
-    ///     The debug keys for the main game: J tops up the supplies, T and R the test rumble,
-    ///     W jumps to the game complete screen, C replaces every core element, I restarts the
-    ///     intro and U runs the unstick routine. Compiled out of a release build entirely by
-    ///     <see cref="ConditionalAttribute" />, which removes the calls to this rather than leaving
-    ///     a branch that is never taken, so a release has no path to them at all.
+    ///     The debug keys for the main game: J tops up the supplies, T and R the test rumble, W jumps
+    ///     to the game complete screen, C replaces every core element, I restarts the intro and U runs
+    ///     the unstick routine. Compiled out of a release build by
+    ///     <see cref="ConditionalAttribute" />, which removes the calls rather than leaving a branch
+    ///     never taken.
     ///     <para>
-    ///         The keys that are not debug keys are handled elsewhere and stay live in both: F8
-    ///         swaps the artwork, F9 steps the cathode ray tube on a notch, F10 the backdrops,
-    ///         F12 fullscreen, and the player's own pause and quit keys.
+    ///         The keys that are not debug keys are handled elsewhere and stay live in both builds: F8
+    ///         swaps the artwork, F9 steps the cathode ray tube, F10 the backdrops, F12 fullscreen,
+    ///         plus the player's own pause and quit keys.
     ///     </para>
     /// </summary>
     [Conditional("DEBUG")]
@@ -458,14 +449,13 @@ internal class MainGameScreen : IGameScreen
     ///     Puts the water in on Olly's screen and takes it out again everywhere else.
     /// </summary>
     /// <remarks>
-    ///     The water is the one screen effect that does not run down on its own, so leaving the
-    ///     screen has to end it - and that is why this runs on every screen change rather than
-    ///     only on the one that arrives at him.
+    ///     The water is the one screen effect that does not run down on its own, so leaving the screen
+    ///     has to end it. That is why this runs on every screen change rather than only on the one
+    ///     that arrives at him.
     ///     <para>
-    ///         Nothing is done if something else is already running. An effect that is mid-way
-    ///         through - a tunnel entry, say - would be cut off by this, and the only way onto
-    ///         Olly's screen while one is playing is to walk off the end of it, which ends the
-    ///         effect of its own accord a frame later.
+    ///         Nothing is done if something else is already running, since this would cut off an
+    ///         effect mid-way through. The only way onto Olly's screen while one is playing is to walk
+    ///         off the end of it, which ends the effect a frame later anyway.
     ///     </para>
     /// </remarks>
     private void FloodOllysScreen()
@@ -492,7 +482,7 @@ internal class MainGameScreen : IGameScreen
     }
 
     /// <summary>
-    ///     The smoke from the wreck of Blob's ship, which only exists on the screen it crashed on.
+    ///     The smoke from the wreck of Blob's ship, which exists only on the screen it crashed on.
     /// </summary>
     private void UpdateShipSmoke(GameTime gameTime)
     {
@@ -540,24 +530,18 @@ internal class MainGameScreen : IGameScreen
         _context.ScreenDirectory.Current = GameScreenType.GameOver;
     }
 
-    /// <summary>
-    ///     The occasional rumble. It starts itself at random, always runs once as the intro sequence hands
-    ///     over, and is suppressed while a screen effect owns the viewport.
-    /// </summary>
-    /// <summary>
-    ///     One frame of the ground moving. Whether it moves and by how much is
-    ///     <see cref="ScreenShake" />'s; the rumble and the view port are this screen's, because only it
-    ///     has the sound engine and the screen effects.
-    /// </summary>
-    /// <summary>
-    ///     Knocks the picture about for a moment, for something that has just exploded.
-    /// </summary>
+    /// <summary>Knocks the picture about for a moment, for something that has just exploded.</summary>
     public void JoltScreen() => _shake.Jolt();
 
+    /// <summary>
+    ///     One frame of the ground moving. Whether it moves and by how much is
+    ///     <see cref="ScreenShake" />'s; the rumble and the view port are this screen's, because only
+    ///     it has the sound engine and the screen effects.
+    /// </summary>
     private void ShakeScreen()
     {
         // Null while a screen effect is composing the picture: the view port is its to move, and the
-        // rumble is left exactly as it was rather than stopped.
+        // rumble is left as it was rather than stopped.
         if (_shake.Step(
                 _context.RandomNumberGenerator,
                 _game.IntroSequence.SequenceRunning,
@@ -596,23 +580,15 @@ internal class MainGameScreen : IGameScreen
     ///     only, which is deliberate: going up or down a row leaves them where they were.
     /// </summary>
     /// <remarks>
+    ///     The stars are drawn first and move at half the planet's rate, which is what makes the two
+    ///     read as being at different distances. Both sheets are exactly a playfield in size but their
+    ///     artwork is inset, the planet's occupying roughly the middle 680 pixels, so sliding them by
+    ///     up to <see cref="BackgroundParallaxStep" /> times fifteen never exposes an edge. That inset
+    ///     sets the ceiling on the step.
     ///     <para>
-    ///         The stars are drawn first and move at half the planet's rate, which is what makes the
-    ///         two read as being at different distances. Both sheets are exactly a playfield in size
-    ///         but their artwork is inset - the planet's occupies roughly the middle 680 pixels - so
-    ///         sliding them sideways by up to <see cref="BackgroundParallaxStep" /> times fifteen never
-    ///         exposes an edge. That inset is what sets the ceiling on the step.
-    ///     </para>
-    ///     <para>
-    ///         The fades are worked out in floating point. Written as
-    ///         <c>
-    ///             BackgroundOpacity /
-    ///             ColourLevels.Full * ScreenFade
-    ///         </c>
-    ///         it was an integer division of 150 by 255, which is 0 -
-    ///         so the planet was drawn on every frame at an alpha of nothing, and had been since the
-    ///         first commit in the repository. <see cref="Colours.GetXna4Colour(int,int,int,int)" /> had the right
-    ///         of it all along.
+    ///         The fades must be worked out in floating point.
+    ///         <c>BackgroundOpacity / ColourLevels.Full * ScreenFade</c> is an integer division of 150
+    ///         by 255, which is nought, so the layer is drawn at an alpha of nothing on every frame.
     ///     </para>
     /// </remarks>
     private void DrawBackground()
@@ -630,8 +606,8 @@ internal class MainGameScreen : IGameScreen
 
     /// <summary>
     ///     One layer of the background, at a given offset and strength. The strength is how much of the
-    ///     layer's own painted alpha comes through, so a layer drawn at <see cref="ColourLevels.Full" />
-    ///     is as the artwork has it.
+    ///     layer's own painted alpha comes through, so a layer drawn at
+    ///     <see cref="ColourLevels.Full" /> is exactly as the artwork has it.
     /// </summary>
     private void DrawBackgroundLayer(string spriteName, int xOffset, int opacity)
     {

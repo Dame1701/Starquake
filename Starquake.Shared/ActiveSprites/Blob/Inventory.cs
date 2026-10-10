@@ -11,20 +11,20 @@ using Starquake.SharedLibs;
 namespace Starquake.ActiveSprites;
 
 /// <summary>
-///     The four things Blob can carry, and the one move he can make with them: press down on a
-///     pick-up and the back of the queue is dropped on the floor, everything shuffles along, and
-///     whatever he is standing on goes in at the front.
+///     The four things Blob can carry, and the one move available with them. Pressing down on a
+///     pick-up drops the back of the queue on the floor, shuffles everything along, and takes in
+///     whatever Blob is standing on at the front.
 /// </summary>
 /// <remarks>
-///     A queue rather than a set of slots, which is what makes the game's puzzles what they are: to
-///     get at an item three places back, Blob has to cycle everything in front of it out onto
-///     the floor and pick it all up again.
+///     A queue rather than a set of slots, which is where the game's puzzles come from. Reaching an
+///     item three places back means cycling everything in front of it onto the floor and picking it
+///     all up again.
 /// </remarks>
 internal class Inventory
 {
     /// <summary>
-    ///     How many things Blob can carry. Picking something up pushes the whole inventory along
-    ///     one and drops whatever falls off the end.
+    ///     How many things Blob can carry. Picking something up pushes the whole inventory along one
+    ///     and drops whatever falls off the end.
     /// </summary>
     public const int Capacity = 4;
 
@@ -44,8 +44,8 @@ internal class Inventory
     public Collectables[] Items { get; }
 
     /// <summary>
-    ///     Drops the back of the queue, shuffles along, and picks up whatever Blob is standing
-    ///     on - which is never the item just dropped, even though it lands under his feet.
+    ///     Drops the back of the queue, shuffles along, and picks up whatever Blob is standing on.
+    ///     Never the item just dropped, even though it lands underfoot.
     /// </summary>
     public void SwapWithFloor(Rectangle blob, List<InteractiveItem> pickUpsOnScreen)
     {
@@ -65,9 +65,9 @@ internal class Inventory
     }
 
     /// <summary>
-    ///     Drops whatever is at the back of the inventory onto the floor, snapped to the collision
-    ///     grid, and hands it back so the pick-up pass can tell it apart from anything already there.
+    ///     Drops whatever is at the back onto the floor, snapped to the collision grid.
     /// </summary>
+    /// <returns>The dropped item, so the pick-up pass can tell it from anything already there.</returns>
     private InteractiveItem? DropLastHeldItem(Rectangle blob, List<InteractiveItem> pickUpsOnScreen)
     {
         if (Items[^1] == Collectables.None)
@@ -107,8 +107,8 @@ internal class Inventory
                 continue;
             }
 
-            // The item just dropped is lying on this very square, so picking straight back up would
-            // undo the swap this is the second half of.
+            // The item just dropped lies on this square, and picking it straight back up would undo
+            // the swap.
             if (itemDropped != null && itemDropped == pickUpsOnScreen[a])
             {
                 continue;

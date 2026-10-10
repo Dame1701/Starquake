@@ -20,9 +20,7 @@ namespace Starquake.GameComponents.PresentationScreens;
 
 internal class GameOverScreen : GameScreenBase, IGameScreen
 {
-    /// <summary>
-    ///     Where each of the four figures sits, against the caption to its left.
-    /// </summary>
+    /// <summary>Where each of the four figures sits, against the caption to its left.</summary>
     private const int ScoreXPos = 630;
 
     /// <inheritdoc cref="ScoreXPos" />
@@ -47,14 +45,12 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
     private const int ElementsReplacedYPos = 560;
 
     /// <summary>
-    ///     The grey the score and the time are written in, dimmer than their captions so the figure
-    ///     reads as the answer rather than competing with the label.
+    ///     The grey the score and time are written in, dimmer than their captions so each figure reads
+    ///     as the answer rather than competing with its label.
     /// </summary>
     private const int DimGrey = 150;
 
-    /// <summary>
-    ///     The purple the core element count is written in, matching its own caption.
-    /// </summary>
+    /// <summary>The purple the core element count is written in, matching its own caption.</summary>
     private const int CorePurpleRed = 134;
 
     /// <inheritdoc cref="CorePurpleRed" />
@@ -150,32 +146,24 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
         ScreenFadeSpeed = 5;
     }
 
-    /// <summary>
-    ///     What the player scored, against the SCORE caption.
-    /// </summary>
+    /// <summary>What the player scored, against the SCORE caption.</summary>
     private void DrawPlayerScore()
         => ProportionalNumbers.Draw(ScoreXPos, ScoreYPos, _stats.PlayerScore.ToString("000000"),
             Resources, Colours.GetXna4Colour(DimGrey, DimGrey, DimGrey, (byte)ScreenFade));
 
-    /// <summary>
-    ///     How much of the planet was walked, as a percentage of its screens.
-    /// </summary>
+    /// <summary>How much of the planet was walked, as a percentage of its screens.</summary>
     private void DrawAdventureScore()
         => ProportionalNumbers.Draw(AdventureScoreXPos, AdventureScoreYPos,
             _gameScreens.GetPercentageOfScreensVisited() + "%",
             Resources, Colours.WhiteFadedTo((byte)ScreenFade));
 
-    /// <summary>
-    ///     How long the game lasted, as minutes and seconds.
-    /// </summary>
+    /// <summary>How long the game lasted, as minutes and seconds.</summary>
     private void DrawTimeTaken()
         => ProportionalNumbers.Draw(TimeTakenXPos, TimeTakenYPos,
             _playTime.Minutes + "." + _playTime.Seconds.ToString("00"),
             Resources, Colours.GetXna4Colour(DimGrey, DimGrey, DimGrey, (byte)ScreenFade));
 
-    /// <summary>
-    ///     How many of the nine core elements were put back.
-    /// </summary>
+    /// <summary>How many of the nine core elements were put back.</summary>
     private void DrawElementsReplaced()
         => ProportionalNumbers.Draw(ElementsReplacedXPos, ElementsReplacedYPos,
             _elements.GetElementsReplacedCount().ToString("00"),

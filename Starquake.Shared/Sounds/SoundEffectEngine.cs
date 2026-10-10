@@ -12,9 +12,9 @@ namespace Starquake.Sounds;
 internal class SoundEffectEngine(ContentManager content) : IDisposable
 {
     /// <summary>
-    ///     How long the background rumble waits before its first outing once it is switched on, and
-    ///     between outings after that. A range, picked from at random each time, so the rumble does
-    ///     not fall into a rhythm.
+    ///     How long the background rumble waits before its first outing once switched on, and between
+    ///     outings after that. A range, drawn from at random each time, so it never falls into a
+    ///     rhythm.
     /// </summary>
     private const int FirstSoundMinDelayMs = 1000;
 
@@ -27,9 +27,7 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
     /// <inheritdoc cref="FirstSoundMinDelayMs" />
     private const int NextSoundMaxDelayMs = 20000;
 
-    /// <summary>
-    ///     How loud the background rumble is against everything else.
-    /// </summary>
+    /// <summary>How loud the background rumble is against everything else.</summary>
     private const float PeriodicSoundVolume = 0.5f;
 
     private readonly List<SoundEffectInstanceRecord> _multiInstanceSoundEffectInstances = [];
@@ -37,7 +35,7 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
 
     /// <summary>
     ///     Guards everything to do with the periodic sound timer. Its callback runs on a thread pool
-    ///     thread and re-arms the timer from there, so enabling, disabling and disposing all have to
+    ///     thread and re-arms the timer from there, so enabling, disabling and disposing must all
     ///     agree with the callback about whether the timer is still wanted.
     /// </summary>
     private readonly Lock _periodicSoundLock = new();
@@ -47,25 +45,22 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
     private Guid _periodicBackgroundSoundsId = Guid.Empty;
 
     /// <summary>
-    ///     Set by the timer callback and cleared by <see cref="Update" />, which is the whole of what
-    ///     the callback is allowed to do to this engine. See the note on <see cref="PlayPeriodicSound" />.
+    ///     Set by the timer callback and cleared by <see cref="Update" />. Setting this is the whole
+    ///     of what the callback may do to this engine. See <see cref="PlayPeriodicSound" />.
     /// </summary>
     private int _periodicSoundDue;
 
     /// <summary>
-    ///     One timer for the life of the engine, re-armed rather than replaced. Enabling and
-    ///     disabling the background rumble used to create and throw away a timer each time, which
-    ///     left the callback able to arm a fresh one just after the old one was disposed - a rumble
-    ///     that would not stop, and one still able to fire at content that had already been
-    ///     unloaded on the way out of the game.
+    ///     One timer for the life of the engine, re-armed rather than replaced. Creating a timer per
+    ///     enable lets the callback arm a fresh one just after the old is disposed, giving a rumble
+    ///     that will not stop and can fire at content already unloaded on the way out.
     /// </summary>
     private Timer? _periodicSoundTimer;
 
     /// <summary>
-    ///     Stops the background rumble for good. The sound effect instances themselves belong to the
-    ///     content manager, which disposes them with the rest of the content; the timer is the one
-    ///     thing here that outlives the game if it is not put down, and it would be calling into
-    ///     those instances after they had gone.
+    ///     Stops the background rumble for good. The sound effect instances belong to the content
+    ///     manager, which disposes them with everything else. The timer is the one thing here that
+    ///     outlives the game if not put down, and it would call into those instances after they go.
     /// </summary>
     public void Dispose()
     {
@@ -139,16 +134,14 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
 
     /// <summary>
     ///     Notes that the background rumble is due and asks for the next one. The asking happens
-    ///     either way: skipping it when the sound was still playing is what used to silence the
-    ///     rumble for the rest of the game the first time the timer caught it.
+    ///     either way: skipping it while the sound is still playing silences the rumble for the rest
+    ///     of the game.
     /// </summary>
     /// <remarks>
-    ///     This runs on a thread pool thread, so it plays nothing itself. It used to call PlaySound
-    ///     and GetSoundState from here, both of which walk the instance lists that the game thread
-    ///     rewrites in KillSounds on every screen change. That survived only because
-    ///     "BackgroundSound1" is registered as a single-instance sound: change that one line of
-    ///     ContentManifest to Multi and the callback starts calling List.Add on a list the game
-    ///     thread is enumerating. <see cref="Update" /> does the playing, on the game thread.
+    ///     Runs on a thread pool thread, so it plays nothing itself. Calling <c>PlaySound</c> or
+    ///     <c>GetSoundState</c> here would walk the instance lists that the game thread rewrites in
+    ///     <c>KillSounds</c> on every screen change. <see cref="Update" /> does the playing, on the
+    ///     game thread.
     /// </remarks>
     private void PlayPeriodicSound(object? state)
     {
@@ -156,7 +149,7 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
 
         lock (_periodicSoundLock)
         {
-            // Disabled or disposed while this callback was running - it is not wanted again.
+            // Disabled or disposed while this callback was running, so it is not wanted again.
             if (!_periodicBackgroundSoundsEnabled)
             {
                 return;
@@ -168,8 +161,8 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
 
     /// <summary>
     ///     Plays the background rumble if the timer has asked for it since the last frame, unless the
-    ///     last one is still going. Called once a frame from the game thread, which is the only thread
-    ///     allowed to touch the sound effect instances.
+    ///     last one is still going. Called once a frame from the game thread, the only thread allowed
+    ///     to touch the sound effect instances.
     /// </summary>
     public void Update()
     {
@@ -185,9 +178,9 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
     }
 
     /// <summary>
-    ///     Stops what is playing. Pausing takes everything down; a screen change takes down only the
-    ///     sounds that said they belong to the screen they were started on, so a sound meant to carry
-    ///     across one - the machinery hum, the background rumble - keeps playing.
+    ///     Stops what is playing. Pausing takes everything down. A screen change takes down only the
+    ///     sounds belonging to the screen they started on, so one meant to carry across, such as the
+    ///     machinery hum or the background rumble, keeps playing.
     /// </summary>
     public void KillSounds(bool paused)
     {
@@ -196,9 +189,8 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
     }
 
     /// <summary>
-    ///     Stops every instance in one of the two lists, or only the ones that do not survive a screen
-    ///     change. Both lists hold the same record type and are stopped the same way, so the two of
-    ///     them times the two reasons used to be four copies of this loop.
+    ///     Stops every instance in one of the two lists, or only those that do not survive a screen
+    ///     change.
     /// </summary>
     private static void StopPlayingInstances(
         IEnumerable<SoundEffectInstanceRecord> instances,
@@ -302,8 +294,8 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
     }
 
     /// <summary>
-    ///     The one instance reserved for a sound that may only play once at a time, or null if this
-    ///     sound is not one of those.
+    ///     The instance reserved for a sound that may only play once at a time, or null if this sound
+    ///     is not one of those.
     /// </summary>
     private SoundEffectInstanceRecord? FindSingleInstance(string soundName)
     {
@@ -319,13 +311,13 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
     }
 
     /// <summary>
-    ///     Plays the sound on its own reserved instance. A one-shot is restarted from the beginning if it
+    ///     Plays the sound on its own reserved instance. A one-shot restarts from the beginning if it
     ///     is already going; a looping one is left alone unless it has stopped.
     /// </summary>
     private static Guid PlaySingleInstance(SoundEffectInstanceRecord record, float volume, bool looped)
     {
-        // A one-shot asked for again starts over from the beginning; a looped one is left alone, so
-        // asking for it every frame does not restart it every frame.
+        // A one-shot asked for again starts over. A looped one is left alone, so asking for it every
+        // frame does not restart it every frame.
         if (!looped && record.SoundInstance.State is SoundState.Playing or SoundState.Paused)
         {
             record.SoundInstance.Stop(true);
@@ -342,8 +334,8 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
     }
 
     /// <summary>
-    ///     Plays a sound that may overlap with itself, on a new instance if there is room for one and on
-    ///     the oldest of the existing ones if there is not.
+    ///     Plays a sound that may overlap with itself: on a new instance if there is room, and on the
+    ///     oldest existing one if not.
     /// </summary>
     private Guid PlayMultiInstance(string soundName, float volume)
     {
@@ -373,8 +365,8 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
     }
 
     /// <summary>
-    ///     Takes over the instance that has been playing longest, which is the one a listener is least
-    ///     likely to notice being cut off.
+    ///     Takes over the instance playing longest, which a listener is least likely to notice being
+    ///     cut off.
     /// </summary>
     private static SoundEffectInstanceRecord StealLongestPlaying(List<SoundEffectInstanceRecord> playing)
     {
@@ -390,11 +382,12 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
 
         soundToPlay.SoundInstance.Stop();
 
-        // The record is the one in the master list, so writing through this reference is what keeps
-        // the list's idea of the oldest instance up to date.
-        // Environment.TickCount64 rather than DateTime.Now: this only ever answers which of two
-        // instances started first, and a monotonic counter does that without a timezone conversion
-        // and without a clock step being able to reorder them.
+        // The record is the one in the master list, so writing through this reference keeps the
+        // list's idea of the oldest instance up to date.
+        //
+        // Environment.TickCount64 rather than DateTime.Now, because this only answers which of two
+        // instances started first. A monotonic counter does that without a timezone conversion and
+        // without a clock step reordering them.
         soundToPlay.PlayStart = Environment.TickCount64;
 
         return soundToPlay;

@@ -9,33 +9,29 @@ using Starquake.Structure;
 
 namespace Starquake.Animations;
 
-/// <summary>
-///     Which tiles pulse, and how each one pulses. Six rows of level design, with nothing in them that
-///     is not data.
-/// </summary>
+/// <summary>Which tiles pulse, and how each one pulses.</summary>
 /// <remarks>
-///     A fresh set every call, deliberately. <see cref="ColourFader" /> is where a pulse keeps
-///     its running state - whether it is going, how far through its loop it is, whether it is stopping -
-///     so a shared static set would have the registered animations and the live ones be the same objects.
+///     A fresh set on every call, deliberately. <see cref="ColourFader" /> holds a pulse's running
+///     state, so a shared static set would make the registered animations and the live ones the same
+///     objects.
 /// </remarks>
 internal static class ColourAnimatedTiles
 {
 
     /// <summary>
-    ///     What <see cref="ColourFader.UpperTileToDraw" /> holds for a pulse that has no second
-    ///     tile laid over the first.
+    ///     What <see cref="ColourFader.UpperTileToDraw" /> holds for a pulse with no second tile laid
+    ///     over the first.
     /// </summary>
     private const int NoUpperTile = -1;
 
     /// <summary>
-    ///     The green in the blue tag, which keeps it from reading as pure blue against the dark scenery.
+    ///     The green in the blue tag, which stops it reading as pure blue against dark scenery.
     /// </summary>
     private const int TagBlueGreen = 100;
     /// <summary>
-    ///     Every tile that pulses, ready to register. The booths each fade towards a colour that says what
-    ///     they are - blue for a teleport, green and red for the two halves of an access tunnel - and the
-    ///     three shuttle tags are the yellow, red and blue ones, which is the only place their colour is
-    ///     written down.
+    ///     Every tile that pulses, ready to register. Each booth fades towards a colour that says
+    ///     what it is: blue for a teleport, green and red for the two halves of an access tunnel.
+    ///     This is also the only place the three shuttle tags' colours are written down.
     /// </summary>
     public static IEnumerable<ColourFader> All()
         =>
@@ -65,9 +61,9 @@ internal static class ColourAnimatedTiles
                 Speed = 32
             },
 
-            // The tags draw no upper tile of their own - they pulse the tile that is already
-            // there, and throw a halo from each of the lights on it. The positions are measured
-            // off the artwork: each light is a blob of 28 by 36 at one end of a 128 by 96 cell.
+            // The tags draw no upper tile of their own. They pulse the tile already there and throw
+            // a halo from each light on it. The positions are measured off the artwork: each light
+            // is 28 by 36 at one end of a 128 by 96 cell.
             new()
             {
                 TileNo = (int)ActionTiles.ShuttleTag1,

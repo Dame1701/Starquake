@@ -9,19 +9,16 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     <see cref="BlobFire" /> replaced six near-identical branches, two of which had silently
-///     drifted from the other four - one testing a Y coordinate against the screen's width, the
-///     other forgetting to record that it had reached the screen's edge at all. Neither showed up
-///     in a build and neither is obvious in play, so the cases that pin the axes and the edges
-///     down are the point of this file.
+///     Where Blob's shot gets to, in each of the six directions it can be fired. Most of these pin
+///     the axes and the edges, because a shot measured against the wrong axis, or one that forgets
+///     it has reached the screen's edge, shows up neither in a build nor obviously in play.
 /// </summary>
 public class BlobFireTests
 {
-    // Internal rather than public, here and in the theories below that take one. The parameter
-    // is one of the game's own types, and those are internal now - this project only sees them
-    // through InternalsVisibleTo, which is not enough to let a public signature here name one.
-    // Dropping to internal costs nothing: xunit requires the test class to be public, not its
-    // test methods, so these are still found and still run.
+    // Internal rather than public, here and in every theory below that takes a Direction. The
+    // game's types are internal and this project only sees them through InternalsVisibleTo, which
+    // is not enough to let a public signature name one. It costs nothing: xunit requires the test
+    // class to be public, not its test methods.
     [Theory]
     [InlineData(Direction.Up, 100, 84)]
     [InlineData(Direction.Down, 100, 116)]
@@ -43,8 +40,8 @@ public class BlobFireTests
         Assert.Equal(TestData.MidScreenX, shot.X);
         Assert.Equal(expectedY, shot.Y);
 
-        // It used to record nothing here: the distance counted the horizontal axis whichever way
-        // the shot went, which is what left the point-blank check unable to apply to this one.
+        // A vertical shot counts its distance down the Y axis. Counting X whichever way the shot
+        // went would leave the point-blank check with nothing to measure.
         Assert.Equal(TestData.Speed, shot.DistanceTravelled);
     }
 

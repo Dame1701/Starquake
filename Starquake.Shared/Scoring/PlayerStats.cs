@@ -14,33 +14,25 @@ namespace Starquake.Scoring;
 ///     losing a life costs and gives back, and how fast energy drains while he is walking about.
 /// </summary>
 /// <remarks>
-///     All of this was on <c>StatusPanel</c>, a class named for the strip of HUD that displays it.
-///     That is why <c>Blob</c> read his own supplies off a widget, and it is the reason the panel had
-///     to be handed Blob per call rather than holding one - the cycle <c>DECOUPLING.md</c> broke
-///     without being able to remove.
+///     Nothing here draws, so nothing needs a graphics device. The sound engine is the only
+///     collaborator, and it answers harmlessly for a sound it has never been given, which keeps the
+///     scoring and power-up rules reachable from a test.
 ///     <para>
-///         Nothing here draws, so nothing here needs a graphics device, which is the point: the
-///         scoring and power-up rules are the part of the game most worth testing and were the part
-///         hardest to reach. The sound engine is the only collaborator, and it answers harmlessly for
-///         a sound it has never been given.
-///     </para>
-///     <para>
-///         The two methods that decide Blob's fate - <see cref="DrainEnergy" /> and
-///         <see cref="TakeALife" /> - return what they decided rather than acting on Blob, so this
+///         The two methods deciding Blob's fate, <see cref="DrainEnergy" /> and
+///         <see cref="TakeALife" />, return what they decided rather than acting on Blob, so this
 ///         class does not need to know what Blob is.
 ///     </para>
 /// </remarks>
 internal class PlayerStats
 {
     /// <summary>
-    ///     How long Blob goes between losing a bar of energy, in logic frames - four seconds.
+    ///     How long Blob goes between losing a bar of energy, in logic frames. Four seconds.
     /// </summary>
     private const int EnergyDrainFrames = 4 * LogicClock.FramesPerSecond;
 
     /// <summary>
-    ///     How much of each supply Blob can hold, and how much he starts a life with. The bars on
-    ///     the panel are drawn full at these, so a pick-up that would take a supply over its ceiling
-    ///     is simply capped.
+    ///     How much of each supply Blob can hold, and how much he starts a life with. The panel's bars
+    ///     are drawn full at these, so a pick-up that would take a supply over its ceiling is capped.
     /// </summary>
     private const int MaxFirePower = 128;
 
@@ -53,20 +45,18 @@ internal class PlayerStats
     /// <inheritdoc cref="MaxFirePower" />
     private const int StartingPlatforms = 32;
 
-    /// <summary>
-    ///     How many lives a game starts with.
-    /// </summary>
+    /// <summary>How many lives a game starts with.</summary>
     private const int StartingLives = 4;
 
     /// <summary>
-    ///     The platforms Blob is given when he comes back, if he died with fewer, so that losing a life never
+    ///     The platforms Blob is given on coming back, if he died with fewer, so losing a life never
     ///     strands him somewhere he cannot climb out of.
     /// </summary>
     private const int PlatformsOnRevival = 10;
 
     /// <summary>
-    ///     What each power-up is worth. There are three sizes of each, plus a top-up that gives
-    ///     whichever supply is running lowest and an extra life.
+    ///     What each power-up is worth. Three sizes of each, plus a top-up that gives whichever supply
+    ///     is running lowest and an extra life.
     /// </summary>
     private const int SmallTopUp = 32;
 
@@ -81,7 +71,7 @@ internal class PlayerStats
 
     /// <summary>
     ///     A platform costs twice what a shot does, so the wildcard power-up weighs the platform count
-    ///     double when deciding which supply is running lowest.
+    ///     double when deciding which supply is lowest.
     /// </summary>
     private const int PlatformCost = 2;
 
@@ -148,7 +138,7 @@ internal class PlayerStats
             }
             case BlobAction.GotPowerUp:
             {
-                // The only action that carries anything, and what it carries is the power up's type
+                // The only action that carries anything, and what it carries is the power-up's type.
                 if (data is not int powerUpType)
                 {
                     throw new ArgumentException(
@@ -160,9 +150,7 @@ internal class PlayerStats
         }
     }
 
-    /// <summary>
-    ///     One frame of the slow energy drain, and whether it has just run Blob out.
-    /// </summary>
+    /// <summary>One frame of the slow energy drain, and whether it has just run Blob out.</summary>
     /// <param name="draining">
     ///     Whether Blob is somewhere that drains him. He is safe inside a teleporter and on every
     ///     screen but the main game.
@@ -194,9 +182,7 @@ internal class PlayerStats
         return EnergyLevel <= 0;
     }
 
-    /// <summary>
-    ///     Takes a life, and either revives Blob or ends the game.
-    /// </summary>
+    /// <summary>Takes a life, and either revives Blob or ends the game.</summary>
     /// <returns>True if that was the last life.</returns>
     public bool TakeALife()
     {
@@ -217,8 +203,8 @@ internal class PlayerStats
     }
 
     /// <summary>
-    ///     Gives Blob enough platforms to carry on with, so a death with none left does not revive
-    ///     him somewhere he cannot climb out of. Only tops up - it never takes any away.
+    ///     Gives Blob enough platforms to carry on with, so a death with none left does not revive him
+    ///     somewhere he cannot climb out of. Only tops up; it never takes any away.
     /// </summary>
     private void TopUpPlatforms()
     {
@@ -263,9 +249,9 @@ internal class PlayerStats
     }
 
     /// <summary>
-    ///     The wildcard power up. A life if Blob has none left, otherwise whichever of his three
-    ///     supplies he is shortest of - and platforms are compared at their energy cost rather than
-    ///     their count, since one platform is worth several units of anything else.
+    ///     The wildcard power-up. A life if Blob has none left, otherwise whichever of his three
+    ///     supplies is shortest. Platforms are compared at their energy cost rather than their count,
+    ///     since one platform is worth several units of anything else.
     /// </summary>
     private void TopUpWhateverIsLowest()
     {

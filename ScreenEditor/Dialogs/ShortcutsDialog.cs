@@ -14,9 +14,9 @@ namespace Starquake.ScreenEditor.Dialogs;
 ///     The keyboard and pointer shortcuts, listed.
 /// </summary>
 /// <remarks>
-///     Everything here is also on a tooltip, but tooltips only answer a question somebody already
-///     knew to ask. The shortcuts that make this quick to use - holding Alt to pick a tile, dragging
-///     the world map to scrub through screens - are the ones nobody would think to hover over.
+///     Everything here is on a tooltip too, but a tooltip only answers a question somebody knew to
+///     ask. The shortcuts that make this quick to use, such as holding Alt to pick a tile, are the
+///     ones nobody would think to hover over.
 /// </remarks>
 internal sealed class ShortcutsDialog : Window
 {

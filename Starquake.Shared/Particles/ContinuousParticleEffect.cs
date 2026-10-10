@@ -14,16 +14,14 @@ internal class ContinuousParticleEffect(GraphicsSet graphicsSet, ParticleEffect 
 {
     private readonly MercuryEffect _mercury = new(graphicsSet, mercuryParticleEffect, renderer);
 
-    /// <summary>
-    ///     How many more logic frames the effect emits for, when it has a duration at all.
-    /// </summary>
+    /// <summary>How many more logic frames the effect emits for, if it has a duration.</summary>
     private int _framesLeftToEmit;
 
     /// <summary>
-    ///     How long the effect emits for, or null to emit until something stops it. Counted off in
-    ///     logic frames once <see cref="Start" /> converts it, rather than compared against the
-    ///     clock every frame - the game moves everything by a fixed amount per logic frame, and an
-    ///     effect timed off DateTime.Now drifts against the thing it is drawn on.
+    ///     How long the effect emits for, or null to emit until something stops it. Counted in logic
+    ///     frames once <see cref="Start" /> converts it, rather than compared against the clock each
+    ///     frame: the game moves everything a fixed amount per logic frame, so an effect timed off
+    ///     <c>DateTime.Now</c> drifts against whatever it is drawn on.
     /// </summary>
     public TimeSpan? EffectDuration { get; init; }
 
@@ -32,9 +30,7 @@ internal class ContinuousParticleEffect(GraphicsSet graphicsSet, ParticleEffect 
 
     public event RaiseEffectComplete? ParticleEffectComplete;
 
-    /// <summary>
-    ///     Starts the effect emitting, and keeps it emitting until <see cref="Stop" />.
-    /// </summary>
+    /// <summary>Starts the effect emitting, and keeps it emitting until <see cref="Stop" />.</summary>
     public void Start()
     {
         if (EffectActive)
@@ -78,8 +74,8 @@ internal class ContinuousParticleEffect(GraphicsSet graphicsSet, ParticleEffect 
             }
             else if (_mercury.ActiveParticles == 0)
             {
-                // The emitting is over, but the particles already in flight have to be allowed to
-                // finish before the effect says it is done
+                // The emitting is over, but the particles already in flight must be allowed to finish
+                // before the effect reports itself done.
                 ParticleEffectComplete?.Invoke();
                 EffectActive = false;
             }

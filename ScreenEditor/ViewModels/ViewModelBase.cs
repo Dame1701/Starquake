@@ -11,11 +11,9 @@ namespace Starquake.ScreenEditor.ViewModels;
 ///     The change notification every bindable object in the editor needs, and nothing else.
 /// </summary>
 /// <remarks>
-///     This used to be ReactiveUI's <c>ReactiveObject</c>, but the editor only ever wanted the two
-///     methods below from it: the commands are plain <see cref="RelayCommand" />s and the drawn
-///     surfaces repaint from the session's own events rather than by observing properties. A whole
-///     reactive framework for two methods is a dependency that has to be kept in step with Avalonia
-///     for nothing, so it is these two methods instead.
+///     Two methods rather than a reactive framework. The commands are plain
+///     <see cref="RelayCommand" />s and the drawn surfaces repaint from the session's own events
+///     rather than by observing properties, so there is nothing else to gain from one.
 /// </remarks>
 internal abstract class ViewModelBase : INotifyPropertyChanged
 {
@@ -26,8 +24,7 @@ internal abstract class ViewModelBase : INotifyPropertyChanged
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
     /// <summary>
-    ///     Assigns a backing field and announces the change, doing nothing if the value is already
-    ///     what it was.
+    ///     Assigns a backing field and announces the change. Does nothing if the value is unchanged.
     /// </summary>
     protected void SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
     {

@@ -12,17 +12,16 @@ namespace Starquake.Animations;
 ///     the path bends over as it goes and the ship arrives nose down rather than on a straight line.
 /// </summary>
 /// <remarks>
-///     Seven of <c>IntroSequence</c>'s mutable fields and the eight lines that moved them,
-///     which is the one part of the intro that is arithmetic rather than sound, particles and
-///     drawing. It needs the crash site and nothing else - no resource manager, no graphics device -
-///     so it is the piece of that class a test can reach.
+///     The arithmetic of the intro, separate from its sound, particles and drawing. It needs the
+///     crash site and nothing else, so it can be tested without a resource manager or a graphics
+///     device.
 /// </remarks>
 internal class ShipDescent
 {
     /// <summary>
-    ///     Where the ship comes into view, off the top of the screen and to the left of wherever it
-    ///     is going to land. Unlike the crash site this is not on the map: nothing about it is a
-    ///     place on a screen, it is just far enough out to be off the picture when the fall starts.
+    ///     Where the ship comes into view, off the top of the screen and left of where it lands.
+    ///     Not on the map, unlike the crash site: it is only far enough out to be off the picture
+    ///     when the fall starts.
     /// </summary>
     private const int EntryXPos = 200;
 
@@ -30,15 +29,15 @@ internal class ShipDescent
     private const int EntryYPos = -160;
 
     /// <summary>
-    ///     How many frames the sideways travel is paced over. The drop is not: it starts at a
-    ///     standstill and accelerates, so it takes longer than this and the ship is still moving
-    ///     across when it arrives.
+    ///     How many frames the sideways travel is paced over. The drop is not paced: it starts at a
+    ///     standstill and accelerates, so it takes longer and the ship is still moving across when it
+    ///     arrives.
     /// </summary>
     private const int DescentFrames = 20;
 
     /// <summary>
     ///     How much more of the drop rate the ship picks up each frame, as a fraction of the paced
-    ///     rate - so the first frame does not move down at all and the eleventh moves a full step.
+    ///     rate. The first frame does not move down at all and the eleventh moves a full step.
     /// </summary>
     private const float AccelerationStep = 0.1f;
 
@@ -48,9 +47,7 @@ internal class ShipDescent
     /// </summary>
     private const float FinalApproachHeight = 100;
 
-    /// <summary>
-    ///     The drop rate at the end of the acceleration, which is one whole paced step per frame.
-    /// </summary>
+    /// <summary>The drop rate once acceleration ends: one whole paced step per frame.</summary>
     private const float FullSpeed = 1f;
 
     private readonly float _acrossPerFrame;
@@ -59,7 +56,7 @@ internal class ShipDescent
     private float _acceleration;
 
     /// <param name="rest">
-    ///     Where the ship ends up, as the top left corner it is drawn from rather than the middle of
+    ///     Where the ship ends up, as the top left corner it is drawn from rather than the centre of
     ///     the crash site.
     /// </param>
     public ShipDescent(Point rest)
@@ -77,14 +74,12 @@ internal class ShipDescent
 
     /// <summary>
     ///     Whether the ship has reached the ground. The fall overshoots by up to a frame's travel
-    ///     rather than landing exactly, which is why anything drawing the ship at rest uses
+    ///     rather than landing exactly, so anything drawing the ship at rest must use
     ///     <see cref="Rest" /> and not this frame's <see cref="Position" />.
     /// </summary>
     public bool Landed => Position.Y >= Rest.Y;
 
-    /// <summary>
-    ///     One frame of the fall.
-    /// </summary>
+    /// <summary>One frame of the fall.</summary>
     public void Step()
     {
         Position = new Vector2(

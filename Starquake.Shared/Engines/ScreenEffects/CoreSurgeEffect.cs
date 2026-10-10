@@ -16,8 +16,8 @@ namespace Starquake.Engines.ScreenEffects;
 ///     springs back, with the core's own light thrown out through it.
 /// </summary>
 /// <remarks>
-///     Like <see cref="TeleportArrivalEffect" /> it does not hold the game still - the core room
-///     carries on around it and Blob is free to walk - and like it the picture is drawn by the
+///     Like <see cref="TeleportArrivalEffect" />, it does not hold the game still: the core room
+///     carries on around it and Blob is free to walk. Also like it, the picture is drawn by the
 ///     shader rather than tinted afterwards. <c>Shaders/CoreSurge.fx</c> does the work.
 /// </remarks>
 internal sealed class CoreSurgeEffect : ScreenEffectBase
@@ -29,9 +29,9 @@ internal sealed class CoreSurgeEffect : ScreenEffectBase
     private int _framesRun;
 
     /// <summary>
-    ///     Where in the room the part went in, as a fraction of the playfield. Defaults to the
-    ///     middle, which is where the core is, so an effect triggered without one being set still
-    ///     wrings about something sensible.
+    ///     Where in the room the part went in, as a fraction of the playfield. Defaults to the middle,
+    ///     where the core is, so an effect triggered without one set still wrings about something
+    ///     sensible.
     /// </summary>
     private Vector2 _slot = new(0.5f, 0.5f);
 
@@ -46,9 +46,7 @@ internal sealed class CoreSurgeEffect : ScreenEffectBase
     /// <inheritdoc />
     public override bool HoldsGameplay => false;
 
-    /// <summary>
-    ///     Says where the next surge should be centred, before it is triggered.
-    /// </summary>
+    /// <summary>Says where the next surge should be centred, before it is triggered.</summary>
     public void WringAbout(Vector2 slotInPlayfield) => _slot = slotInPlayfield;
 
     public override void TriggerEffect(RenderViewPort effectSurface, int effectSpeed, int effectDuration)

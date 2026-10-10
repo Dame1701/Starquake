@@ -5,43 +5,29 @@
 namespace Starquake.Constants;
 
 /// <summary>
-///     The shape of the planet. Screens are held in one flat array and stitched into a map by their
-///     index alone - walking off the right edge of a screen adds one, walking off the bottom adds a
-///     whole row - so these two numbers are the only thing that says where a screen sits relative to
-///     its neighbours.
+///     The shape of the planet. Screens live in one flat array and their index alone places them on
+///     the map. Walking off the right edge adds one; walking off the bottom adds a whole row.
 /// </summary>
 public static class WorldMap
 {
     /// <summary>
-    ///     How many screens make up one row of the map. Adding or subtracting this is what moves Blob
-    ///     a screen down or up, and a screen number modulo this is its column.
+    ///     How many screens make up one row. Add or subtract this to move a screen down or up; a
+    ///     screen number modulo this is its column.
     /// </summary>
     public const int ScreensAcross = 16;
 
-    /// <summary>
-    ///     How many screens there are in total.
-    /// </summary>
     public const int ScreenCount = 512;
 
-    /// <summary>
-    ///     How many rows of screens the map is deep.
-    /// </summary>
     public const int ScreensDown = ScreenCount / ScreensAcross;
 
-    /// <summary>
-    ///     The number of the last screen in the map.
-    /// </summary>
     public const int LastScreenNumber = ScreenCount - 1;
 
     /// <summary>
-    ///     The planet core room. It is a screen like any other as far as the map is concerned, but
-    ///     the game has to recognise it by number: it is seeded differently from the rest, and it
-    ///     keeps running while Blob is elsewhere.
+    ///     The planet core room. The map treats it as an ordinary screen, but the game recognises it
+    ///     by number: it is seeded differently, and it keeps running while Blob is elsewhere.
     /// </summary>
     public const int CoreScreenNumber = 199;
 
-    /// <summary>
-    ///     The room next to the core, which is where Blob is put down on leaving it.
-    /// </summary>
+    /// <summary>The room next to the core, where Blob is put down on leaving it.</summary>
     public const int CoreApproachScreenNumber = 198;
 }

@@ -10,14 +10,11 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     <see cref="GameSession" /> holds the pause and the key bindings, which were two properties on
-///     <c>GameEngine</c> whose setters reached out to the sound engine and to Blob. Neither could
-///     be exercised without standing up the whole engine, so neither ever was - and one of them had
-///     a bug in it for the life of the repo.
+///     <see cref="GameSession" /> holds the pause and the key bindings.
 ///     <para>
-///         What these pin is that setting either one announces it, because the engine's reaction is
-///         hung off that announcement: the background rumble follows the pause, and Blob's
-///         control follows the key set. A set that stopped raising would fail silently in play.
+///         What these pin is that setting either one announces it, because the engine's reaction
+///         hangs off that announcement. The background rumble follows the pause, and Blob's control
+///         follows the key set. A setter that stopped raising would fail silently in play.
 ///     </para>
 /// </summary>
 public class GameSessionTests
@@ -65,8 +62,8 @@ public class GameSessionTests
         session.Paused = false;
 
         // Assert
-        // Pinning what it does rather than what it might: the old setter did not compare either,
-        // and the sound engine's enable and disable are both safe to call twice.
+        // The setter does not compare, and the sound engine's enable and disable are both safe to
+        // call twice, so it announces every set rather than only the ones that changed anything.
         Assert.Equal(1, announcements);
     }
 
@@ -135,8 +132,8 @@ public class GameSessionTests
     public void PlayerKeys_TheJoystickLayout_LeavesEveryMovementKeyUnbound()
     {
         // Arrange
-        // This is the shape the engine tests for when it decides to use the joypad. All five have
-        // to be None - the check read Left twice and never Fire until it was corrected.
+        // This is the shape the engine tests for when it decides to use the joypad. All five keys
+        // have to be None, Fire included.
         var joystick = new PlayerKeySet
         {
             Up = Keys.None,

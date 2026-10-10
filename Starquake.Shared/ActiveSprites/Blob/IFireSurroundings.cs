@@ -7,8 +7,8 @@ using Starquake.Core;
 namespace Starquake.ActiveSprites;
 
 /// <summary>
-///     Everything outside itself that a shot in flight has to ask about. <see cref="BlobFire" />
-///     is the stepping and boundary rules and nothing else, which is what lets them be exercised
+///     Everything outside itself a shot in flight has to ask about. Keeping
+///     <see cref="BlobFire" /> to the stepping and boundary rules is what lets them be exercised
 ///     without a screen, a content pipeline or a graphics device.
 /// </summary>
 internal interface IFireSurroundings
@@ -25,8 +25,8 @@ internal interface IFireSurroundings
     int DistanceClear(Direction direction, int x, int y, int width, int height, int distance);
 
     /// <summary>
-    ///     Which way a shot that has just hit scenery goes. Exactly one of these per deflection:
-    ///     the sequence it draws from is shared with the rest of the game.
+    ///     Which way a shot that has just hit scenery goes. Called exactly once per deflection,
+    ///     because the random sequence it draws from is shared with the rest of the game.
     /// </summary>
     FireDeflection ChooseDeflection();
 

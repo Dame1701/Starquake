@@ -9,10 +9,8 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     One frame of a value moving toward a limit and stopping there. This was
-///     <c>ScreenFadeUpTests</c>, which pinned the upward integer half only, because that was the half
-///     <c>ScreenFadeUp</c> had found - four lines written twice. There were eight copies in two
-///     directions and two types, so the function and these tests cover both of each now.
+///     One frame of a value moving toward a limit and stopping there. Both directions and both
+///     types, because the game ramps ints and floats up and down and all four go through here.
 /// </summary>
 public class RampTests
 {

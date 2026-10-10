@@ -5,13 +5,12 @@
 namespace Starquake.Structure;
 
 /// <summary>
-///     Tiles the game has to recognise by number rather than just draw. A screen is stored as a grid
-///     of indices into the tile sheet, so anything Blob can interact with - a platform that can
-///     be taken away, a spike that kills, a tunnel mouth that leads to the next screen - is only
-///     distinguishable by the index that was painted there.
+///     Tiles the game recognises by number rather than only drawing. A screen is stored as a grid of
+///     tile sheet indices, so the index painted at a position is the only thing identifying what
+///     Blob can interact with there.
 ///     <para>
-///         Every one of these is a tile on the sheet. The positions the author marks for the game to
-///         do something at, which are not on it and are never drawn, are <see cref="MarkerTile" />.
+///         These are all real tiles on the sheet. Positions the author marks that are never drawn
+///         are <see cref="MarkerTile" /> instead.
 ///     </para>
 /// </summary>
 public enum ActionTiles
@@ -29,21 +28,20 @@ public enum ActionTiles
     BreakableBridges = 410,
 
     /// <summary>
-    ///     The teleporter booth. Walking into one from the left switches the game to the teleporter
-    ///     screen.
+    ///     The teleporter booth. Walking into one from the left switches to the teleporter screen.
     /// </summary>
     TeleportBooth = 397,
 
     /// <summary>
-    ///     The signpost that tells the player a teleport code. The board is blank artwork and the
-    ///     game writes the code across it, so this is a tile that has to be recognised by number
-    ///     even though walking into it does nothing - see <see cref="Starquake.Structure.Signposts" />.
+    ///     The signpost that shows a teleport code. The artwork is a blank board and the game writes
+    ///     the code across it, so it needs recognising by number even though walking into it does
+    ///     nothing. See <see cref="Starquake.Structure.Signposts" />.
     /// </summary>
     TeleportSignpost = 364,
 
     /// <summary>
-    ///     The two halves of an access booth. Which one Blob walks into decides which side of the
-    ///     booth it appears on, so they are distinct tiles rather than one tile tested twice.
+    ///     The two halves of an access booth. Separate tiles because which one Blob walks into
+    ///     decides which side of the booth Blob appears on.
     /// </summary>
     AccessBoothLeft = 399,
 
@@ -51,16 +49,15 @@ public enum ActionTiles
     AccessBoothRight = 400,
 
     /// <summary>
-    ///     The foot of a tunnel lift, and the one tile on the sheet with nothing drawn on it. It is
-    ///     solid on every cell, so it reads as a wall Blob cannot see - which is the whole trick
-    ///     of a lift shaft. Not a <see cref="MarkerTile" /> for exactly that reason: a marker is
-    ///     passable as well as invisible.
+    ///     The foot of a tunnel lift, and the only tile on the sheet with nothing drawn on it. Every
+    ///     cell is solid, so it acts as an invisible wall. Not a <see cref="MarkerTile" />, because a
+    ///     marker is passable as well as invisible.
     /// </summary>
     TunnelLiftTile = 408,
 
     /// <summary>
-    ///     The body of a tunnel lift - the tiles that carry Blob upwards while he stands under
-    ///     them. <see cref="TunnelLiftTile" /> is one of these too.
+    ///     The body of a tunnel lift, the tiles that carry Blob upwards from underneath.
+    ///     <see cref="TunnelLiftTile" /> is one of these too.
     /// </summary>
     TunnelLiftShaft1 = 409,
 
@@ -71,9 +68,9 @@ public enum ActionTiles
     TunnelLiftShaft3 = 413,
 
     /// <summary>
-    ///     The top of a tunnel lift. Reaching one of these ends the ride.
-    ///     <see cref="TunnelLiftTopAlternate" /> is another of them that only the redrawn artwork
-    ///     has, which is why the original graphics never look for it.
+    ///     The top of a tunnel lift. Reaching one ends the ride.
+    ///     <see cref="TunnelLiftTopAlternate" /> exists only in the redrawn artwork, so the original
+    ///     graphics never look for it.
     /// </summary>
     TunnelLiftTop1 = 407,
 
@@ -87,9 +84,9 @@ public enum ActionTiles
     TunnelLiftTop3 = 415,
 
     /// <summary>
-    ///     The force field across an access booth. Blob can walk through it but cannot use its
-    ///     inventory while standing in one, which is what stops a key being produced from inside the
-    ///     booth it is meant to open.
+    ///     The force field across an access booth. Blob can walk through it but cannot use the
+    ///     inventory while standing in one, which stops a key being produced inside the booth it is
+    ///     meant to open.
     /// </summary>
     AccessForceField = 419
 }

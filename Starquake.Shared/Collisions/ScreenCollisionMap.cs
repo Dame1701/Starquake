@@ -16,47 +16,40 @@ namespace Starquake.Collisions;
 ///     them, then asked, many times a frame.
 /// </summary>
 /// <remarks>
-///     Collision is tested against a finer grid than the tiles are drawn on - see
-///     <see cref="TileMetrics.CollisionCellWidth" /> - so a tile can be solid in part: the top of a
-///     platform, one edge of a wall.
+///     Collision uses a finer grid than tiles are drawn on (<see cref="TileMetrics.CollisionCellWidth" />),
+///     so a tile can be solid in part: the top of a platform, one edge of a wall.
 ///     <para>
-///         The map is in two halves. Everything read off the screen's tiles lands on a 32-pixel
-///         grid by construction, so it is baked into <see cref="_staticLayer" /> - two planes of
-///         cells, one that stops everything and one that stops only the nasties - and a question
-///         about it is an array index rather than a search. Everything else - the items lying on
-///         the screen, a platform Blob has laid, a door's force field, the core's elements - sits
-///         at whatever pixel it was put at and cannot be gridded, so it stays a list. There are
-///         only ever a handful.
+///         The map has two halves. Anything read off the screen's tiles lands on the cell grid by
+///         construction, so it is baked into <see cref="_staticLayer" /> and a question about it is
+///         an array index rather than a search. Everything else, such as the items on the screen, a
+///         platform Blob has laid, a door's force field or the core's elements, sits at whatever
+///         pixel it was put at and stays a list. There are only ever a handful.
 ///     </para>
 ///     <para>
-///         Two planes rather than one kind per cell, because a cell can be both at once: a
-///         teleport booth lays nasty-only cells over the whole of its tile while the tile's own
-///         mask may already have made part of it solid. Collapsing those two into one would quietly
-///         change what <see cref="HasNastyOnlyCellAt" /> answers, and with it where a nasty may be
-///         born.
+///         Two planes, one stopping everything and one stopping only nasties, because a cell can be
+///         both at once: a teleport booth lays nasty-only cells over its whole tile while the tile's
+///         own mask may already have made part of it solid. Collapsing them changes what
+///         <see cref="HasNastyOnlyCellAt" /> answers, and with it where a nasty may be born.
 ///     </para>
 ///     <para>
-///         The bake is kept between rebuilds and reused when the screen's tiles have not changed,
-///         which is nearly every rebuild - a pick-up taken or a bridge dissolving does not move a
-///         tile. Whether they changed is decided by comparing the tiles themselves rather than by
-///         trusting a caller to say so, because they do change under the game's feet: a breakable
-///         bridge sets its tile to -1 and puts it back, and a shuttle pad swaps between two tile
-///         numbers. A cache that depended on being told would be one missed call away from Blob
-///         walking through a wall.
+///         The bake is kept between rebuilds and reused when the tiles have not changed, which is
+///         nearly always. Whether they changed is decided by comparing the tiles rather than trusting
+///         a caller, because they change under the game's feet: a breakable bridge sets its tile to
+///         -1 and back, and a shuttle pad swaps between two tile numbers. A cache that had to be told
+///         would be one missed call away from Blob walking through a wall.
 ///     </para>
 /// </remarks>
 internal class ScreenCollisionMap
 {
     /// <summary>
-    ///     The box a game object is tested against when checking whether a nasty has ended up embedded
-    ///     in one. Half a sprite, not a whole one, and not a collision cell either - it is its own
-    ///     number and was written inline as a bare 32.
+    ///     The box a game object is tested against when checking whether a nasty has ended up
+    ///     embedded in one. Deliberately its own number, neither a whole sprite nor a collision cell.
     /// </summary>
     private const int GameObjectProbeSize = 32;
 
     /// <summary>
-    ///     How many cells across and down an item lying on a screen occupies, and how big each is.
-    ///     An item is drawn at a sprite's size, which is two collision cells each way.
+    ///     How many cells an item lying on a screen occupies each way, and how big each is. An item
+    ///     is drawn at a sprite's size, which is two collision cells each way.
     /// </summary>
     private const int ItemCellsAcross = 2;
 
@@ -80,15 +73,13 @@ internal class ScreenCollisionMap
     /// <inheritdoc cref="CellsAcrossScreen" />
     private const int CellsDownScreen = TileMetrics.PlayAreaHeight / TileMetrics.CollisionCellHeight;
 
-    /// <summary>
-    ///     What a plane holds where it has no cell.
-    /// </summary>
+    /// <summary>What a plane holds where it has no cell.</summary>
     private const int NoCell = -1;
 
     /// <summary>
-    ///     The cells that are not read off the screen's tiles: the items lying on it, and whatever
-    ///     the dynamic sources and <see cref="Add" /> have put there. Rebuilt in full every time,
-    ///     which costs nothing at this length.
+    ///     The cells not read off the screen's tiles: the items on it, plus whatever the dynamic
+    ///     sources and <see cref="Add" /> have put there. Rebuilt in full every time, which costs
+    ///     nothing at this length.
     /// </summary>
     private readonly List<CollisionTile> _dynamicCells = [];
 
@@ -104,8 +95,8 @@ internal class ScreenCollisionMap
     private readonly StaticLayer _staticLayer = new();
 
     /// <summary>
-    ///     Which cells of each tile image are solid, indexed by tile image, then cell across, then cell
-    ///     down. Ships alongside the screen data and is authored in ScreenEditor.
+    ///     Which cells of each tile image are solid, indexed by tile image, then cell across, then
+    ///     cell down. Ships alongside the screen data and is authored in ScreenEditor.
     /// </summary>
     private readonly int[,,] _tileCollisionData;
 
@@ -162,7 +153,7 @@ internal class ScreenCollisionMap
     }
 
     /// <summary>
-    ///     The width and height of a whole screen in pixels - what a nasty is clamped inside.
+    ///     The width and height of a whole screen in pixels, which is what a nasty is clamped inside.
     /// </summary>
     private static int ScreenWidth => TileMetrics.TileWidth * TileMetrics.TilesAcross;
 
@@ -185,25 +176,25 @@ internal class ScreenCollisionMap
     }
 
     /// <summary>
-    ///     Registers something that owns cells of its own - see <see cref="IDynamicCollisionCells" />.
+    ///     Registers something that owns cells of its own. See <see cref="IDynamicCollisionCells" />.
     ///     A source stays registered for the life of the game and is asked about every screen.
     /// </summary>
     public void RegisterDynamicCells(IDynamicCollisionCells source)
         => _dynamicCellSources.Add(source);
 
     /// <summary>
-    ///     Adds a cell to the map that is not read off the screen's tiles - a jump platform Blob has
-    ///     just laid, or the force field across a key-locked door. This is so the cell counts from this
-    ///     frame on; keeping it across a rebuild is the job of the
-    ///     <see cref="IDynamicCollisionCells" /> source that owns it.
+    ///     Adds a cell not read off the screen's tiles, such as a jump platform Blob just laid or the
+    ///     force field across a key-locked door. This makes the cell count from this frame on.
+    ///     Keeping it across a rebuild is the job of the <see cref="IDynamicCollisionCells" /> source
+    ///     that owns it.
     /// </summary>
     public void Add(CollisionTile cell)
         => _dynamicCells.Add(cell);
 
     /// <summary>
     ///     Takes a cell added by <see cref="Add" /> back out, for a platform that has dissolved. Does
-    ///     nothing if a rebuild has already been through, which is why the source stops reporting a
-    ///     cell rather than relying on this.
+    ///     nothing once a rebuild has been through, which is why a source stops reporting a cell
+    ///     rather than relying on this.
     /// </summary>
     public void Remove(CollisionTile cell)
         => _dynamicCells.Remove(cell);
@@ -214,8 +205,7 @@ internal class ScreenCollisionMap
     ///     passes through it and the search carries on looking for something he does hit.
     /// </summary>
     /// <remarks>
-    ///     Which image comes back when the box covers several cells at once is not promised, and was
-    ///     not before either - it was whichever the build happened to have added first. Every caller
+    ///     Which image comes back when the box covers several cells is not promised. Every caller
     ///     asks only whether anything was hit.
     /// </remarks>
     public int CheckRectangles(
@@ -262,8 +252,8 @@ internal class ScreenCollisionMap
     }
 
     /// <summary>
-    ///     How far the mover may travel in a direction before something stops it - its full velocity if
-    ///     nothing does. Nasties are additionally held inside the screen; Blob is not, because
+    ///     How far the mover may travel in a direction before something stops it, or its full
+    ///     velocity if nothing does. Nasties are also held inside the screen; Blob is not, because
     ///     walking off an edge is how he changes screens.
     /// </summary>
     public int CheckCollision(
@@ -337,23 +327,15 @@ internal class ScreenCollisionMap
     ///     or a booth to step into.
     /// </summary>
     /// <remarks>
-    ///     A probe can cover more than one tile, and which of them is reported is the whole
-    ///     question. It used to be whichever came first in a scan along the top row and down, so a
-    ///     tile up and to the left of the one Blob was walking into answered in its place. Going
-    ///     left that is the tile he has just left, and it hid the tunnel mouth he was standing in.
+    ///     A probe can cover more than one tile, and which one is reported is the whole question.
+    ///     Among the tiles the probe reaches, prefer one the mover is actually standing in; otherwise
+    ///     fall back to scan order. <c>CheckTileByObjectTests</c> measures this over every position on
+    ///     every shipped screen, because a wrong answer makes a tunnel, booth or teleporter
+    ///     unreachable.
     ///     <para>
-    ///         The rule now is: among the tiles the probe reaches, prefer one the mover is actually
-    ///         standing in, and otherwise keep the old scan order exactly. That is deliberately the
-    ///         smallest rule that fixes it, and it is additive - measured over every position on
-    ///         every shipped screen, no tunnel, booth or teleporter that used to be reachable stops
-    ///         being reachable, and what is gained is an eight-pixel band at eighteen places where
-    ///         entry was silently impossible. <c>CheckTileByObjectTests</c> holds that measurement.
-    ///     </para>
-    ///     <para>
-    ///         Markers are skipped as well as empty tiles. A marker is a position the author noted
-    ///         rather than scenery - there is no artwork for one and <see cref="Rebuild" /> has
-    ///         always passed over them - but this did not, so a marker dropped beside a tunnel
-    ///         mouth would have answered in its place and quietly stopped the tunnel working.
+    ///         Markers are skipped as well as empty tiles. A marker is an authored position with no
+    ///         artwork, so one dropped beside a tunnel mouth would otherwise answer in its place and
+    ///         stop the tunnel working.
     ///     </para>
     /// </remarks>
     public TileDetected? CheckTileByObject(
@@ -370,7 +352,7 @@ internal class ScreenCollisionMap
             return null;
         }
 
-        // A check along the vertical axis reports where the object's foot sits inside the tile; every
+        // A check along the vertical axis reports where the object's foot sits inside the tile. Every
         // other check reports where its top does.
         bool measureFromFoot = directionToCheck is Direction.Up or Direction.Down;
 
@@ -434,16 +416,16 @@ internal class ScreenCollisionMap
     }
 
     /// <summary>
-    ///     Whether a tile's top surface is solid enough to stand something on - the two middle cells
-    ///     of its top row. The world generator asks before it puts a pick-up somewhere.
+    ///     Whether a tile's top surface is solid enough to stand something on, meaning the two middle
+    ///     cells of its top row. The world generator asks before placing a pick-up.
     /// </summary>
     public bool CanStandOnTopOf(int tileImage)
         => _tileCollisionData[tileImage, 1, 0] == 1 && _tileCollisionData[tileImage, 2, 0] == 1;
 
     /// <summary>
     ///     Whether one cell of one tile image blocks movement. A tile number the collision data does
-    ///     not cover is passable: a marker is numbered past the end of it, and so is anything painted
-    ///     from a sheet larger than the data was built for.
+    ///     not cover is passable, which covers markers and anything painted from a sheet larger than
+    ///     the data was built for.
     /// </summary>
     public bool IsSolid(int tileImage, int cellAcross, int cellDown)
         => tileImage >= 0 &&
@@ -455,30 +437,23 @@ internal class ScreenCollisionMap
     ///     when the probe reaches more than one.
     /// </summary>
     /// <remarks>
-    ///     Two wrong answers were tried first, and both are worth writing down because each looks
-    ///     right until it is measured against the shipped map.
-    ///     <list type="bullet">
-    ///         <item>
-    ///             The nearest tile along the direction of travel. A probe is stretched the way it
-    ///             is going, so a tile it has reached by one pixel is the nearest one, and Blob
-    ///             stepped into a tunnel sixty-three pixels before he touched its mouth.
-    ///         </item>
-    ///         <item>
-    ///             The tile the probe covers most of. The probe is a different shape in each
-    ///             direction - stretched rightwards, shifted leftwards, a thin strip downwards - so
-    ///             ranking by it moved the answer the wrong way going right, and lost the
-    ///             teleporter, the right-hand tunnels and one side of the access booths.
-    ///         </item>
-    ///     </list>
-    ///     Ranking by the mover's own box is what both were reaching for: among the tiles the probe
-    ///     can see, the one Blob is most inside. The probe still decides which tiles are candidates,
-    ///     so each direction keeps its own reach; it no longer decides which of them wins.
+    ///     Ranked by the mover's own box: among the tiles the probe can see, the one Blob is most
+    ///     inside. The probe still decides which tiles are candidates, so each direction keeps its own
+    ///     reach, but it does not decide which candidate wins.
+    ///     <para>
+    ///         Two other rankings look right and are both wrong against the shipped map. Nearest
+    ///         along the direction of travel fails because a probe is stretched the way it is going,
+    ///         so a tile reached by one pixel is the nearest and Blob enters a tunnel 63 pixels early.
+    ///         Most-covered-by-the-probe fails because the probe is a different shape in each
+    ///         direction, which loses the teleporter, the right-hand tunnels and one side of the
+    ///         access booths.
+    ///     </para>
     ///     <para>
     ///         Plain edge arithmetic rather than the centre-distance test, because this ranks
-    ///         candidates rather than deciding whether they are candidates at all;
+    ///         candidates rather than deciding whether they are candidates;
     ///         <see cref="TilesOverlapping" /> has already settled that with the game's own test. A
-    ///         probe that touches nothing the mover is in - the downward strip below his feet -
-    ///         leaves every candidate on nought, and the first in scan order wins as it always did.
+    ///         probe touching nothing the mover is in, such as the strip below Blob's feet, leaves
+    ///         every candidate on nought and the first in scan order wins.
     ///     </para>
     /// </remarks>
     private static int OverlapWith(Rectangle mover, int tileX, int tileY)
@@ -500,9 +475,9 @@ internal class ScreenCollisionMap
     ///     direction that is not checked, which is every diagonal.
     /// </summary>
     /// <remarks>
-    ///     The four straight directions each probe a different shape, which is the only real difference
-    ///     between the five arms this replaced: up and left shift the whole box, down probes a thin
-    ///     strip below the object's feet, and right stretches the box rather than shifting it.
+    ///     Each straight direction probes a different shape: up and left shift the whole box, down
+    ///     probes a thin strip below the object's feet, and right stretches the box rather than
+    ///     shifting it.
     /// </remarks>
     private static Rectangle? ProbeRectangleFor(
         Direction directionToCheck,
@@ -568,8 +543,7 @@ internal class ScreenCollisionMap
                 TileMetrics.CollisionCellHeight));
 
     /// <summary>
-    ///     An item sitting on a screen occupies two cells each way, and nothing but Blob collides
-    ///     with one.
+    ///     An item on a screen occupies two cells each way, and only Blob collides with one.
     /// </summary>
     private static void AddObjectCollisionTiles(List<CollisionTile> collisionMap, InteractiveItem item)
     {
@@ -644,8 +618,8 @@ internal class ScreenCollisionMap
     ///     is how he changes screens.
     /// </summary>
     /// <remarks>
-    ///     This was four arms, one per direction, which were two shapes written twice. Up and left run
-    ///     into nought; down and right run into the screen's own width or height less the mover's size.
+    ///     Two shapes: up and left run into nought, while down and right run into the screen's width
+    ///     or height less the mover's size.
     /// </remarks>
     private static int ClampToScreenBounds(
         Direction playerDirection,
@@ -688,7 +662,7 @@ internal class ScreenCollisionMap
         => CellsWithin(xPos, yPos, xPos + width, yPos + height);
 
     /// <summary>
-    ///     The baked cells the mover could touch at any point of a move - the box it stands in,
+    ///     The baked cells the mover could touch at any point of a move: the box it stands in,
     ///     stretched the way it is going by as far as it is going.
     /// </summary>
     private static IEnumerable<(int X, int Y)> SweptCells(
@@ -725,8 +699,8 @@ internal class ScreenCollisionMap
 
     /// <summary>
     ///     How far one baked cell allows the mover to travel. The nasty-only plane holds the cells
-    ///     the six interior, spike and tunnel-mouth rules lay down, which are game-object cells and
-    ///     so release a nasty that has ended up inside one.
+    ///     laid down by the interior, spike and tunnel-mouth rules. Those are game-object cells, so
+    ///     they release a nasty that has ended up inside one.
     /// </summary>
     private int StaticStepAllowedBy(
         int cellX,
@@ -771,8 +745,8 @@ internal class ScreenCollisionMap
     }
 
     /// <summary>
-    ///     The cells of everything that keeps its own - the jump platforms, the key-locked doors, the
-    ///     core's elements. Last, so that a source can see nothing of the rebuild it is part of.
+    ///     The cells of everything that keeps its own: the jump platforms, the key-locked doors, the
+    ///     core's elements. Added last, so a source sees nothing of the rebuild it is part of.
     /// </summary>
     private void AddDynamicCollisionCells()
     {
@@ -785,9 +759,7 @@ internal class ScreenCollisionMap
         }
     }
 
-    /// <summary>
-    ///     The power-up, the pick-ups and the pyramid lying on this screen.
-    /// </summary>
+    /// <summary>The power-up, the pick-ups and the pyramid lying on this screen.</summary>
     private void AddScreenObjectCollisionTiles()
     {
         InteractiveItem? powerUp = _screens[ScreenNumber].PowerUp;
@@ -814,22 +786,19 @@ internal class ScreenCollisionMap
     /// </summary>
     private sealed class StaticLayer
     {
-        /// <summary>
-        ///     The tile image behind each cell that stops everything, or <see cref="NoCell" />.
-        /// </summary>
+        /// <summary>The tile image behind each cell that stops everything, or <see cref="NoCell" />.</summary>
         public int[,] StopsEveryone { get; } = new int[CellsAcrossScreen, CellsDownScreen];
 
         /// <summary>
-        ///     The cells that stop the nasties and let Blob through - a spike, a booth's inside, a
-        ///     tunnel mouth. Held apart from <see cref="StopsEveryone" /> because one cell can be
-        ///     both.
+        ///     The cells that stop nasties and let Blob through: a spike, a booth's inside, a tunnel
+        ///     mouth. Kept apart from <see cref="StopsEveryone" /> because one cell can be both.
         /// </summary>
         public int[,] StopsNastiesOnly { get; } = new int[CellsAcrossScreen, CellsDownScreen];
 
         /// <summary>
         ///     The screen the bake is of, and the tile images it was baked from. The images are kept
-        ///     so that staleness is decided by looking rather than by being told - see the class
-        ///     remarks on <see cref="ScreenCollisionMap" />.
+        ///     so staleness is decided by looking rather than by being told. See the class remarks on
+        ///     <see cref="ScreenCollisionMap" />.
         /// </summary>
         private int _bakedScreen = -1;
 
@@ -861,8 +830,8 @@ internal class ScreenCollisionMap
                     int tileImage = screen.ScreenTiles[x, y].TileImage;
                     _bakedFrom[x, y] = tileImage;
 
-                    // A marker is a position the author noted, not a tile: it has no artwork and no
-                    // collision mask, and its number is past the end of the mask data entirely.
+                    // A marker is an authored position, not a tile. It has no artwork, no collision
+                    // mask, and a number past the end of the mask data entirely.
                     if (tileImage <= -1 || MarkerTiles.Contains(tileImage))
                     {
                         continue;
@@ -915,8 +884,8 @@ internal class ScreenCollisionMap
         }
 
         /// <summary>
-        ///     Teleporters, access booths and tunnel lifts. Blob walks into these on purpose, so their
-        ///     cells stop everything except him.
+        ///     Teleporters, access booths and tunnel lifts. Blob walks into these deliberately, so
+        ///     their cells stop everything except him.
         /// </summary>
         private void BakeInteriorCells(int x, int y, int tileImage)
         {
@@ -933,8 +902,8 @@ internal class ScreenCollisionMap
                 return;
             }
 
-            // Every cell of the tile, not just the part the artwork fills: nothing may be born on a
-            // lift shaft at all, so there is no need to be exact about its shape.
+            // Every cell of the tile, not just the part the artwork fills. Nothing may be born on a
+            // lift shaft at all, so its shape does not need to be exact.
             for (int cellDown = 0; cellDown < TileMetrics.CollisionCellsDownTile; cellDown++)
             {
                 for (int cellAcross = 0; cellAcross < TileMetrics.CollisionCellsAcrossTile; cellAcross++)
@@ -945,8 +914,8 @@ internal class ScreenCollisionMap
         }
 
         /// <summary>
-        ///     Central spikes and broken bottles. Only the four middle cells, and only against nasties -
-        ///     Blob is meant to be able to walk onto them and die.
+        ///     Central spikes and broken bottles. Only the four middle cells, and only against
+        ///     nasties, because Blob is meant to walk onto them and die.
         /// </summary>
         private void BakeCentralSpikeCells(int x, int y, int tileImage)
         {
@@ -985,8 +954,8 @@ internal class ScreenCollisionMap
         }
 
         /// <summary>
-        ///     A tunnel mouth, which is a column of cells against one side of its tile - the left side
-        ///     for an even-numbered mouth, the right for an odd one.
+        ///     A tunnel mouth: a column of cells against one side of its tile, the left for an
+        ///     even-numbered mouth and the right for an odd one.
         /// </summary>
         private void BakeSecretPassageCells(int x, int y, int tileImage)
         {

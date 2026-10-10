@@ -9,25 +9,17 @@ using Starquake.Structure;
 namespace Starquake.ContentManagement;
 
 /// <summary>
-///     Everything the game loads, and the name each thing loads under. Nothing but a list: a sprite
-///     sheet with its frame size, a sound with how many instances of it may play at once, a particle
+///     Everything the game loads, and the name each thing loads under. A list and nothing else: a
+///     sprite sheet with its frame size, a sound with how many instances may play at once, a particle
 ///     effect, a screen's tile data.
 ///     <para>
-///         This was a hundred and sixty lines of <c>GameEngine</c>, nineteen per cent of the file,
-///         and the only thing any of it touched was the resource manager. It is declaration rather
-///         than behaviour, so it reads better as a list on its own than as a chapter in the middle
-///         of the class that runs the game.
-///     </para>
-///     <para>
-///         The registration <em>order</em> is kept exactly as it was found. <c>ScreenData</c>
-///         is the one place it is known to matter, and the rest was not worth risking to tidy.
+///         The registration <em>order</em> is load-bearing for <c>ScreenData</c> and is otherwise
+///         kept as found rather than tidied.
 ///     </para>
 /// </summary>
 internal static class ContentManifest
 {
-    /// <summary>
-    ///     Registers everything the game loads. The order is the order it was found in.
-    /// </summary>
+    /// <summary>Registers everything the game loads, in the order it was found in.</summary>
     public static void RegisterAll(ResourceManager resources)
     {
         SharedGraphics(resources);
@@ -61,8 +53,8 @@ internal static class ContentManifest
     }
 
     /// <summary>
-    ///     Both resources read the same file, and the reader takes them in the order they are named here,
-    ///     so these two must stay in this order and in this method.
+    ///     Both resources read the same file and the reader takes them in the order named here, so
+    ///     these two must stay in this order and in this method.
     /// </summary>
     private static void PresentationScreenGraphics(ResourceManager resources)
     {
@@ -95,9 +87,8 @@ internal static class ContentManifest
 
     private static void BlobGraphics(ResourceManager resources)
     {
-        // The third of three redraws of Blob. blobNew and blobNewAlt are the earlier two; both are
-        // still in Content and still built by Content.mgcb, so either can be put back by changing
-        // this one line.
+        // The third of three redraws of Blob. blobNew and blobNewAlt are the earlier two, both still
+        // built by Content.mgcb, so either can be put back by changing this one line.
         resources.AddSpriteResource(ResourceNames.Redrawn.BlobSprites, "Graphics\\blobNewAlt2", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
         resources.AddSpriteResource(ResourceNames.Original.BlobSprites, "Graphics\\BlobOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
 

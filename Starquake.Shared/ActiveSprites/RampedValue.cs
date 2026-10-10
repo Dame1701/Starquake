@@ -11,15 +11,9 @@ namespace Starquake.ActiveSprites;
 ///     the fade that crosses between them are all the same thing with different numbers.
 /// </summary>
 /// <remarks>
-///     This was three classes - <c>FloatAdder</c>, <c>FloatSubtractor</c> and
-///     <c>IntegerSubtractor</c> - identical but for a <c>+</c> against a <c>-</c> and a
-///     <c>float</c> against an <c>int</c>. Which way it travels is not something a caller should
-///     have to pick a class for: it follows from the two ends, and all three were constructed with
-///     both ends given.
-///     <para>
-///         The integer one counted colour levels, which are whole numbers no larger than 255 and so
-///         exactly representable - the sequence a fade steps through is the same either way.
-///     </para>
+///     The direction of travel follows from the two ends rather than being chosen by the caller.
+///     Colour levels are whole numbers no larger than 255, so a fade steps through the same sequence
+///     whether it is counted in floats or integers.
 /// </remarks>
 internal class RampedValue
 {
@@ -42,9 +36,8 @@ internal class RampedValue
     public float Value { get; private set; }
 
     /// <summary>
-    ///     The value as a colour level, for the ramps that are fades rather than scales. The ramp
-    ///     cannot leave the range it was given, so this needs no clamp of its own - the one
-    ///     <c>IntegerSubtractor.ByteModifier</c> carried could never fire.
+    ///     The value as a colour level, for ramps that are fades rather than scales. No clamp is
+    ///     needed, because a ramp cannot leave the range it was given.
     /// </summary>
     public int ColourLevel => (int)Value;
 

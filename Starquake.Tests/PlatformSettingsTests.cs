@@ -9,16 +9,16 @@ namespace Starquake.Tests;
 
 /// <summary>
 ///     How far through coming apart a jump platform is. The burning edges can only be judged by
-///     looking at them; this is the one number driving them.
+///     looking at them. This is the one number driving them.
 /// </summary>
 public class PlatformSettingsTests
 {
-    /// <summary>A platform's life and the point in it the dissolve begins, as JumpPlatform sets them.</summary>
+    /// <summary>The point in a platform's life the dissolve begins, as JumpPlatform sets it.</summary>
     private const int DissolveStartsAt = 50;
 
     /// <summary>
-    ///     It stands whole for the first half of its life, and must not promise anything while it
-    ///     does. A platform glowing before it had begun to go would be lying about its state.
+    ///     It stands whole for the first half of its life. A platform that glowed before it began
+    ///     to go would be lying about its state.
     /// </summary>
     [Theory]
     [InlineData(100)]
@@ -50,9 +50,8 @@ public class PlatformSettingsTests
     }
 
     /// <summary>
-    ///     The countdown is not stopped the instant it reaches nought, so the decay has to hold at
-    ///     gone rather than running past it and lifting the slab brighter than it was ever meant
-    ///     to go.
+    ///     The countdown is not stopped the instant it reaches zero, so the decay has to hold at
+    ///     gone. Running past it would light the slab brighter than it is ever meant to go.
     /// </summary>
     [Theory]
     [InlineData(-1)]

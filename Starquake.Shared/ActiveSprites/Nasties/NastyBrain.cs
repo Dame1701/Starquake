@@ -13,27 +13,26 @@ namespace Starquake.ActiveSprites;
 ///     chasing, the spiky nasty's lunge - and the frame of mind that picks between them.
 /// </summary>
 /// <remarks>
-///     A nasty keeps to one frame of mind for a few hundred frames at a time: whether it is chasing
-///     Blob or wandering, which of the six movement types it is using, which way it set off and
-///     how fast. <see cref="Step" /> is one frame of that - reconsider, then move.
+///     A nasty keeps one frame of mind for a few hundred frames at a time: whether it is chasing Blob
+///     or wandering, which of the six movement types it uses, which way it set off and how fast.
+///     <see cref="Step" /> is one frame of that: reconsider, then move.
 ///     <para>
-///         This was 630 lines of <c>Nasty</c>, which is also a lifecycle state machine and draws
-///         itself. It needs the collision map and a <see cref="Random" /> and no graphics at all,
-///         which is what makes "nasties get stuck" reproducible: the counter that notices it and
-///         the release that fixes it are both in here, and both exist because it happens.
+///         Needs the collision map and a <see cref="Random" /> but no graphics, so getting stuck is
+///         reproducible in a test. The counter that notices it and the release that fixes it are both
+///         here, and both exist because it happens.
 ///     </para>
 /// </remarks>
 internal class NastyBrain
 {
     /// <summary>
-    ///     How long a nasty may sit at the same position while chasing before it gives up chasing -
-    ///     a quarter of a second. Something is in the way that it cannot get round.
+    ///     How long a nasty may sit at the same position while chasing before it gives up. A quarter
+    ///     of a second without moving means something is in the way it cannot get round.
     /// </summary>
     private const int StuckFrames = 15;
 
     /// <summary>
-    ///     How long a nasty keeps to one frame of mind before picking another. It chases Blob for
-    ///     longer than it wanders, so the two ranges are different.
+    ///     How long a nasty keeps one frame of mind before picking another. Chasing lasts longer than
+    ///     wandering, so the two ranges differ.
     /// </summary>
     private const int WanderingShortest = 200;
 
@@ -47,7 +46,7 @@ internal class NastyBrain
     private const int ChasingLongest = 700;
 
     /// <summary>
-    ///     A newly born nasty crawls at one pixel a frame for this long before it picks up speed, so
+    ///     A newly born nasty crawls at one pixel a frame for this long before picking up speed, so
     ///     it can be seen coming.
     /// </summary>
     private const int FirstMovementDuration = 90;
@@ -56,14 +55,14 @@ internal class NastyBrain
     private const int FirstMovementSpeed = 1;
 
     /// <summary>
-    ///     The core guardian's fixed speed. It never picks another, unlike every other nasty.
+    ///     The core guardian's fixed speed. Alone among the nasties, it never picks another.
     /// </summary>
     private const int CoreGuardianSpeed = 8;
 
     /// <summary>
-    ///     How fast a nasty moves. A wandering one ambles through a random walk and strides at anything
-    ///     else; a chasing one is the other way about, picking its way on a random walk and charging on
-    ///     the direct movements. Each pair is the range a speed is drawn from.
+    ///     How fast a nasty moves. A wandering one ambles through a random walk and strides at
+    ///     anything else; a chasing one does the opposite, picking its way on a random walk and
+    ///     charging on the direct movements. Each pair is the range a speed is drawn from.
     /// </summary>
     private const int WanderingAmbleSpeed = 2;
 
@@ -89,8 +88,8 @@ internal class NastyBrain
     private const int ChasingChargeSpeedLimit = 10;
 
     /// <summary>
-    ///     How far a nasty set to bounce in steps travels before choosing again. Shorter than the other
-    ///     runs, which is what makes it step rather than bounce.
+    ///     How far a nasty set to bounce in steps travels before choosing again. Shorter than the
+    ///     other runs, which is what makes it step rather than bounce.
     /// </summary>
     private const int ShortestSteppedRun = 8;
 
@@ -116,7 +115,7 @@ internal class NastyBrain
     private const int LongestBouncingRun = 80;
 
     /// <summary>
-    ///     The shortest runs of the lot, which is what makes a nasty on
+    ///     The shortest runs of all, which makes a nasty on
     ///     <see cref="MoveType.RandomMovement" /> scuttle rather than stride.
     /// </summary>
     private const int ShortestScuttle = 1;
@@ -134,10 +133,9 @@ internal class NastyBrain
     private readonly Random _randomNumberGenerator;
 
     /// <summary>
-    ///     State the nasty on the far side of a screen swap starts fresh with, which is why it is
-    ///     outside <see cref="NastyMovementState" />. That was the old behaviour and it is kept:
-    ///     whether each omission was deliberate cannot be told from the code, so the distinction is
-    ///     written down here rather than being an accident of which fields someone remembered.
+    ///     State a nasty starts fresh with after a screen swap, which is why it lives outside
+    ///     <see cref="NastyMovementState" />. Keeping the two apart is what makes the distinction
+    ///     deliberate rather than an accident of which fields get copied.
     /// </summary>
     private bool _firstMovement;
 
@@ -154,9 +152,8 @@ internal class NastyBrain
     private bool _spikeyPause;
 
     /// <summary>
-    ///     Everything a nasty carries across a screen swap. Held as one struct so that copying it
-    ///     copies all of it: <c>CopyFromSource</c> used to assign seventeen fields by hand, two of
-    ///     them twice, and silently dropped whatever had been added since it was written.
+    ///     Everything a nasty carries across a screen swap. One struct, so copying it copies all of
+    ///     it and nothing added later gets silently dropped.
     /// </summary>
     private NastyMovementState _state;
 
@@ -166,7 +163,7 @@ internal class NastyBrain
         _randomNumberGenerator = randomNumberGenerator;
         _state.MoveSpeed = moveSpeed;
 
-        // Not travelling anywhere yet, which is what every movement method reads as "choose one".
+        // Not travelling anywhere yet, which every movement method reads as "choose a direction".
         // Left at the enum's default of Up, the core guardian would never choose at all.
         _state.Direction = Direction.None;
     }
@@ -181,9 +178,7 @@ internal class NastyBrain
 
     public int YPos { get; set; }
 
-    /// <summary>
-    ///     The size a nasty is tested against the collision map at.
-    /// </summary>
+    /// <summary>The size a nasty is tested against the collision map at.</summary>
     private static int NastyWidth => SpriteMetrics.SpriteWidth;
 
     /// <inheritdoc cref="NastyWidth" />
@@ -198,8 +193,8 @@ internal class NastyBrain
     public int MoveSpeed => _state.MoveSpeed;
 
     /// <summary>
-    ///     The whole of what survives a screen swap, copied as one value. Assigning this is what
-    ///     <c>Nasty.CopyFromSource</c> used seventeen lines to attempt.
+    ///     The whole of what survives a screen swap, copied as one value by
+    ///     <c>Nasty.CopyFromSource</c>.
     /// </summary>
     public NastyMovementState State
     {
@@ -208,8 +203,8 @@ internal class NastyBrain
     }
 
     /// <summary>
-    ///     A nasty being born forgets whatever it was thinking and crawls for its first frame of
-    ///     mind, so that it can be seen coming.
+    ///     A nasty being born forgets what it was thinking and crawls through its first frame of
+    ///     mind, so it can be seen coming.
     /// </summary>
     public void StartFirstMovement()
     {
@@ -218,15 +213,13 @@ internal class NastyBrain
         _firstMovement = true;
     }
 
-    /// <summary>
-    ///     Gives up the chase. The core guardian never chases, so becoming one stops it.
-    /// </summary>
+    /// <summary>Gives up the chase. The core guardian never chases, so becoming one stops it.</summary>
     public void StopChasing()
         => _state.AttractedToBlob = false;
 
     /// <summary>
-    ///     Settles how this kind of nasty moves. The guardian bounces, a spiky one lunges, and
-    ///     everything else starts on one of the five types a wandering nasty can draw.
+    ///     Settles how this kind of nasty moves. The guardian bounces, a spiky one lunges, and the
+    ///     rest start on one of the five types a wandering nasty can draw.
     /// </summary>
     public void BecomeA(NastyType nastyType)
     {
@@ -241,8 +234,8 @@ internal class NastyBrain
     }
 
     /// <summary>
-    ///     What a nasty about to be conceived is set moving as. A spiky one starts paused, which is
-    ///     the half of its cycle that makes it beatable.
+    ///     How a nasty about to be conceived is set moving. A spiky one starts paused, which is the
+    ///     half of its cycle that makes it beatable.
     /// </summary>
     public void PrepareForConception()
     {
@@ -262,10 +255,8 @@ internal class NastyBrain
     ///     the next change of mind.
     /// </summary>
     /// <remarks>
-    ///     Moving before reconsidering rather than after is deliberate - it is the order
-    ///     <c>Nasty.Update</c> called these three in, and it matters: the movement methods read what
-    ///     the step just walked into, so reconsidering first would have them acting on the previous
-    ///     frame's collision.
+    ///     Moving before reconsidering is deliberate. The movement methods read what the last step
+    ///     walked into, so reconsidering first would act on the previous frame's collision.
     /// </remarks>
     public void Step(int blobsXPosition, int blobsYPosition)
     {
@@ -275,8 +266,8 @@ internal class NastyBrain
     }
 
     /// <summary>
-    ///     A nasty chasing Blob with something in the way cannot move at all, so it gives up on the
-    ///     chase after a while rather than grinding against the scenery for ever.
+    ///     A nasty chasing Blob with something in the way cannot move, so it gives up the chase after
+    ///     a while rather than grinding against the scenery forever.
     /// </summary>
     private void ReleaseAttractionIfStuck()
     {
@@ -296,8 +287,8 @@ internal class NastyBrain
 
                 if (_nastyStuckCounter > StuckFrames)
                 {
-                    // It has been pinned against something for a while, so it gives up on Blob and
-                    // picks a direction of its own - otherwise it keeps walking into the same wall.
+                    // Pinned against something for a while, so it gives up on Blob and picks its own
+                    // direction rather than walking into the same wall.
                     _state.AttractedToBlob = false;
                     _nastyStuckCounter = 0;
                 }
@@ -373,14 +364,14 @@ internal class NastyBrain
     }
 
     /// <summary>
-    ///     How long a nasty keeps to one frame of mind before picking another, and what it picks: whether
-    ///     it chases Blob or wanders, how it moves, which way it sets off and how fast.
+    ///     Picks the next frame of mind and how long to keep it: whether to chase Blob or wander, how
+    ///     to move, which way to set off and how fast.
     /// </summary>
     private void UpdateFrameOfMind()
     {
         if (NastyType == NastyType.CoreGuardian)
         {
-            // The guardian has one frame of mind and never changes it
+            // The guardian has one frame of mind and never changes it.
             _state.AttractedToBlob = false;
             _state.ConstantMovement = true;
             _state.MovementType = MoveType.DiagonalBouncing;
@@ -418,8 +409,8 @@ internal class NastyBrain
         }
 
         _state.MovementType = _state.AttractedToBlob
-            // The first two move types are the ones that chase, so a nasty that is after Blob draws
-            // only from those.
+            // The first two move types are the chasing ones, so a nasty after Blob draws only from
+            // those.
             ? (MoveType)_randomNumberGenerator.Next(0, 2)
             : (MoveType)_randomNumberGenerator.Next(0, Enum.GetValues<MoveType>().Length - 1);
 
@@ -429,8 +420,8 @@ internal class NastyBrain
 
         if (_firstMovement)
         {
-            // The first move after being born is always slow, so a nasty eases into motion rather
-            // than appearing already at speed.
+            // The first move after being born is always slow, so a nasty eases into motion instead
+            // of appearing already at speed.
             _state.MoveSpeed = FirstMovementSpeed;
             _state.MovementChangeCount = FirstMovementDuration;
             _firstMovement = false;
@@ -438,9 +429,9 @@ internal class NastyBrain
     }
 
     /// <summary>
-    ///     Which way a nasty sets off, which depends on how it has just decided to move: the bouncing
-    ///     types start on a diagonal, the others on a straight direction, and anything else keeps
-    ///     whatever it was already doing.
+    ///     Which way a nasty sets off, given how it has just decided to move. The bouncing types
+    ///     start on a diagonal, the others on a straight direction, and anything else keeps going the
+    ///     way it already was.
     /// </summary>
     private void SetStartingDirection()
     {
@@ -473,10 +464,6 @@ internal class NastyBrain
     ///     a wandering one at everything except the two random walks, where it is slower - it is picking
     ///     its way towards Blob rather than striding about.
     /// </summary>
-    /// <remarks>
-    ///     This was two blocks of four arms in which the last arm repeated the first, so each block is
-    ///     really one test.
-    /// </remarks>
     private int ChooseMoveSpeed()
     {
         bool randomWalk = _state.MovementType is MoveType.RandomMovement or MoveType.RandomMovementsAllDirections;
@@ -500,8 +487,8 @@ internal class NastyBrain
             Direction = RandomDiagonal();
         }
 
-        // Hitting nothing still turns it away vertically, which is what keeps a nasty set going in
-        // steps from running in a straight line for ever.
+        // Hitting nothing still turns it away vertically, which stops a stepping nasty running in a
+        // straight line forever.
         Direction = Reflected(Direction, _state.LastCollisionDirection) ?? TurnedAwayVertically(Direction);
     }
 
@@ -545,7 +532,7 @@ internal class NastyBrain
 
     /// <summary>
     ///     The same diagonal with its up or down half flipped. Anything that is not a diagonal is
-    ///     left alone, which is what the four bouncing ladders used to do by falling off the end.
+    ///     left alone.
     /// </summary>
     private static Direction TurnedAwayVertically(Direction direction)
         => direction switch
@@ -575,10 +562,9 @@ internal class NastyBrain
     }
 
     /// <summary>
-    ///     The same as <see cref="RandomUpDownLeftRight" /> but in much shorter runs, and it forgets
-    ///     which way it was going before it starts chasing. That second difference matters: with no
-    ///     direction to carry in, a nasty level with Blob heads straight at him rather than
-    ///     turning the vertical move into a diagonal.
+    ///     Like <see cref="RandomUpDownLeftRight" /> but in much shorter runs, and it forgets which
+    ///     way it was going before chasing. That second part matters: with no direction carried in, a
+    ///     nasty level with Blob heads straight at him rather than turning the move into a diagonal.
     /// </summary>
     private void RandomMovement(int blobsXPosition, int blobsYPosition)
     {
@@ -613,8 +599,8 @@ internal class NastyBrain
         };
 
     /// <summary>
-    ///     Points a nasty at Blob - diagonally when he is off in both axes - while refusing to
-    ///     turn into whatever it has just walked into.
+    ///     Points a nasty at Blob, diagonally when he is off in both axes, while refusing to turn
+    ///     into whatever it just walked into.
     /// </summary>
     private void HeadTowardsBlob(int blobsXPosition, int blobsYPosition)
     {
@@ -699,10 +685,9 @@ internal class NastyBrain
         };
 
     /// <summary>
-    ///     The three ways towards Blob from whichever quadrant he is in: straight across,
-    ///     straight up or down, and the diagonal between them. The tests are deliberately inclusive
-    ///     on both sides so that a nasty level with Blob in one axis still has a quadrant, which
-    ///     is why this never has to answer "nowhere".
+    ///     The three ways towards Blob from whichever quadrant he is in: straight across, straight up
+    ///     or down, and the diagonal between. The tests are deliberately inclusive on both sides, so
+    ///     a nasty level with Blob in one axis still has a quadrant and this never answers "nowhere".
     /// </summary>
     private Direction[] WaysTowardsBlob(int blobsXPosition, int blobsYPosition)
     {
@@ -734,16 +719,11 @@ internal class NastyBrain
     private Direction RandomAnyDirection() => (Direction)_randomNumberGenerator.Next(0, 8);
 
     /// <summary>
-    ///     A spiky nasty goes at Blob along whichever axis he is further away on, sometimes cuts
-    ///     the corner diagonally instead, and if it has just walked into something it takes the other
-    ///     axis. Then it rests for a while, which is the other half of the
-    ///     <see cref="_spikeyPause" /> cycle and the reason it is beatable.
+    ///     A spiky nasty lunges at Blob along whichever axis he is further away on, sometimes cutting
+    ///     the corner diagonally, and takes the other axis if it has just walked into something. Then
+    ///     it rests, which is the other half of the <see cref="_spikeyPause" /> cycle and the reason
+    ///     it is beatable.
     /// </summary>
-    /// <remarks>
-    ///     This was four blocks of the same 55 lines, one per quadrant Blob can be in, with the
-    ///     directions and the subtractions swapped round. What is left is the two directions that
-    ///     point at him and the diagonal between them.
-    /// </remarks>
     private void SpikeyMovement(int blobsXPosition, int blobsYPosition)
     {
         if (_spikeyPause)
@@ -787,7 +767,7 @@ internal class NastyBrain
             }
         }
 
-        // It walked into something last step, so try a way it has not just been stopped.
+        // It walked into something last step, so try a way it has not just been stopped on.
         if (_state.LastCollisionDirection == acrossToBlob)
         {
             Direction = alongToBlob;
@@ -818,15 +798,11 @@ internal class NastyBrain
                              SpikeyOvershoot;
     }
 
-    /// <summary>
-    ///     Which of up and down points at Blob.
-    /// </summary>
+    /// <summary>Which of up and down points at Blob.</summary>
     /// <remarks>
-    ///     The four quadrant tests this replaced were an if/else chain with inclusive bounds on both
-    ///     sides, so a nasty exactly level with Blob fell into whichever arm matched first: down
-    ///     if it was to his left, up if it was to his right. That is an artefact of the order they
-    ///     were written in rather than anything intended, but tidying it changes what the game does,
-    ///     so it is reproduced here instead.
+    ///     A nasty exactly level with Blob answers down when it is to his left and up when it is to
+    ///     his right. That tie-break is an artefact of the original's ordering rather than a decision,
+    ///     but changing it changes what the game does, so it is reproduced deliberately.
     /// </remarks>
     private Direction VerticalDirectionTowardsBlob(int blobsXPosition, int blobsYPosition)
     {
@@ -857,9 +833,8 @@ internal class NastyBrain
     /// </summary>
     /// <remarks>
     ///     Every direction is a vertical component, a horizontal one, or both. A diagonal is checked
-    ///     vertically first and then horizontally from where that vertical step left it, which is what
-    ///     lets a nasty pressed diagonally against a wall slide along it rather than stopping dead.
-    ///     This was eight blocks and then eight more, one per direction, saying that twice.
+    ///     vertically first and then horizontally from where that step left it, which lets a nasty
+    ///     pressed diagonally against a wall slide along it rather than stopping dead.
     /// </remarks>
     private void MoveNastyOneStep()
     {

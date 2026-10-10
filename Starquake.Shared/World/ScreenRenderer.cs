@@ -22,18 +22,6 @@ namespace Starquake.World;
 ///     Draws one screen of the planet: its two layers of tiles, whatever is lying on it, the force
 ///     field across a key-locked door, and Olly.
 /// </summary>
-/// <remarks>
-///     This was 400 lines of <c>GameScreenCollection</c>, which is named for what it holds rather
-///     than for drawing it. Taking it out leaves that class as the screen array, the screen number,
-///     and the things that answer questions about them, which is what its name has always claimed.
-///     <para>
-///         There is no test payoff here and none was expected: drawing needs a graphics device, so
-///         none of this becomes reachable from a test. What it does buy is a place for the tile
-///         batching to go - <c>DrawLowerTile</c> and <c>DrawUpperTilePatch</c> run 48 times a frame
-///         each and open and close a sprite batch every time, which is phase 5's first item and is
-///         now a change to one class.
-///     </para>
-/// </remarks>
 internal class ScreenRenderer
 {
     /// <summary>
@@ -83,28 +71,27 @@ internal class ScreenRenderer
     private const int RightTunnelMouthSprite = 12;
 
     /// <summary>
-    ///     Olly, the eye that watches Blob from the wall of one particular screen, and the screen
-    ///     it lives on. Its pupil tracks Blob across the room at a fraction of Blob's speed.
-    /// </summary>
-    /// <summary>
     ///     The screen Olly sits on. Public because the water he sits in is a screen effect, and
-    ///     the thing that starts and stops it has to know which screen that is.
+    ///     whatever starts and stops that has to know which screen it is.
     /// </summary>
     public const int OllyScreenNumber = 477;
 
-    /// <inheritdoc cref="OllyScreenNumber" />
+    /// <summary>
+    ///     Where Olly's eyes rest, and how much of Blob's movement they follow. The damping figures
+    ///     are divisors, so a bigger one means less movement.
+    /// </summary>
     private const int OllyEyesRestX = 486;
 
-    /// <inheritdoc cref="OllyScreenNumber" />
+    /// <inheritdoc cref="OllyEyesRestX" />
     private const int OllyEyesRestY = 206;
 
-    /// <inheritdoc cref="OllyScreenNumber" />
+    /// <inheritdoc cref="OllyEyesRestX" />
     private const int OllyGazeCentreX = 350;
 
-    /// <inheritdoc cref="OllyScreenNumber" />
+    /// <inheritdoc cref="OllyEyesRestX" />
     private const int OllyGazeDamping = 44;
 
-    /// <inheritdoc cref="OllyScreenNumber" />
+    /// <inheritdoc cref="OllyEyesRestX" />
     private const int OllyVerticalGazeDamping = 20;
 
     /// <inheritdoc cref="ForceFieldEmitterNames" />
@@ -114,10 +101,8 @@ internal class ScreenRenderer
     private const int BrightFieldQuantity = 10;
 
     /// <summary>
-    ///     What those two quantities fall to once the door has opened. The sheet of light draws
-    ///     back onto the jambs when it opens - see <c>ForceFieldSettings</c> - and crackle left
-    ///     burning down the middle of a gap the field has let go of says the opposite of what the
-    ///     sheet is saying.
+    ///     What those two quantities fall to once the door has opened. The sheet of light draws back
+    ///     onto the jambs as it opens, so crackle left burning down the middle would contradict it.
     /// </summary>
     private const int DimFieldOpenQuantity = 45;
 
@@ -127,7 +112,7 @@ internal class ScreenRenderer
     /// <summary>
     ///     Where the particles are emitted within the doorway: how far in from each jamb the two
     ///     columns of the dim pass sit, how wide each is, and how wide the bright core down the
-    ///     middle is. All in the gap's own pixels, of which there are thirty-two across.
+    ///     middle is. Measured in the gap's own pixels, 32 of them across.
     /// </summary>
     private const int FieldColumnInset = 4;
 
@@ -138,16 +123,15 @@ internal class ScreenRenderer
     private const int FieldCoreWidth = 12;
 
     /// <summary>
-    ///     How solid that ink is. Short of opaque, because the letters the sign used to carry were
-    ///     painted thinly enough to let the board show through them, and ink that covers it
-    ///     completely reads as a label stuck on the sign rather than as part of it.
+    ///     How solid that ink is. Short of opaque, so the board shows through the letters the way it
+    ///     does in the artwork. Fully opaque ink reads as a label stuck on the sign.
     /// </summary>
     private const int SignpostInkLevel = 190;
 
     /// <summary>
-    ///     How far the code is written a second time, to thicken it. The font is a light one at the
-    ///     size a board leaves for five letters, so a single pass comes out finer than the lettering
-    ///     it stands in for; a pass offset by a pixel is the cheapest way to put the weight back.
+    ///     How far the code is offset when it is written a second time, to thicken it. The font is a
+    ///     light one at the size the board leaves, so one pass comes out finer than the lettering it
+    ///     stands in for.
     /// </summary>
     private const int SignpostStrokeWidening = 1;
 
@@ -158,7 +142,7 @@ internal class ScreenRenderer
     private static readonly string[] ForceFieldEmitterNames = ["Emitter01", "Emitter05"];
 
     /// <summary>
-    ///     The grey the dim pass down each jamb is released in. Unlit enough to read as the body of
+    ///     The grey the dim pass down each jamb is released in. Dark enough to read as the body of
     ///     the field rather than as light of its own, which is the bright pass's job.
     /// </summary>
     private static readonly Vector3 DimFieldColour = new(0.4f, 0.4f, 0.4f);
@@ -178,10 +162,6 @@ internal class ScreenRenderer
     private readonly GameScreenData[] _screens;
     private readonly BitmapFont _signpostFont;
 
-    /// <summary>
-    ///     Where Olly's eyes are looking. He is the face in the backdrop, and his eyes follow Blob
-    ///     about the screen.
-    /// </summary>
     private int _ollyEyesX;
     private int _ollyEyesY;
 
@@ -210,8 +190,8 @@ internal class ScreenRenderer
     public int ScreenNumber { get; set; }
 
     /// <summary>
-    ///     The doors on this screen whose force field is drawn. Handed over by the collection, which
-    ///     owns the key-door state itself - this only paints it.
+    ///     The doors on this screen whose force field is drawn. The collection owns the key-door
+    ///     state; this only paints it.
     /// </summary>
     public List<KeyLockDoor>? KeyLockDoors { get; set; }
 
@@ -222,10 +202,9 @@ internal class ScreenRenderer
     ///     green with it rather than switching the moment Blob picks the key up.
     /// </summary>
     /// <remarks>
-    ///     The sheet of light the crackle sits on is <see cref="DrawKeyDoorForceFields" />, which is
-    ///     a draw rather than an update and so cannot be done from here. Both are measured off
-    ///     <see cref="KeyLockDoor.Doorway" />, which is the one place the gap's shape is written
-    ///     down.
+    ///     The sheet of light the crackle sits on is drawn by
+    ///     <see cref="DrawKeyDoorForceFields" />, not from here. Both measure the gap off
+    ///     <see cref="KeyLockDoor.Doorway" />, which is the only place its shape is written down.
     /// </remarks>
     public void AnimateForceField(KeyLockDoor keyLockDoor, GameTime gameTime)
     {
@@ -352,10 +331,8 @@ internal class ScreenRenderer
     ///     there is one <c>Begin</c>/<c>End</c> pair for the forty-eight of them rather than one each.
     /// </summary>
     /// <remarks>
-    ///     A <c>Begin</c>/<c>End</c> pair flushes a draw call, so this used to issue up to 2,880 of
-    ///     them a second to draw at most 48 sprites - batching is the entire purpose of
-    ///     <c>SpriteBatch</c>. The sort mode is <c>Deferred</c>, which draws in the order the calls
-    ///     were made: <c>Immediate</c> would flush per sprite and undo the batching, and
+    ///     The sort mode has to stay <c>Deferred</c>, which draws in the order the calls were made.
+    ///     <c>Immediate</c> flushes a draw call per sprite and undoes the batching, and
     ///     <c>BackToFront</c> sorts by a layer depth none of these set, which leaves the order among
     ///     them unspecified.
     /// </remarks>
@@ -385,8 +362,8 @@ internal class ScreenRenderer
 
     /// <summary>
     ///     The animated patches that sit over a tile - a breakable bridge, a shuttle pad. Drawn after
-    ///     the whole lower layer rather than tile by tile with it, which is the same picture: every
-    ///     animated patch is at most one tile big, so none of them can be covered by a tile drawn later.
+    ///     the whole lower layer rather than tile by tile with it. That gives the same picture,
+    ///     because a patch is never bigger than its tile and so cannot be covered by a later one.
     /// </summary>
     private void DrawTileAnimations(Color colour)
     {
@@ -412,10 +389,9 @@ internal class ScreenRenderer
     ///     are standing on it.
     /// </summary>
     /// <remarks>
-    ///     The code is fitted to the board rather than drawn at a size chosen here: as tall as the
-    ///     board's lettering unless five letters of it would then run off the end, in which case it is
-    ///     the width that decides. That is two sums rather than a constant because the only thing that
-    ///     knows how wide a code comes out is the font, and a signpost has no room to be wrong in.
+    ///     The scale is measured rather than fixed: as tall as the board's lettering, unless the code
+    ///     would then run off the end, in which case the width decides. Only the font knows how wide
+    ///     a code comes out, so it has to be asked.
     /// </remarks>
     private void DrawSignposts(Color colour)
     {
@@ -433,8 +409,7 @@ internal class ScreenRenderer
         int left = Signposts.TextLeft + (int)Math.Round((Signposts.TextWidth - _signpostFont.MeasureString(code).X * scale) / 2);
         int top = Signposts.TextTop - (int)Math.Round(_signpostFont.CapitalTop * scale);
 
-        // The screen's own fade carries the ink's, so that a sign dims with the room it stands in
-        // rather than staying put while everything around it goes dark.
+        // The screen's own fade carries the ink's, so a sign dims with the room it stands in.
         byte ink = (byte)(colour.A * SignpostInkLevel / ColourLevels.Full);
 
         _signpostFont.Begin(BlendState.AlphaBlend);
@@ -549,9 +524,9 @@ internal class ScreenRenderer
     /// </summary>
     /// <remarks>
     ///     One batch for the whole layer, as with the lower one. The patches and the tunnel entrances
-    ///     come off different sheets and so are two passes rather than one interleaved loop; that is
-    ///     the same picture because every patch is drawn on its own row or the one below it, never
-    ///     above, so a tunnel entrance that shares a cell with one was always drawn after it anyway.
+    ///     come off different sheets, so they are two passes rather than one interleaved loop. That
+    ///     gives the same picture, because a patch is drawn on its own row or the one below it and
+    ///     never above, so an entrance sharing a cell with one is still drawn after it.
     /// </remarks>
     private void DrawUpperTilePatches(Color colour)
     {
@@ -581,13 +556,12 @@ internal class ScreenRenderer
     }
 
     /// <summary>
-    ///     Which sprite of the upper tile set covers a given lower tile, and how many rows below that tile
-    ///     it is drawn. This was a fourteen-arm if/else ladder in which every arm made the same draw call
-    ///     with a different sprite number.
+    ///     Which sprite of the upper tile set covers a given lower tile, and how many rows below that
+    ///     tile it is drawn. Null for a tile with no patch.
     /// </summary>
     /// <remarks>
-    ///     The row offset exists for one case. A shadow belongs to the tile above it, so it is recorded
-    ///     against that tile and drawn a row further down; everything else draws in place.
+    ///     The row offset exists for one case. A shadow belongs to the tile above it, so it is
+    ///     recorded against that tile and drawn a row further down. Everything else draws in place.
     /// </remarks>
     private static (int Sprite, int RowOffset)? UpperLayerPatchFor(int tileImage)
     {
@@ -632,9 +606,9 @@ internal class ScreenRenderer
 
     /// <summary>
     ///     The tunnel mouths, which are lower-layer tiles numbered above everything Blob can stand
-    ///     on and so are drawn over the upper layer rather than under it. A marker is numbered above
-    ///     them again and is not a tile at all, which is why being past <see cref="LastCollidableTile" />
-    ///     is no longer enough on its own.
+    ///     on and so are drawn over the upper layer rather than under it. Being past
+    ///     <see cref="LastCollidableTile" /> is not enough on its own, because markers are numbered
+    ///     above the mouths again and are not drawn at all.
     /// </summary>
     private void DrawTunnelEntrances(Color colour)
     {
@@ -690,20 +664,16 @@ internal class ScreenRenderer
     }
 
     /// <summary>
-    ///     The force field across each key-locked door on the screen: the sheet of light first and
-    ///     the crackle over the top of it, which is the order they read in - the sheet is what bars
-    ///     the way and the particles are what it does while it is barring it.
+    ///     The force field across each key-locked door on the screen: the sheet of light first, then
+    ///     the crackle over the top of it.
     /// </summary>
     /// <remarks>
     ///     One batch per door, because the shader is told what state that door is in and a batch
-    ///     holds one set of values. That is at most a handful of batches on the few screens with a
-    ///     door on them, which is why it is affordable here - the same reason <c>DrawHalos</c>
-    ///     gives for the shuttle tags.
+    ///     holds one set of values. No screen has more than a handful of doors, so the cost is small.
     /// </remarks>
     private void DrawKeyDoorForceFields(Color colour)
     {
-        // Only where there is a door. An empty list is not null, so this used to draw the field on
-        // every screen in the game - see GameScreenCollection.Update.
+        // An empty list is not null, so a null check alone would draw the field on every screen.
         if (KeyLockDoors is not { Count: > 0 })
         {
             return;

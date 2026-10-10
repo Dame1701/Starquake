@@ -10,15 +10,14 @@ namespace Starquake.Tests;
 
 /// <summary>
 ///     The two sums behind a nasty draining Blob. The reddening itself can only be judged by
-///     looking at it; what is held here is how far gone his energy is, and whether there is any
+///     looking at it. What is held here is how far gone his energy is, and whether there is any
 ///     drain to draw at all.
 /// </summary>
 public class EnergyDrainSettingsTests
 {
     /// <summary>
-    ///     The counter is the green and blue he has left, so it reads full when he is unhurt - the
-    ///     other way round from what the shader wants, which is the whole reason this is not just
-    ///     the counter divided by its range.
+    ///     The counter is the green and blue he has left, so it reads full when he is unhurt. The
+    ///     shader wants the opposite, which is why this is not just the counter over its range.
     /// </summary>
     [Fact]
     public void DrainFrom_AcrossTheCounter_RunsTheOppositeWayToIt()
@@ -30,8 +29,8 @@ public class EnergyDrainSettingsTests
     }
 
     /// <summary>
-    ///     A drain outside nought to one would push the wash past the colour it is meant to reach,
-    ///     or back out the other side of his own grey.
+    ///     A drain outside zero to one would push the wash past the colour it is meant to reach, or
+    ///     back out the other side of his own grey.
     /// </summary>
     [Theory]
     [InlineData(-50)]
@@ -53,8 +52,8 @@ public class EnergyDrainSettingsTests
     }
 
     /// <summary>
-    ///     The two have to agree about the one case that matters: if there is nothing to draw, the
-    ///     drain must be nought, or the frame the shader is skipped on would jump.
+    ///     The two have to agree about the one case that matters. If there is nothing to draw, the
+    ///     drain must be zero, or the frame the shader is skipped on would jump.
     /// </summary>
     [Fact]
     public void IsDraining_AndDrainFrom_AgreeAboutHimBeingUntouched()

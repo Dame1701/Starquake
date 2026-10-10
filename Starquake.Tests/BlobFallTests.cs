@@ -14,13 +14,12 @@ namespace Starquake.Tests;
 
 /// <summary>
 ///     Fall damage arithmetic: how fast Blob falls, how far he has come, and when the fall is worth
-///     hearing. None of it could be reached before - it was four counters inside <c>Blob.ApplyGravity</c>,
-///     and Blob needs the content pipeline and a graphics device.
+///     hearing.
 /// </summary>
 /// <remarks>
-///     <see cref="BlobFall" /> needs a <see cref="ScreenCollisionMap" /> and nothing else, which is what
-///     makes this possible: the falling sound is the caller's to play, so the fall itself only has to say
-///     whether the drop has become audible.
+///     <see cref="BlobFall" /> needs a <see cref="ScreenCollisionMap" /> and nothing else. The
+///     falling sound is the caller's to play, so the fall itself only has to say whether the drop
+///     has become audible.
 /// </remarks>
 public class BlobFallTests
 {
@@ -57,8 +56,8 @@ public class BlobFallTests
     }
 
     /// <summary>
-    ///     The thing that makes a long drop feel like one: he gains a pixel a frame for every
-    ///     twelve pixels fallen, so the fourth frame of a fall is faster than the first three.
+    ///     What makes a long drop feel like one. Blob gains a pixel a frame for every 12 pixels
+    ///     fallen, so the fourth frame of a fall is faster than the first three.
     /// </summary>
     [Fact]
     public void Step_FallingPastTheSpeedUpDistance_GainsAPixelAFrame()

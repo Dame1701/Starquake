@@ -17,19 +17,12 @@ namespace Starquake.Display;
 ///     not.
 /// </summary>
 /// <remarks>
-///     The catch is unconditional, and that is deliberate even though the plain mode could draw to
-///     the back buffer directly. Two things want the finished picture as a texture rather than as
-///     something already presented: the tube's glow and curve have to sample it, and
-///     <see cref="ArtworkCrossfade" /> has to keep the frame before an artwork swap so it can be
-///     dissolved into the frame after. Making the catch depend on the tube's mode would mean the
-///     crossfade only worked while the tube was on. The cost is one full-screen blit a frame in
-///     the plain mode, against a game that already composes through three render targets.
-///     <para>
-///         What it replaced was a 1280x800 texture of alternating half-black rows blended on top,
-///         which cost four megabytes of video memory to say "every other row is darker" and was
-///         then resampled by the presentation transform's fractional scale into a flat grey wash
-///         with a slow beat running through it.
-///     </para>
+///     The catch is unconditional, deliberately, even though the plain mode could draw to the back
+///     buffer directly. Two things want the finished picture as a texture: the tube's glow and curve
+///     have to sample it, and <see cref="ArtworkCrossfade" /> has to keep the frame before an artwork
+///     swap to dissolve it into the frame after. Making the catch depend on the tube's mode would
+///     leave the crossfade working only while the tube was on. The cost is one full-screen blit a
+///     frame in the plain mode, in a game that already composes through three render targets.
 /// </remarks>
 internal sealed class ScreenPresenter(
     GraphicsDeviceManager graphics,
@@ -43,14 +36,14 @@ internal sealed class ScreenPresenter(
     private RenderTarget2D? _afterglow;
 
     /// <summary>
-    ///     The target the picture is composed into, sized to the back buffer and rebuilt whenever
-    ///     the window changes. Still holding the last frame drawn when this is called, which is
-    ///     what lets <see cref="ArtworkCrossfade" /> take a copy before the clear.
+    ///     The target the picture is composed into, sized to the back buffer and rebuilt whenever the
+    ///     window changes. Still holds the last frame drawn when this is called, which lets
+    ///     <see cref="ArtworkCrossfade" /> take a copy before the clear.
     /// </summary>
     /// <remarks>
-    ///     <c>PreserveContents</c> because the game switches render targets several times a frame -
-    ///     every <c>SelectRenderViewPort</c> does - so the picture has to survive being left and
-    ///     come back to.
+    ///     <c>PreserveContents</c> because the game switches render targets several times a frame,
+    ///     once per <c>SelectRenderViewPort</c>, so the picture must survive being left and returned
+    ///     to.
     /// </remarks>
     public RenderTarget2D EnsureFrame()
     {
@@ -76,9 +69,8 @@ internal sealed class ScreenPresenter(
     ///     Points the device at the frame and empties it, ready for the picture to be drawn.
     /// </summary>
     /// <remarks>
-    ///     The boot screen draws straight to whatever target is current and the screen effect
-    ///     engine has no view ports to compose yet, so this is the only thing that points it at
-    ///     the frame.
+    ///     The boot screen draws straight to whatever target is current and the screen effect engine
+    ///     has no view ports to compose yet, so this is the only thing pointing it at the frame.
     /// </remarks>
     public RenderTarget2D BeginFrame()
     {
@@ -90,13 +82,11 @@ internal sealed class ScreenPresenter(
         return frame;
     }
 
-    /// <summary>
-    ///     Draws the caught frame to the back buffer.
-    /// </summary>
+    /// <summary>Draws the caught frame to the back buffer.</summary>
     /// <param name="sinceLastDraw">
     ///     How long ago the last frame was drawn, for the phosphor to decay by. Real elapsed time:
-    ///     <c>GameHost</c> sets <c>IsFixedTimeStep</c> false and draws once per vertical retrace,
-    ///     so this is what actually passed and not a nominal frame.
+    ///     <c>GameHost</c> sets <c>IsFixedTimeStep</c> false and draws once per vertical retrace, so
+    ///     this is what actually passed rather than a nominal frame.
     /// </param>
     public void Present(TimeSpan sinceLastDraw)
     {
@@ -109,8 +99,8 @@ internal sealed class ScreenPresenter(
 
         Effect? crt = EffectFor(presentation.CrtMode, frame.Width, frame.Height);
 
-        // Opaque, and one texel of the frame to one pixel of the buffer: this is the whole picture
-        // and there is nothing underneath it to blend with.
+        // Opaque, one texel of the frame to one pixel of the buffer. This is the whole picture, with
+        // nothing underneath to blend with.
         _batch.Begin(SpriteSortMode.Deferred, BlendState.Opaque, SamplerState.LinearClamp,
             null, null, crt);
         _batch.Draw(frame, Vector2.Zero, Color.White);
@@ -118,18 +108,16 @@ internal sealed class ScreenPresenter(
     }
 
     /// <summary>
-    ///     Lays what is left of the last picture into this one, and keeps the result to lay into
-    ///     the next. A phosphor goes on glowing after the beam has moved on, which is what makes
-    ///     something crossing the screen leave a short streak behind it rather than appearing in a
-    ///     new place each frame.
+    ///     Lays what is left of the last picture into this one, and keeps the result for the next. A
+    ///     phosphor goes on glowing after the beam has moved on, so something crossing the screen
+    ///     leaves a short streak rather than appearing in a new place each frame.
     /// </summary>
     /// <remarks>
     ///     A feedback buffer: what is kept has already been decayed, so the trail falls away
-    ///     exponentially rather than ending abruptly, and nothing has to remember how many frames
-    ///     ago anything happened.
+    ///     exponentially and nothing has to remember how many frames ago anything happened.
     ///     <para>
-    ///         Done to the picture before it reaches the shader, so the streak is scanned and
-    ///         bowed along with everything else rather than sitting on the glass in front of it.
+    ///         Applied before the picture reaches the shader, so the streak is scanned and bowed with
+    ///         everything else rather than sitting on the glass in front of it.
     ///     </para>
     /// </remarks>
     private void GlowOnFromTheLastFrame(RenderTarget2D frame, TimeSpan sinceLastDraw)
@@ -144,8 +132,8 @@ internal sealed class ScreenPresenter(
         int retained = (int)(CrtSettings.AfterglowRetainedOver(sinceLastDraw.TotalSeconds)
             * ColourLevels.Full);
 
-        // Premultiplied in all four channels: everything the game composes is premultiplied, so a
-        // half-faded picture has to be half in its colours as well as in its alpha.
+        // Premultiplied in all four channels. Everything the game composes is premultiplied, so a
+        // half-faded picture must be half in its colours as well as its alpha.
         graphics.GraphicsDevice.SetRenderTarget(frame);
 
         _batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
@@ -177,7 +165,7 @@ internal sealed class ScreenPresenter(
 
     /// <summary>
     ///     The shader pass for a mode, or null for <see cref="CrtMode.None" />, which wants the
-    ///     picture across unchanged and so wants no shader at all.
+    ///     picture across unchanged and so needs no shader.
     /// </summary>
     private Effect? EffectFor(CrtMode mode, int backBufferWidth, int backBufferHeight)
     {
@@ -202,8 +190,8 @@ internal sealed class ScreenPresenter(
         crt.Parameters["MaskPeriod"].SetValue(CrtSettings.MaskPeriod);
         crt.Parameters["MaskDepth"].SetValue(CrtSettings.MaskDepth);
 
-        // The reach is given in output pixels and the shader samples in texture coordinates, so it
-        // is handed over already divided by the buffer it will be read from.
+        // The reach is given in output pixels but the shader samples in texture coordinates, so it is
+        // divided by the buffer it will be read from.
         crt.Parameters["GlowStep"].SetValue(new Vector2(
             CrtSettings.GlowRadius / backBufferWidth,
             CrtSettings.GlowRadius / backBufferHeight));

@@ -13,9 +13,9 @@ namespace Starquake.Tests;
 ///     The rules a teleport destination code has to follow, and the codes the planet shipped with.
 /// </summary>
 /// <remarks>
-///     A code is authored in the screen editor and carried in the screen data, so these are the only
-///     two things standing between a typo in the editor and a teleporter that cannot be arrived at:
-///     a code the booth's keypad could not spell, and two screens answering to the same one.
+///     A code is authored in the screen editor and carried in the screen data. These are the only
+///     two things standing between a typo there and a teleporter nobody can arrive at: a code the
+///     booth's keypad cannot spell, and two screens answering to the same one.
 /// </remarks>
 public class TeleportCodeTests
 {
@@ -72,9 +72,8 @@ public class TeleportCodeTests
 
     /// <summary>
     ///     A map saved before codes were part of a screen holds two values per screen rather than
-    ///     three. It still has to load, because that is every copy of the map that exists until the
-    ///     editor saves one again - and when it does load, the screen has no code rather than a
-    ///     broken one.
+    ///     three. It still has to load, because that is every copy of the map until the editor saves
+    ///     one again, and the screen has to come back with no code rather than a broken one.
     /// </summary>
     [Fact]
     public void TeleportCode_AScreenSavedBeforeCodesWereStored_LoadsWithoutOne()

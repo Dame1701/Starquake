@@ -5,9 +5,9 @@
 namespace Starquake.Scoring;
 
 /// <summary>
-///     The power-ups, in the order the tile sheet holds them - the world generator draws one of
-///     these with <c>Next(8)</c> and the number reaches <see cref="PlayerStats" /> as the sprite it
-///     was drawn as. They were eight named ints compared against in an if/else chain.
+///     The power-ups, in the order the tile sheet holds them. The world generator draws one with
+///     <c>Next(8)</c> and the number reaches <see cref="PlayerStats" /> as the sprite it was drawn
+///     as, so the order is load-bearing.
 /// </summary>
 internal enum PowerUp
 {

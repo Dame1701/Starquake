@@ -10,14 +10,12 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     The transform that puts the composed picture on the back buffer. It used to be computed
-///     inside <c>GameEngine</c> from <c>GraphicsDevice.PresentationParameters</c>, so checking it
-///     meant standing up a graphics device; on <see cref="PresentationSettings" /> it is
-///     arithmetic on two integers.
+///     The transform that puts the composed picture on the back buffer. It is arithmetic on two
+///     integers, so none of this needs a graphics device.
 ///     <para>
-///         What these pin is the promise the game is composed on: the scale is uniform, so the
-///         picture is never stretched whatever shape the window is, and whatever is left over
-///         becomes an even border on the two opposite sides rather than being taken off one.
+///         These pin the promise the game is composed on. The scale is uniform, so the picture is
+///         never stretched whatever shape the window is, and whatever is left over becomes an even
+///         border on the two opposite sides rather than being taken off one.
 ///     </para>
 /// </summary>
 public class PresentationSettingsTests
@@ -157,9 +155,7 @@ public class PresentationSettingsTests
 
     private static class TestData
     {
-        /// <summary>
-        ///     The fixed size the game composes at, which every scale here is measured against.
-        /// </summary>
+        /// <summary>The fixed size the game composes at, which every scale here is measured against.</summary>
         public const int CompositionWidth = CompositionSize.Width;
 
         /// <inheritdoc cref="CompositionWidth" />

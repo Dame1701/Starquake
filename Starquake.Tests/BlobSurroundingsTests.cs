@@ -11,15 +11,13 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     The four readings Blob decides almost everything about his surroundings from. These were
-///     four fields on <c>Blob</c> written by one method and read by eight, so none of it could be
-///     reached without Blob, and Blob needs the content pipeline and a graphics device.
+///     The four readings Blob decides almost everything about his surroundings from.
 /// </summary>
 /// <remarks>
-///     The probe reports which tile <em>image</em> is in the way, not whether it is solid - the
-///     collision mask is never consulted. That is deliberate and is what the callers need: they switch
-///     on the tile number to find a shuttle pad or a tunnel mouth, both of which are walked into rather
-///     than blocked by. So these tests place tiles and never set a collision cell.
+///     The probe reports which tile <em>image</em> is in the way, not whether it is solid. The
+///     collision mask is never consulted, deliberately: callers switch on the tile number to find a
+///     shuttle pad or a tunnel mouth, both of which are walked into rather than blocked by. So these
+///     tests place tiles and never set a collision cell.
 /// </remarks>
 public class BlobSurroundingsTests
 {
@@ -63,9 +61,9 @@ public class BlobSurroundingsTests
     }
 
     /// <summary>
-    ///     The reason <c>Around</c> takes a separate height to probe downwards with. Blob riding the
-    ///     shuttle is a shuttle's height taller, and that height is underneath him, so the ground has to
-    ///     be looked for from his own feet - otherwise he reads the floor through the shuttle.
+    ///     Why <c>Around</c> takes a separate height to probe downwards with. Blob riding the
+    ///     shuttle is a shuttle's height taller and that height is underneath him, so the ground has
+    ///     to be looked for from his own feet, or he reads the floor through the shuttle.
     /// </summary>
     [Fact]
     public void Around_AShorterReachBelow_StopsBeforeTheFloorTheFullHeightWouldFind()

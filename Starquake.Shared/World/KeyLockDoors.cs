@@ -19,24 +19,19 @@ namespace Starquake.World;
 ///     stepped once a logic frame, and gone again when Blob leaves.
 /// </summary>
 /// <remarks>
-///     This was the planet's fourth job. <c>GameScreenCollection</c> is the map - the screens, the
-///     landing site, the core, what is where - and it also held the one list of mutable door state
-///     in the codebase, the five methods that stepped it, and the
-///     <see cref="IDynamicCollisionCells" /> implementation that existed solely to hand those
-///     doors' cells to the collision map. That last point is what settles it: the planet's whole
-///     reason for implementing that interface was these doors, so taking them out takes the
-///     interface off the planet with them.
+///     Separate from <c>GameScreenCollection</c>, which is the map itself: the screens, the landing
+///     site, the core and what is where. The doors are the only mutable state among that, and they
+///     are the only reason anything there would need <see cref="IDynamicCollisionCells" />.
 ///     <para>
-///         It is the third thing to own cells this way, after <c>JumpPlatforms</c> and
-///         <c>PlanetCoreScreen</c>, and it registers itself the same way they do.
+///         The third thing to own cells this way, after <c>JumpPlatforms</c> and
+///         <c>PlanetCoreScreen</c>, and it registers itself as they do.
 ///     </para>
 /// </remarks>
 internal sealed class KeyLockDoors : IDynamicCollisionCells
 {
     /// <summary>
-    ///     How loudly a key-locked door says it has given way. The booth's own success tone, which
-    ///     is what the planet already uses for access granted - quietly, because a door may be
-    ///     opened again every time Blob walks back onto its screen.
+    ///     How loudly a key-locked door says it has given way. The booth's own success tone, played
+    ///     quietly because a door may open again every time Blob walks back onto its screen.
     /// </summary>
     private const float DoorGivingWayVolume = 0.25f;
 
@@ -47,14 +42,14 @@ internal sealed class KeyLockDoors : IDynamicCollisionCells
     private readonly GameScreenData[] _screens;
 
     /// <summary>
-    ///     The doors on the screen being shown, or null when they have not been looked for yet.
-    ///     Null rather than empty is the difference between "no doors here" and "not asked yet".
+    ///     The doors on the screen being shown, or null when they have not been looked for yet. Null
+    ///     rather than empty is the difference between "no doors here" and "not asked yet".
     /// </summary>
     private List<KeyLockDoor>? _doors;
 
     /// <summary>
-    ///     Which screen <see cref="_doors" /> was found on, so <see cref="CellsOnScreen" /> can
-    ///     answer nothing for any other.
+    ///     Which screen <see cref="_doors" /> was found on, so <see cref="CellsOnScreen" /> answers
+    ///     nothing for any other.
     /// </summary>
     private int _screenNumber;
 
@@ -73,10 +68,10 @@ internal sealed class KeyLockDoors : IDynamicCollisionCells
     }
 
     /// <summary>
-    ///     The cells of the doors found on the screen being shown. A door only hunts for its own
-    ///     cells when it has none - see <see cref="StepDoor" /> - so without this a rebuild left the
-    ///     door holding cells that were no longer in the map, and its force field let Blob walk
-    ///     through for the rest of the visit.
+    ///     The cells of the doors found on the screen being shown. A door only hunts for its own cells
+    ///     when it has none (see <see cref="StepDoor" />), so without this a rebuild leaves the door
+    ///     holding cells no longer in the map and its force field lets Blob through for the rest of
+    ///     the visit.
     /// </summary>
     public IEnumerable<CollisionTile> CellsOnScreen(int screenNumber)
     {
@@ -96,9 +91,9 @@ internal sealed class KeyLockDoors : IDynamicCollisionCells
 
     /// <summary>
     ///     Throws away the doors found for the screen just left, so the next frame looks for the new
-    ///     screen's. Driven by the screen change rather than by noticing the number has moved: a
-    ///     door is meant to be found on each arrival, which is what gives the moment of one opening
-    ///     in front of Blob rather than having been green when the screen appeared.
+    ///     screen's. Driven by the screen change rather than by noticing the number moved: a door is
+    ///     meant to be found on each arrival, which is what gives the moment of one opening in front
+    ///     of Blob rather than having been green when the screen appeared.
     /// </summary>
     public void ForgetScreen() => _doors = null;
 
@@ -113,13 +108,13 @@ internal sealed class KeyLockDoors : IDynamicCollisionCells
         _renderer.KeyLockDoors = _doors;
 
         // Counted rather than tested for null. DoorsOn returns an empty list for a screen with no
-        // doors on it, never null, so asking whether it is null said yes on all 512 screens - which
-        // left the force field running and being drawn everywhere once any door had started it.
+        // doors, never null, so a null test passes on all 512 screens and leaves the force field
+        // running and drawn everywhere once any door has started it.
         if (_doors.Count == 0)
         {
             // Nothing on this screen is emitting, so neither should anything left over from the last
-            // screen that was. Clearing rather than stopping, because stopping would leave the
-            // particles already in the air hanging there unaged.
+            // screen that was. Cleared rather than stopped, because stopping leaves the particles
+            // already in the air hanging there unaged.
             _renderer.ClearForceField();
 
             return;
@@ -161,9 +156,9 @@ internal sealed class KeyLockDoors : IDynamicCollisionCells
     }
 
     /// <summary>
-    ///     One door: whether it lets Blob through, and the force field that says so. Passable to him
-    ///     if he is carrying the key, solid if not - and solid to nasties either way, which is why
-    ///     the tiles flip between <see cref="CollisionTileType.NotBlob" /> and
+    ///     One door: whether it lets Blob through, and the force field that says so. Passable to Blob
+    ///     if he carries the key and solid if not, but solid to nasties either way, which is why the
+    ///     tiles flip between <see cref="CollisionTileType.NotBlob" /> and
     ///     <see cref="CollisionTileType.EveryoneHits" /> rather than being removed.
     /// </summary>
     private void StepDoor(
@@ -191,14 +186,14 @@ internal sealed class KeyLockDoors : IDynamicCollisionCells
     ///     burst at the moment it gave way, and the clock the field's bands and scanner run off.
     /// </summary>
     /// <remarks>
-    ///     The opening is light and nothing else - the cells above have already flipped on the key
-    ///     alone, so a door caught halfway through opening is passable. What it buys is the moment:
-    ///     a door that is shut when Blob walks onto the screen and opens in front of him says he
-    ///     has the key for it far better than one that was already green when the screen appeared.
+    ///     The opening is light and nothing else: the cells have already flipped on the key alone, so
+    ///     a door caught halfway through opening is passable. What it buys is the moment. A door shut
+    ///     when Blob walks onto the screen and opening in front of him says he has the key far better
+    ///     than one already green when the screen appeared.
     ///     <para>
-    ///         A door is found afresh every time its screen is shown - see
-    ///         <see cref="ForgetScreen" /> - so that moment is had on each arrival rather than once
-    ///         in the game.
+    ///         A door is found afresh every time its screen is shown (see
+    ///         <see cref="ForgetScreen" />), so that moment comes on each arrival rather than once a
+    ///         game.
     ///     </para>
     /// </remarks>
     private void StepTheForceField(KeyLockDoor keyLockDoor, bool blobHasKey, int blobXPos, int blobYPos)
@@ -233,7 +228,7 @@ internal sealed class KeyLockDoors : IDynamicCollisionCells
                     CollisionTileType.None);
 
             // The door keeps its own tiles so it can take them out again, and the collision map is
-            // what anything walking into the door actually tests against.
+            // what anything walking into it actually tests against.
             keyLockDoor.CollisionTiles.Add(keyLockCollisionTile);
             _collisions.Add(keyLockCollisionTile);
         }

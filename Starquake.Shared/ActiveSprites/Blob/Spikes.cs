@@ -11,14 +11,10 @@ namespace Starquake.ActiveSprites;
 ///     Whether Blob is far enough into a spiked tile for its spikes to reach him.
 /// </summary>
 /// <remarks>
-///     Each of the three spike tiles is given the reach its own artwork suggests rather than the
-///     whole tile, so the three cases below are three reaches and not three copies of one test. The
-///     numbers are Blob's position relative to the tile, which is why several are negative: a
-///     negative one means the tile starts before Blob does.
-///     <para>
-///         This was already a pure static method inside <c>Blob</c> and needed nothing but a home
-///         to be testable. Seven numbers decide three hitboxes and none of them was covered.
-///     </para>
+///     Each of the three spike tiles gets the reach its own artwork suggests rather than the whole
+///     tile, so these are three different reaches and not three copies of one test. The numbers are
+///     Blob's position relative to the tile, which is why several are negative: a negative one means
+///     the tile starts before Blob does.
 /// </remarks>
 internal static class Spikes
 {
@@ -36,7 +32,7 @@ internal static class Spikes
 
     /// <summary>
     ///     The spike mounted on the right-hand wall. Measured down the tile rather than across it,
-    ///     and Blob has to have got some way in before it can touch him.
+    ///     and Blob must be some way in before it can touch him.
     /// </summary>
     private const int WallSpikeReachDown = 64;
 

@@ -11,10 +11,9 @@ namespace Starquake.ScreenEditor.Controls;
 ///     Where everything goes for a given control size.
 /// </summary>
 /// <remarks>
-///     Sizes are worked out from the collision cell rather than from the tile, so that the tile
-///     grid, the collision grid and the artwork all land on whole pixels. A tile is four cells
-///     across by three down, so a whole number of pixels per cell is a whole number per tile and
-///     the 4:3 shape of a tile is kept exactly.
+///     Sizes come from the collision cell rather than the tile, so the tile grid, the collision grid
+///     and the artwork all land on whole pixels. A tile is four cells across by three down, so a
+///     whole number of pixels per cell is also a whole number per tile.
 ///     <para>
 ///         Shared rather than private to the painter, because the canvas needs the same geometry to
 ///         turn a pointer position back into a tile.
@@ -23,8 +22,8 @@ namespace Starquake.ScreenEditor.Controls;
 internal readonly record struct ScreenLayout(double Cell, Rect Screen)
 {
     /// <summary>
-    ///     How much of a neighbouring screen to show, in tiles. One is enough to line scenery up
-    ///     against and small enough to leave the screen being edited the obvious subject.
+    ///     How much of a neighbouring screen to show, in tiles. One tile is enough to line scenery
+    ///     up against while leaving the screen being edited the obvious subject.
     /// </summary>
     public const int NeighbourTiles = 1;
 

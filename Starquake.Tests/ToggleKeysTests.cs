@@ -32,8 +32,7 @@ public class ToggleKeysTests
 
     /// <summary>
     ///     Three of the four arrows are abbreviated and Up is not, so it reads by its own name
-    ///     beside DN, LF and RT. That is what the screen has always shown; this pins it so that
-    ///     tidying the table cannot quietly change it.
+    ///     beside DN, LF and RT. Pinned so that tidying the table cannot quietly change it.
     /// </summary>
     [Fact]
     public void GetFriendlyName_TheArrowKeys_AbbreviateAllButUp()
@@ -45,9 +44,8 @@ public class ToggleKeysTests
     }
 
     /// <summary>
-    ///     Four labels are used by two keys each. Pinned because the define-keys screen has only two
-    ///     characters to say which key was chosen, so these pairs are genuinely indistinguishable on
-    ///     it - which is worth knowing deliberately rather than discovering.
+    ///     Four labels are used by two keys each. The define-keys screen has only two characters to
+    ///     say which key was chosen, so these pairs really are indistinguishable on it.
     /// </summary>
     [Fact]
     public void GetFriendlyName_FourLabels_AreSharedByTwoKeysEach()

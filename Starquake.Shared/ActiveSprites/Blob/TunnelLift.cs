@@ -10,28 +10,26 @@ using Starquake.Structure;
 namespace Starquake.ActiveSprites;
 
 /// <summary>
-///     The lift that carries Blob up a shaft. He gets on by walking under one, goes up until the
-///     shaft runs out, and can step off into a side passage once he has gone far enough up to have
-///     cleared the one he got on at.
+///     The lift that carries Blob up a shaft. Blob gets on by walking under one, rises until the
+///     shaft runs out, and can step off into a side passage once high enough to have cleared the
+///     passage boarded from.
 /// </summary>
 /// <remarks>
-///     Going up a shaft is a mode: while he is in one he does not fall, cannot reach his inventory, and
-///     does not leave over the top edge of the screen. Those three guards stay with <see cref="Blob" />
-///     and read <see cref="GoingUp" />; what moved here is the decision about when he is on one and how
-///     far it carries him.
+///     Being on a lift is a mode: Blob does not fall, cannot reach the inventory, and does not leave
+///     over the top edge of the screen. Those three guards live in <see cref="Blob" /> and read
+///     <see cref="GoingUp" />. What is here is when Blob is on a lift and how far it carries him.
 ///     <para>
-///         The lift's sound is two callbacks rather than a sound engine, which is what keeps this class
-///         reachable from a test - the same trade <see cref="BlobFall" /> makes by handing its caller a
-///         flag. The looping sound is asked for on every frame of the way up; the sound engine keeps one
-///         instance of it.
+///         The lift's sound is two callbacks rather than a sound engine, which keeps this class
+///         reachable from a test. The looping sound is asked for on every frame of the way up, and the
+///         sound engine keeps one instance of it.
 ///     </para>
 /// </remarks>
 internal sealed class TunnelLift
 {
     /// <summary>
-    ///     How fast the lift rises, in pixels a logic frame, and how far he has to have gone up before he
-    ///     is allowed to step off sideways. Stepping off any sooner would put him straight back into the
-    ///     passage he arrived through.
+    ///     How fast the lift rises, in pixels a logic frame, and how far up Blob must get before
+    ///     stepping off sideways is allowed. Any sooner would put Blob straight back into the passage
+    ///     arrived through.
     /// </summary>
     private const int Speed = 8;
 
@@ -39,8 +37,8 @@ internal sealed class TunnelLift
     private const int MinimumDistanceUp = 8;
 
     /// <summary>
-    ///     Where in the tile over his head the shaft is recognised: across its middle for getting on, and
-    ///     a tile's height down for the top of it and for a side passage.
+    ///     Where in the tile overhead the shaft is recognised: across its middle for getting on, and a
+    ///     tile's height down for the top of the shaft and for a side passage.
     /// </summary>
     private const int ShaftCentre = 32;
 
@@ -59,26 +57,22 @@ internal sealed class TunnelLift
     }
 
     /// <summary>
-    ///     Whether he is going up a shaft. Read by the three things it suspends - falling, the inventory,
-    ///     and leaving over the top of the screen.
+    ///     Whether Blob is going up a shaft. Read by the three things it suspends: falling, the
+    ///     inventory, and leaving over the top of the screen.
     /// </summary>
     public bool GoingUp { get; private set; }
 
-    /// <summary>
-    ///     Puts him off the lift without stepping it, for when he has just died on one.
-    /// </summary>
+    /// <summary>Puts Blob off the lift without stepping it, after dying on one.</summary>
     public void LetGo() => GoingUp = false;
 
-    /// <summary>
-    ///     One logic frame of the lift. Returns how far it carries him up, which is nought when he is not
-    ///     on one and nought when he is stepping off.
-    /// </summary>
-    /// <param name="collisions">The screen he is going up through.</param>
-    /// <param name="blob">Where he is and how big he is.</param>
-    /// <param name="above">The tile over his head, which is what the shaft is recognised by.</param>
-    /// <param name="movedLeft">Whether he is being steered left, out of the shaft.</param>
-    /// <param name="movedRight">Whether he is being steered right, out of the shaft.</param>
-    /// <param name="horizontalSpeed">How far he would walk in a frame, for testing the side passage.</param>
+    /// <summary>One logic frame of the lift.</summary>
+    /// <param name="collisions">The screen being gone up through.</param>
+    /// <param name="blob">Blob's position and size.</param>
+    /// <param name="above">The tile overhead, which is how a shaft is recognised.</param>
+    /// <param name="movedLeft">Whether Blob is being steered left, out of the shaft.</param>
+    /// <param name="movedRight">Whether Blob is being steered right, out of the shaft.</param>
+    /// <param name="horizontalSpeed">How far Blob walks in a frame, for testing the side passage.</param>
+    /// <returns>How far the lift carries Blob up. Nought when not on one, and when stepping off.</returns>
     public int Step(
         ScreenCollisionMap collisions,
         Rectangle blob,
@@ -122,7 +116,7 @@ internal sealed class TunnelLift
                 (int)ActionTiles.TunnelLiftTile or
                 (int)ActionTiles.TunnelLiftShaft3:
             {
-                // Only under the middle of the shaft, so walking past the edge of one does not grab him.
+                // Only under the middle of the shaft, so walking past the edge does not grab Blob.
                 if (above.XPosition == ShaftCentre)
                 {
                     if (!GoingUp)
@@ -150,8 +144,8 @@ internal sealed class TunnelLift
     }
 
     /// <summary>
-    ///     Whether he is being steered out of the shaft into a passage he can actually walk into, and has
-    ///     gone up far enough to be allowed to.
+    ///     Whether Blob is being steered into a side passage that can actually be walked into, and
+    ///     has risen far enough to be allowed to.
     /// </summary>
     private bool SteppingOffIntoASidePassage(
         ScreenCollisionMap collisions,
@@ -178,9 +172,8 @@ internal sealed class TunnelLift
             return false;
         }
 
-        // Either way out will do. The original tested left and then right in an else-if, so holding both
-        // with a wall to the left still steps him off to the right; keeping that rather than returning on
-        // the first direction asked about.
+        // Either way out will do, so both directions are tested rather than returning on the first.
+        // Holding both with a wall to the left still steps Blob off to the right.
         return movedLeft && RoomToWalk(collisions, blob, Direction.Left, horizontalSpeed)
                || movedRight && RoomToWalk(collisions, blob, Direction.Right, horizontalSpeed);
     }

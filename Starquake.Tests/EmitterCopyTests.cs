@@ -8,16 +8,15 @@ using Xunit;
 
 namespace Starquake.Tests;
 
-/// <summary>
-///     That a copied particle effect can still have its emitters found by name.
-/// </summary>
+/// <summary>That a copied particle effect can still have its emitters found by name.</summary>
 /// <remarks>
-///     Every effect the game uses is a deep copy - <c>ParticleEngine.CopyEffect</c> makes one per
-///     instance so that two callers sharing an effect name do not emit into the same particle pool -
-///     and <see cref="Emitter.CopyBaseFields" /> used to rename each emitter to "Copy of" whatever it
-///     had been called. Nothing could then be looked up by the name its content file gave it, which
-///     crashed the game on the first screen with a key-locked door on it. These are cheap and they
-///     cover a crash that only showed up in the one place the force field is drawn.
+///     Every effect the game uses is a deep copy. <c>ParticleEngine.CopyEffect</c> makes one per
+///     instance, so that two callers sharing an effect name do not emit into the same particle pool.
+///     <para>
+///         <see cref="Emitter.CopyBaseFields" /> must leave the emitter's name alone. Emitters are
+///         looked up by the name their content file gave them, so a copy that renames them crashes
+///         the first screen with a key-locked door on it.
+///     </para>
 /// </remarks>
 public class EmitterCopyTests
 {
@@ -35,8 +34,8 @@ public class EmitterCopyTests
     }
 
     /// <summary>
-    ///     The crash itself: the force field asks its effect for "Emitter01" and "Emitter05", which are
-    ///     the names <c>ForceField.xml</c> gives them.
+    ///     The force field asks its effect for "Emitter01" and "Emitter05", which are the names
+    ///     <c>ForceField.xml</c> gives them.
     /// </summary>
     [Fact]
     public void DeepCopy_AnEffect_StillFindsItsEmittersByTheirContentFileNames()
@@ -57,9 +56,8 @@ public class EmitterCopyTests
     }
 
     /// <summary>
-    ///     A copy of a copy, because an effect instance is copied from one that was itself loaded and
-    ///     may be copied again. Repeated prefixing was what made the old behaviour impossible to work
-    ///     around by writing the prefix out by hand.
+    ///     A copy of a copy, because an effect instance is copied from one that was itself loaded
+    ///     and may be copied again. A name altered on each pass could not be predicted at all.
     /// </summary>
     [Fact]
     public void DeepCopy_TwiceOver_StillLeavesTheNameAlone()
@@ -77,10 +75,10 @@ public class EmitterCopyTests
     private static class TestData
     {
         /// <summary>
-        ///     An emitter the engine will agree to copy. Every guarded property has to be set, not just
-        ///     the name: a budget and a release quantity below one are both refused, and so is a term at
-        ///     or below zero, so an emitter without them cannot be deep copied at all. One loaded from a
-        ///     content file always has all of them.
+        ///     An emitter the engine will agree to copy. Every guarded property has to be set, not
+        ///     just the name. A budget or a release quantity below one is refused, and so is a term
+        ///     at or below zero, so an emitter missing any of them cannot be deep copied at all. One
+        ///     loaded from a content file always has them.
         /// </summary>
         public static Emitter NamedEmitter(string name)
             => new()

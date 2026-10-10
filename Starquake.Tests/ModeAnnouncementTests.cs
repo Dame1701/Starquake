@@ -14,9 +14,7 @@ namespace Starquake.Tests;
 /// </summary>
 public class ModeAnnouncementTests
 {
-    /// <summary>
-    ///     Long enough that the fade has certainly finished, whatever the timings are tuned to.
-    /// </summary>
+    /// <summary>Long enough that the fade has finished, whatever the timings are tuned to.</summary>
     private const int LongEnoughForAnything = LogicClock.FramesPerSecond * 10;
 
     [Fact]

@@ -13,24 +13,21 @@ namespace Starquake.Animations;
 internal class Bounce
 {
     /// <summary>
-    ///     How much of a part's life it spends at full size and full brightness before it starts to go.
-    ///     It used to begin shrinking and fading on the very first frame, which left the parts small and
-    ///     translucent for nearly all of the flight - the explosion was there but barely readable.
+    ///     How much of a part's life it spends at full size and brightness before starting to go.
+    ///     Fading from the first frame leaves the parts small and translucent for nearly all of the
+    ///     flight, which makes the explosion hard to read.
     /// </summary>
     private const double TimeAtFullSize = 0.72;
 
     /// <summary>
-    ///     How much of its size a part keeps as it goes out. It used to shrink all the way to
-    ///     nothing on the same straight line its brightness went out on, so the last of its life
-    ///     was a dim speck - a quarter the size at a quarter the light. A part that stays mostly
-    ///     itself and fades reads as burning out; one that shrinks to a point reads as being
-    ///     scaled away.
+    ///     How much of its size a part keeps as it goes out. A part that stays mostly itself and
+    ///     fades reads as burning out; one that shrinks to a point reads as being scaled away.
     /// </summary>
     private const double SizeKeptAtTheEnd = 0.62;
 
     /// <summary>
-    ///     How fast a part tumbles, in degrees a logic frame. It used to be a half-degree either way,
-    ///     which over the whole life came to less than a sixth of a turn - a wobble rather than a tumble.
+    ///     How fast a part tumbles, in degrees a logic frame. Fast enough to read as a tumble rather
+    ///     than a wobble over the part's whole life.
     /// </summary>
     private const float SlowestTumble = 3f;
 
@@ -87,15 +84,13 @@ internal class Bounce
     }
 
     /// <summary>
-    ///     A part holds its size and brightness for <see cref="TimeAtFullSize" /> of its life and then goes
-    ///     out over what is left, rather than shrinking and fading from the moment it is thrown.
+    ///     A part holds its size and brightness for <see cref="TimeAtFullSize" /> of its life and
+    ///     then goes out over what is left.
     /// </summary>
     /// <remarks>
-    ///     The two no longer run down the same straight line. The light goes out on a curve, so a
-    ///     part dies away rather than being turned down like a dimmer, and it keeps most of its
-    ///     size while it does - see <see cref="SizeKeptAtTheEnd" />. Shrinking and fading together
-    ///     and evenly spent the last of every part as a speck too small and too dim to be seen,
-    ///     which is a third of the tail doing no work.
+    ///     Size and light do not run down the same line. The light goes out on a curve, so a part
+    ///     dies away rather than being turned down like a dimmer, and it keeps most of its size while
+    ///     it does. See <see cref="SizeKeptAtTheEnd" />.
     /// </remarks>
     private void FadeAndShrinkOverTheTail()
     {
@@ -106,7 +101,8 @@ internal class Bounce
             return;
         }
 
-        // At least one frame, so a very short life still ends at nothing rather than dividing by nought.
+        // At least one frame, so a very short life still ends at nothing rather than dividing by
+        // nought.
         int tail = Math.Max(_effectDuration - framesAtFullSize, 1);
         double throughTheTail = Math.Min((double)(_effectDurationCounter - framesAtFullSize) / tail, 1.0);
 

@@ -15,8 +15,8 @@ internal class TunnelLiftArrows
 {
 
     /// <summary>
-    ///     How far apart the arrow animations of neighbouring lift shafts are started, in logic
-    ///     frames, so that two shafts on the same screen ripple rather than pulsing in step.
+    ///     How far apart neighbouring lift shafts start their arrow animations, in logic frames, so
+    ///     two shafts on one screen ripple rather than pulse in step.
     /// </summary>
     private const int ColumnStartStagger = 15;
     private readonly GameScreenCollection _gameScreens;

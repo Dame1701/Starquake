@@ -16,29 +16,26 @@ namespace Starquake.ScreenEditor.Controls;
 ///     Draws one tile, wherever a tile needs drawing.
 /// </summary>
 /// <remarks>
-///     Every surface in the editor shows the same tiles and has to agree about what they look like,
-///     including the ones the game never draws. There is no artwork at all for those - a marker is
-///     numbered clear of the sheet - so the editor draws its own panel for them, carrying the same
-///     icon as the toolbar button that paints them. See <see cref="MarkerCatalogue" />.
+///     Every surface in the editor draws tiles through here so they all agree. Markers are numbered
+///     clear of the sheet and have no artwork, so the editor draws its own panel for them carrying
+///     the same icon as the toolbar button that paints them. See <see cref="MarkerCatalogue" />.
 /// </remarks>
 internal static class TileRenderer
 {
 
     /// <summary>
-    ///     The smallest a marker can be drawn before its label is dropped. Below this the text would
-    ///     be a smudge, and the outline alone still says something is there.
+    ///     The narrowest a marker panel can be and still carry its label. Below this the text would
+    ///     be a smudge, and the dashed outline alone still shows something is there.
     /// </summary>
     private const double MinimumLabelWidth = 44;
 
-    /// <summary>
-    ///     The grid the icons are drawn on, which is what their path data is measured in.
-    /// </summary>
+    /// <summary>The grid the icon path data is measured on.</summary>
     private const double IconGridSize = 24;
 
     /// <summary>
-    ///     How far the icon sits in from the panel's corner, and the range it may be drawn at. Below
-    ///     the minimum an icon is a smudge, so it is left off rather than drawn illegibly; above the
-    ///     maximum it would start competing with the artwork around it.
+    ///     How far the icon sits in from the panel's corner, and the size range it may be drawn at.
+    ///     Below the minimum an icon is a smudge and is left off; above the maximum it competes with
+    ///     the artwork around it.
     /// </summary>
     private const double IconInset = 4;
 
@@ -49,28 +46,25 @@ internal static class TileRenderer
     private const double MaximumIconSize = 34;
 
     /// <summary>
-    ///     How much of the panel's width the icon takes. A third makes it the thing the eye lands on,
-    ///     which is the point of it: a marker is recognised by its icon now and read by its label.
+    ///     What fraction of the panel's width the icon takes. A third makes the icon what the eye
+    ///     lands on, so a marker is recognised by its icon and confirmed by its label.
     /// </summary>
     private const double IconWidthShare = 3;
 
     /// <summary>
-    ///     How far the label sits up from the bottom of the panel. It is down there to stay clear of
-    ///     the icon in the opposite corner without either of them having to know about the other.
+    ///     How far the label sits up from the bottom of the panel. Along the bottom edge keeps it
+    ///     clear of the icon in the opposite corner without either needing to know about the other.
     /// </summary>
     private const double LabelInset = 4;
 
-    /// <summary>
-    ///     How wide a panel has to be before the icon earns its corner. Narrower than this and the
-    ///     dashed outline alone says something is there.
-    /// </summary>
+    /// <summary>The narrowest a panel can be and still carry an icon.</summary>
     private const double MinimumIconPanelWidth = 30;
 
     private static readonly Dictionary<MaterialIconKind, Geometry> IconGeometries = [];
 
     /// <summary>
-    ///     The dashed outline a marker is drawn with. Dashes say "this is an annotation, not
-    ///     scenery" without needing to be loud about it.
+    ///     The dashed outline a marker is drawn with. Dashes mark it as an annotation rather than
+    ///     scenery without being loud about it.
     /// </summary>
     private static readonly IPen MarkerPen = new Pen(
         new SolidColorBrush(EditorColours.Marker, 0.85),
@@ -97,8 +91,8 @@ internal static class TileRenderer
     }
 
     /// <summary>
-    ///     One icon's outline, ready to draw. Parsed once per icon: a screen can hold forty-eight
-    ///     markers and every one of them is redrawn on each repaint.
+    ///     One icon's outline, ready to draw. Parsed once per icon, because a screen can hold 48
+    ///     markers and all of them are redrawn on every repaint.
     /// </summary>
     private static Geometry IconGeometry(MaterialIconKind icon)
     {
@@ -117,13 +111,12 @@ internal static class TileRenderer
     ///     Draws the marker's icon in the top left of its panel, at the size it will still read at.
     /// </summary>
     /// <remarks>
-    ///     An overlay, taking no space of its own: the label is laid out across the whole panel as
-    ///     though the icon were not there. Reserving width for it is what this first did, and it cost
-    ///     "SPACER" its single line - the icon is in one corner and the label along the opposite edge,
-    ///     so there was nothing to reserve it from.
+    ///     An overlay taking no space of its own: the label is laid out across the whole panel as
+    ///     though the icon were not there. The icon sits in one corner and the label along the
+    ///     opposite edge, so reserving width for the icon would needlessly cost a label its line.
     ///     <para>
-    ///         Drawn in the accent rather than the marker's own blue, so that a square on the screen
-    ///         and the toolbar button that paints it are the same colour as well as the same shape.
+    ///         Drawn in the accent rather than the marker's own blue, so a square on the screen
+    ///         matches the toolbar button that paints it in colour as well as shape.
     ///     </para>
     /// </remarks>
     private static void DrawIcon(DrawingContext context, MaterialIconKind icon, Rect panel)
@@ -137,7 +130,7 @@ internal static class TileRenderer
 
         Geometry geometry = IconGeometry(icon);
 
-        // The icons are drawn on a 24 unit grid, so one scale factor fits any of them to the corner.
+        // Every icon is drawn on the same grid, so one scale factor fits any of them to the corner.
         using DrawingContext.PushedState placed = context.PushTransform(
             Matrix.CreateScale(size / IconGridSize, size / IconGridSize) *
             Matrix.CreateTranslation(panel.X + IconInset, panel.Y + IconInset));
@@ -146,14 +139,14 @@ internal static class TileRenderer
     }
 
     /// <summary>
-    ///     The editor's stand-in for a tile the game does not draw: a soft tinted panel, a dashed
-    ///     edge, the icon from the toolbar button that paints it in the top corner, and the word for
-    ///     what the position is reserved for along the bottom.
+    ///     Draws the editor's stand-in for a tile the game never draws: a tinted panel with a dashed
+    ///     edge, the toolbar button's icon in the top corner, and what the position is reserved for
+    ///     along the bottom.
     /// </summary>
     private static void DrawMarker(DrawingContext context, MarkerFace marker, Rect destination)
     {
-        // Inset so that neighbouring markers read as separate panels rather than one long band, and
-        // so the dashed edge is not clipped in half by the tile boundary.
+        // Inset so neighbouring markers read as separate panels rather than one long band, and so
+        // the tile boundary does not clip the dashed edge in half.
         Rect panel = destination.Deflate(Math.Min(3, destination.Width / 16));
         double corner = Math.Min(5, panel.Width / 10);
 
@@ -176,8 +169,8 @@ internal static class TileRenderer
             Math.Clamp(panel.Width / 7, 8, 13),
             MarkerTextBrush)
         {
-            // A label of more than one word wraps rather than being dropped, so that a marker drawn
-            // small still says which one it is.
+            // A label of more than one word wraps rather than being dropped, so a small marker
+            // still says which one it is.
             MaxTextWidth = available,
             TextAlignment = TextAlignment.Center
         };

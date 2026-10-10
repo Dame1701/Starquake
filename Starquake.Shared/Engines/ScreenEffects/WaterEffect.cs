@@ -15,10 +15,10 @@ namespace Starquake.Engines.ScreenEffects;
 ///     Olly's screen, flooded to just below the top of his head.
 /// </summary>
 /// <remarks>
-///     Unlike every other effect here this one does not end on its own: it runs for as long as
-///     Blob is on that screen and is stopped when he leaves. <see cref="HoldsGameplay" /> is false
-///     for the same reason the teleport arrival's is - the water is somewhere to walk about in,
-///     not something that happens to you.
+///     The only effect here that does not end on its own: it runs for as long as Blob is on that
+///     screen and is stopped when he leaves. <see cref="HoldsGameplay" /> is false for the same
+///     reason the teleport arrival's is: the water is somewhere to walk about in rather than
+///     something that happens to you.
 /// </remarks>
 internal sealed class WaterEffect : ScreenEffectBase
 {
@@ -47,8 +47,8 @@ internal sealed class WaterEffect : ScreenEffectBase
     }
 
     /// <summary>
-    ///     The water does not run down - it is simply there - so nothing here ends it. Leaving the
-    ///     screen does, through <see cref="Reset" />.
+    ///     The water does not run down, so nothing here ends it. Leaving the screen does, through
+    ///     <see cref="Reset" />.
     /// </summary>
     public override void Update() => _frame++;
 

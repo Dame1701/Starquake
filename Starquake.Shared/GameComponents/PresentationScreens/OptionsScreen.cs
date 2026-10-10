@@ -20,19 +20,15 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
 
     /// <summary>
     ///     The four presets the player chooses between, which are the first four entries of
-    ///     <see cref="_options" />. The entries after them - define keys, start, quit - are not
+    ///     <see cref="_options" />. The entries after them, define keys, start and quit, are not
     ///     presets and are handled separately.
     /// </summary>
     private const int SelectableOptionCount = 4;
 
-    /// <summary>
-    ///     The joypad preset, which is the only one whose availability depends on the hardware.
-    /// </summary>
+    /// <summary>The only preset whose availability depends on the hardware.</summary>
     private const int JoyPadOption = 0;
 
-    /// <summary>
-    ///     The preset to fall back on when the pad is pulled out - the cursor keys.
-    /// </summary>
+    /// <summary>The preset to fall back on when the pad is pulled out: the cursor keys.</summary>
     private const int DefaultOption = 1;
     private readonly SpriteCollection _backgroundImage;
     private readonly SpriteCollection _foregroundImage;
@@ -167,11 +163,10 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
     }
 
     /// <summary>
-    ///     A pad can be plugged in or pulled out while this screen is up, so the preset that needs one
-    ///     says every frame whether it is there, from the same snapshot everything else reads. Pulling the pad out while its
-    ///     preset is selected moves
-    ///     the selection back to the keyboard, because confirming it would otherwise leave the player
-    ///     with nothing bound at all.
+    ///     A pad can be plugged in or pulled out while this screen is up, so the preset needing one
+    ///     reports every frame whether it is there, from the same snapshot everything else reads.
+    ///     Pulling the pad out while its preset is selected moves the selection back to the keyboard,
+    ///     because confirming it would leave the player with nothing bound at all.
     /// </summary>
     private void FollowTheJoyPad()
     {
@@ -187,8 +182,8 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
     }
 
     /// <summary>
-    ///     0 confirms whatever is selected, 5 goes off to define keys by hand, and 1 to 4 pick one of the
-    ///     four presets.
+    ///     0 confirms whatever is selected, 5 goes off to define keys by hand, and 1 to 4 pick one of
+    ///     the four presets.
     /// </summary>
     private void HandleOptionKeys()
     {
@@ -208,7 +203,7 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
             return;
         }
 
-        // 1 to 4 pick the option of that number, and were four copies of this
+        // 1 to 4 pick the option of that number.
         int option = pressed - Keys.D1;
 
         if (option < 0 || option >= SelectableOptionCount ||
@@ -223,8 +218,8 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
     }
 
     /// <summary>
-    ///     Applies the selected preset and leaves for the report screen. If nothing is selected the keys are
-    ///     left as they were, which is what the original chain of four tests also did.
+    ///     Applies the selected preset and leaves for the report screen. With nothing selected the keys
+    ///     are left as they were.
     /// </summary>
     private void ConfirmSelectedOption()
     {
@@ -245,14 +240,14 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
     }
 
     /// <summary>
-    ///     The four key presets. Each was written out as seven assignments to a fresh PlayerKeySet, so the
-    ///     four are now four object initialisers and the differences between them can be read down a column.
+    ///     The four key presets, as object initialisers so the differences between them read down a
+    ///     column.
     /// </summary>
     private PlayerKeySet KeysForOption(int option)
     {
         return option switch
         {
-            // Joypad: every movement key is unbound, so the pad is the only thing steering
+            // Joypad: every movement key is unbound, so the pad is the only thing steering.
             0 => new PlayerKeySet
             {
                 Up = Keys.None,
@@ -275,7 +270,7 @@ internal class OptionsScreen : GameScreenBase, IGameScreen
                 Pause = Keys.P,
                 Quit = Keys.Q
             },
-            // The original Spectrum layout
+            // The original Spectrum layout.
             2 => new PlayerKeySet
             {
                 Up = Keys.Q,

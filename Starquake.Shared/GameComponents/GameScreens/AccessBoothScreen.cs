@@ -19,20 +19,21 @@ namespace Starquake.GameComponents.GameScreens;
 internal class AccessBoothScreen : IGameScreen
 {
     /// <summary>
-    ///     How long the result is left on screen before the game moves on, in logic frames - one
-    ///     second. It was a DateTime compared against DateTime.Now, which is local time: a DST step
-    ///     or an NTP correction landing in that second turned the pause into an hour.
+    ///     How long the result is left on screen before the game moves on, in logic frames. One
+    ///     second.
     /// </summary>
+    /// <remarks>
+    ///     Counted in frames rather than against <c>DateTime.Now</c>, which is local time: a DST step
+    ///     or an NTP correction landing in that second would turn the pause into an hour.
+    /// </remarks>
     private const int ScreenReadWaitFrames = LogicClock.FramesPerSecond;
 
-    /// <summary>
-    ///     What <see cref="_screenReadWaitFrames" /> holds before the pause has started.
-    /// </summary>
+    /// <summary>What <see cref="_screenReadWaitFrames" /> holds before the pause has started.</summary>
     private const int ScreenReadNotWaiting = -1;
 
     /// <summary>
     ///     How many digits a booth door asks for, and so how many scanners it shows. The world
-    ///     generator draws booth codes from 100 to 999, which is the same three.
+    ///     generator draws booth codes from 100 to 999, which is the same three digits.
     /// </summary>
     private const int DigitsInCode = 3;
 
@@ -55,7 +56,7 @@ internal class AccessBoothScreen : IGameScreen
 
     /// <summary>
     ///     Which slot each scanner reads, and whether the booth is satisfied. Replaced whole by
-    ///     <see cref="CheckInventoryAgainstCode" /> rather than written into a digit at a time.
+    ///     <see cref="CheckInventoryAgainstCode" /> rather than written a digit at a time.
     /// </summary>
     private AccessCodeScan _scan = new([], false);
     private int _screenReadWaitFrames = ScreenReadNotWaiting;
@@ -96,10 +97,9 @@ internal class AccessBoothScreen : IGameScreen
     }
 
     /// <summary>
-    ///     Whether the code the player typed matched. It used to be on IGameScreen, where eight of the
-    ///     nine screens answered a constant true and nothing read it through the interface; this is the
-    ///     one screen with a real answer, and it passes it on explicitly as the post-change parameter
-    ///     rather than leaving anyone to read it off the property.
+    ///     Whether the code the player typed matched. This is the one screen with a real answer, and it
+    ///     passes it on explicitly as the post-change parameter rather than leaving anyone to read it
+    ///     off the property.
     /// </summary>
     private bool Success => _scan.Accepted;
 
@@ -156,15 +156,14 @@ internal class AccessBoothScreen : IGameScreen
     }
 
     /// <summary>
-    ///     The booth's verdict, once all three scanners have read: the sound, and the start of the
-    ///     wait that sends Blob back to the game. Done last so the wait is a whole
-    ///     <see cref="ScreenReadWaitFrames" /> long rather than one frame short of it.
+    ///     The booth's verdict, once all three scanners have read: the sound, and the start of the wait
+    ///     that sends Blob back to the game. Done last, so the wait is a whole
+    ///     <see cref="ScreenReadWaitFrames" /> rather than one frame short.
     /// </summary>
     /// <remarks>
-    ///     This was <see cref="DrawScanResult" />'s job, which meant the sound was asked for once per
-    ///     drawn frame and needed a latch to stop it playing sixty times a second. Both belong on the
-    ///     logic clock: the wait is counted in logic frames, so starting it from a draw tied the
-    ///     length of the pause to the display's refresh rate.
+    ///     Both belong on the logic clock. From a draw the sound is asked for once per drawn frame and
+    ///     needs a latch to stop it playing sixty times a second, and the wait, counted in logic
+    ///     frames, would have its length tied to the display's refresh rate.
     /// </remarks>
     private void AnnounceScanResult()
     {
@@ -201,7 +200,7 @@ internal class AccessBoothScreen : IGameScreen
 
     /// <summary>
     ///     What the booth says once all three scanners have read. The sound and the wait that sends
-    ///     Blob back to the game are <see cref="AnnounceScanResult" />'s, so this only draws.
+    ///     Blob back belong to <see cref="AnnounceScanResult" />, so this only draws.
     /// </summary>
     private void DrawScanResult()
     {
@@ -244,9 +243,8 @@ internal class AccessBoothScreen : IGameScreen
     }
 
     /// <summary>
-    ///     Reads the booth's code and checks Blob's inventory against it, leaving Blob
-    ///     where it is. This is the form the constructor uses, before there is a door to arrive
-    ///     through.
+    ///     Reads the booth's code and checks Blob's inventory against it, leaving Blob where he is.
+    ///     The form the constructor uses, before there is a door to arrive through.
     /// </summary>
     private void Reset()
     {
@@ -272,15 +270,11 @@ internal class AccessBoothScreen : IGameScreen
         MoveBlobToTheBoothDoor(approachedFrom, doorMapXPosition);
     }
 
-    /// <summary>
-    ///     The code is stored on the screen as a string of digits, one per scanner.
-    /// </summary>
+    /// <summary>The code is stored on the screen as a string of digits, one per scanner.</summary>
     private void ReadAccessCode()
         => _accessCode = AccessCodeLock.Digits(_gameScreens.CurrentGameScreenData.AccessCode, DigitsInCode);
 
-    /// <summary>
-    ///     Scan Blob's inventory to see if he is carrying the right stuff.
-    /// </summary>
+    /// <summary>Checks Blob's inventory against the code.</summary>
     private void CheckInventoryAgainstCode()
     {
         _scan = AccessCodeLock.Scan(_blob.Carrying, _accessCode);
@@ -292,14 +286,8 @@ internal class AccessBoothScreen : IGameScreen
     }
 
     /// <summary>
-    ///     Puts Blob on the far side of the door he walked into, which is why the caller passes which side
-    ///     he came from.
-    ///     <para>
-    ///         The two arguments used to arrive as an <c>object[]</c> unboxed by index - a
-    ///         <see cref="Direction" /> at 0 and an <c>int</c> at 1 - because
-    ///         <c>IGameScreen.Reset</c> took a single <c>object?</c>. Nothing checked either cast,
-    ///         and a null meant "don't move him" rather than "no data".
-    ///     </para>
+    ///     Puts Blob on the far side of the door he walked into, which is why the caller passes the
+    ///     side he came from.
     /// </summary>
     private void MoveBlobToTheBoothDoor(Direction approachedFrom, int doorMapXPosition)
     {

@@ -13,10 +13,9 @@ namespace Starquake.Collisions;
 ///     the access booths, both tunnel mouths, a bridge underfoot and the lift shaft overhead.
 /// </summary>
 /// <remarks>
-///     This was four fields on <see cref="T:Starquake.ActiveSprites.Blob" />, written by one method and
-///     read by eight others that said nothing about depending on it. Eight methods silently required
-///     that method to have run first, and one of them deliberately runs before it - see
-///     <c>Blob.UpdateNormalState</c>, where the frame boundary is now written down.
+///     Passed as one value rather than kept as fields, so nothing silently depends on a probe having
+///     run first. <c>Blob.UpdateNormalState</c> deliberately acts on the previous frame's reading;
+///     the frame boundary is written down there.
 /// </remarks>
 internal readonly record struct BlobSurroundings(
     TileDetected? Above,
@@ -24,14 +23,11 @@ internal readonly record struct BlobSurroundings(
     TileDetected? Left,
     TileDetected? Right)
 {
-    /// <summary>
-    ///     Probes the four directions around something of this size at this position.
-    /// </summary>
+    /// <summary>Probes the four directions around something of this size at this position.</summary>
     /// <remarks>
-    ///     <paramref name="heightBelow" /> is the height to probe downwards with, which is not always
-    ///     <paramref name="height" />: Blob riding the shuttle is taller than Blob, and the shuttle is
-    ///     underneath him, so the ground has to be looked for from his own feet rather than the
-    ///     shuttle's. The caller subtracts, because the shuttle's height is the caller's business.
+    ///     <paramref name="heightBelow" /> is not always <paramref name="height" />. Blob on the
+    ///     shuttle is taller, with the shuttle underneath, so the ground is looked for from Blob's own
+    ///     feet. The caller does the subtraction, because the shuttle's height is its business.
     /// </remarks>
     public static BlobSurroundings Around(
         ScreenCollisionMap collisions,

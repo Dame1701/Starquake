@@ -17,9 +17,8 @@ internal class Electricity
 {
 
     /// <summary>
-    ///     The live part of an electricity node, as an inset from the tile it is drawn on. The arc
-    ///     hangs below the node itself and does not reach the tile's edges, so Blob can pass under
-    ///     one corner of the tile without being struck.
+    ///     The live part of an electricity node, as an inset from its tile. The arc hangs below the
+    ///     node and stops short of the tile's edges, so Blob can pass under one corner unharmed.
     /// </summary>
     private const int NodeArcLeft = 40;
 
@@ -48,9 +47,8 @@ internal class Electricity
     private const int GateArcBottom = 56;
 
     /// <summary>
-    ///     Where the original artwork's electricity arc is drawn relative to its tile - centred
-    ///     across it, and raised or dropped depending on whether it hangs from a node or stands in a
-    ///     gate.
+    ///     Where the original artwork's arc is drawn relative to its tile. Centred across it, and
+    ///     raised or dropped depending on whether it hangs from a node or stands in a gate.
     /// </summary>
     private const int OriginalArcXOffset = 32;
 
@@ -78,8 +76,8 @@ internal class Electricity
     private const int ConveyorGateLightXOffset = 33;
 
     /// <summary>
-    ///     The near light of each pair, which sits to the left of the tile's own position rather than
-    ///     along it. These were written inline as bare numbers next to the far offsets above.
+    ///     The near light of each pair, which sits to the left of the tile's own position rather
+    ///     than along it.
     /// </summary>
     private const int NodeLightNearXOffset = 12;
 
@@ -104,9 +102,9 @@ internal class Electricity
 
     private readonly ConveyorNasties _conveyorNasties;
     /// <summary>
-    ///     Logic frames since the engine was built, which is all the flicker needs to know. Counted
-    ///     here rather than in the draw because <c>GameHost</c> draws once per vertical retrace: a
-    ///     flicker counted in drawn frames would crackle faster on a better monitor.
+    ///     Logic frames since the engine was built, which is all the flicker needs. Counted here
+    ///     rather than in draw: <c>GameHost</c> draws once per vertical retrace, so a flicker counted
+    ///     in drawn frames would crackle faster on a better monitor.
     /// </summary>
     private int _flickerFrame;
 
@@ -166,8 +164,8 @@ internal class Electricity
     public event EventHandler? OnBlobStruckByElectricity;
 
     /// <summary>
-    ///     Turns the electricity off on every node and gate, and starts their timers again from the
-    ///     longer interval - which is what gives the player a moment after a death.
+    ///     Turns the electricity off on every node and gate and restarts their timers from the longer
+    ///     interval, which gives the player a moment after a death.
     /// </summary>
     public void Reset()
     {
@@ -268,8 +266,8 @@ internal class Electricity
 
     /// <summary>
     ///     The shader that burns a sprite of electricity, pointed at the frame about to be drawn.
-    ///     Null for the 1985 artwork, which keeps its own arc untouched - F8 is meant to show what
-    ///     the game looked like, not what it would look like with today's shaders on it.
+    ///     Null for the 1985 artwork, which keeps its own arc untouched: that mode is meant to show
+    ///     what the game looked like, not what it would look like with today's shaders.
     /// </summary>
     private Effect? BurningShaderFor(SpriteCollection sprites, int frame)
     {
@@ -287,8 +285,8 @@ internal class Electricity
     }
 
     /// <summary>
-    ///     Drops the controllers, so arriving on a screen builds a set for whatever nodes that screen
-    ///     has rather than carrying the last screen's over.
+    ///     Drops the controllers, so arriving on a screen builds a set for that screen's nodes rather
+    ///     than carrying the last screen's over.
     /// </summary>
     public void PerformPostChangeScreenActions()
     {
@@ -403,8 +401,8 @@ internal class Electricity
     }
 
     /// <summary>
-    ///     Whether the node at this position along the screen's second layer is currently switched on.
-    ///     The old graphics have no lights or arcs at all, so they count as unlit.
+    ///     Whether the node at this position along the screen's second layer is switched on. The old
+    ///     graphics have no lights or arcs, so they always count as unlit.
     /// </summary>
     private bool NodeIsLit(int electricityNodeCounter)
         => ElectricityNodeControllers != null &&
@@ -426,8 +424,8 @@ internal class Electricity
     }
 
     /// <summary>
-    ///     A gate draws its arc before its lights and a node draws it after, which is the only thing
-    ///     that stops the two sharing one method.
+    ///     A gate draws its arc before its lights and a node draws it after, which is the only reason
+    ///     the two do not share one method.
     /// </summary>
     private void DrawLitGate(Point tileLocation)
     {
@@ -471,8 +469,8 @@ internal class Electricity
     }
 
     /// <summary>
-    ///     The two lights at either end of a node or a gate. Each is drawn blue and then cyan over the
-    ///     top, which is what gives it a hot centre, and all three callers wanted the same four draws.
+    ///     The two lights at either end of a node or gate. Each is drawn blue with cyan over the top,
+    ///     which gives it a hot centre.
     /// </summary>
     private void DrawLightPair(string spriteName, Point left, Point right)
     {

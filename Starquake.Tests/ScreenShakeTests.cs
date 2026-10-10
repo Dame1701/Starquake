@@ -10,15 +10,13 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     The planet's tremors: when the ground starts moving, how long for, and what the picture and the
-///     rumble do while it does. All of it was inside <c>MainGameScreen.ShakeScreen</c>, which needs the
-///     whole engine.
+///     The planet's tremors: when the ground starts moving, how long for, and what the picture and
+///     the rumble do while it does.
 /// </summary>
 /// <remarks>
 ///     <see cref="ScreenShake" /> takes a <see cref="Random" /> and three flags and hands back a
-///     <see cref="Shake" />, so a test can seed the generator and step it. The rumble and the view port
-///     stayed with the screen, which is the trade that makes this reachable - the same one
-///     <c>BlobFall</c> makes with the sound of a long fall.
+///     <see cref="Shake" />, so a test can seed the generator and step it. Playing the rumble and
+///     moving the view port are the screen's job, which is what keeps this reachable.
 /// </remarks>
 public class ScreenShakeTests
 {
@@ -31,8 +29,8 @@ public class ScreenShakeTests
         // Act
         Shake? result = shake.Step(TestData.Generator(), false, false, true);
 
-        // Assert. Null rather than Still: a screen effect owns the view port, and the rumble is left
-        // exactly as it was rather than being stopped.
+        // Assert. Null rather than Still, because a screen effect owns the view port and the rumble
+        // is left exactly as it was rather than stopped.
         Assert.Null(result);
     }
 
@@ -51,8 +49,8 @@ public class ScreenShakeTests
     }
 
     /// <summary>
-    ///     The intro's own tremor is the ship coming down, and it is started deliberately rather than
-    ///     rolled for.
+    ///     The intro's own tremor is the ship coming down, started deliberately rather than rolled
+    ///     for.
     /// </summary>
     [Fact]
     public void Step_AsTheIntroReachesItsEndPause_StartsShakingAtOnce()
@@ -68,7 +66,7 @@ public class ScreenShakeTests
     }
 
     /// <summary>
-    ///     No random tremor during the intro: the ship coming down should be the only shake the opening
+    ///     No random tremor during the intro. The ship coming down is the only shake the opening
     ///     has.
     /// </summary>
     [Fact]
@@ -111,15 +109,15 @@ public class ScreenShakeTests
     }
 
     /// <summary>
-    ///     A tremor runs for between three and six seconds at fifty frames a second. Checked as a range
-    ///     because which length it picks is the generator's business.
+    ///     A tremor runs for between three and six seconds. Checked as a range, because which length
+    ///     it picks is the generator's business.
     /// </summary>
     /// <remarks>
-    ///     An unbroken run of shaking is not always one tremor. The frame that ends a tremor still shakes,
-    ///     and the roll for the next one can come up on the very next frame, so two can run back to back
-    ///     with no still frame between them - which a run of 471 frames out of this seed turned out to
-    ///     be. The shortest run observed cannot be two, because two of even the shortest tremor would be
-    ///     360 frames and no single one reaches that, so that is what the upper bound is asserted against.
+    ///     An unbroken run of shaking is not always one tremor. The frame that ends a tremor still
+    ///     shakes, and the roll for the next one can come up on the very next frame, so two can run
+    ///     back to back with no still frame between them. This seed produces a run of 471 frames
+    ///     that way. Only the shortest run can be asserted against the upper bound: two of even the
+    ///     shortest tremor would be 360 frames, which no single one reaches.
     /// </remarks>
     [Fact]
     public void Step_ATremorOnceStarted_RunsForBetweenThreeAndSixSeconds()
@@ -152,8 +150,8 @@ public class ScreenShakeTests
     }
 
     /// <summary>
-    ///     Both offsets are rolled from nought, so some frames of a tremor leave the picture where it is.
-    ///     That unevenness is what makes it read as the ground moving rather than as a buzz.
+    ///     Both offsets are rolled from zero, so some frames of a tremor leave the picture where it
+    ///     is. That unevenness is what makes it read as the ground moving rather than as a buzz.
     /// </summary>
     [Fact]
     public void MovesTheViewPort_OnlyWhenBothOffsetsAreSomething()
@@ -192,7 +190,7 @@ public class ScreenShakeTests
     }
 
     /// <summary>
-    ///     A jolt is what something exploding does to the picture: short, hard, and over before a
+    ///     A jolt is what something exploding does to the picture. Short, hard, and over before a
     ///     tremor would have got going.
     /// </summary>
     [Fact]

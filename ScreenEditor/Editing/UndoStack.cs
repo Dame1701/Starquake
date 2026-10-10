@@ -6,15 +6,11 @@ using Starquake.SharedLibs;
 
 namespace Starquake.ScreenEditor.Editing;
 
-/// <summary>
-///     One reversible change to the map.
-/// </summary>
+/// <summary>One reversible change to the map.</summary>
 internal interface IEdit
 {
 
-    /// <summary>
-    ///     What to call this in the Edit menu, phrased so that it reads after "Undo".
-    /// </summary>
+    /// <summary>What to call this in the Edit menu, phrased to read after "Undo".</summary>
     string Name { get; }
 
     void Undo(EditorDocument document);
@@ -22,9 +18,7 @@ internal interface IEdit
     void Redo(EditorDocument document);
 }
 
-/// <summary>
-///     A single tile on a single screen changing from one number to another.
-/// </summary>
+/// <summary>A single tile on a single screen changing from one number to another.</summary>
 internal sealed class TileEdit(int screen, int x, int y, int oldTile, int newTile) : IEdit
 {
     public string Name => "tile";
@@ -34,9 +28,7 @@ internal sealed class TileEdit(int screen, int x, int y, int oldTile, int newTil
     public void Redo(EditorDocument document) => document.SetTile(screen, x, y, newTile);
 }
 
-/// <summary>
-///     One cell of one tile image's collision mask being made solid or passable.
-/// </summary>
+/// <summary>One cell of one tile image's collision mask being made solid or passable.</summary>
 internal sealed class CollisionEdit(int tileImage, int cellX, int cellY, bool solid) : IEdit
 {
     public string Name => "collision";
@@ -46,9 +38,7 @@ internal sealed class CollisionEdit(int tileImage, int cellX, int cellY, bool so
     public void Redo(EditorDocument document) => document.SetSolid(tileImage, cellX, cellY, solid);
 }
 
-/// <summary>
-///     A whole screen being replaced at once, as a paste, a fill or a clear does.
-/// </summary>
+/// <summary>A whole screen being replaced at once, as a paste, fill or clear does.</summary>
 internal sealed class ScreenEdit(int screen, int[] oldTiles, int[] newTiles) : IEdit
 {
     public string Name => "screen";
@@ -59,8 +49,8 @@ internal sealed class ScreenEdit(int screen, int[] oldTiles, int[] newTiles) : I
 }
 
 /// <summary>
-///     A screen's teleport destination code changing. Null on either side is a screen that has no
-///     code: setting one for the first time, or taking one away.
+///     A screen's teleport code changing. Null on either side means no code: setting one for the
+///     first time, or removing one.
 /// </summary>
 internal sealed class TeleportCodeEdit(int screen, string? oldCode, string? newCode) : IEdit
 {
@@ -72,9 +62,8 @@ internal sealed class TeleportCodeEdit(int screen, string? oldCode, string? newC
 }
 
 /// <summary>
-///     A screen's signpost being pointed at a different screen. Null on either side is a sign with
-///     nothing to say: one that has not been pointed anywhere, or one whose code has been taken off
-///     it.
+///     A screen's signpost being pointed at a different screen. Null on either side means a sign with
+///     nothing to say: not yet pointed anywhere, or had its target removed.
 /// </summary>
 internal sealed class SignpostEdit(int screen, int? oldSignposted, int? newSignposted) : IEdit
 {
@@ -86,8 +75,8 @@ internal sealed class SignpostEdit(int screen, int? oldSignposted, int? newSignp
 }
 
 /// <summary>
-///     The planet core moving. Null on either side is a map that does not place it and so falls back to
-///     where the game used to keep it.
+///     The planet core moving. Null on either side means a map that does not place it and falls back
+///     to the game's default position.
 /// </summary>
 internal sealed class CoreEdit(
     int oldScreen,
@@ -103,9 +92,8 @@ internal sealed class CoreEdit(
 }
 
 /// <summary>
-///     Several edits that should undo together. A brush stroke is the reason this exists: dragging
-///     across a screen is one gesture to the person doing it, so it should take one press of Ctrl+Z
-///     to take back rather than one per tile the pointer happened to cross.
+///     Several edits that undo together. Dragging a brush across a screen is one gesture to the
+///     person doing it, so it should take one Ctrl+Z to undo, not one per tile crossed.
 /// </summary>
 internal sealed class CompoundEdit(string name, IReadOnlyList<IEdit> edits) : IEdit
 {
@@ -113,7 +101,7 @@ internal sealed class CompoundEdit(string name, IReadOnlyList<IEdit> edits) : IE
 
     public void Undo(EditorDocument document)
     {
-        // Backwards, so that overlapping edits unwind in the order they were laid down.
+        // Backwards, so overlapping edits unwind in the reverse of the order they were applied.
         for (int index = edits.Count - 1; index >= 0; index--)
         {
             edits[index].Undo(document);
@@ -130,15 +118,15 @@ internal sealed class CompoundEdit(string name, IReadOnlyList<IEdit> edits) : IE
 }
 
 /// <summary>
-///     The undo history. Edits are recorded as they are applied rather than replayed through here,
-///     so the stack never applies an edit it has not been given both halves of.
+///     The undo history. Edits are recorded as they are applied rather than replayed through here, so
+///     the stack never applies an edit it was not given both halves of.
 /// </summary>
 internal sealed class UndoStack
 {
 
     /// <summary>
     ///     How many steps of history to keep. Tile edits are tiny, so this is generous enough that
-    ///     running out of it in one sitting is unlikely.
+    ///     one sitting is unlikely to exhaust it.
     /// </summary>
     private const int MaxDepth = 500;
 
@@ -234,7 +222,7 @@ internal sealed class UndoStack
 
     private void Push(IEdit edit)
     {
-        // Anything undone is unreachable once a new edit is made on top of it.
+        // A new edit makes anything already undone unreachable.
         _undone.Clear();
         _done.Add(edit);
 

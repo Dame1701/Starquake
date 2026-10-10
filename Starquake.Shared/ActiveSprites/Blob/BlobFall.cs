@@ -10,20 +10,18 @@ using Starquake.Core;
 namespace Starquake.ActiveSprites;
 
 /// <summary>
-///     How Blob falls: how fast, how far he has come, and how far he is allowed to drop this frame.
-///     Not real physics - he falls at a fixed speed that steps up the longer the drop goes on, exactly as
-///     the original did.
+///     How Blob falls: how fast, how far so far, and how far to drop this frame. Not real physics.
+///     The speed is fixed and steps up the longer the drop lasts, exactly as the original did.
 /// </summary>
 /// <remarks>
-///     Four counters and the arithmetic over them, which is the part of falling that decides anything.
-///     What is left behind in <see cref="Blob" /> is the two things that are not arithmetic: moving him
-///     down by what this returns, and the sound of a long fall.
+///     Four counters and the arithmetic over them. <see cref="Blob" /> keeps the two parts that are
+///     not arithmetic: moving down by what this returns, and the sound of a long fall.
 /// </remarks>
 internal sealed class BlobFall
 {
     /// <summary>
-    ///     How fast he starts falling, how fast he can ever fall, and how far he has to drop to gain a
-    ///     pixel a frame. All three in pixels, and the speed in pixels a logic frame.
+    ///     The starting speed, the top speed, and how far a fall must go to gain a pixel a frame.
+    ///     All in pixels; the speeds in pixels a logic frame.
     /// </summary>
     private const int InitialSpeed = 4;
 
@@ -34,12 +32,12 @@ internal sealed class BlobFall
     private const int SpeedIncreaseDistance = 12;
 
     /// <summary>
-    ///     How far he has to have dropped before the fall is worth hearing. A sprite's height, so a drop
-    ///     from one platform to the next below it is silent.
+    ///     How far a fall must go before it is worth hearing. One sprite height, so dropping from one
+    ///     platform to the next below is silent.
     /// </summary>
     private const int AudibleDistance = SpriteMetrics.SpriteHeight;
 
-    /// <summary>How far he has dropped since the last step up in speed, and since the fall began.</summary>
+    /// <summary>How far has been dropped since the last step up in speed, and since the fall began.</summary>
     private int _distanceFallen;
 
     private int _speed = InitialSpeed;
@@ -47,15 +45,15 @@ internal sealed class BlobFall
     private int _totalDistanceFallen;
 
     /// <summary>
-    ///     How far he has fallen without landing. Read by the walk cycle, which will not play while he is
-    ///     in the air, and by the breakable bridges, which only give way under a hard enough landing.
+    ///     How far Blob has fallen without landing. Read by the walk cycle, which does not play in
+    ///     mid-air, and by the breakable bridges, which only give way under a hard enough landing.
     /// </summary>
     public int Height { get; private set; }
 
     /// <summary>
-    ///     Back to the speed a fall starts at, for when he has just arrived somewhere - over the bottom
-    ///     edge of a screen, or back at his entry point after dying. The total is deliberately not
-    ///     cleared: a drop through two screens is one fall, and he lands at the bottom of it just as hard.
+    ///     Resets to the speed a fall starts at, after arriving over a screen's bottom edge or back at
+    ///     the entry point. The total is deliberately not cleared: a drop through two screens is one
+    ///     fall, and the landing at the bottom is just as hard.
     /// </summary>
     public void StartFallingAgain()
     {
@@ -63,15 +61,15 @@ internal sealed class BlobFall
         _speed = InitialSpeed;
     }
 
-    /// <summary>
-    ///     One logic frame of falling. Returns how far down he goes and whether the fall is worth hearing;
-    ///     moving him is the caller's job, because only the caller knows what else has moved him this
-    ///     frame.
-    /// </summary>
-    /// <param name="collisions">The screen he is falling through.</param>
-    /// <param name="blob">Where he is and how big he is.</param>
-    /// <param name="movedLeft">Whether he is being steered left, for the tunnel-mouth shuffle.</param>
-    /// <param name="movedRight">Whether he is being steered right, for the same.</param>
+    /// <summary>One logic frame of falling.</summary>
+    /// <param name="collisions">The screen being fallen through.</param>
+    /// <param name="blob">Blob's position and size.</param>
+    /// <param name="movedLeft">Whether Blob is being steered left, for the tunnel-mouth shuffle.</param>
+    /// <param name="movedRight">Whether Blob is being steered right, for the same.</param>
+    /// <returns>
+    ///     How far down to move and whether the fall is worth hearing. Doing the moving is the
+    ///     caller's job, because only the caller knows what else has moved Blob this frame.
+    /// </returns>
     public Fall Step(ScreenCollisionMap collisions, Rectangle blob, bool movedLeft, bool movedRight)
     {
         int falling = DistanceToTheGround(collisions, blob);
@@ -111,9 +109,9 @@ internal sealed class BlobFall
         => collisions.CheckCollision(Direction.Down, blob.X, blob.Y, blob.Width, blob.Height, _speed, true);
 
     /// <summary>
-    ///     Blob falling past the mouth of a tunnel or a booth, with the player steering him into it, is
-    ///     shuffled sideways rather than dropping past it. Without this the opening is almost impossible
-    ///     to hit, because a fall covers more than its height in a frame.
+    ///     Shuffles Blob sideways into a tunnel or booth mouth being fallen past while the player
+    ///     steers towards it. Without this the opening is nearly impossible to hit, because a fall
+    ///     covers more than the opening's height in one frame.
     /// </summary>
     private static int EdgeShuffleTowardOpening(
         ScreenCollisionMap collisions,

@@ -13,9 +13,9 @@ namespace Starquake.ScreenEditor.Converters;
 ///     equals its parameter, and checking one sets the property to it.
 /// </summary>
 /// <remarks>
-///     Unchecking is deliberately ignored. The toggles behave as one choice out of several, so the
-///     only thing that ever unchecks one is another being checked, and acting on that would undo the
-///     change that caused it.
+///     Unchecking is ignored on purpose. The toggles are one choice out of several, so the only thing
+///     that unchecks one is another being checked, and acting on that would undo the change that
+///     caused it.
 /// </remarks>
 internal sealed class EnumMatchConverter : IValueConverter
 {

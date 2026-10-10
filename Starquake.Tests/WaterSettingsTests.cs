@@ -9,9 +9,8 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     Where the water on Olly's screen sits. How it looks can only be judged by watching it; the
-///     waterline is arithmetic and is held here, because it is placed against Olly rather than
-///     chosen by eye.
+///     Where the water on Olly's screen sits. How it looks can only be judged by watching it, but
+///     the waterline is arithmetic, because it is placed against Olly rather than chosen by eye.
 /// </summary>
 public class WaterSettingsTests
 {
@@ -22,7 +21,7 @@ public class WaterSettingsTests
     private const int OllyBottom = 330;
 
     /// <summary>
-    ///     The whole point of where the line is: the top of his head is in the air and the rest of
+    ///     The whole point of where the line is. The top of his head is in the air and the rest of
     ///     him is under.
     /// </summary>
     [Fact]
@@ -74,8 +73,8 @@ public class WaterSettingsTests
     }
 
     /// <summary>
-    ///     The push is a fraction of the picture, and a small one: a hundredth of the screen is
-    ///     already a pronounced wobble and much more reads as a funhouse mirror rather than water.
+    ///     The push is a small fraction of the picture. A hundredth of the screen is already a
+    ///     pronounced wobble, and much more reads as a funhouse mirror rather than water.
     /// </summary>
     [Fact]
     public void Amplitude_IsASmallFractionOfThePicture()

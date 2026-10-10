@@ -19,24 +19,19 @@ namespace Starquake.ScreenEditor.Controls;
 ///     The whole planet at a glance, with the screen being edited marked on it.
 /// </summary>
 /// <remarks>
+///     512 screens is too many to navigate by number, and the map is the only view that shows how
+///     they join up. Clicking anywhere on it goes straight to that screen.
 ///     <para>
-///         Five hundred and twelve screens is far too many to find your way around by number, and
-///         the map is the only thing that shows how they join up. Clicking anywhere on it goes
-///         straight to that screen.
-///     </para>
-///     <para>
-///         It is drawn by averaging every tile down to a handful of pixels once, when the sheet is
-///         loaded, and then filling a small bitmap from those averages. Drawing the map from the
-///         artwork itself would be twenty-four thousand scaled image draws, which is far too many to
-///         repeat every time a tile is painted.
+///         The map is filled from tile averages worked out once when the sheet loads. Drawing it from
+///         the artwork would be 24,000 scaled image draws every time a tile is painted.
 ///     </para>
 /// </remarks>
 internal sealed class WorldMapView : Control
 {
 
     /// <summary>
-    ///     How many pixels of the map one screen takes up. A tile becomes a handful of pixels rather
-    ///     than one, which is just enough for a platform to still look like a platform.
+    ///     How many map pixels one screen takes up. Several pixels per tile rather than one, which is
+    ///     just enough for a platform to still look like a platform.
     /// </summary>
     private const int ScreenPixelWidth = TileMetrics.TilesAcross * TileSheet.ThumbnailCellsAcross;
 
@@ -60,8 +55,8 @@ internal sealed class WorldMapView : Control
 
     public WorldMapView()
     {
-        // The map is a downscale of an already tiny bitmap, so smoothing it reads better than the
-        // hard pixels the editing surfaces want.
+        // The map downscales an already tiny bitmap, so smoothing reads better here than the hard
+        // pixels the editing surfaces want.
         RenderOptions.SetBitmapInterpolationMode(this, BitmapInterpolationMode.MediumQuality);
     }
 
@@ -110,8 +105,8 @@ internal sealed class WorldMapView : Control
 
     protected override Size MeasureOverride(Size availableSize)
     {
-        // The planet is much taller than it is wide, so the map takes whatever width it is given and
-        // asks for the height that keeps it in proportion.
+        // The planet is taller than it is wide, so the map takes the width it is given and asks for
+        // the height that keeps it in proportion.
         double width = double.IsInfinity(availableSize.Width) ? 240 : availableSize.Width;
 
         return new Size(width, width * WorldPixelHeight / WorldPixelWidth);
@@ -150,8 +145,8 @@ internal sealed class WorldMapView : Control
             InvalidateVisual();
         }
 
-        // Dragging across the map scrubs through screens, which is a quick way to find a room when
-        // you know roughly where it is but not what number it has.
+        // Dragging scrubs through screens, which finds a room you can place roughly but cannot
+        // name by number.
         if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
         {
             GoToScreenUnder(position);
@@ -245,8 +240,8 @@ internal sealed class WorldMapView : Control
         {
             double x = area.X + column * screenWidth;
 
-            // Every fourth line a little stronger, so that a screen can be counted off against the
-            // map's edge without following one line all the way across.
+            // Every fourth line is stronger, so a screen can be counted off against the map's edge
+            // without following one line all the way across.
             context.DrawLine(column % 4 == 0 ? RegionGridPen : ScreenGridPen,
                 new Point(x, area.Y),
                 new Point(x, area.Bottom));
@@ -262,9 +257,7 @@ internal sealed class WorldMapView : Control
         }
     }
 
-    /// <summary>
-    ///     An opaque colour as the premultiplied BGRA word the map's bitmap holds.
-    /// </summary>
+    /// <summary>An opaque colour as the premultiplied BGRA word the map's bitmap holds.</summary>
     private static uint Premultiplied(Color colour)
         => 0xFFu << 24 | (uint)colour.R << 16 | (uint)colour.G << 8 | colour.B;
 
@@ -299,9 +292,8 @@ internal sealed class WorldMapView : Control
     }
 
     /// <summary>
-    ///     Repaints the map bitmap from the document. Filling it outright is around three hundred
-    ///     thousand pixel writes, which is quick enough that tracking which screens changed would cost
-    ///     more in complexity than it saves in time.
+    ///     Repaints the whole map bitmap from the document. That is around 300,000 pixel writes,
+    ///     which is quick enough that tracking which screens changed would cost more than it saves.
     /// </summary>
     private void Refresh(EditorSession session)
     {
@@ -323,9 +315,8 @@ internal sealed class WorldMapView : Control
 
         uint voidColour = Premultiplied(EditorColours.Void);
 
-        // A marker tile is not drawn in the game, so showing its placeholder artwork here would put
-        // a block of flat magenta on the map where the player sees nothing. It is still worth
-        // knowing one is there, so it goes down as a dim tint instead of either extreme.
+        // A marker is never drawn in the game, so its placeholder artwork would put flat magenta on
+        // the map where the player sees nothing. A dim tint shows one is there without shouting.
         uint markerColour = Premultiplied(Blend(EditorColours.Void, EditorColours.Marker, 0.28));
 
         using ILockedFramebuffer frame = _bitmap.Lock();

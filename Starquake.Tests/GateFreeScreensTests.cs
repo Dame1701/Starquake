@@ -17,10 +17,12 @@ namespace Starquake.Tests;
 /// </summary>
 /// <remarks>
 ///     These matter more than most. An item placed behind the gate it opens makes the game
-///     unwinnable, and nothing about playing the game would say so until somebody had walked the whole
-///     planet looking for a key that was behind a door. The two that count are
-///     <see cref="Find_ADoorSealingTheOnlyWayThrough_StrandsWhatIsBehindIt" /> and its booth twin: they
-///     are the cases where getting the answer wrong costs the game.
+///     unwinnable, and nothing in play would say so until somebody had walked the whole planet
+///     looking for a key that was behind a door.
+///     <para>
+///         <see cref="Find_ADoorSealingTheOnlyWayThrough_StrandsWhatIsBehindIt" /> and its booth
+///         twin are the two where getting the answer wrong costs the game.
+///     </para>
 /// </remarks>
 public class GateFreeScreensTests
 {
@@ -52,8 +54,8 @@ public class GateFreeScreensTests
     }
 
     /// <summary>
-    ///     The case the whole thing exists for. A door across the one corridor out of a screen means
-    ///     everything past it needs the key, so the key cannot be there.
+    ///     The case this exists for. A door across the one corridor out of a screen means everything
+    ///     past it needs the key, so the key cannot be there.
     /// </summary>
     [Fact]
     public void Find_ADoorSealingTheOnlyWayThrough_StrandsWhatIsBehindIt()
@@ -117,9 +119,9 @@ public class GateFreeScreensTests
     }
 
     /// <summary>
-    ///     A door blocks one cell column of its tile rather than the whole tile, which is how the game
-    ///     builds it. A screen with a door on it is therefore still reachable itself - it is only what
-    ///     lies past the door that is not.
+    ///     A door blocks one cell column of its tile rather than the whole tile, which is how the
+    ///     game builds it. A screen with a door on it is still reachable itself. Only what lies past
+    ///     the door is not.
     /// </summary>
     [Fact]
     public void Find_AScreenWithADoorOnIt_IsItselfStillReachable()

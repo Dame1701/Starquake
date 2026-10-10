@@ -16,27 +16,28 @@ namespace Starquake;
 public class GameHost : Game
 {
     /// <summary>
-    ///     How many times a second the game thinks. This is the speed of the game: the engine moves
-    ///     everything by a fixed amount per logic frame and scales nothing by elapsed time, exactly as
-    ///     the original did, so this number is the only thing deciding how fast Blob runs.
-    ///     50 matches the PAL original. 60 is the NTSC speed and is 20% faster. Anything is allowed -
-    ///     it does not have to divide into the monitor's refresh rate, and the game runs at this speed
-    ///     on every machine regardless of what the display is doing.
+    ///     How many times a second the game thinks, and so the speed of the game. The engine moves
+    ///     everything by a fixed amount per logic frame and scales nothing by elapsed time, exactly
+    ///     as the original did, so this number alone decides how fast Blob runs.
+    ///     <para>
+    ///         50 matches the PAL original; 60 is NTSC and 20% faster. It need not divide into the
+    ///         monitor's refresh rate, and the game runs at this speed whatever the display does.
+    ///     </para>
     /// </summary>
     private const double LogicFramesPerSecond = LogicClock.FramesPerSecond;
 
     /// <summary>
-    ///     How far behind we let the logic clock fall before dropping frames instead of catching up.
-    ///     A stall - a breakpoint, dragging the window, the machine waking - otherwise leaves a
-    ///     backlog that the game fast-forwards through all in one go.
+    ///     How far the logic clock may fall behind before frames are dropped instead of caught up. A
+    ///     stall from a breakpoint, a dragged window or the machine waking otherwise leaves a backlog
+    ///     the game fast-forwards through in one go.
     /// </summary>
     private const int MaxCatchUpFrames = 5;
     private static readonly TimeSpan LogicFrameLength = TimeSpan.FromTicks((long)(TimeSpan.TicksPerSecond / LogicFramesPerSecond));
     private readonly GraphicsDeviceManager _graphics;
 
     /// <summary>
-    ///     The frame's input. Owned here because this is what decides when a logic frame happens,
-    ///     and it has to be read exactly once per frame from exactly one place.
+    ///     The frame's input. Owned here because this is what decides when a logic frame happens, and
+    ///     input must be read exactly once per frame from exactly one place.
     /// </summary>
     private readonly ToggleKeys _input = new();
     private readonly GameTime _logicGameTime = new();
@@ -45,9 +46,9 @@ public class GameHost : Game
     /// <summary>
     ///     Real time banked since the last logic frame, plus the logic clock the game sees. The game
     ///     is never told the real frame time: every logic frame is exactly one
-    ///     <see cref="LogicFramesPerSecond" />th of a second long, so anything that does work off
-    ///     ElapsedGameTime (the particle engine) stays locked to the same clock as everything that
-    ///     counts frames.
+    ///     <see cref="LogicFramesPerSecond" />th of a second, so anything working off
+    ///     <c>ElapsedGameTime</c>, such as the particle engine, stays locked to the same clock as
+    ///     everything that counts frames.
     /// </summary>
     private TimeSpan _logicAccumulator;
 
@@ -58,7 +59,7 @@ public class GameHost : Game
     public GameHost()
     {
         // Before anything is loaded, and before the graphics device exists. A normal build does not
-        // need it; a NativeAOT one cannot load a particle effect or the collision map without it.
+        // need it. A NativeAOT one cannot load a particle effect or the collision map without it.
         NativeAot.Register();
 
         _graphics = new GraphicsDeviceManager(this);
@@ -71,20 +72,19 @@ public class GameHost : Game
         Window.AllowUserResizing = true;
         Window.ClientSizeChanged += Window_ClientSizeChanged;
 
-        // Draw runs once per vertical retrace so presentation stays smooth and the loop is paced
-        // by the display rather than spinning. Update is left free-running because the fixed
-        // fifty hertz logic step is driven by hand below - MonoGame's own fixed step cannot
-        // subdivide a refresh interval that is not a multiple of the target rate.
+        // Draw runs once per vertical retrace, so presentation stays smooth and the loop is paced by
+        // the display rather than spinning. Update is left free-running because the fixed logic step
+        // is driven by hand below: MonoGame's own fixed step cannot subdivide a refresh interval
+        // that is not a multiple of the target rate.
         IsFixedTimeStep = false;
         Content.RootDirectory = "Content";
     }
 
     /// <summary>
-    ///     Keep the back buffer the same size as the window the user just dragged, so the picture is
-    ///     composed at the resolution it is actually displayed at rather than being stretched up from
-    ///     whatever size the window happened to start at. The game itself needs no telling: it always
-    ///     composes at its fixed size and PresentationSettings.Transform scales that onto whatever
-    ///     the back buffer now is.
+    ///     Keeps the back buffer the same size as the window, so the picture is composed at the
+    ///     resolution it is displayed at rather than stretched up from the window's starting size.
+    ///     The game needs no telling: it always composes at its fixed size and
+    ///     PresentationSettings.Transform scales that onto whatever the back buffer now is.
     /// </summary>
     private void Window_ClientSizeChanged(object? sender, EventArgs e)
     {
@@ -96,7 +96,7 @@ public class GameHost : Game
             return;
         }
 
-        // ApplyChanges resizes the window, which raises this event straight back at us.
+        // ApplyChanges resizes the window, which raises this event straight back.
         _resizingBackBuffer = true;
 
         try
@@ -111,32 +111,22 @@ public class GameHost : Game
         }
     }
 
-    /// <summary>
-    ///     Allows the game to perform any initialization it needs to before starting to run.
-    ///     This is where it can query for any required services and load any non-graphic
-    ///     related content.  Calling base.Initialize will enumerate through any components
-    ///     and initialize them as well.
-    /// </summary>
     protected override void Initialize()
     {
-        // The engine defines and initialises its own content as it is built; base.Initialize is what
+        // The engine defines and initialises its own content as it is built. base.Initialize is what
         // goes on to call LoadContent.
         _gameEngine = new GameEngine(_graphics, Content, _input, Window, Exit);
 
         base.Initialize();
     }
 
-    /// <summary>
-    ///     LoadContent will be called once per game and is the place to load
-    ///     all of your content.
-    /// </summary>
     protected override void LoadContent()
     {
         _graphics.GraphicsDevice.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
 
-        // Content being loaded a second time means the graphics device was lost and MonoGame is
-        // rebuilding it, which this game has no path through - so it says so rather than carrying on
-        // with half its content.
+        // Content loading a second time means the graphics device was lost and MonoGame is rebuilding
+        // it. The game has no path through that, so it says so rather than carrying on with half its
+        // content.
         if (_gameEngine is { Status: GameEngineStatus.Started })
         {
             throw new Exception(
@@ -148,10 +138,9 @@ public class GameHost : Game
 
     /// <summary>
     ///     Called once per rendered frame, which on a modern display is far more often than the game
-    ///     wants to think. Bank the real time that has passed and run whole logic frames out of it,
-    ///     so the game advances at <see cref="LogicFramesPerSecond" /> no matter what the monitor does.
+    ///     needs to think. Banks the real time that has passed and runs whole logic frames out of it,
+    ///     so the game advances at <see cref="LogicFramesPerSecond" /> whatever the monitor does.
     /// </summary>
-    /// <param name="gameTime">Provides a snapshot of timing values.</param>
     protected override void Update(GameTime gameTime)
     {
         _logicAccumulator += gameTime.ElapsedGameTime;
@@ -176,14 +165,14 @@ public class GameHost : Game
     }
 
     /// <summary>
-    ///     One logic frame. Everything that counts frames rather than seconds belongs in here.
+    ///     One logic frame. Everything that counts frames rather than seconds belongs here.
     /// </summary>
     /// <param name="gameTime">The logic clock, always exactly one logic frame elapsed.</param>
     private void UpdateLogicFrame(GameTime gameTime)
     {
-        // This must happen here, outside of the whole game eco system. It has to run per logic
-        // frame rather than per rendered frame: a toggled key is only reported for the one call
-        // after the release, so polling it more often than the game reads it swallows keypresses.
+        // Must run per logic frame rather than per rendered frame: a toggled key is only reported for
+        // the one call after the release, so polling more often than the game reads it swallows
+        // keypresses.
         _input.Update();
 
         // Nothing is acted on until the engine is far enough along to have something to act on.
@@ -204,10 +193,6 @@ public class GameHost : Game
         }
     }
 
-    /// <summary>
-    ///     This is called when the game should draw itself.
-    /// </summary>
-    /// <param name="gameTime">Provides a snapshot of timing values.</param>
     protected override void Draw(GameTime gameTime)
     {
         base.Draw(gameTime);
@@ -216,10 +201,10 @@ public class GameHost : Game
     }
 
     /// <summary>
-    ///     Shutting down. This is the only place the engine is torn down, because it is the only one
-    ///     every way out of the game passes through - the escape key, the gamepad's back button, the
-    ///     window's close box - and because Exit only asks the loop to stop, so a teardown done next
-    ///     to it would be pulling the engine apart underneath the frames still to be drawn.
+    ///     Shutting down. The only place the engine is torn down, because every way out of the game
+    ///     passes through here: the escape key, the gamepad's back button, the window's close box.
+    ///     <c>Exit</c> only asks the loop to stop, so tearing down beside it would pull the engine
+    ///     apart underneath frames still to be drawn.
     /// </summary>
     protected override void Dispose(bool disposing)
     {

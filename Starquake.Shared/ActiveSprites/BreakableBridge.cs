@@ -75,9 +75,9 @@ internal class BreakableBridge
     }
 
     /// <summary>
-    ///     Draws the bridge into a render target of its own, with the pixels the dissolve has eaten
-    ///     left transparent. A render target is a texture rather than a place on the screen, so the
-    ///     sprite goes down at the origin and is put in position when the texture itself is drawn.
+    ///     Draws the bridge into its own render target, leaving the dissolved pixels transparent.
+    ///     A render target is a texture rather than a place on the screen, so the sprite goes down at
+    ///     the origin and is positioned when the texture itself is drawn.
     /// </summary>
     private void ComposeDissolvingBridge()
     {
@@ -92,7 +92,7 @@ internal class BreakableBridge
     }
 
     /// <summary>
-    ///     Puts the composed texture on the screen, rotated about its own centre - which is why the
+    ///     Puts the composed texture on the screen, rotated about its own centre. That is why the
     ///     position is offset by half the sprite as well as the origin being set to it.
     /// </summary>
     private void DrawComposedBridge()

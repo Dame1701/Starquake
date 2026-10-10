@@ -10,22 +10,21 @@ using Xunit;
 
 namespace Starquake.Tests;
 
-/// <summary>
-///     Where the planet core is, now that the map says rather than the game.
-/// </summary>
+/// <summary>Where the planet core is, which the map says rather than the game.</summary>
 /// <remarks>
-///     The core is the one authored position that is not a <see cref="MarkerTile" />: it covers one and
-///     a half tiles by two and has never been tile-aligned, so it is stored as a position and placed to
+///     The core is the one authored position that is not a <see cref="MarkerTile" />. It covers one
+///     and a half tiles by two and is not tile-aligned, so it is stored as a position and placed to
 ///     <see cref="CoreSite.PositionStep" /> pixels. That makes the rounding and the clamping worth
-///     pinning - a core placed part way off the screen would draw elements nobody can reach.
+///     pinning, because a core placed part way off the screen draws elements nobody can reach.
 /// </remarks>
 public class CoreSiteTests
 {
 
     /// <summary>
-    ///     The area the editor outlines has to be the area the game fills, or the author is placing the
-    ///     core against a box that lies. <c>CoreElements</c> takes its grid from <see cref="CoreSite" />,
-    ///     so only the sprite size is said in two places - and this is what holds the two together.
+    ///     The area the editor outlines has to be the area the game fills, or the author is placing
+    ///     the core against a box that lies. <c>CoreElements</c> takes its grid from
+    ///     <see cref="CoreSite" />, so the sprite size is the only thing said in two places, and
+    ///     this is what holds the two together.
     /// </summary>
     [Fact]
     public void SpriteSize_IsTheGamesOwnSpriteSize()
@@ -43,15 +42,15 @@ public class CoreSiteTests
     }
 
     /// <summary>
-    ///     The reason the core cannot be a marker tile: the position the game shipped with does not sit
-    ///     on a tile boundary, so the tile grid could not express it.
+    ///     Why the core cannot be a marker tile. The position the game shipped with does not sit on
+    ///     a tile boundary, so the tile grid cannot express it.
     /// </summary>
     [Fact]
     public void Original_IsNotOnATileBoundary()
         => Assert.NotEqual(0, CoreSite.Original.XPos % TileMetrics.TileWidth);
 
     /// <summary>
-    ///     And the reason the step is sixteen: it is fine enough to express where the core already is.
+    ///     And why the step is 16. It is fine enough to express where the core already is.
     /// </summary>
     [Fact]
     public void Original_IsOnThePositionStep()
@@ -72,8 +71,8 @@ public class CoreSiteTests
     }
 
     /// <summary>
-    ///     A map saved before the position was stored still has to have a core, or the game cannot be
-    ///     finished at all.
+    ///     A map saved before the position was stored still has to have a core, or the game cannot
+    ///     be finished at all.
     /// </summary>
     [Fact]
     public void FindIn_NoCoreOnTheMap_FallsBackToWhereTheGameKeptIt()
@@ -90,8 +89,8 @@ public class CoreSiteTests
         => Assert.Equal(expected, CoreSite.Snap(given, 0).XPos);
 
     /// <summary>
-    ///     Held inside the screen, so the whole core stays on it. Dragging towards a corner should stop
-    ///     against it rather than push elements off the edge.
+    ///     Held inside the screen, so the whole core stays on it. Dragging towards a corner stops
+    ///     against it rather than pushing elements off the edge.
     /// </summary>
     [Fact]
     public void Snap_APositionPastTheEdge_KeepsTheWholeCoreOnTheScreen()

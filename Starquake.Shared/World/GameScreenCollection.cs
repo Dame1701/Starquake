@@ -18,60 +18,39 @@ namespace Starquake.World;
 
 /// <summary>
 ///     The planet. Its 512 screens and the tiles on each, where the landing site, the core and its
-///     exit are, which screens have been visited, and what is where - asked by everything that has
-///     to find somewhere to be. It also builds and owns the four things that are of this planet and
-///     nothing else: the collision map read off its tiles, the renderer that draws them, the colour
-///     animations that pulse some of them, and the key-locked doors standing on them.
+///     exit are, which screens have been visited, and what is where. It also builds and owns the four
+///     things that are of this planet and nothing else: the collision map read off its tiles, the
+///     renderer that draws them, the colour animations that pulse some of them, and the key-locked
+///     doors standing on them.
 /// </summary>
 /// <remarks>
-///     It used to do four jobs rather than one. Two were facades: it carried
-///     <c>CheckRectangles</c>, <c>CheckCollision</c> and <c>CheckTileByObject</c> straight through
-///     to <see cref="Collisions" /> and <c>Draw</c>, <c>DrawUpperLayer</c> and
-///     <c>DrawShadowing</c> straight through to <see cref="Renderer" />, both of which it also
-///     exposes - so there were two ways to ask the same question and callers were split between
-///     them, with <c>TunnelLift</c>, <c>BlobFall</c>, <c>NastyBrain</c> and <c>UnstickProbe</c>
-///     already going the direct way. The forwarders are gone and everything goes the direct way.
+///     It owns those four without answering for them. The renderer and the collision map are built
+///     from this planet's screen data and cannot exist without it, so the planet builds them and keeps
+///     them in step (see <see cref="UpdateCollisionMap" />), but callers go to
+///     <see cref="Collisions" /> and <see cref="Renderer" /> directly rather than through forwarding
+///     members here.
 ///     <para>
-///         The fourth was the key-locked doors: the one list of mutable door state in the codebase,
-///         the five methods that stepped it, and the <c>IDynamicCollisionCells</c> implementation
-///         that existed only to hand those doors' cells to the collision map. That is
-///         <see cref="KeyLockDoors" /> now, and the interface went with it.
-///     </para>
-///     <para>
-///         Owning a thing is not a fifth job. The renderer and the collision map are both built from
-///         this planet's screen data and cannot be built without it, so the planet builds them and
-///         keeps them in step - see <see cref="UpdateCollisionMap" />. What it no longer does is
-///         answer for them.
-///     </para>
-///     <para>
-///         The constructor took nine arguments and four of them were <see cref="TileMetrics" />
-///         constants - the tiles across and down and the size of a collision cell - handed in by the
-///         one place that builds a planet, which read them off <c>TileMetrics</c> to do it. They were
-///         parameters dressed as configuration: a planet with a different grid is not a thing this
-///         game has, and <c>TileMetrics</c> says why in its own remarks. They are read where they are
-///         used now, along with the two more the constructor was copying into fields of its own, and
-///         <c>TilesAcross</c> and <c>TilesDown</c> are no longer properties of the planet either -
-///         the one caller outside it reads the constant, the same way the inside does.
+///         The grid is read from <see cref="TileMetrics" /> where it is used rather than taken as
+///         constructor parameters. A planet with a different grid is not a thing this game has, and
+///         <see cref="TileMetrics" /> says why in its own remarks.
 ///     </para>
 /// </remarks>
 internal class GameScreenCollection
 {
 
 
-    /// <summary>
-    ///     A whole percentage, used for reporting how much of the map has been explored.
-    /// </summary>
+    /// <summary>A whole percentage, for reporting how much of the map has been explored.</summary>
     private const int FullPercentage = 100;
 
     /// <summary>
-    ///     What <c>ColourAnimations.Start</c> is given for an animation that should pulse until
-    ///     it is stopped rather than for a set number of loops.
+    ///     What <c>ColourAnimations.Start</c> is given for an animation that pulses until stopped
+    ///     rather than for a set number of loops.
     /// </summary>
     private const int LoopForever = -1;
 
     /// <summary>
-    ///     The three tiles that mark a shuttle pad, in the order they were always started in. Their
-    ///     colours are <c>ColourAnimatedTiles</c>'s; this is only which three they are.
+    ///     The three tiles that mark a shuttle pad, in the order they are started. Their colours
+    ///     belong to <c>ColourAnimatedTiles</c>; this is only which three they are.
     /// </summary>
     private static readonly ActionTiles[] ShuttleTags =
     [
@@ -99,10 +78,9 @@ internal class GameScreenCollection
         _resources = resources;
         _graphicsSet = graphicsSet;
 
-        // The colour animations are animations of this planet's own tiles, and nothing but the
-        // planet and the main screen drives them - so the planet owns one and hands itself to it.
-        // That is the last cycle in the graph: the animation engine needs the planet to read tiles
-        // from, and the planet was reaching back through the engine to find the animation engine.
+        // The colour animations are of this planet's own tiles, and only the planet and the main
+        // screen drive them, so the planet owns one and hands itself to it. The animation engine
+        // needs the planet to read tiles from, so anything else would be a cycle.
         ColourAnimations = new ColourAnimations(resources, this, graphicsSet);
 
 
@@ -129,7 +107,7 @@ internal class GameScreenCollection
 
         // After the renderer and the collision map, because it drives the one and adds cells to the
         // other. The doors' force fields are cells the tile map does not describe, so it registers
-        // itself as a source the map can ask again on every rebuild - see IDynamicCollisionCells.
+        // itself as a source the map asks again on every rebuild. See IDynamicCollisionCells.
         Doors = new KeyLockDoors(
             resources,
             graphicsSet,
@@ -146,15 +124,13 @@ internal class GameScreenCollection
                 ParticleEffectType.Continual, null);
     }
 
-    /// <summary>
-    ///     The key-locked doors on the screen being shown, and their force fields.
-    /// </summary>
+    /// <summary>The key-locked doors on the screen being shown, and their force fields.</summary>
     public KeyLockDoors Doors { get; }
 
     /// <summary>
-    ///     What can be walked into on the screen being shown, and how far a mover may travel before
-    ///     it is. Rebuilt by <see cref="UpdateCollisionMap" /> whenever the screen changes or
-    ///     something on it does.
+    ///     What can be walked into on the screen being shown, and how far a mover may travel first.
+    ///     Rebuilt by <see cref="UpdateCollisionMap" /> whenever the screen changes or something on it
+    ///     does.
     /// </summary>
     public ScreenCollisionMap Collisions { get; }
 
@@ -169,44 +145,43 @@ internal class GameScreenCollection
     public GameScreenData CurrentGameScreenData => _gameScreens[ScreenNumber];
 
     /// <summary>
-    ///     Where Blob's ship came down, read off the map rather than written into the game. Looked
-    ///     up once: the map does not change while a game is running, and every frame of the wreck's
-    ///     smoke would otherwise walk all 512 screens looking for the marker again.
+    ///     Where Blob's ship came down, read off the map rather than written into the game. Looked up
+    ///     once, because the map does not change while a game runs and every frame of the wreck's
+    ///     smoke would otherwise walk all 512 screens looking for the marker.
     /// </summary>
     public LandingSite LandingSite { get; }
 
     /// <summary>
-    ///     The core's doorstep, read off the map. Looked up once for the same reason as
+    ///     The core's exit square, read off the map. Looked up once for the same reason as
     ///     <see cref="LandingSite" />: three things ask about it, one of them every frame.
     /// </summary>
     public CoreExit CoreExit { get; }
 
     /// <summary>
-    ///     Where the planet core is, read off the map. Looked up once, like the other authored positions.
+    ///     Where the planet core is, read off the map. Looked up once, like the other authored
+    ///     positions.
     /// </summary>
     public CoreSite CoreSite { get; }
 
-    /// <summary>
-    ///     The core's top left corner on the screen that carries it.
-    /// </summary>
+    /// <summary>The core's top left corner on the screen that carries it.</summary>
     public Point CorePosition => new(CoreSite.XPos, CoreSite.YPos);
 
     /// <summary>
-    ///     Where Blob stands at the start of a game: centred across the square the author marked,
-    ///     with its feet on the bottom of it.
+    ///     Where Blob stands at the start of a game: centred across the square the author marked, with
+    ///     his feet on the bottom of it.
     /// </summary>
     public Point BlobStartPosition => StandingIn(LandingSite.BlobStartTileX, LandingSite.BlobStartTileY);
 
     /// <summary>
-    ///     Where Blob stands on leaving the core: the square the author marked, the same way round
-    ///     as <see cref="BlobStartPosition" />.
+    ///     Where Blob stands on leaving the core: the square the author marked, positioned the same
+    ///     way as <see cref="BlobStartPosition" />.
     /// </summary>
     public Point CoreExitPosition => StandingIn(CoreExit.TileX, CoreExit.TileY);
 
     /// <summary>
     ///     The middle of the square the ship comes to rest in. The ship is drawn from its top left and
-    ///     the two graphics sets draw it at different sizes, so the square gives the centre and the
-    ///     caller takes half its own sprite off that.
+    ///     the two graphics sets draw it at different sizes, so this gives the centre and the caller
+    ///     takes half its own sprite off it.
     /// </summary>
     public Point ShipCrashCentre => new(
         LandingSite.CrashTileX * TileMetrics.TileWidth + TileMetrics.TileWidth / 2,
@@ -218,7 +193,7 @@ internal class GameScreenCollection
 
     /// <summary>
     ///     The tiles on this planet that pulse through colours. Owned here because they are this
-    ///     planet's tiles; <c>MainGameScreen</c> starts them for the teleporter and access booths.
+    ///     planet's tiles. <c>MainGameScreen</c> starts them for the teleporter and access booths.
     /// </summary>
     public ColourAnimations ColourAnimations { get; }
 
@@ -241,9 +216,7 @@ internal class GameScreenCollection
         }
     }
 
-    /// <summary>
-    ///     Blob standing in a marked square: centred across it, with his feet on the bottom of it.
-    /// </summary>
+    /// <summary>Blob standing in a marked square: centred across it, feet on the bottom.</summary>
     private static Point StandingIn(int tileX, int tileY) => new(
         tileX * TileMetrics.TileWidth + (TileMetrics.TileWidth - SpriteMetrics.SpriteWidth) / 2,
         tileY * TileMetrics.TileHeight + TileMetrics.TileHeight - SpriteMetrics.SpriteHeight);
@@ -252,10 +225,9 @@ internal class GameScreenCollection
         => _gameScreens[number];
 
     /// <summary>
-    ///     Which screen a teleport destination code reaches, or -1 for a code no screen answers to.
-    ///     The codes are authored in the screen editor and carried in the screen data, so an
-    ///     unrecognised code is an ordinary outcome rather than a missing one - it is what the booth
-    ///     says CODE NOT RECOGNISED to.
+    ///     Which screen a teleport code reaches, or -1 for a code no screen answers to. The codes are
+    ///     authored in the screen editor and carried in the screen data, so an unrecognised code is an
+    ///     ordinary outcome: it is what the booth says CODE NOT RECOGNISED to.
     /// </summary>
     public int FindScreenByTeleportCode(string code)
     {
@@ -271,9 +243,9 @@ internal class GameScreenCollection
     }
 
     /// <summary>
-    ///     Builds the collision map for the first time. The cells are finer than the tiles -
-    ///     <see cref="TileMetrics.CollisionCellWidth" /> square - so a sprite can stand part way
-    ///     across a tile rather than snapping to it.
+    ///     Builds the collision map for the first time. The cells are finer than the tiles, at
+    ///     <see cref="TileMetrics.CollisionCellWidth" /> square, so a sprite can stand part way across
+    ///     a tile rather than snapping to it.
     /// </summary>
     public void Initialise() => UpdateCollisionMap(true);
 
@@ -293,8 +265,8 @@ internal class GameScreenCollection
     }
 
     /// <summary>
-    ///     Every empty tile on this screen that a nasty may be born on. A tile is offered if it is
-    ///     empty scenery and nothing in the collision map underneath it is closed to the nasties.
+    ///     Every empty tile on this screen a nasty may be born on. A tile is offered if it is empty
+    ///     scenery and nothing in the collision map underneath it is closed to nasties.
     /// </summary>
     public List<Point> GetNastyPotentialLocations()
     {
@@ -316,8 +288,8 @@ internal class GameScreenCollection
 
     /// <summary>
     ///     Whether the collision cells under one tile are all open to a nasty. A cell marked
-    ///     <see cref="CollisionTileType.NotBlob" /> is one the nasties are kept out of, so a tile
-    ///     with any of those under it is not offered as somewhere to be born.
+    ///     <see cref="CollisionTileType.NotBlob" /> keeps nasties out, so a tile with any of those
+    ///     under it is not offered as somewhere to be born.
     /// </summary>
     private bool NastiesMayStandOn(int tileX, int tileY)
     {
@@ -338,9 +310,7 @@ internal class GameScreenCollection
         return true;
     }
 
-    /// <summary>
-    ///     Rebuilds the collision map for the screen being shown.
-    /// </summary>
+    /// <summary>Rebuilds the collision map for the screen being shown.</summary>
     /// <param name="screenChanged">
     ///     Whether this is a new screen rather than a change on the one already up. All it controls
     ///     here is the key-door cache: the doors are found once per screen and held.
@@ -439,15 +409,13 @@ internal class GameScreenCollection
     }
 
     /// <summary>
-    ///     Stepped with where Blob is and whether he is carrying a key, rather than holding
-    ///     Blob and asking. Two things on the planet follow Blob - the force field on a
-    ///     key-locked door, which turns green when Blob can open it, and Olly's eyes, which
-    ///     drift after it - and neither needs Blob himself, only three values it can be told.
+    ///     Stepped with where Blob is and whether he carries a key, rather than holding Blob and
+    ///     asking. Two things on the planet follow Blob, the force field on a key-locked door and
+    ///     Olly's eyes, and neither needs Blob himself, only three values it can be told.
     ///     <para>
-    ///         The planet is only ever stepped by name from <c>MainGameScreen</c>, never
-    ///         polymorphically, which is what lets this take arguments at all. Being told instead
-    ///         of asking is in turn what lets the planet be built before Blob rather than
-    ///         after it, which is the whole of the cycle between them.
+    ///         The planet is only ever stepped by name from <c>MainGameScreen</c> and never
+    ///         polymorphically, which is what lets this take arguments. Being told rather than asking
+    ///         is what lets the planet be built before Blob instead of after.
     ///     </para>
     /// </summary>
     public void Update(GameTime gameTime, int blobXPos, int blobYPos, bool blobHasKey)
@@ -461,9 +429,8 @@ internal class GameScreenCollection
     }
 
     /// <summary>
-    ///     Pulses the three tags that mark where the shuttle pad used to be, so that a pad Blob has
-    ///     taken the shuttle off still says where it was. Indefinitely - the tags pulse until the
-    ///     shuttle is put back.
+    ///     Pulses the three tags marking where the shuttle pad used to be, so a pad Blob has taken the
+    ///     shuttle off still says where it was. They pulse until the shuttle is put back.
     /// </summary>
     private void StartShuttleTagAnimations()
     {
@@ -504,14 +471,13 @@ internal class GameScreenCollection
     }
 
     /// <summary>
-    ///     Starts a new game on this planet: Blob back at the wreck, and the whole map scattered
-    ///     with things to find.
+    ///     Starts a new game on this planet: Blob back at the wreck, and the whole map scattered with
+    ///     things to find.
     /// </summary>
     /// <param name="coreElementsWanted">
     ///     The parts the core is still asking for, from <c>CoreElements.ElementsWanted</c>. Passed in
-    ///     rather than read off a core held here: the planet needs this list once, at the start of a
-    ///     game, and holding the core for it was the planet's whole dependency on the things that
-    ///     walk about on it.
+    ///     rather than read off a core held here, because the planet needs this list once per game and
+    ///     holding the core for it would be a dependency on the things that walk about on it.
     /// </param>
     public void Reset(IReadOnlyList<int> coreElementsWanted)
     {

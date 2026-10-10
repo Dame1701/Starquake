@@ -17,14 +17,14 @@ internal enum Gate
 {
 
     /// <summary>
-    ///     A key-locked door. Each <see cref="ActionTiles.AccessForceField" /> tile is one, and it is
-    ///     solid to Blob until he is carrying the key - see <c>GameScreenCollection.UpdateKeyLockDoor</c>.
+    ///     A key-locked door. Each <see cref="ActionTiles.AccessForceField" /> tile is one, solid to
+    ///     Blob until he carries the key. See <c>KeyLockDoors</c>.
     /// </summary>
     KeyDoor,
 
     /// <summary>
-    ///     An access booth. Getting through one means satisfying its code, and the access card
-    ///     satisfies any digit of one - see <c>AccessBoothScreen.CheckInventoryAgainstCode</c>.
+    ///     An access booth. Getting through means satisfying its code, and the access card satisfies
+    ///     any digit. See <c>AccessCodeLock</c>.
     /// </summary>
     AccessBooth
 }
@@ -33,22 +33,19 @@ internal enum Gate
 ///     Which screens Blob can reach from where his ship came down without going through a gate.
 /// </summary>
 /// <remarks>
+///     This is what stops the key being put somewhere that needs the key, and the access card
+///     somewhere that needs the card. "Every route to this screen passes a gate" is the same statement
+///     as "this screen cannot be reached once the gates are shut", so one flood from the landing site
+///     with the gates sealed answers it for all 512 screens at once.
 ///     <para>
-///         This is what stops the key being put somewhere that needs the key, and the access card
-///         somewhere that needs the card. "Every route to this screen passes a gate" is the same
-///         statement as "this screen cannot be reached once the gates are shut", so one flood from
-///         the landing site with the gates sealed answers it for all 512 screens at once rather than
-///         tracing a route per candidate.
-///     </para>
-///     <para>
-///         <b>The model is deliberately an under-estimate.</b> It moves Blob by walking, falling
-///         and climbing only, and knows nothing of tunnel mouths, tunnel lifts, shuttles or
-///         teleporters. Every one of those can only ever <i>add</i> reachability, so a screen this
-///         returns is one Blob genuinely reaches without meeting a gate, and the ones it misses
-///         are merely candidates given up. That asymmetry is the whole point: over-estimating would
-///         put the key behind a door and make the game unwinnable, while under-estimating costs
-///         nothing but variety, and there are still some 185 screens to choose from on the shipped
-///         map. It is also why the planet core does not appear in the result and does not need to.
+///         <b>The model is deliberately an under-estimate.</b> It moves Blob by walking, falling and
+///         climbing only, and knows nothing of tunnel mouths, tunnel lifts, shuttles or teleporters.
+///         Each of those can only ever <i>add</i> reachability, so a screen this returns is one Blob
+///         genuinely reaches without meeting a gate, and the ones it misses are candidates given up.
+///         That asymmetry is the point: over-estimating puts the key behind a door and makes the game
+///         unwinnable, where under-estimating costs only variety, and the shipped map still leaves
+///         some 185 screens to choose from. It is also why the planet core need not appear in the
+///         result.
 ///     </para>
 ///     <para>
 ///         Climbing is treated as free because it very nearly is: walking off the top of a screen
@@ -61,7 +58,7 @@ internal static class GateFreeScreens
 
     /// <summary>
     ///     The collision cells across and down one screen. Movement is worked out on this grid rather
-    ///     than on the tiles, because a door is a single cell wide and a tile is four.
+    ///     than the tiles, because a door is one cell wide where a tile is four.
     /// </summary>
     private const int CellsAcross = TileMetrics.TilesAcross * TileMetrics.CollisionCellsAcrossTile;
 
@@ -69,8 +66,8 @@ internal static class GateFreeScreens
     private const int CellsDown = TileMetrics.TilesDown * TileMetrics.CollisionCellsDownTile;
 
     /// <summary>
-    ///     How many cells of the grid Blob fills, each way. It is as wide as two cells and as tall
-    ///     as two, so a one cell gap is not a way through - which is exactly what a door is.
+    ///     How many cells of the grid Blob fills, each way. Two each way, so a one-cell gap is not a
+    ///     way through, which is exactly what a door is.
     /// </summary>
     private const int BlobCellsAcross = SpriteMetrics.SpriteWidth / TileMetrics.CollisionCellWidth;
 
@@ -79,15 +76,15 @@ internal static class GateFreeScreens
 
     /// <summary>
     ///     How far into its tile a key-locked door's barrier stands, in cells. The door adds its
-    ///     collision at <c>Location.X + 48</c>, which is partway through the tile rather than across
-    ///     the whole of it, so sealing the tile would wall off more than the door does.
+    ///     collision partway through the tile rather than across the whole of it, so sealing the tile
+    ///     would wall off more than the door does.
     /// </summary>
     private const int DoorBarrierCell = 48 / TileMetrics.CollisionCellWidth;
 
     /// <summary>
-    ///     How far the search will look for somewhere Blob fits, if the landing site itself is
-    ///     inside scenery. A badly marked start should still seed the flood rather than report that
-    ///     the planet is empty.
+    ///     How far the search looks for somewhere Blob fits, if the landing site itself is inside
+    ///     scenery. A badly marked start should still seed the flood rather than report the planet
+    ///     empty.
     /// </summary>
     private const int StartSearchRadius = 2;
 
@@ -135,8 +132,8 @@ internal static class GateFreeScreens
     }
 
     /// <summary>
-    ///     Where Blob can stand, as one cell per position of his top left corner. Built for the
-    ///     whole planet at once because the flood crosses screens.
+    ///     Where Blob can stand, as one cell per position of his top left corner. Built for the whole
+    ///     planet at once, because the flood crosses screens.
     /// </summary>
     private static bool[] BuildBlockedCells(
         GameScreenData[] screens,
@@ -155,7 +152,7 @@ internal static class GateFreeScreens
                 {
                     int image = tiles[tileX, tileY].TileImage;
 
-                    // A marker is a note to the game, not scenery, and nothing collides with one.
+                    // A marker is a note to the game rather than scenery, and nothing collides with it.
                     if (image < 0 || MarkerTiles.Contains(image))
                     {
                         continue;
@@ -172,8 +169,8 @@ internal static class GateFreeScreens
 
     /// <summary>
     ///     Shuts a gate, if this tile is one of the kind being sealed. A door is a single cell column
-    ///     the height of its tile; an access booth is sealed whole, because Blob cannot get past
-    ///     one without the card even though it can stand in the mouth of it.
+    ///     the height of its tile. An access booth is sealed whole, because Blob cannot get past one
+    ///     without the card even though he can stand in its mouth.
     /// </summary>
     private static void BlockGate(
         bool[] blocked,
@@ -244,8 +241,8 @@ internal static class GateFreeScreens
         => (screen * CellsAcross + cellX) * CellsDown + cellY;
 
     /// <summary>
-    ///     Whether Blob fits with his top left corner at a position, which means every cell of his
-    ///     footprint being clear.
+    ///     Whether Blob fits with his top left corner at a position, meaning every cell of his
+    ///     footprint is clear.
     /// </summary>
     private static bool Fits(bool[] blocked, int position)
     {
@@ -274,8 +271,8 @@ internal static class GateFreeScreens
     }
 
     /// <summary>
-    ///     Where Blob starts the flood from: the square the landing site marks, or the nearest
-    ///     place to it that it actually fits.
+    ///     Where Blob starts the flood from: the square the landing site marks, or the nearest place
+    ///     he actually fits.
     /// </summary>
     private static int? FindFoothold(bool[] blocked, int screenCount, LandingSite site)
     {
@@ -315,15 +312,15 @@ internal static class GateFreeScreens
     }
 
     /// <summary>
-    ///     The four places Blob could move to from a position, following his own rules for leaving
-    ///     a screen.
+    ///     The four places Blob could move to from a position, following his own rules for leaving a
+    ///     screen.
     /// </summary>
     /// <remarks>
-    ///     Horizontally the planet is a ribbon rather than a grid: walking off the right hand edge adds
+    ///     Horizontally the planet is a ribbon rather than a grid: walking off the right-hand edge adds
     ///     one to the screen number whatever column it was in, so the end of a row leads to the start
-    ///     of the next one rather than to nothing. Vertically it is a grid, a row of screens at a time.
-    ///     Both of those are <c>Blob.ChangeScreenOff*Edge</c> and neither is geometric adjacency, which
-    ///     is why this cannot be one flat bitmap of the planet.
+    ///     of the next. Vertically it is a grid, a row of screens at a time. Both follow
+    ///     <c>Blob.ChangeScreenOff*Edge</c> and neither is geometric adjacency, which is why this
+    ///     cannot be one flat bitmap of the planet.
     /// </remarks>
     private static IEnumerable<int> Steps(int position, int screenCount)
     {

@@ -40,9 +40,7 @@ internal class TriggeredParticleEffect(GraphicsSet graphicsSet,
         EffectActive = true;
     }
 
-    /// <summary>
-    ///     Stops the effect at once, particles in the air included.
-    /// </summary>
+    /// <summary>Stops the effect at once, particles in the air included.</summary>
     public void Stop()
     {
         _mercury.Terminate();
@@ -64,8 +62,9 @@ internal class TriggeredParticleEffect(GraphicsSet graphicsSet,
             {
                 _mercury.Trigger(xPos, yPos);
 
-                // Workaround for a bizarre bug that seems to stop the particle from working
-                // unless we trigger until we get an active particle count.....
+                // Mercury sometimes reports no active particles after a trigger, so it is triggered
+                // again until the count comes back non-zero. The cause is not understood; removing
+                // this loop stops the effect appearing at all.
                 if (_mercury.ActiveParticles > 0)
                 {
                     _triggered = true;

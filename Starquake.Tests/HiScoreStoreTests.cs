@@ -8,12 +8,11 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     The hi-score table across a restart, which is the whole of what was added: the game used to
-///     hold eight names in a field initialiser and forget anything that beat them.
+///     The hi-score table surviving a restart.
 /// </summary>
 /// <remarks>
 ///     Each test gets a path of its own under the temporary directory and deletes it afterwards, so
-///     none of them touches the table belonging to whoever is running them -
+///     none of them touches the table belonging to whoever is running them.
 ///     <see cref="HiScoreStore.DefaultPath" /> is deliberately never used here.
 /// </remarks>
 public sealed class HiScoreStoreTests : IDisposable
@@ -32,9 +31,9 @@ public sealed class HiScoreStoreTests : IDisposable
     }
 
     /// <summary>
-    ///     The agreement <see cref="HiScoreDefaults.TableSize" /> is declared on trust. The two
-    ///     drifting apart would make every saved file the wrong length and so throw every saved
-    ///     table away for the defaults, silently.
+    ///     <see cref="HiScoreDefaults.TableSize" /> is declared on trust. If the two drift apart,
+    ///     every saved file is the wrong length and every saved table is silently thrown away for
+    ///     the defaults.
     /// </summary>
     [Fact]
     public void TheDeclaredTableSize_IsTheNumberOfDefaultsThereActuallyAre()
@@ -64,8 +63,7 @@ public sealed class HiScoreStoreTests : IDisposable
     }
 
     /// <summary>
-    ///     The headline behaviour: a score survives the process ending, which is the thing the game
-    ///     has never done.
+    ///     The headline behaviour. A score survives the process ending.
     /// </summary>
     [Fact]
     public void AScoreSaved_IsInTheTableTheNextTimeTheGameStarts()

@@ -11,23 +11,21 @@ using Starquake.Structure;
 namespace Starquake.Tests;
 
 /// <summary>
-///     The collision map as it was before it was indexed: one flat list of cells, scanned from end
-///     to end for every question asked of it. Kept here, and nowhere else, as the oracle the real
-///     map is measured against.
+///     The collision map written the slow way: one flat list of cells, scanned end to end for every
+///     question asked of it. Kept here, and nowhere else, as the oracle the real map is measured
+///     against.
 /// </summary>
 /// <remarks>
 ///     This is a transcription rather than a wrapper. It shares no code with
-///     <see cref="Starquake.Collisions.ScreenCollisionMap" /> - it walks a move one pixel at a time
-///     rather than solving for it, and it answers from a list rather than a grid - so the two
-///     agreeing is evidence and not a tautology. That is the same trick
-///     <see cref="CollisionBroadPhaseTests" /> plays one level down, and for the same reason: the
-///     rewrite was meant to be faster and nothing else, so what matters is that every answer
-///     survived it.
+///     <see cref="Starquake.Collisions.ScreenCollisionMap" />, walks a move one pixel at a time
+///     rather than solving for it, and answers from a list rather than a grid. That is what makes
+///     the two agreeing evidence rather than a tautology, and
+///     <see cref="CollisionBroadPhaseTests" /> plays the same trick one level down.
 ///     <para>
-///         It deliberately does not follow the real map's later corrections - it skips only tile
-///         <c>-1</c> in <see cref="CheckTileByObject" /> rather than markers too, and it takes the
-///         first tile in scan order rather than the nearest one. Those two are the changes that were
-///         meant to happen, and <see cref="CheckTileByObjectTests" /> is where they are pinned.
+///         It deliberately does not match the real map in two places. It skips only tile <c>-1</c>
+///         in <see cref="CheckTileByObject" /> rather than markers as well, and it takes the first
+///         tile in scan order rather than the nearest one. Both differences are intended, and
+///         <see cref="CheckTileByObjectTests" /> is where the real behaviour is pinned.
 ///     </para>
 /// </remarks>
 internal sealed class ReferenceCollisionMap
@@ -182,9 +180,8 @@ internal sealed class ReferenceCollisionMap
     }
 
     /// <summary>
-    ///     Whether any cell sits exactly here and lets Blob through - the question
-    ///     <c>GameScreenCollection.NastiesMayStandOn</c> asks, which used to mean scanning the whole
-    ///     list once per cell of the tile it was asking about.
+    ///     Whether any cell sits exactly here and lets Blob through. This is the question
+    ///     <c>GameScreenCollection.NastiesMayStandOn</c> asks, once per cell of a tile.
     /// </summary>
     public bool HasNastyOnlyCellAt(int cellX, int cellY)
     {
@@ -209,8 +206,8 @@ internal sealed class ReferenceCollisionMap
            _tileCollisionData[tileImage, cellAcross, cellDown] == 1;
 
     /// <summary>
-    ///     Two boxes overlapping, by the distance between their centres - the game's own test,
-    ///     written out again so the oracle leans on nothing that is being changed.
+    ///     Two boxes overlapping, by the distance between their centres. The game's own test,
+    ///     written out again so the oracle leans on nothing it is measuring.
     /// </summary>
     private static bool Overlaps(Rectangle one, Rectangle two)
         => Math.Abs(one.X + one.Width / 2 - (two.X + two.Width / 2)) < one.Width / 2 + two.Width / 2 &&
@@ -218,7 +215,7 @@ internal sealed class ReferenceCollisionMap
 
     /// <summary>
     ///     The move walked a pixel at a time, which is how far a thing may travel before it meets
-    ///     another - the shape the real one now solves for in one step.
+    ///     another. The real map solves the same shape in one step.
     /// </summary>
     private static int WalkedStep(Direction direction, int velocity,
         int obj1X, int obj1Y, int obj1W, int obj1H,

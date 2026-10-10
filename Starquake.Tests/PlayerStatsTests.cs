@@ -13,14 +13,13 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     Every scoring and power-up rule in the game. None of this was reachable from a test until
-///     <see cref="PlayerStats" /> came out of <c>StatusPanel</c>, because reaching the rules meant
-///     constructing a HUD widget, which meant a graphics device.
+///     Every scoring and power-up rule in the game. <see cref="PlayerStats" /> holds them without
+///     the HUD that draws them, so none of this needs a graphics device.
 /// </summary>
 /// <remarks>
-///     The sound engine is real, and deliberately so: it is handed a <c>ContentManager</c> with no
+///     The sound engine is real, and deliberately so. It is handed a <c>ContentManager</c> with no
 ///     content, and a sound it has never been given is a no-op that returns <c>Guid.Empty</c>. That
-///     is cheaper and more honest than an interface introduced to be faked.
+///     is cheaper than an interface introduced only to be faked.
 /// </remarks>
 public class PlayerStatsTests
 {
@@ -41,11 +40,10 @@ public class PlayerStatsTests
         Assert.Equal(TestData.StartingPlatforms, stats.Platforms);
     }
 
-    // Internal rather than public, here and in the theories below that take one. The parameter
-    // is one of the game's own types, and those are internal now - this project only sees them
-    // through InternalsVisibleTo, which is not enough to let a public signature here name one.
-    // Dropping to internal costs nothing: xunit requires the test class to be public, not its
-    // test methods, so these are still found and still run.
+    // Internal rather than public, here and in every theory below that takes a game type. The
+    // game's types are internal and this project only sees them through InternalsVisibleTo, which
+    // is not enough to let a public signature name one. It costs nothing: xunit requires the test
+    // class to be public, not its test methods.
     [Theory]
     [InlineData(PowerUp.EnergySmall, TestData.SmallTopUp)]
     [InlineData(PowerUp.EnergyMedium, TestData.MediumTopUp)]

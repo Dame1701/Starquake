@@ -51,12 +51,13 @@ internal class ParticleEngine
     }
 
     /// <summary>
-    ///     Returns a Particle effect based on the effect name given if it's single trigger it will only trigger once
+    ///     A particle effect by name. A single-trigger effect plays once per trigger; the others emit
+    ///     until stopped.
     /// </summary>
-    /// <param name="effectName"></param>
+    /// <param name="effectName">The name the effect was registered under.</param>
     /// <param name="duration">
-    ///     Single trigger how long until we signal the effect is complete, for non single trigger, how long
-    ///     we want to play the routine
+    ///     For a single-trigger effect, how long before it reports itself complete. For the others,
+    ///     how long to emit for.
     /// </param>
     public ContinuousParticleEffect CreateContinualEffectInstance(string effectName, TimeSpan? duration) =>
         new(_graphicsSet, CopyEffect(effectName), _particleRenderer)
@@ -71,8 +72,8 @@ internal class ParticleEngine
         new(_graphicsSet, CopyEffect(effectName), _particleRenderer);
 
     /// <summary>
-    ///     Each instance needs its own copy of the effect, otherwise callers sharing an effect name emit into,
-    ///     and draw from, the same particle pool.
+    ///     Each instance needs its own copy of the effect, or callers sharing an effect name emit into
+    ///     and draw from the same particle pool.
     /// </summary>
     private ParticleEffect CopyEffect(string effectName)
     {

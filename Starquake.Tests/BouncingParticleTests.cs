@@ -9,8 +9,8 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     How Blob's six parts are thrown when he comes apart. They used to be a fountain - every one
-///     upward, differing only in how far it leaned - and are the points of a star now.
+///     How Blob's six parts are thrown when he comes apart. They are the points of a star, thrown
+///     evenly around him rather than all upward.
 /// </summary>
 public class BouncingParticleTests
 {
@@ -20,9 +20,9 @@ public class BouncingParticleTests
 
     /// <summary>
     ///     How far off a perfect star the rounding puts things. A velocity is whole pixels a frame,
-    ///     so each axis can be half a pixel out, which at this speed is about seven tenths of a
-    ///     pixel of length and three hundredths of a radian of direction. The star is as even as
-    ///     integers allow and the tests ask for no more than that.
+    ///     so each axis can be half a pixel out, which at this speed is about 0.7 of a pixel of
+    ///     length and 0.03 of a radian of direction. The star is as even as integers allow, and the
+    ///     tests ask for no more than that.
     /// </summary>
     private const double Rounding = 0.08;
 
@@ -53,8 +53,7 @@ public class BouncingParticleTests
     }
 
     /// <summary>
-    ///     The thing that makes it a burst rather than a fountain: some parts go up and some go
-    ///     down, where every one of them used to go up.
+    ///     What makes it a burst rather than a fountain. Some parts go up and some go down.
     /// </summary>
     [Fact]
     public void StarburstVelocity_AcrossThePoints_ThrowsSomeUpAndSomeDown()
@@ -74,9 +73,7 @@ public class BouncingParticleTests
         Assert.Contains(thrown, part => part.X > 0);
     }
 
-    /// <summary>
-    ///     Every part is thrown as hard as every other - the star has no short points.
-    /// </summary>
+    /// <summary>Every part is thrown as hard as every other. The star has no short points.</summary>
     [Fact]
     public void StarburstVelocity_AcrossThePoints_ThrowsThemAllAtTheSameSpeed()
     {

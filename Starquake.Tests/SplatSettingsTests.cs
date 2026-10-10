@@ -13,8 +13,8 @@ namespace Starquake.Tests;
 
 /// <summary>
 ///     The numbers behind an organic nasty coming apart. The dissolve itself can only be judged by
-///     looking at it; what is held here is the decay the shader is driven by and the colour its
-///     rim takes.
+///     looking at it. What is held here is the decay the shader is driven by and the colour its rim
+///     takes.
 /// </summary>
 public class SplatSettingsTests
 {
@@ -40,8 +40,7 @@ public class SplatSettingsTests
 
     /// <summary>
     ///     The rim takes the colour that kind of nasty already throws from its left side, so the
-    ///     dissolve and the particles playing over it agree rather than being two colours of the
-    ///     same death.
+    ///     dissolve and the particles playing over it are the same colour.
     /// </summary>
     [Theory]
     [InlineData(NastyType.FriedEgg)]

@@ -10,9 +10,7 @@ namespace Starquake.Tests;
 
 /// <summary>
 ///     Walking off the edge of a screen. The planet is one flat array stitched together by index, so
-///     every one of these is arithmetic on a screen number against the shape of the map - and none of
-///     it could be reached before, because it was four methods inside <c>Blob</c>, which needs a
-///     resource manager, a graphics device and the planet to construct.
+///     every one of these is arithmetic on a screen number against the shape of the map.
 /// </summary>
 public class ScreenEdgesTests
 {
@@ -65,11 +63,11 @@ public class ScreenEdgesTests
             ScreenWidth - Width + 8, 100, Width, ScreenWidth, WorldMap.LastScreenNumber));
 
     /// <summary>
-    ///     The pair of equalities that stop one step across a boundary being taken as two. Blob's four
-    ///     edges are tested in turn and without short-circuiting, so the position a sideways crossing
-    ///     leaves him in is immediately offered to the opposite edge - and in both directions it lands
-    ///     exactly on the one value that edge reads as still being on the screen. A single pixel either
-    ///     way and walking left would carry him left for ever.
+    ///     The pair of equalities that stop one step across a boundary being taken as two. Blob's
+    ///     four edges are tested in turn and without short-circuiting, so the position a sideways
+    ///     crossing leaves him in is offered straight away to the opposite edge. In both directions
+    ///     it lands on the one value that edge reads as still being on the screen. A pixel either
+    ///     way, and walking left would carry him left for ever.
     /// </summary>
     [Fact]
     public void OffRight_WhereGoingLeftLandsHim_IsNotAFurtherCrossing()

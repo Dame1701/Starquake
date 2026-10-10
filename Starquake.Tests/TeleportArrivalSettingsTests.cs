@@ -8,9 +8,9 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     The settle behind a teleport arrival. The shimmer itself can only be judged by looking at
-///     it; what is held here is that it starts unsettled, ends at the picture untouched, and gets
-///     there without going backwards.
+///     The settle behind a teleport arrival. The shimmer itself can only be judged by looking at it.
+///     What is held here is that it starts unsettled, ends at the picture untouched, and gets there
+///     without going backwards.
 /// </summary>
 public class TeleportArrivalSettingsTests
 {
@@ -45,8 +45,8 @@ public class TeleportArrivalSettingsTests
     }
 
     /// <summary>
-    ///     It falls away quickly at first and lingers, rather than running down evenly - a linear
-    ///     settle reads as the effect being switched off at a moment.
+    ///     It falls away quickly at first and then lingers, rather than running down evenly. A
+    ///     linear settle reads as the effect being switched off at a moment.
     /// </summary>
     [Fact]
     public void StrengthAt_Halfway_HasAlreadyLostMoreThanHalfOfItself()

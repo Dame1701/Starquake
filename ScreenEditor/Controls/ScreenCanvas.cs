@@ -18,11 +18,9 @@ namespace Starquake.ScreenEditor.Controls;
 ///     edges.
 /// </summary>
 /// <remarks>
-///     Starquake's world does not scroll - Blob walks off one edge and the next screen replaces
-///     it whole - so a screen has to be built to line up with its neighbours without ever being seen
-///     alongside them in the game. That is what the border of neighbouring tiles is for: a platform
-///     that stops a tile short of the edge, or a tunnel mouth with nothing on the other side of it,
-///     is obvious here and invisible on a screen drawn on its own.
+///     The world does not scroll, so a screen must line up with its neighbours even though the game
+///     never shows them together. The border of neighbouring tiles is what makes a platform that
+///     stops a tile short, or a tunnel mouth with nothing behind it, visible while editing.
 /// </remarks>
 internal sealed class ScreenCanvas : Control
 {
@@ -39,8 +37,8 @@ internal sealed class ScreenCanvas : Control
     private bool _placingCore;
 
     /// <summary>
-    ///     Where the pointer is in the screen's own pixels, or null when it is off the screen. The tile
-    ///     the pointer is over is not enough for the core, which is placed between tiles.
+    ///     Where the pointer is in the screen's own pixels, or null when it is off the screen. The
+    ///     tile alone is not enough for the core, which is placed between tiles.
     /// </summary>
     private Point? _pointerOnScreen;
 
@@ -54,8 +52,8 @@ internal sealed class ScreenCanvas : Control
 
         Focusable = true;
 
-        // The artwork is pixel art and the overlays are hairlines; both want to land on whole
-        // pixels rather than be smoothed across them.
+        // The artwork is pixel art and the overlays are hairlines. Both need to land on whole pixels
+        // rather than be smoothed across them.
         RenderOptions.SetBitmapInterpolationMode(this, BitmapInterpolationMode.None);
         RenderOptions.SetEdgeMode(this, EdgeMode.Aliased);
     }
@@ -70,9 +68,8 @@ internal sealed class ScreenCanvas : Control
         => ScreenPainter.Paint(context, Session, Bounds.Size, CurrentHover());
 
     /// <summary>
-    ///     What the pointer is over and what would be laid down there. A stroke in progress keeps the
-    ///     tool it started with, so the canvas decides which tool the ghost shows rather than the
-    ///     painter reading the session's current one.
+    ///     What the pointer is over and what would be laid down there. The canvas decides which tool
+    ///     the ghost shows, because a stroke in progress keeps the tool it started with.
     /// </summary>
     private Hover CurrentHover()
         => new(
@@ -111,8 +108,8 @@ internal sealed class ScreenCanvas : Control
             return;
         }
 
-        // Shift and click on a booth sets its destination code. Taken before the tool is applied, so
-        // that the gesture which opens the dialog cannot also paint over the booth it was aimed at.
+        // Shift and click on a booth sets its destination code. Handled before the tool is applied,
+        // so opening the dialog cannot also paint over the booth it was aimed at.
         if (e.KeyModifiers.HasFlag(KeyModifiers.Shift) &&
             session.Document.GetTile(session.CurrentScreen, x, y) == (int)ActionTiles.TeleportBooth)
         {
@@ -122,8 +119,8 @@ internal sealed class ScreenCanvas : Control
             return;
         }
 
-        // And on a signpost it asks which teleporter the sign points at, for the same reason: what
-        // the sign says is not a tile number, so there is nowhere else on the canvas to change it.
+        // On a signpost it asks which teleporter the sign points at. What a sign says is not a tile
+        // number, so there is nowhere else on the canvas to change it.
         if (e.KeyModifiers.HasFlag(KeyModifiers.Shift) &&
             session.Document.GetTile(session.CurrentScreen, x, y) == (int)ActionTiles.TeleportSignpost)
         {
@@ -135,8 +132,8 @@ internal sealed class ScreenCanvas : Control
 
         _strokeTool = ToolFor(point, e.KeyModifiers, session.Tool);
 
-        // The core is a position rather than a tile, so it is placed from the pointer in screen pixels
-        // and does not go through the tile-based tools at all.
+        // The core is a position rather than a tile, so it is placed from the pointer in screen
+        // pixels and skips the tile-based tools.
         if (_strokeTool == EditorTool.Core)
         {
             _placingCore = true;
@@ -175,9 +172,8 @@ internal sealed class ScreenCanvas : Control
         _hoverX = inside ? x : -1;
         _hoverY = inside ? y : -1;
 
-        // The core is placed between tiles, so following it needs a repaint per pixel rather than per
-        // tile - but only while its tool is in hand, or every other tool would repaint far more often
-        // than it has any reason to.
+        // The core is placed between tiles, so following it needs a repaint per pixel rather than
+        // per tile. Only while its tool is in hand, or every other tool would repaint needlessly.
         Point? previous = _pointerOnScreen;
         _pointerOnScreen = inside ? ScreenPixel(session, position) : null;
 
@@ -193,8 +189,7 @@ internal sealed class ScreenCanvas : Control
             return;
         }
 
-        // Dragging paints a trail; the other two tools would either repeat themselves pointlessly
-        // or fight with the pointer, so they act once per press.
+        // Only paint and erase repeat while dragging. The other tools act once per press.
         if (_stroking && inside && moved &&
             _strokeTool is EditorTool.Paint or EditorTool.Erase)
         {
@@ -242,8 +237,6 @@ internal sealed class ScreenCanvas : Control
             return;
         }
 
-        // Walking the map with the arrow keys is the same gesture as walking it in the game, and
-        // it beats reaching for the world map every time the next screen along needs a look.
         switch (e.Key)
         {
             case Key.Left:
@@ -276,8 +269,6 @@ internal sealed class ScreenCanvas : Control
             return EditorTool.Erase;
         }
 
-        // Alt to pick is the habit every paint program has trained, and it saves a trip to the
-        // toolbar in the middle of laying tiles down.
         return modifiers.HasFlag(KeyModifiers.Alt) ? EditorTool.Pick : selected;
     }
 
@@ -302,9 +293,8 @@ internal sealed class ScreenCanvas : Control
     }
 
     /// <summary>
-    ///     Puts the core where the pointer is, measured in the screen's own pixels so that the position
-    ///     means the same thing whatever size the canvas is drawn at. The pointer is taken as the middle
-    ///     of the core rather than its corner, which is how dragging something about ought to feel.
+    ///     Puts the core where the pointer is, in the screen's own pixels so the position means the
+    ///     same thing at any canvas size. The pointer marks the middle of the core, not its corner.
     /// </summary>
     private void PlaceCore(EditorSession session, Point position)
     {
@@ -353,22 +343,22 @@ internal sealed class ScreenCanvas : Control
         int tile = session.Document.GetTile(session.CurrentScreen, _hoverX, _hoverY);
         string status = _hoverX + ", " + _hoverY + "  ·  " + TileCatalogue.Describe(tile);
 
-        // A booth is the one tile that carries something beyond its number, and nothing on the screen
-        // shows what that something is, so the status bar says it and how to change it.
+        // A booth carries a code beyond its tile number, and nothing on screen shows it, so the
+        // status bar gives the code and how to change it.
         if (tile == (int)ActionTiles.TeleportBooth)
         {
             status += "  ·  code " + (session.CurrentTeleportCode ?? "not set") + "  ·  shift-click to set";
         }
 
-        // Nor does a sign's number say which teleporter it advertises.
+        // A sign's tile number does not say which teleporter it advertises either.
         if (tile == (int)ActionTiles.TeleportSignpost)
         {
             status += "  ·  reads " + (session.Document.GetSignpostCode(session.CurrentScreen) ?? "blank") +
                       "  ·  shift-click to set";
         }
 
-        // The core is not a tile, so nothing above would mention it. Worth saying where the pointer is
-        // over it, because that is the only way to tell it apart from the scenery underneath.
+        // The core is not a tile, so nothing above mentions it. The status bar is the only way to
+        // tell it apart from the scenery underneath.
         CoreSite core = session.Positions.Core;
 
         if (core.ScreenNumber == session.CurrentScreen)
@@ -381,9 +371,8 @@ internal sealed class ScreenCanvas : Control
     }
 
     /// <summary>
-    ///     A pointer position in the screen's own pixels, which is what the core is placed in. An
-    ///     instance method rather than a static one because it needs the control's size to know what the
-    ///     canvas is drawn at.
+    ///     Converts a pointer position to the screen's own pixels, which is what the core is placed
+    ///     in. Not static, because it needs the control's size.
     /// </summary>
     private Point ScreenPixel(EditorSession session, Point position)
     {

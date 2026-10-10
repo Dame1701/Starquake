@@ -8,14 +8,11 @@ using Starquake.Structure;
 
 namespace Starquake.ScreenEditor.ViewModels;
 
-/// <summary>
-///     One marker as the toolbar offers it.
-/// </summary>
+/// <summary>One marker as the toolbar offers it.</summary>
 /// <remarks>
-///     The buttons are generated from <see cref="MarkerCatalogue" /> rather than written out one by
-///     one, so that the icon on a button is by construction the icon drawn on the square it paints.
-///     Writing them out would mean naming each icon twice - once here and once on the canvas - and a
-///     button that paints a square showing a different icon would be worse than no icons at all.
+///     The buttons are generated from <see cref="MarkerCatalogue" /> rather than written out, so a
+///     button's icon is always the icon drawn on the square it paints. Writing them out would name
+///     each icon twice, here and on the canvas, and let the two disagree.
 /// </remarks>
 internal sealed class MarkerChoice : ViewModelBase
 {
@@ -40,9 +37,9 @@ internal sealed class MarkerChoice : ViewModelBase
     public string Description => Face.Description;
 
     /// <summary>
-    ///     Whether this is the marker in hand. Setting it picks the marker up; unchecking is ignored,
-    ///     because the only thing that unchecks one of these is another being checked, and acting on
-    ///     that would undo the change that caused it.
+    ///     Whether this is the marker in hand. Setting it picks the marker up. Unchecking is ignored,
+    ///     because the only thing that unchecks one is another being checked, and acting on that would
+    ///     undo the change that caused it.
     /// </summary>
     public bool IsSelected
     {
@@ -57,8 +54,8 @@ internal sealed class MarkerChoice : ViewModelBase
     }
 
     /// <summary>
-    ///     Announces that what is in hand has changed. Called for every button whenever the selection
-    ///     moves, because a tile picked from the palette unchecks all of them and no button can know
+    ///     Announces that what is in hand has changed. Called for every button on any selection
+    ///     change, because a tile picked from the palette unchecks them all and no button can tell
     ///     that from its own state.
     /// </summary>
     public void NotifySelectionChanged() => RaisePropertyChanged(nameof(IsSelected));

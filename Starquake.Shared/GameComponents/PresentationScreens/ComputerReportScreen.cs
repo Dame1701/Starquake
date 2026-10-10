@@ -24,8 +24,8 @@ internal class ComputerReportScreen : GameScreenBase, IGameScreen
     private bool _fadeComplete;
 
     /// <summary>
-    ///     How long the page has been on screen, in logic frames, which is the whole of what the
-    ///     malfunction is driven by - see <see cref="MalfunctionSettings" />.
+    ///     How long the page has been on screen, in logic frames, which is the whole of what drives
+    ///     the malfunction. See <see cref="MalfunctionSettings" />.
     /// </summary>
     private int _framesShown;
 
@@ -92,9 +92,9 @@ internal class ComputerReportScreen : GameScreenBase, IGameScreen
     {
         ScreenEffects.SelectRenderViewPort(ViewPorts.EntireScreen);
 
-        // Asked for before the page is drawn and applied after it, when the view port is composed:
-        // what the malfunction has to break up is the finished page, so that the text comes apart
-        // along with the artwork under it rather than swimming about on top of it.
+        // Asked for before the page is drawn and applied after, when the view port is composed. What
+        // the malfunction breaks up is the finished page, so the text comes apart with the artwork
+        // under it rather than swimming about on top.
         ScreenEffects.ComposeViewPortThrough(ViewPorts.EntireScreen, Malfunctioning());
 
         _backgroundImage.Begin(BlendState.AlphaBlend);
@@ -143,9 +143,9 @@ internal class ComputerReportScreen : GameScreenBase, IGameScreen
     }
 
     /// <summary>
-    ///     The display failing, set up for this frame. <c>Shaders/Malfunction.fx</c> does the work;
-    ///     everything handed to it is a function of how long the page has been up, so it fails the
-    ///     same way every time anybody reads it.
+    ///     The display failing, set up for this frame. <c>Shaders/Malfunction.fx</c> does the work, and
+    ///     everything handed to it is a function of how long the page has been up, so it fails the same
+    ///     way every time.
     /// </summary>
     private Effect Malfunctioning()
     {

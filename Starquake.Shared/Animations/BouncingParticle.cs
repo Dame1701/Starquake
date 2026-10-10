@@ -23,35 +23,25 @@ internal class BouncingParticle
     private const bool Horizontal = false;
 
     /// <summary>
-    ///     The part is one collision cell across, and a step is never allowed to be longer than that -
-    ///     a longer one could pass straight through a wall without ever being tested inside it.
+    ///     A part is one collision cell across, and a step is never longer than that. A longer one
+    ///     could pass straight through a wall without ever being tested inside it.
     /// </summary>
     private const int ParticleSize = 32;
 
-    /// <summary>
-    ///     Where the fireball trails from, measured in from the part's top left corner.
-    /// </summary>
+    /// <summary>Where the fireball trails from, measured in from the part's top left corner.</summary>
     private const int FireballXOffset = 20;
 
     /// <inheritdoc cref="FireballXOffset" />
     private const int FireballYOffset = 5;
 
     /// <summary>
-    ///     How hard a part is thrown sideways, in pixels a logic frame. Which way is a coin flip.
-    /// </summary>
-    /// <summary>
-    ///     How hard a part is thrown, and the gravity that brings it back down.
+    ///     How hard a part is thrown, in pixels a logic frame, and the gravity that brings it back
+    ///     down.
     /// </summary>
     /// <remarks>
-    ///     Every part used to be thrown <em>upward</em> - ten to twenty-two a frame - with four to
-    ///     twelve of sideways either way, which is a fountain: they all went the same way and
-    ///     differed only in how far they leaned. They are thrown out along the points of a star
-    ///     now, evenly around the circle, so he bursts rather than spouts. Harder, too, because a
-    ///     part going sideways has no height to fall from and needs the speed to get anywhere.
-    ///     <para>
-    ///         The throw was <em>downward</em> before even that, at one to nineteen, so the parts
-    ///         dribbled off the bottom of him.
-    ///     </para>
+    ///     Parts are thrown along the points of a star, evenly around the circle, so Blob bursts
+    ///     rather than spouts. Thrown hard, because a part going sideways has no height to fall from
+    ///     and needs the speed to get anywhere.
     /// </remarks>
     private const int SlowestBurst = 19;
 
@@ -84,8 +74,8 @@ internal class BouncingParticle
     public bool Triggered => _particleBounce.Triggered;
 
     /// <summary>
-    ///     True while the emitter still holds particles, which outlives the bounce itself - so the
-    ///     last few released can fade out under their own modifiers instead of vanishing with the
+    ///     True while the emitter still holds particles, which outlasts the bounce itself, so the
+    ///     last few released fade out under their own modifiers instead of vanishing with the
     ///     fragment.
     /// </summary>
     public bool HasActiveParticles => Fireball.Effect.ActiveParticlesCount > 0;
@@ -95,13 +85,12 @@ internal class BouncingParticle
     /// <summary>
     ///     Throws this part out of Blob along its own point of the star.
     /// </summary>
-    /// <remarks>
-    ///     <paramref name="point" /> is which point of the star it goes along and
-    ///     <paramref name="points" /> is how many there are, which is how many parts he comes
-    ///     apart into. <paramref name="spin" /> turns the whole star, in radians: it is drawn once
-    ///     per death and given to every part, so they stay evenly spread but the burst is not in
-    ///     the same attitude every time.
-    /// </remarks>
+    /// <param name="point">Which point of the star this part goes along.</param>
+    /// <param name="points">How many points there are, which is how many parts Blob comes apart into.</param>
+    /// <param name="spin">
+    ///     Turns the whole star, in radians. Drawn once per death and given to every part, so they
+    ///     stay evenly spread but the burst is not in the same attitude every time.
+    /// </param>
     public void Trigger(
         int xPos,
         int yPos,
@@ -117,8 +106,8 @@ internal class BouncingParticle
         _oldYPos = YPos;
         _oldXPos = XPos;
 
-        // Clear any particles left over from the last death, they are still sitting in the
-        // emitter's buffer at the positions they froze at when the bounce stopped
+        // Clear particles left over from the last death. They are still in the emitter's buffer at
+        // the positions they froze at when the bounce stopped.
         Fireball.Reset();
 
         Fireball.Start();
@@ -126,7 +115,6 @@ internal class BouncingParticle
         Point thrown = StarburstVelocity(
             point, points, _randomNumberGenerator.Next(SlowestBurst, FastestBurst), spin);
 
-        // The gravity was a Next(1, 2), which can only ever return the one.
         _particleBounce.Trigger(
             Gravity, thrown.Y, thrown.X, effectMinDuration, effectMaxDuration);
     }
@@ -153,18 +141,11 @@ internal class BouncingParticle
     ///     A sideways throw in whole pixels a frame, never rounded to none at all.
     /// </summary>
     /// <remarks>
-    ///     A part thrown within a degree of the vertical has a cosine small enough to round away,
-    ///     and the sideways speed is the one thing nothing afterwards ever changes - no gravity
-    ///     acts along it and nothing damps it - so a part that starts with none has none for the
-    ///     whole of its life. It goes straight up, comes straight back down the same line, and
-    ///     bounces on that spot until its time runs out. That is about one crash landing in
-    ///     twenty: the star is turned by a fresh angle every time, and six points spaced sixty
-    ///     degrees apart put one of them within a degree of the vertical that often.
-    ///     <para>
-    ///         Rounding up rather than away is the smallest answer that keeps the star even. The
-    ///         part is still thrown as near to straight up as the arithmetic allows - it simply
-    ///         lands somewhere other than where it left.
-    ///     </para>
+    ///     Nothing ever changes a part's sideways speed: no gravity acts along it and nothing damps
+    ///     it. So a part thrown within a degree of the vertical, whose cosine would round away to
+    ///     nothing, would go straight up, come straight back down the same line, and bounce on that
+    ///     spot until its time ran out. Rounding up instead keeps the star even and still throws the
+    ///     part as near to straight up as the arithmetic allows.
     /// </remarks>
     private static int WithoutRoundingItAway(double sideways)
     {
@@ -187,9 +168,8 @@ internal class BouncingParticle
     {
         if (!_particleBounce.Triggered)
         {
-            // The bounce has finished, so stop releasing particles, but keep updating the
-            // effect so the ones still in flight age, move and retire rather than freezing
-            // in the emitter's buffer
+            // The bounce has finished, so stop releasing particles but keep updating the effect, so
+            // the ones still in flight age, move and retire rather than freezing in the buffer.
             Fireball.Stop();
             Fireball.Update(XPos + FireballXOffset, YPos + FireballYOffset, gameTime);
 
@@ -198,7 +178,7 @@ internal class BouncingParticle
 
         Point p = _particleBounce.Update();
 
-        // Vertically first, and the horizontal step is then taken from where that left it
+        // Vertically first, with the horizontal step taken from where that left it.
         YPos += StepAlongAxis(Vertical, p.Y);
         _oldYPos = YPos;
 
@@ -209,23 +189,20 @@ internal class BouncingParticle
     }
 
     /// <summary>
-    ///     Moves the part one step along one axis, bouncing it off anything it meets and off the edges
-    ///     of the screen, and returns how far it actually got.
+    ///     Moves the part one step along one axis, bouncing off anything it meets and off the screen
+    ///     edges.
     /// </summary>
     /// <remarks>
-    ///     This was four blocks - one per axis per direction - which were the same twelve lines with the
-    ///     axis and the sign swapped. The sign is what decides everything: which way to probe, whether
-    ///     the result is negated, and which of the two screen edges is the one to stop at.
+    ///     The sign decides everything: which way to probe, whether the result is negated, and which
+    ///     screen edge to stop at.
     ///     <para>
     ///         A step of nothing is not a wall. <c>CheckCollision</c> answers with the distance it was
-    ///         handed and can only ever lower it, so asking it for nought gets nought back - which read
-    ///         here as blocked and turned the part round on that axis, with a clang and a shower of
-    ///         sparks, on every frame it was not moving along that axis. Vertically that was the top of
-    ///         every arc, where the fall passes through nought on its way back down. Horizontally it
-    ///         never ended: nothing changes a part's sideways speed once it is thrown, so a part thrown
-    ///         straight up spent its whole life striking sparks off thin air.
+    ///         handed and can only lower it, so asking for nought gets nought back. Reading that as
+    ///         blocked would turn the part round with a clang and sparks on every frame it was not
+    ///         moving along that axis.
     ///     </para>
     /// </remarks>
+    /// <returns>How far the part actually got.</returns>
     private int StepAlongAxis(bool vertical, int requestedStep)
     {
         if (requestedStep == 0)
@@ -235,8 +212,7 @@ internal class BouncingParticle
 
         bool movingPositive = requestedStep > 0;
 
-        // Never more than its own size in one step, or it could pass clean through a wall between
-        // one frame and the next.
+        // Never more than its own size in one step, or it could pass clean through a wall.
         int step = movingPositive
             ? Math.Min(requestedStep, ParticleSize)
             : Math.Max(requestedStep, -ParticleSize);
@@ -247,7 +223,7 @@ internal class BouncingParticle
                 ? Direction.Right
                 : Direction.Left;
 
-        // CheckCollision wants a distance rather than a signed step; the direction is already in the
+        // CheckCollision wants a distance rather than a signed step. The direction is already in the
         // argument above it.
         int speed = _gameScreens.Collisions.CheckCollision(
             direction,
@@ -274,8 +250,7 @@ internal class BouncingParticle
             ? _gameScreens.ScreenHeight
             : _gameScreens.ScreenWidth;
 
-        // Bounced off the screen edges as well as the scenery, which keeps the fragments on screen
-        // where they can be seen.
+        // Bounced off the screen edges as well as the scenery, which keeps the fragments in view.
         if (movingPositive && position > screenSize - ParticleSize)
         {
             BounceBackTo(vertical, screenSize - ParticleSize);
@@ -315,8 +290,8 @@ internal class BouncingParticle
             _particleBounce.Draw(spriteToDraw, XPos + 4, YPos + 4, spriteNumber);
         }
 
-        // Carry on drawing after the bounce has finished so the last particles released can
-        // fade out under their own modifiers instead of vanishing with the fragment
+        // Keep drawing after the bounce has finished, so the last particles released fade out under
+        // their own modifiers instead of vanishing with the fragment.
         if (Triggered || HasActiveParticles)
         {
             Fireball.Draw(screenFade);

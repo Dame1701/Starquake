@@ -13,8 +13,8 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     The two parts of <c>Blob</c> that are about arithmetic rather than about drawing: getting him
-///     out of scenery he has ended up inside, and the four things he can carry.
+///     The two parts of <c>Blob</c> that are arithmetic rather than drawing: getting him out of
+///     scenery he has ended up inside, and the four things he can carry.
 /// </summary>
 public class UnstickProbeTests
 {
@@ -152,9 +152,9 @@ public class UnstickProbeTests
 }
 
 /// <summary>
-///     The four things Blob carries. A queue rather than a set of slots, which is what makes
-///     the game's puzzles what they are: to get at something three places back he has to cycle
-///     everything in front of it out onto the floor.
+///     The four things Blob carries. A queue rather than a set of slots, which is what makes the
+///     puzzles work. To get at something three places back, Blob has to cycle everything in front
+///     of it out onto the floor.
 /// </summary>
 public class InventoryTests
 {

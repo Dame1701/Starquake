@@ -5,38 +5,32 @@
 namespace Starquake.Constants;
 
 /// <summary>
-///     The tunnel mouths that join one screen to the next. There are ten of them because the artwork
-///     draws a tunnel differently depending on the scenery it is cut into, but they all behave
-///     alike: walking into a left-hand mouth steps the screen number down, a right-hand one steps it
-///     up. They are laid out as one contiguous run of tile numbers with the two directions
-///     interleaved, so a left mouth is always even and its right-hand partner is the next number up.
+///     The tunnel mouths that join one screen to the next. Walking into a left-hand mouth steps the
+///     screen number down, a right-hand one steps it up. There are ten of each because the artwork
+///     varies with the scenery the tunnel is cut into; they all behave the same.
+///     <para>
+///         The tile numbers form one unbroken run with the two directions alternating, so a left
+///         mouth is always even and its right-hand partner is the next number up.
+///     </para>
 /// </summary>
 public static class TunnelTiles
 {
-    /// <summary>
-    ///     The first and last tile numbers of the run, for code that sweeps the whole set rather than
-    ///     testing one tile. The bounds are inclusive.
-    /// </summary>
+    /// <summary>The first and last tile numbers of the run, both inclusive.</summary>
     public const int FirstMouth = LeftMouth1;
 
     /// <inheritdoc cref="FirstMouth" />
     public const int LastMouth = RightMouth10;
 
-    /// <summary>
-    ///     How many tunnel mouths there are of each direction.
-    /// </summary>
+    /// <summary>How many tunnel mouths there are in each direction.</summary>
     public const int MouthPairs = 10;
 
     /// <summary>
-    ///     The distance from one mouth of a given direction to the next, which is two because the
-    ///     left and right mouths alternate.
+    ///     The step from one mouth to the next of the same direction. Two, because left and right
+    ///     mouths alternate.
     /// </summary>
     public const int MouthStride = 2;
 
-    /// <summary>
-    ///     The ten left-hand tunnel mouths. Walking into one of these moves Blob to the previous
-    ///     screen.
-    /// </summary>
+    /// <summary>The left-hand mouths. Walking into one moves Blob to the previous screen.</summary>
     public const int LeftMouth1 = 420;
 
     /// <inheritdoc cref="LeftMouth1" />
@@ -66,10 +60,7 @@ public static class TunnelTiles
     /// <inheritdoc cref="LeftMouth1" />
     public const int LeftMouth10 = 438;
 
-    /// <summary>
-    ///     The ten right-hand tunnel mouths. Walking into one of these moves Blob to the next
-    ///     screen.
-    /// </summary>
+    /// <summary>The right-hand mouths. Walking into one moves Blob to the next screen.</summary>
     public const int RightMouth1 = 421;
 
     /// <inheritdoc cref="RightMouth1" />
@@ -100,23 +91,16 @@ public static class TunnelTiles
     public const int RightMouth10 = 439;
 
     /// <summary>
-    ///     Whether <paramref name="tileImage" /> is one of the ten left-hand mouths - the tiles that
-    ///     step the screen number down when Blob walks into one.
+    ///     Whether <paramref name="tileImage" /> is a left-hand mouth, the kind that steps the screen
+    ///     number down.
     /// </summary>
-    /// <remarks>
-    ///     The run is contiguous and the two directions alternate from an even first mouth, which is
-    ///     what <see cref="FirstMouth" />, <see cref="LastMouth" /> and <see cref="MouthStride" />
-    ///     are for. Those three were already here and the question was still being asked by naming
-    ///     all ten, four times over - twice in <c>Blob</c> and twice in <c>ScreenRenderer</c>.
-    /// </remarks>
     public static bool IsLeftMouth(int tileImage)
         => tileImage is >= FirstMouth and <= LastMouth && tileImage % MouthStride == 0;
 
     /// <summary>
-    ///     Whether <paramref name="tileImage" /> is one of the ten right-hand mouths - the tiles that
-    ///     step the screen number up.
+    ///     Whether <paramref name="tileImage" /> is a right-hand mouth, the kind that steps the
+    ///     screen number up.
     /// </summary>
-    /// <inheritdoc cref="IsLeftMouth" />
     public static bool IsRightMouth(int tileImage)
         => tileImage is >= FirstMouth and <= LastMouth && tileImage % MouthStride != 0;
 }

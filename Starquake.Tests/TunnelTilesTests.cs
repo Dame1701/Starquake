@@ -8,10 +8,8 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     Which tunnel mouths step the screen number which way. The ten of each direction were named
-///     out in full at four separate sites - twice in <c>Blob</c>, deciding whether Blob walks
-///     through, and twice in <c>ScreenRenderer</c>, deciding which sprite covers the tile - while
-///     the constants describing the run as contiguous and alternating sat unused beside them.
+///     Which tunnel mouths step the screen number which way. <c>Blob</c> reads them to decide
+///     whether he walks through, and <c>ScreenRenderer</c> to decide which sprite covers the tile.
 /// </summary>
 /// <remarks>
 ///     Deriving the answer rather than listing it is only safe if the layout really is what
@@ -56,8 +54,7 @@ public class TunnelTilesTests
 
     /// <summary>
     ///     The two directions are interleaved, so getting the parity the wrong way round would send
-    ///     Blob through every tunnel backwards - which is the mistake this refactor could have made
-    ///     and nothing else would have caught.
+    ///     Blob through every tunnel backwards, and nothing else would catch it.
     /// </summary>
     [Theory]
     [InlineData(TunnelTiles.RightMouth1)]

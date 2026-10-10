@@ -18,8 +18,8 @@ internal class StartableGameComponentBase
     /// <summary>
     ///     How far through starting up this component is. Written by whichever thread is doing the
     ///     work and read by the one drawing the loading screen, so both are backed by volatile
-    ///     fields - the reader polls these every frame and needs to see a change promptly rather
-    ///     than whenever the CPU happens to publish it.
+    ///     fields: the reader polls every frame and must see a change promptly rather than whenever
+    ///     the CPU happens to publish it.
     /// </summary>
     public GameEngineStatus Status
     {

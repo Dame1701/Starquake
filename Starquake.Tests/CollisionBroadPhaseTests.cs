@@ -20,13 +20,10 @@ namespace Starquake.Tests;
 /// </remarks>
 public class CollisionBroadPhaseTests
 {
-    // Internal test methods rather than public, as in CollisionDetectionTests and for the same
-    // reason: Direction is one of the game's own types and those are internal, which a public
-    // signature here cannot name.
+    // Internal test methods rather than public. Direction is one of the game's own types and those
+    // are internal, which a public signature here cannot name.
 
-    /// <summary>
-    ///     The walk as it was before anything was skipped: step by step, stop when the boxes touch.
-    /// </summary>
+    /// <summary>The walk written out plainly: step by step, stop when the boxes touch.</summary>
     private static int WalkedOneStepAtATime(Direction direction, int velocity,
         int obj1X, int obj1Y, int obj1W, int obj1H,
         int obj2X, int obj2Y, int obj2W, int obj2H)
@@ -63,7 +60,7 @@ public class CollisionBroadPhaseTests
 
     /// <summary>
     ///     Every cell position on a screen, against a mover the size of Blob, in all four
-    ///     directions - which is the case the skip was written for and the one it runs in.
+    ///     directions. That is the case the skip was written for and the one it runs in.
     /// </summary>
     [Theory]
     [InlineData(Direction.Left)]
@@ -100,8 +97,8 @@ public class CollisionBroadPhaseTests
     }
 
     /// <summary>
-    ///     The boundary the skip is most likely to get wrong: a cell exactly as far away as the
-    ///     mover can reach, one pixel nearer, and one pixel further. Swept across every offset a
+    ///     The boundary the skip is most likely to get wrong. A cell exactly as far away as the
+    ///     mover can reach, one pixel nearer, and one pixel further, swept across every offset a
     ///     cell can sit at relative to the mover, on both axes, at several speeds.
     /// </summary>
     [Theory]

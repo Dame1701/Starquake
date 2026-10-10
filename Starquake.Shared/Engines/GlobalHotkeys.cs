@@ -21,11 +21,9 @@ namespace Starquake.Engines;
 ///     know which way a toggle has just gone is to recognise the result.
 /// </summary>
 /// <remarks>
-///     These are not the composition root and they are not the frame loop, which is what
-///     <c>GameEngine</c> is for. Three of them are about the session and the presentation and
-///     nothing else; the fourth, the artwork swap, has to tell whoever is drawing that the sprites
-///     underneath them have changed, and it does that through a callback the engine supplies
-///     rather than by holding the engine.
+///     Most of these touch only the session and the presentation. The artwork swap has to tell
+///     whoever is drawing that the sprites underneath them changed, and does so through a callback
+///     the engine supplies rather than by holding the engine.
 /// </remarks>
 internal class GlobalHotkeys(
     ToggleKeys input,
@@ -56,14 +54,13 @@ internal class GlobalHotkeys(
     /// </summary>
     /// <remarks>
     ///     The pause is what makes Q safe to take. Q is not a spare key during play: the original
-    ///     Spectrum layout binds it to <em>up</em>, so quitting on it unconditionally ended the game
-    ///     every time that player tried to climb. It is also <c>PlayerKeySet.Quit</c> in two of the
-    ///     four layouts, which <c>MainGameScreen</c> reads to abandon a game to the Game Over screen.
-    ///     Pausing first settles both: nothing is being steered, and while the hand-over to Game Over
-    ///     is still reached in the same logic frame, the process ends before it can be seen.
+    ///     Spectrum layout binds it to <em>up</em>, so quitting on it unconditionally would end the
+    ///     game every time that player tried to climb. It is also <c>PlayerKeySet.Quit</c> in two of
+    ///     the four layouts, which <c>MainGameScreen</c> reads to abandon a game to the Game Over
+    ///     screen. Requiring a pause settles both.
     ///     <para>
-    ///         Only an in-play screen can be paused - <see cref="TogglePauseIfAsked" /> will not pause
-    ///         anything else - so on the menus Escape remains the way out.
+    ///         Only an in-play screen can be paused, as <see cref="TogglePauseIfAsked" /> will not
+    ///         pause anything else, so Escape remains the way out of the menus.
     ///     </para>
     /// </remarks>
     private void QuitIfAsked()
@@ -80,7 +77,7 @@ internal class GlobalHotkeys(
     }
 
     /// <summary>
-    ///     The teleporter is deliberately not pausable - it is the one in-play screen where standing
+    ///     The teleporter is deliberately not pausable. It is the one in-play screen where standing
     ///     still is the point, so pausing it would do nothing and only confuse.
     /// </summary>
     private void TogglePauseIfAsked()
@@ -104,9 +101,9 @@ internal class GlobalHotkeys(
     }
 
     /// <remarks>
-    ///     A toggle rather than IsKeyDown: held down, that flipped fullscreen once per logic frame for
-    ///     as long as the key was held. The game pauses itself afterwards so the player does not die
-    ///     while the window is resizing - on every in-play screen but the teleporter, which cannot pause.
+    ///     A toggle rather than <c>IsKeyDown</c>, which held down would flip fullscreen once per logic
+    ///     frame. The game pauses itself afterwards so the player does not die while the window
+    ///     resizes, on every in-play screen but the teleporter, which cannot pause.
     /// </remarks>
     private void ToggleFullScreenIfAsked()
     {
@@ -121,7 +118,7 @@ internal class GlobalHotkeys(
         if (pausedForTheSwitch)
         {
             // Paused after switching to or from fullscreen, so the player does not die while the
-            // window is still resizing.
+            // window is resizing.
             session.Paused = true;
         }
 
@@ -138,24 +135,20 @@ internal class GlobalHotkeys(
     }
 
     /// <summary>
-    ///     Leaves the window in a state the player can still use after a failed display switch. The
-    ///     caller rethrows: this tidies up, it does not handle anything.
+    ///     Leaves the window usable after a failed display switch. The caller rethrows: this tidies
+    ///     up, it does not handle anything.
     /// </summary>
     /// <remarks>
-    ///     What was here was a bare <c>catch { }</c>, and it was wrong twice over. It swallowed
-    ///     everything, including a bug in the method it wrapped - and it swallowed it into the one
-    ///     state <see cref="ToggleFullScreen" />'s own remarks warn about. Going fullscreen drops the
-    ///     window's border before the switch, because SDL ignores a border change on a window that
-    ///     is already fullscreen; so a throw anywhere after that line left the window borderless and
-    ///     still windowed, which is a game with no title bar and no way to close it with the mouse.
-    ///     Silently. With the game paused, because the pause is set before the attempt.
+    ///     Going fullscreen drops the window's border before the switch, because SDL ignores a border
+    ///     change on a window that is already fullscreen. So a throw after that line leaves the window
+    ///     borderless but still windowed, which is a game with no title bar and no way to close it
+    ///     with the mouse, and paused, because the pause is set before the attempt.
     ///     <para>
-    ///         So the border is put back to match where the device actually ended up, the pause is
-    ///         lifted if this is what set it, and the player is told. Then it rethrows, because none
-    ///         of that makes the failure handled: there is no documented exception set for a device
-    ///         reset, nothing here can judge whether the graphics device is still fit to draw with,
-    ///         and a game that cannot switch its own display has something wrong with it that is
-    ///         worth seeing rather than worth hiding behind an F12 that quietly does nothing.
+    ///         The border is put back to match where the device actually ended up, the pause lifted if
+    ///         this is what set it, and the player told. It then rethrows: there is no documented
+    ///         exception set for a device reset, nothing here can judge whether the graphics device is
+    ///         still fit to draw with, and a game that cannot switch its own display has something
+    ///         wrong worth seeing rather than hiding behind an F12 that quietly does nothing.
     ///     </para>
     /// </remarks>
     private void PutTheWindowBack(bool pausedForTheSwitch)
@@ -200,25 +193,23 @@ internal class GlobalHotkeys(
     }
 
     /// <summary>
-    ///     Go fullscreen at the resolution the desktop is already running at, so the picture is
-    ///     composed for the display it lands on instead of being stretched up from the windowed
-    ///     size. The game itself never changes size: it always composes at
-    ///     <see cref="CompositionSize.Width" /> x <see cref="CompositionSize.Height" /> and
-    ///     Presentation.Transform scales that onto whatever back buffer we end up with.
+    ///     Goes fullscreen at the desktop's own resolution, so the picture is composed for the display
+    ///     it lands on rather than stretched up from the windowed size. The game never changes size:
+    ///     it always composes at <see cref="CompositionSize.Width" /> by
+    ///     <see cref="CompositionSize.Height" /> and Presentation.Transform scales that onto whatever
+    ///     back buffer results.
     ///     <para>
-    ///         A hardware mode switch was used here and is not needed: the game scales onto any back
-    ///         buffer, so there is nothing to gain from changing the display's mode, and on a Retina
-    ///         Mac it left the window server stroking a one point #333333 outline round all four
-    ///         edges of the display. Measured rather than guessed - the window itself sat at exactly
-    ///         0,0 by the full display size and its own contents were black to the last pixel on
-    ///         every edge, so the grey was composited outside it and was not the game's to draw or
-    ///         to clear. Borderless with no mode switch is the combination that has no outline.
+    ///         Borderless with no hardware mode switch, and both parts are needed. A mode switch gains
+    ///         nothing, since the game scales onto any back buffer, and on a Retina Mac it leaves the
+    ///         window server stroking a one point #333333 outline around all four edges of the
+    ///         display: the window itself sits at exactly 0,0 by the full display size with its own
+    ///         contents black to the last pixel, so that grey is composited outside it and is not the
+    ///         game's to clear.
     ///     </para>
     ///     <para>
-    ///         Borderless alone was tried before and rejected, because on its own it gives a window
-    ///         clamped to the desktop area *below* the menu bar - 39 points short and 39 points down.
-    ///         Dropping the window's border is what stops that: a bordered window cannot cover the
-    ///         menu bar, and a borderless one can. The two changes only work together.
+    ///         Borderless alone clamps the window to the desktop area <em>below</em> the menu bar, 39
+    ///         points short and 39 points down. Dropping the border is what allows covering the menu
+    ///         bar, so the two changes only work together.
     ///     </para>
     /// </summary>
     private void ToggleFullScreen()
@@ -229,8 +220,8 @@ internal class GlobalHotkeys(
 
         if (goingFullScreen)
         {
-            // Before the switch, not after: SDL ignores a border change on a window that is
-            // already fullscreen, so asking for it afterwards does nothing at all.
+            // Before the switch, not after. SDL ignores a border change on a window that is already
+            // fullscreen, so asking afterwards does nothing.
             window.IsBorderless = true;
 
             DisplayMode desktop = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
@@ -249,10 +240,10 @@ internal class GlobalHotkeys(
 
         if (!goingFullScreen)
         {
-            // And after the switch coming back, for that same reason - which is the whole of why
-            // this is not one assignment either side of ApplyChanges. Asking for the border while
-            // the window was still fullscreen left it borderless in a window, with no title bar
-            // and so no way to close the game with the mouse.
+            // And after the switch coming back, for the same reason, which is why this is not one
+            // assignment either side of ApplyChanges. Asking for the border while the window is
+            // still fullscreen leaves it borderless in a window, with no title bar and so no way to
+            // close the game with the mouse.
             window.IsBorderless = false;
         }
     }

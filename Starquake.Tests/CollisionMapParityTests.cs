@@ -17,10 +17,10 @@ namespace Starquake.Tests;
 /// </summary>
 /// <remarks>
 ///     <see cref="CollisionMapDifferentialTests" /> sweeps the real map, but a screen as it is
-///     stored carries no pick-ups, no power-up and no pyramid - those are placed by
-///     <c>WorldPopulator</c> when a game starts - and nothing there has laid a platform or opened a
-///     door. Those are the cells that are not on the grid and so are the ones the rework left in a
-///     list, which makes them exactly the ones worth measuring.
+///     stored carries no pick-ups, no power-up and no pyramid, because <c>WorldPopulator</c> places
+///     those when a game starts, and nothing there has laid a platform or opened a door. Those are
+///     the cells the map holds in a list rather than on its grid, which makes them the ones worth
+///     measuring here.
 /// </remarks>
 public class CollisionMapParityTests
 {

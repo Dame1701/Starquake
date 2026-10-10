@@ -21,9 +21,8 @@ internal class MultiTriggerTimeBasedParticleEffect(
     public ParticleEffect Effect => _mercury.Effect;
 
     /// <summary>
-    ///     This one has no active flag of its own: it is emitting for as long as there is anything
-    ///     in flight, which is what lets the same effect be triggered again at a second place
-    ///     before the first lot has finished.
+    ///     No active flag of its own: it is emitting for as long as anything is in flight, which is
+    ///     what lets the same effect be triggered at a second place before the first lot has finished.
     /// </summary>
     public bool EffectActive => _mercury.ActiveParticles > 0;
 
@@ -44,7 +43,7 @@ internal class MultiTriggerTimeBasedParticleEffect(
     public void Reset() => _mercury.Terminate();
 
     /// <remarks>
-    ///     Unlike the other two this skips the draw entirely when nothing is in flight, rather than
+    ///     Unlike the other two, this skips the draw entirely when nothing is in flight rather than
     ///     handing Mercury an empty effect to render.
     /// </remarks>
     public void Draw()

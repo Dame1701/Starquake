@@ -12,15 +12,14 @@ namespace Starquake.Engines.ScreenEffects;
 ///     taking the player away from after the game has moved on to the next one.
 /// </summary>
 /// <remarks>
-///     A view port's own target is reused every frame, so by the time a transition is drawing, the
-///     screen being left behind has already been painted over. Taking the copy costs one target the
-///     size of the play area and one blit at the moment the effect starts.
+///     A view port's own target is reused every frame, so by the time a transition draws, the screen
+///     being left has already been painted over. The copy costs one target the size of the play area
+///     and one blit when the effect starts.
 ///     <para>
-///         The copy is taken during <c>Update</c>, before anything has drawn this frame, so what the
-///         source target still holds is the last frame that was actually shown - which is the screen
-///         being left, even though the screen number has already moved on. The targets are created
-///         <see cref="RenderTargetUsage.PreserveContents" />, so that is guaranteed rather than
-///         lucky.
+///         Taken during <c>Update</c>, before anything has drawn this frame, so what the source
+///         target still holds is the last frame actually shown: the screen being left, even though
+///         the screen number has moved on. The targets are created
+///         <see cref="RenderTargetUsage.PreserveContents" />, which is what guarantees that.
 ///     </para>
 /// </remarks>
 internal sealed class ScreenSnapshot(GraphicsDeviceManager graphics)
@@ -28,14 +27,10 @@ internal sealed class ScreenSnapshot(GraphicsDeviceManager graphics)
     private SpriteBatch? _copier;
     private RenderTarget2D? _picture;
 
-    /// <summary>
-    ///     The last picture taken, or null before anything has asked for one.
-    /// </summary>
+    /// <summary>The last picture taken, or null before anything has asked for one.</summary>
     public Texture2D? Picture => _picture;
 
-    /// <summary>
-    ///     Copies what <paramref name="source" /> is holding now.
-    /// </summary>
+    /// <summary>Copies what <paramref name="source" /> is holding now.</summary>
     public void Capture(RenderTarget2D source)
     {
         GraphicsDevice device = graphics.GraphicsDevice;

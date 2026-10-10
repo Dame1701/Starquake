@@ -37,8 +37,8 @@ public class SignpostTests
     }
 
     /// <summary>
-    ///     The whole reason a sign stores a screen number rather than a copy of the code: renaming
-    ///     the code has to rename what every sign pointing at it says.
+    ///     This is why a sign stores a screen number rather than a copy of the code. Renaming the
+    ///     code has to rename what every sign pointing at it says.
     /// </summary>
     [Fact]
     public void CodeShownOn_TheTeleportersCodeRenamed_ReadsTheNewCode()

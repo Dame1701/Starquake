@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 
 namespace Starquake.Particles;
 
-// All standard triggered and continual with and without duration particle effects
+// Every particle effect triggered from one position, continuous or not, with or without a duration.
 internal interface IStandardParticleEffect : IParticleEffect
 {
     void Start();

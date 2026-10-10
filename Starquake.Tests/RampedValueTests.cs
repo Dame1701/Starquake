@@ -9,10 +9,8 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     A value travelling from one end to the other a step per frame. This was three classes -
-///     <c>FloatAdder</c>, <c>FloatSubtractor</c> and <c>IntegerSubtractor</c> - and the thing worth
-///     pinning now they are one is that nobody picks the direction any more: it follows from the two
-///     ends it is given.
+///     A value travelling from one end to the other a step per frame. Nothing tells it which way to
+///     go: the direction follows from the two ends it is given, which is what these pin.
 /// </summary>
 public class RampedValueTests
 {
@@ -69,8 +67,8 @@ public class RampedValueTests
     }
 
     /// <summary>
-    ///     The fade that crosses between the element leaving and the element arriving. It was the
-    ///     one of the three held as an int, and it steps through the same colour levels either way.
+    ///     The fade that crosses between the element leaving and the element arriving. Read as a
+    ///     whole colour level rather than a float, and it steps through the same levels either way.
     /// </summary>
     [Fact]
     public void ColourLevel_SteppedDownFromFull_CountsOffWholeLevels()

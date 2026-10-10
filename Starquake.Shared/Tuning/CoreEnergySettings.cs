@@ -14,9 +14,8 @@ namespace Starquake.Tuning;
 ///     <c>Shaders/CoreFunnel.fx</c> and the node arcs' own shader; see <c>PlanetCoreScreen</c>.
 /// </summary>
 /// <remarks>
-///     The room had two particle effects emitted from its middle and nothing else moving, which is
-///     a quiet room rather than the heart of a planet. Both of those are kept - what is added is
-///     underneath them and between the elements.
+///     Drawn underneath the room's two particle effects and between the elements, not in place of
+///     them.
 /// </remarks>
 internal static class CoreEnergySettings
 {
@@ -26,60 +25,55 @@ internal static class CoreEnergySettings
     /// <summary>How many arms the spiral has.</summary>
     public const float Arms = 5f;
 
-    /// <summary>
-    ///     How hard the arms wind inward. Negative turns the funnel the other way, which is the
-    ///     one knob worth trying both ways before settling.
-    /// </summary>
+    /// <summary>How hard the arms wind inward. Negative turns the funnel the other way.</summary>
     public const float Twist = 0.9f;
 
     /// <summary>How fast it turns, in radians per logic frame.</summary>
     private const double TurnSpeed = 0.11;
 
     /// <summary>
-    ///     How much faster than the funnel the particles behind it go round. The same way about,
-    ///     and a little quicker, so the two read as one body of energy turning rather than two
-    ///     things that happen to be spinning.
+    ///     How much faster than the funnel the particles behind it travel. The same way round and a
+    ///     little quicker, so the two read as one body of energy turning rather than two things that
+    ///     happen to be spinning.
     /// </summary>
     private const double ParticleTurnFaster = 1.35;
 
     /// <summary>
-    ///     How far out from the middle the particles are thrown from, in pixels. They used to come
-    ///     from the exact centre, which gives an even spray however fast anything else is turning;
-    ///     orbiting the point they leave from is what makes them spiral, and it costs nothing but
-    ///     the two sums below - <c>ProjectMercury</c> has no vortex of its own and is out of
-    ///     bounds to add one to.
+    ///     How far out from the middle the particles are thrown from, in pixels. Orbiting the point
+    ///     they leave from is what makes them spiral: emitted from the exact centre they give an even
+    ///     spray however fast anything else turns. <c>ProjectMercury</c> has no vortex of its own and
+    ///     is out of bounds to add one to, so the two sums below do it instead.
     /// </summary>
     private const double EmitterOrbit = 44;
 
     /// <summary>
     ///     Where the funnel fades out, as a fraction of the rectangle it is drawn over. Short of a
-    ///     half so it is gone before the rectangle's corners, which would otherwise show as a hard
-    ///     square edge against the room.
+    ///     half, so it is gone before the corners, which would otherwise show as a hard square edge
+    ///     against the room.
     /// </summary>
     public const float OuterEdge = 0.46f;
 
     /// <summary>
     ///     Where the throat begins. The elements sit inside this, so the arms sweep around them
-    ///     rather than across them.
+    ///     rather than across.
     /// </summary>
     public const float ThroatEdge = 0.17f;
 
     /// <summary>
-    ///     How brightly the funnel burns. It is drawn additively, so this is how much light it
-    ///     adds to the room rather than how opaque it is - the room shows through it either way,
-    ///     and turning this down is what makes it something the core is seen through rather than
-    ///     something drawn over the core.
+    ///     How brightly the funnel burns. Drawn additively, so this is how much light it adds to the
+    ///     room rather than how opaque it is. Keeping it low is what makes the funnel something the
+    ///     core is seen through rather than something drawn over the core.
     /// </summary>
     /// <remarks>
-    ///     Settled by eye between two that were not it: 0.85 drew over the core rather than around
-    ///     it, and 0.3 could hardly be seen at all.
+    ///     Narrow usable range: much brighter draws over the core instead of around it, much dimmer
+    ///     cannot be seen at all.
     /// </remarks>
     public const float Brightness = 0.5f;
 
     /// <summary>
-    ///     How much of <see cref="Brightness" /> the throat gets. Held down separately because it
-    ///     is one bright patch in the middle where the arms are thin lines spread over the room,
-    ///     so the same number on both leaves the middle shouting and the arms whispering.
+    ///     How much of <see cref="Brightness" /> the throat gets. Held down separately because the
+    ///     throat is one bright patch where the arms are thin lines spread over the room, so the same
+    ///     number on both leaves the middle shouting and the arms whispering.
     /// </summary>
     public const float ThroatShare = 0.55f;
 
@@ -101,26 +95,23 @@ internal static class CoreEnergySettings
     /// <summary>How many elements there are to arc between.</summary>
     public static int ElementCount => CoreSite.SpritesAcross * CoreSite.SpritesDown;
 
-    /// <summary>
-    ///     How far the funnel has turned by a given logic frame.
-    /// </summary>
+    /// <summary>How far the funnel has turned by a given logic frame.</summary>
     public static float TurnedBy(int logicFrame) => (float)(logicFrame * TurnSpeed);
 
     /// <summary>
-    ///     Where the core's particles are thrown from - a point going round the middle rather than
-    ///     the middle itself.
+    ///     Where the core's particles are thrown from: a point going round the middle rather than the
+    ///     middle itself.
     /// </summary>
     /// <remarks>
-    ///     Driven by how far the funnel has actually turned rather than by the frame, so the two
-    ///     stay in step when it winds up for a replacement. Working it out from the frame kept them
-    ///     together only while the rate never changed.
-    /// </remarks>
-    /// <remarks>
-    ///     It turns the same way the funnel does, which is anticlockwise on screen: the shader's
-    ///     arms hold their shape where <c>angle * Arms + Turned</c> is constant, so the angle they
-    ///     sit at falls as the turn climbs, and screen angles run clockwise because y counts
-    ///     downward. Hence the minus. If the two are ever seen turning against each other, that
-    ///     sign is the whole of it.
+    ///     Driven by how far the funnel has actually turned rather than by the frame, so the two stay
+    ///     in step when it winds up for a replacement. Deriving it from the frame only holds while
+    ///     the rate never changes.
+    ///     <para>
+    ///         The minus sign is what makes it turn the same way as the funnel. The shader's arms
+    ///         hold their shape where <c>angle * Arms + Turned</c> is constant, so the angle they sit
+    ///         at falls as the turn climbs, and screen angles run clockwise because y counts
+    ///         downward. If the two are ever seen turning against each other, that sign is the cause.
+    ///     </para>
     /// </remarks>
     public static Point EmitterAt(float funnelTurned, int centreX, int centreY)
     {
@@ -133,41 +124,39 @@ internal static class CoreEnergySettings
 
     /// <summary>
     ///     How much brighter the funnel burns while a slot is being filled, and how much faster it
-    ///     turns. The core is a machine being repaired: it should bear down on the part going in,
-    ///     not stop and wait for it.
+    ///     turns. The core is a machine being repaired, so it bears down on the part going in rather
+    ///     than stopping to wait for it.
     /// </summary>
     public const float FillingBrightness = 2.1f;
 
     /// <inheritdoc cref="FillingBrightness" />
     public const float FillingTurnFaster = 2.6f;
 
-    /// <summary>
-    ///     How many frames the funnel takes to wind up to that and back down again.
-    /// </summary>
+    /// <summary>How many frames the funnel takes to wind up to that and back down.</summary>
     public static readonly int WindFrames = LogicClock.Seconds(0.35);
 
     /// <summary>
-    ///     How far along winding up to a filling the core is, nought at rest and one at full
-    ///     bearing. Ramped rather than switched, so the room leans into a replacement and settles
-    ///     out of it instead of snapping either way.
+    ///     How far the core has wound up towards a filling, nought at rest and one at full bearing.
+    ///     Ramped rather than switched, so the room leans into a replacement and settles out of it
+    ///     instead of snapping either way.
     /// </summary>
     public static float WoundUpBy(int framesWinding)
         => Math.Clamp(framesWinding / (float)WindFrames, 0f, 1f);
 
     /// <summary>
     ///     Which two elements a beam joins at a given moment. Deterministic, so the core looks the
-    ///     same on every machine and this can be checked without running the game, but spread
-    ///     enough that the beams do not fall into a visible rhythm.
+    ///     same on every machine and can be checked without running the game, but spread enough that
+    ///     the beams do not fall into a visible rhythm.
     /// </summary>
     /// <remarks>
-    ///     The two are never the same element - a beam from a thing to itself has no length and
-    ///     would draw as a blot sitting on it.
-    /// </remarks>
-    /// <remarks>
-    ///     <paramref name="slotBeingFilled" /> pulls every beam onto the one element going in. A
-    ///     beam that would otherwise have started there keeps its other end, so the three do not
-    ///     collapse onto one line - which is also why the slot is the <c>To</c> and never the
-    ///     <c>From</c>: the energy arrives at it.
+    ///     The two are never the same element: a beam from a thing to itself has no length and draws
+    ///     as a blot sitting on it.
+    ///     <para>
+    ///         <paramref name="slotBeingFilled" /> pulls every beam onto the element going in. A beam
+    ///         that would otherwise have started there keeps its other end, so the three do not
+    ///         collapse onto one line. That is also why the slot is always the <c>To</c> and never
+    ///         the <c>From</c>: the energy arrives at it.
+    ///     </para>
     /// </remarks>
     public static (int From, int To) BeamEndsAt(int logicFrame, int beam, int? slotBeingFilled)
     {
@@ -178,7 +167,7 @@ internal static class CoreEnergySettings
             return (from, to);
         }
 
-        // The one beam that was already coming from there is turned around rather than dropped.
+        // A beam already coming from there is turned around rather than dropped.
         return from == slot ? (to, slot) : (from, slot);
     }
 
@@ -187,13 +176,13 @@ internal static class CoreEnergySettings
     {
         int step = logicFrame / BeamHoldFrames;
 
-        // Multiplied by numbers that share no factor with the element count, so the pairs walk the
-        // grid rather than settling into the same few.
+        // Multiplied by numbers sharing no factor with the element count, so the pairs walk the grid
+        // rather than settling into the same few.
         int from = Math.Abs(step * 7 + beam * 23) % ElementCount;
         int to = Math.Abs(step * 11 + beam * 5 + 1) % (ElementCount - 1);
 
-        // Folded past the one it started from, which keeps every other element equally likely
-        // rather than making the one after it twice as likely.
+        // Folded past the element it started from, which keeps every other element equally likely
+        // rather than making the next one twice as likely.
         if (to >= from)
         {
             to++;
@@ -202,9 +191,7 @@ internal static class CoreEnergySettings
         return (from, to);
     }
 
-    /// <summary>
-    ///     Where one element sits, as the middle of its square.
-    /// </summary>
+    /// <summary>Where one element sits, as the middle of its square.</summary>
     public static Point ElementCentre(Point coreTopLeft, int element)
         => new(
             coreTopLeft.X + element % CoreSite.SpritesAcross * SpriteMetrics.SpriteWidth

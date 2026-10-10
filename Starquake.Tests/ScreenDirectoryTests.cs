@@ -10,23 +10,18 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     <see cref="ScreenDirectory" /> was a dictionary, a <see cref="GameScreenType" /> field and a
-///     lookup method on <c>GameEngine</c>, so none of it could be exercised without a graphics
-///     device and a loaded content pipeline behind it.
+///     <see cref="ScreenDirectory" /> holds every screen and hands them back two different ways,
+///     and the engine relies on the difference.
 ///     <para>
-///         What is worth pinning is the difference between its two jobs, because the engine relies
-///         on it. Asking for the <em>current</em> screen returns null, because update and draw run
-///         every frame whatever <see cref="ScreenDirectory.Current" /> has been set to and have
-///         always skipped a screen they could not find. Asking for a screen <em>by name</em> -
-///         now a typed property per screen - throws, since a screen handing over to another has no
-///         way to carry on without it.
+///         Asking for the <em>current</em> screen returns null, because update and draw run every
+///         frame whatever <see cref="ScreenDirectory.Current" /> has been set to, and skip a screen
+///         they cannot find. Asking for a screen <em>by name</em>, through its own typed property,
+///         throws instead, because a screen handing over to another cannot carry on without it.
 ///     </para>
 ///     <para>
-///         Only the throwing half of the named lookups can be pinned here: the ten typed properties
-///         return real screen components, and one of those cannot be constructed without a graphics
-///         device. What they would otherwise have needed - an <see cref="IGameScreen" /> wide
-///         enough for a stub to stand in for any screen - is the thing that put eleven empty and
-///         throwing members on the screens in the first place.
+///         Only the throwing half of the named lookups is pinned here. The typed properties return
+///         real screen components and one of those needs a graphics device, so a stub cannot stand
+///         in for it.
 ///     </para>
 /// </summary>
 public class ScreenDirectoryTests
@@ -46,9 +41,8 @@ public class ScreenDirectoryTests
     {
         // Arrange
         // Every screen the directory hands back by name, and the property that does it. A screen
-        // missing from here is one no other screen can hand over to. These stay in one test rather
-        // than a theory because both the enum and the directory are internal, and a theory's
-        // parameters would have to be public.
+        // missing from here is one no other screen can hand over to. One test rather than a theory,
+        // because the enum and the directory are internal and a theory's parameters are public.
         var directory = new ScreenDirectory();
         (GameScreenType Screen, Func<object> Lookup)[] namedLookups =
         [

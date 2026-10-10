@@ -5,21 +5,9 @@
 namespace Starquake.Core;
 
 /// <summary>
-///     One frame of a value moving steadily toward a limit and stopping there. A fade up out of
-///     black, a corpse fading out and shrinking, a core element growing into place - all of them are
-///     this, and all of them had written it out by hand.
+///     One frame of a value moving steadily towards a limit and stopping there. A fade up out of
+///     black, a corpse fading out and shrinking, a core element growing into place are all this.
 /// </summary>
-/// <remarks>
-///     Eight copies, in two directions and two types: <c>ScreenFadeUp.Advanced</c> for the pages and
-///     the game, the fade and the shrink in both <c>Nasty</c> and <c>ConveyorNasty</c>,
-///     <c>TeleportScreen</c>'s fade out, <c>PlanetCoreScreen</c>'s blanking tiles, and the whole
-///     bodies of <c>FloatAdder</c>, <c>FloatSubtractor</c> and <c>IntegerSubtractor</c>.
-///     <para>
-///         <c>ScreenFadeUp</c> had already found half of this - it says so itself, that four lines
-///         were written twice - and named only the upward integer half. The measurement that found
-///         the other six is in <c>GODCLASSES.md</c>.
-///     </para>
-/// </remarks>
 internal static class Ramp
 {
     /// <summary>
@@ -28,8 +16,8 @@ internal static class Ramp
     /// </summary>
     /// <param name="value">Where the value is now.</param>
     /// <param name="step">
-    ///     How far to move it, as a magnitude. Nought is what a value that is not moving holds, which
-    ///     is why this can be called every frame without a flag saying whether anything is running.
+    ///     How far to move it, as a magnitude. A step of nought leaves the value where it is, which
+    ///     is why this can be called every frame without a flag for whether anything is running.
     /// </param>
     /// <param name="limit">The value to stop at, and to clamp back to from beyond it.</param>
     public static int Up(int value, int step, int limit)

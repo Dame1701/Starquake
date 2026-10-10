@@ -10,17 +10,16 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     The sums behind a key-locked door's force field. The sheet of light itself can only be
-///     judged by looking at it; these are the numbers handed to it, and what they have to get
-///     right is that a door says which of the two things it is - barring Blob's way, or letting
-///     him through.
+///     The sums behind a key-locked door's force field. The sheet of light itself can only be judged
+///     by looking at it. These are the numbers handed to it, and what they have to get right is that
+///     a door says which of the two things it is: barring Blob's way, or letting him through.
 /// </summary>
 public class ForceFieldSettingsTests
 {
     /// <summary>
-    ///     A door at the top left of a screen. The gap is the middle-right column of its tile - see
-    ///     <c>KeyLockDoor.Doorway</c> - so these are the coordinates everything else is measured
-    ///     against.
+    ///     A door at the top left of a screen. The gap is the middle-right column of its tile, as
+    ///     <c>KeyLockDoor.Doorway</c> works it out, so these are the coordinates everything else is
+    ///     measured against.
     /// </summary>
     private static readonly Rectangle Doorway = new(48, 0, 32, TileMetrics.TileHeight);
 
@@ -36,8 +35,8 @@ public class ForceFieldSettingsTests
     }
 
     /// <summary>
-    ///     A number past one would start pulling the sheet further back than the open door's
-    ///     setting, and past nothing would take it past the shut one - so both ends hold.
+    ///     A number past one pulls the sheet further back than the open door's setting, and one
+    ///     below zero takes it past the shut one, so both ends hold.
     /// </summary>
     [Fact]
     public void OpennessAfter_AtEitherEnd_StaysThere()
@@ -51,9 +50,9 @@ public class ForceFieldSettingsTests
         => Assert.True(ForceFieldSettings.OpennessAfter(1f, false) < 1f);
 
     /// <summary>
-    ///     The travel is short on purpose - it is a door being told to open, not a drawbridge - but
-    ///     it has to be over within a second, or Blob walks through a field still drawn as though
-    ///     it were holding him.
+    ///     The travel is short on purpose. It is a door being told to open, not a drawbridge, and it
+    ///     has to be over within a second or Blob walks through a field still drawn as though it
+    ///     were holding him.
     /// </summary>
     [Fact]
     public void OpennessAfter_StepAfterStep_IsFullyOpenInsideASecond()

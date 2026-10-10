@@ -20,21 +20,19 @@ namespace Starquake.GameComponents.GameScreens;
 
 internal class IntroSequence
 {
-    /// <summary>
-    ///     One whole revolution in degrees, which is where <see cref="_shipRotation" /> wraps.
-    /// </summary>
+    /// <summary>One whole revolution in degrees, where <see cref="_shipRotation" /> wraps.</summary>
     private const float FullTurn = 360f;
 
     /// <summary>
     ///     How fast the tumble slows once the ship has hit, in degrees per logic frame off the
-    ///     rotation speed. It divides the speed the ship enters at, so the spin stops dead rather
-    ///     than reversing.
+    ///     rotation speed. It divides the entry speed exactly, so the spin stops dead rather than
+    ///     reversing.
     /// </summary>
     private const float TumbleSlowingStep = 2;
 
     /// <summary>
-    ///     How fast the crash darkens into the caption, and how fast the caption itself comes up
-    ///     and goes back down, in colour levels per logic frame.
+    ///     How fast the crash darkens into the caption, and how fast the caption comes up and goes
+    ///     back down, in colour levels per logic frame.
     /// </summary>
     private const int CrashFadeOutStep = 2;
 
@@ -42,8 +40,8 @@ internal class IntroSequence
     private const int CaptionFadeStep = 3;
 
     /// <summary>
-    ///     How hard the ground shakes when the ship hits, and how fast that dies away. The shake is
-    ///     a random offset of up to this many pixels in each direction.
+    ///     How hard the ground shakes when the ship hits, and how fast that dies away. The shake is a
+    ///     random offset of up to this many pixels in each direction.
     /// </summary>
     private const float RumbleFrom = 100;
 
@@ -51,8 +49,8 @@ internal class IntroSequence
     private const float RumbleFadeStep = 0.5f;
 
     /// <summary>
-    ///     How long the screen holds still before the ship comes into view, and how long it holds
-    ///     on the wreck before the caption, in logic frames. A second each.
+    ///     How long the screen holds still before the ship comes into view, and how long it holds on
+    ///     the wreck before the caption, in logic frames. A second each.
     /// </summary>
     private const int StartPauseFrames = LogicClock.FramesPerSecond;
 
@@ -60,8 +58,8 @@ internal class IntroSequence
     private const int PreFadeOutPauseFrames = LogicClock.FramesPerSecond;
 
     /// <summary>
-    ///     How long the wreck is left on screen after the caption has gone before the game takes
-    ///     over, in logic frames. Four seconds, which is the rumble dying out.
+    ///     How long the wreck is left on screen after the caption has gone before the game takes over,
+    ///     in logic frames. Four seconds, which is the rumble dying out.
     /// </summary>
     private const int EndPauseFrames = LogicClock.FramesPerSecond * 4;
 
@@ -80,8 +78,8 @@ internal class IntroSequence
     private readonly ScreenEffectEngine _screenEffects;
 
     /// <summary>
-    ///     The ship's fall, replaced whole at the start of each sequence. Where it comes in, where
-    ///     it is going and how fast it is dropping are all its own.
+    ///     The ship's fall, replaced whole at the start of each sequence. Where it comes in, where it
+    ///     is going and how fast it drops are all its own.
     /// </summary>
     private ShipDescent _descent = new(Point.Zero);
     private int _endPauseFrameCounter;
@@ -92,15 +90,15 @@ internal class IntroSequence
     private Guid _rumbleSound = Guid.Empty;
 
     /// <summary>
-    ///     Logic frames since the ship came to rest, which is what the wreck's electrics are timed
-    ///     off. It keeps counting for the rest of the game: the wreck stays on the landing site and
-    ///     goes on failing for as long as Blob is there to see it.
+    ///     Logic frames since the ship came to rest, which the wreck's electrics are timed off. It
+    ///     keeps counting for the rest of the game: the wreck stays on the landing site and goes on
+    ///     failing for as long as Blob is there to see it.
     /// </summary>
     private int _wreckFrame;
 
     /// <summary>
     ///     The sparks the wreck throws. The same effect Blob's own fragments strike off the ground
-    ///     with - a wreck spitting and a part of him bouncing are the same small shower.
+    ///     with, because a wreck spitting and a part of him bouncing are the same small shower.
     /// </summary>
     private readonly IPositionalTriggerParticleEffect _wreckSparks;
 
@@ -110,9 +108,9 @@ internal class IntroSequence
 
     /// <summary>
     ///     Which way round the ship is drawn, in degrees. Held here and handed to all four sheets the
-    ///     ship is composed from, so they turn together: each sheet used to keep its own angle and
-    ///     advance it as it was drawn, which tied the spin to the display's refresh rate and left any
-    ///     sheet that a frame skipped behind the others.
+    ///     ship is composed from, so they turn together. A sheet keeping its own angle and advancing
+    ///     it while drawing ties the spin to the display's refresh rate and falls behind the others on
+    ///     any skipped frame.
     /// </summary>
     private float _shipRotation;
 
@@ -149,8 +147,8 @@ internal class IntroSequence
     }
 
     /// <summary>
-    ///     Whether the crash is still playing. The game reads it to know whether to let Blob move,
-    ///     and the sequence is the only thing that sets it.
+    ///     Whether the crash is still playing. The game reads it to know whether to let Blob move, and
+    ///     the sequence is the only thing that sets it.
     /// </summary>
     public bool SequenceRunning { get; private set; }
 
@@ -158,19 +156,20 @@ internal class IntroSequence
 
     public int BlobSpaceShipYPos => (int)_descent.Position.Y + _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).SpriteHeight / 2;
     /// <summary>
-    ///     The caption that plays once Blob's ship has come down: what he is here for, and the
-    ///     joke the game tells about it, in one breath.
+    ///     The caption that plays once Blob's ship has come down: what he is here for and the joke the
+    ///     game tells about it, in one breath.
     /// </summary>
     /// <remarks>
-    ///     This was "Prepare for mission Starquake ...", which was wrong twice. It is not a
-    ///     briefing - the caption comes *after* the crash, so there is nothing left to prepare for
-    ///     - and it is written in a voice the game does not use anywhere else. The 1985 inlay is
-    ///     dramatic and then immediately undercuts itself: "If the core of this planet is not
-    ///     rebuilt it will implode causing the whole universe to go 'Ka Boomf!' - Strewth, a
-    ///     Starquake...", and on why Blob was chosen for it, "Nope - 'Cause all the other guys
-    ///     have pranged their spaceships." These lines are that sentence, cut to fit, and the
-    ///     "Betta" is the inlay's register rather than a typo - it belongs with "Strewth" and
-    ///     "'Cause", and correcting it to "Better" would take the voice out of it.
+    ///     Cut from the 1985 inlay, which is dramatic and then undercuts itself: "If the core of this
+    ///     planet is not rebuilt it will implode causing the whole universe to go 'Ka Boomf!' -
+    ///     Strewth, a Starquake...".
+    ///     <para>
+    ///         <b>"Betta" is deliberate</b>, not a typo. It is the inlay's register and belongs with
+    ///         "Strewth" and "'Cause"; correcting it to "Better" takes the voice out of it.
+    ///     </para>
+    ///     <para>
+    ///         The caption comes <em>after</em> the crash, so it cannot be written as a briefing.
+    ///     </para>
     /// </remarks>
     private static readonly string[] Caption =
     [
@@ -179,15 +178,14 @@ internal class IntroSequence
     ];
 
     /// <summary>
-    ///     Where the caption sits and how far apart its lines are. Centred on the playfield rather
-    ///     than indented by a number that happened to suit the old caption's length - the playfield
-    ///     and not the composition, because the intro is drawn into the game area's own render
-    ///     target, which is 1024 wide against the composition's 1280. Centring on the wider of the
-    ///     two put the caption 128 pixels right of where it belonged. That the old caption's
-    ///     hand-set indent of 180 is almost exactly where centring in 1024 lands it is the clue
-    ///     that said so - which
-    ///     is also why it is broken across lines at all: fifty-three characters will not go across
-    ///     the screen at this size, where the thirty the break leaves will.
+    ///     Where the caption sits and how far apart its lines are. Centred on the playfield, not the
+    ///     composition: the intro draws into the game area's own render target, which is 1024 wide
+    ///     against the composition's 1280, so centring on the wider of the two puts the caption 128
+    ///     pixels right of where it belongs.
+    ///     <para>
+    ///         It is broken across lines because fifty-three characters will not fit across the screen
+    ///         at this size, where the thirty the break leaves will.
+    ///     </para>
     /// </summary>
     private const int CaptionTopLine = 180;
 
@@ -197,8 +195,8 @@ internal class IntroSequence
     public IntroSequenceStage SequenceStage { get; private set; } = IntroSequenceStage.None;
 
     /// <summary>
-    ///     The screen the sequence fades up over. Looked up rather than held, so the sequence cannot
-    ///     be built before the screen it needs exists.
+    ///     The screen the sequence fades up over. Looked up rather than held, so the sequence cannot be
+    ///     built before the screen it needs exists.
     /// </summary>
     private MainGameScreen MainScreen => _screenDirectory.MainGame;
 
@@ -218,8 +216,8 @@ internal class IntroSequence
         _shipRotationSpeed = 10f;
 
         // Where it comes down is the square the author marked on the map. The ship is drawn from its
-        // top left and the two graphics sets draw it at different sizes, so the square's middle is
-        // what the two have in common and half a ship is taken off it here.
+        // top left and the two graphics sets draw it at different sizes, so the square's middle is the
+        // common reference and half a ship is taken off it here.
         SpriteCollection ship = _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip);
         Point crashCentre = _gameScreens.ShipCrashCentre;
 
@@ -235,8 +233,8 @@ internal class IntroSequence
     }
 
     /// <summary>
-    ///     The stages run in the order they are tested here. InitialPause is its own test rather than part
-    ///     of the chain because it hands straight on to ShipFalling in the same frame.
+    ///     The stages run in the order they are tested here. InitialPause is its own test rather than
+    ///     part of the chain, because it hands straight on to ShipFalling in the same frame.
     /// </summary>
     public void Update(GameTime gameTime)
     {
@@ -329,13 +327,11 @@ internal class IntroSequence
                 MainScreen.ScreenFade = 0;
                 SequenceStage = IntroSequenceStage.CaptionFadeUp;
 
-                // The wreckage stops here. It is thrown for a hundred to two hundred frames, and
-                // the intro stops updating it at this point - but MainGameScreen picks it straight
-                // back up, because its DeathRoutineRunning counts BlobKiller.Active and the parts
-                // are still in the air. So the ship's fragments went on bouncing and clanging
-                // through the caption and into the game, which is the noise that has been heard
-                // over the opening for as long as anybody can remember. By now the screen has
-                // faded to black and there is nothing of them left to see.
+                // The intro stops updating the wreckage here, but MainGameScreen picks it straight
+                // back up: its DeathRoutineRunning counts BlobKiller.Active and the parts are thrown
+                // for a hundred to two hundred frames. So the fragments go on bouncing and clanging
+                // through the caption and into the game. The screen has faded to black by then, so
+                // there is nothing left to see of them.
                 _blobKiller.Reset();
                 _resources.GetSoundFxEngine().StopSound(_shipExplosionSound, SoundFade.Fast);
             }
@@ -385,8 +381,8 @@ internal class IntroSequence
     }
 
     /// <remarks>
-    ///     Takes the clock only for the wreck's sparks, which outlive the sequence: this is the
-    ///     one update that keeps running once the intro has finished.
+    ///     Takes the clock only for the wreck's sparks, which outlive the sequence. This is the one
+    ///     update that keeps running once the intro has finished.
     /// </remarks>
     private void UpdateEndPause(GameTime gameTime)
     {
@@ -413,13 +409,12 @@ internal class IntroSequence
     }
 
     /// <summary>
-    ///     The occasional spark off the wreck once it has come to rest. Started on one frame and
-    ///     left to live its own half second, which is why this only has to decide when and where.
+    ///     The occasional spark off the wreck once it has come to rest. Started on one frame and left
+    ///     to live its own half second, so this only decides when and where.
     /// </summary>
     /// <remarks>
-    ///     Only once the ship is down and still - while it is falling and exploding there is
-    ///     already more than enough happening to it - and only for the redrawn artwork, as the
-    ///     rest of the 1985 set is left as it was.
+    ///     Only once the ship is down and still, since there is already plenty happening while it
+    ///     falls and explodes, and only for the redrawn artwork.
     /// </remarks>
     private void SparkOffTheWreck(GameTime gameTime)
     {
@@ -454,11 +449,10 @@ internal class IntroSequence
                 SpriteCollection originalShip = _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip);
                 originalShip.Begin(BlendState.AlphaBlend);
 
-                // Upright and square on the crash site once it has landed, still tumbling before that.
-                // The resting position used to be a pair of numbers written down here as well, which
-                // happened to be where the fall ended - so it is asked for rather than repeated. It
-                // cannot be the live position: the fall overshoots its target by up to a frame's
-                // travel, and the rotating overload leaves the ship at whatever angle it stopped at.
+                // Upright and square on the crash site once landed, still tumbling before that. The
+                // resting position is asked of the fall rather than written down again. It cannot be
+                // the live position: the fall overshoots its target by up to a frame's travel, and the
+                // rotating overload leaves the ship at whatever angle it stopped at.
                 if (SequenceStage == IntroSequenceStage.Finished || SequenceStage == IntroSequenceStage.CaptionFadeUp || SequenceStage == IntroSequenceStage.EndPause)
                 {
                     originalShip.DrawSprite(0, _descent.Rest.X, _descent.Rest.Y, new Color(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, MainScreen.ScreenFade));

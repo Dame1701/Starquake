@@ -7,17 +7,16 @@ using Starquake.ScreenEditor.ViewModels;
 namespace Starquake.ScreenEditor.Editing;
 
 /// <summary>
-///     What the editor shows over and around the screen being worked on, and how large the palette draws
-///     its tiles. Preferences about looking, with nothing in them about the map.
+///     What the editor shows over and around the screen being worked on, and how large the palette
+///     draws its tiles. Preferences about viewing, with nothing in them about the map.
 /// </summary>
 /// <remarks>
-///     Every one of these is read by something that draws and written by a toggle on the toolbar, and not
-///     one of them is touched by anything that edits. They were six fields on <see cref="EditorSession" />
-///     among fourteen others that are about the map itself.
+///     Each of these is read by something that draws and written by a toolbar toggle. Nothing that
+///     edits the map touches them.
 ///     <para>
-///         Changing one has to repaint, and the canvas already listens to the session's one
-///         <c>Invalidated</c> event - so rather than raise a second event for the same purpose, this is
-///         handed the session's own way of asking for a repaint.
+///         Changing one needs a repaint, and the canvas already listens to the session's
+///         <c>Invalidated</c> event, so this is handed the session's own way of asking for one rather
+///         than raising a second event.
 ///     </para>
 /// </remarks>
 internal sealed class CanvasViewOptions : ViewModelBase
@@ -81,8 +80,8 @@ internal sealed class CanvasViewOptions : ViewModelBase
     } = true;
 
     /// <summary>
-    ///     How wide to draw a tile in the palette. The sheet has over four hundred tiles in it, so
-    ///     being able to go from picking one out by eye to seeing most of them at once matters.
+    ///     How wide to draw a tile in the palette. The sheet holds over 400 tiles, so the range has
+    ///     to cover both picking one out by eye and seeing most of them at once.
     /// </summary>
     public double PaletteTileWidth
     {
@@ -95,8 +94,8 @@ internal sealed class CanvasViewOptions : ViewModelBase
     } = DefaultPaletteTileWidth;
 
     /// <summary>
-    ///     What the status line says about whatever the pointer is over. Written by the surfaces as the
-    ///     pointer moves, so it does not ask for a repaint - the thing that set it has just drawn.
+    ///     What the status line says about whatever the pointer is over. Setting it does not ask for
+    ///     a repaint, because whatever set it has just drawn.
     /// </summary>
     public string HoverStatus
     {

@@ -10,10 +10,12 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     The two sums behind a nasty arriving. The shader itself can only be judged by looking at
-///     it; these are the numbers handed to it, and the one that matters is the rectangle - a
-///     sprite is drawn out of a sheet with its neighbours either side, so a wrong rectangle means
-///     the shader samples the nasty next door.
+///     The two sums behind a nasty arriving. The shader itself can only be judged by looking at it,
+///     so these pin the numbers handed to it.
+///     <para>
+///         The rectangle is the one that matters. A sprite is drawn out of a sheet with its
+///         neighbours either side, so a wrong rectangle makes the shader sample the nasty next door.
+///     </para>
 /// </summary>
 public class MaterialiseSettingsTests
 {
@@ -27,10 +29,9 @@ public class MaterialiseSettingsTests
     }
 
     /// <summary>
-    ///     The birth runs past its own period - it keeps spinning for up to thirty frames more
-    ///     waiting to come to rest square - and a progress past one would start pulling the colour
-    ///     channels apart again in the other direction, so an arrived nasty would come apart while
-    ///     it waited.
+    ///     The birth runs past its own period, spinning for up to 30 frames more while it waits to
+    ///     come to rest square. A progress above one would pull the colour channels apart again the
+    ///     other way, so an arrived nasty would come apart while it waited.
     /// </summary>
     [Theory]
     [InlineData(61)]

@@ -17,19 +17,14 @@ namespace Starquake.GameComponents.GameScreens;
 ///     score, the lives and the core that outlive any one game.
 /// </summary>
 /// <remarks>
-///     The counterpart to <see cref="RunningGame" />, and the split between the two is lifetime.
-///     Everything in that record comes into being when content finishes loading and is replaced when
-///     it reloads; everything here is built in <c>GameEngine.Initialise</c> before any content exists
-///     and lasts as long as the process. Folding the two together would have meant one record whose
-///     own doc comment could not say when its properties were safe to read.
+///     The counterpart to <see cref="RunningGame" />, split from it by lifetime. Everything in that
+///     record comes into being when content finishes loading and is replaced when it reloads;
+///     everything here is built in <c>GameEngine.Initialise</c> before any content exists and lasts as
+///     long as the process. Folding the two together gives one record whose doc comment cannot say
+///     when its properties are safe to read.
 ///     <para>
-///         This pair is what <c>MainGameScreen</c> holds instead of the engine. It held a
-///         <c>GameEngine</c> and reached eighteen of its members across a hundred and seventeen call
-///         sites, which made it the only class in the codebase still holding one and the last
-///         namespace cycle in the graph - the engine builds the screens, so the screens naming the
-///         engine closed a loop. <c>GameScreenBase</c>'s remarks argue against fixing it on the
-///         grounds that the screen would then hold that base class *and* the engine; the answer is
-///         that it holds neither.
+///         This pair is what <c>MainGameScreen</c> holds instead of the engine. The engine builds the
+///         screens, so a screen naming the engine closes a namespace cycle.
 ///     </para>
 /// </remarks>
 internal sealed class GameplayContext

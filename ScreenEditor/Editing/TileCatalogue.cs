@@ -12,34 +12,30 @@ namespace Starquake.ScreenEditor.Editing;
 ///     Names for the tiles the game treats as more than scenery.
 /// </summary>
 /// <remarks>
-///     A screen is stored as bare tile numbers, so nothing in the data says that 397 is a teleport
-///     booth or that 420 is a tunnel mouth that leads to the previous screen. The game knows because
+///     A screen is stored as bare tile numbers, so nothing in the data says 397 is a teleport booth.
 ///     <see cref="ActionTiles" />, <see cref="TunnelTiles" /> and <see cref="MarkerTile" /> say so,
-///     and the editor reads the same sources rather than keeping its own list that could drift out of
-///     step with them. How a marker is drawn, as opposed to what it is called here, belongs to
-///     <see cref="MarkerCatalogue" />.
+///     and the editor reads those rather than keeping a list that could drift out of step. How a
+///     marker is drawn belongs to <see cref="MarkerCatalogue" />.
 /// </remarks>
 internal static class TileCatalogue
 {
 
     private static readonly Dictionary<int, string> Names = BuildNames();
 
-    /// <summary>
-    ///     What the game does with this tile, or null if it is ordinary scenery.
-    /// </summary>
+    /// <summary>What the game does with this tile, or null if it is ordinary scenery.</summary>
     public static string? SpecialName(int tileImage)
         => Names.GetValueOrDefault(tileImage);
 
     public static bool IsSpecial(int tileImage) => Names.ContainsKey(tileImage);
 
     /// <summary>
-    ///     Whether the editor draws this tile itself rather than from the sheet - see
-    ///     <see cref="MarkerCatalogue" />, which holds what it draws.
+    ///     Whether the editor draws this tile itself rather than from the sheet.
+    ///     <see cref="MarkerCatalogue" /> holds what it draws.
     /// </summary>
     public static bool IsMarker(int tileImage) => MarkerCatalogue.IsDrawnAsAMarker(tileImage);
 
     /// <summary>
-    ///     A tile described for a status bar or a tooltip: its number, and what it is for if that is
+    ///     Describes a tile for a status bar or tooltip: its number, and what it is for if it is
     ///     anything in particular.
     /// </summary>
     public static string Describe(int tileImage)
@@ -80,8 +76,8 @@ internal static class TileCatalogue
     }
 
     /// <summary>
-    ///     Turns an enum member's name into something readable: "AccessBoothLeft" becomes "Access
-    ///     booth left", "TunnelLiftTop1" becomes "Tunnel lift top 1".
+    ///     Turns an enum member's name into readable text. "AccessBoothLeft" becomes "Access booth
+    ///     left"; "TunnelLiftTop1" becomes "Tunnel lift top 1".
     /// </summary>
     private static string Humanise(string name)
     {

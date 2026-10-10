@@ -14,18 +14,17 @@ namespace Starquake.ScreenEditor.Content;
 ///     A loaded tile sheet, cut into tiles the way the game cuts it.
 /// </summary>
 /// <remarks>
-///     The sheet is one long image and a screen refers to its tiles by number, so everything here is
-///     about turning a number into a rectangle. It also averages each tile down to a handful of
-///     colours up front, which is what lets the world map draw five hundred screens at once without
-///     five hundred trips back to the full size artwork.
+///     The sheet is one long image and screens refer to tiles by number, so most of this turns a
+///     number into a rectangle. Each tile is also averaged down to a few colours up front, which
+///     lets the world map draw five hundred screens without returning to the full size artwork.
 /// </remarks>
 internal sealed class TileSheet : IDisposable
 {
 
     /// <summary>
-    ///     How many colours a tile is boiled down to for the world map. Reusing the collision grid's
-    ///     subdivision is not just convenience: it is fine enough that a platform still reads as a
-    ///     platform at map scale, and it means one tile occupies a whole number of pixels there.
+    ///     How many colours a tile is reduced to for the world map. Reuses the collision grid's
+    ///     subdivision, which is fine enough that a platform still reads as a platform at map scale
+    ///     and leaves each tile a whole number of pixels wide.
     /// </summary>
     public const int ThumbnailCellsAcross = TileMetrics.CollisionCellsAcrossTile;
 
@@ -45,9 +44,6 @@ internal sealed class TileSheet : IDisposable
 
     private string Path { get; }
 
-    /// <summary>
-    ///     The sheet itself, for drawing tiles from.
-    /// </summary>
     private IImage Image => _bitmap;
 
     private int TilesAcross { get; }
@@ -58,9 +54,8 @@ internal sealed class TileSheet : IDisposable
 
     /// <summary>
     ///     Every tile averaged down to <see cref="ThumbnailCellsAcross" /> by
-    ///     <see cref="ThumbnailCellsDown" /> premultiplied BGRA pixels, laid out tile by tile and then
-    ///     in reading order within a tile. This is the form the world map's bitmap wants, so it can be
-    ///     blitted straight in.
+    ///     <see cref="ThumbnailCellsDown" /> premultiplied BGRA pixels, ordered tile by tile and then
+    ///     in reading order within each tile. The world map's bitmap takes this form directly.
     /// </summary>
     public uint[] ThumbnailColours { get; }
 
@@ -79,9 +74,7 @@ internal sealed class TileSheet : IDisposable
         return new TileSheet(path, bitmap, tilesAcross, tilesDown, thumbnailColours);
     }
 
-    /// <summary>
-    ///     Where a tile number sits on the sheet, in sheet pixels.
-    /// </summary>
+    /// <summary>Where a tile number sits on the sheet, in sheet pixels.</summary>
     private Rect SourceRect(int tileImage)
     {
         int row = tileImage / TilesAcross;
@@ -97,8 +90,8 @@ internal sealed class TileSheet : IDisposable
     public bool Contains(int tileImage) => tileImage >= 0 && tileImage < TileCount;
 
     /// <summary>
-    ///     Draws one tile into the given rectangle. Tile sheets are pixel art, so callers are expected
-    ///     to have turned interpolation off on the control doing the drawing.
+    ///     Draws one tile into the given rectangle. Tile sheets are pixel art, so the caller must
+    ///     have turned interpolation off on the control doing the drawing.
     /// </summary>
     public void DrawTile(DrawingContext context, int tileImage, Rect destination)
     {
@@ -120,8 +113,7 @@ internal sealed class TileSheet : IDisposable
 
         using ILockedFramebuffer frame = bitmap.Lock();
 
-        // Both byte orders turn up depending on the platform's preferred format, and the only
-        // difference that makes here is whether red or blue comes first.
+        // The platform's preferred format decides whether red or blue comes first.
         bool redFirst = frame.Format == PixelFormat.Rgba8888;
 
         unsafe

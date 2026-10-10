@@ -16,10 +16,9 @@ namespace Starquake.WorldGeneration;
 ///     map: the map is authored, what is lying on it is not.
 /// </summary>
 /// <remarks>
-///     Everything here is decided by one <see cref="Random" />, handed in rather than made, so a world
-///     is reproducible from the seed that made it. That is what makes this testable at all, and it is
-///     why the one-line change that stopped <c>Reset</c> building its own generator from the clock
-///     was worth its own commit in phase 0.
+///     Everything here is decided by one <see cref="Random" />, handed in rather than made, so a
+///     world is reproducible from the seed that made it. Nothing may build its own generator from
+///     the clock.
 ///     <para>
 ///         It works on the screen records and the collision map, and needs no content: the tile size
 ///         is a constant rather than something to ask a sprite sheet for.
@@ -27,9 +26,7 @@ namespace Starquake.WorldGeneration;
 /// </remarks>
 internal class WorldPopulator
 {
-    /// <summary>
-    ///     How many of the 512 screens are given a pick-up.
-    /// </summary>
+    /// <summary>How many of the 512 screens are given a pick-up.</summary>
     private const int PickUpCount = 100;
 
     /// <summary>
@@ -60,8 +57,9 @@ internal class WorldPopulator
     /// <summary>
     ///     How many kinds of pick-up the scatter draws from, and how many kinds of power-up. The
     ///     pick-up count stops one short of <see cref="Collectables.AccessCard" /> and
-    ///     <see cref="Collectables.Key" />, which is why neither has ever appeared on the map - see
-    ///     PLAN.md, "The key and the access card".
+    ///     <see cref="Collectables.Key" />, so the scatter never produces either of those. The one
+    ///     key and the one access card are put down separately by
+    ///     <see cref="PlaceKeyAndAccessCard" />.
     /// </summary>
     private const int PickUpTypeCount = 28;
 
@@ -97,9 +95,9 @@ internal class WorldPopulator
 
     /// <summary>
     ///     The tiles no pick-up, power-up or pyramid may be placed on, because each of them already
-    ///     means something to the game - a shuttle, a spike, a bridge. This was a fifteen-term chain of
-    ///     inequalities. Every <see cref="MarkerTile" /> is out of bounds too, which is the point of a
-    ///     marker: the author reserved that square for something, so the scatter leaves it alone.
+    ///     means something to the game - a shuttle, a spike, a bridge. Every <see cref="MarkerTile" />
+    ///     is out of bounds too, which is the point of a marker: the author reserved that square for
+    ///     something, so the scatter leaves it alone.
     /// </summary>
     private static readonly HashSet<int> TilesNothingMayBePlacedOn = BuildTilesNothingMayBePlacedOn();
 
@@ -119,13 +117,11 @@ internal class WorldPopulator
         _coreScreen = CoreSite.FindIn(screens).ScreenNumber;
     }
 
-    /// <summary>
-    ///     Fills the whole world.
-    /// </summary>
+    /// <summary>Fills the whole world.</summary>
     /// <param name="coreElementsWanted">
     ///     The element numbers the core is asking for this game. Some of the core elements scattered
-    ///     over the map are set to these so that the game can be finished; the list is passed in
-    ///     rather than read off <c>CoreElements</c>, which would drag the graphics in behind it.
+    ///     over the map are set to these, so that the game can be finished. Passed in rather than
+    ///     read off <c>CoreElements</c>, which would drag the graphics in behind it.
     /// </param>
     public void Populate(IReadOnlyList<int> coreElementsWanted)
     {
@@ -145,14 +141,13 @@ internal class WorldPopulator
         PlaceKeyAndAccessCard();
     }
 
-    /// <summary>
-    ///     Puts the key and the access card on the planet, one of each.
-    /// </summary>
+    /// <summary>Puts the key and the access card on the planet, one of each.</summary>
     /// <remarks>
-    ///     Last of all, and deliberately so. The scatter above empties <see cref="GameScreenData.PickUps" />
-    ///     on every screen it thins out, so a key placed any earlier could be thinned away with the core
-    ///     elements - and <see cref="MatchSomeCoreElementsToTheCore" /> writes over the first pick-up on a
-    ///     screen, which by then would be the key.
+    ///     Last of all, and it has to be. The scatter above empties
+    ///     <see cref="GameScreenData.PickUps" /> on every screen it thins out, so a key placed
+    ///     earlier could be thinned away with the core elements, and
+    ///     <see cref="MatchSomeCoreElementsToTheCore" /> writes over the first pick-up on a screen,
+    ///     which by then could be the key.
     /// </remarks>
     private void PlaceKeyAndAccessCard()
     {
@@ -166,10 +161,12 @@ internal class WorldPopulator
     ///     itself opens, so that it can never be the thing standing between Blob and itself.
     /// </summary>
     /// <remarks>
-    ///     Screens are tried in a random order and the first with somewhere free to stand wins, rather
-    ///     than the whole list being filtered first: almost every screen has room, so this draws once in
-    ///     the ordinary case. A planet with nowhere at all to put the item leaves it unplaced, which a
-    ///     test is what catches - there is nothing sensible to do about it here.
+    ///     Screens are tried in a random order and the first with room wins, rather than the whole
+    ///     list being filtered first. Almost every screen has room, so this usually draws once.
+    ///     <para>
+    ///         A planet with nowhere at all to put the item leaves it unplaced. There is nothing
+    ///         sensible to do about that here, so a test is what guards against it.
+    ///     </para>
     /// </remarks>
     private void PlaceBehindNoGate(Collectables item, Gate gate)
     {
@@ -228,9 +225,7 @@ internal class WorldPopulator
            placed.XLocation == spot.XLocation &&
            placed.YLocation == spot.YLocation;
 
-    /// <summary>
-    ///     Whether a code reads unambiguously - no digit appearing twice.
-    /// </summary>
+    /// <summary>Whether a code reads unambiguously - no digit appearing twice.</summary>
     private static bool CheckAccessCodeValidity(string accessCode)
     {
         for (int a = 0; a < accessCode.Length; a++)
@@ -248,8 +243,8 @@ internal class WorldPopulator
     }
 
     /// <summary>
-    ///     Picks the screens a power-up goes on. Only screens that can hold more than one object qualify,
-    ///     because a power-up has to share with whatever is already there.
+    ///     Picks the screens a power-up goes on. Only screens with room for more than one object
+    ///     qualify, because a power-up has to share with whatever is already there.
     /// </summary>
     private List<int> ChoosePowerUpScreens()
     {
@@ -282,8 +277,8 @@ internal class WorldPopulator
     }
 
     /// <summary>
-    ///     Fills in every screen but the core: its pick-ups, its power-up if it drew one, its pyramid and
-    ///     its access code.
+    ///     Fills in every screen but the core: its pick-ups, its power-up if it drew one, its pyramid
+    ///     and its access code.
     /// </summary>
     private void PlaceScreenObjects(List<int> powerUpScreens)
     {
@@ -315,8 +310,8 @@ internal class WorldPopulator
     }
 
     /// <summary>
-    ///     The power-up first, then a pick-up on a different tile if this screen drew one. Each takes its
-    ///     location out of the list so the two cannot land on top of each other.
+    ///     The power-up first, then a pick-up on a different tile if this screen drew one. Each takes
+    ///     its location out of the list, so the two cannot land on top of each other.
     /// </summary>
     private void PlacePowerUpAndPickUp(
         int screenNumber,
@@ -376,8 +371,8 @@ internal class WorldPopulator
     }
 
     /// <summary>
-    ///     A screen with a booth on either side gets one code, which is what the booth on the far side of
-    ///     the door asks for.
+    ///     A screen with a booth on either side gets one code, which is what the booth on the far
+    ///     side of the door asks for.
     /// </summary>
     private void AssignAccessBoothCode(int screenNumber)
     {
@@ -392,9 +387,7 @@ internal class WorldPopulator
         }
     }
 
-    /// <summary>
-    ///     A code from the range, redrawn until no digit in it repeats.
-    /// </summary>
+    /// <summary>A code from the range, redrawn until no digit in it repeats.</summary>
     private string DrawUniqueCode(int lowest, int exclusiveUpperBound)
     {
         string code;
@@ -466,14 +459,14 @@ internal class WorldPopulator
     }
 
     /// <summary>
-    ///     Where this screen's author said a core element would be best placed, if they said so at all.
+    ///     Where this screen's author said a core element would be best placed, if they said so at
+    ///     all.
     /// </summary>
     /// <remarks>
-    ///     Unlike <see cref="GetPotentialLocations" /> this reads the whole screen including its top
-    ///     row. That loop starts at row 1 because it puts an item on top of the tile it finds, which
-    ///     from the top row would be above the screen, and because it looks at the row above. This
-    ///     one puts the item inside the marked tile and looks at nothing else, so a marker on the top
-    ///     row is as good as a marker anywhere - and it used to be ignored.
+    ///     This reads the top row as well, where <see cref="GetPotentialLocations" /> starts at row
+    ///     1. That loop has to, because it stands an item on top of the tile it finds and reads the
+    ///     row above it. This one puts the item inside the marked tile and reads nothing else, so a
+    ///     marker on the top row works like a marker anywhere else.
     /// </remarks>
     private InteractiveItem? GetPreferredLocation(int screenNumber)
     {
@@ -505,9 +498,9 @@ internal class WorldPopulator
                 screensContainingCheopsPyramid.Add(screen);
             }
 
-            // A screen counts as holding a core element if it holds any pick-up that is not one of
-            // the two items the core does not want - a guard written in anticipation of the key and
-            // the access card being placed, which they never were.
+            // A screen counts as holding a core element if it holds any pick-up that is not a key or
+            // an access card. Neither can be here yet - the scatter cannot produce them and the real
+            // two are placed last - so this guards that order rather than filtering anything today.
             foreach (InteractiveItem pickUp in screen.PickUps)
             {
                 if ((Collectables)pickUp.Type != Collectables.AccessCard &&
@@ -521,9 +514,8 @@ internal class WorldPopulator
     }
 
     /// <summary>
-    ///     Thins a list of screens down to at most <paramref name="maximum" /> of them by picking one at
-    ///     random and stripping what it was listed for. The pyramids and the core elements were two copies
-    ///     of this loop differing only in what they cleared.
+    ///     Thins a list of screens down to at most <paramref name="maximum" /> of them by picking one
+    ///     at random and stripping what it was listed for.
     /// </summary>
     private void TrimTo(
         List<GameScreenData> screens,
@@ -540,8 +532,8 @@ internal class WorldPopulator
     }
 
     /// <summary>
-    ///     Between two and five of the core elements lying about the map are set to ones the core actually
-    ///     wants, so that a game is always winnable without being trivially so.
+    ///     Between two and five of the core elements lying about the map are set to ones the core
+    ///     actually wants, so that a game is always winnable without being trivially so.
     /// </summary>
     private void MatchSomeCoreElementsToTheCore(
         List<GameScreenData> screensContainingCoreElements,
@@ -549,9 +541,8 @@ internal class WorldPopulator
     {
         var elementsLeftToPlace = new List<int>(coreElementsWanted);
 
-        // Neither list is a fixed length - one is however many screens the generator gave a pick-up
-        // to, the other however many elements the core still wants - so the draw is clamped to what
-        // is actually there rather than trusted to fit.
+        // Neither list is a fixed length, so the draw is clamped to what is actually there rather
+        // than trusted to fit.
         int matchesToMake = Math.Min(
             _randomNumberGenerator.Next(MinimumCoreMatches, MaximumCoreMatchesExclusive),
             Math.Min(screensContainingCoreElements.Count, elementsLeftToPlace.Count));

@@ -18,14 +18,9 @@ namespace Starquake.GameComponents.PresentationScreens;
 ///     bottom of it, and the wait for a keypress once it is full.
 /// </summary>
 /// <remarks>
-///     This was five fields, seven layout constants, three methods and forty lines of <c>Draw</c>
-///     inside <c>GameEngine</c>, which is otherwise the composition root and the frame loop. It is a
-///     screen, and every other screen in the game is its own class.
-///     <para>
-///         It is drawn before the game exists, which is why it loads its three sprites directly
-///         rather than through the resource manager, and why its viewport is the whole back buffer
-///         rather than a render view port - there is no screen effect engine yet to own one.
-///     </para>
+///     Drawn before the game exists, which is why it loads its three sprites directly rather than
+///     through the resource manager, and why its viewport is the whole back buffer rather than a
+///     render view port: there is no screen effect engine yet to own one.
 /// </remarks>
 internal class LoadingScreen(
     GraphicsDeviceManager graphics,
@@ -34,14 +29,14 @@ internal class LoadingScreen(
     ToggleKeys input)
 {
     /// <summary>
-    ///     How much of a colour channel the loading screen's fade moves by, each logic frame.
+    ///     How much of a colour channel the fade moves each logic frame.
     ///     <see cref="ColourLevels.Full" /> divided by this is how many frames the fade lasts.
     /// </summary>
     private const int BootFadeStep = 4;
 
     /// <summary>
-    ///     How wide the boot progress bar is at full, in the one-pixel-wide slices it is drawn from,
-    ///     and where the first slice goes. Each slice is drawn two pixels further right than the last.
+    ///     How wide the boot progress bar is at full, in the one-pixel slices it is drawn from, and
+    ///     where the first slice goes. Each slice is drawn two pixels right of the last.
     /// </summary>
     private const int BootProgressBarSlices = 519;
 
@@ -54,9 +49,7 @@ internal class LoadingScreen(
     /// <inheritdoc cref="BootProgressBarSlices" />
     private const int BootProgressBarSliceSpacing = 2;
 
-    /// <summary>
-    ///     Where the progress bar's backing plate sits on the boot screen.
-    /// </summary>
+    /// <summary>Where the progress bar's backing plate sits on the boot screen.</summary>
     private const int BootProgressBackgroundXPos = 116;
 
     /// <inheritdoc cref="BootProgressBackgroundXPos" />
@@ -86,9 +79,7 @@ internal class LoadingScreen(
     private int _bootProgressBackgroundFade = ColourLevels.Full;
     private int _loadingScreenFade;
 
-    /// <summary>
-    ///     Fades the boot screen up a step.
-    /// </summary>
+    /// <summary>Fades the boot screen up a step.</summary>
     /// <returns>True once it is fully up, which is when the content load may begin.</returns>
     public bool FadeUp()
     {
@@ -105,9 +96,9 @@ internal class LoadingScreen(
     }
 
     /// <summary>
-    ///     Holds the finished loading screen until a key is pressed, fading the progress bar out
-    ///     while it waits. The wait is deliberate - it has been here since the first commit - so the
-    ///     boot screen is something to look at and leave rather than something that vanishes.
+    ///     Holds the finished loading screen until a key is pressed, fading the progress bar out while
+    ///     it waits. The wait is deliberate, so the boot screen is something to look at and leave
+    ///     rather than something that vanishes.
     /// </summary>
     /// <returns>True when the player has pressed something and the game may start.</returns>
     public bool WaitForAKey()
@@ -126,16 +117,15 @@ internal class LoadingScreen(
     }
 
     /// <summary>
-    ///     Draws the boot screen, its progress bar backing and as much of the bar as has been
-    ///     earned.
+    ///     Draws the boot screen, its progress bar backing, and as much of the bar as has been earned.
     /// </summary>
     /// <param name="percentComplete">How far through loading the content the game is.</param>
     /// <param name="fullyLoadedPercent">What <paramref name="percentComplete" /> reads at the end.</param>
     public void Draw(int percentComplete, int fullyLoadedPercent)
     {
-        // The viewport has to be the whole back buffer, not the composition size: the boot screen
-        // is scaled up into it by Presentation.Transform like everything else, and a viewport any
-        // smaller would just clip the result.
+        // The viewport must be the whole back buffer rather than the composition size. The boot
+        // screen is scaled up into it by Presentation.Transform like everything else, and a smaller
+        // viewport would only clip the result.
         PresentationParameters backBuffer = graphics.GraphicsDevice.PresentationParameters;
 
         graphics.GraphicsDevice.Viewport = new Viewport

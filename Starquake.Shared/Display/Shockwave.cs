@@ -17,14 +17,13 @@ namespace Starquake.Display;
 ///     Blob coming apart has one, and so does each of the two nasties that are machines.
 /// </summary>
 /// <remarks>
-///     It owns no artwork. A single square sprite is drawn at the size the ring will reach and
-///     <c>Shaders/Shockwave.fx</c> fills it - see <see cref="ShockwaveSettings" /> for the numbers
-///     it is driven by. What this holds is where the blast was, how many frames ago, and the
-///     attitude that blast's wobble was dealt.
+///     Owns no artwork. A single square sprite is drawn at the size the ring will reach and
+///     <c>Shaders/Shockwave.fx</c> fills it; <see cref="ShockwaveSettings" /> holds the numbers
+///     driving it. What this keeps is where the blast was, how many frames ago, and the attitude its
+///     wobble was dealt.
 ///     <para>
-///         Counted in logic frames and never in the draw. The game is drawn once per vertical
-///         retrace, so a ring stepped on the drawn frame would travel faster on a better monitor -
-///         the same trap <c>BlobWeapon</c>'s beam is kept out of.
+///         Counted in logic frames and never in the draw. The game draws once per vertical retrace,
+///         so a ring stepped on the drawn frame would travel faster on a better monitor.
 ///     </para>
 /// </remarks>
 internal sealed class Shockwave
@@ -39,8 +38,8 @@ internal sealed class Shockwave
     private bool _running;
 
     /// <summary>
-    ///     Where this blast started the waves that run round its rim, in radians. Dealt fresh on
-    ///     every trigger, so two rings going off together are not rippling in step.
+    ///     Where this blast started the waves running round its rim, in radians. Dealt fresh on every
+    ///     trigger, so two rings going off together do not ripple in step.
     /// </summary>
     private float _attitude;
 
@@ -55,8 +54,8 @@ internal sealed class Shockwave
     }
 
     /// <summary>
-    ///     Something has gone off at a point. Restarts the ring from nothing wherever it had got
-    ///     to, because a second blast is a second blast and not a continuation of the first.
+    ///     Something has gone off at a point. Restarts the ring from nothing wherever it had reached,
+    ///     because a second blast is not a continuation of the first.
     /// </summary>
     public void Trigger(int centreX, int centreY)
     {
@@ -68,8 +67,8 @@ internal sealed class Shockwave
     }
 
     /// <summary>
-    ///     Takes the ring off the screen at once. For a screen change, where a blast on the room
-    ///     Blob has just left would otherwise finish travelling over the one he has walked onto.
+    ///     Takes the ring off the screen at once, for a screen change. A blast on the room Blob has
+    ///     left would otherwise finish travelling over the one he walked onto.
     /// </summary>
     public void Stop() => _running = false;
 
@@ -106,12 +105,12 @@ internal sealed class Shockwave
 
         Effect blast = _resources.GetEffect(Assets.Shaders.Shockwave);
 
-        // The quad's square in its sheet, as the one multiply and add the shader can afford
-        // rather than the rectangle and the divide the other shaders are handed.
+        // The quad's square in its sheet, as one multiply and add rather than the rectangle and
+        // divide the other shaders are handed.
         Vector4 quadRect = quad.SpriteRectIn01(0);
 
-        // Doubled, so the quad runs minus one to one across and the shader has one multiply
-        // fewer to make the distance out with.
+        // Doubled, so the quad runs minus one to one across and the shader has one multiply fewer to
+        // work out the distance from the centre.
         var quadScale = new Vector2(2f / quadRect.Z, 2f / quadRect.W);
 
         blast.Parameters["QuadScale"].SetValue(quadScale);
@@ -132,8 +131,8 @@ internal sealed class Shockwave
         blast.Parameters["Intensity"].SetValue(ShockwaveSettings.IntensityAt(_frame, _frames));
         blast.Parameters["OverRimFade"].SetValue(1f / ShockwaveSettings.RimFade);
 
-        // The scaled draw turns about the sprite's own middle, so the corner is stepped back by
-        // half a sprite to put that middle on the blast.
+        // The scaled draw turns about the sprite's own middle, so the corner is stepped back half a
+        // sprite to put that middle on the blast.
         quad.Begin(BlendState.Additive, null, blast);
         quad.DrawSprite(
             0,

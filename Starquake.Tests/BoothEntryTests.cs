@@ -12,8 +12,7 @@ namespace Starquake.Tests;
 
 /// <summary>
 ///     Whether walking at a booth's doorway puts Blob in it. Three doorways - a teleport booth and
-///     either hand of an access booth - over two reaches and one standing, all four of which were
-///     bare numbers or private constants inside <c>Blob</c>.
+///     either hand of an access booth - over two reaches and one standing.
 /// </summary>
 public class BoothEntryTests
 {
@@ -34,8 +33,8 @@ public class BoothEntryTests
 
     /// <summary>
     ///     The three doorways are three different tiles and each predicate answers for its own only.
-    ///     An access booth is not a teleporter: the two do entirely different things to Blob, so one
-    ///     answering for the other would be worse than neither answering at all.
+    ///     An access booth is not a teleporter. The two do entirely different things to Blob, so one
+    ///     answering for the other is worse than neither answering at all.
     /// </summary>
     [Theory]
     [InlineData(ActionTiles.AccessBoothLeft)]
@@ -57,9 +56,9 @@ public class BoothEntryTests
         => Assert.Equal(entered, BoothEntry.IntoATeleporter(At(ActionTiles.TeleportBooth, xPos, OnTheFloor)));
 
     /// <summary>
-    ///     The standing is exact, not a range - a booth must not take Blob as he falls past its
-    ///     doorway. It is the same offset a booth puts him back down at, which is the whole reason
-    ///     <see cref="BoothMetrics" /> exists: walking in and arriving have to agree.
+    ///     The standing is exact, not a range, so a booth cannot take Blob as he falls past its
+    ///     doorway. It is the same offset a booth puts him back down at, which is why
+    ///     <see cref="BoothMetrics" /> exists. Walking in and arriving have to agree.
     /// </summary>
     [Theory]
     [InlineData(31)]
@@ -69,7 +68,7 @@ public class BoothEntryTests
         => Assert.False(BoothEntry.IntoATeleporter(At(ActionTiles.TeleportBooth, Reach, yPos)));
 
     /// <summary>
-    ///     And the floor the three inline values above are a pixel either side of is the one
+    ///     The floor the three inline values above are a pixel either side of is the one
     ///     <see cref="BoothMetrics" /> names, not a 32 that happens to match it.
     /// </summary>
     [Fact]
@@ -81,9 +80,8 @@ public class BoothEntryTests
         => Assert.True(BoothEntry.IntoALeftHandBooth(At(ActionTiles.AccessBoothLeft, Reach, OnTheFloor)));
 
     /// <summary>
-    ///     The left-hand access booth shares the teleporter's reach, which was not visible before:
-    ///     the teleporter had it as a named constant and the booth had the same 24 written inline
-    ///     eighteen lines away. If they ever stop agreeing it should be because someone decided so.
+    ///     The left-hand access booth shares the teleporter's reach. Pinned so that if the two ever
+    ///     stop agreeing, it is because someone decided they should.
     /// </summary>
     [Theory]
     [InlineData(Reach - 1)]
@@ -95,9 +93,9 @@ public class BoothEntryTests
             BoothEntry.IntoALeftHandBooth(At(ActionTiles.AccessBoothLeft, xPos, OnTheFloor)));
 
     /// <summary>
-    ///     The right-hand side is met from the far side of its tile, so its reach is measured towards
-    ///     the tile's left edge and is its own number - the same asymmetry the two tunnel mouths
-    ///     have.
+    ///     The right-hand side is met from the far side of its tile, so its reach is measured
+    ///     towards the tile's left edge and is its own number. The two tunnel mouths are asymmetric
+    ///     the same way.
     /// </summary>
     [Theory]
     [InlineData(0, true)]

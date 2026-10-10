@@ -15,10 +15,9 @@ namespace Starquake.Tests;
 ///     the flat list it replaced, over the planet the game actually ships.
 /// </summary>
 /// <remarks>
-///     The rewrite was meant to change how fast an answer arrives and not what the answer is, so
-///     these compare the two everywhere rather than checking a handful of chosen spots. A
-///     disagreement anywhere is a regression, and it is reported with the screen, the position and
-///     the direction that found it rather than as a bare count.
+///     The indexed map is faster, and has to answer the same. These compare the two everywhere
+///     rather than at a handful of chosen spots, and report a disagreement with the screen, the
+///     position and the direction that found it rather than as a bare count.
 ///     <para>
 ///         The shipped screens carry no pick-ups or power-ups - those are placed by
 ///         <c>WorldPopulator</c> at the start of a game, not stored in the map - so the items and

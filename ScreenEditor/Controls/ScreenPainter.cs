@@ -19,23 +19,16 @@ namespace Starquake.ScreenEditor.Controls;
 ///     and whichever overlays are switched on over the top.
 /// </summary>
 /// <remarks>
-///     Starquake's world does not scroll - Blob walks off one edge and the next screen replaces it
-///     whole - so a screen has to be built to line up with its neighbours without ever being seen
-///     alongside them in the game. That is what the border of neighbouring tiles is for: a platform that
-///     stops a tile short of the edge, or a tunnel mouth with nothing on the other side of it, is
-///     obvious here and invisible on a screen drawn on its own.
-///     <para>
-///         Nothing here touches the control. It reads the session, a <see cref="ScreenLayout" /> and a
-///         <see cref="Hover" />, and writes to the drawing context - which is what lets the canvas be
-///         about input and this be about pixels.
-///     </para>
+///     Nothing here touches the control. It reads the session, a <see cref="ScreenLayout" /> and a
+///     <see cref="Hover" />, and writes to the drawing context, which keeps the canvas about input
+///     and this about pixels.
 /// </remarks>
 internal static class ScreenPainter
 {
     /// <summary>
-    ///     How many chequer squares make up one collision cell, each way. Two, so the square is sixteen
-    ///     game pixels - fine enough to read as a texture rather than as blocks, and an even number of
-    ///     squares to a tile either way, which is what lets the pattern carry across a tile boundary.
+    ///     How many chequer squares make up one collision cell, each way. Two gives a sixteen pixel
+    ///     square, which reads as a texture rather than as blocks, and an even number of squares per
+    ///     tile both ways, so the pattern carries across a tile boundary.
     /// </summary>
     private const int ChequerSquaresPerCell = 2;
 
@@ -46,11 +39,9 @@ internal static class ScreenPainter
     private const int ChequerSquaresDownTile = TileMetrics.CollisionCellsDownTile * ChequerSquaresPerCell;
 
     /// <summary>
-    ///     Where a signpost's code sits on the tile it is painted on, as a fraction of it: the middle
-    ///     of the board across, and the foot of the lettering down. The game writes the code into a
-    ///     box measured off that board - see <see cref="Signposts" /> - and lines it up by the foot
-    ///     of its capitals, so lining this up the same way is what keeps the canvas showing where the
-    ///     letters will actually land.
+    ///     Where a signpost's code sits on its tile, as a fraction of the tile: the middle of the
+    ///     board across, the foot of the lettering down. Matches how the game lines the code up
+    ///     (<see cref="Signposts" />), so the canvas shows where the letters will really land.
     /// </summary>
     private const double BoardCentreX =
         (Signposts.TextLeft + Signposts.TextWidth / 2.0) / TileMetrics.TileWidth;
@@ -63,29 +54,26 @@ internal static class ScreenPainter
 
     /// <summary>
     ///     For the teleport code written across a booth. Heavier than the tile numbers because it is
-    ///     drawn over artwork rather than over a badge in the corner of a tile.
+    ///     drawn over artwork rather than over a badge.
     /// </summary>
     private static readonly Typeface CodeTypeface = new(FontFamily.Default, FontStyle.Normal, FontWeight.SemiBold);
 
-    /// <summary>
-    ///     The planet core's area: a wash with the nine elements picked out inside it.
-    /// </summary>
+    /// <summary>The planet core's area: a wash with the nine elements picked out inside it.</summary>
     private static readonly IBrush CoreFillBrush = new SolidColorBrush(EditorColours.Accent, 0.16);
 
     /// <inheritdoc cref="CoreFillBrush" />
     private static readonly IPen CoreElementPen = new Pen(new SolidColorBrush(EditorColours.Accent, 0.5));
 
     /// <summary>
-    ///     How solid a signpost's code is drawn, matching the ink the game writes it in - the board
-    ///     shows through the letters rather than being covered by them.
+    ///     How solid a signpost's code is drawn. Matches the game's ink, so the board shows through
+    ///     the letters rather than being covered by them.
     /// </summary>
     private static readonly IBrush SignpostInkBrush = new SolidColorBrush(Colors.Black, 0.75);
 
     /// <summary>
-    ///     The game's own typeface, which is not a label font and is not drawn like one: this stands
-    ///     in for lettering painted on a board, so it is the face the game will write the code in
-    ///     rather than the one the editor's other labels use. Bold, because the game thickens its own
-    ///     for the same reason - see <c>ScreenRenderer.SignpostStrokeWidening</c>.
+    ///     The game's own typeface, used instead of the editor's label font so a signpost shows the
+    ///     face the game will write the code in. Bold to match the game's own thickening, see
+    ///     <c>ScreenRenderer.SignpostStrokeWidening</c>.
     /// </summary>
     private static readonly Typeface SignpostTypeface = new(
         new FontFamily("avares://ScreenEditor/Fonts/elektora.ttf#Elektora"),
@@ -93,8 +81,8 @@ internal static class ScreenPainter
         FontWeight.Bold);
 
     /// <summary>
-    ///     One frame of the canvas. Which overlays are drawn is the session's to say; the order they go
-    ///     down in is this method's, and it is the whole of the drawing policy.
+    ///     Draws one frame of the canvas. The session decides which overlays are drawn; this method
+    ///     decides the order they go down in.
     /// </summary>
     public static void Paint(DrawingContext context, EditorSession? session, Size bounds, Hover hover)
     {
@@ -168,12 +156,10 @@ internal static class ScreenPainter
     ///     Fills a tile position that holds nothing with a chequer, which marks it as a hole.
     /// </summary>
     /// <remarks>
-    ///     The square is half a collision cell, and which squares are filled is worked out from the
-    ///     position on the screen rather than within the tile. Both of those are about the pattern
-    ///     running on across a tile boundary. It used to be a whole cell and counted from the tile's own
-    ///     corner, and a tile is three cells down - an odd number, so every tile below the first started
-    ///     the pattern out of phase and two rows of the same colour met at the seam. Halving the square
-    ///     makes the count even either way; counting from the screen is what makes it not matter.
+    ///     The square is half a collision cell and the pattern is counted from the position on the
+    ///     screen, not within the tile. Both keep it in phase across a tile boundary: a tile is three
+    ///     cells down, so counting whole cells from a tile corner would put every tile below the first
+    ///     out of step and meet two rows of the same colour at the seam.
     /// </remarks>
     private static void DrawEmptyTile(DrawingContext context, ScreenLayout layout, Rect destination, int tileX, int tileY)
     {
@@ -232,8 +218,8 @@ internal static class ScreenPainter
 
                 int neighbour = neighbourRow * WorldMap.ScreensAcross + neighbourColumn;
 
-                // Only the tiles that fall inside the border are worth drawing, so each direction
-                // contributes the one row or column of its screen that touches this one.
+                // Each direction contributes only the row or column of its screen that touches this
+                // one, since the rest falls outside the border.
                 (int firstX, int lastX) = StripRange(dx, TileMetrics.TilesAcross);
                 (int firstY, int lastY) = StripRange(dy, TileMetrics.TilesDown);
 
@@ -257,9 +243,9 @@ internal static class ScreenPainter
     }
 
     /// <summary>
-    ///     Which row or column of a neighbouring screen touches this one, given the direction it lies
-    ///     in. A screen to the side contributes its far column, one above or below its far row, and
-    ///     the direction that is not offset contributes everything.
+    ///     Which row or column of a neighbouring screen touches this one. A screen to the side
+    ///     contributes its far column, one above or below its far row, and an unoffset direction
+    ///     contributes everything.
     /// </summary>
     private static (int First, int Last) StripRange(int direction, int extent)
         => direction switch
@@ -374,10 +360,8 @@ internal static class ScreenPainter
     }
 
     /// <summary>
-    ///     Writes the screen's destination code across every teleport booth on it. The code is the
-    ///     one thing about a screen that is not a tile number, and the booth is where anybody looking
-    ///     for it would look. A booth without one says so, because a booth no code reaches is a
-    ///     screen that cannot be teleported to.
+    ///     Writes the screen's destination code across every teleport booth on it. A booth with no
+    ///     code says so, because a screen no code reaches cannot be teleported to.
     /// </summary>
     private static void DrawTeleportCodes(DrawingContext context, EditorSession session, ScreenLayout layout)
     {
@@ -419,9 +403,8 @@ internal static class ScreenPainter
     }
 
     /// <summary>
-    ///     Writes what every signpost on the screen reads across the sign itself. The game writes the
-    ///     code onto a blank board, so without this the canvas would show a blank board too and there
-    ///     would be no way to see what the sign says without opening a dialog.
+    ///     Writes what each signpost reads across the sign itself. The artwork is a blank board, so
+    ///     without this there would be no way to see what a sign says without opening a dialog.
     /// </summary>
     private static void DrawSignpostCodes(DrawingContext context, EditorSession session, ScreenLayout layout)
     {
@@ -449,18 +432,16 @@ internal static class ScreenPainter
                     continue;
                 }
 
-                // Over the board, not over the middle of the tile. The sign hangs from the top of
-                // its square and the post below it is most of the artwork, so anything centred on
-                // the tile sits a third of a tile below the words it stands for.
+                // Over the board, not the middle of the tile. The sign hangs from the top of its
+                // square and the post takes up most of the artwork below it.
                 Rect sign = layout.TileRect(x, y);
                 var where = new Point(
                     sign.X + sign.Width * BoardCentreX - text.Width / 2,
                     sign.Y + sign.Height * BoardBaselineY - text.Baseline);
 
-                // A code is drawn as the game draws it - black, straight onto the board, which is
-                // gold and needs nothing behind the letters to read. "BLANK" is not a preview of
-                // anything, because a sign with no code is drawn blank; it is a note that there is
-                // nothing to preview, so it keeps the chip the editor's other notes are drawn on.
+                // A real code is drawn as the game draws it: black straight onto the gold board,
+                // which needs nothing behind the letters. "BLANK" is a note rather than a preview,
+                // so it keeps the chip the editor's other notes are drawn on.
                 if (code is null)
                 {
                     var backing = new Rect(where.X - 6, where.Y - 3, text.Width + 12, text.Height + 6);
@@ -474,14 +455,13 @@ internal static class ScreenPainter
     }
 
     /// <summary>
-    ///     The planet core's area, outlined where it sits on this screen, with the nine elements it holds
-    ///     marked out inside it.
+    ///     Outlines the planet core where it sits on this screen, with its nine elements marked
+    ///     inside.
     /// </summary>
     /// <remarks>
-    ///     Drawn rather than described because the core is the one authored thing that is not a tile: it
-    ///     is one and a half tiles across by two down and sits at a position of its own, so the only way
-    ///     to see whether it fits the room around it is to see it. An unplaced core is drawn faintly at
-    ///     the position the game would fall back to.
+    ///     Drawn rather than described because the core is one and a half tiles across by two down at
+    ///     a position of its own, so seeing whether it fits the room needs seeing it. An unplaced core
+    ///     is drawn faintly at the fallback position.
     /// </remarks>
     private static void DrawCore(DrawingContext context, EditorSession session, ScreenLayout layout)
     {
@@ -498,9 +478,8 @@ internal static class ScreenPainter
     }
 
     /// <summary>
-    ///     The core as the canvas draws it, wherever it is being drawn: a wash, the nine elements picked
-    ///     out inside it, and an edge. One method, so the core following the pointer is the same picture
-    ///     as the core already placed rather than a sketch of it.
+    ///     Draws the core: a wash, its nine elements, and an edge. One method, so the core following
+    ///     the pointer looks the same as one already placed.
     /// </summary>
     private static void DrawCoreArea(DrawingContext context, Rect area)
     {

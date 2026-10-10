@@ -11,7 +11,7 @@ namespace Starquake.Tests;
 
 /// <summary>
 ///     When the wreck of Blob's ship spits a spark and where from. The sparks themselves are a
-///     particle effect and can only be judged by looking at them; what is held here is the timing,
+///     particle effect and can only be judged by looking at them. What is held here is the timing,
 ///     which is a function of the frame.
 /// </summary>
 public class ShipWreckSettingsTests
@@ -20,7 +20,7 @@ public class ShipWreckSettingsTests
 
     private const int HullHeight = 128;
 
-    /// <summary>A minute at fifty hertz, which is long enough for a good many sparks.</summary>
+    /// <summary>A minute at 50 frames a second, which is long enough for a good many sparks.</summary>
     private const int AMinute = 60 * 50;
 
     /// <summary>
@@ -83,7 +83,7 @@ public class ShipWreckSettingsTests
     }
 
     /// <summary>
-    ///     The jitter is held below the period so that every window holds exactly one spark - a
+    ///     The jitter is held below the period so that every window holds exactly one spark. A
     ///     jitter as long as the period could push one into the next window and leave a gap.
     /// </summary>
     [Fact]
@@ -103,9 +103,7 @@ public class ShipWreckSettingsTests
         Assert.InRange(longestSilence, 1, LogicClock.Seconds(5));
     }
 
-    /// <summary>
-    ///     Sparks come off the ship, not the air beside it.
-    /// </summary>
+    /// <summary>Sparks come off the ship, not the air beside it.</summary>
     [Fact]
     public void SparkAt_AcrossTheSparks_ComesFromTheHull()
     {

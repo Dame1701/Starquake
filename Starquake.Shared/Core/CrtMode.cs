@@ -13,23 +13,19 @@ internal enum CrtMode
 {
     /// <summary>
     ///     The picture as the game composed it, drawn straight to the back buffer with no filter
-    ///     pass at all.
+    ///     pass.
     /// </summary>
     None,
 
-    /// <summary>
-    ///     Scanlines, on a period locked to whole output pixels.
-    /// </summary>
+    /// <summary>Scanlines, on a period locked to whole output pixels.</summary>
     Scanlines,
 
     /// <summary>
-    ///     Scanlines, a phosphor grille and the beam's glow into its neighbours. Still flat, so
-    ///     the picture lines up with the window.
+    ///     Scanlines, a phosphor grille and the beam's glow into its neighbours. Still flat, so the
+    ///     picture lines up with the window.
     /// </summary>
     Phosphor,
 
-    /// <summary>
-    ///     All of that, bowed out like a real tube, with the corners falling away.
-    /// </summary>
+    /// <summary>All of that, bowed out like a real tube, with the corners falling away.</summary>
     Tube
 }

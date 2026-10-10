@@ -51,8 +51,8 @@ internal class SpriteCollection
         int counter = 0;
         _fade = ColourLevels.Full;
 
-        // Where each frame sits in the sheet, worked out once here so drawing one is an index rather
-        // than a multiplication.
+        // Where each frame sits in the sheet, worked out once so drawing one is an index rather than
+        // a multiplication.
         for (int y = 0; y < noVerticalImages; y++)
         {
             for (int x = 0; x < noHorizontalImages; x++)
@@ -81,47 +81,39 @@ internal class SpriteCollection
 
 
     /// <summary>
-    ///     The batch this collection draws through, built on first use rather than on construction.
+    ///     The batch this collection draws through, built on first use rather than at construction.
     ///     <para>
-    ///         Content is loaded on a background thread, and MonoGame marshals texture creation to
-    ///         the main thread for us - <c>Texture2D</c> does its GL work through
-    ///         <c>Threading.BlockOnUIThread</c>. <c>SpriteBatch</c> does not: its constructor builds
-    ///         a <c>SpriteEffect</c> and a <c>SpriteBatcher</c> directly, so constructing one off the
-    ///         main thread touches the graphics context from the wrong thread. Every draw call is on
-    ///         the main thread, so deferring it to the first one puts it where it belongs.
+    ///         Content loads on a background thread, and MonoGame marshals texture creation back to
+    ///         the main thread. <c>SpriteBatch</c> is not marshalled: its constructor builds a
+    ///         <c>SpriteEffect</c> and a <c>SpriteBatcher</c> directly, so building one off the main
+    ///         thread touches the graphics context from the wrong thread. Every draw call is on the
+    ///         main thread, so deferring to the first one puts it where it belongs.
     ///     </para>
     /// </summary>
     private SpriteBatch Sprites
         => _sprites ??= new SpriteBatch(_graphicsDeviceManager.GraphicsDevice);
 
-    /// <param name="blendState">
-    ///     Blend State for the device
-    /// </param>
-    /// <param name="transform">
-    ///     Only wanted when drawing straight to the back buffer, where it scales and centres the
-    ///     composition - see PresentationSettings.Transform. Drawing into a render target the
-    ///     game composes at its own fixed size, so there it is left null.
-    /// </param>
     /// <summary>
     ///     Opens a batch. Everything drawn until <see cref="End" /> is queued and issued in the order
     ///     the calls were made.
     /// </summary>
     /// <remarks>
-    ///     There was a second overload taking a <see cref="SpriteSortMode" />, and 37 of its 39
-    ///     callers asked for <c>BackToFront</c>. Nothing in the game sets a layer depth - every
-    ///     <c>Draw</c> below passes nought - so that was a sort by a constant key, which costs a sort
-    ///     and leaves the order among equal keys unspecified. The other two asked for
-    ///     <c>Immediate</c>, which flushes a draw call per sprite. Neither was wanted, so neither can
-    ///     be asked for.
+    ///     The sort mode is always <c>Deferred</c>, and deliberately not a parameter. Nothing in the
+    ///     game sets a layer depth, so <c>BackToFront</c> would sort by a constant key and leave the
+    ///     order among equal keys unspecified, while <c>Immediate</c> flushes a draw call per sprite.
     /// </remarks>
+    /// <param name="blendState">The blend state to draw with.</param>
+    /// <param name="transform">
+    ///     Only wanted when drawing straight to the back buffer, where it scales and centres the
+    ///     composition. See PresentationSettings.Transform. Left null when drawing into a render
+    ///     target, which the game composes at its own fixed size.
+    /// </param>
     /// <param name="effect">
-    ///     A pixel shader to put every sprite in this batch through, or null for the ordinary
-    ///     path. <c>Nasty</c>'s birth is the only caller that passes one - see
-    ///     <c>Shaders/Materialise.fx</c> - and anything that does has to hand the shader
-    ///     <see cref="SpriteRectIn01" /> as well, because a sprite drawn from a sheet has its
+    ///     A pixel shader to put every sprite in this batch through, or null for the ordinary path.
+    ///     <c>Nasty</c>'s birth is the only caller that passes one. Anything that does must also hand
+    ///     the shader <see cref="SpriteRectIn01" />, because a sprite drawn from a sheet has its
     ///     neighbours either side of it.
     /// </param>
-    /// <inheritdoc cref="Begin(BlendState,Matrix?)" />
     public void Begin(BlendState blendState, Matrix? transform, Effect? effect)
     {
         Sprites.Begin(SpriteSortMode.Deferred, blendState, null, null, null, effect, transform);
@@ -133,8 +125,8 @@ internal class SpriteCollection
     }
 
     /// <summary>
-    ///     Where one sprite sits in its sheet, as a fraction of the sheet: xy the corner and zw the
-    ///     size. What a shader needs to know to keep its sampling inside the sprite it was given.
+    ///     Where one sprite sits in its sheet, as a fraction of the sheet: xy the corner, zw the
+    ///     size. What a shader needs to keep its sampling inside the sprite it was given.
     /// </summary>
     public Vector4 SpriteRectIn01(int spriteNumber) => RectIn01(
         _spriteImages.Width,
@@ -145,8 +137,8 @@ internal class SpriteCollection
         SpriteHeight);
 
     /// <summary>
-    ///     The arithmetic of <see cref="SpriteRectIn01" />, which is a division and nothing else,
-    ///     kept apart from the sheet so it can be checked without loading one.
+    ///     The arithmetic of <see cref="SpriteRectIn01" />, kept apart from the sheet so it can be
+    ///     checked without loading one.
     /// </summary>
     public static Vector4 RectIn01(
         int sheetWidth,
@@ -304,14 +296,12 @@ internal class SpriteCollection
         }
     }
 
-    /// <summary>
-    ///     Draws one sprite at an angle, in radians, about its own centre.
-    /// </summary>
+    /// <summary>Draws one sprite at an angle, in radians, about its own centre.</summary>
     /// <remarks>
-    ///     The angle belongs to the caller. This class used to hold one itself, advanced by a speed
-    ///     inside <see cref="End" /> - so the spin ran at the display's refresh rate rather than the
-    ///     logic clock, a sheet drawn twice in a frame spun twice as fast, and everything drawing from
-    ///     one of the shared collections the resource manager hands out shared a single angle.
+    ///     The angle belongs to the caller. Holding one here and advancing it while drawing would run
+    ///     the spin at the display's refresh rate, spin twice as fast for a sheet drawn twice in a
+    ///     frame, and share one angle across everything using a collection the resource manager hands
+    ///     out.
     /// </remarks>
     public void DrawSprite(int spriteNumber, int xPosition, int yPosition, Color spriteColour, float scale,
         float rotation)
@@ -358,11 +348,8 @@ internal class SpriteCollection
     ///     A second collection over the same sheet, carrying this one's fade, rotation and spin.
     /// </summary>
     /// <remarks>
-    ///     The two sprite position arrays used to be copied here by round-tripping them through
-    ///     MessagePack - a deep-clone-via-BinaryFormatter idiom carried forward - and the texture was
-    ///     loaded a second time. None of the three was needed: the constructor on the line above
-    ///     computes both arrays from the same sheet's dimensions and loads the same texture, so all
-    ///     three assigned a value over an identical one.
+    ///     The constructor already computes both sprite position arrays from the sheet's dimensions
+    ///     and loads the same texture, so none of that needs copying across.
     /// </remarks>
     public SpriteCollection Clone()
     {

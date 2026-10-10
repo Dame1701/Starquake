@@ -8,10 +8,8 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     A door reading a code off Blob's inventory. This was <c>CheckInventoryAgainstCode</c>, written
-///     character for character twice - once in <c>AccessBoothScreen</c> for the three-digit booth
-///     doors and once in <c>CheopsScreen</c> for the two-digit pyramid - and could not be tested in
-///     either, because both classes need the content pipeline to build.
+///     A door reading a code off Blob's inventory. The access booths ask for three digits and the
+///     Cheops pyramid for two, and both go through the same scan.
 /// </summary>
 public class AccessCodeLockTests
 {
@@ -76,7 +74,7 @@ public class AccessCodeLockTests
     }
 
     /// <summary>
-    ///     What makes the card worth carrying: it answers whatever is asked, so one card opens a
+    ///     What makes the card worth carrying. It answers whatever is asked, so one card opens a
     ///     three-digit door on its own.
     /// </summary>
     [Fact]

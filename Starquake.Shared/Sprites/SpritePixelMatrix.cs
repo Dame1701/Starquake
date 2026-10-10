@@ -14,9 +14,9 @@ internal class SpritePixelMatrix
     {
         _randomNumberGenerator = randomNumberGenerator;
 
-        // The array has to be filled, not just allocated: every pixel starts on and white, which
-        // is both what Finished counts down from and what SetRandomPixel's loop looks for in an
-        // as-yet-untouched pixel.
+        // The array must be filled, not just allocated. Every pixel starts on and white, which is
+        // both what Finished counts down from and what SetRandomPixel's loop looks for in an
+        // untouched pixel.
         Matrix = new SpritePixel[size];
         for (int a = 0; a < Matrix.Length; a++)
         {

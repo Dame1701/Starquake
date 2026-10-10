@@ -8,20 +8,16 @@ using Microsoft.Xna.Framework.Input;
 namespace Starquake.Input;
 
 /// <summary>
-///     The frame's input, read once. Its main job is the keys that have been pressed down and then
-///     released, which is what the game acts on for anything that should happen once rather than for
-///     as long as a key is held.
+///     The frame's input, read once. Mainly the keys pressed down and then released, which is what
+///     the game acts on for anything that should happen once rather than while a key is held.
 /// </summary>
 /// <remarks>
-///     This was two mutable static fields, the last global state in the game - it survived the
-///     deletion of GameEngine.GetInstance() in stage 2 of DECOUPLING.md. It required Update to be
-///     called exactly once a frame from exactly one place and nothing in the type system said so.
-///     It is an instance now, owned by GameHost, which is the thing that decides when a logic frame
-///     happens.
+///     An instance rather than static state, owned by <c>GameHost</c>, which is what decides when a
+///     logic frame happens. <see cref="Update" /> must be called exactly once a frame from exactly
+///     one place.
 ///     <para>
-///         The snapshot Update takes is public because everything reading input this frame should
-///         read the same one. Keyboard.GetState() was called three times here and five more in
-///         CustomControl, so two of those reads could disagree inside one frame.
+///         The snapshot it takes is public because everything reading input this frame must read the
+///         same one. Separate <c>Keyboard.GetState()</c> calls can disagree inside a single frame.
 ///     </para>
 /// </remarks>
 internal class ToggleKeys
@@ -29,17 +25,13 @@ internal class ToggleKeys
     private Keys _heldKey = Keys.None;
     private Keys _toggledKey = Keys.None;
 
-    /// <summary>
-    ///     The keyboard and first gamepad as they were when this frame began.
-    /// </summary>
+    /// <summary>The keyboard and first gamepad as they were when this frame began.</summary>
     public KeyboardState KeyboardState { get; private set; }
 
     /// <inheritdoc cref="KeyboardState" />
     public GamePadState GamePadState { get; private set; }
 
-    /// <summary>
-    ///     The key released this frame, if exactly one was down and has just come up.
-    /// </summary>
+    /// <summary>The key released this frame, if exactly one was down and has just come up.</summary>
     public Keys GetPressedKey() => _toggledKey;
 
     public void Update()
@@ -68,12 +60,10 @@ internal class ToggleKeys
     ///     room for two. Anything without one is shown by its own name.
     /// </summary>
     /// <remarks>
-    ///     This was a 232-line ladder of <c>if (key == Keys.X) return "Y";</c>, which is a lookup
-    ///     table written as control flow. Two oddities in it are kept because they are what the
-    ///     screen currently shows: <see cref="Keys.Up" /> has no entry, so it reads "Up" while the
-    ///     other three arrows read DN, LF and RT; and four labels are used twice over - RT for both
-    ///     Right and Enter, BS for both browser Search and Stop, CL for CapsLock and OemClear, and a
-    ///     full stop for Decimal and OemPeriod.
+    ///     Two oddities are kept deliberately, because they are what the screen shows:
+    ///     <see cref="Keys.Up" /> has no entry, so it reads "Up" while the other three arrows read
+    ///     DN, LF and RT; and four labels are used twice over, RT for Right and Enter, BS for browser
+    ///     Search and Stop, CL for CapsLock and OemClear, and a full stop for Decimal and OemPeriod.
     /// </remarks>
     public static string GetFriendlyName(Keys key) => key switch
     {

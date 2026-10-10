@@ -33,8 +33,8 @@ internal class ScreenEffectEngine
         _renderViewPorts = new List<RenderViewPort>();
         _screenEffects = new List<ScreenEffectBase>();
 
-        // One snapshot between the two tunnel directions: only one effect is ever active, so they
-        // cannot both be mid-transition and want a picture of their own.
+        // One snapshot shared between the two tunnel directions. Only one effect is ever active, so
+        // they cannot both be mid-transition and want a picture of their own.
         var outgoingScreen = new ScreenSnapshot(graphics);
 
         _screenEffects.Add(new LeftTunnelEntryEffect(outgoingScreen, presentation, resources));
@@ -49,9 +49,9 @@ internal class ScreenEffectEngine
     }
 
     /// <summary>
-    ///     Whether Blob and the nasties are being held still. Both that the caller asked for a
-    ///     halt and that the running effect still wants one - the tunnel transition lets go before
-    ///     it has finished, so the last of it settles while Blob is already walking.
+    ///     Whether Blob and the nasties are being held still. Requires both that the caller asked for
+    ///     a halt and that the running effect still wants one: the tunnel transition lets go before it
+    ///     finishes, so the last of it settles while Blob is already walking.
     /// </summary>
     public bool HaltBlobAndNasties
         => _haltBlobAndNastiesRequested && ActiveScreenEffect is { HoldsGameplay: true };
@@ -60,7 +60,7 @@ internal class ScreenEffectEngine
 
     /// <summary>
     ///     Sets up a named <c>RenderTarget2D</c> at the size wanted, rather than a viewport on the
-    ///     back buffer, and remembers where on the screen it is to be drawn.
+    ///     back buffer, and remembers where on screen it is to be drawn.
     /// </summary>
     public void RegisterViewPort(string name,
         int xPosition,
@@ -92,11 +92,11 @@ internal class ScreenEffectEngine
     }
 
     /// <summary>
-    ///     Says that one view port should be composed through a pixel shader this frame, rather
-    ///     than handed to the back buffer as it is. The full-screen pages' way in: they are not the
-    ///     play area, so <see cref="ExecuteScreenEffect" /> cannot reach them, and what the
-    ///     computer report's malfunction has to distort is the finished page - text, artwork and
-    ///     all - which only exists once the page has drawn itself into its target.
+    ///     Says that one view port should be composed through a pixel shader this frame rather than
+    ///     handed to the back buffer as it is. The full-screen pages' way in: they are not the play
+    ///     area, so <see cref="ExecuteScreenEffect" /> cannot reach them, and what the computer
+    ///     report's malfunction must distort is the finished page, text and artwork alike, which only
+    ///     exists once the page has drawn itself into its target.
     /// </summary>
     public void ComposeViewPortThrough(string name, Effect shader)
         => GetRenderViewPort(name).ComposeThrough = shader;
@@ -126,9 +126,9 @@ internal class ScreenEffectEngine
            ?? throw new InvalidOperationException($"Could not find a RenderViewPort named '{name}'.");
 
     /// <summary>
-    ///     Says where the next core surge should be centred. Separate from triggering it because
-    ///     <see cref="ExecuteScreenEffect" /> is the same call for every effect and only this one
-    ///     has somewhere to be.
+    ///     Says where the next core surge should be centred. Separate from triggering it, because
+    ///     <see cref="ExecuteScreenEffect" /> is the same call for every effect and only this one has
+    ///     somewhere to be.
     /// </summary>
     public void WringCoreSurgeAbout(Vector2 slotInPlayfield)
     {
@@ -145,7 +145,7 @@ internal class ScreenEffectEngine
 
     public void ExecuteScreenEffect(ScreenEffectType screenEffectToExecute, int effectSpeed, int effectDuration, bool haltBlobAndNasties)
     {
-        // Only one effect runs at a time, so every other one is reset before this one is looked for.
+        // Only one effect runs at a time, so every other is reset before this one is looked for.
         foreach (ScreenEffectBase screenEffect in _screenEffects)
         {
             screenEffect.Reset();
@@ -165,9 +165,9 @@ internal class ScreenEffectEngine
     }
 
     /// <summary>
-    ///     Ends whatever is running, if anything. For the effects that do not run down on their
-    ///     own - the water on Olly's screen is the only one - which have to be told when the thing
-    ///     they belong to has gone.
+    ///     Ends whatever is running, if anything. For effects that do not run down on their own, of
+    ///     which the water on Olly's screen is the only one, and so must be told when the thing they
+    ///     belong to has gone.
     /// </summary>
     public void StopActiveScreenEffect()
     {
@@ -190,16 +190,15 @@ internal class ScreenEffectEngine
     }
 
     /// <param name="composeOnto">
-    ///     Where the finished picture goes: null for the back buffer, or the frame
-    ///     <c>CrtFilter</c> is catching when the tube is switched on.
+    ///     Where the finished picture goes: null for the back buffer, or the frame <c>CrtFilter</c> is
+    ///     catching when the tube is switched on.
     /// </param>
     public void Draw(RenderTarget2D? composeOnto = null)
     {
-        // Nothing to compose until the view ports have been registered, and clearing the back
-        // buffer to draw nothing over it would wipe out whatever did draw - the boot screen, which
-        // is on screen for the whole of the content load and is drawn straight to the back buffer.
-        // This used to be guaranteed by the engine not existing yet; it is built before the view
-        // ports now, so it has to say so itself.
+        // Nothing to compose until the view ports are registered, and clearing the back buffer to
+        // draw nothing over it would wipe out whatever did draw. That is the boot screen, which is on
+        // screen for the whole content load and draws straight to the back buffer. The engine is
+        // built before its view ports, so this guard has to be here.
         if (_renderViewPorts.Count == 0)
         {
             return;
@@ -226,7 +225,7 @@ internal class ScreenEffectEngine
     }
 
     /// <summary>
-    ///     Whether this is the view port the screen effects apply to. Only the playfield gets them -
+    ///     Whether this is the view port the screen effects apply to. Only the playfield gets them;
     ///     the status panel and the full-screen pages are composed by
     ///     <see cref="DrawViewPortDirectly" />, with or without a shader of their own.
     /// </summary>
@@ -235,16 +234,16 @@ internal class ScreenEffectEngine
 
     /// <summary>
     ///     Lets the running effect compose the playfield instead, and says whether it did. An effect
-    ///     that draws both halves of a transition itself leaves nothing for the plain path to do; one
-    ///     that only tints what is there hands it back.
+    ///     drawing both halves of a transition leaves nothing for the plain path to do; one that only
+    ///     tints what is there hands it back.
     /// </summary>
     private bool ComposedByActiveEffect(RenderViewPort renderViewPort)
         => ActiveScreenEffect != null && !ActiveScreenEffect.Draw(_renderer, renderViewPort);
 
     /// <summary>
     ///     One view port's render target onto the back buffer, through the presentation transform so
-    ///     it lands where the composition says it should - and through whatever shader the view port
-    ///     was handed by <see cref="ComposeViewPortThrough" />, if it was handed one.
+    ///     it lands where the composition says it should, and through whatever shader
+    ///     <see cref="ComposeViewPortThrough" /> handed it, if any.
     /// </summary>
     private void DrawViewPortDirectly(RenderViewPort renderViewPort)
     {

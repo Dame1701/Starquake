@@ -9,17 +9,15 @@ using Starquake.Core;
 namespace Starquake.Tuning;
 
 /// <summary>
-///     The numbers the CRT shader is driven by, and the look it is tuned to. Pure arithmetic on
-///     the back buffer's size, kept apart from <c>ScreenPresenter</c> so it can be checked
-///     without a graphics device - the same split <see cref="PresentationSettings.TransformFor" />
-///     is written for.
+///     The numbers the CRT shader is driven by. Arithmetic on the back buffer's size, kept apart from
+///     <c>ScreenPresenter</c> so it can be checked without a graphics device, the same split
+///     <see cref="PresentationSettings.TransformFor" /> is written for.
 /// </summary>
 internal static class CrtSettings
 {
     /// <summary>
-    ///     How dark the trough of a scanline goes. The overlay this replaces was black at an alpha
-    ///     of 128 on every other row, so half - but it was then averaged away by the resampling it
-    ///     went through, and this one is not, so it reads much stronger at the same number.
+    ///     How dark the trough of a scanline goes. Nothing resamples this away, so it reads much
+    ///     stronger than the same number would in composition space.
     /// </summary>
     public const float ScanlineDepth = 0.35f;
 
@@ -27,22 +25,22 @@ internal static class CrtSettings
     public const float MaskDepth = 0.18f;
 
     /// <summary>
-    ///     How much of the blur is added back on top of the picture. Additive, so this is how far
-    ///     a bright pixel lifts its neighbours rather than how much of the picture is blurred.
+    ///     How much of the blur is added back on top of the picture. Additive, so this is how far a
+    ///     bright pixel lifts its neighbours rather than how much of the picture is blurred.
     /// </summary>
     public const float GlowAmount = 0.45f;
 
     /// <summary>
-    ///     How far the glow reaches, in output pixels. Taken diagonally - see <c>Crt.fx</c>'s
-    ///     <c>Glow</c> - so the halo is about this wide in every direction rather than this wide on
+    ///     How far the glow reaches, in output pixels. Taken diagonally, see <c>Crt.fx</c>'s
+    ///     <c>Glow</c>, so the halo is about this wide in every direction rather than this wide on
     ///     the axes and further at the corners.
     /// </summary>
     public const float GlowRadius = 2.6f;
 
     /// <summary>
-    ///     How far the tube bows. A tenth is already a fishbowl at this aspect ratio - the picture
-    ///     is wide, so the corners travel much further than the sides do and the bow reads as
-    ///     stronger than the number suggests.
+    ///     How far the tube bows. A tenth is already a fishbowl at this aspect ratio: the picture is
+    ///     wide, so the corners travel much further than the sides and the bow reads as stronger than
+    ///     the number suggests.
     /// </summary>
     public const float Curvature = 0.022f;
 
@@ -51,47 +49,42 @@ internal static class CrtSettings
 
     /// <summary>
     ///     How long the phosphor takes to fall to about a third of its brightness once the beam has
-    ///     moved on. What makes a moving object streak slightly rather than simply appear in a new
-    ///     place every frame.
+    ///     moved on. What makes a moving object streak slightly rather than appear in a new place
+    ///     every frame.
     /// </summary>
     /// <remarks>
-    ///     Twenty milliseconds is a little over one logic frame, and the trail is gone inside three
-    ///     - a smear behind something moving rather than a second copy of it following along. It
-    ///     was 35ms first, which at sixty hertz kept nearly two thirds of each frame and read as
-    ///     the picture being dragged.
+    ///     A little over one logic frame, with the trail gone inside three: a smear behind something
+    ///     moving rather than a second copy following it. Much longer and the picture reads as being
+    ///     dragged.
     /// </remarks>
     public const double PhosphorDecaySeconds = 0.020;
 
     /// <summary>
-    ///     One red, green and blue stripe span, in output pixels. Three so that each channel owns
-    ///     a whole pixel of it and the grille cannot land between two.
+    ///     One red, green and blue stripe span, in output pixels. Three, so each channel owns a whole
+    ///     pixel and the grille cannot land between two.
     /// </summary>
     public const float MaskPeriod = 3f;
 
-    /// <summary>
-    ///     How many output pixels one light-and-dark pair spans.
-    /// </summary>
+    /// <summary>How many output pixels one light-and-dark pair spans.</summary>
     /// <remarks>
-    ///     The whole point of the shader. The bitmap overlay had a two-pixel period in composition
-    ///     space and was then scaled by a fractional amount, which is what made it a grey wash with
-    ///     a beat in it. Rounding to a whole number of output pixels keeps the lines the same
-    ///     thickness everywhere on the screen, and never less than two, because one on and one off
-    ///     is the thinnest a scanline can be.
+    ///     Rounded to a whole number of output pixels, which keeps the lines the same thickness
+    ///     everywhere on screen. A period in composition space scaled by a fractional amount becomes
+    ///     a grey wash with a beat in it. Never less than two, because one on and one off is the
+    ///     thinnest a scanline can be.
     /// </remarks>
     public static int ScanlinePeriodFor(float scale)
         => Math.Max(2, (int)Math.Round(2 * scale, MidpointRounding.AwayFromZero));
 
     /// <summary>
-    ///     What the picture has to be multiplied by to put back the light the scanlines and the
-    ///     grille take out of it, so that turning the effect on dims the picture as little as
-    ///     possible rather than by a third.
+    ///     What the picture is multiplied by to put back the light the scanlines and the grille take
+    ///     out, so turning the effect on barely dims the picture rather than costing a third of it.
     /// </summary>
     /// <remarks>
     ///     Both patterns are a <c>lerp</c> from <c>1 - depth</c> to <c>1</c> across a smoothed
-    ///     triangle wave, and the mean of that wave over one period is exactly a half - the
-    ///     triangle is uniform over nought to one, and the mean of <c>x * x * (3 - 2x)</c> over
-    ///     that range is <c>1 - 1/2</c>. So each pattern costs <c>depth / 2</c> of the picture's
-    ///     light on average, and the gain is the reciprocal of what is left.
+    ///     triangle wave, whose mean over one period is exactly a half: the triangle is uniform over
+    ///     nought to one, and the mean of <c>x * x * (3 - 2x)</c> over that range is <c>1 - 1/2</c>.
+    ///     So each pattern costs <c>depth / 2</c> of the light on average, and the gain is the
+    ///     reciprocal of what is left.
     /// </remarks>
     public static float GainFor(CrtMode mode)
     {
@@ -106,11 +99,10 @@ internal static class CrtSettings
     }
 
     /// <summary>
-    ///     Where the composition sits inside the back buffer, in texture coordinates: xy the
-    ///     corner and zw the size. The same scale and border
-    ///     <see cref="PresentationSettings.TransformFor" /> works out, expressed as a fraction of
-    ///     the buffer rather than as a matrix, because the shader bows the picture about the middle
-    ///     of the composition and not the middle of the window.
+    ///     Where the composition sits inside the back buffer, in texture coordinates: xy the corner,
+    ///     zw the size. The same scale and border <see cref="PresentationSettings.TransformFor" />
+    ///     works out, as a fraction of the buffer rather than a matrix, because the shader bows the
+    ///     picture about the middle of the composition and not the middle of the window.
     /// </summary>
     public static Vector4 CompositionRectFor(int backBufferWidth, int backBufferHeight)
     {
@@ -133,9 +125,9 @@ internal static class CrtSettings
             backBufferHeight / (float)CompositionSize.Height);
 
     /// <summary>
-    ///     Which pass of the shader a mode is drawn with. The techniques are separate rather than
-    ///     one shader with branches because <c>ps_2_0</c> has no dynamic branching, and so each
-    ///     mode is compiled as only the work it needs.
+    ///     Which pass of the shader a mode is drawn with. Separate techniques rather than one shader
+    ///     with branches, because <c>ps_2_0</c> has no dynamic branching, so each mode compiles to
+    ///     only the work it needs.
     /// </summary>
     public static string TechniqueFor(CrtMode mode)
         => mode switch
@@ -145,36 +137,30 @@ internal static class CrtSettings
             _ => "Tube"
         };
 
-    /// <summary>
-    ///     How much of the last picture is still glowing this long afterwards.
-    /// </summary>
+    /// <summary>How much of the last picture is still glowing this long afterwards.</summary>
     /// <remarks>
-    ///     An exponential decay over elapsed time rather than a fixed fraction a frame, and that
-    ///     is the whole reason for taking the time at all: the game draws once per vertical
-    ///     retrace, so a fixed fraction would leave the streak less than half as long on a 144
-    ///     hertz monitor as on a 60 hertz one. Decaying by the clock gives the same streak over
-    ///     the same number of seconds on any display, which is what a phosphor actually does.
+    ///     An exponential decay over elapsed time rather than a fixed fraction per frame, which is
+    ///     the only reason the time is taken at all. The game draws once per vertical retrace, so a
+    ///     fixed fraction would leave the streak less than half as long at 144 hertz as at 60.
     ///     <para>
-    ///         It compounds, which is what makes that true: decaying twice over half an interval
-    ///         leaves exactly what decaying once over the whole interval leaves, so a frame rate
-    ///         that varies from moment to moment does not change the result either.
+    ///         It compounds, which is what makes that work: decaying twice over half an interval
+    ///         leaves exactly what decaying once over the whole interval leaves, so a frame rate that
+    ///         varies from moment to moment does not change the result.
     ///     </para>
     /// </remarks>
     public static float AfterglowRetainedOver(double seconds)
         => (float)Math.Exp(-seconds / PhosphorDecaySeconds);
 
     /// <summary>
-    ///     Whether a mode glows on after the beam has passed. The plain scanline mode does not -
-    ///     each press of F9 adds one thing, and the persistence belongs with the phosphor that
-    ///     has it.
+    ///     Whether a mode glows on after the beam has passed. The plain scanline mode does not: each
+    ///     press of F9 adds one thing, and the persistence belongs with the phosphor.
     /// </summary>
     public static bool ShowsAfterglow(CrtMode mode)
         => mode is CrtMode.Phosphor or CrtMode.Tube;
 
     /// <summary>
-    ///     What to call a mode on screen when F9 has just stepped onto it. Capitals and spaces
-    ///     only: the bitmap font is a sprite font with the characters it was built with, and these
-    ///     are the ones the rest of the game writes in.
+    ///     What to call a mode on screen when F9 steps onto it. Capitals and spaces only, because the
+    ///     bitmap font has only the characters it was built with.
     /// </summary>
     public static string NameOf(CrtMode mode)
         => mode switch
@@ -186,7 +172,7 @@ internal static class CrtSettings
         };
 
     /// <summary>
-    ///     The next mode F9 steps to. Each press adds one thing and the fourth takes the lot away.
+    ///     The next mode F9 steps to. Each press adds one thing and the fourth takes them all away.
     /// </summary>
     public static CrtMode Next(CrtMode mode)
         => mode switch

@@ -12,11 +12,10 @@ namespace Starquake.ActiveSprites;
 internal class ElectricityRandomiser
 {
     /// <summary>
-    ///     How long the arcs hold their state for, in logic frames. Left as the frame counts they
-    ///     have always been rather than expressed in seconds: they were chosen when the loop ran at
-    ///     sixty frames a second, and <see cref="LogicClock.FramesPerSecond" /> is fifty now - so the
-    ///     comment that called 240 to 300 "four to five seconds" is out by a fifth, and rewriting
-    ///     them in terms of the clock would retime the hazard rather than describe it.
+    ///     How long the arcs hold their state for, in logic frames. Deliberately left as raw frame
+    ///     counts: they were chosen for a sixty frame loop and
+    ///     <see cref="LogicClock.FramesPerSecond" /> is fifty, so restating them in seconds would
+    ///     retime the hazard rather than describe it.
     /// </summary>
     private const int OnScreenEntryFrames = 60;
 
@@ -27,8 +26,8 @@ internal class ElectricityRandomiser
     private const int AfterResetMaxFrames = 300;
 
     /// <summary>
-    ///     How loud the arcs are. They run constantly wherever they are on a screen, so they sit
-    ///     below everything that happens once.
+    ///     How loud the arcs are. They run constantly, so they sit below everything that happens
+    ///     once.
     /// </summary>
     private const float SoundVolume = 0.3f;
 
@@ -67,14 +66,14 @@ internal class ElectricityRandomiser
         _counter = 0;
         if (nodeReset)
         {
-            // Longer after a reset, which usually means Blob has just died - so the player has a
-            // moment to get clear before the arcs start again.
+            // Longer after a reset, which usually follows a death, so the player has a moment to get
+            // clear before the arcs start again.
             _counterTarget = _randomGenerator.Next(AfterResetMinFrames, AfterResetMaxFrames);
         }
         else if (changedScreens)
         {
-            // Always the same on arrival, so a screen's arcs are in a known state when Blob walks on
-            // rather than possibly flipping the instant he does.
+            // Always the same on arrival, so a screen's arcs are in a known state when Blob walks
+            // on rather than flipping the instant he does.
             _counterTarget = OnScreenEntryFrames;
         }
         else
@@ -90,8 +89,8 @@ internal class ElectricityRandomiser
     }
 
     /// <summary>
-    ///     Starts the arcing sound if it is not already going. One instance for however many nodes
-    ///     are on the screen, which is why it is started from the flag rather than per node.
+    ///     Starts the arcing sound if it is not already going. One instance covers however many
+    ///     nodes are on the screen, which is why it is started from the flag rather than per node.
     /// </summary>
     private void StartElectricitySound()
     {

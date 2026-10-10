@@ -17,11 +17,5 @@ internal static class Colours
     ///     White, dimmed to <paramref name="fade" />. Nearly every fade in the game is a sprite or a
     ///     string drawn in its own colours and brought up or down as a whole, which is this.
     /// </summary>
-    /// <remarks>
-    ///     It was written out as GetXna4Colour(ColourLevels.Full, ColourLevels.Full,
-    ///     ColourLevels.Full, fade) at forty-seven sites across seventeen files - three full
-    ///     screens' worth of the same three arguments. Nothing else in the codebase passes all three
-    ///     channels full and varies only the fourth.
-    /// </remarks>
     public static Color WhiteFadedTo(int fade) => GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full, fade);
 }

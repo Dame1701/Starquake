@@ -14,8 +14,8 @@ namespace Starquake.Display;
 internal class KeyScanner
 {
     /// <summary>
-    ///     Where the digit sits inside the slot it is drawn in, so it is centred on the artwork
-    ///     behind it rather than against its corner.
+    ///     Where the digit sits inside its slot, so it is centred on the artwork behind it rather
+    ///     than against the corner.
     /// </summary>
     private const int KeyXInset = 2;
 
@@ -23,7 +23,7 @@ internal class KeyScanner
     private const int KeyYInset = 6;
 
     /// <summary>
-    ///     How far the scan line overhangs the digit each side, so it reads as sweeping across it
+    ///     How far the scan line overhangs the digit each side, so it reads as sweeping across
     ///     rather than being contained by it.
     /// </summary>
     private const int ScanLineXOutset = 4;
@@ -61,16 +61,14 @@ internal class KeyScanner
     }
 
     /// <summary>
-    ///     Runs a row of scanners through a code, one digit at a time: the first starts itself, and
+    ///     Runs a row of scanners through a code, one digit at a time: the first starts itself and
     ///     each one that finishes starts the next. The slot each digit is read from comes off the
     ///     scan, so the status panel lights up the inventory slot being looked at.
     /// </summary>
     /// <remarks>
-    ///     The access booths ask for three digits and the Cheops pyramid for two, and this was
-    ///     written out twice - once per screen - differing in nothing but that count, which it now
-    ///     takes from the array it is given. <see cref="AccessCodeLock" /> is the
-    ///     same split: the part that needs no graphics device went there, and this is the animation
-    ///     the digits are shown through, which does.
+    ///     How many digits comes from the array passed in: three for an access booth, two for the
+    ///     Cheops pyramid. <see cref="AccessCodeLock" /> holds the part that needs no graphics
+    ///     device; this is the animation the digits are shown through, which does.
     /// </remarks>
     public static void ScanCodeInTurn(KeyScanner[] scanners, AccessCodeScan scan, StatusPanel statusPanel)
     {
@@ -162,9 +160,7 @@ internal class KeyScanner
         DrawScanLine(xPos, yPos);
     }
 
-    /// <summary>
-    ///     The digit the door is asking for, drawn as the pick-up that answers it.
-    /// </summary>
+    /// <summary>The digit the door is asking for, drawn as the pick-up that answers it.</summary>
     private void DrawCodeKey(int codeNumber, int xPos, int yPos)
     {
         SpriteCollection pickups = _resources.GetSpriteCollection(_graphicsSet.Names.Pickups);
@@ -177,7 +173,7 @@ internal class KeyScanner
 
     /// <summary>
     ///     The digit again, in the colour that says whether Blob is carrying it, revealed down to
-    ///     wherever the scan line has reached - so the verdict is painted on as the line passes.
+    ///     wherever the scan line has reached, so the verdict is painted on as the line passes.
     /// </summary>
     private void DrawScanVerdict(int codeNumber, int xPos, int yPos)
     {
@@ -196,9 +192,7 @@ internal class KeyScanner
         verdict.End();
     }
 
-    /// <summary>
-    ///     The line itself, running down the digit.
-    /// </summary>
+    /// <summary>The line itself, running down the digit.</summary>
     private void DrawScanLine(int xPos, int yPos)
     {
         SpriteCollection scanLine = _resources.GetSpriteCollection(Assets.Graphics.ScanLine);

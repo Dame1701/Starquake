@@ -66,9 +66,9 @@ internal class ColourAnimations
     }
 
     /// <summary>
-    ///     Starts one registered animation from the top: invisible, fading up, with its loop count
-    ///     reset. The transition colour's alpha is zeroed here rather than by the caller, so an
-    ///     animation always begins invisible whichever overload asked for it.
+    ///     Starts one registered animation from the top: invisible, fading up, loop count reset. The
+    ///     transition colour's alpha is zeroed here rather than by the caller, so an animation always
+    ///     begins invisible whichever overload asked for it.
     /// </summary>
     private static void Begin(ColourFader fader, int loopCount)
     {
@@ -171,18 +171,17 @@ internal class ColourAnimations
 
     /// <summary>
     ///     Draws every pulsing tile on the screen, from one sheet, as one batch. The lower layer
-    ///     repaints the tile that is already there; the upper one lays a second tile over it, and a
-    ///     pulse that has no second tile is skipped - which is the only difference between the two
-    ///     passes, and the whole of why they were written out twice.
+    ///     repaints the tile already there; the upper lays a second tile over it and skips a pulse
+    ///     that has none, which is the only difference between the two passes.
     /// </summary>
     private void DrawLayer(string sheetName, bool upperLayer)
     {
         SpriteCollection tiles = _resources.GetSpriteCollection(sheetName);
 
         // Found before any of it is drawn, for two reasons. A halo needs the shader pointed at its
-        // own tile and a batch holds one set of values, so the halos cannot share the batch the
-        // plain pulses go down in - and the halo has to go *under* the light it belongs to, which
-        // means it cannot be drawn as it is found either.
+        // own tile and a batch holds one set of values, so halos cannot share the batch the plain
+        // pulses go down in. And a halo goes under the light it belongs to, so it cannot be drawn as
+        // it is found either.
         List<(int Tile, int X, int Y, ColourFader Animation)> pulsing = [];
 
         for (int y = 0; y < TileMetrics.TilesDown; y++)
@@ -226,18 +225,16 @@ internal class ColourAnimations
     }
 
     /// <summary>
-    ///     The halo under each tile that asked for one: a soft glow drawn at rather more than the
-    ///     tile's own size, which is where the spreading comes from.
+    ///     The halo under each tile that asked for one: a soft glow drawn larger than the tile itself,
+    ///     which is where the spreading comes from.
     /// </summary>
     /// <remarks>
-    ///     One batch per tile, because the shader has to be told which square of the sheet the
-    ///     tile occupies, and a batch holds one set of values. That is a batch apiece for at most a
-    ///     handful of tiles on a screen, which is why it is affordable here and would not be for
-    ///     the tiles at large.
+    ///     One batch per tile, because the shader must be told which square of the sheet the tile
+    ///     occupies and a batch holds one set of values. Affordable for the handful of such tiles on a
+    ///     screen, and not for the tiles at large.
     ///     <para>
     ///         The halo takes its colour from the pulse's own, because the shader multiplies by the
-    ///         tint it is drawn with - so a tag that pulses red throws a red halo without being
-    ///         told what colour it is.
+    ///         tint it is drawn with, so a tag pulsing red throws a red halo without being told.
     ///     </para>
     /// </remarks>
     private void DrawHalos(
@@ -265,12 +262,12 @@ internal class ColourAnimations
             foreach (Point light in animation.HaloLights)
             {
                 // The scaled draw turns about the tile's own middle, so the corner is stepped back
-                // by half a tile to put that middle on the light instead.
+                // half a tile to put that middle on the light instead.
                 int haloX = x * TileMetrics.TileWidth + light.X - TileMetrics.TileWidth / 2;
                 int haloY = y * TileMetrics.TileHeight + light.Y - TileMetrics.TileHeight / 2;
 
-                // Over itself, because it is competing with a pulse that has already drawn the
-                // tile over itself as many as six times - see HaloSettings.Passes.
+                // Over itself, because it competes with a pulse that has already drawn the tile over
+                // itself up to six times. See HaloSettings.Passes.
                 for (int pass = 0; pass < HaloSettings.Passes; pass++)
                 {
                     tiles.DrawSprite(
@@ -283,7 +280,7 @@ internal class ColourAnimations
     }
 
     /// <summary>
-    ///     One pulsing tile, drawn over itself as many times as its intensity asks for. The blend is
+    ///     One pulsing tile, drawn over itself as many times as its intensity asks. The blend is
     ///     additive, so each pass deepens the shade rather than replacing it.
     /// </summary>
     private static void DrawLayeredUp(

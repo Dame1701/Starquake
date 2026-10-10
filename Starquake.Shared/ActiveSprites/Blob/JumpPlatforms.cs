@@ -16,9 +16,9 @@ namespace Starquake.ActiveSprites;
 internal class JumpPlatforms : IDynamicCollisionCells
 {
     /// <summary>
-    ///     What <see cref="GetNewJumpPlatform" /> answers when there is no room for one. It has to be
-    ///     well below any real answer rather than -1, because the position it normally returns can
-    ///     itself be negative while Blob is crossing between screens.
+    ///     What <see cref="GetNewJumpPlatform" /> answers when there is no room for one. Well below
+    ///     any real answer rather than -1, because the position it normally returns can itself be
+    ///     negative while Blob crosses between screens.
     /// </summary>
     public const int NoRoomForPlatform = -1000;
 
@@ -46,14 +46,14 @@ internal class JumpPlatforms : IDynamicCollisionCells
         _screenEffects = screenEffects;
         _platforms = new List<JumpPlatform>();
 
-        // The platforms' cells are not on the screen's tile map, so the collision map has to be able
-        // to ask for them again every time it is rebuilt - see IDynamicCollisionCells.
+        // Platform cells are not on the screen's tile map, so the collision map asks for them again
+        // on every rebuild. See IDynamicCollisionCells.
         _gameScreens.Collisions.RegisterDynamicCells(this);
     }
 
     /// <summary>
-    ///     The cells of every platform still standing on one screen. A platform that has dissolved or
-    ///     has not been handed out is not active and owns nothing.
+    ///     The cells of every platform still standing on one screen. A platform that has dissolved,
+    ///     or has not been handed out, owns nothing.
     /// </summary>
     public IEnumerable<CollisionTile> CellsOnScreen(int screenNumber)
     {
@@ -113,8 +113,8 @@ internal class JumpPlatforms : IDynamicCollisionCells
         newPlatform.ReadyToAllocate = false;
         newPlatform.ScreenNumber = _gameScreens.ScreenNumber;
 
-        // Into the map as it stands, so Blob can be put on the platform this same frame. A
-        // rebuild asks CellsOnScreen for them again rather than keeping these two.
+        // Added to the map as it stands, so Blob can be put on the platform this same frame. A
+        // rebuild asks CellsOnScreen for them again rather than keeping these.
         _gameScreens.Collisions.Add(newPlatform.LeftCollisionTile);
         _gameScreens.Collisions.Add(newPlatform.RightCollisionTile);
 
@@ -157,9 +157,9 @@ internal class JumpPlatforms : IDynamicCollisionCells
 
     /// <summary>
     ///     Takes a platform out of use and its cells out of the map. The removal only reaches the
-    ///     screen being shown, which is the only one being asked about collision; cells left behind on
-    ///     a screen Blob has since walked off go when that screen is next rebuilt, and
-    ///     <see cref="CellsOnScreen" /> stops reporting them the moment the platform is reset.
+    ///     screen being shown, which is the only one asked about collision. Cells left on a screen
+    ///     Blob has walked off go when that screen is next rebuilt, and <see cref="CellsOnScreen" />
+    ///     stops reporting them as soon as the platform is reset.
     /// </summary>
     private void RetirePlatform(JumpPlatform platform)
     {

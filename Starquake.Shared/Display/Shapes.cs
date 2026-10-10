@@ -7,10 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Starquake.Display;
 
-/// <summary>
-///     An extended version of the SpriteBatch class that supports line and
-///     rectangle drawing.
-/// </summary>
+/// <summary>A <c>SpriteBatch</c> that can also draw lines and rectangles.</summary>
 internal class Shapes : SpriteBatch
 {
 
@@ -21,16 +18,11 @@ internal class Shapes : SpriteBatch
         WhiteTexture.SetData([Color.White]);
     }
     /// <summary>
-    ///     The texture used when drawing rectangles, lines and other
-    ///     primitives. This is a 1x1 white texture created at runtime.
+    ///     A 1x1 white texture, built at runtime, stretched to draw every line and rectangle.
     /// </summary>
     private Texture2D WhiteTexture { get; }
 
-    /// <summary>
-    ///     Fill a rectangle.
-    /// </summary>
-    /// <param name="rectangle">The rectangle to fill.</param>
-    /// <param name="color">The fill color.</param>
+    /// <summary>Fills a rectangle.</summary>
     public void FillRectangle(Rectangle rectangle, Color color)
     {
         Draw(WhiteTexture, rectangle, color);

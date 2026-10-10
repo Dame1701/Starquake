@@ -14,15 +14,13 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     The lift that carries Blob up a shaft: when he is on one, how far it takes him, and when he is
-///     allowed to step off sideways. All of it was inside <c>Blob.GoUpTheShaft</c>, which needed Blob,
-///     and Blob needs the content pipeline and a graphics device.
+///     The lift that carries Blob up a shaft: when he is on one, how far it takes him, and when he
+///     is allowed to step off sideways.
 /// </summary>
 /// <remarks>
-///     <see cref="TunnelLift" /> takes its sound as two callbacks rather than a sound engine, which is
-///     what makes this reachable - the same trade <see cref="BlobFall" /> makes by returning a flag. The
-///     callbacks are counted here, because when the lift's sound starts and stops is part of what it
-///     decides.
+///     <see cref="TunnelLift" /> takes its sound as two callbacks rather than a sound engine, so
+///     none of this needs the sound engine. The callbacks are counted here, because when the lift's
+///     sound starts and stops is part of what it decides.
 /// </remarks>
 public class TunnelLiftTests
 {
@@ -62,7 +60,8 @@ public class TunnelLiftTests
     }
 
     /// <summary>
-    ///     Walking past the edge of a shaft must not grab him, or a lift would catch anyone who brushed it.
+    ///     Walking past the edge of a shaft must not grab Blob, or a lift catches anyone who brushes
+    ///     against it.
     /// </summary>
     [Theory]
     [InlineData(0)]

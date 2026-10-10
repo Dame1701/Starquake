@@ -10,16 +10,12 @@ namespace Starquake.ActiveSprites;
 ///     A nasty's frame of mind, as one value.
 /// </summary>
 /// <remarks>
-///     This exists because of what it replaced. Twice the number of nasties needed are kept, and on
-///     a screen swap the spare set is given the live set's state by <c>Nasty.CopyFromSource</c> - a
-///     method that assigned seventeen fields by hand, two of them twice, out of a class that had
-///     about thirty-five. Anything added to the class afterwards was silently dropped at every
-///     screen change, and nothing said so.
+///     Twice the number of nasties needed are kept, and a screen swap copies the live set's state
+///     onto the spare set. A record struct copies whole, so what survives a screen change is decided
+///     by what is declared here.
 ///     <para>
-///         A record struct copies whole, so the question of which fields are carried is answered by
-///         what is declared here rather than by what someone remembered to write down. The state a
-///         nasty deliberately starts fresh with stays outside it, on <see cref="NastyBrain" />,
-///         where that decision is written down instead of being an omission.
+///         State a nasty should start fresh with belongs on <see cref="NastyBrain" /> instead, where
+///         it is reset deliberately rather than carried by omission.
 ///     </para>
 /// </remarks>
 internal record struct NastyMovementState
@@ -40,8 +36,7 @@ internal record struct NastyMovementState
     public int StepsToMove { get; set; }
 
     /// <summary>
-    ///     Whether it moves every frame regardless of the run counter, which is what the bouncing
-    ///     types do.
+    ///     Whether it moves every frame regardless of the run counter, as the bouncing types do.
     /// </summary>
     public bool ConstantMovement { get; set; }
 
@@ -50,7 +45,7 @@ internal record struct NastyMovementState
 
     /// <summary>
     ///     What it walked into last step, so the movement methods know where to send it next. A
-    ///     diagonal stopped on one axis only reports that axis.
+    ///     diagonal stopped on one axis reports only that axis.
     /// </summary>
     public Direction LastCollisionDirection { get; set; }
 

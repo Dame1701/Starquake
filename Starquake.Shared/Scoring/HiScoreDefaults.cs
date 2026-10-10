@@ -4,19 +4,16 @@
 // -
 namespace Starquake.Scoring;
 
-/// <summary>
-///     The table a fresh installation starts with - the eight names that used to be written into
-///     <see cref="HiScores" />'s field initialiser, when they were the whole of the feature.
-/// </summary>
+/// <summary>The eight-name table a fresh installation starts with.</summary>
 /// <remarks>
-///     They are still the table's starting point rather than a placeholder for one: deleting the
-///     saved file brings these back, which is the closest thing the game has to a reset. Returned
-///     as a new list each call because the caller owns it and sorts and splices it in place.
+///     The table's genuine starting point rather than a placeholder: deleting the saved file brings
+///     these back, which is the closest thing the game has to a reset. Returned as a new list each
+///     call, because the caller owns it and sorts and splices it in place.
 /// </remarks>
 internal static class HiScoreDefaults
 {
     /// <summary>
-    ///     How many places the table has, and so the number of lines a saved file must have to be
+    ///     How many places the table has, and so how many lines a saved file must have to be
     ///     believed. A test holds it against <see cref="Create" />'s own length, because the two
     ///     disagreeing would silently throw away every saved table.
     /// </summary>

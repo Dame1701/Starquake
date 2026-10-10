@@ -15,9 +15,7 @@ namespace Starquake.Tests;
 /// </summary>
 public class CoreEnergySettingsTests
 {
-    /// <summary>
-    ///     A beam from an element to itself has no length and would draw as a blot sitting on it.
-    /// </summary>
+    /// <summary>A beam from an element to itself has no length, and draws as a blot on it.</summary>
     [Fact]
     public void BeamEndsAt_OverALongRun_NeverJoinsAnElementToItself()
     {
@@ -50,8 +48,8 @@ public class CoreEnergySettingsTests
     }
 
     /// <summary>
-    ///     Every element has to take its turn, or the beams would crawl over the same corner of the
-    ///     core and leave the rest of it as dead as it was before.
+    ///     Every element has to take its turn, or the beams crawl over one corner of the core and
+    ///     leave the rest of it looking dead.
     /// </summary>
     [Fact]
     public void BeamEndsAt_OverALongRun_ReachesEveryElement()

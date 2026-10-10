@@ -11,23 +11,21 @@ namespace Starquake.Scoring;
 ///     writes a file of its own.
 /// </summary>
 /// <remarks>
-///     The file is one line per place, <c>name</c>, <c>score</c> and <c>adventure score</c>
-///     separated by tabs. Text rather than the MessagePack the map uses, for three reasons: it is
-///     eight lines rather than a planet, deleting it by hand is a supported way to reset the table
-///     and so looking at it by hand should work too, and a name is only ever the letters A to Z and
-///     a space, so there is nothing a tab has to escape.
+///     One line per place: <c>name</c>, <c>score</c> and <c>adventure score</c> separated by tabs.
+///     Text rather than the MessagePack the map uses, because it is eight lines rather than a planet,
+///     deleting it by hand is a supported reset so reading it by hand should work too, and a name is
+///     only ever A to Z and a space, so nothing needs escaping.
 ///     <para>
-///         <see cref="Read" /> answers <c>null</c> for a file that is missing, unreadable or not
-///         the shape this wrote, and the caller takes that as "use the defaults" without
-///         distinguishing the cases - because the only thing it could do differently is tell the
-///         player their table is corrupt, on a screen that has no room to say it.
+///         <see cref="Read" /> answers <c>null</c> for a file that is missing, unreadable or not the
+///         shape this wrote, and the caller takes that as "use the defaults" without distinguishing
+///         the cases. The only thing it could do differently is tell the player their table is
+///         corrupt, on a screen with no room to say it.
 ///     </para>
 ///     <para>
-///         Both directions swallow the input and output failures rather than letting them reach the
-///         frame loop. That is the opposite of what <c>ResourceManager</c> does with a failed
-///         content load, deliberately: content missing means the game cannot run, whereas a
-///         read-only home directory means the table does not persist, and killing the game over
-///         that would be the worse outcome of the two.
+///         Both directions swallow their input and output failures rather than letting them reach the
+///         frame loop. That is deliberately the opposite of <c>ResourceManager</c>'s treatment of a
+///         failed content load: missing content means the game cannot run, where a read-only home
+///         directory only means the table does not persist.
 ///     </para>
 /// </remarks>
 internal sealed class HiScoreStore
@@ -38,32 +36,26 @@ internal sealed class HiScoreStore
 
     private readonly string _path;
 
-    /// <summary>
-    ///     The store the game uses, writing where the running user can always be written to.
-    /// </summary>
+    /// <summary>The store the game uses, writing where the running user always can.</summary>
     public HiScoreStore()
         : this(DefaultPath)
     {
     }
 
-    /// <summary>
-    ///     A store over a named file, which is how the tests get one that is not the player's.
-    /// </summary>
+    /// <summary>A store over a named file, which is how the tests get one that is not the player's.</summary>
     public HiScoreStore(string path) => _path = path;
 
     /// <summary>
-    ///     Beside the player's other application data rather than beside the executable: on a Mac
-    ///     the game runs from inside a signed <c>.app</c>, and on every platform the build output
-    ///     is thrown away and rewritten, so a table kept there would not survive a rebuild.
+    ///     Beside the player's other application data rather than the executable. On a Mac the game
+    ///     runs from inside a signed <c>.app</c>, and on every platform the build output is thrown
+    ///     away and rewritten, so a table kept there would not survive a rebuild.
     /// </summary>
     public static string DefaultPath => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "Starquake",
         "HiScores.txt");
 
-    /// <summary>
-    ///     The saved table, or <c>null</c> if there is not one worth having.
-    /// </summary>
+    /// <summary>The saved table, or <c>null</c> if there is not one worth having.</summary>
     public List<HiScore>? Read()
     {
         string[] lines;
@@ -108,10 +100,10 @@ internal sealed class HiScoreStore
             });
         }
 
-        // The table is ordered highest first, and everything asked of it relies on that - a score
-        // is placed above the first one it beats, so a file out of order would put a new score in
-        // the wrong place rather than merely display oddly. Reading is where that is re-established,
-        // because a text file invites being edited by hand.
+        // The table is ordered highest first and everything asked of it relies on that: a score goes
+        // above the first one it beats, so a file out of order would place a new score wrongly rather
+        // than merely display oddly. Re-established on reading, because a text file invites being
+        // edited by hand.
         scores.Sort((higher, lower) => lower.Score.CompareTo(higher.Score));
 
         return scores;
@@ -128,9 +120,9 @@ internal sealed class HiScoreStore
                 Directory.CreateDirectory(directory);
             }
 
-            // Built whole and moved into place, as the screen editor writes the map, so that a
-            // failure part way through cannot leave a half a table behind - which would read back
-            // as the wrong number of lines and be thrown away for the defaults.
+            // Built whole and moved into place, as the screen editor writes the map, so a failure
+            // part way through cannot leave half a table behind. That would read back as the wrong
+            // number of lines and be thrown away for the defaults.
             string temporaryPath = _path + ".tmp";
 
             File.WriteAllLines(temporaryPath, scores.Select(AsLine));

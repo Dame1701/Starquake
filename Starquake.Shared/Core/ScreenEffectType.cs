@@ -10,18 +10,12 @@ internal enum ScreenEffectType
     LeftTunnelEntry,
     RightTunnelEntry,
 
-    /// <summary>
-    ///     The room settling after Blob has arrived somewhere by teleport.
-    /// </summary>
+    /// <summary>The room settling after Blob arrives somewhere by teleport.</summary>
     TeleportArrival,
 
-    /// <summary>
-    ///     The room being wrung round a slot after a part has gone into the planet's core.
-    /// </summary>
+    /// <summary>The room wrung round a slot after a part goes into the planet's core.</summary>
     CoreSurge,
 
-    /// <summary>
-    ///     Olly's screen, flooded. The only effect that does not end on its own.
-    /// </summary>
+    /// <summary>Olly's screen, flooded. The only effect that does not end on its own.</summary>
     Water
 }

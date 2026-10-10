@@ -8,8 +8,8 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     The flicker behind the electricity. The burning itself can only be judged by looking at it;
-///     this is the one part of it that is a function and can be held to what it promises.
+///     The flicker behind the electricity. The burning itself can only be judged by looking at it.
+///     This is the one part that is a function, and so the one part a test can hold to anything.
 /// </summary>
 public class ElectricSettingsTests
 {
@@ -24,8 +24,8 @@ public class ElectricSettingsTests
     }
 
     /// <summary>
-    ///     It has to actually move, or there is no flicker - and it has to move within a frame or
-    ///     two rather than drifting, or it reads as the arc breathing instead of crackling.
+    ///     It has to move, or there is no flicker. It also has to move within a frame or two rather
+    ///     than drifting, or the arc reads as breathing instead of crackling.
     /// </summary>
     [Fact]
     public void FlickerAt_FromOneFrameToTheNext_Changes()

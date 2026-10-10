@@ -35,9 +35,9 @@ internal class Animation
     }
 
     /// <summary>
-    ///     An animation that runs the same way round for ever, which is what nearly every cycle in the
-    ///     game is. <paramref name="animateForwards" /> picks which way: Blob's left walk is the
-    ///     right walk's frames played backwards.
+    ///     An animation that runs the same way round forever, which nearly every cycle in the game
+    ///     is. <paramref name="animateForwards" /> picks the direction: Blob's left walk is the right
+    ///     walk's frames played backwards.
     /// </summary>
     public static Animation Looping(int firstFrame, int lastFrame, int delay, bool animateForwards)
         => new()

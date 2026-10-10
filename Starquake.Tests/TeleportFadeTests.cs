@@ -9,9 +9,8 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     Blob dissolving into a teleport beam and coming back out of one. Two mutable fields inside
-///     <c>Blob</c>, one of them cleared by a particle effect's completion callback - which is why
-///     nothing could reach either.
+///     Blob dissolving into a teleport beam and coming back out of one. The beam is ended by a
+///     particle effect's completion callback, and the fade climbs on its own.
 /// </summary>
 public class TeleportFadeTests
 {
@@ -89,8 +88,8 @@ public class TeleportFadeTests
 
     /// <summary>
     ///     The beam and the fade are two things, not two stages of one. The beam runs for as long as
-    ///     the particle effect runs and says when it is done; the fade climbs at a fixed rate. Either
-    ///     can finish first, so neither may end the other.
+    ///     the particle effect does, and the fade climbs at a fixed rate. Either can finish first,
+    ///     so neither may end the other.
     /// </summary>
     [Fact]
     public void BeamFinished_WhileHeIsStillFadingIn_DoesNotFinishTheFade()

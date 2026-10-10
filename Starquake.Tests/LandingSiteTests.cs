@@ -14,22 +14,19 @@ namespace Starquake.Tests;
 ///     down.
 /// </summary>
 /// <remarks>
-///     The screen a game opens on, the square Blob is put down on and the square the wreck rests
-///     in used to be three numbers written into three different files. They are painted on the map
-///     now, so a typo in the screen editor is the only thing between an authored landing site and a
-///     game that opens somewhere nobody meant - which is what these are here to catch.
+///     The screen a game opens on, the square Blob is put down on and the square the wreck rests in
+///     are all painted on the map. A typo in the screen editor is the only thing between an authored
+///     landing site and a game that opens somewhere nobody meant, which is what these catch.
 /// </remarks>
 public class LandingSiteTests
 {
 
-    /// <summary>
-    ///     What <see cref="MarkerTiles.Contains" /> is asked about a square nothing has been painted on.
-    /// </summary>
+    /// <summary>What <see cref="MarkerTiles.Contains" /> is asked about an unpainted square.</summary>
     private const int EmptySquare = -1;
 
     /// <summary>
-    ///     The point of the numbering: a marker is not on either tile sheet, so nothing can draw one by
-    ///     indexing a sheet with it and nothing can read a collision mask for one.
+    ///     The point of the numbering. A marker is not on either tile sheet, so nothing can draw one
+    ///     by indexing a sheet with it and nothing can read a collision mask for one.
     /// </summary>
     [Fact]
     public void All_EveryMarker_IsNumberedPastTheEndOfTheTileSheet()
@@ -53,8 +50,8 @@ public class LandingSiteTests
         => Assert.True(MarkerTiles.Contains((int)MarkerTile.Spacer));
 
     /// <summary>
-    ///     The foot of a lift shaft is the near miss: nothing is drawn on it either, but it is a tile on
-    ///     the sheet and it is solid, so treating it as a marker would take a lift's floor away.
+    ///     The foot of a lift shaft is the near miss. Nothing is drawn on it either, but it is a
+    ///     tile on the sheet and it is solid, so treating it as a marker takes a lift's floor away.
     /// </summary>
     [Theory]
     [InlineData((int)ActionTiles.TunnelLiftTile)]

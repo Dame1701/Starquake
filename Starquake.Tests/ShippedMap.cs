@@ -8,15 +8,17 @@ using Starquake.SharedLibs;
 namespace Starquake.Tests;
 
 /// <summary>
-///     The planet the game actually ships, for the few tests that should be measured against it rather
-///     than against a world built by hand.
+///     The planet the game actually ships, for the few tests that have to be measured against it
+///     rather than against a world built by hand.
 /// </summary>
 /// <remarks>
-///     Most tests are better off with a world they describe themselves - a failure you can read beats
-///     one you have to go looking for. These are the exception: whether there is anywhere safe to put
-///     the key is a question about this map, and a hand-built world cannot answer it. The file is
-///     copied next to the test assembly by the same <c>PreserveNewest</c> rule that puts it next to the
-///     game.
+///     Most tests are better off with a world they describe themselves, because a failure you can
+///     read beats one you have to go looking for. These are the exception. Whether there is anywhere
+///     safe to put the key is a question about this map, and a hand-built world cannot answer it.
+///     <para>
+///         The file is copied next to the test assembly by the same <c>PreserveNewest</c> rule that
+///         puts it next to the game.
+///     </para>
 /// </remarks>
 internal static class ShippedMap
 {
@@ -32,8 +34,8 @@ internal static class ShippedMap
     }
 
     /// <summary>
-    ///     One length-prefixed MessagePack Blob, which is the shape of the file - see
-    ///     <c>ScreenDataFile</c> in the screen editor, which is the thing that writes it.
+    ///     One length-prefixed MessagePack blob, which is the shape of the file. See
+    ///     <c>ScreenDataFile</c> in the screen editor, which writes it.
     /// </summary>
     private static byte[] ReadBlob(Stream stream)
     {

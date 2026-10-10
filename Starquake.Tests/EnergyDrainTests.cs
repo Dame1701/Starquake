@@ -9,12 +9,10 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     How far gone Blob's energy is while a nasty has hold of him, and how it comes back. Three
-///     mutable fields and a sixteen-line branch inside <c>Blob</c> until now, which is why none of
-///     it was reachable.
+///     How far gone Blob's energy is while a nasty has hold of him, and how it comes back.
 /// </summary>
 /// <remarks>
-///     The level is the green and blue he has left, so full is unhurt and nought is a nasty having
+///     The level is the green and blue he has left, so full is unhurt and zero is a nasty having
 ///     taken all of it.
 /// </remarks>
 public class EnergyDrainTests
@@ -43,7 +41,7 @@ public class EnergyDrainTests
 
     /// <summary>
     ///     The shader is skipped entirely when nothing is draining him, which is nearly all the
-    ///     time - so the first frame of a touch is what has to turn it on.
+    ///     time, so the first frame of a touch is what has to turn it on.
     /// </summary>
     [Fact]
     public void Draining_OneFrameOfATouch_HasSomethingToDraw()
@@ -54,7 +52,7 @@ public class EnergyDrainTests
         => Assert.Equal(ColourLevels.Full - Step, Touched(1).Level);
 
     /// <summary>
-    ///     It stops at nought rather than going past it - the level is a colour channel and the
+    ///     It stops at zero rather than going past it. The level is a colour channel, and the
     ///     shader divides by the full range.
     /// </summary>
     [Fact]
@@ -93,7 +91,7 @@ public class EnergyDrainTests
     }
 
     /// <summary>
-    ///     The two directions are not symmetrical, and this is the whole of the feel. Being touched
+    ///     The two directions are not symmetrical, and that is the whole of the feel. Being touched
     ///     snaps the level back to full before taking it down, so a drain always starts from the
     ///     same place however drained he already was.
     /// </summary>

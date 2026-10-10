@@ -16,14 +16,13 @@ namespace Starquake.Engines.ScreenEffects;
 ///     through it, and settles as they die away.
 /// </summary>
 /// <remarks>
-///     It displaces where the picture is read from rather than drawing anything over it, so the
-///     room itself is what moves and the picture it settles to is exactly the one that was always
-///     there. <c>Shaders/TeleportArrival.fx</c> does the work.
+///     Displaces where the picture is read from rather than drawing over it, so the room itself moves
+///     and the picture it settles to is exactly the one that was always there.
+///     <c>Shaders/TeleportArrival.fx</c> does the work.
 ///     <para>
-///         Alone among the effects it does not hold the game still while it runs. The tunnel
-///         entries have to - Blob is being moved through a wall - but a player who has just
-///         arrived somewhere wants to be able to walk, and a second of being unable to is a second
-///         of the game having stopped. The waves are decoration, so they decorate.
+///         It does not hold the game still while it runs. The tunnel entries have to, because Blob is
+///         being moved through a wall, but a player who has just arrived wants to walk and a second
+///         of being unable to is a second of the game having stopped.
 ///     </para>
 /// </remarks>
 internal sealed class TeleportArrivalEffect : ScreenEffectBase

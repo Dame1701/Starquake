@@ -12,25 +12,22 @@ namespace Starquake.Tuning;
 ///     wants and shaking it loose, and the room being wrung round the slot once the part is in.
 /// </summary>
 /// <remarks>
-///     Driven by <c>Shaders/CoreSurge.fx</c> and by <c>CoreElement</c>'s own drawing. The surge is
-///     deliberately a different shape from <c>TeleportArrivalSettings</c>' standing waves: arriving
-///     somewhere is something that happens to the room, where this is the room answering something
-///     put into it.
+///     Driven by <c>Shaders/CoreSurge.fx</c> and <c>CoreElement</c>'s own drawing. Deliberately a
+///     different shape from <c>TeleportArrivalSettings</c>' standing waves: arriving somewhere
+///     happens to the room, where this is the room answering something put into it.
 /// </remarks>
 internal static class CoreReplacementSettings
 {
     /// <summary>
-    ///     How long the core spends picking a part out before it goes in, in logic frames. The
-    ///     whole point of the beat: there was none, and a part simply appeared and shrank.
+    ///     How long the core spends picking a part out before it goes in, in logic frames. Without
+    ///     this beat a part simply appears and shrinks.
     /// </summary>
     public static readonly int IdentifyFrames = LogicClock.Seconds(1.1);
 
     /// <summary>How far the identified part shakes at its worst, in pixels.</summary>
     private const float ShakeDistance = 2.5f;
 
-    /// <summary>
-    ///     How much the identified part brightens at the top of its pulse, over its own colour.
-    /// </summary>
+    /// <summary>How much the identified part brightens at the top of its pulse.</summary>
     public const float GlowAmount = 0.8f;
 
     /// <summary>How fast the glow pulses, in radians per logic frame.</summary>
@@ -58,8 +55,8 @@ internal static class CoreReplacementSettings
     public const float Surge = 0.75f;
 
     /// <summary>
-    ///     How hard the identified part is glowing and shaking on a given frame - a pulse rather
-    ///     than a steady light, so it reads as the core worrying at it rather than as a label.
+    ///     How hard the identified part is glowing and shaking on a given frame. A pulse rather than
+    ///     a steady light, so it reads as the core working at the part rather than as a label.
     /// </summary>
     public static float PulseAt(int frame)
         => (float)((Math.Sin(frame * PulseSpeed) + 1) * 0.5);
@@ -68,8 +65,8 @@ internal static class CoreReplacementSettings
     ///     Where the identified part sits relative to where it is drawn, as it is shaken loose.
     /// </summary>
     /// <remarks>
-    ///     Two rates that do not divide one another, one per axis, so it rattles rather than
-    ///     tracing a line - the same reasoning as <c>OverloadSettings.ShakeAt</c>.
+    ///     Two rates that do not divide one another, one per axis, so it rattles rather than tracing
+    ///     a line. The same reasoning as <c>OverloadSettings.ShakeAt</c>.
     /// </remarks>
     public static Vector2 ShakeAt(int frame)
         => new(
@@ -77,9 +74,9 @@ internal static class CoreReplacementSettings
             (float)Math.Sin(frame * 4.1 + 1.3) * ShakeDistance);
 
     /// <summary>
-    ///     How unsettled the room still is after a part landed, one as it lands and nought once
-    ///     the room has recovered. Squared, so it springs back and then eases, as
-    ///     <c>TeleportArrivalSettings.StrengthAt</c> does and for the same reason.
+    ///     How unsettled the room still is after a part lands, one at the landing and nought once
+    ///     recovered. Squared, so it springs back and then eases, like
+    ///     <c>TeleportArrivalSettings.StrengthAt</c>.
     /// </summary>
     public static float SurgeStrengthAt(int frame)
     {

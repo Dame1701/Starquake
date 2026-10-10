@@ -22,20 +22,18 @@ namespace Starquake.GameComponents.GameScreens;
 internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 {
     /// <summary>
-    ///     The most aliens the core room ever holds, which is also how many it holds once Blob
-    ///     has nearly finished repairing it - the fuller the core, the busier its guards.
+    ///     The most aliens the core room ever holds, which is also how many it holds once Blob has
+    ///     nearly finished repairing it. The fuller the core, the busier its guards.
     /// </summary>
     private const int MaxCoreAliens = 4;
 
-    /// <summary>
-    ///     How many core elements there are to replace. Putting the last one back finishes the game.
-    /// </summary>
+    /// <summary>How many core elements there are to replace. The last one finishes the game.</summary>
     private const int CoreElementsToReplace = 9;
 
     /// <summary>
-    ///     How busy the core room gets as it is repaired. The guards arrive as the number of elements
+    ///     How busy the core room gets as it is repaired. A guard arrives as the number of elements
     ///     still missing falls past each of these, so an untouched core is unguarded and a nearly
-    ///     finished one has all <see cref="MaxCoreAliens" /> of them.
+    ///     finished one has all <see cref="MaxCoreAliens" />.
     /// </summary>
     private const int OneAlienFrom = 8;
 
@@ -53,9 +51,7 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     /// </summary>
     private const int CoreVisitFrames = 240;
 
-    /// <summary>
-    ///     How fast the tiles that blank out the room fade away as the core is revealed.
-    /// </summary>
+    /// <summary>How fast the tiles blanking out the room fade as the core is revealed.</summary>
     private const int BlankingTilesFadeStep = 16;
 
     /// <summary>
@@ -71,22 +67,17 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     private const int BlankingTilesFirstColumn = TileMetrics.TileWidth;
 
     /// <summary>
-    ///     Where in the room the core's own particle effects are emitted from: the middle of the
-    ///     playfield.
+    ///     Where the core's own particle effects are emitted from: the middle of the playfield.
     /// </summary>
     private const int CoreCentreX = TileMetrics.PlayAreaWidth / 2;
 
     /// <inheritdoc cref="CoreCentreX" />
     private const int CoreCentreY = TileMetrics.PlayAreaHeight / 2;
 
-    /// <summary>
-    ///     How many frames the electricity artwork has, so the beams crawl as well as move.
-    /// </summary>
+    /// <summary>How many frames the electricity artwork has, so the beams crawl as well as move.</summary>
     private const int CoreArcFrames = 10;
 
-    /// <summary>
-    ///     What the status panel is told when no part is being drawn out of Blob's hands.
-    /// </summary>
+    /// <summary>What the status panel is told when no part is being drawn out of Blob's hands.</summary>
     private const int NoSlotIdentified = -1;
     private readonly Blob _blob;
 
@@ -98,10 +89,9 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     private readonly CoreElements _elements;
 
     /// <summary>
-    ///     What the core is taking and which of Blob's slots it is coming out of. The slot is
-    ///     carried because it is no longer emptied the moment he walks in: it has to still be
-    ///     holding the part while the core makes a show of picking it out, so the match can be
-    ///     seen glowing at both ends.
+    ///     What the core is taking and which of Blob's slots it comes out of. The slot is carried
+    ///     because it is not emptied when Blob walks in: it must still hold the part while the core
+    ///     makes a show of picking it out, so the match can be seen glowing at both ends.
     /// </summary>
     private readonly Queue<(int Element, int Slot)> _elementsToReplace = new();
     private readonly GameScreenCollection _gameScreens;
@@ -113,45 +103,38 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     /// </summary>
     private readonly Shapes _shapes;
 
-    /// <summary>
-    ///     Held only to wring the room when a part lands in the core.
-    /// </summary>
+    /// <summary>Held only to wring the room when a part lands in the core.</summary>
     private readonly ScreenEffectEngine _screenEffects;
 
-    /// <summary>
-    ///     Held to glow the inventory slot a part is being drawn out of.
-    /// </summary>
+    /// <summary>Held to glow the inventory slot a part is being drawn out of.</summary>
     private readonly StatusPanel _statusPanel;
 
     /// <summary>
-    ///     Logic frames the core has been running, which turns the funnel and moves the beams. It
-    ///     counts while Blob is elsewhere too - the core is the one room that carries on off
-    ///     screen, so it would be odd for its energy to stop and wait for him.
+    ///     Logic frames the core has been running, which turns the funnel and moves the beams. Counts
+    ///     while Blob is elsewhere too, because the core is the one room that carries on off screen.
     /// </summary>
     private int _coreFrame;
 
     /// <summary>
-    ///     How far the funnel has turned. Accumulated rather than worked out from
-    ///     <see cref="_coreFrame" />, because the rate changes while a slot is being filled and a
-    ///     rate applied to the whole history would jump the funnel round as it changed.
+    ///     How far the funnel has turned. Accumulated rather than derived from
+    ///     <see cref="_coreFrame" />, because the rate changes while a slot is being filled and a new
+    ///     rate applied to the whole history would jump the funnel round.
     /// </summary>
     private float _funnelTurned;
 
     /// <summary>
-    ///     How many frames the core has been winding up toward bearing down on a replacement, or
+    ///     How many frames the core has been winding up towards bearing down on a replacement, or
     ///     winding back out of one.
     /// </summary>
     private int _framesWinding;
 
-    /// <summary>
-    ///     How long the core has been making a show of the part it has picked out.
-    /// </summary>
+    /// <summary>How long the core has been making a show of the part it picked out.</summary>
     private int _framesIdentifying;
 
 
     /// <summary>
-    ///     How hard the core is bearing down on the slot being filled: one at rest, rising toward
-    ///     <see cref="CoreEnergySettings.FillingBrightness" /> while one is going in.
+    ///     How hard the core is bearing down on the slot being filled: one at rest, rising towards
+    ///     <see cref="CoreEnergySettings.FillingBrightness" /> while a part goes in.
     /// </summary>
     private float BearingDown => 1f + (CoreEnergySettings.FillingBrightness - 1f)
         * CoreEnergySettings.WoundUpBy(_framesWinding);
@@ -190,8 +173,8 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
         _elements.OnCoreElementReplaced += Elements_OnCoreElementReplaced;
         _elements.OnCoreElementLanded += Elements_OnCoreElementLanded;
 
-        // The elements standing in the core are collision the core screen's tiles say nothing about,
-        // so the collision map asks for them each time it is rebuilt - see IDynamicCollisionCells.
+        // The elements standing in the core are collision the screen's tiles say nothing about, so
+        // the collision map asks for them on every rebuild. See IDynamicCollisionCells.
         _gameScreens.Collisions.RegisterDynamicCells(this);
 
         _coreAliens = new List<Nasty>();
@@ -203,9 +186,9 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
                 graphicsSet,
                 _blob,
                 randomNumberGenerator,
-                // A guardian is a CoreGuardian and so never mechanical, which is the only kind
-                // that explodes this way - but it is wired truthfully rather than with a no-op, so
-                // that one ever made mechanical would shake the room like anything else.
+                // A guardian is never mechanical, and only mechanical nasties explode this way, but
+                // it is wired truthfully rather than with a no-op so one ever made mechanical would
+                // shake the room like anything else.
                 () => screenDirectory.MainGame.JoltScreen(),
                 0,
                 0,
@@ -222,9 +205,9 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     }
 
     /// <summary>
-    ///     The cells of the nine elements standing in the core room, which are there only while the
-    ///     core room is the screen being shown - the core sits on one of the planet's own screens, and
-    ///     Blob walks that screen normally once he has been put back outside.
+    ///     The cells of the nine elements standing in the core room, present only while the core room
+    ///     is the screen being shown. The core sits on one of the planet's own screens, which Blob
+    ///     walks normally once he has been put back outside.
     /// </summary>
     public IEnumerable<CollisionTile> CellsOnScreen(int screenNumber)
     {
@@ -241,15 +224,14 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
     public void Update(GameTime gameTime)
     {
-        // The core room has to step the screen effects itself. Only MainGameScreen did, which was
-        // enough while every effect belonged to it - the tunnel entries and the fade are all
-        // triggered from the planet. The core's surge is triggered here, and without this it was
-        // never advanced: it stayed pinned at full strength and never finished, so each part going
-        // in re-centred a twist that had not unwound.
+        // The core room steps the screen effects itself, because the surge is triggered here and
+        // MainGameScreen only steps the ones triggered from the planet. Without this the surge stays
+        // pinned at full strength and never finishes, so each part going in re-centres a twist that
+        // has not unwound.
         //
         // Here and not in UpdateOffScreen, which the engine also calls while Blob is out on the
-        // planet - and MainGameScreen is stepping them then, so the two together would run every
-        // effect at twice its proper speed.
+        // planet. MainGameScreen is stepping them then, so the two together would run every effect
+        // at twice its proper speed.
         _screenEffects.Update();
 
         if (_justEnteredCore)
@@ -257,9 +239,9 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
             _blankingTilesOpacity = ColourLevels.Full;
             _replacingElements = false;
 
-            // The count has to be settled before EnterCore, because that is what places and clamps
-            // that many guardians. Called the other way round it positioned the previous visit's
-            // number of them and left the rest of this visit's wherever they last stood.
+            // The count must be settled before EnterCore, which places and clamps that many
+            // guardians. The other way round places the previous visit's number and leaves the rest
+            // wherever they last stood.
             CalculateCoreAlienCount();
             EnterCore();
             _justEnteredCore = false;
@@ -299,9 +281,9 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
     public void Draw()
     {
-        // Under everything else in the room, so the elements and the guardians sit in the funnel
-        // rather than behind it. Drawn through a replacement as well as around one - the room used
-        // to go dark for the one moment it most ought to be alive.
+        // Under everything else in the room, so the elements and guardians sit in the funnel rather
+        // than behind it. Drawn through a replacement as well as around one: the room should be at
+        // its most alive at that moment, not dark.
         DrawFunnel();
 
         _coreComputationEffect.Draw();
@@ -324,7 +306,7 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
         DrawCoreGuardians();
 
-        // Where the core is comes off the map, so it is asked for rather than known here.
+        // Where the core sits comes off the map, so it is asked for rather than known here.
         Point core = _gameScreens.CorePosition;
 
         _elements.Draw(core.X, core.Y);
@@ -334,8 +316,8 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
     /// <summary>
     ///     The funnel of energy turning about the core, drawn over a plain filled rectangle rather
-    ///     than over any artwork - every pixel of it is worked out by the shader, so there is
-    ///     nothing to sample and <c>Shapes</c>' one by one white texture is the whole quad.
+    ///     than artwork. The shader works out every pixel, so there is nothing to sample and
+    ///     <c>Shapes</c>' one by one white texture is the whole quad.
     /// </summary>
     private void DrawFunnel()
     {
@@ -353,7 +335,7 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
         funnel.Parameters["ArmColour"].SetValue(CoreEnergySettings.ArmColour);
 
         // The three spans are constants, so their reciprocals are worked out here rather than
-        // costing a divide on every pixel - see the shader, which has no slots to spare.
+        // costing a divide on every pixel. The shader has no slots to spare.
         funnel.Parameters["OuterEdge"].SetValue(CoreEnergySettings.OuterEdge);
         funnel.Parameters["OverOuterEdge"].SetValue(1f / CoreEnergySettings.OuterEdge);
         funnel.Parameters["OverThroatEdge"].SetValue(1f / CoreEnergySettings.ThroatEdge);
@@ -373,7 +355,7 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
     /// <summary>
     ///     Electricity crawling between the elements set into the core, through the same burning
-    ///     shader the node and gate arcs use - it is the same electricity and should look it.
+    ///     shader the node and gate arcs use, because it is the same electricity.
     /// </summary>
     private void DrawBeamsAcrossTheElements(Point core)
     {
@@ -412,10 +394,9 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
 
     /// <summary>
-    ///     Keeps the core room's events moving while Blob is away from it. The engine calls
-    ///     this directly rather than through <see cref="IGameScreen" />, which the frame loop's two
-    ///     members are all of - the core is the only screen that carries on off screen, so an
-    ///     interface for it described one class.
+    ///     Keeps the core room's events moving while Blob is away. The engine calls this directly
+    ///     rather than through <see cref="IGameScreen" />, which holds only the frame loop's two
+    ///     members, because the core is the only screen that carries on off screen.
     /// </summary>
     public void UpdateOffScreen(GameTime gameTime)
     {
@@ -426,8 +407,8 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
         _elements.Update(gameTime, _gameScreens.CorePosition);
 
-        // Thrown from a point going round the middle rather than from the middle itself, so they
-        // spiral the way the funnel over them turns instead of spraying evenly outward.
+        // Thrown from a point going round the middle rather than the middle itself, so they spiral
+        // the way the funnel over them turns instead of spraying evenly outward.
         Point emitter = CoreEnergySettings.EmitterAt(_funnelTurned, CoreCentreX, CoreCentreY);
 
         _coreSparks.Start();
@@ -440,8 +421,8 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
         _coreFrame++;
 
-        // Wound toward bearing down while a slot is being filled and back out of it afterwards,
-        // so the room leans into a replacement rather than snapping into one.
+        // Wound towards bearing down while a slot is being filled and back out afterwards, so the
+        // room leans into a replacement rather than snapping into one.
         _framesWinding = _elements.SlotBeingFilled is null
             ? Math.Max(0, _framesWinding - 1)
             : Math.Min(CoreEnergySettings.WindFrames, _framesWinding + 1);
@@ -453,10 +434,10 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     }
 
     /// <summary>
-    ///     A part has reached full size in its slot. The sound and the wring belong here rather
-    ///     than on <see cref="Elements_OnCoreElementReplaced" />, which is a fifth of a second
-    ///     later - it waits on the burst that goes off at this moment, so hanging the room's answer
-    ///     off it left a plain gap between the part landing and the room noticing.
+    ///     A part has reached full size in its slot. The sound and the wring belong here rather than
+    ///     on <see cref="Elements_OnCoreElementReplaced" />, which comes a fifth of a second later:
+    ///     it waits on the burst at this moment, so hanging the room's answer off it leaves a gap
+    ///     between the part landing and the room noticing.
     /// </summary>
     private void Elements_OnCoreElementLanded()
     {
@@ -470,11 +451,14 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     ///     Wrings the room about the slot a part has just landed in. The slot is found before the
     ///     element's state moves on, so where it went in is read rather than guessed.
     /// </summary>
+    /// <remarks>
+    ///     The landing is raised while the part is still going in, so the element itself still says
+    ///     which slot it is. Latching it every frame instead is only needed if the room is told after
+    ///     the part has finished and stopped saying so.
+    /// </remarks>
     private void WringTheRoomAboutTheSlotJustFilled()
     {
-        // Read rather than remembered: the landing is raised while the part is still going in, so
-        // the element itself still says which slot it is. This used to be latched every frame
-        // because the room was only told once the part had finished and stopped saying so.
+        // Read rather than remembered. See the remarks above.
         if (_elements.SlotBeingFilled is not { } slot)
         {
             return;
@@ -492,9 +476,8 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     }
 
     /// <summary>
-    ///     Starts the next element going in, and says whether there was one. Reached both when
-    ///     Blob walks in carrying something the core wants and when one has just finished seating
-    ///     itself.
+    ///     Starts the next element going in, and says whether there was one. Reached both when Blob
+    ///     walks in carrying something the core wants and when one has just finished seating itself.
     /// </summary>
     private bool StartNextReplacement()
     {
@@ -503,26 +486,24 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
             return false;
         }
 
-        // Picked out and left to glow and shake first, in Blob's hands as well as in the core.
-        // What drops it in is the countdown below, once the core has made a show of finding it.
+        // Picked out and left to glow and shake first, in Blob's hands as well as in the core. The
+        // countdown below is what drops it in, once the core has made a show of finding it.
         (int element, int slot) = _elementsToReplace.Peek();
 
         _elements.IdentifyElement(element);
         _statusPanel.IdentifySlot(slot);
         _framesIdentifying = 0;
 
-        // The overload alarm, borrowed: a part being drawn out of Blob is the same kind of event
-        // as his energy failing, and the core had no voice of its own. Placeholder - see the
-        // remarks on Elements_OnCoreElementReplaced.
+        // The overload alarm, borrowed: a part being drawn out of Blob is the same kind of event as
+        // his energy failing. Placeholder, see the remarks on Elements_OnCoreElementReplaced.
         _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobOverloadAlarm, 1f, false);
 
         return true;
     }
 
     /// <summary>
-    ///     Counts out the beat the core spends picking a part out, and drops it in at the end of
-    ///     it. The part is only dequeued here, so the identified one and the queued one cannot
-    ///     come apart.
+    ///     Counts out the beat the core spends picking a part out, then drops it in. The part is
+    ///     dequeued only here, so the identified one and the queued one cannot come apart.
     /// </summary>
     private void UpdateIdentifying()
     {
@@ -540,7 +521,7 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
         (int element, int slot) = _elementsToReplace.Dequeue();
 
-        // Taken out of his hands at the moment it goes in, not when he walked through the door.
+        // Taken out of Blob's hands at the moment it goes in, not when he walked through the door.
         _blob.Carrying[slot] = Collectables.None;
         _statusPanel.IdentifySlot(NoSlotIdentified);
 
@@ -551,8 +532,8 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     }
 
     /// <summary>
-    ///     Takes off Blob anything the core is still missing, and queues it to be put in. Every slot
-    ///     is checked against every element the core wants, so one visit can hand over more than one.
+    ///     Takes from Blob anything the core is still missing and queues it to go in. Every slot is
+    ///     checked against every element the core wants, so one visit can hand over several.
     /// </summary>
     private void TakeElementsTheCoreWants()
     {
@@ -577,11 +558,11 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
     /// <summary>
     ///     Puts Blob out of the core and back on the planet, on the square the author marked rather
-    ///     than beside the core and hard against its right-hand wall.
+    ///     than beside the core against its right-hand wall.
     /// </summary>
     /// <remarks>
-    ///     The Y is set as well as the X. It used to be left at whatever height Blob happened to be
-    ///     at inside the core room, which on any other screen could be mid air.
+    ///     The Y is set as well as the X. Leaving it at whatever height Blob was at inside the core
+    ///     room can put him mid air on any other screen.
     /// </remarks>
     private void LeaveTheCoreRoom()
     {
@@ -598,9 +579,7 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
         _justEnteredCore = true;
     }
 
-    /// <summary>
-    ///     The core is whole again, which is the end of the game.
-    /// </summary>
+    /// <summary>The core is whole again, which is the end of the game.</summary>
     private void CompleteTheGame()
     {
         _screenDirectory.Current = GameScreenType.GameComplete;
@@ -620,14 +599,15 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     }
 
     /// <summary>
-    ///     Puts the core screen and its guardians in place for when he has just arrived. Places
-    ///     <see cref="_coreAlienCount" /> of them, so <see cref="CalculateCoreAlienCount" /> runs first.
+    ///     Puts the core screen and its guardians in place for an arrival. Places
+    ///     <see cref="_coreAlienCount" /> of them, so <see cref="CalculateCoreAlienCount" /> must run
+    ///     first.
     /// </summary>
     private void EnterCore()
     {
         // Setting the screen number rebuilds the collision map, and that rebuild is what puts the
-        // core's elements into it - see CellsOnScreen. They used to be added here instead, which left
-        // them out again the moment anything else on this screen rebuilt the map.
+        // core's elements into it. See CellsOnScreen. Adding them here instead loses them the moment
+        // anything else on this screen rebuilds the map.
         _gameScreens.ScreenNumber = _gameScreens.CoreSite.ScreenNumber;
 
         PlaceCoreGuardians(0);
@@ -635,13 +615,13 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
     /// <summary>
     ///     Stands the guardians from <paramref name="firstToPlace" /> up to
-    ///     <see cref="_coreAlienCount" /> somewhere the room allows, and brings them to life. Clamps
-    ///     the count if the room offers fewer places than that.
+    ///     <see cref="_coreAlienCount" /> somewhere the room allows and brings them to life. Clamps
+    ///     the count if the room offers fewer places.
     /// </summary>
     /// <param name="firstToPlace">
-    ///     The first guardian that needs placing. Nought on arriving in the room, so all of them are
-    ///     put down; the old count when a replacement has just raised it, so the ones already walking
-    ///     about are left where they are rather than jumping to fresh squares.
+    ///     The first guardian needing placement. Nought on arriving in the room, so all are put down.
+    ///     The old count when a replacement has just raised it, so the ones already walking about stay
+    ///     where they are rather than jumping to fresh squares.
     /// </param>
     private void PlaceCoreGuardians(int firstToPlace)
     {
@@ -661,19 +641,14 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     }
 
     /// <summary>
-    ///     One element has gone in, so either the next one starts or the room settles back.
+    ///     One element has gone in, so either the next starts or the room settles back.
     /// </summary>
     /// <remarks>
-    ///     <para>
-    ///         <b>The two sounds here are placeholders.</b> They are existing effects borrowed from
-    ///         elsewhere in the game - a power-up for a part dropping in and the access-granted
-    ///         chime for it locking - because the core had no sound of its own at all and the most
-    ///         significant act in the game was played in silence. They are the right shape and the
-    ///         wrong sound; replacing them is a one-word change at each of the two call sites, and
-    ///         adding a sound of its own is a wav in <c>Content/Sounds</c>, a block in
-    ///         <c>Content.mgcb</c>, a name in <c>Assets.Sounds</c> and a line in
-    ///         <c>ContentManifest</c>.
-    ///     </para>
+    ///     <b>The two sounds here are placeholders.</b> A power-up effect stands in for a part
+    ///     dropping in and the access-granted chime for it locking, because the core has no sound of
+    ///     its own. Replacing them is a one-word change at each of the two call sites; adding a sound
+    ///     of its own needs a wav in <c>Content/Sounds</c>, a block in <c>Content.mgcb</c>, a name in
+    ///     <c>Assets.Sounds</c> and a line in <c>ContentManifest</c>.
     /// </remarks>
     private void Elements_OnCoreElementReplaced()
     {
@@ -685,10 +660,9 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
         _entryTime = 0;
         _replacingElements = false;
 
-        // Replacing an element can earn another guardian, and one that has never been placed is
-        // still sitting at the origin with nothing to move it - a core guardian is drawn whatever
-        // its state, so it showed as a guardian stuck in the top left corner until the room was
-        // left and entered again, which is what did place it.
+        // Replacing an element can earn another guardian, and one never placed is still at the
+        // origin with nothing to move it. A core guardian is drawn whatever its state, so it would
+        // show stuck in the top left corner until the room was left and entered again.
         int guardiansAlreadyPlaced = _coreAlienCount;
 
         CalculateCoreAlienCount();

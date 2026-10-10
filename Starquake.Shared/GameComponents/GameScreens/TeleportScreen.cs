@@ -28,14 +28,14 @@ internal class TeleportScreen : IGameScreen
     private const string EmptyCode = "_____";
 
     /// <summary>
-    ///     How fast the screen darkens once the code is recognised, in colour levels per logic
-    ///     frame. Slow enough that the booth is visibly left behind rather than cutting away.
+    ///     How fast the screen darkens once the code is recognised, in colour levels per logic frame.
+    ///     Slow enough that the booth is visibly left behind rather than cut away from.
     /// </summary>
     private const int ScreenFadeOutStep = 3;
 
     /// <summary>
-    ///     Where each key of the teleporter's keypad sits on the screen, indexed by the same number as
-    ///     its overlay sprite. Three rows with gaps in them, so a list rather than a grid.
+    ///     Where each key of the teleporter's keypad sits on screen, indexed by the same number as its
+    ///     overlay sprite. Three rows with gaps in them, so a list rather than a grid.
     /// </summary>
     private static readonly Point[] KeyHighlightPositions =
     [
@@ -147,8 +147,8 @@ internal class TeleportScreen : IGameScreen
         _teleportCode = _gameScreens.CurrentGameScreenData.TeleportCode;
 
         // The code of the booth Blob walked into, held across the teleport so RunTeleportAttempt can
-        // tell an arrival on a new screen from one that went nowhere. Drawing used to latch this,
-        // which left a logic decision depending on a frame having been drawn.
+        // tell an arrival on a new screen from one that went nowhere. Latched here rather than while
+        // drawing, so no logic decision depends on a frame having been drawn.
         if (!_attemptingTeleport)
         {
             _previousCode = _teleportCode ?? string.Empty;
@@ -181,8 +181,8 @@ internal class TeleportScreen : IGameScreen
     }
 
     /// <summary>
-    ///     A letter key goes into the first free slot of the code. The loop over 65 to 90 is A to Z as key
-    ///     codes, and only one key registers per press because the caller latches _keyPressed.
+    ///     A letter key goes into the first free slot of the code. The loop over 65 to 90 is A to Z as
+    ///     key codes, and only one key registers per press because the caller latches _keyPressed.
     /// </summary>
     private void TypeAnyKeyPressed()
     {
@@ -215,9 +215,7 @@ internal class TeleportScreen : IGameScreen
         }
     }
 
-    /// <summary>
-    ///     An underscore is an empty slot, so a code with none left in it is ready to try.
-    /// </summary>
+    /// <summary>An underscore is an empty slot, so a code with none left is ready to try.</summary>
     private void StartTeleportIfCodeComplete()
     {
         if (!_currentCode.Contains("_") && !_attemptingTeleport)
@@ -240,8 +238,9 @@ internal class TeleportScreen : IGameScreen
     }
 
     /// <summary>
-    ///     Counts out the message, fades the screen if the code was good, and hands back to the main game
-    ///     once the animation has run. An unrecognised code plays out the same way but does not move Blob.
+    ///     Counts out the message, fades the screen if the code was good, and hands back to the main
+    ///     game once the animation has run. An unrecognised code plays out the same way but does not
+    ///     move Blob.
     /// </summary>
     private void RunTeleportAttempt()
     {
@@ -256,7 +255,7 @@ internal class TeleportScreen : IGameScreen
 
         _teleportCounter++;
 
-        // An unrecognised code leaves the picture up, because Blob is not going anywhere - there is
+        // An unrecognised code leaves the picture up, because Blob is not going anywhere and there is
         // nothing to fade out to.
         if (_codeRecognised)
         {
@@ -269,9 +268,9 @@ internal class TeleportScreen : IGameScreen
             _presentation.ScreenYOffset = _oldOffsetY;
 
             // A recognised code moved the screen the moment it was typed, so this puts Blob into a
-            // booth on the screen it has arrived at. A code that was not recognised leaves it in the
-            // booth it walked into, which is where it already is - moving it then would have carried
-            // it across to some other booth on the same screen.
+            // booth on the screen arrived at. An unrecognised code leaves him in the booth he walked
+            // into, where he already is: moving him then would carry him to some other booth on the
+            // same screen.
             if (_codeRecognised)
             {
                 ArriveInABooth();
@@ -279,8 +278,8 @@ internal class TeleportScreen : IGameScreen
 
             _screenDirectory.MainGame.ScreenFade = 0;
 
-            // A code that merely names the booth Blob is already standing in is not a journey, so
-            // the screen it arrived on is not told to set itself up again.
+            // A code naming the booth Blob already stands in is not a journey, so the screen is not
+            // told to set itself up again.
             if (_codeRecognised && _currentCode != _previousCode.ToUpper())
             {
                 _screenDirectory.MainGame.PerformPostScreenChangeActions(GameScreenType.Teleporter, new ScreenChange.FadeIn());
@@ -290,14 +289,12 @@ internal class TeleportScreen : IGameScreen
         }
     }
 
-    /// <summary>
-    ///     Steps Blob out of a booth on the screen he has just arrived at.
-    /// </summary>
+    /// <summary>Steps Blob out of a booth on the screen he has just arrived at.</summary>
     /// <remarks>
-    ///     A screen may have any number of booths on it and Blob arrives in the first, because a
-    ///     code belongs to the screen it reaches rather than to any one booth standing on it. A screen
-    ///     with none is left alone rather than guessed at: there is nowhere on it a booth would put
-    ///     Blob, and dropping him into the scenery would be worse than leaving him where he was.
+    ///     A screen may have any number of booths and Blob arrives in the first, because a code
+    ///     belongs to the screen it reaches rather than any one booth on it. A screen with no booth is
+    ///     left alone rather than guessed at: dropping Blob into the scenery would be worse than
+    ///     leaving him where he was.
     /// </remarks>
     private void ArriveInABooth()
     {
@@ -360,8 +357,8 @@ internal class TeleportScreen : IGameScreen
     }
 
     /// <summary>
-    ///     The green or red message, with its blocks closing in from both sides. Drawn between the console
-    ///     font's Begin and End, which is why it is not a Draw* of its own.
+    ///     The green or red message, with its blocks closing in from both sides. Drawn between the
+    ///     console font's Begin and End, which is why it is not a Draw method of its own.
     /// </summary>
     private void DrawTeleportOutcome()
     {
@@ -420,10 +417,7 @@ internal class TeleportScreen : IGameScreen
         teleportInteriorUpper.End();
     }
 
-    /// <summary>
-    ///     Lights up whichever keys the player is pressing. This was sixteen lines of the same call with a
-    ///     different sprite number and position; the positions are now the table they always were.
-    /// </summary>
+    /// <summary>Lights up whichever keys the player is pressing.</summary>
     private void DrawKeyHighlights()
     {
         SpriteCollection overlays = _resources.GetSpriteCollection(Assets.Graphics.TeleporterKeyOverlays);

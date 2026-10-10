@@ -18,9 +18,9 @@ internal abstract class ScreenEffectBase
     public bool EffectFinished { get; protected set; } = true;
 
     /// <summary>
-    ///     Whether Blob and the nasties should still be held still. An effect that says nothing
-    ///     holds them for as long as it runs, which is what they all used to do; one that can afford
-    ///     to give control back before it has finished drawing says so by overriding this.
+    ///     Whether Blob and the nasties should still be held still. An effect that says nothing holds
+    ///     them for as long as it runs; one that can give control back before it has finished drawing
+    ///     overrides this.
     /// </summary>
     public virtual bool HoldsGameplay => !EffectFinished;
 
@@ -36,11 +36,12 @@ internal abstract class ScreenEffectBase
 
     public abstract void Update();
 
-    /// <summary>
-    ///     Composes the playfield this frame. Returns true to say the plain renderer should draw it
-    ///     as usual - an effect that only tints or shifts what is there hands it back that way, and
-    ///     one that draws the picture itself returns false.
-    /// </summary>
+    /// <summary>Composes the playfield this frame.</summary>
+    /// <returns>
+    ///     True if the plain renderer should still draw the playfield as usual, which is what an
+    ///     effect that only tints or shifts what is there wants. False if the effect drew the picture
+    ///     itself.
+    /// </returns>
     public virtual bool Draw(SpriteBatch renderer, RenderViewPort renderViewPortToUse)
         => true;
 }

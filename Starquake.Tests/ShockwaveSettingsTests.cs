@@ -10,8 +10,8 @@ namespace Starquake.Tests;
 
 /// <summary>
 ///     The numbers behind the ring a blast throws out. What it looks like can only be judged by
-///     watching one go off; what is held here is the travel the shader is driven by, and the
-///     spans it is handed as reciprocals - which is where a ring of nought would divide by zero.
+///     watching one go off. What is held here is the travel the shader is driven by, and the spans
+///     it is handed as reciprocals, where a radius of zero would divide by zero.
 /// </summary>
 public class ShockwaveSettingsTests
 {
@@ -27,9 +27,9 @@ public class ShockwaveSettingsTests
     }
 
     /// <summary>
-    ///     A ring that expanded evenly would read as something being drawn larger, so it still
-    ///     slows as it goes - but only partly. Wholly thrown, it put nearly half its travel into
-    ///     its first quarter and was gone before there was anything to watch.
+    ///     A ring that expanded evenly reads as something being drawn larger, so it slows as it
+    ///     goes. Only partly, though: a fully thrown ring puts nearly half its travel into its first
+    ///     quarter and is gone before there is anything to watch.
     /// </summary>
     [Fact]
     public void RadiusAt_OverTheTwoHalvesOfTheBlast_SlowsWithoutBoltingFromTheStart()
@@ -45,16 +45,14 @@ public class ShockwaveSettingsTests
         Assert.True(first < second * 2f, $"The first half covered {first} and the second {second}.");
     }
 
-    /// <summary>
-    ///     And the same thing said about the quarter it used to spend half its travel in.
-    /// </summary>
+    /// <summary>The same claim, measured at the quarter rather than the half.</summary>
     [Fact]
     public void RadiusAt_AQuarterOfTheWayThrough_HasNotAlreadyCoveredHalfTheGround()
         => Assert.InRange(ShockwaveSettings.RadiusAt(Frames / 4, Frames), 0.2f, 0.4f);
 
     /// <summary>
     ///     The front's thickness and the ripple spacing are both measured against the radius, so a
-    ///     radius of nought on the frame the blast goes off would hand the shader an infinity.
+    ///     radius of zero on the frame the blast goes off would hand the shader an infinity.
     /// </summary>
     [Theory]
     [InlineData(0)]
@@ -81,9 +79,9 @@ public class ShockwaveSettingsTests
     }
 
     /// <summary>
-    ///     A ring is stopped on the frame it runs out, but the arithmetic is asked for frames past
-    ///     the end by nothing in particular - and a negative intensity would subtract light from
-    ///     the room through an additive blend.
+    ///     A ring is stopped on the frame it runs out, but nothing stops the arithmetic being asked
+    ///     for a frame past the end, and a negative intensity would subtract light from the room
+    ///     through an additive blend.
     /// </summary>
     [Theory]
     [InlineData(-5)]

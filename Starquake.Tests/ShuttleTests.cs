@@ -10,20 +10,17 @@ using Xunit;
 namespace Starquake.Tests;
 
 /// <summary>
-///     Taking the shuttle and stepping off it. All of this was inside <c>Blob</c>, where boarding
-///     meant writing a flag and a height in the same breath - four separate places did it, and one
-///     without the other leaves Blob standing half inside the floor.
+///     Taking the shuttle and stepping off it.
 /// </summary>
 /// <remarks>
-///     Nothing here needs a screen, a sound or a graphics device. What stayed behind is the world's
-///     own record of which pads have been taken and the collision map that follows from it, so the
-///     one thing these tests cannot see is that the caller acts on what <see cref="Shuttle.Step" />
-///     returns.
+///     Nothing here needs a screen, a sound or a graphics device. The world keeps its own record of
+///     which pads have been taken, and the collision map follows from that, so the one thing these
+///     tests cannot see is the caller acting on what <see cref="Shuttle.Step" /> returns.
 /// </remarks>
 public class ShuttleTests
 {
     /// <summary>
-    ///     Squarely on the pad: 32 pixels in, which is a 64-wide Blob centred on a 128-wide tile, and
+    ///     Squarely on the pad. 32 pixels in, which is a 64-wide Blob centred on a 128-wide tile,
     ///     with his feet exactly on top of it.
     /// </summary>
     private const int SquarelyOn = 32;
@@ -46,8 +43,9 @@ public class ShuttleTests
     }
 
     /// <summary>
-    ///     The height is derived, not stored, so there is no sequence of calls that can leave it
-    ///     disagreeing with <see cref="Shuttle.Riding" />. That is the whole reason this class exists.
+    ///     The height is derived, not stored, so no sequence of calls can leave it disagreeing with
+    ///     <see cref="Shuttle.Riding" />. That is why this class exists: a flag and a height written
+    ///     separately, one without the other, leaves Blob standing half inside the floor.
     /// </summary>
     [Fact]
     public void BlobHeight_Riding_IncludesTheShuttleUnderneath()
@@ -80,8 +78,8 @@ public class ShuttleTests
     }
 
     /// <summary>
-    ///     The gap a taken shuttle leaves counts as much as the pad itself, because standing on it is
-    ///     how he puts the shuttle back.
+    ///     The gap a taken shuttle leaves counts as much as the pad itself, because standing on it
+    ///     is how Blob puts the shuttle back.
     /// </summary>
     [Fact]
     public void NoticeThePadUnderfoot_NothingUnderfoot_IsNotOnThePad()
