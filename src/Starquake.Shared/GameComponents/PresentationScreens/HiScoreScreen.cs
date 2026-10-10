@@ -58,7 +58,7 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
     {
         if (!_gotHighScore)
         {
-            if (Input.GetPressedKey() != Keys.None)
+            if (Input.AnyKeyPressed)
             {
                 GraphicsDeviceManager.GraphicsDevice.Clear(Presentation.ScreenClearColour);
                 ScreenDirectory.Current = GameScreenType.Options;

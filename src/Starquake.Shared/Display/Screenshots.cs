@@ -4,6 +4,7 @@
 // -
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Starquake.Constants;
 
 namespace Starquake.Display;
 
@@ -71,6 +72,8 @@ internal sealed class Screenshots
         Color[] pixels = new Color[buffer.BackBufferWidth * buffer.BackBufferHeight];
         device.GetBackBufferData(pixels);
 
+        MakeOpaque(pixels);
+
         Directory.CreateDirectory(Folder);
 
         using var picture = new Texture2D(device, buffer.BackBufferWidth, buffer.BackBufferHeight);
@@ -78,6 +81,24 @@ internal sealed class Screenshots
 
         using FileStream file = File.Create(NextFilePath());
         picture.SaveAsPng(file, buffer.BackBufferWidth, buffer.BackBufferHeight);
+    }
+
+    /// <summary>Turns every pixel fully opaque, which is what the player was looking at.</summary>
+    /// <remarks>
+    ///     The buffer's alpha is whatever composing the picture happened to leave behind, and the
+    ///     display never reads it. A PNG does. The status panel is the worst of it: its artwork is
+    ///     almost entirely transparent, reading as black only because the frame beneath was cleared
+    ///     to black, and <c>ScreenEffectEngine</c> composes each view port with
+    ///     <see cref="BlendState.Opaque" />, so the panel's own alpha is written straight through to
+    ///     the buffer. Saved as it stands, the panel comes out see-through and shows whatever the
+    ///     picture is viewed against rather than the black that was on screen.
+    /// </remarks>
+    private static void MakeOpaque(Color[] pixels)
+    {
+        for (int pixel = 0; pixel < pixels.Length; pixel++)
+        {
+            pixels[pixel].A = ColourLevels.Full;
+        }
     }
 
     /// <summary>

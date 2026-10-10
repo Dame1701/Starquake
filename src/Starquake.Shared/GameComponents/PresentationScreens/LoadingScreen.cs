@@ -4,7 +4,6 @@
 // -
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.Core;
@@ -113,7 +112,7 @@ internal class LoadingScreen(
             _bootProgressBackgroundFade = 0;
         }
 
-        return input.GetPressedKey() != Keys.None;
+        return input.AnyKeyPressed;
     }
 
     /// <summary>

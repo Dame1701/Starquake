@@ -22,6 +22,22 @@ namespace Starquake.Input;
 /// </remarks>
 internal class ToggleKeys
 {
+    /// <summary>
+    ///     The keys that do not count towards <see cref="AnyKeyPressed" />. These are the game's
+    ///     own: F5 takes a screenshot, F8 switches the graphics set, F10 the backdrops, F12 goes
+    ///     fullscreen, and <c>TestModeKeys</c> holds several more. Pressing one on a page that is
+    ///     waiting to be dismissed would do its own job and dismiss the page as well.
+    /// </summary>
+    /// <remarks>
+    ///     A set rather than a test for the function keys, so reserving something that is not one is
+    ///     a matter of adding it here.
+    /// </remarks>
+    private static readonly HashSet<Keys> ReservedKeys =
+    [
+        Keys.F1, Keys.F2, Keys.F3, Keys.F4, Keys.F5, Keys.F6,
+        Keys.F7, Keys.F8, Keys.F9, Keys.F10, Keys.F11, Keys.F12
+    ];
+
     private Keys _heldKey = Keys.None;
     private Keys _toggledKey = Keys.None;
 
@@ -33,6 +49,12 @@ internal class ToggleKeys
 
     /// <summary>The key released this frame, if exactly one was down and has just come up.</summary>
     public Keys GetPressedKey() => _toggledKey;
+
+    /// <summary>
+    ///     Whether the player pressed something that a page waiting to be dismissed should act on.
+    ///     The reserved keys do not count; see <see cref="ReservedKeys" />.
+    /// </summary>
+    public bool AnyKeyPressed => _toggledKey != Keys.None && !ReservedKeys.Contains(_toggledKey);
 
     public void Update()
     {

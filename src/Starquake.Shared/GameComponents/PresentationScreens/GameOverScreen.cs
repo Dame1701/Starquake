@@ -3,7 +3,6 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using Starquake.ActiveSprites;
 using Starquake.Constants;
@@ -96,7 +95,7 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
 
     public override void Update(GameTime gameTime)
     {
-        if (Input.GetPressedKey() != Keys.None)
+        if (Input.AnyKeyPressed)
         {
             var playersScore = new HiScore
             {

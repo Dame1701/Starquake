@@ -3,7 +3,6 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
@@ -58,7 +57,7 @@ internal class ComputerReportScreen : GameScreenBase, IGameScreen
 
     public override void Update(GameTime gameTime)
     {
-        if (Input.GetPressedKey() != Keys.None)
+        if (Input.AnyKeyPressed)
         {
             GraphicsDeviceManager.GraphicsDevice.Clear(Presentation.ScreenClearColour);
             ScreenDirectory.Current = GameScreenType.MainGame;
