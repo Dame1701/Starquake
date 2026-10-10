@@ -354,7 +354,7 @@ public class PlayerStatsTests
 
         public const int FullTopUp = 128;
 
-        public const int PlatformsOnRevival = 8;
+        public const int PlatformsOnRevival = 10;
 
         /// <summary>Kept in step with <see cref="PlayerStats" />' own constant.</summary>
         public const int EnergyDrainFrames = 4 * LogicClock.FramesPerSecond;
