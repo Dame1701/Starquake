@@ -112,9 +112,15 @@ resharper_convert_if_statement_to_conditional_ternary_expression_highlighting = 
 # and would make comparing against upstream harder. Its .csproj also turns Nullable off for
 # the same reason. Sources here are Latin-1, not UTF-8, so the charset rule is lifted or an
 # editor would rewrite every file's copyright header on save.
+#
+# The glob is `src/...` because this file sits at the repository root and the solution sits
+# one folder down. An .editorconfig section is matched against the path relative to the file
+# it is written in, so the prefix is load-bearing: without it the section matches nothing, the
+# six rules below come back on for the fork, and the build stops with sixty-three errors in
+# source we did not write.
 # ---------------------------------------------------------------------------------------
 
-[{ProjectMercury,ProjectMercury.ContentPipeline}/**.cs]
+[src/{ProjectMercury,ProjectMercury.ContentPipeline}/**.cs]
 charset = unset
 trim_trailing_whitespace = false
 insert_final_newline = false

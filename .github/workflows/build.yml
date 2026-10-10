@@ -16,6 +16,13 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Every path below is relative to the solution, which lives in src/ rather than at the root of
+# the repository. Set once here rather than per step: this applies to `run` steps only, which is
+# every step that takes a path - checkout and setup-dotnet are actions and want the root.
+defaults:
+  run:
+    working-directory: src
+
 jobs:
   build:
     strategy:
