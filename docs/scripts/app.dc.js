@@ -17,12 +17,12 @@ class Component extends DCLogic {
   /* ---------- Content ---------- */
 
   shotLabels = [
-    'The Crash Site',
-    'Flight Computer Report',
-    'Teleportal Code Entry',
-    'The Molecule Fields',
-    'Violet Stalactite Caves',
-    'The Explorer Who Didn't Make It'
+    "The Crash Site",
+    "Flight Computer Report",
+    "Teleportal Code Entry",
+    "The Molecule Fields",
+    "Violet Stalactite Caves",
+    "The Explorer Who Didn't Make It"
   ];
 
   downloads = [
