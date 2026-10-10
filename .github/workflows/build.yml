@@ -1,37 +1,60 @@
 # The gate the repository did not have.
 #
-# "0 warnings, 65 tests green" was held by discipline alone until this file existed, and
-# discipline is exactly what a `git bisect` six months from now cannot verify. Directory.Build.props
-# sets TreatWarningsAsErrors, so a warning fails the build here rather than scrolling past in a log.
+# "0 warnings, tests green" was held by discipline alone until this file existed, and discipline
+# is exactly what a `git bisect` six months from now cannot verify. Directory.Build.props sets
+# TreatWarningsAsErrors, so a warning fails the build here rather than scrolling past in a log.
 #
-# Every project builds on every platform - the Windows head sets EnableWindowsTargeting - so one
-# job would prove the code compiles. Three exist because the packaging does not travel: the .app
-# bundle and its ad-hoc signature are a macOS-only target, and only a run on macOS builds them.
+# Five jobs, and the shape of them is decided by one fact: MonoGame has no shader compiler of its
+# own. On Windows it uses the DirectX one already on the machine; on macOS and Linux it runs that
+# same Windows compiler under Wine, which is a 450MB install and, since Homebrew disabled its wine
+# casks, a fiddly one. So the content is built once, on the only runner that needs nothing
+# installed to do it, and handed to everything else as an artifact. That is possible at all only
+# because every head is DesktopGL now - one MonoGame platform, one set of .xnb, three consumers.
+# See "Publishing ahead of time" and "CI" in BUILD.md.
 
 name: Build
 
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
   workflow_dispatch:
 
 # Every path below is relative to the solution, which lives in src/ rather than at the root of
 # the repository. Set once here rather than per step: this applies to `run` steps only, which is
-# every step that takes a path - checkout and setup-dotnet are actions and want the root.
+# every step that takes a path - checkout, setup-dotnet and the artifact actions are actions and
+# want paths from the root.
 defaults:
   run:
     working-directory: src
 
 jobs:
+  # A new cycle is one misfiled file, and this fails in about a second. No restore, no build, no
+  # .NET, and no reason to run it once per operating system - so it answers long before the builds
+  # finish. tools/namespace-cycles.py counts the namespaces in Starquake.Shared that depend on each
+  # other both ways, and the count is zero. Nothing but this keeps it there: C# has no rule against
+  # a namespace cycle, which is why it had drifted to fourteen before anything measured it.
+  namespaces:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: No namespace cycles
+        run: python3 tools/namespace-cycles.py
+
+  # Does it compile, and do the tests pass, on all three operating systems.
+  #
+  # Deliberately independent of the content job, so a compile error reports in a couple of minutes
+  # rather than after MGCB has ground through 107MB of art. PrebuiltContentDir pointed at an empty
+  # folder is what buys that: it skips the content build outright. Nothing here needs the content -
+  # the tests hand the sound engine a ContentManager with nothing in it on purpose - and this job
+  # never proved anything about the art, only about the code.
   build:
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-
     runs-on: ${{ matrix.os }}
-
     steps:
       - uses: actions/checkout@v4
 
@@ -45,31 +68,24 @@ jobs:
             8.0.x
             10.0.x
 
-      - name: Restore
-        run: dotnet restore Starquake.sln
-
-      - name: Build
-        run: dotnet build Starquake.sln --no-restore
+      - name: Compile without content
+        shell: bash
+        run: |
+          mkdir -p "${{ runner.temp }}/no-content"
+          dotnet restore Starquake.sln
+          dotnet build Starquake.sln --no-restore -p:PrebuiltContentDir="${{ runner.temp }}/no-content"
 
       - name: Test
-        run: dotnet test Starquake.Tests/Starquake.Tests.csproj --no-build
+        shell: bash
+        run: dotnet test Starquake.Tests/Starquake.Tests.csproj --no-build -p:PrebuiltContentDir="${{ runner.temp }}/no-content"
 
-  # The open question, asked on every push instead of never.
+  # The content, built once for everybody.
   #
-  # The three AOT heads were set up on a Mac, and NativeAOT does not cross-compile, so the Windows
-  # one has never been run - see "Windows is wired up and unproven" in BUILD.md. MonoGame's
-  # WindowsDX flavour brings Windows Forms with it, which Microsoft does not list as supported
-  # under NativeAOT, and SharpDX, which predates trimming entirely. Nothing in the SDK blocks
-  # either; whether what comes out of ILC is a working executable is the thing nobody here knows.
-  #
-  # continue-on-error because it is an experiment and not yet a promise: a failure should report
-  # the answer, not turn main red for a build nobody ships yet. Turn it into a gate - drop that
-  # line - the first time it passes. Only the publish runs: a GitHub runner has no GPU, so
-  # launching the result would prove nothing beyond what the compile already did.
-  windows-aot:
+  # On Windows because Windows is the one runner with a shader compiler already on it. The output
+  # is platform-independent - /platform:DesktopGL, the same .xnb the Mac and Linux heads load - so
+  # which runner produced it does not matter to anything downstream.
+  content:
     runs-on: windows-latest
-    continue-on-error: true
-
     steps:
       - uses: actions/checkout@v4
 
@@ -80,24 +96,138 @@ jobs:
             8.0.x
             10.0.x
 
-      - name: Publish NativeAOT
-        run: dotnet publish Starquake.Windows/Starquake.Windows.csproj -p:PublishProfile=Aot-win-x64
+      - name: Build content
+        run: dotnet build Starquake.Shared/Starquake.Shared.csproj -c Release
 
-  # A second gate the repository did not have. tools/namespace-cycles.py counts the namespaces in
-  # Starquake.Shared that depend on each other both ways, and the count is zero. Nothing but this
-  # keeps it there: C# has no rule against a namespace cycle - one assembly, so any type may
-  # reference any other - which is why the count had drifted to fourteen before anything measured
-  # it, through the whole of a plan whose stated goal was cutting cycles.
+      - name: Upload content
+        uses: actions/upload-artifact@v4
+        with:
+          name: content
+          path: src/Starquake.Shared/Content/bin/DesktopGL/Content
+          retention-days: 7
+
+  # One native executable per target, each compiled on its own hardware.
   #
-  # Its own job rather than a step in the matrix above. It reads source and nothing else: no
-  # restore, no build, no .NET, and no reason to run it once per operating system. It fails in
-  # about a second, which is the point - a new cycle is one misfiled file, and it is far cheaper
-  # to hear about before the three builds finish than after.
-  namespaces:
-    runs-on: ubuntu-latest
-
+  # NativeAOT does not cross-compile. ILC will happily emit code for another operating system - it
+  # produces a valid object file - but the link then fails for want of a linker that knows the other
+  # platform, so each of these has to run where it is going. That is the whole reason this is a
+  # matrix of runners rather than five invocations on one of them.
+  publish:
+    needs: content
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { rid: osx-arm64,   head: Starquake.Mac,     runs-on: macos-latest }
+          - { rid: osx-x64,     head: Starquake.Mac,     runs-on: macos-latest }
+          - { rid: linux-x64,   head: Starquake.Linux,   runs-on: ubuntu-latest }
+          - { rid: linux-arm64, head: Starquake.Linux,   runs-on: ubuntu-24.04-arm }
+          - { rid: win-x64,     head: Starquake.Windows, runs-on: windows-latest }
+    runs-on: ${{ matrix.runs-on }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: No namespace cycles
-        run: python3 tools/namespace-cycles.py
+      - name: Install .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      # ILC shells out to clang to link and to objcopy to strip symbols. Without the stripping
+      # tool the publish fails at the very last step, after all the compiling is done.
+      - name: Install the native toolchain
+        if: startsWith(matrix.rid, 'linux')
+        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev binutils
+
+      - name: Download content
+        uses: actions/download-artifact@v4
+        with:
+          name: content
+          path: content
+
+      - name: Publish ahead of time
+        shell: bash
+        run: >
+          dotnet publish ${{ matrix.head }}/${{ matrix.head }}.csproj
+          -p:PublishProfile=Aot-${{ matrix.rid }}
+          -p:PrebuiltContentDir="${{ github.workspace }}/content"
+
+      # ditto rather than zip, because the .app carries an ad-hoc signature and plain zip does not
+      # preserve everything the signature covers. Apple Silicon refuses to start an unsigned arm64
+      # binary at all, so losing it in the archive would mean shipping a bundle that cannot run.
+      - name: Package (macOS)
+        if: startsWith(matrix.rid, 'osx')
+        run: >
+          ditto -c -k --sequesterRsrc --keepParent
+          ${{ matrix.head }}/bin/Publish/${{ matrix.rid }}/Starquake.app
+          "${{ github.workspace }}/Starquake-${{ matrix.rid }}.zip"
+
+      # tar, not zip: zip does not record the executable bit, and a Starquake without one is a
+      # file the player cannot start.
+      - name: Package (Linux)
+        if: startsWith(matrix.rid, 'linux')
+        run: >
+          tar -czf "${{ github.workspace }}/Starquake-${{ matrix.rid }}.tar.gz"
+          -C ${{ matrix.head }}/bin/Publish/${{ matrix.rid }}
+          --exclude='*.pdb' --exclude='*.dbg' .
+
+      # Compress-Archive has no exclude of its own, so the symbols go before the archive is made.
+      - name: Package (Windows)
+        if: startsWith(matrix.rid, 'win')
+        shell: pwsh
+        run: |
+          $out = "${{ matrix.head }}/bin/Publish/${{ matrix.rid }}"
+          Remove-Item "$out/*.pdb" -ErrorAction SilentlyContinue
+          Compress-Archive -Path "$out/*" -DestinationPath "${{ github.workspace }}/Starquake-${{ matrix.rid }}.zip"
+
+      - name: Upload the build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Starquake-${{ matrix.rid }}
+          path: Starquake-${{ matrix.rid }}.*
+          retention-days: 14
+
+  # Tagging is the release process. Push a v* tag and the archives the publish job just built
+  # become the assets on a GitHub Release; every other push leaves them as plain artifacts, which
+  # expire. gh is already on the runner, so this needs no third-party action holding contents:write.
+  release:
+    needs: publish
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download every build
+        uses: actions/download-artifact@v4
+        with:
+          pattern: Starquake-*
+          path: dist
+          merge-multiple: true
+
+      # working-directory, because this job has no checkout and so has no src/ to default into.
+      - name: Release
+        working-directory: ${{ github.workspace }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > notes.md <<'NOTES'
+          Built ahead of time: there is no .NET runtime to install on any platform.
+
+          Each download is a folder rather than a single file. The executable holds all of the
+          game's code, but `Content/` is read off disk and SDL2 and OpenAL are loaded by name at
+          runtime, so those have to travel beside it.
+
+          **macOS** - the bundle is ad-hoc signed, which is what Apple Silicon requires to start
+          it at all, and is not what Gatekeeper wants. A download from a browser is quarantined,
+          so run `xattr -dr com.apple.quarantine Starquake.app` first, or use System Settings →
+          Privacy & Security → "Open Anyway". Control-clicking and choosing Open has not worked
+          since macOS 15.
+
+          **Linux arm64** - ships without SDL2, because MonoGame has no arm64 Linux native to
+          ship. `sudo apt install libsdl2-2.0-0` before first launch. linux-x64 needs nothing.
+          NOTES
+          gh release create "${{ github.ref_name }}" dist/* \
+            --repo "${{ github.repository }}" \
+            --title "Starquake ${{ github.ref_name }}" \
+            --notes-file notes.md

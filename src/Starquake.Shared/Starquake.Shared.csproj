@@ -96,7 +96,26 @@
           Wine and wants MGFXC_WINE_PATH set. That is a requirement of the machine doing the
           build, not of the platform being built for. See BUILD.md.
         -->
-        <MonoGameContentReference Include="Content\Content.mgcb"/>
+        <MonoGameContentReference Include="Content\Content.mgcb" Condition="'$(PrebuiltContentDir)' == ''"/>
+    </ItemGroup>
+
+    <!--
+      Content built elsewhere and handed in, which is how CI does it.
+
+      Point PrebuiltContentDir at a folder of .xnb and the content build is skipped entirely;
+      those files are copied to the output as if MGCB had just produced them. CI builds the
+      content once on a Windows runner - the only one of the three with a shader compiler of its
+      own - and the macOS and Linux publish jobs take it from there, so no runner needs the 450MB
+      of Wine the alternative would cost on two platforms out of three.
+
+      It is a path in, not a second source of truth: nothing is committed, and a build with the
+      property unset compiles the content from Content.mgcb exactly as before.
+    -->
+    <ItemGroup Condition="'$(PrebuiltContentDir)' != ''">
+        <Content Include="$(PrebuiltContentDir)\**\*.xnb">
+            <Link>Content\%(RecursiveDir)%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
