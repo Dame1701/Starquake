@@ -15,10 +15,10 @@ using Starquake.Input;
 namespace Starquake.Engines;
 
 /// <summary>
-///     The five keys that work anywhere in the game rather than belonging to a screen: pause,
-///     fullscreen, the backdrops, the artwork swap and quit. The two that change how the game
-///     looks say so through <see cref="ModeAnnouncement" />, because otherwise the only way to
-///     know which way a toggle has just gone is to recognise the result.
+///     The keys that work anywhere in the game rather than belonging to a screen: pause,
+///     fullscreen, the backdrops, the artwork swap, a screenshot and quit. The two that change how
+///     the game looks say so through <see cref="ModeAnnouncement" />, because otherwise the only
+///     way to know which way a toggle has just gone is to recognise the result.
 /// </summary>
 /// <remarks>
 ///     Most of these touch only the session and the presentation. The artwork swap has to tell
@@ -35,6 +35,7 @@ internal class GlobalHotkeys(
     GameWindow window,
     ResourceManager resources,
     ModeAnnouncement announce,
+    Screenshots screenshots,
     Action artworkSwapped,
     Action quitGame)
 {
@@ -44,6 +45,7 @@ internal class GlobalHotkeys(
         ToggleFullScreenIfAsked();
         ToggleBackgroundsIfAsked();
         SwitchGraphicsSetIfAsked();
+        TakeScreenshotIfAsked();
         QuitIfAsked();
     }
 
@@ -161,6 +163,19 @@ internal class GlobalHotkeys(
         }
 
         announce.Show("DISPLAY SWITCH FAILED");
+    }
+
+    /// <summary>
+    ///     F5 asks for a screenshot. Only asks: the picture is read off the back buffer at the end
+    ///     of the draw pass, where there is a finished frame to read, and that is also what
+    ///     announces the result.
+    /// </summary>
+    private void TakeScreenshotIfAsked()
+    {
+        if (input.GetPressedKey() == Keys.F5)
+        {
+            screenshots.Ask();
+        }
     }
 
     private void ToggleBackgroundsIfAsked()

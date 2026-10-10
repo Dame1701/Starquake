@@ -31,6 +31,8 @@ Function keys
 =============
 These are live whatever the control scheme:
 
+- F5 saves a PNG of exactly what is on screen, cathode ray tube and all, into Pictures/Starquake/Screenshots.
+  The file is named for the moment it was taken.
 - F8 switches the artwork between the redrawn graphics and the original 1985 set (with a few enhancements)
 - F9 steps the CRT emulation on a notch, round four settings: CRT OFF, CRT SCANLINES, CRT PHOSPHOR and
   CRT FULL TUBE. Each press cycles through the different modes.

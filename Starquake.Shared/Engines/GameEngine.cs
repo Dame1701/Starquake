@@ -111,6 +111,9 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     /// <summary>Dissolves one set of artwork into the other when F8 switches between them.</summary>
     private ArtworkCrossfade _crossfade;
 
+    /// <summary>Writes a PNG of the back buffer when F5 has asked for one.</summary>
+    private readonly Screenshots _screenshots = new();
+
     private bool _particleTestTrigger;
 
     /// <summary>
@@ -332,6 +335,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             _window,
             ContentResourceManager,
             _announcement,
+            _screenshots,
             ArtworkSwapped,
             _quitGame);
 
@@ -930,6 +934,13 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         _announcement.Draw(Font2, Presentation.Transform);
 
         _presenter.Present(sinceLastDraw);
+
+        // After the picture has reached the buffer and after the announcement was drawn, so the
+        // shot is the finished frame and the message about it lands in the next one.
+        if (_screenshots.SaveIfAsked(_graphicsDeviceMgr.GraphicsDevice) is { } saved)
+        {
+            _announcement.Show(saved ? "SCREENSHOT SAVED" : "SCREENSHOT FAILED");
+        }
     }
 
 }

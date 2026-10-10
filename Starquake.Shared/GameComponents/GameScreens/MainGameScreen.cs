@@ -365,9 +365,9 @@ internal class MainGameScreen : IGameScreen
     ///     <see cref="ConditionalAttribute" />, which removes the calls rather than leaving a branch
     ///     never taken.
     ///     <para>
-    ///         The keys that are not debug keys are handled elsewhere and stay live in both builds: F8
-    ///         swaps the artwork, F9 steps the cathode ray tube, F10 the backdrops, F12 fullscreen,
-    ///         plus the player's own pause and quit keys.
+    ///         The keys that are not debug keys are handled elsewhere and stay live in both builds:
+    ///         F5 takes a screenshot, F8 swaps the artwork, F9 steps the cathode ray tube, F10 the
+    ///         backdrops, F12 fullscreen, plus the player's own pause and quit keys.
     ///     </para>
     /// </summary>
     [Conditional("DEBUG")]
