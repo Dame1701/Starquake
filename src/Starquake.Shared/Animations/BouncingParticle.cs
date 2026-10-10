@@ -3,11 +3,9 @@
 // ---------------------------------------------------------
 // -
 using Microsoft.Xna.Framework;
-using Starquake.ContentManagement;
 using Starquake.Core;
 using Starquake.Particles;
 using Starquake.Sprites;
-using Starquake.World;
 
 namespace Starquake.Animations;
 
@@ -51,18 +49,15 @@ internal class BouncingParticle
     /// <inheritdoc cref="SlowestBurst" />
     private const double Gravity = 1.0;
 
-    private readonly GameScreenCollection _gameScreens;
     private readonly Bounce _particleBounce;
     private readonly Random _randomNumberGenerator;
+    private readonly IFragmentSurroundings _surroundings;
 
-    private int _oldXPos;
-    private int _oldYPos;
-
-    public BouncingParticle(ResourceManager resources, GameScreenCollection gameScreens, Random randomNumberGenerator, int spriteNo)
+    public BouncingParticle(IFragmentSurroundings surroundings, Random randomNumberGenerator, int spriteNo)
     {
-        _gameScreens = gameScreens;
+        _surroundings = surroundings;
         _randomNumberGenerator = randomNumberGenerator;
-        _particleBounce = new Bounce(resources, randomNumberGenerator, spriteNo);
+        _particleBounce = new Bounce(randomNumberGenerator, spriteNo);
     }
 
     public required IStandardParticleEffect Fireball { get; init; }
@@ -79,8 +74,6 @@ internal class BouncingParticle
     ///     fragment.
     /// </summary>
     public bool HasActiveParticles => Fireball.Effect.ActiveParticlesCount > 0;
-
-    public required IPositionalTriggerParticleEffect SparkEffect { get; init; }
 
     /// <summary>
     ///     Throws this part out of Blob along its own point of the star.
@@ -100,11 +93,11 @@ internal class BouncingParticle
         int effectMinDuration = 50,
         int effectMaxDuration = 100)
     {
-        XPos = xPos + 16;
-        YPos = yPos + 16;
-
-        _oldYPos = YPos;
-        _oldXPos = XPos;
+        // Started within the edges whatever Blob's own position was. Everything below holds a part
+        // between them by refusing it the step that would take it out, so a part born outside them
+        // would have nowhere legal to go and would sit there turning around.
+        XPos = Math.Clamp(xPos + 16, 0, LastPositionOnScreen(Horizontal));
+        YPos = Math.Clamp(yPos + 16, 0, LastPositionOnScreen(Vertical));
 
         // Clear particles left over from the last death. They are still in the emitter's buffer at
         // the positions they froze at when the bounce stopped.
@@ -179,11 +172,8 @@ internal class BouncingParticle
         Point p = _particleBounce.Update();
 
         // Vertically first, with the horizontal step taken from where that left it.
-        YPos += StepAlongAxis(Vertical, p.Y);
-        _oldYPos = YPos;
-
-        XPos += StepAlongAxis(Horizontal, p.X);
-        _oldXPos = XPos;
+        StepAlongAxis(Vertical, p.Y);
+        StepAlongAxis(Horizontal, p.X);
 
         Fireball.Update(XPos + FireballXOffset, YPos + FireballYOffset, gameTime);
     }
@@ -193,94 +183,104 @@ internal class BouncingParticle
     ///     edges.
     /// </summary>
     /// <remarks>
-    ///     The sign decides everything: which way to probe, whether the result is negated, and which
-    ///     screen edge to stop at.
+    ///     The sign decides everything: which way to probe, which edge is the one ahead, and which
+    ///     way the position moves.
     ///     <para>
-    ///         A step of nothing is not a wall. <c>CheckCollision</c> answers with the distance it was
+    ///         Both limits are worked out as a distance the part is allowed to travel, and the part is
+    ///         only ever moved by a distance something has agreed to. Nothing writes a position that
+    ///         has not been asked about, because the edges are not only edges: the cells along them
+    ///         are usually solid floor and wall, and a part overlapping a solid cell is blocked in
+    ///         every direction at once, so one put down inside one would stay there, clanging and
+    ///         throwing sparks, until its time ran out.
+    ///     </para>
+    ///     <para>
+    ///         A step of nothing is not a wall. <c>DistanceClear</c> answers with the distance it was
     ///         handed and can only lower it, so asking for nought gets nought back. Reading that as
     ///         blocked would turn the part round with a clang and sparks on every frame it was not
     ///         moving along that axis.
     ///     </para>
     /// </remarks>
-    /// <returns>How far the part actually got.</returns>
-    private int StepAlongAxis(bool vertical, int requestedStep)
+    private void StepAlongAxis(bool vertical, int requestedStep)
     {
         if (requestedStep == 0)
         {
-            return 0;
+            return;
         }
 
         bool movingPositive = requestedStep > 0;
 
         // Never more than its own size in one step, or it could pass clean through a wall.
-        int step = movingPositive
-            ? Math.Min(requestedStep, ParticleSize)
-            : Math.Max(requestedStep, -ParticleSize);
-
-        Direction direction = vertical
-            ? movingPositive ? Direction.Down : Direction.Up
-            : movingPositive
-                ? Direction.Right
-                : Direction.Left;
-
-        // CheckCollision wants a distance rather than a signed step. The direction is already in the
-        // argument above it.
-        int speed = _gameScreens.Collisions.CheckCollision(
-            direction,
-            XPos,
-            YPos,
-            ParticleSize,
-            ParticleSize,
-            Math.Abs(step),
-            true);
-
-        if (speed == 0)
-        {
-            BounceBackTo(vertical, vertical ? _oldYPos : _oldXPos);
-        }
-
-        if (!movingPositive)
-        {
-            // CheckCollision answers a distance, so the sign the step came in with is put back.
-            speed = -speed;
-        }
+        int distance = Math.Min(Math.Abs(requestedStep), ParticleSize);
 
         int position = vertical ? YPos : XPos;
-        int screenSize = vertical
-            ? _gameScreens.ScreenHeight
-            : _gameScreens.ScreenWidth;
 
-        // Bounced off the screen edges as well as the scenery, which keeps the fragments in view.
-        if (movingPositive && position > screenSize - ParticleSize)
+        // Measured before the step is taken rather than after, so the edge shortens the step instead
+        // of catching the part beyond it.
+        int toTheEdge = movingPositive
+            ? LastPositionOnScreen(vertical) - position
+            : position;
+
+        int allowed = Math.Min(distance, toTheEdge);
+
+        if (allowed > 0)
         {
-            BounceBackTo(vertical, screenSize - ParticleSize);
-        }
-        else if (!movingPositive && position < ParticleSize)
-        {
-            BounceBackTo(vertical, ParticleSize);
+            Direction direction = vertical
+                ? movingPositive ? Direction.Down : Direction.Up
+                : movingPositive
+                    ? Direction.Right
+                    : Direction.Left;
+
+            // The scenery is asked for a distance rather than a signed step. The direction is
+            // already in the argument above it.
+            allowed = _surroundings.DistanceClear(
+                direction, XPos, YPos, ParticleSize, ParticleSize, allowed);
         }
 
-        return speed;
+        // Nowhere to go on this axis, so the part turns around where it stands. Once, whether it was
+        // the scenery or the edge that stopped it: turning around twice in a frame would leave the
+        // part still travelling into whatever had just stopped it.
+        if (allowed <= 0)
+        {
+            BounceOffWhatItMet(vertical);
+
+            return;
+        }
+
+        MoveAlong(vertical, movingPositive ? position + allowed : position - allowed);
     }
 
-    /// <summary>
-    ///     Puts the part back where it can be, turns it around on that axis and throws a spark from
-    ///     where it struck.
-    /// </summary>
-    private void BounceBackTo(bool vertical, int position)
+    /// <summary>The furthest along an axis a part can sit and still be wholly on screen.</summary>
+    private int LastPositionOnScreen(bool vertical)
+        => (vertical ? _surroundings.ScreenHeight : _surroundings.ScreenWidth) - ParticleSize;
+
+    private void MoveAlong(bool vertical, int position)
     {
         if (vertical)
         {
             YPos = position;
-            _particleBounce.YBounce();
         }
         else
         {
             XPos = position;
+        }
+    }
+
+    /// <summary>
+    ///     Turns the part around on one axis and throws a spark from where it struck.
+    /// </summary>
+    private void BounceOffWhatItMet(bool vertical)
+    {
+        if (vertical)
+        {
+            _particleBounce.YBounce();
+        }
+        else
+        {
             _particleBounce.XBounce();
         }
 
-        SparkEffect.Start(XPos, YPos);
+        _surroundings.Clang();
+        _surroundings.ThrowSparks(XPos, YPos);
     }
 
     public void Draw(SpriteCollection? spriteToDraw, int screenFade, int spriteNumber = -1)

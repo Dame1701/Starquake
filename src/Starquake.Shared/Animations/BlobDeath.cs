@@ -109,15 +109,16 @@ internal class BlobDeath
         _blobFragmentBounceSparks = (IPositionalTriggerParticleEffect)_resources
             .GetParticleEffectInstance(Assets.Effects.FireSparks, ParticleEffectType.TriggeredMultiLocationTimed, null);
 
+        var surroundings = new FragmentSurroundings(_resources, _gameScreens, _blobFragmentBounceSparks);
+
         // Each fragment needs its own explosion emitter, but all of them share one effect.
         _bouncingParticles.Clear();
         foreach (int fragmentSpriteNumber in FragmentSpriteNumbers)
         {
-            _bouncingParticles.Add(new BouncingParticle(_resources, _gameScreens, _randomNumberGenerator, fragmentSpriteNumber)
+            _bouncingParticles.Add(new BouncingParticle(surroundings, _randomNumberGenerator, fragmentSpriteNumber)
             {
                 Fireball = (IStandardParticleEffect)_resources
-                    .GetParticleEffectInstance(Assets.Effects.BlobFragmentExplosion, ParticleEffectType.Continual, null),
-                SparkEffect = _blobFragmentBounceSparks
+                    .GetParticleEffectInstance(Assets.Effects.BlobFragmentExplosion, ParticleEffectType.Continual, null)
             });
         }
     }
@@ -244,5 +245,35 @@ internal class BlobDeath
                 _blobFragmentBounceSparks.Draw(screenFade);
             }
         }
+    }
+
+    /// <summary>
+    ///     Joins the parts to the screen they come apart over. Answering everything a part asks here
+    ///     is what keeps it knowing nothing but its own position, so its stepping and bouncing can be
+    ///     exercised without a screen or a graphics device.
+    /// </summary>
+    private sealed class FragmentSurroundings(
+        ResourceManager resources,
+        GameScreenCollection gameScreens,
+        IPositionalTriggerParticleEffect sparks)
+        : IFragmentSurroundings
+    {
+        public int ScreenWidth => gameScreens.ScreenWidth;
+
+        public int ScreenHeight => gameScreens.ScreenHeight;
+
+        /// <inheritdoc />
+        /// <remarks>
+        ///     Asked as Blob, so the map does not hold the part inside the screen. The part keeps
+        ///     itself inside, and it bounces off the edges rather than being stopped dead at them.
+        /// </remarks>
+        public int DistanceClear(Direction direction, int x, int y, int width, int height, int distance)
+            => gameScreens.Collisions.CheckCollision(direction, x, y, width, height, distance, true);
+
+        /// <inheritdoc />
+        public void ThrowSparks(int x, int y) => sparks.Start(x, y);
+
+        /// <inheritdoc />
+        public void Clang() => resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPartClang, false);
     }
 }

@@ -4,7 +4,6 @@
 // -
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
-using Starquake.ContentManagement;
 using Starquake.Core;
 using Starquake.Sprites;
 
@@ -35,7 +34,6 @@ internal class Bounce
     private const float FastestTumble = 9f;
 
     private readonly Random _randomNumberGenerator;
-    private readonly ResourceManager _resources;
 
     private readonly int _spriteNo;
 
@@ -51,10 +49,9 @@ internal class Bounce
     private int _xDelta;
     private double _yDelta;
 
-    public Bounce(ResourceManager resources, Random randomNumberGenerator, int spriteNo)
+    public Bounce(Random randomNumberGenerator, int spriteNo)
     {
         _spriteNo = spriteNo;
-        _resources = resources;
         _randomNumberGenerator = randomNumberGenerator;
     }
     public bool Triggered { get; private set; }
@@ -116,7 +113,6 @@ internal class Bounce
     {
         if (Triggered)
         {
-            _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPartClang, false);
             _yDelta = -_yDelta;
         }
     }
@@ -125,7 +121,6 @@ internal class Bounce
     {
         if (Triggered)
         {
-            _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobPartClang, false);
             _xDelta = -_xDelta;
         }
     }
