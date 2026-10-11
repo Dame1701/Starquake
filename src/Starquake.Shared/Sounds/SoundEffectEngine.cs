@@ -154,7 +154,6 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
             {
                 return;
             }
-
             _periodicSoundTimer?.Change(Random.Shared.Next(NextSoundMinDelayMs, NextSoundMaxDelayMs), Timeout.Infinite);
         }
     }
@@ -251,7 +250,6 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
                     soundEffectInstanceRecord.SoundInstance.Volume = 0;
                 }
             }
-
             return;
         }
 
@@ -273,24 +271,19 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
         }
     }
 
-    public Guid PlaySound(string soundName, bool looped)
-        => PlaySound(soundName, 1F, looped);
+    public Guid PlaySound(string soundName, bool looped) => PlaySound(soundName, 1F, looped);
 
-    public Guid PlaySound(string soundName, float volume)
-        => PlaySound(soundName, volume, false);
+    public Guid PlaySound(string soundName, float volume) => PlaySound(soundName, volume, false);
 
     public Guid PlaySound(string soundName, float volume, bool looped)
     {
         SoundEffectInstanceRecord? singleInstance = FindSingleInstance(soundName);
-
-        if (singleInstance != null)
+        if (singleInstance == null)
         {
-            singleInstance.Volume = volume;
-
-            return PlaySingleInstance(singleInstance, volume, looped);
+            return PlayMultiInstance(soundName, volume);
         }
-
-        return PlayMultiInstance(soundName, volume);
+        singleInstance.Volume = volume;
+        return PlaySingleInstance(singleInstance, volume, looped);
     }
 
     /// <summary>
@@ -329,7 +322,6 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
         {
             record.SoundInstance.Play();
         }
-
         return record.Id;
     }
 
@@ -410,14 +402,15 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
         return soundToPlay;
     }
 
-    public Guid PlaySound(string soundName)
-        => PlaySound(soundName, 1, false);
+    public Guid PlaySound(string soundName) => PlaySound(soundName, 1, false);
 
     private SoundState GetSoundState(Guid id)
     {
         SoundEffectInstanceRecord? soundEffectInstanceRecord = _singleInstanceSoundEffectInstances
             .FirstOrDefault(sfx => sfx.Id == id);
 
-        return soundEffectInstanceRecord != null ? soundEffectInstanceRecord.SoundInstance.State : SoundState.Stopped;
+        return soundEffectInstanceRecord != null
+            ? soundEffectInstanceRecord.SoundInstance.State
+            : SoundState.Stopped;
     }
 }

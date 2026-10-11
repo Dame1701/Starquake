@@ -93,9 +93,13 @@ internal class GameOverScreen : GameScreenBase, IGameScreen
         _foregroundImage = Resources.GetSpriteCollection(Assets.Graphics.GameOverScreenForeground);
     }
 
+    /// <summary>
+    ///     Hands over to the hi-scores, on a key or on the end of this screen's music, so a player
+    ///     who walks away still sees the rest of the sequence.
+    /// </summary>
     public override void Update(GameTime gameTime)
     {
-        if (Input.AnyKeyPressed)
+        if (Input.AnyKeyPressed || Resources.GetMusicEngine().HasPlayedThrough)
         {
             var playersScore = new HiScore
             {

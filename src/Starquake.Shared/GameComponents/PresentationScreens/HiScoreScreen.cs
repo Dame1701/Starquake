@@ -58,7 +58,10 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
     {
         if (!_gotHighScore)
         {
-            if (Input.AnyKeyPressed)
+            // On a key or on the end of this screen's music, so a player who walks away is returned
+            // to the title screen. Only once the table is the thing on show: the branch below has
+            // the player mid-word and is theirs to finish.
+            if (Input.AnyKeyPressed || Resources.GetMusicEngine().HasPlayedThrough)
             {
                 GraphicsDeviceManager.GraphicsDevice.Clear(Presentation.ScreenClearColour);
                 ScreenDirectory.Current = GameScreenType.Options;
@@ -92,6 +95,10 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
                     // table worth keeping.
                     _gotHighScore = false;
                     _hiScoreList.Save();
+
+                    // The table is what this screen's music is for, and this is the first frame it
+                    // is the thing on show.
+                    Resources.GetMusicEngine().StopHoldingBack();
                 }
 
 
@@ -163,6 +170,11 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
 
         if (_gotHighScore)
         {
+            // Silent while the name is being typed. A player sitting over the keyboard working out
+            // six letters is not being played out to, and the music belongs to the table they get
+            // afterwards.
+            Resources.GetMusicEngine().HoldBack(GameScreenType.HiScores);
+
             _playersHighScore = playersScore;
             _playersHighScore.Name = string.Empty;
 

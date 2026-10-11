@@ -15,7 +15,8 @@ namespace Starquake.GameComponents;
 /// <summary>
 ///     A full-screen page: the options screen, the hi-scores, game over, game complete, the computer
 ///     report. Each fades itself up, draws text and numbers over a cleared screen, and hands over to
-///     another page when a key is pressed.
+///     another page when a key is pressed - and three of them when their music ends, so the end of a
+///     game plays itself out to the title screen whether or not anyone is watching.
 ///     <para>
 ///         Everything held here is what all five of those pages need: the sheets and the font to draw
 ///         with, the graphics device to clear, the presentation settings for the clear colour and the
