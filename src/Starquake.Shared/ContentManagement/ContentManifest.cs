@@ -241,7 +241,6 @@ internal static class ContentManifest
         resources.AddSoundResource(Assets.Sounds.AccessFailed, "Sounds\\AccessFailed", SoundEffectInstanceType.Single, 0, false);
         resources.AddSoundResource(Assets.Sounds.MachineryBackground, "Sounds\\MachineryBackground", SoundEffectInstanceType.Single, 0, true);
 
-        resources.AddSoundResource(Assets.Sounds.Tunnel, "Sounds\\Tunnel", SoundEffectInstanceType.Single, 0, false);
         resources.AddSoundResource(Assets.Sounds.TunnelSwish1, "Sounds\\TunnelSwish1", SoundEffectInstanceType.Single, 0, false);
         resources.AddSoundResource(Assets.Sounds.TunnelSwish2, "Sounds\\TunnelSwish2", SoundEffectInstanceType.Single, 0, false);
 
@@ -264,7 +263,6 @@ internal static class ContentManifest
         resources.AddSoundResource(Assets.Sounds.BlobExplodes, "Sounds\\BlobExplodes", SoundEffectInstanceType.Multi, 4, false);
         resources.AddSoundResource(Assets.Sounds.BlobPartClang, "Sounds\\BlobPartClang", SoundEffectInstanceType.Multi, 8, false);
 
-        resources.AddSoundResource(Assets.Sounds.NastyAppears, "Sounds\\BlobExplodes", SoundEffectInstanceType.Multi, 4, false);
         resources.AddSoundResource(Assets.Sounds.TeleportKeyClick, "Sounds\\TeleportKeyClick", SoundEffectInstanceType.Multi, 5, false);
         resources.AddSoundResource(Assets.Sounds.TeleportInvalidCode, "Sounds\\TeleportInvalidCode", SoundEffectInstanceType.Single, 0, false);
         resources.AddSoundResource(Assets.Sounds.Teleport, "Sounds\\Teleport", SoundEffectInstanceType.Multi, 3, false);

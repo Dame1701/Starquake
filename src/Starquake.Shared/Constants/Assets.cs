@@ -143,7 +143,6 @@ internal static class Assets
         public const string AccessSuccess = "AccessSuccess";
         public const string AccessFailed = "AccessFailed";
         public const string MachineryBackground = "MachineryBackground";
-        public const string Tunnel = "Tunnel";
         public const string TunnelSwish1 = "TunnelSwish1";
         public const string TunnelSwish2 = "TunnelSwish2";
         public const string NastyDeath = "NastyDeath";
@@ -163,7 +162,6 @@ internal static class Assets
         public const string BlobShipExplodes = "BlobShipExplodes";
         public const string BlobExplodes = "BlobExplodes";
         public const string BlobPartClang = "BlobPartClang";
-        public const string NastyAppears = "NastyAppears";
         public const string TeleportKeyClick = "TeleportKeyClick";
         public const string TeleportInvalidCode = "TeleportInvalidCode";
         public const string Teleport = "Teleport";
