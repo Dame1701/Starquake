@@ -17,6 +17,21 @@ assets/           hero art, comic panels, screenshots
 `scripts/app.dc.js` into the `<script data-dc-script>` island at the bottom of
 the page, which is how the runtime expects to find it.
 
+## Previewing
+
+Serve the folder — don't open `index.html` from disk. The loader at the foot of the page pulls
+`scripts/app.dc.js` in over a synchronous `XMLHttpRequest`, and `file://` blocks that as
+cross-origin, so the runtime boots with no component logic at all. The page still looks mostly
+right, because everything written as plain markup renders: what disappears is whatever the script
+builds — the download cards, the screenshot gallery and the starfield, all of them silently.
+
+```sh
+cd docs && python3 -m http.server 8000   # then http://localhost:8000/
+```
+
+Chrome caches `styles.css` aggressively across reloads; after editing it, shift-reload or the page
+will look unstyled.
+
 ## Publish
 GitHub Pages serves this folder as it stands: Settings → Pages → Deploy from branch → `main`,
 folder `/docs`.
