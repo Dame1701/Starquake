@@ -53,6 +53,12 @@ internal class Blob
     private const int WalkSpeed = 8;
 
     /// <summary>
+    ///     How far apart a slow walk's footfalls are: as far as the full step covers while the
+    ///     footfall sound, a tenth of a second long, plays once. See <see cref="PatterFeet" />.
+    /// </summary>
+    private static readonly int FootfallSpacing = WalkSpeed * LogicClock.Seconds(0.1);
+
+    /// <summary>
     ///     Where the teleport beam and the shot's smoke trail are emitted from, measured in from the
     ///     top left of Blob and of the shot.
     /// </summary>
@@ -104,6 +110,12 @@ internal class Blob
 
 
     private Direction _blobsLastAnimDirection = Direction.None;
+
+    /// <summary>How far Blob has walked since the walk cycle last moved on. See <see cref="Stride" />.</summary>
+    private int _strideWalked;
+
+    /// <summary>How much further a slow walk goes before the next footfall. See <see cref="PatterFeet" />.</summary>
+    private int _distanceToFootfall;
 
     private Guid _blobTunnelLiftSoundId = Guid.Empty;
 
@@ -157,7 +169,7 @@ internal class Blob
             graphicsSet,
             randomNumberGenerator,
             screenEffects);
-        Control = new CustomControl(session.PlayerKeys, input);
+        Control = new CustomControl(session.PlayerKeys, input, session);
         State = BlobState.Normal;
 
         _blobTeleporterBeam =
@@ -401,21 +413,67 @@ internal class Blob
         _gameScreens.UpdateCollisionMap(false);
     }
 
+    /// <summary>
+    ///     Moves the walk cycle on by the distance stepped rather than once a frame, so a slow
+    ///     analogue walk does not shuffle its feet on the spot. At the full step it moves on once a
+    ///     frame, as it always has, whether or not a wall stops the step.
+    /// </summary>
+    private void Stride(Animation walk, int step)
+    {
+        _strideWalked += step;
+
+        while (_strideWalked >= HorizontalSpeed)
+        {
+            walk.GetNextFrame();
+            _strideWalked -= HorizontalSpeed;
+        }
+    }
+
+    /// <summary>
+    ///     The sound of Blob's feet. At the full step it is asked for every frame and starts again
+    ///     whenever it finishes, as it always has. A slower analogue walk spaces the footfalls out by
+    ///     the distance the full step covers between them instead, so the feet slow down with Blob.
+    /// </summary>
+    private void PatterFeet(int step)
+    {
+        if (_shuttle.Riding || _fall.Height != 0)
+        {
+            return;
+        }
+
+        if (step == HorizontalSpeed)
+        {
+            _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobRun, true);
+
+            return;
+        }
+
+        if (_distanceToFootfall <= 0)
+        {
+            _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobRun, true);
+            _distanceToFootfall += FootfallSpacing;
+        }
+
+        _distanceToFootfall -= step;
+    }
+
     private void WalkLeft()
     {
         if (Control.MovedLeft())
         {
+            int step = Control.WalkStep(HorizontalSpeed, _xPos, true);
+
             if (_blobsLastAnimDirection == Direction.Right)
             {
                 _blobAnimLeft.CurrentFrame = BlobWalkFrames.TurningLeftFrom(Frame);
             }
             else
             {
-                _blobAnimLeft.GetNextFrame();
+                Stride(_blobAnimLeft, step);
             }
 
             int amountToMove = _gameScreens.Collisions.CheckCollision(Direction.Left, _xPos, _yPos,
-                Width, Height, HorizontalSpeed, true);
+                Width, Height, step, true);
             if (amountToMove > 0)
             {
                 _xPos -= amountToMove;
@@ -429,11 +487,7 @@ internal class Blob
             DirectionBlobMoved = Direction.Left;
             _blobsLastAnimDirection = Direction.Left;
 
-            if (!_shuttle.Riding && _fall.Height == 0)
-            {
-                _resources.GetSoundFxEngine()
-                    .PlaySound(Assets.Sounds.BlobRun, true);
-            }
+            PatterFeet(step);
         }
     }
 
@@ -441,17 +495,19 @@ internal class Blob
     {
         if (Control.MovedRight())
         {
+            int step = Control.WalkStep(HorizontalSpeed, _xPos, false);
+
             if (_blobsLastAnimDirection == Direction.Left)
             {
                 _blobAnimRight.CurrentFrame = BlobWalkFrames.TurningRightFrom(Frame);
             }
             else
             {
-                _blobAnimRight.GetNextFrame();
+                Stride(_blobAnimRight, step);
             }
 
             int amountToMove = _gameScreens.Collisions.CheckCollision(Direction.Right, _xPos, _yPos,
-                Width, Height, HorizontalSpeed, true);
+                Width, Height, step, true);
             if (amountToMove > 0)
             {
                 _xPos += amountToMove;
@@ -465,10 +521,7 @@ internal class Blob
             DirectionBlobMoved = Direction.Right;
             _blobsLastAnimDirection = Direction.Right;
 
-            if (!_shuttle.Riding && _fall.Height == 0)
-            {
-                _resources.GetSoundFxEngine().PlaySound(Assets.Sounds.BlobRun, true);
-            }
+            PatterFeet(step);
         }
     }
 
@@ -502,9 +555,7 @@ internal class Blob
 
     private void LayJumpPlatformOrJump()
     {
-        if (Control.MovedDown() &&
-            !Control.MovedLeft() &&
-            !Control.MovedRight())
+        if (Control.LaysPlatform())
         {
             if (!_jumpPressed)
             {
@@ -582,9 +633,7 @@ internal class Blob
             }
         }
 
-        if (Control.MovedUp() &&
-            !Control.MovedLeft() &&
-            !Control.MovedRight())
+        if (Control.SwapsInventory())
         {
             if (!_inventoryAccessed &&
                 !_lift.GoingUp &&
@@ -628,12 +677,12 @@ internal class Blob
 
     private void ReleaseHeldControls()
     {
-        if (!Control.MovedUp())
+        if (!Control.AskedForInventory())
         {
             _inventoryAccessed = false;
         }
 
-        if (!Control.MovedDown())
+        if (!Control.AskedForPlatform())
         {
             _jumpPressed = false;
         }

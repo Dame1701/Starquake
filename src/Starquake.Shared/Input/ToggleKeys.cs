@@ -24,8 +24,8 @@ internal class ToggleKeys
 {
     /// <summary>
     ///     The keys that do not count towards <see cref="AnyKeyPressed" />. These are the game's
-    ///     own: F5 takes a screenshot, F8 switches the graphics set, F10 the backdrops, F12 goes
-    ///     fullscreen, and <c>TestModeKeys</c> holds several more. Pressing one on a page that is
+    ///     own: F3 switches the analogue walk, F5 takes a screenshot, F8 switches the graphics set,
+    ///     F10 the backdrops, F12 goes fullscreen, and <c>TestModeKeys</c> holds several more. Pressing one on a page that is
     ///     waiting to be dismissed would do its own job and dismiss the page as well.
     /// </summary>
     /// <remarks>
@@ -38,8 +38,13 @@ internal class ToggleKeys
         Keys.F7, Keys.F8, Keys.F9, Keys.F10, Keys.F11, Keys.F12
     ];
 
+    /// <summary>How far the right trigger must be pulled to fire.</summary>
+    private const float TriggerThreshold = 0.5f;
+
     private Keys _heldKey = Keys.None;
     private Keys _toggledKey = Keys.None;
+
+    private bool _fireReleased;
 
     /// <summary>The keyboard and first gamepad as they were when this frame began.</summary>
     public KeyboardState KeyboardState { get; private set; }
@@ -47,19 +52,33 @@ internal class ToggleKeys
     /// <inheritdoc cref="KeyboardState" />
     public GamePadState GamePadState { get; private set; }
 
+    /// <summary>Whether the pad's fire is held: the A button, cross on a PlayStation pad, or the right trigger.</summary>
+    public bool PadFireHeld { get; private set; }
+
     /// <summary>The key released this frame, if exactly one was down and has just come up.</summary>
     public Keys GetPressedKey() => _toggledKey;
 
     /// <summary>
-    ///     Whether the player pressed something that a page waiting to be dismissed should act on.
-    ///     The reserved keys do not count; see <see cref="ReservedKeys" />.
+    ///     Whether the player pressed something that a page waiting to be dismissed should act on:
+    ///     a key, or the pad's fire button. The reserved keys do not count; see
+    ///     <see cref="ReservedKeys" />.
     /// </summary>
-    public bool AnyKeyPressed => _toggledKey != Keys.None && !ReservedKeys.Contains(_toggledKey);
+    /// <remarks>
+    ///     Fire counts when it comes back up, as a key does, so the press that dismisses one page is
+    ///     over before the next one starts reading.
+    /// </remarks>
+    public bool AnyKeyPressed =>
+        _toggledKey != Keys.None && !ReservedKeys.Contains(_toggledKey) || _fireReleased;
 
     public void Update()
     {
         KeyboardState = Keyboard.GetState();
         GamePadState = GamePad.GetState(PlayerIndex.One);
+
+        bool fireDown = GamePadState.Buttons.A == ButtonState.Pressed ||
+                        GamePadState.Triggers.Right > TriggerThreshold;
+        _fireReleased = PadFireHeld && !fireDown;
+        PadFireHeld = fireDown;
 
         _toggledKey = Keys.None;
 

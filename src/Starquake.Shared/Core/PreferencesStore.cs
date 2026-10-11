@@ -25,6 +25,7 @@ internal sealed class PreferencesStore
     private const string GraphicsKey = "Graphics";
     private const string BackdropsKey = "Backdrops";
     private const string HertzKey = "Hertz";
+    private const string AnalogueWalkKey = "AnalogueWalk";
 
     private const string Original = "Original";
     private const string Enhanced = "Enhanced";
@@ -91,6 +92,8 @@ internal sealed class PreferencesStore
                     => preferences with { Backdrops = value == On },
                 HertzKey when value is "50" or "60"
                     => preferences with { Hertz = new LogicRate(int.Parse(value)).Hertz },
+                AnalogueWalkKey when value is On or Off
+                    => preferences with { AnalogueWalk = value == On },
                 _ => preferences
             };
         }
@@ -119,7 +122,8 @@ internal sealed class PreferencesStore
                     $"{CrtKey}{Separator}{preferences.CrtMode}",
                     $"{GraphicsKey}{Separator}{(preferences.OriginalGraphics ? Original : Enhanced)}",
                     $"{BackdropsKey}{Separator}{(preferences.Backdrops ? On : Off)}",
-                    $"{HertzKey}{Separator}{preferences.Hertz}"
+                    $"{HertzKey}{Separator}{preferences.Hertz}",
+                    $"{AnalogueWalkKey}{Separator}{(preferences.AnalogueWalk ? On : Off)}"
                 ]);
             File.Move(temporaryPath, _path, true);
         }

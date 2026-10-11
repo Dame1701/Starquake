@@ -29,7 +29,8 @@ Energy, laser charge and bridges are all expendable and all replenishable if you
 ## Playing
 
 Movement is digital: cursor keys by default, with **Left Alt** to fire. A connected gamepad works
-too — d-pad or left stick, **A** to fire.
+too — d-pad or left stick, **A** or the right trigger to fire, **B** (circle on a PlayStation pad) to lay a platform and **X** (square) to swap with the
+inventory.
 
 The options screen offers four schemes: joypad only, cursor keys with Left Alt, the original
 Spectrum layout (**Q A O P** and **Space**), or define all seven keys yourself. Pause and quit come
@@ -39,6 +40,7 @@ These work everywhere, in both debug and release builds:
 
 | Key | |
 | --- | --- |
+| `F3` | Analogue walk on or off: how far the left stick leans sets Blob's walking speed |
 | `F5` | Save a screenshot |
 | `F8` | Swap between the redrawn artwork and the original 1985 graphics |
 | `F9` | Step the CRT filter: off → scanlines → phosphor grille → bowed tube |

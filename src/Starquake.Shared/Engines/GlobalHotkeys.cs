@@ -16,7 +16,8 @@ namespace Starquake.Engines;
 
 /// <summary>
 ///     The keys that work anywhere in the game rather than belonging to a screen: pause,
-///     fullscreen, the backdrops, the artwork swap, the game's speed, a screenshot and quit. The
+///     fullscreen, the backdrops, the artwork swap, the game's speed, the analogue walk, a
+///     screenshot and quit. The
 ///     ones that change how the game looks or runs say so through <see cref="ModeAnnouncement" />,
 ///     because otherwise the only way to know which way a toggle has just gone is to recognise the
 ///     result, and they ask for the preferences to be saved so the next run starts the same way.
@@ -49,6 +50,7 @@ internal class GlobalHotkeys(
         ToggleBackgroundsIfAsked();
         SwitchGraphicsSetIfAsked();
         SwitchLogicRateIfAsked();
+        ToggleAnalogueWalkIfAsked();
         TakeScreenshotIfAsked();
         QuitIfAsked();
     }
@@ -227,6 +229,23 @@ internal class GlobalHotkeys(
         logicRate.Switch();
 
         announce.Show(logicRate.Name);
+        preferencesChanged();
+    }
+
+    /// <summary>
+    ///     F3 switches whether the left stick's lean sets how fast Blob walks. See
+    ///     <see cref="AnalogueWalk" />.
+    /// </summary>
+    private void ToggleAnalogueWalkIfAsked()
+    {
+        if (input.GetPressedKey() != Keys.F3)
+        {
+            return;
+        }
+
+        session.AnalogueWalk = !session.AnalogueWalk;
+
+        announce.Show(session.AnalogueWalk ? "ANALOGUE WALK ON" : "ANALOGUE WALK OFF");
         preferencesChanged();
     }
 

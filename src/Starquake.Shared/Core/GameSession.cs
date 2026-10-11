@@ -66,6 +66,12 @@ internal sealed class GameSession
     }
 
     /// <summary>
+    ///     Whether how far the left stick leans sets how fast Blob walks. F3 switches it, and it is
+    ///     off unless the player has switched it on. See <c>AnalogueWalk</c>.
+    /// </summary>
+    public bool AnalogueWalk { get; set; }
+
+    /// <summary>
     ///     Raised when <see cref="Paused" /> is set, with the value it was set to. The engine answers
     ///     by stopping and restarting the periodic background sounds.
     /// </summary>

@@ -193,6 +193,9 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
 
         DefineContent();
         Initialise();
+
+        // Here rather than in ApplyPreferences, which runs before Initialise has built the session.
+        Session.AnalogueWalk = savedPreferences.AnalogueWalk;
     }
 
     /// <summary>
@@ -411,7 +414,8 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         Presentation.CrtMode,
         _graphicsSet.IsOriginal,
         Presentation.DrawBackgrounds,
-        _logicRate.Hertz));
+        _logicRate.Hertz,
+        Session.AnalogueWalk));
 
     /// <summary>
     ///     The artwork has just been swapped, so whatever is drawing has to pick up the new sheets.

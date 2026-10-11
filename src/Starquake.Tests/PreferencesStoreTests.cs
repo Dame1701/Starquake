@@ -39,7 +39,7 @@ public sealed class PreferencesStoreTests : IDisposable
     public void PreferencesWritten_AreReadBackTheNextTimeTheGameStarts()
     {
         // Arrange
-        var written = new Preferences(CrtMode.Tube, true, false, LogicRate.Ntsc);
+        var written = new Preferences(CrtMode.Tube, true, false, LogicRate.Ntsc, true);
 
         // Act
         new PreferencesStore(PreferencesFilePath).Write(written);
