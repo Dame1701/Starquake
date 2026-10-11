@@ -29,7 +29,7 @@
                 <Variation>3.14</Variation>
             </ReleaseRotation>
             <ReleaseImpulse>0 0</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\Particle004</ParticleTextureAssetName>
+            <ParticleTextureAssetName>Graphics\Enhanced\Textures\Particle004</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="ProjectMercury.Modifiers.OpacityModifier">
                     <Initial>0.1</Initial>
@@ -81,7 +81,7 @@
                 <Variation>3.14</Variation>
             </ReleaseRotation>
             <ReleaseImpulse>0 0</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\Cloud004</ParticleTextureAssetName>
+            <ParticleTextureAssetName>Graphics\Enhanced\Textures\Cloud004</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="ProjectMercury.Modifiers.OpacityInterpolatorModifier">
                     <InitialOpacity>0</InitialOpacity>

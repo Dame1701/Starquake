@@ -29,7 +29,7 @@
                 <Variation>0</Variation>
             </ReleaseRotation>
             <ReleaseImpulse>0 0</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\Cloud001</ParticleTextureAssetName>
+            <ParticleTextureAssetName>Graphics\Enhanced\Textures\Cloud001</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="Modifiers:OpacityModifier">
                     <Initial>0.2</Initial>
@@ -85,7 +85,7 @@
                 <Variation>3.14</Variation>
             </ReleaseRotation>
             <ReleaseImpulse>0 0</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\Particle004</ParticleTextureAssetName>
+            <ParticleTextureAssetName>Graphics\Enhanced\Textures\Particle004</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="Modifiers:OpacityModifier">
                     <Initial>0.9</Initial>
@@ -132,7 +132,7 @@
                 <Variation>0</Variation>
             </ReleaseRotation>
             <ReleaseImpulse>0 0</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\Particle005</ParticleTextureAssetName>
+            <ParticleTextureAssetName>Graphics\Enhanced\Textures\Particle005</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="Modifiers:OpacityModifier">
                     <Initial>1</Initial>
@@ -173,7 +173,7 @@
                 <Variation>0</Variation>
             </ReleaseRotation>
             <ReleaseImpulse>0 0</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\Particle005</ParticleTextureAssetName>
+            <ParticleTextureAssetName>Graphics\Enhanced\Textures\Particle005</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="Modifiers:OpacityModifier">
                     <Initial>1</Initial>

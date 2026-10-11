@@ -207,16 +207,13 @@ internal static class ContentManifest
         resources.AddParticleResource(Assets.Effects.BeamMeUpSmall, "ParticleEffects\\BeamMeUp_Small");
         resources.AddParticleResource(Assets.Effects.FireTrail, "ParticleEffects\\FireTrail");
 
-        resources.AddParticleResource(Assets.Effects.Fireball, "ParticleEffects\\Fireball");
         resources.AddParticleResource(Assets.Effects.NastyDies, "ParticleEffects\\NastyDies");
         resources.AddParticleResource(Assets.Effects.NastySplat, "ParticleEffects\\NastySplat");
 
         resources.AddParticleResource(Assets.Effects.BinaryEffect, "ParticleEffects\\BinaryEffect");
-        resources.AddParticleResource(Assets.Effects.BasicSmokeSmall, "ParticleEffects\\BasicSmokeSmall");
 
         resources.AddParticleResource(Assets.Effects.BasicSmokePlume, "ParticleEffects\\BasicSmokePlume");
         resources.AddParticleResource(Assets.Effects.BasicSmokePlume2, "ParticleEffects\\BasicSmokePlume2");
-        resources.AddParticleResource(Assets.Effects.Sparks, "ParticleEffects\\Sparks");
 
         resources.AddParticleResource(Assets.Effects.CoreSparks, "ParticleEffects\\CoreSparks");
         resources.AddParticleResource(Assets.Effects.CoreReplacementParticleEffect, "ParticleEffects\\CoreReplacementParticleEffect");

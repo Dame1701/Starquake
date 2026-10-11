@@ -29,7 +29,7 @@
                 <Variation>3.14</Variation>
             </ReleaseRotation>
             <ReleaseImpulse>0 0</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\Cloud001</ParticleTextureAssetName>
+            <ParticleTextureAssetName>Graphics\Enhanced\Textures\Cloud001</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="Modifiers:DampingModifier">
                     <DampingCoefficient>0.95</DampingCoefficient>
@@ -85,7 +85,7 @@
                 <Variation>3.14</Variation>
             </ReleaseRotation>
             <ReleaseImpulse>0 0</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\Cloud001</ParticleTextureAssetName>
+            <ParticleTextureAssetName>Graphics\Enhanced\Textures\Cloud001</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="Modifiers:DampingModifier">
                     <DampingCoefficient>0.95</DampingCoefficient>

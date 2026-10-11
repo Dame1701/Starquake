@@ -241,7 +241,7 @@
                 <Variation>0</Variation>
             </ReleaseRotation>
             <ReleaseImpulse>0 0</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\CoreElementTexture1</ParticleTextureAssetName>
+            <ParticleTextureAssetName>Graphics\Enhanced\Textures\CoreElementTexture1</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="Modifiers:OpacityInterpolatorModifier">
                     <InitialOpacity>0.2</InitialOpacity>
@@ -281,7 +281,7 @@
                 <Variation>0</Variation>
             </ReleaseRotation>
             <ReleaseImpulse>0 0</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\CoreElementTexture2</ParticleTextureAssetName>
+            <ParticleTextureAssetName>Graphics\Enhanced\Textures\CoreElementTexture2</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="Modifiers:OpacityInterpolatorModifier">
                     <InitialOpacity>0.2</InitialOpacity>
@@ -321,7 +321,7 @@
                 <Variation>0</Variation>
             </ReleaseRotation>
             <ReleaseImpulse>0 0</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\CoreElementTexture3</ParticleTextureAssetName>
+            <ParticleTextureAssetName>Graphics\Enhanced\Textures\CoreElementTexture3</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="Modifiers:OpacityInterpolatorModifier">
                     <InitialOpacity>0.2</InitialOpacity>
@@ -361,7 +361,7 @@
                 <Variation>0</Variation>
             </ReleaseRotation>
             <ReleaseImpulse>0 0</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\CoreElementTexture5</ParticleTextureAssetName>
+            <ParticleTextureAssetName>Graphics\Enhanced\Textures\CoreElementTexture5</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="Modifiers:OpacityInterpolatorModifier">
                     <InitialOpacity>0.2</InitialOpacity>
@@ -401,7 +401,7 @@
                 <Variation>0</Variation>
             </ReleaseRotation>
             <ReleaseImpulse>0 0</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\CoreElementTexture6</ParticleTextureAssetName>
+            <ParticleTextureAssetName>Graphics\Enhanced\Textures\CoreElementTexture6</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="Modifiers:OpacityInterpolatorModifier">
                     <InitialOpacity>0.2</InitialOpacity>
@@ -441,7 +441,7 @@
                 <Variation>0</Variation>
             </ReleaseRotation>
             <ReleaseImpulse>0 0</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\CoreElementTexture4</ParticleTextureAssetName>
+            <ParticleTextureAssetName>Graphics\Enhanced\Textures\CoreElementTexture4</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="Modifiers:OpacityInterpolatorModifier">
                     <InitialOpacity>0.2</InitialOpacity>

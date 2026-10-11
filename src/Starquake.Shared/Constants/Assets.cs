@@ -124,14 +124,11 @@ internal static class Assets
     {
         public const string BeamMeUpSmall = "BeamMeUp_Small";
         public const string FireTrail = "FireTrail";
-        public const string Fireball = "Fireball";
         public const string NastyDies = "NastyDies";
         public const string NastySplat = "NastySplat";
         public const string BinaryEffect = "BinaryEffect";
-        public const string BasicSmokeSmall = "BasicSmokeSmall";
         public const string BasicSmokePlume = "BasicSmokePlume";
         public const string BasicSmokePlume2 = "BasicSmokePlume2";
-        public const string Sparks = "Sparks";
         public const string CoreSparks = "CoreSparks";
         public const string CoreReplacementParticleEffect = "CoreReplacementParticleEffect";
         public const string FireSparks = "FireSparks";

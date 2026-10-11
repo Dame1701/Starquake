@@ -29,7 +29,7 @@
                 <Variation>0</Variation>
             </ReleaseRotation>
             <ReleaseImpulse>0 0</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\LensFlare</ParticleTextureAssetName>
+            <ParticleTextureAssetName>Graphics\Enhanced\Textures\LensFlare</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="Modifiers:LinearGravityModifier">
                     <Gravity>0 -150</Gravity>
@@ -82,7 +82,7 @@
                 <Variation>0</Variation>
             </ReleaseRotation>
             <ReleaseImpulse>0 -50</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\Beam</ParticleTextureAssetName>
+            <ParticleTextureAssetName>Graphics\Enhanced\Textures\Beam</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="Modifiers:OpacityInterpolatorModifier">
                     <InitialOpacity>0</InitialOpacity>
@@ -126,7 +126,7 @@
                 <Variation>0</Variation>
             </ReleaseRotation>
             <ReleaseImpulse>0 -25</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\BeamBlurred</ParticleTextureAssetName>
+            <ParticleTextureAssetName>Graphics\Enhanced\Textures\BeamBlurred</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="Modifiers:OpacityInterpolatorModifier">
                     <InitialOpacity>0</InitialOpacity>

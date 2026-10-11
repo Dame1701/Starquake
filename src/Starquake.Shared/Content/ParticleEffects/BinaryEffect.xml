@@ -29,7 +29,7 @@
                 <Variation>0</Variation>
             </ReleaseRotation>
             <ReleaseImpulse>10 10</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\BinaryTexture2</ParticleTextureAssetName>
+            <ParticleTextureAssetName>Graphics\Enhanced\Textures\BinaryTexture2</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="Modifiers:OpacityInterpolatorModifier">
                     <InitialOpacity>0</InitialOpacity>
@@ -73,7 +73,7 @@
                 <Variation>0</Variation>
             </ReleaseRotation>
             <ReleaseImpulse>0 0</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\BinaryTexture1</ParticleTextureAssetName>
+            <ParticleTextureAssetName>Graphics\Enhanced\Textures\BinaryTexture1</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="Modifiers:OpacityInterpolatorModifier">
                     <InitialOpacity>0</InitialOpacity>

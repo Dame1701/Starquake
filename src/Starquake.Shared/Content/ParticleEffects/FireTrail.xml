@@ -29,7 +29,7 @@
                 <Variation>3.14</Variation>
             </ReleaseRotation>
             <ReleaseImpulse>10 0</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\LensFlare</ParticleTextureAssetName>
+            <ParticleTextureAssetName>Graphics\Enhanced\Textures\LensFlare</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="Modifiers:DampingModifier">
                     <DampingCoefficient>-8</DampingCoefficient>
@@ -79,7 +79,7 @@
                 <Variation>3.14</Variation>
             </ReleaseRotation>
             <ReleaseImpulse>50 20</ReleaseImpulse>
-            <ParticleTextureAssetName>Textures\LensFlare</ParticleTextureAssetName>
+            <ParticleTextureAssetName>Graphics\Enhanced\Textures\LensFlare</ParticleTextureAssetName>
             <Modifiers>
                 <Item Type="Modifiers:DampingModifier">
                     <DampingCoefficient>-8</DampingCoefficient>
