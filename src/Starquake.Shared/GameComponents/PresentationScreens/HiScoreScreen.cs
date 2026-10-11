@@ -18,6 +18,15 @@ namespace Starquake.GameComponents.PresentationScreens;
 
 internal class HiScoreScreen : GameScreenBase, IGameScreen
 {
+    /// <summary>The most letters a name in the table can have, each shown as a slot while it is typed.</summary>
+    private const int NameLength = 6;
+
+    /// <summary>
+    ///     How far apart the name's slots sit, the same pitch as the teleporter's code so a letter
+    ///     lands in place over its underscore rather than pushing the rest along.
+    /// </summary>
+    private const int NameSlotPitch = 50;
+
     private readonly SpriteCollection _backgroundImage;
     private readonly SpriteCollection _foregroundImage;
 
@@ -75,16 +84,16 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
                 string keyPressedString = Input.GetPressedKey().ToString().ToUpper();
                 int keyPressed = AsciiCodes.GetAsciiCode(keyPressedString);
 
-                if (_playersHighScore.Name.Length < 6)
+                if (_playersHighScore.Name.Length < NameLength)
                 {
                     if (keyPressed is > 64 and < 91)
                     {
-                        _playersHighScore.Name += keyPressedString;
+                        TypeIntoName(keyPressedString);
                     }
 
                     if (Input.GetPressedKey() == Keys.Space)
                     {
-                        _playersHighScore.Name += " ";
+                        TypeIntoName(" ");
                     }
                 }
 
@@ -107,6 +116,7 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
                     if (_playersHighScore.Name.Length > 0)
                     {
                         _playersHighScore.Name = _playersHighScore.Name.Substring(0, _playersHighScore.Name.Length - 1);
+                        PlayKeyClick();
                     }
                 }
             }
@@ -133,7 +143,7 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
             Font.WriteTextCentred(1280, 300, "FOR YOU HAVE ACHIEVED", 2, Colours.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full), (byte)ScreenFade);
             Font.WriteTextCentred(1280, 360, "A HERO'S SCORE", 2, Colours.GetXna4Colour(ColourLevels.Full, ColourLevels.Full, ColourLevels.Full), (byte)ScreenFade);
 
-            Font.WriteTextCentred(1280, 420, _playersHighScore.Name, 2, Colours.GetXna4Colour(9, 132, ColourLevels.Full), (byte)ScreenFade);
+            DrawEnteredName();
             Font.End();
         }
         else
@@ -150,6 +160,33 @@ internal class HiScoreScreen : GameScreenBase, IGameScreen
         _foregroundImage.DrawSprite(0, 230, 120, Colours.WhiteFadedTo((byte)ScreenFade));
 
         _foregroundImage.End();
+    }
+
+    private void TypeIntoName(string letter)
+    {
+        _playersHighScore.Name += letter;
+        PlayKeyClick();
+    }
+
+    private void PlayKeyClick()
+    {
+        Resources.GetSoundFxEngine().PlaySound(Assets.Sounds.TeleportKeyClick, 0.5f, false);
+    }
+
+    /// <summary>
+    ///     The name as typed so far, one underscore per letter still free, laid out in fixed slots
+    ///     like the teleporter's code. Drawn between the font's Begin and End.
+    /// </summary>
+    private void DrawEnteredName()
+    {
+        int slotX = (1280 - NameLength * NameSlotPitch) / 2;
+        string paddedName = _playersHighScore.Name.PadRight(NameLength, '_');
+
+        foreach (char letter in paddedName)
+        {
+            Font.WriteText(slotX, 420, letter.ToString(), 2, Colours.GetXna4Colour(9, 132, ColourLevels.Full), (byte)ScreenFade);
+            slotX += NameSlotPitch;
+        }
     }
 
     /// <summary>
