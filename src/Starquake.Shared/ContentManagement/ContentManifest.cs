@@ -275,6 +275,8 @@ internal static class ContentManifest
         resources.AddSoundResource(Assets.Sounds.LifePowerUp, "Sounds\\LifePowerUp", SoundEffectInstanceType.Multi, 2, false);
 
         resources.AddSoundResource(Assets.Sounds.BackgroundSound1, "Sounds\\BackgroundSound1", SoundEffectInstanceType.Single, 0, false);
+        resources.AddSoundResource(Assets.Sounds.CoreSounds, "Sounds\\CoreSounds", SoundEffectInstanceType.Single, 0, true);
+        resources.AddSoundResource(Assets.Sounds.CoreSoundsSecondVoice, "Sounds\\CoreSounds", SoundEffectInstanceType.Single, 0, true);
     }
 
     /// <summary>

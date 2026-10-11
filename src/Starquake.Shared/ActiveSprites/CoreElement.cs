@@ -104,6 +104,14 @@ internal class CoreElement
 
     public CoreElementState ElementState { get; set; }
 
+    /// <summary>
+    ///     How far a missing element is showing the passed colour over the failed one, from minus
+    ///     one to one. Nought once it is no longer flashing. The core room's sound bends with it.
+    /// </summary>
+    public float Flash => ElementState == CoreElementState.Missing
+        ? (_fader3.FadeLevel - _fader2.FadeLevel) / (float)ColourLevels.Full
+        : 0f;
+
     public int CurrentElement { get; }
 
     private int FinalElement { get; }

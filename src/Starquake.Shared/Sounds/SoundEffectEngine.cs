@@ -271,6 +271,26 @@ internal class SoundEffectEngine(ContentManager content) : IDisposable
         }
     }
 
+    /// <summary>
+    ///     Sets how far off true a sound that may only play once at a time plays, and which speaker
+    ///     it is in. Does nothing to any other sound. The volume is left to <c>PlaySound</c> and
+    ///     <see cref="StopSound" />, which keep their own account of it for fading.
+    /// </summary>
+    /// <param name="id">The sound, as <c>PlaySound</c> returned it.</param>
+    /// <param name="pitch">Minus one an octave down, one an octave up.</param>
+    /// <param name="pan">Minus one for the left speaker, one for the right.</param>
+    public void Bend(Guid id, float pitch, float pan)
+    {
+        SoundEffectInstanceRecord? record = _singleInstanceSoundEffectInstances.FirstOrDefault(sfx => sfx.Id == id);
+        if (record == null)
+        {
+            return;
+        }
+
+        record.SoundInstance.Pitch = pitch;
+        record.SoundInstance.Pan = pan;
+    }
+
     public Guid PlaySound(string soundName, bool looped) => PlaySound(soundName, 1F, looped);
 
     public Guid PlaySound(string soundName, float volume) => PlaySound(soundName, volume, false);

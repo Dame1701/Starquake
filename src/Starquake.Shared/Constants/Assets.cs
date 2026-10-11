@@ -172,6 +172,13 @@ internal static class Assets
         public const string PowerUp3 = "PowerUp3";
         public const string LifePowerUp = "LifePowerUp";
         public const string BackgroundSound1 = "BackgroundSound1";
+        public const string CoreSounds = "CoreSounds";
+
+        /// <summary>
+        ///     The same recording as <see cref="CoreSounds" />, on an instance of its own so the two
+        ///     can play together. See <c>CoreSoundSettings</c>.
+        /// </summary>
+        public const string CoreSoundsSecondVoice = "CoreSoundsSecondVoice";
     }
 
     /// <summary>

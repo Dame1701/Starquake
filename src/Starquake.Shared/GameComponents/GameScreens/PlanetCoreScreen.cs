@@ -13,6 +13,7 @@ using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Particles;
 using Starquake.SharedLibs;
+using Starquake.Sounds;
 using Starquake.Sprites;
 using Starquake.Tuning;
 using Starquake.World;
@@ -79,6 +80,13 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
     /// <summary>What the status panel is told when no part is being drawn out of Blob's hands.</summary>
     private const int NoSlotIdentified = -1;
+
+    /// <summary>
+    ///     The two copies of the core room's loop, each on its own instance so they can be tuned and
+    ///     placed apart. See <see cref="CoreSoundSettings" />.
+    /// </summary>
+    private static readonly string[] CoreSoundVoices =
+        [Assets.Sounds.CoreSounds, Assets.Sounds.CoreSoundsSecondVoice];
     private readonly Blob _blob;
 
     private readonly List<Nasty> _coreAliens;
@@ -146,6 +154,9 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     private bool _justEnteredCore = true;
 
     private bool _replacingElements;
+
+    /// <summary>The copies of the core room's loop, held so they can be bent and silenced.</summary>
+    private readonly Guid[] _coreSoundIds = new Guid[CoreSoundSettings.Voices];
 
 
     public PlanetCoreScreen(
@@ -263,6 +274,8 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
             _blankingTilesOpacity = Ramp.Down(_blankingTilesOpacity, BlankingTilesFadeStep, ColourLevels.None);
         }
 
+        PlayCoreSoundsUnlessReplacing();
+
         if (!_replacingElements && _entryTime > CoreVisitFrames)
         {
             LeaveTheCoreRoom();
@@ -312,6 +325,44 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
         _elements.Draw(core.X, core.Y);
 
         DrawBeamsAcrossTheElements(core);
+    }
+
+    /// <summary>
+    ///     Loops the core room's sound while the room is idling, its elements flashing and its
+    ///     guardians bounding about, and silences it while parts are going in. Asked for every frame,
+    ///     which a looped sound shrugs off, so it comes back by itself once the last part has landed.
+    ///     Leaving the room takes it down with the rest of the screen's sounds.
+    /// </summary>
+    /// <remarks>
+    ///     Placed, tuned and bent afresh each frame, off the same frame count the funnel turns by and
+    ///     the same faders the elements flash with. See <see cref="CoreSoundSettings" />.
+    /// </remarks>
+    private void PlayCoreSoundsUnlessReplacing()
+    {
+        SoundEffectEngine sounds = _resources.GetSoundFxEngine();
+
+        if (_replacingElements)
+        {
+            foreach (Guid id in _coreSoundIds)
+            {
+                sounds.StopSound(id, SoundFade.Fast);
+            }
+            return;
+        }
+
+        float flashSwing = CoreSoundSettings.FlashSwing(
+            _elements.GetActiveElements().Select(element => element.Flash).ToList());
+
+        for (int voice = 0; voice < CoreSoundSettings.Voices; voice++)
+        {
+            _coreSoundIds[voice] = sounds.PlaySound(
+                CoreSoundVoices[voice], CoreSoundSettings.VolumeOf(voice, _coreFrame), true);
+
+            sounds.Bend(
+                _coreSoundIds[voice],
+                CoreSoundSettings.PitchOf(voice, flashSwing),
+                CoreSoundSettings.PanOf(voice, _coreFrame));
+        }
     }
 
     /// <summary>
@@ -582,6 +633,13 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     /// <summary>The core is whole again, which is the end of the game.</summary>
     private void CompleteTheGame()
     {
+        // The game complete screen is not a change of screen as far as the sounds are concerned,
+        // so the core's loop would carry on under its music.
+        foreach (Guid id in _coreSoundIds)
+        {
+            _resources.GetSoundFxEngine().StopSound(id, SoundFade.None);
+        }
+
         _screenDirectory.Current = GameScreenType.GameComplete;
         _screenDirectory.GameComplete.PerformPostScreenChangeActions();
     }

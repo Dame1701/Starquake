@@ -1253,6 +1253,12 @@
 /processorParam:Quality=Best
 /build:Sounds/BridgeBreak.wav
 
+#begin Sounds/CoreSounds.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/CoreSounds.wav
+
 #begin Sounds/ElectricityNodes.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
