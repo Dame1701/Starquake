@@ -6,7 +6,6 @@ using Microsoft.Xna.Framework.Input;
 using Starquake.ActiveSprites;
 using Starquake.Constants;
 using Starquake.Core;
-using Starquake.Engines.ScreenEffects;
 using Starquake.GameComponents;
 using Starquake.Input;
 using Starquake.Scoring;
@@ -15,8 +14,8 @@ using Starquake.World;
 namespace Starquake.Engines;
 
 /// <summary>
-///     The debug keys: F1 kills Blob, F2 refills his lives, F3 runs the fade effect, F4 hands him
-///     a core element the core is still missing, F7 hands him the key and the access card, and the
+///     The debug keys: F1 kills Blob, F2 refills his lives, F4 hands him a core
+///     element the core is still missing, F7 hands him the key and the access card, and the
 ///     numeric keypad steps between screens.
 /// </summary>
 /// <remarks>
@@ -33,7 +32,6 @@ internal class TestModeKeys(
     ToggleKeys input,
     Blob player,
     PlayerStats stats,
-    ScreenEffectEngine screenEffects,
     ScreenDirectory screenDirectory,
     GameScreenCollection gameScreens,
     CoreElements coreElements)
@@ -69,11 +67,6 @@ internal class TestModeKeys(
         {
             stats.BlobLives = TestModeLivesRestored;
             player.State = BlobState.Dead;
-        }
-
-        if (input.GetPressedKey() == Keys.F3)
-        {
-            screenEffects.ExecuteScreenEffect(ScreenEffectType.AdditiveFade, -1, 50, false);
         }
 
         if (input.GetPressedKey() == Keys.F4)

@@ -6,7 +6,6 @@ namespace Starquake.Core;
 
 internal enum ScreenEffectType
 {
-    AdditiveFade,
     LeftTunnelEntry,
     RightTunnelEntry,
 

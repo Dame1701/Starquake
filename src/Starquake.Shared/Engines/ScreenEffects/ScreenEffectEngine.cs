@@ -39,7 +39,6 @@ internal class ScreenEffectEngine
 
         _screenEffects.Add(new LeftTunnelEntryEffect(outgoingScreen, presentation, resources));
         _screenEffects.Add(new RightTunnelEntryEffect(outgoingScreen, presentation, resources));
-        _screenEffects.Add(new AdditiveFade(presentation));
         _screenEffects.Add(new TeleportArrivalEffect(presentation, resources));
         _screenEffects.Add(new CoreSurgeEffect(presentation, resources));
         _screenEffects.Add(new WaterEffect(presentation, resources));

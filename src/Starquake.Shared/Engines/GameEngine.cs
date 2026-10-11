@@ -807,7 +807,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     [Conditional("DEBUG")]
     private void BuildTestModeKeys()
         => _testModeKeys = new TestModeKeys(
-            Input, Player, Stats, ScreenEffectEngine, ScreenDirectory, GameScreens, Elements);
+            Input, Player, Stats, ScreenDirectory, GameScreens, Elements);
 
     private void UpdateActiveScreen(GameTime gameTime)
     {
