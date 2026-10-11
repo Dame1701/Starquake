@@ -183,7 +183,6 @@ internal static class ContentManifest
         resources.AddSpriteResource(Assets.Graphics.JumpBar, "Graphics\\JumpBar", 240, 30);
         resources.AddSpriteResource(Assets.Graphics.AmmoBar, "Graphics\\AmmoBar", 240, 30);
         resources.AddSpriteResource(Assets.Graphics.PanelNumbers, "Graphics\\PanelNumbers", 29, 29);
-        resources.AddSpriteResource(Assets.Graphics.StatusPanelShadow, "Graphics\\StatusPanelShadow", 1020, 50);
         resources.AddSpriteResource(Assets.Graphics.StatusPanelOverlay, "Graphics\\StatusPanelOverlay", 966, 135);
 
         resources.AddSpriteResource(Assets.Graphics.ParticleSprite, "Graphics\\BouncingParticle", 32, 32);

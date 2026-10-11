@@ -1013,18 +1013,6 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/StatusPanelOverlay.png
 
-#begin Graphics/StatusPanelShadow.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/StatusPanelShadow.png
-
 #begin Graphics/TeleportDistort.png
 /importer:TextureImporter
 /processor:TextureProcessor

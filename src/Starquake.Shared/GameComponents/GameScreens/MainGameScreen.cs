@@ -205,11 +205,6 @@ internal class MainGameScreen : IGameScreen
 
             DrawShipSmoke1();
 
-            if (GameIsInPlay)
-            {
-                _game.GameScreens.Renderer.DrawShadowing();
-            }
-
             // Last, so Blob's sparks are in front of the shadows down the screen exits rather than
             // behind them.
             _game.Player.DrawUpper(ScreenFade);

@@ -708,15 +708,4 @@ internal class ScreenRenderer
 
         _keyDoorForceField.Draw();
     }
-
-    public void DrawShadowing()
-    {
-        if (_graphicsSet.IsRedrawn)
-        {
-            SpriteCollection statusPanelShadow = _resources.GetSpriteCollection(Assets.Graphics.StatusPanelShadow);
-            statusPanelShadow.Begin(BlendState.AlphaBlend);
-            statusPanelShadow.DrawSprite(0, 0, 0, Color.White);
-            statusPanelShadow.End();
-        }
-    }
 }

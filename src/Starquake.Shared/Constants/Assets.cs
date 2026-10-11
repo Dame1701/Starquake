@@ -104,7 +104,6 @@ internal static class Assets
         public const string JumpBar = "JumpBar";
         public const string AmmoBar = "AmmoBar";
         public const string PanelNumbers = "PanelNumbers";
-        public const string StatusPanelShadow = "StatusPanelShadow";
         public const string StatusPanelOverlay = "StatusPanelOverlay";
 
         /// <summary>
