@@ -58,6 +58,15 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     private readonly GraphicsSet _graphicsSet = new();
 
     /// <summary>
+    ///     How fast the game runs. The host's, which paces itself from it; held here only so F11 can
+    ///     switch it and the preferences can record it.
+    /// </summary>
+    private readonly LogicRate _logicRate;
+
+    /// <summary>Where the settings the function keys change are kept between runs.</summary>
+    private readonly PreferencesStore _preferencesStore;
+
+    /// <summary>
     ///     Closes the game. The host's <c>Exit</c>, held only to hand to
     ///     <see cref="GlobalHotkeys" />, because ending the process is the host's job rather than the
     ///     engine's.
@@ -159,13 +168,20 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         ContentManager content,
         ToggleKeys input,
         GameWindow window,
+        LogicRate logicRate,
+        Preferences savedPreferences,
+        PreferencesStore preferencesStore,
         Action quitGame)
     {
         Input = input;
         _graphicsDeviceMgr = graphics;
         _contentMgr = content;
         _window = window;
+        _logicRate = logicRate;
+        _preferencesStore = preferencesStore;
         _quitGame = quitGame;
+
+        ApplyPreferences(savedPreferences);
 
         // The one generator the game logic draws from, so a game can be reproduced from its seed.
         // The sound engine deliberately does not get it: its only draw happens on a thread pool
@@ -336,7 +352,9 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             ContentResourceManager,
             _announcement,
             _screenshots,
+            _logicRate,
             ArtworkSwapped,
+            SavePreferences,
             _quitGame);
 
         Elements = new CoreElements(Stats, ContentResourceManager, _graphicsSet, RandomNumberGenerator);
@@ -368,6 +386,32 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
 
         ContentManifest.RegisterAll(ContentResourceManager);
     }
+
+    /// <summary>
+    ///     Puts the game back the way the player left it. Called before anything is loaded or drawn,
+    ///     so the artwork is chosen before the first sheet is asked for rather than swapped under it.
+    ///     The rate needs nothing here: the host built it from the same preferences.
+    /// </summary>
+    private void ApplyPreferences(Preferences preferences)
+    {
+        if (preferences.OriginalGraphics != _graphicsSet.IsOriginal)
+        {
+            _graphicsSet.Switch();
+        }
+
+        Presentation.CrtMode = preferences.CrtMode;
+        Presentation.DrawBackgrounds = preferences.Backdrops;
+    }
+
+    /// <summary>
+    ///     Writes down the settings the function keys change, as they stand. Called by whichever key
+    ///     has just changed one, so the file is always what the player last chose.
+    /// </summary>
+    private void SavePreferences() => _preferencesStore.Write(new Preferences(
+        Presentation.CrtMode,
+        _graphicsSet.IsOriginal,
+        Presentation.DrawBackgrounds,
+        _logicRate.Hertz));
 
     /// <summary>
     ///     The artwork has just been swapped, so whatever is drawing has to pick up the new sheets.
@@ -743,6 +787,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             Presentation.CrtMode = CrtSettings.Next(Presentation.CrtMode);
 
             _announcement.Show(CrtSettings.NameOf(Presentation.CrtMode));
+            SavePreferences();
         }
 
         // Stepped here rather than in UpdateRunningGame, so the message also fades on the menus. F9

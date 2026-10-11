@@ -17,9 +17,10 @@ namespace Starquake.Constants;
 internal static class LogicClock
 {
     /// <summary>
-    ///     How many logic frames make a second. 50 is the PAL rate the original was written for and
-    ///     what the game runs at; 60 is NTSC and 20% faster. <c>GameHost</c> paces itself from this
-    ///     and is the only thing that may change it.
+    ///     How many logic frames make a second of game time. 50 is the PAL rate the original was
+    ///     written for. F11 can have <c>GameHost</c> run them at sixty a real second instead, the
+    ///     NTSC speed, which runs the whole game 20% fast without changing this. See
+    ///     <c>LogicRate</c>.
     /// </summary>
     public const int FramesPerSecond = 50;
 

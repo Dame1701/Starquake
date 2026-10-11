@@ -7,8 +7,8 @@ using System.Globalization;
 namespace Starquake.Scoring;
 
 /// <summary>
-///     Where the hi-score table is kept between runs, and the only part of the game that reads or
-///     writes a file of its own.
+///     Where the hi-score table is kept between runs. <c>PreferencesStore</c> keeps the function
+///     keys' settings beside it.
 /// </summary>
 /// <remarks>
 ///     One line per place: <c>name</c>, <c>score</c> and <c>adventure score</c> separated by tabs.

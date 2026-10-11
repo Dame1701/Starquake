@@ -16,7 +16,8 @@ namespace Starquake.Display;
 /// </summary>
 /// <remarks>
 ///     F8, F9 and F10 all change how the game looks, and two of them have more than two settings, so
-///     which one is in play cannot be told by looking.
+///     which one is in play cannot be told by looking. F11 changes how fast it runs, which is no
+///     easier to tell at a glance.
 ///     <para>
 ///         The fade is counted in logic frames and stepped from <c>Update</c>, never from a draw.
 ///         <c>GameHost</c> runs the logic at fifty hertz and draws once per vertical retrace, so a

@@ -25,7 +25,7 @@ namespace Starquake.Engines;
 ///     <para>
 ///         The keys that are not debug keys belong to <see cref="GlobalHotkeys" /> and stay live in
 ///         both builds: F5 takes a screenshot, F8 swaps the artwork, F9 steps the cathode ray tube,
-///         F10 the backdrops, F12 fullscreen, plus the player's own pause and quit keys.
+///         F10 the backdrops, F11 the speed, F12 fullscreen, plus the player's own pause and quit keys.
 ///     </para>
 /// </remarks>
 internal class TestModeKeys(

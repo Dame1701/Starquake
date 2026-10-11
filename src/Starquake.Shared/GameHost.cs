@@ -16,23 +16,18 @@ namespace Starquake;
 public class GameHost : Game
 {
     /// <summary>
-    ///     How many times a second the game thinks, and so the speed of the game. The engine moves
-    ///     everything by a fixed amount per logic frame and scales nothing by elapsed time, exactly
-    ///     as the original did, so this number alone decides how fast Blob runs.
-    ///     <para>
-    ///         50 matches the PAL original; 60 is NTSC and 20% faster. It need not divide into the
-    ///         monitor's refresh rate, and the game runs at this speed whatever the display does.
-    ///     </para>
-    /// </summary>
-    private const double LogicFramesPerSecond = LogicClock.FramesPerSecond;
-
-    /// <summary>
     ///     How far the logic clock may fall behind before frames are dropped instead of caught up. A
     ///     stall from a breakpoint, a dragged window or the machine waking otherwise leaves a backlog
     ///     the game fast-forwards through in one go.
     /// </summary>
     private const int MaxCatchUpFrames = 5;
-    private static readonly TimeSpan LogicFrameLength = TimeSpan.FromTicks((long)(TimeSpan.TicksPerSecond / LogicFramesPerSecond));
+
+    /// <summary>
+    ///     How much game time one logic frame is, whatever <see cref="_logicRate" /> is pacing them
+    ///     at. Always a <see cref="LogicClock.FramesPerSecond" />th of a second, so at sixty hertz
+    ///     the particles speed up with everything else rather than holding to the wall clock.
+    /// </summary>
+    private static readonly TimeSpan GameFrameLength = TimeSpan.FromTicks(TimeSpan.TicksPerSecond / LogicClock.FramesPerSecond);
     private readonly GraphicsDeviceManager _graphics;
 
     /// <summary>
@@ -40,13 +35,26 @@ public class GameHost : Game
     ///     input must be read exactly once per frame from exactly one place.
     /// </summary>
     private readonly ToggleKeys _input = new();
+
+    /// <summary>
+    ///     How many times a real second the game thinks, and so the speed of the game. The engine
+    ///     moves everything by a fixed amount per logic frame and scales nothing by elapsed time,
+    ///     exactly as the original did, so this alone decides how fast Blob runs. It need not divide
+    ///     into the monitor's refresh rate. F11 switches it, through <c>GlobalHotkeys</c>.
+    /// </summary>
+    private readonly LogicRate _logicRate;
+
+    /// <summary>The settings the function keys change, as saved at the end of the last run.</summary>
+    private readonly Preferences _savedPreferences;
+
+    private readonly PreferencesStore _preferencesStore = new();
     private readonly GameTime _logicGameTime = new();
     private GameEngine? _gameEngine;
 
     /// <summary>
     ///     Real time banked since the last logic frame, plus the logic clock the game sees. The game
-    ///     is never told the real frame time: every logic frame is exactly one
-    ///     <see cref="LogicFramesPerSecond" />th of a second, so anything working off
+    ///     is never told the real frame time: every logic frame is exactly
+    ///     <see cref="GameFrameLength" /> of game time, so anything working off
     ///     <c>ElapsedGameTime</c>, such as the particle engine, stays locked to the same clock as
     ///     everything that counts frames.
     /// </summary>
@@ -61,6 +69,9 @@ public class GameHost : Game
         // Before anything is loaded, and before the graphics device exists. A normal build does not
         // need it. A NativeAOT one cannot load a particle effect or the collision map without it.
         NativeAot.Register();
+
+        _savedPreferences = _preferencesStore.Read();
+        _logicRate = new LogicRate(_savedPreferences.Hertz);
 
         _graphics = new GraphicsDeviceManager(this);
         _graphics.SynchronizeWithVerticalRetrace = true;
@@ -115,7 +126,8 @@ public class GameHost : Game
     {
         // The engine defines and initialises its own content as it is built. base.Initialize is what
         // goes on to call LoadContent.
-        _gameEngine = new GameEngine(_graphics, Content, _input, Window, Exit);
+        _gameEngine = new GameEngine(
+            _graphics, Content, _input, Window, _logicRate, _savedPreferences, _preferencesStore, Exit);
 
         base.Initialize();
     }
@@ -139,25 +151,27 @@ public class GameHost : Game
     /// <summary>
     ///     Called once per rendered frame, which on a modern display is far more often than the game
     ///     needs to think. Banks the real time that has passed and runs whole logic frames out of it,
-    ///     so the game advances at <see cref="LogicFramesPerSecond" /> whatever the monitor does.
+    ///     so the game advances at <see cref="_logicRate" /> whatever the monitor does.
     /// </summary>
     protected override void Update(GameTime gameTime)
     {
         _logicAccumulator += gameTime.ElapsedGameTime;
 
-        TimeSpan maxBacklog = LogicFrameLength * MaxCatchUpFrames;
+        // Read afresh each time, because F11 can change it between one call and the next.
+        TimeSpan logicFrameLength = _logicRate.FrameLength;
+        TimeSpan maxBacklog = logicFrameLength * MaxCatchUpFrames;
 
         if (_logicAccumulator > maxBacklog)
         {
             _logicAccumulator = maxBacklog;
         }
 
-        while (_logicAccumulator >= LogicFrameLength)
+        while (_logicAccumulator >= logicFrameLength)
         {
-            _logicAccumulator -= LogicFrameLength;
-            _logicClock += LogicFrameLength;
+            _logicAccumulator -= logicFrameLength;
+            _logicClock += GameFrameLength;
 
-            _logicGameTime.ElapsedGameTime = LogicFrameLength;
+            _logicGameTime.ElapsedGameTime = GameFrameLength;
             _logicGameTime.TotalGameTime = _logicClock;
 
             UpdateLogicFrame(_logicGameTime);

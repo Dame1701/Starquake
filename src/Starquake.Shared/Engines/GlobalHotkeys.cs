@@ -16,9 +16,10 @@ namespace Starquake.Engines;
 
 /// <summary>
 ///     The keys that work anywhere in the game rather than belonging to a screen: pause,
-///     fullscreen, the backdrops, the artwork swap, a screenshot and quit. The two that change how
-///     the game looks say so through <see cref="ModeAnnouncement" />, because otherwise the only
-///     way to know which way a toggle has just gone is to recognise the result.
+///     fullscreen, the backdrops, the artwork swap, the game's speed, a screenshot and quit. The
+///     ones that change how the game looks or runs say so through <see cref="ModeAnnouncement" />,
+///     because otherwise the only way to know which way a toggle has just gone is to recognise the
+///     result, and they ask for the preferences to be saved so the next run starts the same way.
 /// </summary>
 /// <remarks>
 ///     Most of these touch only the session and the presentation. The artwork swap has to tell
@@ -36,7 +37,9 @@ internal class GlobalHotkeys(
     ResourceManager resources,
     ModeAnnouncement announce,
     Screenshots screenshots,
+    LogicRate logicRate,
     Action artworkSwapped,
+    Action preferencesChanged,
     Action quitGame)
 {
     public void Update()
@@ -45,6 +48,7 @@ internal class GlobalHotkeys(
         ToggleFullScreenIfAsked();
         ToggleBackgroundsIfAsked();
         SwitchGraphicsSetIfAsked();
+        SwitchLogicRateIfAsked();
         TakeScreenshotIfAsked();
         QuitIfAsked();
     }
@@ -185,6 +189,7 @@ internal class GlobalHotkeys(
             presentation.DrawBackgrounds = !presentation.DrawBackgrounds;
 
             announce.Show(presentation.DrawBackgrounds ? "BACKDROPS ON" : "BACKDROPS OFF");
+            preferencesChanged();
         }
     }
 
@@ -203,8 +208,26 @@ internal class GlobalHotkeys(
         announce.Show(graphicsSet.IsRedrawn ? "ENHANCED GRAPHICS" : "ORIGINAL GRAPHICS");
 
         artworkSwapped();
+        preferencesChanged();
 
         resources.GetSoundFxEngine().PlaySound(Assets.Sounds.AccessSuccess, 1f, false);
+    }
+
+    /// <summary>
+    ///     F11 switches the game between fifty and sixty hertz: the PAL speed the original was
+    ///     written for, and the NTSC one, 20% faster. See <see cref="LogicRate" />.
+    /// </summary>
+    private void SwitchLogicRateIfAsked()
+    {
+        if (input.GetPressedKey() != Keys.F11)
+        {
+            return;
+        }
+
+        logicRate.Switch();
+
+        announce.Show(logicRate.Name);
+        preferencesChanged();
     }
 
     /// <summary>
