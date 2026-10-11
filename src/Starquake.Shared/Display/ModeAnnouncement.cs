@@ -115,11 +115,10 @@ internal sealed class ModeAnnouncement
         int lineTop = CompositionSize.Height - BottomMargin - font.CapitalTop - font.CapitalHeight;
 
         font.Begin(BlendState.AlphaBlend);
-        font.WriteText(
+        font.WriteScaledText(
             (int)(transform.Translation.X + XPos * scale),
             (int)(transform.Translation.Y + lineTop * scale),
             _message,
-            0,
             Color.White,
             (byte)_fade,
             scale);
