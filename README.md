@@ -43,6 +43,7 @@ These work everywhere, in both debug and release builds:
 | `F8` | Swap between the redrawn artwork and the original 1985 graphics |
 | `F9` | Step the CRT filter: off → scanlines → phosphor grille → bowed tube |
 | `F10` | Backdrops on or off |
+| `F11` | Switch between 50Hz and 60Hz |
 | `F12` | Fullscreen |
 
 ## Building
