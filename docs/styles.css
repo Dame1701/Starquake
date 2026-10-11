@@ -567,6 +567,172 @@ img { display: block; }
 }
 
 /* ==========================================================================
+   Shared keycap — used by the feature cards and the how-to-play lists
+   ========================================================================== */
+.keycap {
+  display: inline-block;
+  padding: 2px 8px;
+  background: var(--panel-hi);
+  border: 2px solid #000;
+  box-shadow: 0 3px 0 #000;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.3;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  color: var(--white);
+}
+
+/* ==========================================================================
+   What's new
+   ========================================================================== */
+.fresh {
+  padding: clamp(40px, 6vw, 80px) var(--gutter) clamp(20px, 3vw, 40px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(28px, 4vw, 44px);
+}
+
+.fresh__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: clamp(20px, 3vw, 32px);
+}
+
+/* The accent drives the drop shadow and the heading, so a card is one class. */
+.feature {
+  background: var(--panel);
+  border: var(--edge);
+  box-shadow: 6px 6px 0 var(--feature-accent), 6px 6px 0 3px #000;
+  padding: clamp(18px, 2.5vw, 26px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.feature--lime { --feature-accent: var(--lime); }
+.feature--pink { --feature-accent: var(--pink); }
+.feature--teal { --feature-accent: var(--teal); }
+.feature--yellow { --feature-accent: var(--yellow); }
+.feature--orange { --feature-accent: var(--orange); }
+
+.feature__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(24px, 2.4vw, 30px);
+  letter-spacing: 1px;
+  color: var(--feature-accent);
+  text-shadow: 2px 2px 0 #000;
+}
+
+.feature__body {
+  margin: 0;
+  color: var(--t-100);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.feature__body strong { color: var(--white); }
+
+/* ==========================================================================
+   How to play
+   ========================================================================== */
+.howto {
+  padding: clamp(40px, 6vw, 80px) var(--gutter) clamp(20px, 3vw, 40px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(20px, 3vw, 32px);
+}
+
+.howto__lede {
+  margin: 0;
+  max-width: 62ch;
+  font-size: clamp(16px, 1.6vw, 19px);
+  line-height: 1.7;
+  color: var(--t-100);
+}
+
+.howto__cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: clamp(20px, 3vw, 32px);
+}
+
+.howto__card {
+  background: var(--panel);
+  border: var(--edge);
+  box-shadow: 6px 6px 0 var(--howto-accent, var(--lime)), 6px 6px 0 3px #000;
+  padding: clamp(20px, 3vw, 30px);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.howto__card--pink { --howto-accent: var(--pink); }
+
+.howto__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(26px, 2.6vw, 32px);
+  letter-spacing: 1px;
+  color: var(--white);
+  text-shadow: 2px 2px 0 #000;
+}
+
+.howto__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.howto__item {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--t-100);
+}
+
+.howto__item strong { color: var(--white); }
+
+.keylist {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.keyrow {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+}
+
+.keyrow dt { flex: 0 0 auto; }
+
+.keyrow dd {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--t-100);
+}
+
+.howto__note {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--t-300);
+}
+
+.howto__note strong { color: var(--t-100); }
+
+/* ==========================================================================
    Download
    ========================================================================== */
 .download {
