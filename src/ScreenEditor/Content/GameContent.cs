@@ -20,8 +20,8 @@ internal static class GameContent
 
     private static readonly string[] TileSheetNames =
     [
-        "StartilesNew.png",
-        "StartilesOriginal.png"
+        Path.Combine("Enhanced", "LowerScreenTiles.png"),
+        Path.Combine("Original", "LowerScreenTiles.png")
     ];
 
     /// <summary>

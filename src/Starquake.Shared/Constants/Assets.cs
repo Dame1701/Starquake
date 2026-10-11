@@ -28,9 +28,11 @@ internal static class Assets
     /// <summary>The sprite sheets, by the name each is registered under.</summary>
     internal static class Graphics
     {
-        // Shared
+        // Backdrops, which only the redrawn set has
         public const string Background1 = "Background1";
         public const string Background2 = "Background2";
+
+        // Shared
         public const string ProportionalNumbers = "ProportionalNumbers";
 
         // Presentation screens
@@ -45,17 +47,12 @@ internal static class Assets
         public const string GameCompleteScreenBackground = "GameCompleteScreenBackground";
         public const string GameCompleteScreenForeground = "GameCompleteScreenForeground";
 
-        // Screen tiles
-        public const string ExitShadows = "ExitShadows";
-
         // Blob
         public const string BlobParts = "BlobParts";
         public const string BlobShuttle = "BlobShuttle";
         public const string BlobShuttleOriginal = "BlobShuttleOriginal";
         public const string BlobFire1 = "BlobFire1";
-        public const string BlobFire2 = "BlobFire2";
         public const string BlobFire2Original = "BlobFire2Original";
-        public const string BlobFire2Overlay = "BlobFire2Overlay";
         public const string JumpPlatforms = "JumpPlatforms";
         public const string JumpPlatformsOriginal = "JumpPlatformsOriginal";
 
@@ -112,7 +109,6 @@ internal static class Assets
         ///     sprite batch can hand a pixel shader to work on.
         /// </summary>
         public const string ParticleSprite = "ParticleSprite";
-        public const string CollisionTile = "CollisionTile";
     }
 
     /// <summary>The animated tile sheets. Each is bound to the tile number it animates.</summary>

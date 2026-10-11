@@ -29,7 +29,7 @@
 /processorParam:TextureFormat=Compressed
 /build:Fonts/elektoraSmall.spritefont
 
-#begin Graphics/AccessCodesFailed.png
+#begin Graphics/Enhanced/AccessCodesFailed.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -39,9 +39,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/AccessCodesFailed.png
+/build:Graphics/Enhanced/AccessCodesFailed.png
 
-#begin Graphics/AccessCodesFailedOriginal.png
+#begin Graphics/Original/AccessCodesFailed.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -51,9 +51,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/AccessCodesFailedOriginal.png
+/build:Graphics/Original/AccessCodesFailed.png
 
-#begin Graphics/AccessCodesGray.png
+#begin Graphics/Enhanced/AccessCodesGray.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -63,9 +63,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/AccessCodesGray.png
+/build:Graphics/Enhanced/AccessCodesGray.png
 
-#begin Graphics/AccessCodesGrayOriginal.png
+#begin Graphics/Original/AccessCodesGray.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -75,9 +75,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/AccessCodesGrayOriginal.png
+/build:Graphics/Original/AccessCodesGray.png
 
-#begin Graphics/AccessCodesPassed.png
+#begin Graphics/Enhanced/AccessCodesPassed.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -87,9 +87,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/AccessCodesPassed.png
+/build:Graphics/Enhanced/AccessCodesPassed.png
 
-#begin Graphics/AccessCodesPassedOriginal.png
+#begin Graphics/Original/AccessCodesPassed.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -99,7 +99,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/AccessCodesPassedOriginal.png
+/build:Graphics/Original/AccessCodesPassed.png
 
 #begin Graphics/AmmoBar.png
 /importer:TextureImporter
@@ -113,7 +113,7 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/AmmoBar.png
 
-#begin Graphics/Background1.png
+#begin Graphics/Enhanced/Background1.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -123,9 +123,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/Background1.png
+/build:Graphics/Enhanced/Background1.png
 
-#begin Graphics/Background2.png
+#begin Graphics/Enhanced/Background2.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -135,7 +135,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/Background2.png
+/build:Graphics/Enhanced/Background2.png
 
 #begin Graphics/BlankingTile.png
 /importer:TextureImporter
@@ -149,7 +149,7 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/BlankingTile.png
 
-#begin Graphics/blob.png
+#begin Graphics/Original/BlobFire1.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -159,9 +159,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/blob.png
+/build:Graphics/Original/BlobFire1.png
 
-#begin Graphics/blobEnergyDrain.png
+#begin Graphics/Original/BlobFire2.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -171,9 +171,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/blobEnergyDrain.png
+/build:Graphics/Original/BlobFire2.png
 
-#begin Graphics/BlobFire1.png
+#begin Graphics/Enhanced/BlobJumpPlatform.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -183,9 +183,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/BlobFire1.png
+/build:Graphics/Enhanced/BlobJumpPlatform.png
 
-#begin Graphics/BlobFire1New.png
+#begin Graphics/Original/BlobJumpPlatform.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -195,79 +195,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/BlobFire1New.png
-
-#begin Graphics/blobfire2New.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/blobfire2New.png
-
-#begin Graphics/BlobFire2Original.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/BlobFire2Original.png
-
-#begin Graphics/BlobFire2Overlay.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/BlobFire2Overlay.png
-
-#begin Graphics/BlobFireNew2.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/BlobFireNew2.png
-
-#begin Graphics/BlobJumpPlatform.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/BlobJumpPlatform.png
-
-#begin Graphics/BlobJumpPlatformOriginal.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/BlobJumpPlatformOriginal.png
+/build:Graphics/Original/BlobJumpPlatform.png
 
 #begin Graphics/blobNew.png
 /importer:TextureImporter
@@ -293,7 +221,7 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/blobNewAlt.png
 
-#begin Graphics/blobNewAlt2.png
+#begin Graphics/Enhanced/Blob.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -303,9 +231,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/blobNewAlt2.png
+/build:Graphics/Enhanced/Blob.png
 
-#begin Graphics/BlobOriginal.png
+#begin Graphics/Original/Blob.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -315,9 +243,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/BlobOriginal.png
+/build:Graphics/Original/Blob.png
 
-#begin Graphics/blobParts.png
+#begin Graphics/Enhanced/BlobParts.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -327,9 +255,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/blobParts.png
+/build:Graphics/Enhanced/BlobParts.png
 
-#begin Graphics/BlobShuttle.png
+#begin Graphics/Enhanced/BlobShuttle.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -339,9 +267,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/BlobShuttle.png
+/build:Graphics/Enhanced/BlobShuttle.png
 
-#begin Graphics/BlobShuttleOriginal.png
+#begin Graphics/Original/BlobShuttle.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -351,9 +279,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/BlobShuttleOriginal.png
+/build:Graphics/Original/BlobShuttle.png
 
-#begin Graphics/BlobsSpaceShip.png
+#begin Graphics/Enhanced/BlobsSpaceShip.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -363,9 +291,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/BlobsSpaceShip.png
+/build:Graphics/Enhanced/BlobsSpaceShip.png
 
-#begin Graphics/BlobsSpaceShipHazardLights.png
+#begin Graphics/Enhanced/BlobsSpaceShipHazardLights.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -375,9 +303,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/BlobsSpaceShipHazardLights.png
+/build:Graphics/Enhanced/BlobsSpaceShipHazardLights.png
 
-#begin Graphics/BlobsSpaceShipHeadLights.png
+#begin Graphics/Enhanced/BlobsSpaceShipHeadLights.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -387,9 +315,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/BlobsSpaceShipHeadLights.png
+/build:Graphics/Enhanced/BlobsSpaceShipHeadLights.png
 
-#begin Graphics/BlobsSpaceShipOriginal.png
+#begin Graphics/Original/BlobsSpaceShip.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -399,7 +327,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/BlobsSpaceShipOriginal.png
+/build:Graphics/Original/BlobsSpaceShip.png
 
 #begin Graphics/BootProgress.png
 /importer:TextureImporter
@@ -437,7 +365,7 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/BouncingParticle.png
 
-#begin Graphics/BreakableBridge.png
+#begin Graphics/Enhanced/BreakableBridge.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -447,9 +375,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/BreakableBridge.png
+/build:Graphics/Enhanced/BreakableBridge.png
 
-#begin Graphics/BreakableBridgeAnim.png
+#begin Graphics/Enhanced/BreakableBridgeAnim.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -459,9 +387,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/BreakableBridgeAnim.png
+/build:Graphics/Enhanced/BreakableBridgeAnim.png
 
-#begin Graphics/BreakableBridgeOriginal.png
+#begin Graphics/Original/BreakableBridge.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -471,9 +399,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/BreakableBridgeOriginal.png
+/build:Graphics/Original/BreakableBridge.png
 
-#begin Graphics/CheopsPyramid.png
+#begin Graphics/Enhanced/CheopsPyramid.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -483,9 +411,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/CheopsPyramid.png
+/build:Graphics/Enhanced/CheopsPyramid.png
 
-#begin Graphics/CheopsPyramidOriginal.png
+#begin Graphics/Original/CheopsPyramid.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -495,19 +423,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/CheopsPyramidOriginal.png
-
-#begin Graphics/CollisionTile.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/CollisionTile.png
+/build:Graphics/Original/CheopsPyramid.png
 
 #begin Graphics/ComputerReportScreenBackground.png
 /importer:TextureImporter
@@ -545,7 +461,7 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/ConveyorNasty.png
 
-#begin Graphics/ElectricityAnim.png
+#begin Graphics/Enhanced/Electricity.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -555,9 +471,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/ElectricityAnim.png
+/build:Graphics/Enhanced/Electricity.png
 
-#begin Graphics/ElectricityOriginal.png
+#begin Graphics/Original/Electricity.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -567,7 +483,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/ElectricityOriginal.png
+/build:Graphics/Original/Electricity.png
 
 #begin Graphics/EnergyBar.png
 /importer:TextureImporter
@@ -580,18 +496,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Graphics/EnergyBar.png
-
-#begin Graphics/ExitShadows.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/ExitShadows.png
 
 #begin Graphics/GameCompleteScreenBackground.png
 /importer:TextureImporter
@@ -641,7 +545,7 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/GameOverScreenForeground.png
 
-#begin Graphics/GateLight.png
+#begin Graphics/Enhanced/GateLight.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -651,7 +555,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/GateLight.png
+/build:Graphics/Enhanced/GateLight.png
 
 #begin Graphics/HiScoreScreenBackground.png
 /importer:TextureImporter
@@ -689,7 +593,7 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/JumpBar.png
 
-#begin Graphics/Nasties.png
+#begin Graphics/Enhanced/Nasties.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -699,9 +603,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/Nasties.png
+/build:Graphics/Enhanced/Nasties.png
 
-#begin Graphics/NastiesOriginal.png
+#begin Graphics/Original/Nasties.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -711,9 +615,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/NastiesOriginal.png
+/build:Graphics/Original/Nasties.png
 
-#begin Graphics/nasty.png
+#begin Graphics/Enhanced/NodeLight.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -723,9 +627,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/nasty.png
+/build:Graphics/Enhanced/NodeLight.png
 
-#begin Graphics/NodeElectricity.png
+#begin Graphics/Enhanced/OllyBackground.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -735,9 +639,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/NodeElectricity.png
+/build:Graphics/Enhanced/OllyBackground.png
 
-#begin Graphics/NodeLight.png
+#begin Graphics/Enhanced/OllyEyes.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -747,9 +651,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/NodeLight.png
+/build:Graphics/Enhanced/OllyEyes.png
 
-#begin Graphics/OllyBackground.png
+#begin Graphics/Enhanced/OllyLower.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -759,9 +663,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/OllyBackground.png
+/build:Graphics/Enhanced/OllyLower.png
 
-#begin Graphics/OllyEyes.png
+#begin Graphics/Original/Olly.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -771,9 +675,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/OllyEyes.png
+/build:Graphics/Original/Olly.png
 
-#begin Graphics/OllyLower.png
+#begin Graphics/Enhanced/OllyUpper.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -783,31 +687,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/OllyLower.png
-
-#begin Graphics/OllyOriginal.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/OllyOriginal.png
-
-#begin Graphics/OllyUpper.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/OllyUpper.png
+/build:Graphics/Enhanced/OllyUpper.png
 
 #begin Graphics/OptionsScreenBackground.png
 /importer:TextureImporter
@@ -845,7 +725,7 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/PanelNumbers.png
 
-#begin Graphics/Particle.png
+#begin Graphics/Enhanced/Pickups.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -855,9 +735,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/Particle.png
+/build:Graphics/Enhanced/Pickups.png
 
-#begin Graphics/Pickups.png
+#begin Graphics/Enhanced/PickupsIlluminated.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -867,9 +747,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/Pickups.png
+/build:Graphics/Enhanced/PickupsIlluminated.png
 
-#begin Graphics/PickupsIlluminated.png
+#begin Graphics/Original/PickupsIlluminated.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -879,9 +759,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/PickupsIlluminated.png
+/build:Graphics/Original/PickupsIlluminated.png
 
-#begin Graphics/PickupsIlluminatedOriginal.png
+#begin Graphics/Original/Pickups.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -891,9 +771,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/PickupsIlluminatedOriginal.png
+/build:Graphics/Original/Pickups.png
 
-#begin Graphics/PickupsOriginal.png
+#begin Graphics/Enhanced/PowerUps.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -903,9 +783,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/PickupsOriginal.png
+/build:Graphics/Enhanced/PowerUps.png
 
-#begin Graphics/PowerUps.png
+#begin Graphics/Original/PowerUps.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -915,19 +795,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/PowerUps.png
-
-#begin Graphics/PowerUpsOriginal.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/PowerUpsOriginal.png
+/build:Graphics/Original/PowerUps.png
 
 #begin Graphics/ProgressBarBackground.png
 /importer:TextureImporter
@@ -965,7 +833,7 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/ScanLine.png
 
-#begin Graphics/StartilesNew.png
+#begin Graphics/Enhanced/LowerScreenTiles.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -975,9 +843,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/StartilesNew.png
+/build:Graphics/Enhanced/LowerScreenTiles.png
 
-#begin Graphics/StartilesOriginal.png
+#begin Graphics/Original/LowerScreenTiles.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -987,7 +855,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/StartilesOriginal.png
+/build:Graphics/Original/LowerScreenTiles.png
 
 #begin Graphics/StatusPanelNew.png
 /importer:TextureImporter
@@ -1013,30 +881,6 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/StatusPanelOverlay.png
 
-#begin Graphics/TeleportDistort.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/TeleportDistort.png
-
-#begin Graphics/TeleportEntry.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/TeleportEntry.png
-
 #begin Graphics/TeleporterKeyOverlays.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -1049,7 +893,7 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/TeleporterKeyOverlays.png
 
-#begin Graphics/TeleporterPadAnimationOccupied.png
+#begin Graphics/Enhanced/TeleporterPadAnimationOccupied.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -1059,9 +903,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/TeleporterPadAnimationOccupied.png
+/build:Graphics/Enhanced/TeleporterPadAnimationOccupied.png
 
-#begin Graphics/TeleporterPadAnimationUnoccupied.png
+#begin Graphics/Enhanced/TeleporterPadAnimationUnoccupied.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -1071,7 +915,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/TeleporterPadAnimationUnoccupied.png
+/build:Graphics/Enhanced/TeleporterPadAnimationUnoccupied.png
 
 #begin Graphics/TeleporterPowerSupply.png
 /importer:TextureImporter
@@ -1084,30 +928,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Graphics/TeleporterPowerSupply.png
-
-#begin Graphics/TeleportInfoMonitor.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/TeleportInfoMonitor.png
-
-#begin Graphics/TeleportInfoMonitorDistortion.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/TeleportInfoMonitorDistortion.png
 
 #begin Graphics/TeleportInteriorLower.png
 /importer:TextureImporter
@@ -1133,7 +953,7 @@
 /processorParam:TextureFormat=Color
 /build:Graphics/TeleportInteriorUpper.png
 
-#begin Graphics/tunnelpatch.png
+#begin Graphics/Enhanced/UpperScreenTiles.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -1143,9 +963,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/tunnelpatch.png
+/build:Graphics/Enhanced/UpperScreenTiles.png
 
-#begin Graphics/UpperScreenTiles.png
+#begin Graphics/Original/UpperScreenTiles.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -1155,43 +975,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Graphics/UpperScreenTiles.png
-
-#begin Graphics/UpperScreenTilesOriginal.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/UpperScreenTilesOriginal.png
-
-#begin Graphics/water.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/water.png
-
-#begin Graphics/waterfall.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=False
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Graphics/waterfall.png
+/build:Graphics/Original/UpperScreenTiles.png
 
 #begin Music/completed-game-song.m4a
 /importer:Mp3Importer

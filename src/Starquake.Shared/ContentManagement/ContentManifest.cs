@@ -16,6 +16,13 @@ namespace Starquake.ContentManagement;
 ///         The registration <em>order</em> is load-bearing for <c>ScreenData</c> and is otherwise
 ///         kept as found rather than tidied.
 ///     </para>
+///     <para>
+///         Four sheets sit in <c>Content\Graphics</c> and are deliberately absent from here and from
+///         <c>Content.mgcb</c>: <c>Enhanced\BlobFire2</c>, <c>BlobFire2Overlay</c>,
+///         <c>ExitShadows</c> and <c>CollisionTile</c>. Each was registered once and drawn by
+///         nothing, so each was costing a texture on the graphics device for the whole run. The
+///         artwork is kept; reviving one takes a line here and a block in <c>Content.mgcb</c>.
+///     </para>
 /// </summary>
 internal static class ContentManifest
 {
@@ -40,10 +47,15 @@ internal static class ContentManifest
         Music(resources);
     }
 
+    /// <summary>
+    ///     The two parallax backdrops and the proportional digits. The backdrops are the redrawn
+    ///     set's own - F8 turns them off along with the artwork, because the 1985 graphics have none
+    ///     drawn for them - so only the digits here are shared.
+    /// </summary>
     private static void SharedGraphics(ResourceManager resources)
     {
-        resources.AddSpriteResource(Assets.Graphics.Background1, "Graphics\\Background1", 1024, 576);
-        resources.AddSpriteResource(Assets.Graphics.Background2, "Graphics\\Background2", 1024, 576);
+        resources.AddSpriteResource(Assets.Graphics.Background1, "Graphics\\Enhanced\\Background1", 1024, 576);
+        resources.AddSpriteResource(Assets.Graphics.Background2, "Graphics\\Enhanced\\Background2", 1024, 576);
         resources.AddSpriteResource(Assets.Graphics.ProportionalNumbers, "Graphics\\ProportionalNumbers", 27, 26);
     }
 
@@ -77,66 +89,69 @@ internal static class ContentManifest
 
     private static void GameScreenTiles(ResourceManager resources)
     {
-        resources.AddSpriteResource(ResourceNames.Redrawn.UpperScreenTiles, "Graphics\\UpperScreenTiles", TileMetrics.TileWidth, TileMetrics.TileHeight);
-        resources.AddSpriteResource(ResourceNames.Original.UpperScreenTiles, "Graphics\\UpperScreenTilesOriginal", TileMetrics.TileWidth, TileMetrics.TileHeight);
+        resources.AddSpriteResource(ResourceNames.Redrawn.UpperScreenTiles, "Graphics\\Enhanced\\UpperScreenTiles", TileMetrics.TileWidth, TileMetrics.TileHeight);
+        resources.AddSpriteResource(ResourceNames.Original.UpperScreenTiles, "Graphics\\Original\\UpperScreenTiles", TileMetrics.TileWidth, TileMetrics.TileHeight);
 
-        resources.AddSpriteResource(ResourceNames.Redrawn.LowerScreenTiles, "Graphics\\StartilesNew", TileMetrics.TileWidth, TileMetrics.TileHeight);
-        resources.AddSpriteResource(ResourceNames.Original.LowerScreenTiles, "Graphics\\StartilesOriginal", TileMetrics.TileWidth, TileMetrics.TileHeight);
-
-        resources.AddSpriteResource(Assets.Graphics.ExitShadows, "Graphics\\ExitShadows", TileMetrics.TileWidth, TileMetrics.TileHeight);
+        resources.AddSpriteResource(ResourceNames.Redrawn.LowerScreenTiles, "Graphics\\Enhanced\\LowerScreenTiles", TileMetrics.TileWidth, TileMetrics.TileHeight);
+        resources.AddSpriteResource(ResourceNames.Original.LowerScreenTiles, "Graphics\\Original\\LowerScreenTiles", TileMetrics.TileWidth, TileMetrics.TileHeight);
     }
 
     private static void BlobGraphics(ResourceManager resources)
     {
-        // The third of three redraws of Blob. blobNew and blobNewAlt are the earlier two, both still
-        // built by Content.mgcb, so either can be put back by changing this one line.
-        resources.AddSpriteResource(ResourceNames.Redrawn.BlobSprites, "Graphics\\blobNewAlt2", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        resources.AddSpriteResource(ResourceNames.Original.BlobSprites, "Graphics\\BlobOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        // The third of three redraws of Blob. Graphics\blobNew and Graphics\blobNewAlt are the
+        // earlier two, left where they are rather than moved in beside this one because neither is a
+        // second set of artwork. Both are still built, so either can be put back by changing this
+        // one line.
+        resources.AddSpriteResource(ResourceNames.Redrawn.BlobSprites, "Graphics\\Enhanced\\Blob", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        resources.AddSpriteResource(ResourceNames.Original.BlobSprites, "Graphics\\Original\\Blob", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
 
-        resources.AddSpriteResource(Assets.Graphics.BlobParts, "Graphics\\blobParts", 32, 32);
-        resources.AddSpriteResource(Assets.Graphics.BlobShuttle, "Graphics\\BlobShuttle", 64, 32);
-        resources.AddSpriteResource(Assets.Graphics.BlobShuttleOriginal, "Graphics\\BlobShuttleOriginal", 64, 32);
+        resources.AddSpriteResource(Assets.Graphics.BlobParts, "Graphics\\Enhanced\\BlobParts", 32, 32);
+        resources.AddSpriteResource(Assets.Graphics.BlobShuttle, "Graphics\\Enhanced\\BlobShuttle", 64, 32);
+        resources.AddSpriteResource(Assets.Graphics.BlobShuttleOriginal, "Graphics\\Original\\BlobShuttle", 64, 32);
 
-        resources.AddSpriteResource(Assets.Graphics.BlobFire1, "Graphics\\BlobFire1", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        resources.AddSpriteResource(Assets.Graphics.BlobFire2, "Graphics\\BlobFireNew2", 32, 32);
-        resources.AddSpriteResource(Assets.Graphics.BlobFire2Original, "Graphics\\BlobFire2Original", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        // Both Original only. The redrawn set draws Blob's shot as a beam out of nothing and his
+        // death and the nasties' as particles, so it wants no flame sheet at all: see
+        // BlobWeapon.Draw, BlobDeath.Draw and Nasty, each of which reaches for these two under
+        // IsOriginal and nothing under the other set. Graphics\Enhanced\BlobFire2 is a redraw of
+        // the second that was left behind by that, which is why it sits on disk registered nowhere.
+        resources.AddSpriteResource(Assets.Graphics.BlobFire1, "Graphics\\Original\\BlobFire1", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        resources.AddSpriteResource(Assets.Graphics.BlobFire2Original, "Graphics\\Original\\BlobFire2", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
 
-        resources.AddSpriteResource(Assets.Graphics.BlobFire2Overlay, "Graphics\\BlobFire2Overlay", 48, 48);
-        resources.AddSpriteResource(Assets.Graphics.JumpPlatforms, "Graphics\\BlobJumpPlatform", 64, 32);
-        resources.AddSpriteResource(Assets.Graphics.JumpPlatformsOriginal, "Graphics\\BlobJumpPlatformOriginal", 64, 32);
+        resources.AddSpriteResource(Assets.Graphics.JumpPlatforms, "Graphics\\Enhanced\\BlobJumpPlatform", 64, 32);
+        resources.AddSpriteResource(Assets.Graphics.JumpPlatformsOriginal, "Graphics\\Original\\BlobJumpPlatform", 64, 32);
     }
 
     private static void PickUpAndNastyGraphics(ResourceManager resources)
     {
-        resources.AddSpriteResource(ResourceNames.Redrawn.PowerUps, "Graphics\\PowerUps", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        resources.AddSpriteResource(ResourceNames.Original.PowerUps, "Graphics\\PowerUpsOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        resources.AddSpriteResource(ResourceNames.Redrawn.Pickups, "Graphics\\Pickups", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        resources.AddSpriteResource(ResourceNames.Original.Pickups, "Graphics\\PickupsOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        resources.AddSpriteResource(ResourceNames.Redrawn.PowerUps, "Graphics\\Enhanced\\PowerUps", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        resources.AddSpriteResource(ResourceNames.Original.PowerUps, "Graphics\\Original\\PowerUps", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        resources.AddSpriteResource(ResourceNames.Redrawn.Pickups, "Graphics\\Enhanced\\Pickups", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        resources.AddSpriteResource(ResourceNames.Original.Pickups, "Graphics\\Original\\Pickups", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
         resources.AddSpriteResource(Assets.Graphics.ConveyorNasty, "Graphics\\ConveyorNasty", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
 
-        resources.AddSpriteResource(Assets.Graphics.Nasties, "Graphics\\Nasties", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        resources.AddSpriteResource(Assets.Graphics.NastiesOriginal, "Graphics\\NastiesOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        resources.AddSpriteResource(Assets.Graphics.Nasties, "Graphics\\Enhanced\\Nasties", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        resources.AddSpriteResource(Assets.Graphics.NastiesOriginal, "Graphics\\Original\\Nasties", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
     }
 
     private static void AccessBoothGraphics(ResourceManager resources)
     {
         resources.AddSpriteResource(Assets.Graphics.ScanLine, "Graphics\\ScanLine", 74, 9);
 
-        resources.AddSpriteResource(ResourceNames.Redrawn.AccessCodesFailed, "Graphics\\AccessCodesFailed", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        resources.AddSpriteResource(ResourceNames.Redrawn.AccessCodesPassed, "Graphics\\AccessCodesPassed", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        resources.AddSpriteResource(Assets.Graphics.AccessCodesGray, "Graphics\\AccessCodesGray", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        resources.AddSpriteResource(ResourceNames.Redrawn.PickupsIlluminated, "Graphics\\PickupsIlluminated", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        resources.AddSpriteResource(ResourceNames.Redrawn.AccessCodesFailed, "Graphics\\Enhanced\\AccessCodesFailed", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        resources.AddSpriteResource(ResourceNames.Redrawn.AccessCodesPassed, "Graphics\\Enhanced\\AccessCodesPassed", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        resources.AddSpriteResource(Assets.Graphics.AccessCodesGray, "Graphics\\Enhanced\\AccessCodesGray", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        resources.AddSpriteResource(ResourceNames.Redrawn.PickupsIlluminated, "Graphics\\Enhanced\\PickupsIlluminated", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
 
-        resources.AddSpriteResource(ResourceNames.Original.AccessCodesFailed, "Graphics\\AccessCodesFailedOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        resources.AddSpriteResource(ResourceNames.Original.AccessCodesPassed, "Graphics\\AccessCodesPassedOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        resources.AddSpriteResource(Assets.Graphics.AccessCodesGrayOriginal, "Graphics\\AccessCodesGrayOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        resources.AddSpriteResource(ResourceNames.Original.PickupsIlluminated, "Graphics\\PickupsIlluminatedOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        resources.AddSpriteResource(ResourceNames.Original.AccessCodesFailed, "Graphics\\Original\\AccessCodesFailed", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        resources.AddSpriteResource(ResourceNames.Original.AccessCodesPassed, "Graphics\\Original\\AccessCodesPassed", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        resources.AddSpriteResource(Assets.Graphics.AccessCodesGrayOriginal, "Graphics\\Original\\AccessCodesGray", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        resources.AddSpriteResource(ResourceNames.Original.PickupsIlluminated, "Graphics\\Original\\PickupsIlluminated", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
     }
 
     private static void CheopsGraphics(ResourceManager resources)
     {
-        resources.AddSpriteResource(Assets.Graphics.CheopsPyramid, "Graphics\\CheopsPyramid", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        resources.AddSpriteResource(Assets.Graphics.CheopsPyramidOriginal, "Graphics\\CheopsPyramidOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        resources.AddSpriteResource(Assets.Graphics.CheopsPyramid, "Graphics\\Enhanced\\CheopsPyramid", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        resources.AddSpriteResource(Assets.Graphics.CheopsPyramidOriginal, "Graphics\\Original\\CheopsPyramid", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
     }
 
     private static void TeleporterGraphics(ResourceManager resources)
@@ -149,31 +164,31 @@ internal static class ContentManifest
 
     private static void ElectricityGraphics(ResourceManager resources)
     {
-        resources.AddSpriteResource(Assets.Graphics.ElectricityNodeElectricity1, "Graphics\\ElectricityAnim", 70, 64);
-        resources.AddSpriteResource(Assets.Graphics.ElectricityNodeElectricity2, "Graphics\\ElectricityAnim", 70, 64);
-        resources.AddSpriteResource(Assets.Graphics.NodeLights, "Graphics\\NodeLight", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
-        resources.AddSpriteResource(Assets.Graphics.GateLights, "Graphics\\GateLight", 32, 32);
-        resources.AddSpriteResource(Assets.Graphics.ElectricityOriginal, "Graphics\\ElectricityOriginal", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        resources.AddSpriteResource(Assets.Graphics.ElectricityNodeElectricity1, "Graphics\\Enhanced\\Electricity", 70, 64);
+        resources.AddSpriteResource(Assets.Graphics.ElectricityNodeElectricity2, "Graphics\\Enhanced\\Electricity", 70, 64);
+        resources.AddSpriteResource(Assets.Graphics.NodeLights, "Graphics\\Enhanced\\NodeLight", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
+        resources.AddSpriteResource(Assets.Graphics.GateLights, "Graphics\\Enhanced\\GateLight", 32, 32);
+        resources.AddSpriteResource(Assets.Graphics.ElectricityOriginal, "Graphics\\Original\\Electricity", SpriteMetrics.SpriteWidth, SpriteMetrics.SpriteHeight);
     }
 
     private static void OddSizedGraphics(ResourceManager resources)
     {
-        resources.AddSpriteResource(Assets.Graphics.OllyBackground, "Graphics\\OllyBackground", 256, 192);
-        resources.AddSpriteResource(Assets.Graphics.OllyLower, "Graphics\\OllyLower", 256, 192);
-        resources.AddSpriteResource(Assets.Graphics.OllyUpper, "Graphics\\OllyUpper", 125, 120);
-        resources.AddSpriteResource(Assets.Graphics.OllyEyes, "Graphics\\OllyEyes", 44, 8);
-        resources.AddSpriteResource(Assets.Graphics.OllyOriginal, "Graphics\\OllyOriginal", 256, 192);
+        resources.AddSpriteResource(Assets.Graphics.OllyBackground, "Graphics\\Enhanced\\OllyBackground", 256, 192);
+        resources.AddSpriteResource(Assets.Graphics.OllyLower, "Graphics\\Enhanced\\OllyLower", 256, 192);
+        resources.AddSpriteResource(Assets.Graphics.OllyUpper, "Graphics\\Enhanced\\OllyUpper", 125, 120);
+        resources.AddSpriteResource(Assets.Graphics.OllyEyes, "Graphics\\Enhanced\\OllyEyes", 44, 8);
+        resources.AddSpriteResource(Assets.Graphics.OllyOriginal, "Graphics\\Original\\Olly", 256, 192);
 
-        resources.AddSpriteResource(ResourceNames.Original.BlobsShip, "Graphics\\BlobsSpaceShipOriginal", TileMetrics.TileWidth, TileMetrics.TileHeight);
-        resources.AddSpriteResource(ResourceNames.Redrawn.BlobsShip, "Graphics\\BlobsSpaceShip", 156, 128);
-        resources.AddSpriteResource(Assets.Graphics.BlobsShipHazardLights, "Graphics\\BlobsSpaceShipHazardLights", 156, 128);
-        resources.AddSpriteResource(Assets.Graphics.BlobsShipHeadLights, "Graphics\\BlobsSpaceShipHeadLights", 156, 128);
+        resources.AddSpriteResource(ResourceNames.Original.BlobsShip, "Graphics\\Original\\BlobsSpaceShip", TileMetrics.TileWidth, TileMetrics.TileHeight);
+        resources.AddSpriteResource(ResourceNames.Redrawn.BlobsShip, "Graphics\\Enhanced\\BlobsSpaceShip", 156, 128);
+        resources.AddSpriteResource(Assets.Graphics.BlobsShipHazardLights, "Graphics\\Enhanced\\BlobsSpaceShipHazardLights", 156, 128);
+        resources.AddSpriteResource(Assets.Graphics.BlobsShipHeadLights, "Graphics\\Enhanced\\BlobsSpaceShipHeadLights", 156, 128);
 
 
         resources.AddSpriteResource(Assets.Graphics.BlankingTile, "Graphics\\BlankingTile", TileMetrics.TileWidth, TileMetrics.TileHeight);
 
-        resources.AddSpriteResource(Assets.Graphics.BreakableBridge, "Graphics\\BreakableBridge", TileMetrics.TileWidth, TileMetrics.TileHeight);
-        resources.AddSpriteResource(Assets.Graphics.BreakableBridgeOriginal, "Graphics\\BreakableBridgeOriginal", TileMetrics.TileWidth, TileMetrics.TileHeight);
+        resources.AddSpriteResource(Assets.Graphics.BreakableBridge, "Graphics\\Enhanced\\BreakableBridge", TileMetrics.TileWidth, TileMetrics.TileHeight);
+        resources.AddSpriteResource(Assets.Graphics.BreakableBridgeOriginal, "Graphics\\Original\\BreakableBridge", TileMetrics.TileWidth, TileMetrics.TileHeight);
     }
 
     private static void StatusPanelGraphics(ResourceManager resources)
@@ -185,9 +200,7 @@ internal static class ContentManifest
         resources.AddSpriteResource(Assets.Graphics.PanelNumbers, "Graphics\\PanelNumbers", 29, 29);
         resources.AddSpriteResource(Assets.Graphics.StatusPanelOverlay, "Graphics\\StatusPanelOverlay", 966, 135);
 
-        resources.AddSpriteResource(Assets.Graphics.ParticleSprite, "Graphics\\BouncingParticle", 32, 32);
-        resources.AddSpriteResource(Assets.Graphics.CollisionTile, "Graphics\\CollisionTile", TileMetrics.CollisionCellWidth, TileMetrics.CollisionCellHeight);
-    }
+        resources.AddSpriteResource(Assets.Graphics.ParticleSprite, "Graphics\\BouncingParticle", 32, 32);    }
 
     private static void ParticleEffects(ResourceManager resources)
     {
@@ -213,11 +226,15 @@ internal static class ContentManifest
         resources.AddParticleResource(Assets.Effects.BlobFragmentExplosion, "ParticleEffects\\BlobFragmentExplosion");
     }
 
+    /// <summary>
+    ///     All three are the redrawn set's own: <c>AnimTile.Draw</c> draws nothing under the 1985
+    ///     artwork, whose tiles do not animate.
+    /// </summary>
     private static void AnimationTiles(ResourceManager resources)
     {
-        resources.AddAnimatedSpriteResource(Assets.Animations.BreakableBridges, "Graphics\\BreakableBridgeAnim", TileMetrics.TileWidth, 8, (int)ActionTiles.BreakableBridges, 4);
-        resources.AddAnimatedSpriteResource(Assets.Animations.TeleporterPadsOccupied, "Graphics\\TeleporterPadAnimationOccupied", TileMetrics.TileWidth, TileMetrics.TileHeight, (int)ActionTiles.ShuttlePlatform, 8);
-        resources.AddAnimatedSpriteResource(Assets.Animations.TeleporterPadsUnoccupied, "Graphics\\TeleporterPadAnimationUnoccupied", TileMetrics.TileWidth, TileMetrics.TileHeight, (int)ActionTiles.RemovedShuttlePlatform, 1);
+        resources.AddAnimatedSpriteResource(Assets.Animations.BreakableBridges, "Graphics\\Enhanced\\BreakableBridgeAnim", TileMetrics.TileWidth, 8, (int)ActionTiles.BreakableBridges, 4);
+        resources.AddAnimatedSpriteResource(Assets.Animations.TeleporterPadsOccupied, "Graphics\\Enhanced\\TeleporterPadAnimationOccupied", TileMetrics.TileWidth, TileMetrics.TileHeight, (int)ActionTiles.ShuttlePlatform, 8);
+        resources.AddAnimatedSpriteResource(Assets.Animations.TeleporterPadsUnoccupied, "Graphics\\Enhanced\\TeleporterPadAnimationUnoccupied", TileMetrics.TileWidth, TileMetrics.TileHeight, (int)ActionTiles.RemovedShuttlePlatform, 1);
     }
 
     private static void Sounds(ResourceManager resources)
