@@ -31,7 +31,7 @@
           publishes the GitHub Release. So a bump is a release and nothing else is: see
           the Versioning section of plans/BUILD.md before changing it.
         -->
-        <Version>1.0.0</Version>
+        <Version>1.1.0</Version>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <!--
