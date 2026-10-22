@@ -9,10 +9,9 @@
 // square. Trying to do this with Electric.fx first is what showed why it needs its own: that one
 // spreads light from bright texels with four taps, which is a rim at four pixels and four ghost
 // copies at twenty, where a halo wants a smooth falloff the size of the tile again.
-//
-// ps_2_0, because Content.mgcb is built /profile:Reach.
 
-sampler2D SpriteTexture : register(s0);
+Texture2D SpriteTexture : register(t0);
+SamplerState SpriteTextureSampler : register(s0);
 
 // The square the tile is drawn in, within its sheet. Not to read from - nothing here samples - but
 // to turn a point in the sheet into a point in the halo.
@@ -28,7 +27,7 @@ float Falloff;
 // wider than it is tall gives an oval rather than a halo.
 float YOverX;
 
-float4 Halo(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
+float4 Halo(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target
 {
     float2 fromMiddle = (texCoord - SpriteRect.xy) / SpriteRect.zw - 0.5;
 
@@ -52,6 +51,6 @@ technique Halo
 {
     pass Glow
     {
-        PixelShader = compile ps_2_0 Halo();
+        PixelShader = compile ps_6_0 Halo();
     }
 }

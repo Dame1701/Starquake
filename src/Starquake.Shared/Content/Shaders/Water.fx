@@ -9,10 +9,9 @@
 // overlay: what sells water is the room behind it moving, and nothing drawn over the top can do
 // that. The playfield is already composed into a render target by the time this runs, so it is
 // there to be read.
-//
-// ps_2_0, because Content.mgcb is built /profile:Reach.
 
-sampler2D SpriteTexture : register(s0);
+Texture2D SpriteTexture : register(t0);
+SamplerState SpriteTextureSampler : register(s0);
 
 // Where the surface sits, as a fraction down the picture, and the reciprocal of how far below it
 // the water reaches its full colour. The divide is done on the processor because it never changes
@@ -46,7 +45,7 @@ float3 SurfaceColour;
 // How thick the bright line at the surface is, as a fraction of the picture.
 float SurfaceThickness;
 
-float4 Flooded(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
+float4 Flooded(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target
 {
     // How far below the surface this pixel is. Negative above it, which is the air.
     float below = texCoord.y - Waterline;
@@ -64,7 +63,7 @@ float4 Flooded(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
 
     float2 uv = saturate(float2(texCoord.x + pushed * under, texCoord.y));
 
-    float4 room = tex2D(SpriteTexture, uv);
+    float4 room = SpriteTexture.Sample(SpriteTextureSampler, uv);
 
     // Greener and darker with depth, the way looking down through water goes - but already
     // coloured at the surface rather than only once it is deep, or the first stretch below the
@@ -91,6 +90,6 @@ technique Flooded
 {
     pass Submerge
     {
-        PixelShader = compile ps_2_0 Flooded();
+        PixelShader = compile ps_6_0 Flooded();
     }
 }

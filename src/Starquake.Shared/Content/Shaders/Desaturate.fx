@@ -12,18 +12,16 @@
 // each channel on its own, and turning a colour grey needs the three channels added together,
 // which no multiplier can do. The darkening half could be a tint, but it belongs with the
 // draining rather than in a second pass over the same pixels.
-//
-// ps_2_0 because Content.mgcb is built /profile:Reach, which allows no higher. There is room
-// to spare - this is a dot product, a lerp and a multiply.
 
-sampler2D SpriteTexture : register(s0);
+Texture2D SpriteTexture : register(t0);
+SamplerState SpriteTextureSampler : register(s0);
 
 float Saturation;
 float Brightness;
 
-float4 DrainTheColour(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
+float4 DrainTheColour(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target
 {
-    float4 texel = tex2D(SpriteTexture, texCoord) * tint;
+    float4 texel = SpriteTexture.Sample(SpriteTextureSampler, texCoord) * tint;
 
     // Rec. 601 luma. The green weight is the large one because the eye reads most of a
     // picture's brightness out of green.
@@ -41,7 +39,7 @@ technique Desaturate
 {
     pass DrainIt
     {
-        PixelShader = compile ps_2_0 DrainTheColour();
+        PixelShader = compile ps_6_0 DrainTheColour();
     
     }
 }

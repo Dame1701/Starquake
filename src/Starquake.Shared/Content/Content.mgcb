@@ -3,7 +3,7 @@
 
 /outputDir:bin
 /intermediateDir:obj
-/platform:DesktopGL
+/platform:DesktopVK
 /config:
 /profile:Reach
 /compress:False

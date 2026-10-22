@@ -8,10 +8,9 @@
 // A sibling of TeleportArrival.fx and a deliberately different shape: that one is standing waves
 // settling, because arriving somewhere is a thing that happens *to* the room. This is a twist
 // about a point, because something has been put *into* it and the room is answering.
-//
-// ps_2_0, because Content.mgcb is built /profile:Reach.
 
-sampler2D SpriteTexture : register(s0);
+Texture2D SpriteTexture : register(t0);
+SamplerState SpriteTextureSampler : register(s0);
 
 // One as the part lands and nought once the room has recovered.
 float Strength;
@@ -33,7 +32,7 @@ float Phase;
 float3 SurgeColour;
 float Surge;
 
-float4 Wring(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
+float4 Wring(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target
 {
     float2 fromSlot = texCoord - Centre;
 
@@ -57,7 +56,7 @@ float4 Wring(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
         fromSlot.x * wringSin + fromSlot.y * wringCos);
 
     // Held inside the picture, or a tap off the edge smears the outermost row across the border.
-    float4 room = tex2D(SpriteTexture, saturate(Centre + wrung));
+    float4 room = SpriteTexture.Sample(SpriteTextureSampler, saturate(Centre + wrung));
 
     // The core's own light coming back out through the room, strongest where the part went in.
     float3 thrown = SurgeColour * (Surge * Strength * near * near);
@@ -69,6 +68,6 @@ technique Wring
 {
     pass TakeIt
     {
-        PixelShader = compile ps_2_0 Wring();
+        PixelShader = compile ps_6_0 Wring();
     }
 }

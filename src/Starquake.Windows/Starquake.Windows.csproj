@@ -11,29 +11,20 @@
 
     <ItemGroup>
         <!--
-          DesktopGL, not WindowsDX, and net10.0 rather than net10.0-windows because of it.
+          Vulkan, the same as the Linux and macOS heads, and net10.0 rather than net10.0-windows
+          because nothing here needs Windows Forms.
 
-          WindowsDX was the original choice and it cost more than it bought. Its content is
-          built by MGCB's Windows platform, which rejects the ps_2_0 shaders this game is
-          written in - "must be SM 4.0 level 9.1 or higher" - so that head could never build
-          its own content on any machine; and it brings Windows Forms and SharpDX with it,
-          neither of which Microsoft lists as supported under NativeAOT, which left the one
-          head nobody could prove.
-
-          DesktopGL is the flavour the Linux and macOS heads already run, so this head now
-          renders through SDL and OpenGL on a path that is exercised daily rather than one of
-          its own. MonoGame.Library.SDL ships a win-x64 SDL2.dll and OpenAL a win-x64
-          openal.dll, so nothing has to be found on the player's machine. See BUILD.md.
+          The runtime package ships mgruntime.dll for win-x64 and win-arm64, with SDL inside
+          it. vulkan-1.dll comes with the graphics driver. See BUILD.md.
         -->
-        <PackageReference Include="MonoGame.Framework.DesktopGL"/>
+        <PackageReference Include="MonoGame.Framework.Native"/>
+        <PackageReference Include="MonoGame.Runtime.Windows.Vulkan"/>
     </ItemGroup>
 
     <ItemGroup>
         <!--
-          The window icon, and new with DesktopGL. MonoGame's SdlGameWindow looks for an
-          embedded "Icon.bmp" in the entry assembly and falls back to its own MonoGame logo
-          when there isn't one; WindowsDX put the window up through WinForms and took its icon
-          from ApplicationIcon instead, so this head never needed the resource before.
+          The window icon. MonoGame's NativeGameWindow looks for an embedded "Icon.bmp" in the
+          entry assembly and falls back to its own MonoGame logo when there isn't one.
 
           ApplicationIcon stays: that is the icon Explorer draws on Starquake.exe itself, which
           is a different thing from the icon on the window. This is the square master, the same

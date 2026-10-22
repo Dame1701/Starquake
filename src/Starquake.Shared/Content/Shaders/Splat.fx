@@ -8,10 +8,9 @@
 //
 // Only the organic ones. Spiky and conveyor nasties are machines and keep the explosion they have
 // always had - Nasty.DrawDeath picks between the two, and the same test picks their particles.
-//
-// ps_2_0, because Content.mgcb is built /profile:Reach.
 
-sampler2D SpriteTexture : register(s0);
+Texture2D SpriteTexture : register(t0);
+SamplerState SpriteTextureSampler : register(s0);
 
 // Where this sprite sits in its sheet, in texture coordinates: xy the corner, zw the size. The
 // nasties share a sheet, so nothing may be read outside this rectangle or it would be the nasty
@@ -32,9 +31,9 @@ float RimBrightness;
 // How much the boundary wanders. At nought the body dissolves as a clean oval.
 float Lumpiness;
 
-float4 Splat(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
+float4 Splat(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target
 {
-    float4 flesh = tex2D(SpriteTexture, texCoord);
+    float4 flesh = SpriteTexture.Sample(SpriteTextureSampler, texCoord);
 
     float2 local = (texCoord - SpriteRect.xy) / SpriteRect.zw;
     float2 fromMiddle = local - 0.5;
@@ -73,6 +72,6 @@ technique Splat
 {
     pass ComeApart
     {
-        PixelShader = compile ps_2_0 Splat();
+        PixelShader = compile ps_6_0 Splat();
     }
 }

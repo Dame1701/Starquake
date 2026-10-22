@@ -14,8 +14,6 @@
 // always were. The same pass serves both states, because the difference between them is not a
 // colour: a locked door is a sheet drawn right across the gap, and an open one is that sheet
 // pulled back onto its jambs leaving the middle clear to walk through. DrawBack is which.
-//
-// ps_2_0, because Content.mgcb is built /profile:Reach.
 
 // What the field burns. One colour rather than two, because the red and the green are crossfaded
 // on the processor as the door opens - see ForceFieldSettings.
@@ -48,7 +46,7 @@ float PostGlow;
 // The burst at the moment the door gives way. Nought for all but a fraction of a second.
 float Flash;
 
-float4 Field(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
+float4 Field(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target
 {
     // The quad is the doorway itself, so nothing is sampled: x runs from one jamb to the other
     // and y from the lintel to the floor.
@@ -95,6 +93,6 @@ technique Field
 {
     pass Bar
     {
-        PixelShader = compile ps_2_0 Field();
+        PixelShader = compile ps_6_0 Field();
     }
 }

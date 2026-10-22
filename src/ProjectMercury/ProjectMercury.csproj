@@ -7,11 +7,8 @@
   is a net8.0 application, and a net10.0 assembly cannot be loaded into it. The game is
   free to target net10.0 and reference this.
 
-  One MonoGame flavour, DesktopGL, because that is what every head uses now. This used to
-  multi-target net8.0 and net8.0-windows so the Windows head could have WindowsDX; the
-  flavours share an assembly identity and cannot meet in one output folder, so a second
-  target framework was the only way to build both. Moving Windows to DesktopGL removed the
-  reason for it.
+  It references MonoGame.Framework.Native, the managed framework every head uses. That
+  package is netstandard2.1, so it loads into MGCB and into the game alike.
 
   The 25 #if WINDOWS blocks through these sources are inert and always were: nothing here
   has ever defined that symbol. They are upstream XNA-era guards around [Serializable] and
@@ -37,7 +34,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MonoGame.Framework.DesktopGL"/>
+        <PackageReference Include="MonoGame.Framework.Native"/>
     </ItemGroup>
 
 </Project>

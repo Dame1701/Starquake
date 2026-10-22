@@ -13,10 +13,9 @@
 // Only the redrawn artwork goes through this. The 1985 graphics keep their own arc untouched -
 // F8 is meant to show what the game looked like, not what it would look like with today's
 // shaders on it.
-//
-// ps_2_0, because Content.mgcb is built /profile:Reach.
 
-sampler2D SpriteTexture : register(s0);
+Texture2D SpriteTexture : register(t0);
+SamplerState SpriteTextureSampler : register(s0);
 
 // This frame's own square of the strip. The arc is ten frames side by side, so a tap that wanders
 // out of this rectangle lands in the next frame of the animation.
@@ -59,20 +58,20 @@ float Intensity(float3 colour)
     return max(colour.r, max(colour.g, colour.b));
 }
 
-float4 Electric(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
+float4 Electric(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target
 {
-    float4 arc = tex2D(SpriteTexture, texCoord);
+    float4 arc = SpriteTexture.Sample(SpriteTextureSampler, texCoord);
 
     // Four taps at the corners rather than the sides, for the reason Crt.fx gives: the sampler is
     // linear, so a corner tap returns the average of the four texels it sits among, and four of
     // them cover the ring instead of four points on it.
-    float4 spill = tex2D(SpriteTexture, OnThisFrame(texCoord + GlowStep));
-    spill += tex2D(SpriteTexture, OnThisFrame(texCoord - GlowStep));
+    float4 spill = SpriteTexture.Sample(SpriteTextureSampler, OnThisFrame(texCoord + GlowStep));
+    spill += SpriteTexture.Sample(SpriteTextureSampler, OnThisFrame(texCoord - GlowStep));
 
     float2 across = float2(GlowStep.x, -GlowStep.y);
 
-    spill += tex2D(SpriteTexture, OnThisFrame(texCoord + across));
-    spill += tex2D(SpriteTexture, OnThisFrame(texCoord - across));
+    spill += SpriteTexture.Sample(SpriteTextureSampler, OnThisFrame(texCoord + across));
+    spill += SpriteTexture.Sample(SpriteTextureSampler, OnThisFrame(texCoord - across));
     spill *= 0.25;
 
     float halo = Intensity(spill.rgb);
@@ -106,6 +105,6 @@ technique Electric
 {
     pass Burn
     {
-        PixelShader = compile ps_2_0 Electric();
+        PixelShader = compile ps_6_0 Electric();
     }
 }

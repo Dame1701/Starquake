@@ -2,12 +2,9 @@
   The game itself. Every platform builds from these sources, and none of them is
   platform-specific.
 
-  One target framework and one MonoGame flavour, because every head is DesktopGL - Windows
-  included. This project used to multi-target net10.0 and net10.0-windows so that the Windows
-  head could have MonoGame.Framework.WindowsDX: the flavours share an assembly identity and
-  cannot meet in one output folder, so a second target framework was the only way to build
-  both. Moving Windows to DesktopGL removed the reason, and with it EnableWindowsTargeting,
-  the WINDOWS compilation symbol, and the conditional content build. See BUILD.md.
+  One target framework and one MonoGame platform, DesktopVK, because every head renders
+  through Vulkan. The managed framework is the same on all three; only the native runtime
+  package differs, and each head names its own. See BUILD.md.
 
   Program.cs is deliberately excluded: a .NET entry point has to be compiled into the
   executable itself, so each head links that one file in. See Starquake.Shared.props.
@@ -19,6 +16,9 @@
         <OutputType>Library</OutputType>
         <RootNamespace>Starquake</RootNamespace>
         <AssemblyName>Starquake.Shared</AssemblyName>
+        <!-- MonoGame.Framework.Native does not set this, and the content build refuses to run
+             without it. It picks the folder MGCB writes to and the shader target. -->
+        <MonoGamePlatform>DesktopVK</MonoGamePlatform>
         <TieredCompilation>false</TieredCompilation>
         <Nullable>enable</Nullable>
         <!-- Content.mgcb is named explicitly below; don't glob for it as well. -->
@@ -85,16 +85,12 @@
     <ItemGroup>
         <!--
           The content is built here, once, rather than in each head, and reaches each head's
-          output through the project reference. There is one set of .xnb for every platform now:
-          MGCB keys its output folder off the MonoGamePlatform that the MonoGame package sets,
-          and with DesktopGL everywhere that is a single DesktopGL folder all three heads share.
-          When WindowsDX was in the solution it was also a race to avoid - two heads on the same
-          platform writing the same files - which no longer arises.
+          output through the project reference. There is one set of .xnb for every platform:
+          MGCB keys its output folder off MonoGamePlatform, and with DesktopVK everywhere that is
+          a single folder all three heads share.
 
-          Shaders need a compiler MonoGame does not ship. On Windows it uses the DirectX one
-          already on the machine; on macOS and Linux it runs that same Windows compiler under
-          Wine and wants MGFXC_WINE_PATH set. That is a requirement of the machine doing the
-          build, not of the platform being built for. See BUILD.md.
+          Shaders are compiled to SPIR-V by the DXC that MGCB ships for each host, so the
+          content builds on Windows, macOS and Linux with nothing else installed. See BUILD.md.
         -->
         <MonoGameContentReference Include="Content\Content.mgcb" Condition="'$(PrebuiltContentDir)' == ''"/>
     </ItemGroup>
@@ -124,7 +120,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="MonoGame.Framework.DesktopGL"/>
+        <PackageReference Include="MonoGame.Framework.Native"/>
     </ItemGroup>
 
     <ItemGroup>

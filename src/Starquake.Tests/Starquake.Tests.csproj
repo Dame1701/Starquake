@@ -1,11 +1,11 @@
 ﻿<!--
   Unit tests for the parts of the game that are only maths.
 
-  Single-targeted at net10.0 while Starquake.Shared multi-targets, so a reference to it
-  resolves to the net10.0 build and brings MonoGame.Framework.DesktopGL along. That is fine
-  headlessly: the types the tests touch are plain managed structs, and SDL is only loaded
-  when something constructs a Game or a GraphicsDevice, which no test does. A test that
-  needs a GraphicsDevice does not belong here.
+  The reference to Starquake.Shared brings MonoGame.Framework.Native along, but none of the
+  native runtime packages. That is fine headlessly: the types the tests touch are plain
+  managed structs, and the native library is only loaded when something constructs a Game
+  or a GraphicsDevice, which no test does. A test that needs a GraphicsDevice does not
+  belong here.
 
   The tests run in parallel, which is xunit's default. They used to be held serial by an
   AssemblyInfo.cs that said why: CollisionDetection kept its intermediate values in static

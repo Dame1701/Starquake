@@ -10,10 +10,9 @@
 // here: his own brightness can be mapped onto any colours at all without an existing hue to fight,
 // so he can run from ember through orange to white-hot as the charge climbs. The alarm used to be
 // a flat red tint, which is the same idea with one stop instead of three.
-//
-// ps_2_0, because Content.mgcb is built /profile:Reach.
 
-sampler2D SpriteTexture : register(s0);
+Texture2D SpriteTexture : register(t0);
+SamplerState SpriteTextureSampler : register(s0);
 
 // Blob's own square of his strip. He is eleven frames side by side, so a tap that wanders out of
 // this lands on a different pose of him.
@@ -63,13 +62,13 @@ float2 OnThisFrame(float2 uv)
 // own alpha stands above his neighbours' - no silhouette has to be stored, and it costs four taps.
 float Rim(float2 uv, float here)
 {
-    float around = tex2D(SpriteTexture, OnThisFrame(uv + RimStep)).a;
-    around += tex2D(SpriteTexture, OnThisFrame(uv - RimStep)).a;
+    float around = SpriteTexture.Sample(SpriteTextureSampler, OnThisFrame(uv + RimStep)).a;
+    around += SpriteTexture.Sample(SpriteTextureSampler, OnThisFrame(uv - RimStep)).a;
 
     float2 across = float2(RimStep.x, -RimStep.y);
 
-    around += tex2D(SpriteTexture, OnThisFrame(uv + across)).a;
-    around += tex2D(SpriteTexture, OnThisFrame(uv - across)).a;
+    around += SpriteTexture.Sample(SpriteTextureSampler, OnThisFrame(uv + across)).a;
+    around += SpriteTexture.Sample(SpriteTextureSampler, OnThisFrame(uv - across)).a;
 
     return saturate(here - around * 0.25);
 }
@@ -78,9 +77,9 @@ float Rim(float2 uv, float here)
 // The charge building in him, while the alarm sounds and while he swells.
 // ---------------------------------------------------------------------------------------------
 
-float4 Charging(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
+float4 Charging(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target
 {
-    float4 blob = tex2D(SpriteTexture, texCoord);
+    float4 blob = SpriteTexture.Sample(SpriteTextureSampler, texCoord);
 
     // Greyscale artwork, so any channel is his brightness. Divided back out of the premultiplied
     // alpha, or his soft edges would read as dark and never take any heat.
@@ -110,9 +109,9 @@ float4 Charging(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
 // and a corona gathers on his outline where it is leaving him.
 // ---------------------------------------------------------------------------------------------
 
-float4 Draining(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
+float4 Draining(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target
 {
-    float4 blob = tex2D(SpriteTexture, texCoord);
+    float4 blob = SpriteTexture.Sample(SpriteTextureSampler, texCoord);
 
     // Greyscale artwork, so any channel is his brightness. Divided back out of the premultiplied
     // alpha, or his soft edges would read as dark and take no colour.
@@ -136,9 +135,9 @@ float4 Draining(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
 // Held open and splitting, the beat before the burst.
 // ---------------------------------------------------------------------------------------------
 
-float4 Splitting(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
+float4 Splitting(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target
 {
-    float4 blob = tex2D(SpriteTexture, texCoord);
+    float4 blob = SpriteTexture.Sample(SpriteTextureSampler, texCoord);
 
     float lit = blob.r / max(blob.a, 0.001);
     float2 local = (texCoord - SpriteRect.xy) / SpriteRect.zw;
@@ -176,9 +175,9 @@ float4 Splitting(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
 // the tint, which is per-draw and so costs no second batch.
 // ---------------------------------------------------------------------------------------------
 
-float4 Discharging(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
+float4 Discharging(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target
 {
-    float4 blob = tex2D(SpriteTexture, texCoord);
+    float4 blob = SpriteTexture.Sample(SpriteTextureSampler, texCoord);
 
     float lit = blob.r / max(blob.a, 0.001);
     float skin = Rim(texCoord, blob.a);
@@ -194,7 +193,7 @@ technique Charging
 {
     pass BuildUp
     {
-        PixelShader = compile ps_2_0 Charging();
+        PixelShader = compile ps_6_0 Charging();
     }
 }
 
@@ -202,7 +201,7 @@ technique Draining
 {
     pass LoseIt
     {
-        PixelShader = compile ps_2_0 Draining();
+        PixelShader = compile ps_6_0 Draining();
     }
 }
 
@@ -210,7 +209,7 @@ technique Splitting
 {
     pass OpenUp
     {
-        PixelShader = compile ps_2_0 Splitting();
+        PixelShader = compile ps_6_0 Splitting();
     }
 }
 
@@ -218,6 +217,6 @@ technique Discharging
 {
     pass ComeApart
     {
-        PixelShader = compile ps_2_0 Discharging();
+        PixelShader = compile ps_6_0 Discharging();
     }
 }

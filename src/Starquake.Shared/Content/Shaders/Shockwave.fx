@@ -23,7 +23,8 @@
 // both the distance and the direction; and every amplitude that could be folded into a uniform
 // folded into one. See BUILD.md.
 
-sampler2D SpriteTexture : register(s0);
+Texture2D SpriteTexture : register(t0);
+SamplerState SpriteTextureSampler : register(s0);
 
 // Where the quad sits in its sheet, as the scale and bias that turn a point in the sheet into one
 // measured from the middle of the quad, running minus one to one across it. Two numbers rather
@@ -82,7 +83,7 @@ float Intensity;
 // goes rather than meeting the corner and showing the square it was drawn in.
 float OverRimFade;
 
-float4 Blast(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
+float4 Blast(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target
 {
     float2 fromMiddle = texCoord * QuadScale - QuadBias;
 
@@ -165,6 +166,6 @@ technique Blast
 {
     pass Ring
     {
-        PixelShader = compile ps_2_0 Blast();
+        PixelShader = compile ps_6_0 Blast();
     }
 }

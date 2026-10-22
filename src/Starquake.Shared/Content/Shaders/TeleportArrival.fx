@@ -8,10 +8,9 @@
 // It displaces where the picture is read from rather than drawing anything over it, which is what
 // makes it a shimmer rather than a veil: the room itself is what is moving, and when the waves are
 // gone the picture is exactly the one that was there all along.
-//
-// ps_2_0, because Content.mgcb is built /profile:Reach.
 
-sampler2D SpriteTexture : register(s0);
+Texture2D SpriteTexture : register(t0);
+SamplerState SpriteTextureSampler : register(s0);
 
 // One as Blob arrives and nought once the room has settled. Everything below is scaled by it, so
 // at nought this shader is the picture untouched.
@@ -29,7 +28,7 @@ float2 Frequency;
 float Glimmer;
 float3 ArrivalColour;
 
-float4 Shimmer(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
+float4 Shimmer(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target
 {
     // Each axis pushed by a wave running along the other, so the picture moves in two directions
     // at once rather than sliding bodily to one side. The two frequencies do not divide one
@@ -41,7 +40,7 @@ float4 Shimmer(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
 
     // Held inside the picture. The sampler clamps as well, but a tap off the edge would smear the
     // outermost row of pixels across the border, which reads as the room leaking.
-    float4 room = tex2D(SpriteTexture, saturate(pushed));
+    float4 room = SpriteTexture.Sample(SpriteTextureSampler, saturate(pushed));
 
     // The light swims with the waves rather than evenly, so the shimmer is in the brightness as
     // well as in the shape - a displacement alone reads as a wobble rather than as energy.
@@ -58,6 +57,6 @@ technique Shimmer
 {
     pass Settle
     {
-        PixelShader = compile ps_2_0 Shimmer();
+        PixelShader = compile ps_6_0 Shimmer();
     }
 }

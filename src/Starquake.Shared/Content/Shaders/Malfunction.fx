@@ -14,10 +14,9 @@
 //
 // Deliberately not a tube. Shaders/Crt.fx already scans, bows and glows the whole composition
 // this is composed into, so there is not a scanline here: this is the signal going, not the glass.
-//
-// ps_2_0, because Content.mgcb is built /profile:Reach.
 
-sampler2D PageTexture : register(s0);
+Texture2D PageTexture : register(t0);
+SamplerState PageTextureSampler : register(s0);
 
 // How badly the computer is failing this frame, nought to one. Everything below is scaled by it,
 // so at nought this shader is the page untouched.
@@ -47,7 +46,7 @@ float ChromaSplit;
 float Dropout;
 float3 SignalColour;
 
-float4 Failing(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
+float4 Failing(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target
 {
     // The hold going. Only where the picture is read from moves, so the bands below are measured
     // against the glass and stay put while the picture slides through them - which is what they do
@@ -80,9 +79,9 @@ float4 Failing(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
     // the fringing - a tint cannot do it, because the channels have to come from different places.
     float split = ChromaSplit * Breakup;
 
-    float4 page = tex2D(PageTexture, uv);
-    float red = tex2D(PageTexture, frac(uv + float2(split, 0.0))).r;
-    float blue = tex2D(PageTexture, frac(uv - float2(split, 0.0))).b;
+    float4 page = PageTexture.Sample(PageTextureSampler, uv);
+    float red = PageTexture.Sample(PageTextureSampler, frac(uv + float2(split, 0.0))).r;
+    float blue = PageTexture.Sample(PageTextureSampler, frac(uv - float2(split, 0.0))).b;
 
     float3 lit = float3(red, page.g, blue);
 
@@ -99,6 +98,6 @@ technique Failing
 {
     pass BreakUp
     {
-        PixelShader = compile ps_2_0 Failing();
+        PixelShader = compile ps_6_0 Failing();
     }
 }

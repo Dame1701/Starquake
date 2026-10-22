@@ -10,8 +10,6 @@
 // drawn on foot was taken out of the game on purpose a long time ago, on the grounds that it
 // added nothing, and putting it back proved the point: what the shot wanted was not a picture of
 // a flame but light of its own.
-//
-// ps_2_0, because Content.mgcb is built /profile:Reach.
 
 // How tight the white line down the middle is, as a reciprocal, and the colours of the line and of
 // what spreads off it. The three reciprocals in here are worked out on the processor because they
@@ -45,7 +43,7 @@ float HeadStretch;
 float HeadBoost;
 float BackShare;
 
-float4 Beam(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
+float4 Beam(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target
 {
     // The quad runs nought to one along the shot and across it, so nothing is sampled and there is
     // no artwork to be in step with - this is drawn over a plain filled rectangle.
@@ -95,6 +93,6 @@ technique Beam
 {
     pass Fire
     {
-        PixelShader = compile ps_2_0 Beam();
+        PixelShader = compile ps_6_0 Beam();
     }
 }

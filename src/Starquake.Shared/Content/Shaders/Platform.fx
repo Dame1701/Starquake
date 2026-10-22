@@ -13,10 +13,9 @@
 //
 // The render target is one to one with the sprite and drawn whole, so there is no sheet to stray
 // into and no rectangle to clamp against - unlike every other sprite shader here.
-//
-// ps_2_0, because Content.mgcb is built /profile:Reach.
 
-sampler2D SpriteTexture : register(s0);
+Texture2D SpriteTexture : register(t0);
+SamplerState SpriteTextureSampler : register(s0);
 
 // One texel of the render target, for looking at what is next to this one.
 float2 TexelSize;
@@ -36,16 +35,16 @@ float EdgeBoost;
 // failure rather than simply being eaten.
 float Charge;
 
-float4 Dissolving(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
+float4 Dissolving(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target
 {
-    float4 slab = tex2D(SpriteTexture, texCoord);
+    float4 slab = SpriteTexture.Sample(SpriteTextureSampler, texCoord);
 
     // What is left around this texel. The dissolve takes single pixels at random, so a texel
     // beside a hole has three solid neighbours and one gone - which is enough to find it.
-    float around = tex2D(SpriteTexture, texCoord + float2(TexelSize.x, 0)).a;
-    around += tex2D(SpriteTexture, texCoord - float2(TexelSize.x, 0)).a;
-    around += tex2D(SpriteTexture, texCoord + float2(0, TexelSize.y)).a;
-    around += tex2D(SpriteTexture, texCoord - float2(0, TexelSize.y)).a;
+    float around = SpriteTexture.Sample(SpriteTextureSampler, texCoord + float2(TexelSize.x, 0)).a;
+    around += SpriteTexture.Sample(SpriteTextureSampler, texCoord - float2(TexelSize.x, 0)).a;
+    around += SpriteTexture.Sample(SpriteTextureSampler, texCoord + float2(0, TexelSize.y)).a;
+    around += SpriteTexture.Sample(SpriteTextureSampler, texCoord - float2(0, TexelSize.y)).a;
     around *= 0.25;
 
     // Solid here and less so around means this texel is on the lip of a hole. Doubled because a
@@ -64,6 +63,6 @@ technique Dissolving
 {
     pass ComeApart
     {
-        PixelShader = compile ps_2_0 Dissolving();
+        PixelShader = compile ps_6_0 Dissolving();
     }
 }

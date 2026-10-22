@@ -10,11 +10,9 @@
 // Nasties are drawn out of a sheet with their neighbours either side, so a shader that samples
 // anywhere but the exact texel it was given will pull in the nasty next door. Every offset sample
 // here is clamped to the rectangle this sprite actually occupies.
-//
-// ps_2_0, because Content.mgcb is built /profile:Reach. There is room to spare - this is three
-// taps and a handful of sums, against the whole-tube pass in Crt.fx which has none.
 
-sampler2D SpriteTexture : register(s0);
+Texture2D SpriteTexture : register(t0);
+SamplerState SpriteTextureSampler : register(s0);
 
 // Where this sprite sits in its sheet, in texture coordinates: xy the corner, zw the size.
 float4 SpriteRect;
@@ -47,7 +45,7 @@ float2 OnThisSprite(float2 uv)
     return clamp(uv, SpriteRect.xy, SpriteRect.xy + SpriteRect.zw);
 }
 
-float4 Materialise(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
+float4 Materialise(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target
 {
     float2 local = (texCoord - SpriteRect.xy) / SpriteRect.zw;
 
@@ -56,12 +54,12 @@ float4 Materialise(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
     // three would smear the shape rather than fringe it.
     float2 apart = ChromaticSpread * (1.0 - Progress);
 
-    float4 centre = tex2D(SpriteTexture, texCoord);
+    float4 centre = SpriteTexture.Sample(SpriteTextureSampler, texCoord);
 
     float3 split = float3(
-        tex2D(SpriteTexture, OnThisSprite(texCoord + apart)).r,
+        SpriteTexture.Sample(SpriteTextureSampler, OnThisSprite(texCoord + apart)).r,
         centre.g,
-        tex2D(SpriteTexture, OnThisSprite(texCoord - apart)).b);
+        SpriteTexture.Sample(SpriteTextureSampler, OnThisSprite(texCoord - apart)).b);
 
     // How far down the screen this texel actually is, once the sprite's own spin is taken back
     // out of it. Half is the middle of the sprite, which is what it turns about.
@@ -103,6 +101,6 @@ technique Materialise
 {
     pass Arrive
     {
-        PixelShader = compile ps_2_0 Materialise();
+        PixelShader = compile ps_6_0 Materialise();
     }
 }

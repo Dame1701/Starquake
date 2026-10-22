@@ -9,12 +9,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MonoGame.Framework.DesktopGL"/>
+        <PackageReference Include="MonoGame.Framework.Native"/>
+        <PackageReference Include="MonoGame.Runtime.Mac.Vulkan"/>
     </ItemGroup>
 
     <ItemGroup>
         <!--
-          The Dock icon while the game is running. MonoGame's SdlGameWindow looks for an
+          The Dock icon while the game is running. MonoGame's NativeGameWindow looks for an
           embedded "Icon.bmp" in the entry assembly and falls back to its own MonoGame logo
           when there isn't one. SDL's macOS backend sets NSApplication's icon from it, which
           overrides Starquake.icns the moment the window opens - so this has to carry the same
@@ -72,7 +73,7 @@
 
     <!--
       The same bundle again, around the publish output rather than the build output. A NativeAOT
-      publish writes one native executable and its two dylibs to PublishDir and never touches
+      publish writes one native executable and libmgruntime.dylib to PublishDir and never touches
       bin/<Config>/<TFM>/, so the bundle CreateAppBundle makes is of the wrong thing entirely:
       it would hold a Starquake.dll and no runtime, and launching it does nothing.
 

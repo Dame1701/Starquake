@@ -8,12 +8,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MonoGame.Framework.DesktopGL"/>
+        <PackageReference Include="MonoGame.Framework.Native"/>
+        <PackageReference Include="MonoGame.Runtime.Linux.Vulkan"/>
     </ItemGroup>
 
     <ItemGroup>
         <!--
-          The window icon. MonoGame's SdlGameWindow looks for an embedded "Icon.bmp" in the
+          The window icon. MonoGame's NativeGameWindow looks for an embedded "Icon.bmp" in the
           entry assembly and falls back to its own MonoGame logo when there isn't one. This is
           the square master; only macOS wants the art inset into a rounded body.
         -->

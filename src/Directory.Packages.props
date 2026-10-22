@@ -5,9 +5,10 @@
   meant finding each of them and getting them all right. With central management a bump is
   one line here and the projects keep naming only what they depend on.
 
-  There is one MonoGame flavour now. WindowsDX used to sit beside DesktopGL here, and the
-  two had to move together or the heads stopped agreeing with the content pipeline; moving
-  the Windows head to DesktopGL retired it.
+  The game renders through Vulkan on every platform. MonoGame.Framework.Native is the managed
+  framework; each Runtime package carries the native library for one operating system, with
+  SDL and MoltenVK built into it. All of them move together with the content builder, or the
+  heads stop agreeing with the content pipeline.
 
   Avalonia is four packages plus Material.Icons.Avalonia, which is what holds the editor at
   11.3 rather than the 11.2 it was generated against; they move together too. 11.3.22 rather
@@ -25,9 +26,12 @@
     </PropertyGroup>
 
     <ItemGroup Label="MonoGame">
-        <PackageVersion Include="MonoGame.Content.Builder.Task" Version="3.8.4.1"/>
-        <PackageVersion Include="MonoGame.Framework.Content.Pipeline" Version="3.8.4.1"/>
-        <PackageVersion Include="MonoGame.Framework.DesktopGL" Version="3.8.4.1"/>
+        <PackageVersion Include="MonoGame.Content.Builder.Task" Version="3.8.6"/>
+        <PackageVersion Include="MonoGame.Framework.Content.Pipeline" Version="3.8.6"/>
+        <PackageVersion Include="MonoGame.Framework.Native" Version="3.8.6"/>
+        <PackageVersion Include="MonoGame.Runtime.Linux.Vulkan" Version="3.8.6"/>
+        <PackageVersion Include="MonoGame.Runtime.Mac.Vulkan" Version="3.8.6"/>
+        <PackageVersion Include="MonoGame.Runtime.Windows.Vulkan" Version="3.8.6"/>
     </ItemGroup>
 
     <ItemGroup Label="Screen data">

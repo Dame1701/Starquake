@@ -8,8 +8,6 @@
 // a one by one white texture, so the coordinates run nought to one across whatever rectangle it is
 // stretched over and every pixel here is worked out rather than sampled. That is why this shader
 // reads no texture at all, and why it needs no sprite rectangle: there is no sheet to stray into.
-//
-// ps_2_0, because Content.mgcb is built /profile:Reach.
 
 // Turns with the logic clock, so the funnel spins at the same rate whatever the display does.
 float Turned;
@@ -38,7 +36,7 @@ float3 ArmColour;
 float Brightness;
 float ThroatBrightness;
 
-float4 Funnel(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
+float4 Funnel(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target
 {
     float2 fromCentre = texCoord - 0.5;
 
@@ -84,6 +82,6 @@ technique Funnel
 {
     pass Turn
     {
-        PixelShader = compile ps_2_0 Funnel();
+        PixelShader = compile ps_6_0 Funnel();
     }
 }

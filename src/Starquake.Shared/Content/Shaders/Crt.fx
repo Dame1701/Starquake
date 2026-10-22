@@ -19,7 +19,8 @@
 // branching and 64 arithmetic slots, so each mode is compiled as only the work it needs. It is
 // also why the glow is four taps and the tests below are step() products rather than ifs.
 
-sampler2D SpriteTexture : register(s0);
+Texture2D SpriteTexture : register(t0);
+SamplerState SpriteTextureSampler : register(s0);
 
 // The back buffer in pixels. Turns a texture coordinate into the output pixel the scanlines and
 // the grille have to line up with.
@@ -94,13 +95,13 @@ float3 Grille(float outputX)
 // scanline, or this. This costs nothing and looks better than the cross it replaces.
 float3 Glow(float2 uv)
 {
-    float3 spill = tex2D(SpriteTexture, uv + GlowStep).rgb;
-    spill += tex2D(SpriteTexture, uv - GlowStep).rgb;
+    float3 spill = SpriteTexture.Sample(SpriteTextureSampler, uv + GlowStep).rgb;
+    spill += SpriteTexture.Sample(SpriteTextureSampler, uv - GlowStep).rgb;
 
     float2 across = float2(GlowStep.x, -GlowStep.y);
 
-    spill += tex2D(SpriteTexture, uv + across).rgb;
-    spill += tex2D(SpriteTexture, uv - across).rgb;
+    spill += SpriteTexture.Sample(SpriteTextureSampler, uv + across).rgb;
+    spill += SpriteTexture.Sample(SpriteTextureSampler, uv - across).rgb;
 
     return spill * 0.25;
 }
@@ -109,9 +110,9 @@ float3 Glow(float2 uv)
 // Scanlines alone.
 // ---------------------------------------------------------------------------------------------
 
-float4 ScanlinesOnly(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
+float4 ScanlinesOnly(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target
 {
-    float4 picture = tex2D(SpriteTexture, texCoord);
+    float4 picture = SpriteTexture.Sample(SpriteTextureSampler, texCoord);
     float2 outputPixel = texCoord * BackBufferSize;
 
     return float4(picture.rgb * Gain * Scanline(outputPixel.y), picture.a);
@@ -121,9 +122,9 @@ float4 ScanlinesOnly(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
 // Scanlines, the grille and the glow. Flat, so the picture still lines up with the window.
 // ---------------------------------------------------------------------------------------------
 
-float4 ScanlinesAndPhosphor(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
+float4 ScanlinesAndPhosphor(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target
 {
-    float4 picture = tex2D(SpriteTexture, texCoord);
+    float4 picture = SpriteTexture.Sample(SpriteTextureSampler, texCoord);
     float2 outputPixel = texCoord * BackBufferSize;
 
     float3 lit = picture.rgb + Glow(texCoord) * GlowAmount;
@@ -138,7 +139,7 @@ float4 ScanlinesAndPhosphor(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) :
 // The whole tube: the picture bowed inside its own frame, with the corners falling away.
 // ---------------------------------------------------------------------------------------------
 
-float4 WholeTube(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
+float4 WholeTube(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : SV_Target
 {
     // Where this pixel is within the composition, from -1 to 1 either way, so the bow is about
     // the middle of the picture and not the middle of the window.
@@ -159,7 +160,7 @@ float4 WholeTube(float4 tint : COLOR0, float2 texCoord : TEXCOORD0) : COLOR0
     float2 uv = CompositionRect.xy + (bowed * 0.5 + 0.5) * CompositionRect.zw;
     float2 outputPixel = texCoord * BackBufferSize;
 
-    float3 picture = tex2D(SpriteTexture, uv).rgb + Glow(uv) * GlowAmount;
+    float3 picture = SpriteTexture.Sample(SpriteTextureSampler, uv).rgb + Glow(uv) * GlowAmount;
 
     // Gathered into one multiply rather than four. The corners of a tube are further from the gun
     // and never quite as bright, and past its edge there is no picture at all.
@@ -175,7 +176,7 @@ technique Scanlines
 {
     pass Lines
     {
-        PixelShader = compile ps_2_0 ScanlinesOnly();
+        PixelShader = compile ps_6_0 ScanlinesOnly();
     }
 }
 
@@ -183,7 +184,7 @@ technique Phosphor
 {
     pass LinesAndGrille
     {
-        PixelShader = compile ps_2_0 ScanlinesAndPhosphor();
+        PixelShader = compile ps_6_0 ScanlinesAndPhosphor();
     }
 }
 
@@ -191,6 +192,6 @@ technique Tube
 {
     pass TheWholeThing
     {
-        PixelShader = compile ps_2_0 WholeTube();
+        PixelShader = compile ps_6_0 WholeTube();
     }
 }
