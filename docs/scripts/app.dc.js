@@ -30,7 +30,7 @@ class Component extends DCLogic {
      published file name; the full name and URL are built from it in renderVals,
      so a new release means bumping `version` and the sizes. */
 
-  version = '1.0.0';
+  version = '1.1.0';
 
   repo = 'https://github.com/Dame1701/Starquake';
 
@@ -41,9 +41,9 @@ class Component extends DCLogic {
       accent: '#2b3fe0',
       asset: 'osx-arm64.dmg',
       package: 'Apple Silicon .dmg',
-      size: '41 MB',
+      size: '45 MB',
       alternates: [
-        { label: 'Intel .dmg', asset: 'osx-x64.dmg', size: '41 MB' }
+        { label: 'Intel .dmg', asset: 'osx-x64.dmg', size: '46 MB' }
       ]
     },
     {
@@ -54,7 +54,7 @@ class Component extends DCLogic {
       package: 'Installer .exe',
       size: '33 MB',
       alternates: [
-        { label: 'Portable .zip', asset: 'win-x64.zip', size: '39 MB' }
+        { label: 'Portable .zip', asset: 'win-x64.zip', size: '38 MB' }
       ]
     },
     {
@@ -65,8 +65,8 @@ class Component extends DCLogic {
       package: 'x64 .AppImage',
       size: '38 MB',
       alternates: [
-        { label: 'x64 .tar.gz',     asset: 'linux-x64.tar.gz',      size: '39 MB' },
-        { label: 'ARM64 .AppImage', asset: 'linux-arm64.AppImage',  size: '38 MB' },
+        { label: 'x64 .tar.gz',     asset: 'linux-x64.tar.gz',      size: '38 MB' },
+        { label: 'ARM64 .AppImage', asset: 'linux-arm64.AppImage',  size: '37 MB' },
         { label: 'ARM64 .tar.gz',   asset: 'linux-arm64.tar.gz',    size: '38 MB' }
       ]
     }
