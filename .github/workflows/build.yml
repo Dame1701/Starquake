@@ -4,13 +4,10 @@
 # is exactly what a `git bisect` six months from now cannot verify. Directory.Build.props sets
 # TreatWarningsAsErrors, so a warning fails the build here rather than scrolling past in a log.
 #
-# Five jobs, and the shape of them is decided by one fact: MonoGame has no shader compiler of its
-# own. On Windows it uses the DirectX one already on the machine; on macOS and Linux it runs that
-# same Windows compiler under Wine, which is a 450MB install and, since Homebrew disabled its wine
-# casks, a fiddly one. So the content is built once, on the only runner that needs nothing
-# installed to do it, and handed to everything else as an artifact. That is possible at all only
-# because every head is DesktopGL now - one MonoGame platform, one set of .xnb, three consumers.
-# See "Publishing ahead of time" and "CI" in BUILD.md.
+# Five jobs. The content is built once and handed to every publish as an artifact, because every
+# head is DesktopVK - one MonoGame platform, one set of .xnb, three consumers - and building it five
+# times would cost five passes through the art for the same files. See "Publishing ahead of time"
+# and "CI" in BUILD.md.
 
 name: Build
 
@@ -137,8 +134,8 @@ jobs:
 
   # The content, built once for everybody.
   #
-  # On Windows because Windows is the one runner with a shader compiler already on it. The output
-  # is platform-independent - /platform:DesktopGL, the same .xnb the Mac and Linux heads load - so
+  # Any runner could do it: MGCB brings DXC for each host, so the shaders need nothing installed.
+  # The output is platform-independent - /platform:DesktopVK, the same .xnb every head loads - so
   # which runner produced it does not matter to anything downstream.
   content:
     runs-on: windows-latest
@@ -159,7 +156,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: content
-          path: src/Starquake.Shared/Content/bin/DesktopGL/Content
+          path: src/Starquake.Shared/Content/bin/DesktopVK/Content
           retention-days: 7
 
   # One native executable per target, each compiled on its own hardware.
@@ -251,14 +248,6 @@ jobs:
           cp Starquake.Linux/AppRun Starquake.Linux/starquake.desktop Starquake.Linux/Starquake.png AppDir/
           chmod +x AppDir/AppRun AppDir/Starquake
 
-          # MonoGame.Library.SDL carries no arm64 Linux native, so that build arrives without one
-          # and dies on launch. An AppImage is allowed to bring its own, which is the one place
-          # this gap can be closed without asking the player to apt-get anything.
-          if [ ! -f AppDir/libSDL2-2.0.so.0 ]; then
-            sudo apt-get install -y libsdl2-2.0-0
-            cp "$(ldconfig -p | awk '/libSDL2-2.0.so.0/ {print $NF; exit}')" AppDir/
-          fi
-
           arch="$(uname -m)"
           wget -qO appimagetool \
             "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${arch}.AppImage"
@@ -328,7 +317,9 @@ jobs:
           set -eu
           ls -la dist/
           cat > notes.md <<'NOTES'
-          Built ahead of time: there is no .NET runtime to install on any platform.
+          Built ahead of time: there is no .NET runtime to install on any platform. The game
+          renders through Vulkan, so it needs a graphics driver with Vulkan support - any current
+          driver on Windows, Mesa or the vendor's driver on Linux, and nothing extra on macOS.
 
           | Platform | Download | |
           | --- | --- | --- |
@@ -351,8 +342,6 @@ jobs:
 
           **Linux** - the AppImage needs `libfuse2`, which Ubuntu has not shipped by default
           since 22.04: `sudo apt install libfuse2`, or run it with `--appimage-extract-and-run`.
-          The arm64 AppImage carries its own SDL2; the arm64 tarball does not, and wants
-          `sudo apt install libsdl2-2.0-0` before it will start.
           NOTES
           flags=""
           [ "$PRERELEASE" = "true" ] && flags="--prerelease"

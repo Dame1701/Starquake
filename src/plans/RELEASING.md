@@ -120,14 +120,13 @@ version ──┬── content (windows) ──── publish × 5 ────
 - **`namespaces`** fails in about a second if a namespace cycle has appeared.
 - **`build`** compiles and tests with `PrebuiltContentDir` pointed at an empty folder, so it
   reports a compile error in two minutes rather than after MGCB has ground through the artwork.
-- **`content`** builds the `.xnb` once, on Windows, because Windows is the only runner with a
-  shader compiler already on it. Every platform gets the same DesktopGL output.
+- **`content`** builds the `.xnb` once, on Windows, and hands them to every publish. Every
+  platform gets the same DesktopVK output.
 - **`publish`** compiles one native executable per target, each on its own hardware. NativeAOT
   does not cross-compile, which is why this is a matrix of runners.
 - **`release`** runs only when `version` said so, and only after all five publishes succeed.
 
-See BUILD.md for why the content is built once and handed round, and for the Wine that a local
-content build needs on macOS and Linux.
+See BUILD.md for why the content is built once and handed round.
 
 ## Prerequisites
 
