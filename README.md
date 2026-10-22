@@ -42,6 +42,7 @@ These work everywhere, in both debug and release builds:
 | --- | --- |
 | `F3` | Analogue walk on or off: how far the left stick leans sets Blob's walking speed |
 | `F5` | Save a screenshot |
+| `F6` | Frame rate on or off: frames drawn in the last second, and the longest of them |
 | `F8` | Swap between the redrawn artwork and the original 1985 graphics |
 | `F9` | Step the CRT filter: off → scanlines → phosphor grille → bowed tube |
 | `F10` | Backdrops on or off |

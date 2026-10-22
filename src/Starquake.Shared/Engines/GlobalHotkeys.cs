@@ -16,8 +16,8 @@ namespace Starquake.Engines;
 
 /// <summary>
 ///     The keys that work anywhere in the game rather than belonging to a screen: pause,
-///     fullscreen, the backdrops, the artwork swap, the game's speed, the analogue walk, a
-///     screenshot and quit. The
+///     fullscreen, the backdrops, the artwork swap, the game's speed, the analogue walk, the frame
+///     rate, a screenshot and quit. The
 ///     ones that change how the game looks or runs say so through <see cref="ModeAnnouncement" />,
 ///     because otherwise the only way to know which way a toggle has just gone is to recognise the
 ///     result, and they ask for the preferences to be saved so the next run starts the same way.
@@ -37,6 +37,7 @@ internal class GlobalHotkeys(
     GameWindow window,
     ResourceManager resources,
     ModeAnnouncement announce,
+    FrameRateDisplay frameRate,
     Screenshots screenshots,
     LogicRate logicRate,
     Action artworkSwapped,
@@ -51,6 +52,7 @@ internal class GlobalHotkeys(
         SwitchGraphicsSetIfAsked();
         SwitchLogicRateIfAsked();
         ToggleAnalogueWalkIfAsked();
+        ToggleFrameRateIfAsked();
         TakeScreenshotIfAsked();
         QuitIfAsked();
     }
@@ -247,6 +249,22 @@ internal class GlobalHotkeys(
 
         announce.Show(session.AnalogueWalk ? "ANALOGUE WALK ON" : "ANALOGUE WALK OFF");
         preferencesChanged();
+    }
+
+    /// <summary>
+    ///     F6 shows or hides the frame rate. Not saved with the preferences: it is for finding out
+    ///     why the game is not smooth, and should not come back by itself next run.
+    /// </summary>
+    private void ToggleFrameRateIfAsked()
+    {
+        if (input.GetPressedKey() != Keys.F6)
+        {
+            return;
+        }
+
+        frameRate.Showing = !frameRate.Showing;
+
+        announce.Show(frameRate.Showing ? "FRAME RATE ON" : "FRAME RATE OFF");
     }
 
     /// <summary>

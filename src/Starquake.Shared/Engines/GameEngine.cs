@@ -53,6 +53,9 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     ///     cannot be built in the wrong phase.
     /// </summary>
     private readonly ModeAnnouncement _announcement = new();
+
+    /// <summary>F6's frame rate, in the bottom right. Built here for the same reason.</summary>
+    private readonly FrameRateDisplay _frameRate = new();
     private readonly ContentManager _contentMgr;
 
     private readonly GraphicsDeviceManager _graphicsDeviceMgr;
@@ -350,6 +353,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             _window,
             ContentResourceManager,
             _announcement,
+            _frameRate,
             _screenshots,
             _logicRate,
             ArtworkSwapped,
@@ -940,6 +944,8 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     /// </param>
     public void Draw(TimeSpan sinceLastDraw)
     {
+        _frameRate.Count(sinceLastDraw);
+
         CalculatePresentationTransform();
 
         // Before the clear, because what the crossfade wants is what is still in the frame: the last
@@ -982,6 +988,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         // Over the finished picture but before the tube, so the message is part of what the tube
         // shows rather than something laid on the glass.
         _announcement.Draw(Font2, Presentation.Transform);
+        _frameRate.Draw(Font2, Presentation.Transform);
 
         _presenter.Present(sinceLastDraw);
 
