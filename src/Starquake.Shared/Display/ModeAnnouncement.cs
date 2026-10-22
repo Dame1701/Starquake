@@ -1,9 +1,9 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
-using Microsoft.Xna.Framework.Graphics;
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
 using Starquake.Core;
 using Starquake.Fonts;
@@ -54,8 +54,6 @@ internal sealed class ModeAnnouncement
     /// <inheritdoc cref="FadeInStep" />
     private static readonly int FadeOutStep = ColourLevels.Full / LogicClock.Seconds(0.6);
 
-    private int _fade;
-
     private int _framesLeftToHold;
 
     private string _message = string.Empty;
@@ -64,7 +62,7 @@ internal sealed class ModeAnnouncement
     ///     How strongly the message is showing, from nought to <see cref="ColourLevels.Full" />.
     ///     What <see cref="Draw" /> writes with.
     /// </summary>
-    public int Fade => _fade;
+    public int Fade { get; private set; }
 
     /// <summary>
     ///     Says what has just been switched to. Replaces whatever was showing and restarts the hold
@@ -85,12 +83,12 @@ internal sealed class ModeAnnouncement
         if (_framesLeftToHold > 0)
         {
             _framesLeftToHold--;
-            _fade = Ramp.Up(_fade, FadeInStep, ColourLevels.Full);
+            Fade = Ramp.Up(Fade, FadeInStep, ColourLevels.Full);
 
             return;
         }
 
-        _fade = Ramp.Down(_fade, FadeOutStep, ColourLevels.None);
+        Fade = Ramp.Down(Fade, FadeOutStep, ColourLevels.None);
     }
 
     /// <summary>Draws the message over the finished picture.</summary>
@@ -103,7 +101,7 @@ internal sealed class ModeAnnouncement
     /// </remarks>
     public void Draw(BitmapFont font, Matrix transform)
     {
-        if (_fade <= ColourLevels.None || _message.Length == 0)
+        if (Fade <= ColourLevels.None || _message.Length == 0)
         {
             return;
         }
@@ -120,7 +118,7 @@ internal sealed class ModeAnnouncement
             (int)(transform.Translation.Y + lineTop * scale),
             _message,
             Color.White,
-            (byte)_fade,
+            (byte)Fade,
             scale);
         font.End();
     }

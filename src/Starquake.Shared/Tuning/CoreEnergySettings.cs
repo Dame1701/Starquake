@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.Structure;
@@ -77,12 +77,6 @@ internal static class CoreEnergySettings
     /// </summary>
     public const float ThroatShare = 0.55f;
 
-    /// <summary>The colour down the throat of it.</summary>
-    public static Vector3 ThroatColour => new(1f, 0.72f, 0.3f);
-
-    /// <summary>The colour of the arms further out.</summary>
-    public static Vector3 ArmColour => new(0.3f, 0.55f, 1f);
-
     /// <summary>How many beams crawl across the elements at once.</summary>
     public const int BeamCount = 3;
 
@@ -91,6 +85,25 @@ internal static class CoreEnergySettings
 
     /// <summary>How big the arc artwork is drawn as a beam between two elements.</summary>
     public const float BeamScale = 0.85f;
+
+    /// <summary>
+    ///     How much brighter the funnel burns while a slot is being filled, and how much faster it
+    ///     turns. The core is a machine being repaired, so it bears down on the part going in rather
+    ///     than stopping to wait for it.
+    /// </summary>
+    public const float FillingBrightness = 2.1f;
+
+    /// <inheritdoc cref="FillingBrightness" />
+    public const float FillingTurnFaster = 2.6f;
+
+    /// <summary>How many frames the funnel takes to wind up to that and back down.</summary>
+    public static readonly int WindFrames = LogicClock.Seconds(0.35);
+
+    /// <summary>The colour down the throat of it.</summary>
+    public static Vector3 ThroatColour => new(1f, 0.72f, 0.3f);
+
+    /// <summary>The colour of the arms further out.</summary>
+    public static Vector3 ArmColour => new(0.3f, 0.55f, 1f);
 
     /// <summary>How many elements there are to arc between.</summary>
     public static int ElementCount => CoreSite.SpritesAcross * CoreSite.SpritesDown;
@@ -121,19 +134,6 @@ internal static class CoreEnergySettings
             centreX + (int)(Math.Cos(turned) * EmitterOrbit),
             centreY + (int)(Math.Sin(turned) * EmitterOrbit));
     }
-
-    /// <summary>
-    ///     How much brighter the funnel burns while a slot is being filled, and how much faster it
-    ///     turns. The core is a machine being repaired, so it bears down on the part going in rather
-    ///     than stopping to wait for it.
-    /// </summary>
-    public const float FillingBrightness = 2.1f;
-
-    /// <inheritdoc cref="FillingBrightness" />
-    public const float FillingTurnFaster = 2.6f;
-
-    /// <summary>How many frames the funnel takes to wind up to that and back down.</summary>
-    public static readonly int WindFrames = LogicClock.Seconds(0.35);
 
     /// <summary>
     ///     How far the core has wound up towards a filling, nought at rest and one at full bearing.
@@ -195,7 +195,7 @@ internal static class CoreEnergySettings
     public static Point ElementCentre(Point coreTopLeft, int element)
         => new(
             coreTopLeft.X + element % CoreSite.SpritesAcross * SpriteMetrics.SpriteWidth
-            + SpriteMetrics.HalfSpriteWidth,
+                          + SpriteMetrics.HalfSpriteWidth,
             coreTopLeft.Y + element / CoreSite.SpritesAcross * SpriteMetrics.SpriteHeight
-            + SpriteMetrics.HalfSpriteHeight);
+                          + SpriteMetrics.HalfSpriteHeight);
 }

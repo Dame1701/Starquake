@@ -1,9 +1,9 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
-using Microsoft.Xna.Framework.Graphics;
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
 using Starquake.Core;
 
@@ -38,12 +38,10 @@ internal sealed class ArtworkCrossfade(GraphicsDeviceManager graphics)
 
     private bool _holdTheNextFrameCaught;
 
-    private int _fade;
-
     /// <summary>
     ///     How much of the old picture is still showing. Nought when no swap is dissolving.
     /// </summary>
-    public int Fade => _fade;
+    public int Fade { get; private set; }
 
     /// <summary>
     ///     Reports that the artwork has just been switched. Called from the logic frame that did it.
@@ -53,14 +51,14 @@ internal sealed class ArtworkCrossfade(GraphicsDeviceManager graphics)
     public void Start()
     {
         _holdTheNextFrameCaught = true;
-        _fade = ColourLevels.Full;
+        Fade = ColourLevels.Full;
     }
 
     /// <summary>
     ///     One logic frame of the dissolve. Counted in logic frames and never drawn ones, for the
     ///     reason <see cref="ModeAnnouncement" /> gives.
     /// </summary>
-    public void Update() => _fade = Ramp.Down(_fade, FadeStep, ColourLevels.None);
+    public void Update() => Fade = Ramp.Down(Fade, FadeStep, ColourLevels.None);
 
     /// <summary>
     ///     Takes the copy, if a swap has just happened. Must be called before the frame is cleared
@@ -92,13 +90,13 @@ internal sealed class ArtworkCrossfade(GraphicsDeviceManager graphics)
     /// </summary>
     public void Draw()
     {
-        if (_fade <= ColourLevels.None || _heldPicture is not { } held)
+        if (Fade <= ColourLevels.None || _heldPicture is not { } held)
         {
             return;
         }
 
         _batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-        _batch.Draw(held, Vector2.Zero, new Color(_fade, _fade, _fade, _fade));
+        _batch.Draw(held, Vector2.Zero, new Color(Fade, Fade, Fade, Fade));
         _batch.End();
     }
 

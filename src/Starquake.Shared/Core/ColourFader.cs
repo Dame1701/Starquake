@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 
 namespace Starquake.Core;
@@ -22,6 +22,19 @@ internal class ColourFader
     ///     <see cref="TransitionColour" /> and back down once per loop.
     /// </summary>
     public ColourFaderDirection Direction;
+
+    /// <summary>
+    ///     Where the lights sit within this tile, each of which throws a halo. Empty for a tile that
+    ///     does not glow, which is everything but the shuttle tags.
+    /// </summary>
+    /// <remarks>
+    ///     Positions rather than a flag, because the lights are not at a tile's middle. A tag cell is
+    ///     128 by 96 and its lights are blobs of 28 by 36 at one end, with tag 417 having two at
+    ///     opposite ends, so a halo centred on the tile would land in the middle of the launcher with
+    ///     the lights dark at its edges.
+    ///     <para>Measured off the artwork, so they move if the tiles are redrawn.</para>
+    /// </remarks>
+    public Point[] HaloLights = [];
 
     /// <summary>
     ///     How many times the tile is drawn over itself. The blend is additive, so a higher count
@@ -61,17 +74,4 @@ internal class ColourFader
     ///     already there, as the shuttle tags do.
     /// </summary>
     public int UpperTileToDraw;
-
-    /// <summary>
-    ///     Where the lights sit within this tile, each of which throws a halo. Empty for a tile that
-    ///     does not glow, which is everything but the shuttle tags.
-    /// </summary>
-    /// <remarks>
-    ///     Positions rather than a flag, because the lights are not at a tile's middle. A tag cell is
-    ///     128 by 96 and its lights are blobs of 28 by 36 at one end, with tag 417 having two at
-    ///     opposite ends, so a halo centred on the tile would land in the middle of the launcher with
-    ///     the lights dark at its edges.
-    ///     <para>Measured off the artwork, so they move if the tiles are redrawn.</para>
-    /// </remarks>
-    public Point[] HaloLights = [];
 }

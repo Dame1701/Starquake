@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 
@@ -18,11 +18,6 @@ namespace Starquake.Tuning;
 /// </remarks>
 internal static class CoreReplacementSettings
 {
-    /// <summary>
-    ///     How long the core spends picking a part out before it goes in, in logic frames. Without
-    ///     this beat a part simply appears and shrinks.
-    /// </summary>
-    public static readonly int IdentifyFrames = LogicClock.Seconds(1.1);
 
     /// <summary>How far the identified part shakes at its worst, in pixels.</summary>
     private const float ShakeDistance = 2.5f;
@@ -32,9 +27,6 @@ internal static class CoreReplacementSettings
 
     /// <summary>How fast the glow pulses, in radians per logic frame.</summary>
     private const double PulseSpeed = 0.42;
-
-    /// <summary>How long the room takes to recover from a part landing, in logic frames.</summary>
-    public static readonly int SurgeFrames = LogicClock.Seconds(0.9);
 
     /// <summary>How far round the room is wrung at the slot, in radians.</summary>
     public const float Twist = 1.15f;
@@ -48,11 +40,19 @@ internal static class CoreReplacementSettings
     /// <summary>How fast the ripple travels outward, in radians per logic frame.</summary>
     private const double RippleSpeed = 0.5;
 
-    /// <summary>The light the core throws back through the room as it takes a part.</summary>
-    public static Vector3 SurgeColour => new(1f, 0.74f, 0.32f);
-
     /// <summary>How hard that light burns at the slot.</summary>
     public const float Surge = 0.75f;
+    /// <summary>
+    ///     How long the core spends picking a part out before it goes in, in logic frames. Without
+    ///     this beat a part simply appears and shrinks.
+    /// </summary>
+    public static readonly int IdentifyFrames = LogicClock.Seconds(1.1);
+
+    /// <summary>How long the room takes to recover from a part landing, in logic frames.</summary>
+    public static readonly int SurgeFrames = LogicClock.Seconds(0.9);
+
+    /// <summary>The light the core throws back through the room as it takes a part.</summary>
+    public static Vector3 SurgeColour => new(1f, 0.74f, 0.32f);
 
     /// <summary>
     ///     How hard the identified part is glowing and shaking on a given frame. A pulse rather than

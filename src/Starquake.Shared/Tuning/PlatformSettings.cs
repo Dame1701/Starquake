@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 
 namespace Starquake.Tuning;
@@ -17,11 +17,6 @@ namespace Starquake.Tuning;
 /// </remarks>
 internal static class PlatformSettings
 {
-    /// <summary>
-    ///     What a cut edge burns. Close to the arcing blue the rest of the game's energy uses,
-    ///     because a platform conjured out of thin air belongs with it.
-    /// </summary>
-    public static Vector3 EdgeColour => new(0.4f, 0.75f, 1f);
 
     /// <summary>How hard a cut edge burns.</summary>
     public const float EdgeBoost = 1.6f;
@@ -31,6 +26,11 @@ internal static class PlatformSettings
     ///     to failure rather than only being eaten away at the edges.
     /// </summary>
     public const float Charge = 0.35f;
+    /// <summary>
+    ///     What a cut edge burns. Close to the arcing blue the rest of the game's energy uses,
+    ///     because a platform conjured out of thin air belongs with it.
+    /// </summary>
+    public static Vector3 EdgeColour => new(0.4f, 0.75f, 1f);
 
     /// <summary>
     ///     How far through coming apart a platform is, from the countdown it already runs.

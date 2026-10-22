@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Starquake.Constants;
 using Starquake.Core;
 using Starquake.Structure;
@@ -200,7 +200,8 @@ internal static class ContentManifest
         resources.AddSpriteResource(Assets.Graphics.PanelNumbers, "Graphics\\PanelNumbers", 29, 29);
         resources.AddSpriteResource(Assets.Graphics.StatusPanelOverlay, "Graphics\\StatusPanelOverlay", 966, 135);
 
-        resources.AddSpriteResource(Assets.Graphics.ParticleSprite, "Graphics\\BouncingParticle", 32, 32);    }
+        resources.AddSpriteResource(Assets.Graphics.ParticleSprite, "Graphics\\BouncingParticle", 32, 32);
+    }
 
     private static void ParticleEffects(ResourceManager resources)
     {

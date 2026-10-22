@@ -1,7 +1,7 @@
-// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Starquake.Core;
 using Xunit;
 
@@ -63,7 +63,11 @@ public sealed class PreferencesStoreTests : IDisposable
         Preferences read = new PreferencesStore(PreferencesFilePath).Read();
 
         // Assert
-        Assert.Equal(Preferences.Defaults with { CrtMode = CrtMode.Phosphor, Backdrops = false }, read);
+        Assert.Equal(Preferences.Defaults with
+        {
+            CrtMode = CrtMode.Phosphor,
+            Backdrops = false
+        }, read);
     }
 
     /// <summary>

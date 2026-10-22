@@ -1,9 +1,9 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
-using Microsoft.Xna.Framework.Graphics;
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.Animations;
 using Starquake.Constants;
 using Starquake.ContentManagement;
@@ -63,6 +63,42 @@ internal class IntroSequence
     /// </summary>
     private const int EndPauseFrames = LogicClock.FramesPerSecond * 4;
 
+    /// <summary>
+    ///     Where the caption sits and how far apart its lines are. Centred on the playfield, not the
+    ///     composition: the intro draws into the game area's own render target, which is 1024 wide
+    ///     against the composition's 1280, so centring on the wider of the two puts the caption 128
+    ///     pixels right of where it belongs.
+    ///     <para>
+    ///         It is broken across lines because fifty-three characters will not fit across the screen
+    ///         at this size, where the thirty the break leaves will.
+    ///     </para>
+    /// </summary>
+    private const int CaptionTopLine = 180;
+
+    /// <inheritdoc cref="CaptionTopLine" />
+    private const int CaptionLineSpacing = 56;
+    /// <summary>
+    ///     The caption that plays once Blob's ship has come down: what he is here for and the joke the
+    ///     game tells about it, in one breath.
+    /// </summary>
+    /// <remarks>
+    ///     Cut from the 1985 inlay, which is dramatic and then undercuts itself: "If the core of this
+    ///     planet is not rebuilt it will implode causing the whole universe to go 'Ka Boomf!' -
+    ///     Strewth, a Starquake...".
+    ///     <para>
+    ///         <b>"Betta" is deliberate</b>, not a typo. It is the inlay's register and belongs with
+    ///         "Strewth" and "'Cause"; correcting it to "Better" takes the voice out of it.
+    ///     </para>
+    ///     <para>
+    ///         The caption comes <em>after</em> the crash, so it cannot be written as a briefing.
+    ///     </para>
+    /// </remarks>
+    private static readonly string[] Caption =
+    [
+        "Betta rebuild that core",
+        "or the universe goes Ka Boomf!"
+    ];
+
     private readonly BlobDeath _blobKiller;
 
 
@@ -78,6 +114,12 @@ internal class IntroSequence
     private readonly ScreenEffectEngine _screenEffects;
 
     /// <summary>
+    ///     The sparks the wreck throws. The same effect Blob's own fragments strike off the ground
+    ///     with, because a wreck spitting and a part of him bouncing are the same small shower.
+    /// </summary>
+    private readonly IPositionalTriggerParticleEffect _wreckSparks;
+
+    /// <summary>
     ///     The ship's fall, replaced whole at the start of each sequence. Where it comes in, where it
     ///     is going and how fast it drops are all its own.
     /// </summary>
@@ -88,20 +130,6 @@ internal class IntroSequence
 
     private float _rumbleAmount = RumbleFrom;
     private Guid _rumbleSound = Guid.Empty;
-
-    /// <summary>
-    ///     Logic frames since the ship came to rest, which the wreck's electrics are timed off. It
-    ///     keeps counting for the rest of the game: the wreck stays on the landing site and goes on
-    ///     failing for as long as Blob is there to see it.
-    /// </summary>
-    private int _wreckFrame;
-
-    /// <summary>
-    ///     The sparks the wreck throws. The same effect Blob's own fragments strike off the ground
-    ///     with, because a wreck spitting and a part of him bouncing are the same small shower.
-    /// </summary>
-    private readonly IPositionalTriggerParticleEffect _wreckSparks;
-
 
 
     private Guid _shipExplosionSound = Guid.Empty;
@@ -117,6 +145,13 @@ internal class IntroSequence
     private float _shipRotationSpeed;
 
     private int _startPauseCounter;
+
+    /// <summary>
+    ///     Logic frames since the ship came to rest, which the wreck's electrics are timed off. It
+    ///     keeps counting for the rest of the game: the wreck stays on the landing site and goes on
+    ///     failing for as long as Blob is there to see it.
+    /// </summary>
+    private int _wreckFrame;
 
     public IntroSequence(
         ResourceManager resources,
@@ -155,42 +190,6 @@ internal class IntroSequence
     public int BlobSpaceShipXPos => (int)_descent.Position.X + _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).SpriteWidth / 2;
 
     public int BlobSpaceShipYPos => (int)_descent.Position.Y + _resources.GetSpriteCollection(_graphicsSet.Names.BlobsShip).SpriteHeight / 2;
-    /// <summary>
-    ///     The caption that plays once Blob's ship has come down: what he is here for and the joke the
-    ///     game tells about it, in one breath.
-    /// </summary>
-    /// <remarks>
-    ///     Cut from the 1985 inlay, which is dramatic and then undercuts itself: "If the core of this
-    ///     planet is not rebuilt it will implode causing the whole universe to go 'Ka Boomf!' -
-    ///     Strewth, a Starquake...".
-    ///     <para>
-    ///         <b>"Betta" is deliberate</b>, not a typo. It is the inlay's register and belongs with
-    ///         "Strewth" and "'Cause"; correcting it to "Better" takes the voice out of it.
-    ///     </para>
-    ///     <para>
-    ///         The caption comes <em>after</em> the crash, so it cannot be written as a briefing.
-    ///     </para>
-    /// </remarks>
-    private static readonly string[] Caption =
-    [
-        "Betta rebuild that core",
-        "or the universe goes Ka Boomf!"
-    ];
-
-    /// <summary>
-    ///     Where the caption sits and how far apart its lines are. Centred on the playfield, not the
-    ///     composition: the intro draws into the game area's own render target, which is 1024 wide
-    ///     against the composition's 1280, so centring on the wider of the two puts the caption 128
-    ///     pixels right of where it belongs.
-    ///     <para>
-    ///         It is broken across lines because fifty-three characters will not fit across the screen
-    ///         at this size, where the thirty the break leaves will.
-    ///     </para>
-    /// </summary>
-    private const int CaptionTopLine = 180;
-
-    /// <inheritdoc cref="CaptionTopLine" />
-    private const int CaptionLineSpacing = 56;
 
     public IntroSequenceStage SequenceStage { get; private set; } = IntroSequenceStage.None;
 

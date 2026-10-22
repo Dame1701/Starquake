@@ -1,19 +1,21 @@
-/*  
- Copyright © 2009 Project Mercury Team Members (http://mpe.codeplex.com/People/ProjectPeople.aspx)
+// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
 
- This program is licensed under the Microsoft Permissive License (Ms-PL).  You should 
+/*
+ Copyright ï¿½ 2009 Project Mercury Team Members (http://mpe.codeplex.com/People/ProjectPeople.aspx)
+
+ This program is licensed under the Microsoft Permissive License (Ms-PL).  You should
  have received a copy of the license along with the source code.  If not, an online copy
  of the license can be found at http://mpe.codeplex.com/license.
 */
 
-namespace ProjectMercury.Emitters
-{
-    using System;
-    using System.ComponentModel;
-    using Microsoft.Xna.Framework;
-    using Microsoft.Xna.Framework.Content;
-    using Microsoft.Xna.Framework.Graphics;
-    using ProjectMercury.Modifiers;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
+using ProjectMercury.Modifiers;
+
+namespace ProjectMercury.Emitters;
 
 #if MPE_RAISEEVENTS
     /// <summary>
@@ -24,214 +26,215 @@ namespace ProjectMercury.Emitters
     public delegate void ParticleEventHandler(Emitter emitter, ref Particle particle);
 #endif
 
-    /// <summary>
-    /// Defines the base class for a Particle Emitter. The basic implementation releases Particles from a single point.
-    /// </summary>
+/// <summary>
+///     Defines the base class for a Particle Emitter. The basic implementation releases Particles from a single point.
+/// </summary>
 #if WINDOWS
     [TypeConverter("ProjectMercury.Design.Emitters.EmitterTypeConverter, ProjectMercury.Design")]
 #endif
-    public class Emitter
+public class Emitter
+{
+    private static int CreationIndex;
+
+    /// <summary>
+    ///     Gets a default name for the next Emitter.
+    /// </summary>
+    private static string NextEmitterName()
+        => string.Format("Emitter{0:00}", CreationIndex++);
+
+    private string _name;
+
+    /// <summary>
+    ///     Gets or sets the name of the Emitter.
+    /// </summary>
+    public string Name
     {
-        static private int CreationIndex;
-
-        /// <summary>
-        /// Gets a default name for the next Emitter.
-        /// </summary>
-        static private string NextEmitterName()
+        get => _name;
+        set
         {
-            return String.Format("Emitter{0:00}", Emitter.CreationIndex++);
-        }
+            Guard.ArgumentNullOrEmpty("Name", value);
 
-        private string _name;
-
-        /// <summary>
-        /// Gets or sets the name of the Emitter.
-        /// </summary>
-        public string Name
-        {
-            get { return this._name; }
-            set
+            if (Name != value)
             {
-                Guard.ArgumentNullOrEmpty("Name", value);
+                _name = value;
 
-                if (this.Name != value)
-                {
-                    this._name = value;
-
-                    this.OnNameChanged(EventArgs.Empty);
-                }
+                OnNameChanged(EventArgs.Empty);
             }
         }
+    }
 
-        private float TotalSeconds;
+    private float TotalSeconds;
 
-        /// <summary>
-        /// True if the Emitter object has been initialised, else false.
-        /// </summary>
-        [ContentSerializerIgnore]
-        public bool Initialised { get; private set; }
+    /// <summary>
+    ///     True if the Emitter object has been initialised, else false.
+    /// </summary>
+    [ContentSerializerIgnore]
+    public bool Initialised { get; private set; }
 
-        /// <summary>
-        /// Gets or sets a value indicating wether or not the Emitter is enabled (can be triggered).
-        /// </summary>
-        public bool Enabled;
+    /// <summary>
+    ///     Gets or sets a value indicating wether or not the Emitter is enabled (can be triggered).
+    /// </summary>
+    public bool Enabled;
 
-        private int _budget;
+    private int _budget;
 
-        /// <summary>
-        /// Gets or sets the number of Particles which are available to the Emitter.
-        /// </summary>
-        /// <exception cref="System.InvalidOperationException">Thrown if trying to set this property after the Emitter has been initialised.</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if the specified value is less than 1.</exception>
-        public int Budget
+    /// <summary>
+    ///     Gets or sets the number of Particles which are available to the Emitter.
+    /// </summary>
+    /// <exception cref="System.InvalidOperationException">
+    ///     Thrown if trying to set this property after the Emitter has been
+    ///     initialised.
+    /// </exception>
+    /// <exception cref="System.ArgumentOutOfRangeException">Thrown if the specified value is less than 1.</exception>
+    public int Budget
+    {
+        get => _budget;
+        set
         {
-            get { return this._budget; }
-            set
-            {
-                Guard.IsTrue(this.Initialised, "Cannot alter Budget after Emitter is initialised.");
-                Guard.ArgumentLessThan("Budget", value, 1);
+            Guard.IsTrue(Initialised, "Cannot alter Budget after Emitter is initialised.");
+            Guard.ArgumentLessThan("Budget", value, 1);
 
-                this._budget = value;
-            }
+            _budget = value;
         }
+    }
 
-        private float _term;
+    private float _term;
 
-        /// <summary>
-        /// Gets or sets the length of time that released Particles will remain active, in whole and fractional seconds.
-        /// </summary>
-        /// <exception cref="System.InvalidOperationException">Thrown if trying to set this property after the Emitter has been initialised.</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if the supplied value is less than or equal to 0.</exception>
-        public float Term
+    /// <summary>
+    ///     Gets or sets the length of time that released Particles will remain active, in whole and fractional seconds.
+    /// </summary>
+    /// <exception cref="System.InvalidOperationException">
+    ///     Thrown if trying to set this property after the Emitter has been
+    ///     initialised.
+    /// </exception>
+    /// <exception cref="System.ArgumentOutOfRangeException">Thrown if the supplied value is less than or equal to 0.</exception>
+    public float Term
+    {
+        get => _term;
+        set
         {
-            get { return this._term; }
-            set
-            {
-                Guard.IsTrue(this.Initialised, "Cannot alter Term after Emitter is initialised.");
-                Guard.ArgumentNotFinite("Term", value);
-                Guard.ArgumentLessThan("Term", value, float.Epsilon);
+            Guard.IsTrue(Initialised, "Cannot alter Term after Emitter is initialised.");
+            Guard.ArgumentNotFinite("Term", value);
+            Guard.ArgumentLessThan("Term", value, float.Epsilon);
 
-                this._term = value;
-            }
+            _term = value;
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the array of particles managed by the emitter.
-        /// </summary>
-        [ContentSerializerIgnore]
-        public Particle[] Particles;
+    /// <summary>
+    ///     Gets or sets the array of particles managed by the emitter.
+    /// </summary>
+    [ContentSerializerIgnore]
+    public Particle[] Particles;
 
-        private int Idle;
+    private int _releaseQuantity;
 
-        private int _releaseQuantity;
-
-        /// <summary>
-        /// Gets or sets the number of Particles which will be released on each trigger.
-        /// </summary>
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if the specified value is less than 1.</exception>
-        public int ReleaseQuantity
+    /// <summary>
+    ///     Gets or sets the number of Particles which will be released on each trigger.
+    /// </summary>
+    /// <exception cref="System.ArgumentOutOfRangeException">Thrown if the specified value is less than 1.</exception>
+    public int ReleaseQuantity
+    {
+        get => _releaseQuantity;
+        set
         {
-            get { return this._releaseQuantity; }
-            set
-            {
-                Guard.ArgumentLessThan("ReleaseQuantity", value, 1);
+            Guard.ArgumentLessThan("ReleaseQuantity", value, 1);
 
-                this._releaseQuantity = value;
-            }
+            _releaseQuantity = value;
         }
+    }
 
-        /// <summary>
-        /// Gets or sets the speed at which Particles travel when they are released.
-        /// </summary>
-        public VariableFloat ReleaseSpeed;
+    /// <summary>
+    ///     Gets or sets the speed at which Particles travel when they are released.
+    /// </summary>
+    public VariableFloat ReleaseSpeed;
 
-        /// <summary>
-        /// Gets or sets the colour of released Particles.
-        /// </summary>
-        public VariableFloat3 ReleaseColour;
+    /// <summary>
+    ///     Gets or sets the colour of released Particles.
+    /// </summary>
+    public VariableFloat3 ReleaseColour;
 
-        /// <summary>
-        /// Gets or sets the opacity of released Particles.
-        /// </summary>
-        public VariableFloat ReleaseOpacity;
+    /// <summary>
+    ///     Gets or sets the opacity of released Particles.
+    /// </summary>
+    public VariableFloat ReleaseOpacity;
 
-        /// <summary>
-        /// Gets or sets the scale of released particles.
-        /// </summary>
-        public VariableFloat ReleaseScale;
+    /// <summary>
+    ///     Gets or sets the scale of released particles.
+    /// </summary>
+    public VariableFloat ReleaseScale;
 
-        /// <summary>
-        /// Gets or sets the rotation of released Particles.
-        /// </summary>
-        public VariableFloat ReleaseRotation;
+    /// <summary>
+    ///     Gets or sets the rotation of released Particles.
+    /// </summary>
+    public VariableFloat ReleaseRotation;
 
-        /// <summary>
-        /// Gets or sets the initial impulse applied to Particles as they are relased.
-        /// </summary>
-        [ContentSerializer(Optional = true)]
-        public Vector2 ReleaseImpulse;
+    /// <summary>
+    ///     Gets or sets the initial impulse applied to Particles as they are relased.
+    /// </summary>
+    [ContentSerializer(Optional = true)]
+    public Vector2 ReleaseImpulse;
 
-        /// <summary>
-        /// Gets the asset name of a texture to load in the LoadContent method.
-        /// </summary>
-        [ContentSerializer(Optional = true)]
-        public string ParticleTextureAssetName;
+    /// <summary>
+    ///     Gets the asset name of a texture to load in the LoadContent method.
+    /// </summary>
+    [ContentSerializer(Optional = true)]
+    public string ParticleTextureAssetName;
 
-        /// <summary>
-        /// Gets or sets the Texture2D used to display the Particles.
-        /// </summary>
-        [ContentSerializerIgnore]
-        public Texture2D ParticleTexture;
+    /// <summary>
+    ///     Gets or sets the Texture2D used to display the Particles.
+    /// </summary>
+    [ContentSerializerIgnore]
+    public Texture2D ParticleTexture;
 
-        /// <summary>
-        /// Gets the collection of Modifiers which are acting upon the Emitter.
-        /// </summary>
-        public ModifierCollection Modifiers;
+    /// <summary>
+    ///     Gets the collection of Modifiers which are acting upon the Emitter.
+    /// </summary>
+    public ModifierCollection Modifiers;
 
-         /// <summary>
-        /// The blending mode to be used by Renderers when rendering this Emitter.
-        /// </summary>
-        public EmitterBlendMode BlendMode;
+    /// <summary>
+    ///     The blending mode to be used by Renderers when rendering this Emitter.
+    /// </summary>
+    public EmitterBlendMode BlendMode;
 
-        /// <summary>
-        /// The Emitters trigger offset in relation to the ParticleEffect.
-        /// </summary>
-        [ContentSerializer(Optional = true)]
-        public Vector2 TriggerOffset;
+    /// <summary>
+    ///     The Emitters trigger offset in relation to the ParticleEffect.
+    /// </summary>
+    [ContentSerializer(Optional = true)]
+    public Vector2 TriggerOffset;
 
-        /// <summary>
-        /// Defines the minimum amount of time between triggers for the Emitter, expressed in
-        /// whole and fractional seconds. Triggers which occur during this period will be ignored.
-        /// </summary>
-        [ContentSerializer(Optional = true)]
-        public float MinimumTriggerPeriod;
+    /// <summary>
+    ///     Defines the minimum amount of time between triggers for the Emitter, expressed in
+    ///     whole and fractional seconds. Triggers which occur during this period will be ignored.
+    /// </summary>
+    [ContentSerializer(Optional = true)]
+    public float MinimumTriggerPeriod;
 
-        /// <summary>
-        /// Stores the time at which the Emitter was most recently triggered.
-        /// </summary>
-        private float MostRecentTrigger;
+    /// <summary>
+    ///     Stores the time at which the Emitter was most recently triggered.
+    /// </summary>
+    private float MostRecentTrigger;
 
-        /// <summary>
-        /// Gets the number of Particles which are currently active.
-        /// </summary>
-        public int ActiveParticlesCount
+    /// <summary>
+    ///     Gets the number of Particles which are currently active.
+    /// </summary>
+    public int ActiveParticlesCount { get; private set; }
+
+    /// <summary>
+    ///     Raised when the name of the Emitter has been changed.
+    /// </summary>
+    public event EventHandler NameChanged;
+
+    /// <summary>
+    ///     Raises the NameChanged event.
+    /// </summary>
+    protected virtual void OnNameChanged(EventArgs e)
+    {
+        if (NameChanged != null)
         {
-            get { return this.Idle; }
+            NameChanged(this, e);
         }
-
-        /// <summary>
-        /// Raised when the name of the Emitter has been changed.
-        /// </summary>
-        public event EventHandler NameChanged;
-
-        /// <summary>
-        /// Raises the NameChanged event.
-        /// </summary>
-        protected virtual void OnNameChanged(EventArgs e)
-        {
-            if (this.NameChanged != null)
-                this.NameChanged(this, e);
-        }
+    }
 #if MPE_RAISEEVENTS
         /// <summary>
         /// Raised when a Particle is released by the Emitter.
@@ -263,336 +266,349 @@ namespace ProjectMercury.Emitters
                 this.ParticleRetired(this, ref particle);
         }
 #endif
-        /// <summary>
-        /// Instantiates a new instance of the Emitter class.
-        /// </summary>
-        public Emitter()
+    /// <summary>
+    ///     Instantiates a new instance of the Emitter class.
+    /// </summary>
+    public Emitter()
+    {
+        Name = NextEmitterName();
+
+        Enabled = true;
+
+        Modifiers = new ModifierCollection();
+    }
+
+    /// <summary>
+    ///     Returns an unitialised deep copy of the Emitter.
+    /// </summary>
+    /// <returns>A deep copy of the Emitter.</returns>
+    public virtual Emitter DeepCopy()
+    {
+        var emitter = new Emitter();
+
+        CopyBaseFields(emitter);
+
+        return emitter;
+    }
+
+    /// <summary>
+    ///     Copies the fields of the Emitter base class into the specified Emitter.
+    /// </summary>
+    /// <param name="emitter">The Emitter which will be copied into.</param>
+    protected void CopyBaseFields(Emitter emitter)
+    {
+        emitter.BlendMode = BlendMode;
+        emitter.Budget = Budget;
+        emitter.Enabled = Enabled;
+        emitter.MinimumTriggerPeriod = MinimumTriggerPeriod;
+        emitter.Modifiers = Modifiers.DeepCopy();
+        // Kept as it is, not renamed. An emitter is addressed by the name its content file
+        // gives it - the game looks up the two that make a key door's force field, and the
+        // engine's own TimelineController looks one up per timeline event - and every effect
+        // instance is a deep copy, so renaming the parts here left nothing findable by name.
+        emitter.Name = Name;
+        emitter.ParticleTexture = ParticleTexture;
+        emitter.ParticleTextureAssetName = ParticleTextureAssetName ?? string.Empty;
+        emitter.ReleaseColour = ReleaseColour;
+        emitter.ReleaseOpacity = ReleaseOpacity;
+        emitter.ReleaseQuantity = ReleaseQuantity;
+        emitter.ReleaseRotation = ReleaseRotation;
+        emitter.ReleaseScale = ReleaseScale;
+        emitter.ReleaseSpeed = ReleaseSpeed;
+        emitter.ReleaseImpulse = ReleaseImpulse;
+        emitter.Term = Term;
+        emitter.TriggerOffset = TriggerOffset;
+    }
+
+    /// <summary>
+    ///     Initialises the Emitter.
+    /// </summary>
+    /// <exception cref="System.InvalidOperationException">Thrown if the Term and/or Budget properties have not been set.</exception>
+    public virtual void Initialise()
+    {
+        Guard.IsTrue(Term < float.Epsilon, "Term property has not been assigned a valid value.");
+        Guard.IsTrue(Budget < 1, "Budget property has not been assigned a valid value.");
+
+        Particles = new Particle[Budget];
+
+        ActiveParticlesCount = 0;
+
+        TotalSeconds = 0f;
+        MostRecentTrigger = 0f;
+
+        Initialised = true;
+    }
+
+    /// <summary>
+    ///     Initialises the Emitter.
+    /// </summary>
+    /// <param name="budget">The number of Particles which are available to the Emitter.</param>
+    /// <param name="term">The length of time that released Particles will remain active, in whole and fractional seconds.</param>
+    /// <exception cref="System.ArgumentException">
+    ///     Thrown if the budget parameter is less than one, or if the term paramter
+    ///     is not a positive value.
+    /// </exception>
+    public void Initialise(int budget, float term)
+    {
+        Guard.ArgumentNotFinite("Term", term);
+        Guard.ArgumentLessThan("budget", budget, 1);
+        Guard.ArgumentLessThan("term", term, float.Epsilon);
+
+        Initialised = false;
+
+        Budget = budget;
+        Term = term;
+
+        Initialise();
+    }
+
+    /// <summary>
+    ///     Terminates the emitter immediately.
+    /// </summary>
+    public void Terminate()
+    {
+        ActiveParticlesCount = 0;
+    }
+
+    /// <summary>
+    ///     Forces the Emitter to execute its next trigger, even if it has a minimum trigger period and is
+    ///     currently 'cooling down'.
+    /// </summary>
+    public void ForceNextTrigger()
+    {
+        MostRecentTrigger = 0f;
+    }
+
+    /// <summary>
+    ///     Loads resources required by the Emitter via a ContentManager.
+    /// </summary>
+    /// <param name="content">The ContentManager used to load resources.</param>
+    /// <exception cref="Microsoft.Xna.Framework.Content.ContentLoadException">
+    ///     Thrown if the asset defined
+    ///     in the ParticleTextureAssetName property could not be loaded.
+    /// </exception>
+    public virtual void LoadContent(ContentManager content)
+    {
+        Guard.ArgumentNull("content", content);
+
+        if (!string.IsNullOrEmpty(ParticleTextureAssetName))
         {
-            this.Name = Emitter.NextEmitterName();
-
-            this.Enabled = true;
-
-            this.Modifiers = new ModifierCollection();
-        }
-
-        /// <summary>
-        /// Returns an unitialised deep copy of the Emitter.
-        /// </summary>
-        /// <returns>A deep copy of the Emitter.</returns>
-        public virtual Emitter DeepCopy()
-        {
-            Emitter emitter = new Emitter();
-
-            this.CopyBaseFields(emitter);
-
-            return emitter;
-        }
-
-        /// <summary>
-        /// Copies the fields of the Emitter base class into the specified Emitter.
-        /// </summary>
-        /// <param name="emitter">The Emitter which will be copied into.</param>
-        protected void CopyBaseFields(Emitter emitter)
-        {
-            emitter.BlendMode                = this.BlendMode;
-            emitter.Budget                   = this.Budget;
-            emitter.Enabled                  = this.Enabled;
-            emitter.MinimumTriggerPeriod     = this.MinimumTriggerPeriod;
-            emitter.Modifiers                = this.Modifiers.DeepCopy();
-            // Kept as it is, not renamed. An emitter is addressed by the name its content file
-            // gives it - the game looks up the two that make a key door's force field, and the
-            // engine's own TimelineController looks one up per timeline event - and every effect
-            // instance is a deep copy, so renaming the parts here left nothing findable by name.
-            emitter.Name                     = this.Name;
-            emitter.ParticleTexture          = this.ParticleTexture;
-            emitter.ParticleTextureAssetName = this.ParticleTextureAssetName ?? String.Empty;
-            emitter.ReleaseColour            = this.ReleaseColour;
-            emitter.ReleaseOpacity           = this.ReleaseOpacity;
-            emitter.ReleaseQuantity          = this.ReleaseQuantity;
-            emitter.ReleaseRotation          = this.ReleaseRotation;
-            emitter.ReleaseScale             = this.ReleaseScale;
-            emitter.ReleaseSpeed             = this.ReleaseSpeed;
-            emitter.ReleaseImpulse           = this.ReleaseImpulse;
-            emitter.Term                     = this.Term;
-            emitter.TriggerOffset            = this.TriggerOffset;
-        }
-
-        /// <summary>
-        /// Initialises the Emitter.
-        /// </summary>
-        /// <exception cref="System.InvalidOperationException">Thrown if the Term and/or Budget properties have not been set.</exception>
-        public virtual void Initialise()
-        {
-            Guard.IsTrue(this.Term < float.Epsilon, "Term property has not been assigned a valid value.");
-            Guard.IsTrue(this.Budget < 1, "Budget property has not been assigned a valid value.");
-
-            this.Particles = new Particle[this.Budget];
-
-            this.Idle = 0;
-
-            this.TotalSeconds = 0f;
-            this.MostRecentTrigger = 0f;
-
-            this.Initialised = true;
-        }
-
-        /// <summary>
-        /// Initialises the Emitter.
-        /// </summary>
-        /// <param name="budget">The number of Particles which are available to the Emitter.</param>
-        /// <param name="term">The length of time that released Particles will remain active, in whole and fractional seconds.</param>
-        /// <exception cref="System.ArgumentException">Thrown if the budget parameter is less than one, or if the term paramter
-        /// is not a positive value.</exception>
-        public void Initialise(int budget, float term)
-        {
-            Guard.ArgumentNotFinite("Term", term);
-            Guard.ArgumentLessThan("budget", budget, 1);
-            Guard.ArgumentLessThan("term", term, float.Epsilon);
-
-            this.Initialised = false;
-
-            this.Budget = budget;
-            this.Term = term;
-
-            this.Initialise();
-        }
-
-        /// <summary>
-        /// Terminates the emitter immediately.
-        /// </summary>
-        public void Terminate()
-        {
-            this.Idle = 0;
-        }
-
-        /// <summary>
-        /// Forces the Emitter to execute its next trigger, even if it has a minimum trigger period and is
-        /// currently 'cooling down'.
-        /// </summary>
-        public void ForceNextTrigger()
-        {
-            this.MostRecentTrigger = 0f;
-        }
-
-        /// <summary>
-        /// Loads resources required by the Emitter via a ContentManager.
-        /// </summary>
-        /// <param name="content">The ContentManager used to load resources.</param>
-        /// <exception cref="Microsoft.Xna.Framework.Content.ContentLoadException">Thrown if the asset defined
-        /// in the ParticleTextureAssetName property could not be loaded.</exception>
-        public virtual void LoadContent(ContentManager content)
-        {
-            Guard.ArgumentNull("content", content);
-
-            if (String.IsNullOrEmpty(this.ParticleTextureAssetName) == false)
+            try
             {
-                try
+                if (ParticleTexture == null)
                 {
-                    if (this.ParticleTexture == null)
-                        this.ParticleTexture = content.Load<Texture2D>(this.ParticleTextureAssetName);
+                    ParticleTexture = content.Load<Texture2D>(ParticleTextureAssetName);
                 }
-                catch (ContentLoadException e)
-                {
-                    string message = String.Format(@"Unable to load the specified content item '{0}'
+            }
+            catch (ContentLoadException e)
+            {
+                string message = string.Format(@"Unable to load the specified content item '{0}'
                                                     Please check the 'ParticleTextureAssetName' property!",
-                                                    this.ParticleTextureAssetName);
+                    ParticleTextureAssetName);
 
-                    throw new ContentLoadException(message, e);
-                }
+                throw new ContentLoadException(message, e);
             }
         }
+    }
 
-        /// <summary>
-        /// Retires the specified number of Particles.
-        /// </summary>
-        [Obsolete("Old implementation, may still be faster in some scenarios.")]
-        private void RetireParticles(int count)
+    /// <summary>
+    ///     Retires the specified number of Particles.
+    /// </summary>
+    [Obsolete("Old implementation, may still be faster in some scenarios.")]
+    private void RetireParticles(int count)
+    {
+        // Move the remaining particles to the front of the Particles array...
+        Array.Copy(Particles, count, Particles, 0, ActiveParticlesCount - count);
+
+        // The Array.Copy method appears to be slow in some circumstances. In those situations
+        // it should be faster to use the following code instead...
+        /*
+        for (int i = count; i < this.Idle; i++)
         {
-            // Move the remaining particles to the front of the Particles array...
-            Array.Copy(this.Particles, count, this.Particles, 0, this.Idle - count);
+            this.Particles[i - count] = this.Particles[i];
+            this.Tags[i - count] = this.Tags[i];
+        }
+        */
 
-            // The Array.Copy method appears to be slow in some circumstances. In those situations
-            // it should be faster to use the following code instead...
-            /*
-            for (int i = count; i < this.Idle; i++)
-            {
-                this.Particles[i - count] = this.Particles[i];
-                this.Tags[i - count] = this.Tags[i];
-            }
-            */
+        // Decrement the idle marker accordingly...
+        ActiveParticlesCount -= count;
+    }
 
-            // Decrement the idle marker accordingly...
-            this.Idle -= count;
+    /// <summary>
+    ///     Retires the specified number of particles from the particle array.
+    /// </summary>
+    /// <param name="particleArray">A pointer to the first element in an array of particles.</param>
+    /// <param name="count">The number of particles to retire.</param>
+    private unsafe void RetireParticles(Particle* particleArray, int count)
+    {
+        Particle* src = particleArray + count;
+        Particle* dst = particleArray;
+
+        int num = ActiveParticlesCount - count;
+
+        for (int i = 0; i < num; i++)
+        {
+            *dst = *src;
+
+            src++;
+            dst++;
         }
 
-        /// <summary>
-        /// Retires the specified number of particles from the particle array.
-        /// </summary>
-        /// <param name="particleArray">A pointer to the first element in an array of particles.</param>
-        /// <param name="count">The number of particles to retire.</param>
-        private unsafe void RetireParticles(Particle* particleArray, int count)
+        ActiveParticlesCount -= count;
+    }
+
+    /// <summary>
+    ///     Updates the Emitter and all Particles within.
+    /// </summary>
+    /// <param name="deltaSeconds">Elapsed frame time in whole and fractional seconds.</param>
+    public void Update(float deltaSeconds)
+    {
+        Guard.IsFalse(Initialised, "Emitter has not been initialised.");
+        Guard.ArgumentNotFinite("deltaSeconds", deltaSeconds);
+
+        TotalSeconds += deltaSeconds;
+
+        unsafe
         {
-            Particle* src = (particleArray + count);
-            Particle* dst = particleArray;
-
-            int num = this.Idle - count;
-
-            for (int i = 0; i < num; i++)
+            // Create a fixed pointer to the particle array...
+            fixed (Particle* particleArray = Particles)
             {
-                *dst = *src;
+                // Loop index, we need to save the because its final value will be the number of
+                // particles we need to reclaim...
+                int i = ActiveParticlesCount;
 
-                src++;
-                dst++;
-            }
+                Particle* particle = particleArray + (i - 1);
 
-            this.Idle -= count;
-        }
-
-        /// <summary>
-        /// Updates the Emitter and all Particles within.
-        /// </summary>
-        /// <param name="deltaSeconds">Elapsed frame time in whole and fractional seconds.</param>
-        public void Update(float deltaSeconds)
-        {
-            Guard.IsFalse(this.Initialised, "Emitter has not been initialised.");
-            Guard.ArgumentNotFinite("deltaSeconds", deltaSeconds);
-
-            this.TotalSeconds += deltaSeconds;
-
-            unsafe
-            {
-                // Create a fixed pointer to the particle array...
-                fixed (Particle* particleArray = this.Particles)
+                while (--i >= 0)
                 {
-                    // Loop index, we need to save the because its final value will be the number of
-                    // particles we need to reclaim...
-                    int i = this.Idle;
+                    float actualAge = TotalSeconds - particle->Inception;
 
-                    Particle* particle = particleArray + (i - 1);
-
-                    while (--i >= 0)
+                    // If we reach a particle that has expired, we know that all preceeding particles
+                    // have also expired, so we can safely exit the loop without doing any further processing...
+                    if (actualAge > Term)
                     {
-                        float actualAge = this.TotalSeconds - particle->Inception;
-
-                        // If we reach a particle that has expired, we know that all preceeding particles
-                        // have also expired, so we can safely exit the loop without doing any further processing...
-                        if (actualAge > this.Term)
-                            break;
-
-                        // Update the Particle (inlined from Particle.Update method)...
-                        particle->Age = actualAge / this.Term;
-
-                        particle->Momentum.X += particle->Velocity.X;
-                        particle->Momentum.Y += particle->Velocity.Y;
-
-                        particle->Velocity.X = particle->Velocity.Y = 0f;
-
-                        particle->Position.X += particle->Momentum.X * deltaSeconds;
-                        particle->Position.Y += particle->Momentum.Y * deltaSeconds;
-
-                        particle--;
+                        break;
                     }
 
-                    // Retire particles if necessary...
-                    if (i >= 0)
-                        this.RetireParticles(particleArray, i + 1);
+                    // Update the Particle (inlined from Particle.Update method)...
+                    particle->Age = actualAge / Term;
 
-                    // Send the particle array to the modifiers for processing...
-                    this.Modifiers.RunProcessors(deltaSeconds, particleArray, this.ActiveParticlesCount);
+                    particle->Momentum.X += particle->Velocity.X;
+                    particle->Momentum.Y += particle->Velocity.Y;
+
+                    particle->Velocity.X = particle->Velocity.Y = 0f;
+
+                    particle->Position.X += particle->Momentum.X * deltaSeconds;
+                    particle->Position.Y += particle->Momentum.Y * deltaSeconds;
+
+                    particle--;
                 }
+
+                // Retire particles if necessary...
+                if (i >= 0)
+                {
+                    RetireParticles(particleArray, i + 1);
+                }
+
+                // Send the particle array to the modifiers for processing...
+                Modifiers.RunProcessors(deltaSeconds, particleArray, ActiveParticlesCount);
             }
         }
+    }
 
-        /// <summary>
-        ///  Triggers the Emitter at the specified position...
-        /// </summary>
-        /// <exception cref="System.InvalidOperationException">Thrown if the Emitter has not been initialised.</exception>
-        public void Trigger(ref Vector2 triggerPosition)
+    /// <summary>
+    ///     Triggers the Emitter at the specified position...
+    /// </summary>
+    /// <exception cref="System.InvalidOperationException">Thrown if the Emitter has not been initialised.</exception>
+    public void Trigger(ref Vector2 triggerPosition)
+    {
+        Guard.IsFalse(Initialised, "Emitter has not been initialised.");
+
+        // Bail if the Emitter is disabled...
+        if (!Enabled)
         {
-            Guard.IsFalse(this.Initialised, "Emitter has not been initialised.");
+            return;
+        }
 
-            // Bail if the Emitter is disabled...
-            if (this.Enabled == false)
-                return;
+        // Bail if the Emitter is still in its cool down period...
+        if (TotalSeconds - MostRecentTrigger < MinimumTriggerPeriod)
+        {
+            return;
+        }
 
-            // Bail if the Emitter is still in its cool down period...
-            if (this.TotalSeconds - this.MostRecentTrigger < this.MinimumTriggerPeriod)
-                return;
+        // Add the Emitter offset vector to the trigger position...
+        var position = new Vector2
+        {
+            X = triggerPosition.X + TriggerOffset.X,
+            Y = triggerPosition.Y + TriggerOffset.Y
+        };
 
-            // Add the Emitter offset vector to the trigger position...
-            Vector2 position = new Vector2
+        int oldIdle = ActiveParticlesCount;
+
+        for (int i = oldIdle; i < oldIdle + ReleaseQuantity; i++)
+        {
+            if (i < Budget)
             {
-                X = triggerPosition.X + this.TriggerOffset.X,
-                Y = triggerPosition.Y + this.TriggerOffset.Y,
-            };
-
-            int oldIdle = this.Idle;
-
-            for (int i = oldIdle; i < oldIdle + this.ReleaseQuantity; i++)
-            {
-                if (i < this.Budget)
+                unsafe
                 {
-                    unsafe
+                    fixed (Particle* particle = &Particles[i])
                     {
-                        fixed (Particle* particle = &this.Particles[i])
-                        {
-                            Vector2 offset, force;
+                        Vector2 offset, force;
 
-                            // Generate and offset and force vector for the particle...
-                            this.GenerateOffsetAndForce(out offset, out force);
+                        // Generate and offset and force vector for the particle...
+                        GenerateOffsetAndForce(out offset, out force);
 
-                            // Calculate the velocity of the particle using the force vector and the release velocity...
-                            float speed = this.ReleaseSpeed.Sample();
+                        // Calculate the velocity of the particle using the force vector and the release velocity...
+                        float speed = ReleaseSpeed.Sample();
 
-                            particle->Inception = this.TotalSeconds;
-                            particle->Position.X = position.X + offset.X;
-                            particle->Position.Y = position.Y + offset.Y;
-                            particle->Velocity.X = force.X * speed;
-                            particle->Velocity.Y = force.Y * speed;
-                            particle->Momentum = this.ReleaseImpulse;
-                            particle->Age = 0f;
-                            particle->Colour = new Vector4(this.ReleaseColour.Sample(), this.ReleaseOpacity.Sample());
-                            particle->Scale = this.ReleaseScale.Sample();
-                            particle->Rotation = 0f;
+                        particle->Inception = TotalSeconds;
+                        particle->Position.X = position.X + offset.X;
+                        particle->Position.Y = position.Y + offset.Y;
+                        particle->Velocity.X = force.X * speed;
+                        particle->Velocity.Y = force.Y * speed;
+                        particle->Momentum = ReleaseImpulse;
+                        particle->Age = 0f;
+                        particle->Colour = new Vector4(ReleaseColour.Sample(), ReleaseOpacity.Sample());
+                        particle->Scale = ReleaseScale.Sample();
+                        particle->Rotation = 0f;
 
-                            particle->Rotate(this.ReleaseRotation.Sample());
+                        particle->Rotate(ReleaseRotation.Sample());
 #if MPE_RAISEEVENTS
                             this.OnParticleReleased(ref *particle);
 #endif
-                        }
-
-                        this.Idle++;
                     }
-                }
-                else
-                {
-                    // There are no more idle Particles...
-                    break;
+
+                    ActiveParticlesCount++;
                 }
             }
-
-            this.MostRecentTrigger = this.TotalSeconds;
+            else
+            {
+                // There are no more idle Particles...
+                break;
+            }
         }
 
-        /// <summary>
-        ///  Triggers the Emitter at the specified position...
-        /// </summary>
-        /// <exception cref="System.InvalidOperationException">Thrown if the Emitter has not been initialised.</exception>
-        public void Trigger(Vector2 position)
-        {
-            this.Trigger(ref position);
-        }
+        MostRecentTrigger = TotalSeconds;
+    }
 
-        /// <summary>
-        /// Generates an offset vector and force vector for a Particle when it is released.
-        /// </summary>
-        /// <param name="offset">The offset of the Particle from the trigger location.</param>
-        /// <param name="force">A unit vector defining the initial force of the Particle.</param>
-        protected virtual void GenerateOffsetAndForce(out Vector2 offset, out Vector2 force)
-        {
-            offset = Vector2.Zero;
+    /// <summary>
+    ///     Triggers the Emitter at the specified position...
+    /// </summary>
+    /// <exception cref="System.InvalidOperationException">Thrown if the Emitter has not been initialised.</exception>
+    public void Trigger(Vector2 position)
+    {
+        Trigger(ref position);
+    }
 
-            force = RandomHelper.NextUnitVector();
-        }
+    /// <summary>
+    ///     Generates an offset vector and force vector for a Particle when it is released.
+    /// </summary>
+    /// <param name="offset">The offset of the Particle from the trigger location.</param>
+    /// <param name="force">A unit vector defining the initial force of the Particle.</param>
+    protected virtual void GenerateOffsetAndForce(out Vector2 offset, out Vector2 force)
+    {
+        offset = Vector2.Zero;
+
+        force = RandomHelper.NextUnitVector();
     }
 }

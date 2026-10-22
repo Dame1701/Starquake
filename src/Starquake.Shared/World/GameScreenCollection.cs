@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 using Starquake.Collisions;
 using Starquake.Constants;
@@ -139,7 +139,6 @@ internal class GameScreenCollection
     ///     <see cref="Collisions" />.
     /// </summary>
     public ScreenRenderer Renderer { get; }
-
 
 
     public GameScreenData CurrentGameScreenData => _gameScreens[ScreenNumber];

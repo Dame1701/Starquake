@@ -1,7 +1,7 @@
-// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 namespace Starquake.Core;
 
 /// <summary>
@@ -25,7 +25,10 @@ internal sealed class LogicRate
     ///     A rate at <paramref name="hertz" />, or at <see cref="Pal" /> for anything that is not one
     ///     of the two rates, which is what a hand-edited preferences file can hand over.
     /// </summary>
-    public LogicRate(int hertz) => Hertz = hertz == Ntsc ? Ntsc : Pal;
+    public LogicRate(int hertz)
+    {
+        Hertz = hertz == Ntsc ? Ntsc : Pal;
+    }
 
     public int Hertz { get; private set; }
 

@@ -1,9 +1,9 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
-using Microsoft.Xna.Framework.Graphics;
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Core;
@@ -31,9 +31,9 @@ internal sealed class ScreenPresenter(
 {
     private readonly SpriteBatch _batch = new(graphics.GraphicsDevice);
 
-    private RenderTarget2D? _frame;
-
     private RenderTarget2D? _afterglow;
+
+    private RenderTarget2D? _frame;
 
     /// <summary>
     ///     The target the picture is composed into, sized to the back buffer and rebuilt whenever the
@@ -130,7 +130,7 @@ internal sealed class ScreenPresenter(
         RenderTarget2D afterglow = AfterglowFor(frame.Width, frame.Height);
 
         int retained = (int)(CrtSettings.AfterglowRetainedOver(sinceLastDraw.TotalSeconds)
-            * ColourLevels.Full);
+                             * ColourLevels.Full);
 
         // Premultiplied in all four channels. Everything the game composes is premultiplied, so a
         // half-faded picture must be half in its colours as well as its alpha.

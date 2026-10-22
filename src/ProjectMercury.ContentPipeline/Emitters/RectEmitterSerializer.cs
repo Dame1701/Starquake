@@ -1,35 +1,33 @@
-﻿namespace ProjectMercury.ContentPipeline.Emitters
-{
-    using Microsoft.Xna.Framework.Content;
-    using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate;
-    using ProjectMercury.Emitters;
-    using System;
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
 
-    //[ContentTypeSerializer]
-    //public class RectEmitterSerializer : AbstractEmitterSerializer<RectEmitter>
-    //{
-    //    protected override void Serialize(IntermediateWriter output, RectEmitter value, ContentSerializerAttribute format)
-    //    {
-    //        base.Serialize(output, value, format);
+namespace ProjectMercury.ContentPipeline.Emitters;
 
-    //        output.Xml.WriteElementString("Width", value.Width.ToString());
-    //        output.Xml.WriteElementString("Height", value.Height.ToString());
-    //        output.Xml.WriteElementString("Rotation", value.Rotation.ToString());
-    //        output.Xml.WriteElementString("Frame", value.Frame.ToString());
-    //    }
+//[ContentTypeSerializer]
+//public class RectEmitterSerializer : AbstractEmitterSerializer<RectEmitter>
+//{
+//    protected override void Serialize(IntermediateWriter output, RectEmitter value, ContentSerializerAttribute format)
+//    {
+//        base.Serialize(output, value, format);
 
-    //    protected override RectEmitter Deserialize(IntermediateReader input, ContentSerializerAttribute format, RectEmitter existingInstance)
-    //    {
-    //        RectEmitter value = existingInstance ?? new RectEmitter();
+//        output.Xml.WriteElementString("Width", value.Width.ToString());
+//        output.Xml.WriteElementString("Height", value.Height.ToString());
+//        output.Xml.WriteElementString("Rotation", value.Rotation.ToString());
+//        output.Xml.WriteElementString("Frame", value.Frame.ToString());
+//    }
 
-    //        base.Deserialize(input, format, value);
+//    protected override RectEmitter Deserialize(IntermediateReader input, ContentSerializerAttribute format, RectEmitter existingInstance)
+//    {
+//        RectEmitter value = existingInstance ?? new RectEmitter();
 
-    //        value.Width = Single.Parse(input.Xml.ReadElementString("Width"));
-    //        value.Height = Single.Parse(input.Xml.ReadElementString("Height"));
-    //        value.Rotation = Single.Parse(input.Xml.ReadElementString("Rotation"));
-    //        value.Frame = Boolean.Parse(input.Xml.ReadElementString("Frame"));
+//        base.Deserialize(input, format, value);
 
-    //        return value;
-    //    }
-    //}
-}
+//        value.Width = Single.Parse(input.Xml.ReadElementString("Width"));
+//        value.Height = Single.Parse(input.Xml.ReadElementString("Height"));
+//        value.Rotation = Single.Parse(input.Xml.ReadElementString("Rotation"));
+//        value.Frame = Boolean.Parse(input.Xml.ReadElementString("Frame"));
+
+//        return value;
+//    }
+//}

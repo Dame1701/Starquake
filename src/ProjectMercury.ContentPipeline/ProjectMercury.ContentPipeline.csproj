@@ -30,12 +30,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MonoGame.Framework.Content.Pipeline" />
-        <PackageReference Include="MonoGame.Framework.DesktopGL" />
+        <PackageReference Include="MonoGame.Framework.Content.Pipeline"/>
+        <PackageReference Include="MonoGame.Framework.DesktopGL"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\ProjectMercury\ProjectMercury.csproj" />
+        <ProjectReference Include="..\ProjectMercury\ProjectMercury.csproj"/>
     </ItemGroup>
 
 </Project>

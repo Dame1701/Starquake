@@ -1,10 +1,10 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.Core;
 
@@ -25,8 +25,6 @@ internal class SpriteCollection
     private readonly int[] _spriteTexturePosY;
 
     private byte _fade;
-
-    private SpriteBatch? _sprites;
 
     public SpriteCollection(GraphicsDeviceManager graphics, ContentManager content, string imageFilePath,
         int spriteWidth, int spriteHeight)
@@ -91,7 +89,7 @@ internal class SpriteCollection
     ///     </para>
     /// </summary>
     private SpriteBatch Sprites
-        => _sprites ??= new SpriteBatch(_graphicsDeviceManager.GraphicsDevice);
+        => field ??= new SpriteBatch(_graphicsDeviceManager.GraphicsDevice);
 
     /// <summary>
     ///     Opens a batch. Everything drawn until <see cref="End" /> is queued and issued in the order

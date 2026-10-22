@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 
@@ -23,6 +23,12 @@ namespace Starquake.Tuning;
 /// </remarks>
 internal static class ShipWreckSettings
 {
+
+    /// <summary>
+    ///     How far across and down the hull a spark can come from, as a fraction of it. Short of the
+    ///     whole, so sparks come off the ship rather than the air beside it.
+    /// </summary>
+    private const float AcrossTheHull = 0.55f;
     /// <summary>
     ///     Roughly how long between sparks, in logic frames, and how far that wanders either side.
     /// </summary>
@@ -36,12 +42,6 @@ internal static class ShipWreckSettings
 
     /// <inheritdoc cref="SparkPeriod" />
     private static readonly int SparkJitter = LogicClock.Seconds(1.6);
-
-    /// <summary>
-    ///     How far across and down the hull a spark can come from, as a fraction of it. Short of the
-    ///     whole, so sparks come off the ship rather than the air beside it.
-    /// </summary>
-    private const float AcrossTheHull = 0.55f;
 
     /// <summary>
     ///     Whether this is the frame a spark goes off on. True for one frame at a time; the burst

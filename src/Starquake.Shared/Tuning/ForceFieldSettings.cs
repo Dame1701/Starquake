@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 
@@ -29,15 +29,6 @@ namespace Starquake.Tuning;
 /// </remarks>
 internal static class ForceFieldSettings
 {
-    /// <summary>
-    ///     What a door burns when it will not let Blob through, and when it will. Hot red and a green
-    ///     leaning towards the cyan the rest of the game's energy uses, rather than flat primaries:
-    ///     these are added over the room behind them, and a flat green added to anything washes out.
-    /// </summary>
-    public static Vector3 LockedColour => new(1f, 0.13f, 0.08f);
-
-    /// <inheritdoc cref="LockedColour" />
-    public static Vector3 OpenColour => new(0.15f, 1f, 0.4f);
 
     /// <summary>
     ///     How far the sheet of light is pulled back onto the jambs, shut and open. Under one leaves
@@ -104,12 +95,6 @@ internal static class ForceFieldSettings
     private const float FlashSpent = 0.01f;
 
     /// <summary>
-    ///     How long a door takes to open or shut again, in frames. Short, because it is a door rather
-    ///     than a drawbridge, but long enough to be seen happening.
-    /// </summary>
-    private static readonly int OpeningFrames = LogicClock.Seconds(0.35);
-
-    /// <summary>
     ///     How near Blob has to be for a shut door to brace against him, in pixels, and how much
     ///     harder it burns when he is right up against it.
     /// </summary>
@@ -121,6 +106,24 @@ internal static class ForceFieldSettings
 
     /// <inheritdoc cref="BraceReach" />
     private const float BraceBoost = 0.7f;
+
+    /// <summary>
+    ///     How long a door takes to open or shut again, in frames. Short, because it is a door rather
+    ///     than a drawbridge, but long enough to be seen happening.
+    /// </summary>
+    private static readonly int OpeningFrames = LogicClock.Seconds(0.35);
+    /// <summary>
+    ///     What a door burns when it will not let Blob through, and when it will. Hot red and a green
+    ///     leaning towards the cyan the rest of the game's energy uses, rather than flat primaries:
+    ///     these are added over the room behind them, and a flat green added to anything washes out.
+    /// </summary>
+    public static Vector3 LockedColour => new(1f, 0.13f, 0.08f);
+
+    /// <inheritdoc cref="LockedColour" />
+    public static Vector3 OpenColour => new(0.15f, 1f, 0.4f);
+
+    /// <inheritdoc cref="ScanWidth" />
+    public static float OverScanWidth => 1f / ScanWidth;
 
     /// <summary>
     ///     How far towards open or shut a door is after another frame. Linear, because a door is
@@ -147,9 +150,6 @@ internal static class ForceFieldSettings
     /// <summary>How far the scanner has travelled down the gap, as a fraction of its height.</summary>
     public static float ScanAt(int logicFrame)
         => logicFrame % ScanFrames / (float)ScanFrames;
-
-    /// <inheritdoc cref="ScanWidth" />
-    public static float OverScanWidth => 1f / ScanWidth;
 
     /// <summary>
     ///     What the field burns at a given openness: the locked colour crossfaded into the open one.

@@ -1,7 +1,7 @@
-// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Material.Icons;
 using Starquake.ScreenEditor.Editing;
 using Starquake.Structure;

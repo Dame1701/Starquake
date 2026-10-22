@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Media;
@@ -63,6 +63,16 @@ internal sealed class MusicEngine(ContentManager content)
     private GameScreenType _following = GameScreenType.None;
 
     /// <summary>
+    ///     How many frames of the pass the piece is making are left, counted down from the piece's
+    ///     own length. Nought means no pass is running: either nothing has started yet, or the pass
+    ///     has finished and <see cref="HasPlayedThrough" /> is the answer to read instead.
+    /// </summary>
+    private int _framesLeftOfPiece;
+
+    /// <inheritdoc cref="_waitingToPlay" />
+    private int _framesUntilPlay;
+
+    /// <summary>
     ///     The screen whose piece is being held back, or <see cref="GameScreenType.None" /> when
     ///     none is. Named rather than held as a flag so a hold left behind can only ever silence the
     ///     screen that asked for it. See <see cref="HoldBack" />.
@@ -75,16 +85,6 @@ internal sealed class MusicEngine(ContentManager content)
     ///     so a piece plays through its loop rather than being restarted every frame.
     /// </summary>
     private bool _waitingToPlay;
-
-    /// <inheritdoc cref="_waitingToPlay" />
-    private int _framesUntilPlay;
-
-    /// <summary>
-    ///     How many frames of the pass the piece is making are left, counted down from the piece's
-    ///     own length. Nought means no pass is running: either nothing has started yet, or the pass
-    ///     has finished and <see cref="HasPlayedThrough" /> is the answer to read instead.
-    /// </summary>
-    private int _framesLeftOfPiece;
 
     /// <summary>
     ///     Whether the piece belonging to the screen now showing has run its full length, which is
@@ -108,14 +108,14 @@ internal sealed class MusicEngine(ContentManager content)
     {
         if (!musicDesc.CanBeDistorted)
         {
-            Song song = content.Load<Song>(musicDesc.FilePath);
+            var song = content.Load<Song>(musicDesc.FilePath);
 
             _streamedPieces.Add(musicDesc.Screen, song);
             _pieceLengths.Add(musicDesc.Screen, LogicClock.Seconds(song.Duration.TotalSeconds));
             return;
         }
 
-        SoundEffect effect = content.Load<SoundEffect>(musicDesc.FilePath);
+        var effect = content.Load<SoundEffect>(musicDesc.FilePath);
         SoundEffectInstance piece = effect.CreateInstance();
         piece.IsLooped = true;
 

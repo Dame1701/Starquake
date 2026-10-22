@@ -1,35 +1,33 @@
-﻿namespace ProjectMercury.ContentPipeline.Emitters
-{
-    using Microsoft.Xna.Framework.Content;
-    using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate;
-    using ProjectMercury.Emitters;
-    using System;
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
 
-    //[ContentTypeSerializer]
-    //public class LineEmitterSerializer : AbstractEmitterSerializer<LineEmitter>
-    //{
-    //    protected override void Serialize(IntermediateWriter output, LineEmitter value, ContentSerializerAttribute format)
-    //    {
-    //        base.Serialize(output, value, format);
+namespace ProjectMercury.ContentPipeline.Emitters;
 
-    //        output.Xml.WriteElementString("Length", value.Length.ToString());
-    //        output.Xml.WriteElementString("Angle", value.Angle.ToString());
-    //        output.Xml.WriteElementString("Rectilinear", value.Rectilinear.ToString());
-    //        output.Xml.WriteElementString("EmitBothWays", value.EmitBothWays.ToString());
-    //    }
+//[ContentTypeSerializer]
+//public class LineEmitterSerializer : AbstractEmitterSerializer<LineEmitter>
+//{
+//    protected override void Serialize(IntermediateWriter output, LineEmitter value, ContentSerializerAttribute format)
+//    {
+//        base.Serialize(output, value, format);
 
-    //    protected override LineEmitter Deserialize(IntermediateReader input, ContentSerializerAttribute format, LineEmitter existingInstance)
-    //    {
-    //        LineEmitter value = existingInstance ?? new LineEmitter();
+//        output.Xml.WriteElementString("Length", value.Length.ToString());
+//        output.Xml.WriteElementString("Angle", value.Angle.ToString());
+//        output.Xml.WriteElementString("Rectilinear", value.Rectilinear.ToString());
+//        output.Xml.WriteElementString("EmitBothWays", value.EmitBothWays.ToString());
+//    }
 
-    //        base.Deserialize(input, format, value);
+//    protected override LineEmitter Deserialize(IntermediateReader input, ContentSerializerAttribute format, LineEmitter existingInstance)
+//    {
+//        LineEmitter value = existingInstance ?? new LineEmitter();
 
-    //        value.Length = Single.Parse(input.Xml.ReadElementString("Length"));
-    //        value.Angle = Single.Parse(input.Xml.ReadElementString("Angle"));
-    //        value.Rectilinear = Boolean.Parse(input.Xml.ReadElementString("Rectilinear"));
-    //        value.EmitBothWays = Boolean.Parse(input.Xml.ReadElementString("EmitBothWays"));
+//        base.Deserialize(input, format, value);
 
-    //        return value;
-    //    }
-    //}
-}
+//        value.Length = Single.Parse(input.Xml.ReadElementString("Length"));
+//        value.Angle = Single.Parse(input.Xml.ReadElementString("Angle"));
+//        value.Rectilinear = Boolean.Parse(input.Xml.ReadElementString("Rectilinear"));
+//        value.EmitBothWays = Boolean.Parse(input.Xml.ReadElementString("EmitBothWays"));
+
+//        return value;
+//    }
+//}

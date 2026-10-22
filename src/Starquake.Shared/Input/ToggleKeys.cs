@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
@@ -22,6 +22,9 @@ namespace Starquake.Input;
 /// </remarks>
 internal class ToggleKeys
 {
+
+    /// <summary>How far the right trigger must be pulled to fire.</summary>
+    private const float TriggerThreshold = 0.5f;
     /// <summary>
     ///     The keys that do not count towards <see cref="AnyKeyPressed" />. These are the game's
     ///     own: F3 switches the analogue walk, F5 takes a screenshot, F8 switches the graphics set,
@@ -38,13 +41,10 @@ internal class ToggleKeys
         Keys.F7, Keys.F8, Keys.F9, Keys.F10, Keys.F11, Keys.F12
     ];
 
-    /// <summary>How far the right trigger must be pulled to fire.</summary>
-    private const float TriggerThreshold = 0.5f;
+    private bool _fireReleased;
 
     private Keys _heldKey = Keys.None;
     private Keys _toggledKey = Keys.None;
-
-    private bool _fireReleased;
 
     /// <summary>The keyboard and first gamepad as they were when this frame began.</summary>
     public KeyboardState KeyboardState { get; private set; }
@@ -54,9 +54,6 @@ internal class ToggleKeys
 
     /// <summary>Whether the pad's fire is held: the A button, cross on a PlayStation pad, or the right trigger.</summary>
     public bool PadFireHeld { get; private set; }
-
-    /// <summary>The key released this frame, if exactly one was down and has just come up.</summary>
-    public Keys GetPressedKey() => _toggledKey;
 
     /// <summary>
     ///     Whether the player pressed something that a page waiting to be dismissed should act on:
@@ -69,6 +66,9 @@ internal class ToggleKeys
     /// </remarks>
     public bool AnyKeyPressed =>
         _toggledKey != Keys.None && !ReservedKeys.Contains(_toggledKey) || _fireReleased;
+
+    /// <summary>The key released this frame, if exactly one was down and has just come up.</summary>
+    public Keys GetPressedKey() => _toggledKey;
 
     public void Update()
     {

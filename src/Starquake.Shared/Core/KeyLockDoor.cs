@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.SharedLibs;
@@ -28,25 +28,6 @@ internal class KeyLockDoor
     private const int GapWidth = TileMetrics.CollisionCellWidth;
 
     public readonly List<CollisionTile> CollisionTiles;
-    public Point Location;
-
-    /// <summary>
-    ///     How far open the door is drawn, from nothing when it bars Blob's way to one when it has
-    ///     let him through. Eased towards its target rather than set outright.
-    ///     <c>ForceFieldSettings</c> reads everything the field is drawn with off this.
-    /// </summary>
-    public float Openness;
-
-    /// <summary>
-    ///     What is left of the burst from the moment the door gave way, and whether it has given way
-    ///     at all. A door is found again every time its screen is shown, so both start as a shut door
-    ///     starts: Blob arriving with the key is a door opening in front of him, which is the moment
-    ///     the burst is for.
-    /// </summary>
-    public float Flash;
-
-    /// <inheritdoc cref="Flash" />
-    public bool WasOpen;
 
     /// <summary>
     ///     How hard Blob is leaning on the door, from nothing when away from it to one when standing
@@ -56,11 +37,30 @@ internal class KeyLockDoor
     public float Brace;
 
     /// <summary>
+    ///     What is left of the burst from the moment the door gave way, and whether it has given way
+    ///     at all. A door is found again every time its screen is shown, so both start as a shut door
+    ///     starts: Blob arriving with the key is a door opening in front of him, which is the moment
+    ///     the burst is for.
+    /// </summary>
+    public float Flash;
+
+    /// <summary>
     ///     How many logic frames the door has been on screen. The field's own clock for the bands
     ///     travelling up it, the scanner working down it and the flicker, so all three run the same
     ///     whatever the display is doing.
     /// </summary>
     public int Frame;
+    public Point Location;
+
+    /// <summary>
+    ///     How far open the door is drawn, from nothing when it bars Blob's way to one when it has
+    ///     let him through. Eased towards its target rather than set outright.
+    ///     <c>ForceFieldSettings</c> reads everything the field is drawn with off this.
+    /// </summary>
+    public float Openness;
+
+    /// <inheritdoc cref="Flash" />
+    public bool WasOpen;
 
     public KeyLockDoor()
     {

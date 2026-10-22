@@ -1,7 +1,7 @@
-// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.Core;
@@ -36,6 +36,10 @@ public class CollisionMapDifferentialTests
 
     /// <inheritdoc cref="PositionStride" />
     private const int PositionOffset = -11;
+
+    private const int SweepWidth = 64;
+
+    private const int SweepHeight = 64;
 
     private static readonly int[] Velocities = [1, 4, 8, 12];
 
@@ -95,7 +99,7 @@ public class CollisionMapDifferentialTests
                 {
                     foreach (bool isBlob in (bool[])[true, false])
                     {
-                        int velocity = Velocities[(x + y + (int)direction) & 3];
+                        int velocity = Velocities[x + y + (int)direction & 3];
 
                         int fromSubject = subject.CheckCollision(
                             direction, x, y, SweepWidth, SweepHeight, velocity, isBlob);
@@ -194,10 +198,6 @@ public class CollisionMapDifferentialTests
         // Assert
         Assert.Empty(disagreements);
     }
-
-    private const int SweepWidth = 64;
-
-    private const int SweepHeight = 64;
 
     /// <summary>
     ///     The positions a sweep visits: across the screen and a little beyond each edge, because

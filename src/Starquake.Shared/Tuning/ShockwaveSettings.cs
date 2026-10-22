@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 
@@ -29,43 +29,12 @@ internal static class ShockwaveSettings
     /// </remarks>
     public const int BlobDiameter = 1400;
 
-    /// <inheritdoc cref="BlobDiameter" />
-    public static readonly int BlobFrames = LogicClock.Seconds(0.6);
-
     /// <summary>
     ///     What a machine throws. Smaller and over sooner, because a spiky nasty going off happens in
     ///     a corner of the room rather than to the whole of it and several can go off at once. Still
     ///     wide enough to leave the room from anywhere in it.
     /// </summary>
     public const int NastyDiameter = 1100;
-
-    /// <inheritdoc cref="NastyDiameter" />
-    public static readonly int NastyFrames = LogicClock.Seconds(0.5);
-
-    /// <summary>
-    ///     What the ring burns outside its crest: the ripples and the outer skirt of the front. The
-    ///     orange of the flames the explosion already throws, so the ring is the blast's own light
-    ///     rather than a second idea about it.
-    /// </summary>
-    /// <remarks>
-    ///     Warm rather than the cold blue of the electricity and the jump platforms. A shockwave here
-    ///     is fire going out, and a blue ring over orange flames reads as two unrelated things
-    ///     happening in one place.
-    /// </remarks>
-    public static Vector3 EdgeColour => new(1f, 0.55f, 0.08f);
-
-    /// <summary>
-    ///     What the crest of the front burns. Nearly white but still yellow, so the front reads as
-    ///     the hot part of the same fire rather than a white ring with an orange one behind it.
-    /// </summary>
-    public static Vector3 CoreColour => new(1f, 0.95f, 0.72f);
-
-    /// <summary>
-    ///     The difference between the two, which is what the shader is handed. It adds a share of
-    ///     this to <see cref="EdgeColour" /> rather than mixing between the pair, because a lerp
-    ///     costs three instruction slots the pass cannot spare.
-    /// </summary>
-    public static Vector3 ColourLift => CoreColour - EdgeColour;
 
     /// <summary>
     ///     How hard the ring burns at the moment of the blast. Over one on purpose, like the splat's
@@ -96,13 +65,6 @@ internal static class ShockwaveSettings
     ///     nothing behind it worth seeing.
     /// </summary>
     public const float TrailShare = 0.95f;
-
-    /// <summary>
-    ///     What the shader is handed for that. Its crests are a triangle peaking at a half, squared
-    ///     and so peaking at a quarter, and correcting for that here costs nothing where doing it per
-    ///     pixel costs a slot the pass cannot spare.
-    /// </summary>
-    public static float TrailWeight => TrailShare * TrianglePeakOver;
 
     /// <inheritdoc cref="TrailWeight" />
     private const float TrianglePeakOver = 4f;
@@ -167,6 +129,54 @@ internal static class ShockwaveSettings
     private const float Thrown = 0.6f;
 
     /// <summary>
+    ///     How much of the wobble the finer wave takes, and how fast it travels against the coarser
+    ///     one. Both under the whole, so the finer rides on the coarser rather than fighting it, and
+    ///     the differing rate keeps the two from coming back into step.
+    /// </summary>
+    private const float FineShimmerShare = 0.7f;
+
+    /// <inheritdoc cref="FineShimmerShare" />
+    private const double FineShimmerRate = 0.7;
+
+    /// <inheritdoc cref="BlobDiameter" />
+    public static readonly int BlobFrames = LogicClock.Seconds(0.6);
+
+    /// <inheritdoc cref="NastyDiameter" />
+    public static readonly int NastyFrames = LogicClock.Seconds(0.5);
+
+    /// <summary>
+    ///     What the ring burns outside its crest: the ripples and the outer skirt of the front. The
+    ///     orange of the flames the explosion already throws, so the ring is the blast's own light
+    ///     rather than a second idea about it.
+    /// </summary>
+    /// <remarks>
+    ///     Warm rather than the cold blue of the electricity and the jump platforms. A shockwave here
+    ///     is fire going out, and a blue ring over orange flames reads as two unrelated things
+    ///     happening in one place.
+    /// </remarks>
+    public static Vector3 EdgeColour => new(1f, 0.55f, 0.08f);
+
+    /// <summary>
+    ///     What the crest of the front burns. Nearly white but still yellow, so the front reads as
+    ///     the hot part of the same fire rather than a white ring with an orange one behind it.
+    /// </summary>
+    public static Vector3 CoreColour => new(1f, 0.95f, 0.72f);
+
+    /// <summary>
+    ///     The difference between the two, which is what the shader is handed. It adds a share of
+    ///     this to <see cref="EdgeColour" /> rather than mixing between the pair, because a lerp
+    ///     costs three instruction slots the pass cannot spare.
+    /// </summary>
+    public static Vector3 ColourLift => CoreColour - EdgeColour;
+
+    /// <summary>
+    ///     What the shader is handed for that. Its crests are a triangle peaking at a half, squared
+    ///     and so peaking at a quarter, and correcting for that here costs nothing where doing it per
+    ///     pixel costs a slot the pass cannot spare.
+    /// </summary>
+    public static float TrailWeight => TrailShare * TrianglePeakOver;
+
+    /// <summary>
     ///     How far out the front has got by a given frame, as a fraction of the quad's half-width.
     /// </summary>
     public static float RadiusAt(int frame, int frames)
@@ -214,16 +224,6 @@ internal static class ShockwaveSettings
     public static Vector2 FineShimmerTurnAt(int frame, float attitude)
         => Turned(attitude * 1.7f - (float)(frame * EdgeSpeed * FineShimmerRate))
            * (Wobble * FineShimmerShare);
-
-    /// <summary>
-    ///     How much of the wobble the finer wave takes, and how fast it travels against the coarser
-    ///     one. Both under the whole, so the finer rides on the coarser rather than fighting it, and
-    ///     the differing rate keeps the two from coming back into step.
-    /// </summary>
-    private const float FineShimmerShare = 0.7f;
-
-    /// <inheritdoc cref="FineShimmerShare" />
-    private const double FineShimmerRate = 0.7;
 
     private static Vector2 Turned(float phase)
         => new((float)Math.Cos(phase), (float)Math.Sin(phase));

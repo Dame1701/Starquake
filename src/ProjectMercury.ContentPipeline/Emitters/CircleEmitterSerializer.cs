@@ -1,33 +1,31 @@
-﻿namespace ProjectMercury.ContentPipeline.Emitters
-{
-    using Microsoft.Xna.Framework.Content;
-    using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate;
-    using ProjectMercury.Emitters;
-    using System;
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
 
-    //[ContentTypeSerializer]
-    //public class CircleEmitterSerializer : AbstractEmitterSerializer<CircleEmitter>
-    //{
-    //    protected override void Serialize(IntermediateWriter output, CircleEmitter value, ContentSerializerAttribute format)
-    //    {
-    //        base.Serialize(output, value, format);
+namespace ProjectMercury.ContentPipeline.Emitters;
 
-    //        output.Xml.WriteElementString("Radius", value.Radius.ToString());
-    //        output.Xml.WriteElementString("Ring", value.Ring.ToString());
-    //        output.Xml.WriteElementString("Radiate", value.Radiate.ToString());
-    //    }
+//[ContentTypeSerializer]
+//public class CircleEmitterSerializer : AbstractEmitterSerializer<CircleEmitter>
+//{
+//    protected override void Serialize(IntermediateWriter output, CircleEmitter value, ContentSerializerAttribute format)
+//    {
+//        base.Serialize(output, value, format);
 
-    //    protected override CircleEmitter Deserialize(IntermediateReader input, ContentSerializerAttribute format, CircleEmitter existingInstance)
-    //    {
-    //        CircleEmitter value = existingInstance ?? new CircleEmitter();
+//        output.Xml.WriteElementString("Radius", value.Radius.ToString());
+//        output.Xml.WriteElementString("Ring", value.Ring.ToString());
+//        output.Xml.WriteElementString("Radiate", value.Radiate.ToString());
+//    }
 
-    //        base.Deserialize(input, format, value);
+//    protected override CircleEmitter Deserialize(IntermediateReader input, ContentSerializerAttribute format, CircleEmitter existingInstance)
+//    {
+//        CircleEmitter value = existingInstance ?? new CircleEmitter();
 
-    //        value.Radius = Single.Parse(input.Xml.ReadElementString("Radius"));
-    //        value.Ring = Boolean.Parse(input.Xml.ReadElementString("Ring"));
-    //        value.Radiate = Boolean.Parse(input.Xml.ReadElementString("Radiate"));
+//        base.Deserialize(input, format, value);
 
-    //        return value;
-    //    }
-    //}
-}
+//        value.Radius = Single.Parse(input.Xml.ReadElementString("Radius"));
+//        value.Ring = Boolean.Parse(input.Xml.ReadElementString("Ring"));
+//        value.Radiate = Boolean.Parse(input.Xml.ReadElementString("Radiate"));
+
+//        return value;
+//    }
+//}

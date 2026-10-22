@@ -1,14 +1,14 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
-using System.Diagnostics.CodeAnalysis;
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework;
 using Starquake.ActiveSprites;
 using Starquake.Animations;
 using Starquake.Constants;
@@ -17,9 +17,9 @@ using Starquake.Core;
 using Starquake.Display;
 using Starquake.Engines.ScreenEffects;
 using Starquake.Fonts;
+using Starquake.GameComponents;
 using Starquake.GameComponents.GameScreens;
 using Starquake.GameComponents.PresentationScreens;
-using Starquake.GameComponents;
 using Starquake.Input;
 using Starquake.Scoring;
 using Starquake.Tuning;
@@ -46,6 +46,13 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
 
     /// <summary>How many nasties can be on a screen at once.</summary>
     private const int NastiesPerScreen = 4;
+
+    /// <summary>
+    ///     The line in the bottom left naming what a hotkey has just switched to. Built here rather
+    ///     than in <c>Initialise</c> because it depends on nothing, and a thing with no collaborators
+    ///     cannot be built in the wrong phase.
+    /// </summary>
+    private readonly ModeAnnouncement _announcement = new();
     private readonly ContentManager _contentMgr;
 
     private readonly GraphicsDeviceManager _graphicsDeviceMgr;
@@ -73,6 +80,9 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     private readonly Action _quitGame;
 
+    /// <summary>Writes a PNG of the back buffer when F5 has asked for one.</summary>
+    private readonly Screenshots _screenshots = new();
+
     /// <summary>
     ///     The host's window. Held only to hand to <see cref="GlobalHotkeys" />, which drops the
     ///     window's border when going fullscreen. Nothing else in the engine touches it.
@@ -93,6 +103,9 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     public readonly ScreenDirectory ScreenDirectory = new();
 
+    /// <summary>Dissolves one set of artwork into the other when F8 switches between them.</summary>
+    private ArtworkCrossfade _crossfade;
+
     private bool _disposed;
 
     /// <summary>
@@ -109,19 +122,6 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     ///     everything else loads.
     /// </summary>
     private LoadingScreen _loadingScreen;
-
-    /// <summary>
-    ///     The line in the bottom left naming what a hotkey has just switched to. Built here rather
-    ///     than in <c>Initialise</c> because it depends on nothing, and a thing with no collaborators
-    ///     cannot be built in the wrong phase.
-    /// </summary>
-    private readonly ModeAnnouncement _announcement = new();
-
-    /// <summary>Dissolves one set of artwork into the other when F8 switches between them.</summary>
-    private ArtworkCrossfade _crossfade;
-
-    /// <summary>Writes a PNG of the back buffer when F5 has asked for one.</summary>
-    private readonly Screenshots _screenshots = new();
 
     private bool _particleTestTrigger;
 
@@ -218,12 +218,8 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     private Blob Player => Game.Player;
 
 
-
     /// <inheritdoc cref="RunningGame.IntroSequence" />
     private IntroSequence IntroSequence => Game.IntroSequence;
-
-
-
 
 
     /// <summary>
@@ -996,5 +992,4 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
             _announcement.Show(saved ? "SCREENSHOT SAVED" : "SCREENSHOT FAILED");
         }
     }
-
 }

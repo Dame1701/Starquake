@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 
@@ -18,17 +18,17 @@ namespace Starquake.Tuning;
 /// </remarks>
 internal static class EnergyDrainSettings
 {
-    /// <summary>
-    ///     What the loss burns. Not pure red: a little green keeps Blob looking lit rather than like
-    ///     a silhouette cut out of the background.
-    /// </summary>
-    public static Vector3 DrainColour => new(1f, 0.18f, 0.12f);
 
     /// <summary>How hard the corona gathers on Blob's outline.</summary>
     public const float CoronaAmount = 1.5f;
 
     /// <summary>How far out the corona is looked for, in the sprite's own pixels.</summary>
     public const float CoronaRadius = 1.4f;
+    /// <summary>
+    ///     What the loss burns. Not pure red: a little green keeps Blob looking lit rather than like
+    ///     a silhouette cut out of the background.
+    /// </summary>
+    public static Vector3 DrainColour => new(1f, 0.18f, 0.12f);
 
     /// <summary>
     ///     How far gone Blob's energy is, taken from the counter the drain already runs. That counter

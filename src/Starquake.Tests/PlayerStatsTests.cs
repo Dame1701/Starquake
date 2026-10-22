@@ -1,9 +1,9 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
-using Microsoft.Xna.Framework.Content;
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Starquake.Constants;
 using Starquake.Core;
 using Starquake.Scoring;

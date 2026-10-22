@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 
@@ -13,6 +13,12 @@ namespace Starquake.Tuning;
 /// </summary>
 internal static class TeleportArrivalSettings
 {
+
+    /// <summary>How much the brightness swims with the waves.</summary>
+    public const float Glimmer = 0.35f;
+
+    /// <summary>How fast the waves travel, in radians per logic frame.</summary>
+    private const double WaveSpeed = 0.55;
     /// <summary>
     ///     How long the room takes to settle, in logic frames. Just over a second: long enough to be
     ///     seen arriving, short enough to be over before the player wonders what is wrong with the
@@ -33,17 +39,11 @@ internal static class TeleportArrivalSettings
     /// </summary>
     public static Vector2 Frequency => new(29f, 17f);
 
-    /// <summary>How much the brightness swims with the waves.</summary>
-    public const float Glimmer = 0.35f;
-
     /// <summary>
     ///     The cold light the beam leaves on the room as it goes. The same blue the teleport beam
     ///     uses, so the arrival looks like the end of that rather than a new idea.
     /// </summary>
     public static Vector3 ArrivalColour => new(0.1f, 0.22f, 0.4f);
-
-    /// <summary>How fast the waves travel, in radians per logic frame.</summary>
-    private const double WaveSpeed = 0.55;
 
     /// <summary>
     ///     How unsettled the room still is, one as Blob arrives and nought once settled.

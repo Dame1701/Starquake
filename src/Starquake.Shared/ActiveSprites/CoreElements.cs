@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
@@ -69,6 +69,27 @@ internal class CoreElements
         }
     }
 
+    /// <summary>
+    ///     Which slot the core has picked out, or null when none. Separate from
+    ///     <see cref="SlotBeingFilled" /> because the room reacts to the two differently: it gathers
+    ///     on the slot about to be taken and bears down on the one being filled.
+    /// </summary>
+    public int? SlotIdentified
+    {
+        get
+        {
+            for (int element = 0; element < Elements.Length; element++)
+            {
+                if (Elements[element].ElementState == CoreElementState.Identified)
+                {
+                    return element;
+                }
+            }
+
+            return null;
+        }
+    }
+
     public event RaiseEffectComplete? OnCoreElementReplaced;
 
     /// <inheritdoc cref="CoreElement.OnCoreElementLanded" />
@@ -108,27 +129,6 @@ internal class CoreElements
 
                 return;
             }
-        }
-    }
-
-    /// <summary>
-    ///     Which slot the core has picked out, or null when none. Separate from
-    ///     <see cref="SlotBeingFilled" /> because the room reacts to the two differently: it gathers
-    ///     on the slot about to be taken and bears down on the one being filled.
-    /// </summary>
-    public int? SlotIdentified
-    {
-        get
-        {
-            for (int element = 0; element < Elements.Length; element++)
-            {
-                if (Elements[element].ElementState == CoreElementState.Identified)
-                {
-                    return element;
-                }
-            }
-
-            return null;
         }
     }
 

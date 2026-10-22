@@ -1,9 +1,9 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
-using Microsoft.Xna.Framework.Graphics;
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Core;
@@ -102,7 +102,9 @@ internal class StatusPanel(ResourceManager resources,
     private readonly KeyScanner _inventoryScanner = new(resources, graphicsSet, randomNumberGenerator, false);
 
     private Collectables[]? _blobsInventory;
-    private int _slotToScan = -1;
+
+    /// <inheritdoc cref="_slotIdentified" />
+    private int _identifiedFrame;
 
     /// <summary>
     ///     The slot the core has picked out, or -1 for none. Drawn glowing and shaking, so a match
@@ -110,9 +112,7 @@ internal class StatusPanel(ResourceManager resources,
     ///     and appearing in the other.
     /// </summary>
     private int _slotIdentified = -1;
-
-    /// <inheritdoc cref="_slotIdentified" />
-    private int _identifiedFrame;
+    private int _slotToScan = -1;
 
     public int Width => resources.GetSpriteCollection(Assets.Graphics.StatusPanelGraphic).SpriteWidth;
 
@@ -133,7 +133,7 @@ internal class StatusPanel(ResourceManager resources,
         {
             _blobsInventory = blobsInventory;
 
-            BlobInstruction instruction = BlobInstruction.None;
+            var instruction = BlobInstruction.None;
 
             // Blob is only drained while walking the planet. A teleporter, a booth or a pyramid is a
             // safe place to stand. PlayerStats decides whether the drain has killed him.
@@ -313,7 +313,7 @@ internal class StatusPanel(ResourceManager resources,
             InventorySlotSpacing * _slotIdentified + InventoryItemXPos + (int)shake.X,
             InventoryItemYPos + (int)shake.Y,
             Colours.WhiteFadedTo((byte)(pulse * CoreReplacementSettings.GlowAmount
-                                             * ColourLevels.Full)));
+                                              * ColourLevels.Full)));
         illuminated.End();
     }
 

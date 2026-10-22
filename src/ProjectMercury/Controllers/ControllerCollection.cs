@@ -1,43 +1,44 @@
-﻿namespace ProjectMercury.Controllers
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
+namespace ProjectMercury.Controllers;
+
+/// <summary>
+///     Defines a collection of controller objects.
+/// </summary>
+public class ControllerCollection : List<Controller>
 {
-    using System.Collections.Generic;
+    /// <summary>
+    ///     Gets or sets the particle effect which owns the collection.
+    /// </summary>
+    public ParticleEffect Owner { get; internal set; }
 
     /// <summary>
-    /// Defines a collection of controller objects.
+    ///     Adds a controller to the collection.
     /// </summary>
-    public class ControllerCollection : List<Controller>
+    /// <param name="controller">The controller to add.</param>
+    public new void Add(Controller controller)
     {
-        /// <summary>
-        /// Gets or sets the particle effect which owns the collection.
-        /// </summary>
-        public ParticleEffect Owner { get; internal set; }
-
-        /// <summary>
-        /// Adds a controller to the collection.
-        /// </summary>
-        /// <param name="controller">The controller to add.</param>
-        public new void Add(Controller controller)
+        if (!Contains(controller))
         {
-            if (base.Contains(controller) == false)
-            {
-                controller.ParticleEffect = this.Owner;
+            controller.ParticleEffect = Owner;
 
-                base.Add(controller);
-            }
+            base.Add(controller);
         }
+    }
 
-        /// <summary>
-        /// Removes a controller from the collection.
-        /// </summary>
-        /// <param name="controller">The controller to remove.</param>
-        public new void Remove(Controller controller)
+    /// <summary>
+    ///     Removes a controller from the collection.
+    /// </summary>
+    /// <param name="controller">The controller to remove.</param>
+    public new void Remove(Controller controller)
+    {
+        if (Contains(controller))
         {
-            if (base.Contains(controller))
-            {
-                controller.ParticleEffect = null;
+            controller.ParticleEffect = null;
 
-                base.Remove(controller);
-            }
+            base.Remove(controller);
         }
     }
 }

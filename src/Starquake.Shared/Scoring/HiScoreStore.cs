@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using System.Globalization;
 
 namespace Starquake.Scoring;
@@ -43,7 +43,10 @@ internal sealed class HiScoreStore
     }
 
     /// <summary>A store over a named file, which is how the tests get one that is not the player's.</summary>
-    public HiScoreStore(string path) => _path = path;
+    public HiScoreStore(string path)
+    {
+        _path = path;
+    }
 
     /// <summary>
     ///     Beside the player's other application data rather than the executable. On a Mac the game

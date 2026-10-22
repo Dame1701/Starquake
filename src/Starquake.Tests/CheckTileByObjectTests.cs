@@ -1,7 +1,7 @@
-// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.Core;
@@ -316,10 +316,10 @@ public class CheckTileByObjectTests
         /// <summary>A tile image solid in every cell.</summary>
         public const int SolidTile = 1;
 
+        private const int TestTileImageCount = 512;
+
         public static readonly Direction[] ProbeDirections =
             [Direction.Up, Direction.Down, Direction.Left, Direction.Right, Direction.None];
-
-        private const int TestTileImageCount = 512;
 
         public static GameScreenData EmptyScreen()
             => new(TileMetrics.TilesAcross, TileMetrics.TilesDown);

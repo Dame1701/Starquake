@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 
@@ -42,13 +42,6 @@ internal static class WaterSettings
     /// <summary>How fast the waves travel, in radians per logic frame.</summary>
     private const double WaveSpeed = 0.075;
 
-    /// <summary>
-    ///     What the water does to the colour behind it, and how much of that is applied at full
-    ///     depth. A multiplier rather than a wash, so the room keeps its own lightness and only
-    ///     loses its reds.
-    /// </summary>
-    public static Vector3 WaterColour => new(0.35f, 0.8f, 0.95f);
-
     /// <inheritdoc cref="WaterColour" />
     public const float Tint = 0.85f;
 
@@ -58,6 +51,16 @@ internal static class WaterSettings
     ///     shallows looks no different from Blob beside them.
     /// </summary>
     public const float AtTheSurface = 0.7f;
+
+    /// <inheritdoc cref="SurfaceColour" />
+    public const float SurfaceThickness = 0.007f;
+
+    /// <summary>
+    ///     What the water does to the colour behind it, and how much of that is applied at full
+    ///     depth. A multiplier rather than a wash, so the room keeps its own lightness and only
+    ///     loses its reds.
+    /// </summary>
+    public static Vector3 WaterColour => new(0.35f, 0.8f, 0.95f);
 
     /// <summary>
     ///     The blue laid over everything under the water. <see cref="WaterColour" /> is a multiplier
@@ -69,18 +72,15 @@ internal static class WaterSettings
     /// <summary>What the line at the surface burns, and how thick it is as a fraction.</summary>
     public static Vector3 SurfaceColour => new(0.3f, 0.55f, 0.6f);
 
-    /// <inheritdoc cref="SurfaceColour" />
-    public const float SurfaceThickness = 0.007f;
+    /// <summary>The waterline as a fraction of the picture, which is what the shader works in.</summary>
+    public static float WaterlineIn01 => WaterlineY / (float)TileMetrics.PlayAreaHeight;
+
+    /// <inheritdoc cref="WaterlineIn01" />
+    public static float OverFullDepthIn01 => TileMetrics.PlayAreaHeight / (float)FullDepth;
 
     /// <summary>
     ///     Where the waves have travelled to by a given logic frame. Logic frames, so the water moves
     ///     at the same rate whatever the display is doing.
     /// </summary>
     public static float PhaseAt(int logicFrame) => (float)(logicFrame * WaveSpeed);
-
-    /// <summary>The waterline as a fraction of the picture, which is what the shader works in.</summary>
-    public static float WaterlineIn01 => WaterlineY / (float)TileMetrics.PlayAreaHeight;
-
-    /// <inheritdoc cref="WaterlineIn01" />
-    public static float OverFullDepthIn01 => TileMetrics.PlayAreaHeight / (float)FullDepth;
 }

@@ -1,10 +1,10 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
-using ProjectMercury.Renderers;
 using ProjectMercury;
+using ProjectMercury.Renderers;
 using Starquake.Core;
 
 namespace Starquake.Particles;

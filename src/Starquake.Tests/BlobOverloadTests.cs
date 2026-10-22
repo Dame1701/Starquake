@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Starquake.ActiveSprites;
 using Starquake.Constants;
 using Starquake.Core;
@@ -349,26 +349,6 @@ public class BlobOverloadTests
         } while (overload.Swell() != OverloadStage.Exploded && frames < TestData.LongerThanAnyDeath);
     }
 
-    private static class TestData
-    {
-        /// <summary>A second of alarm at fifty hertz, as <see cref="BlobOverload" /> sets it.</summary>
-        public const int AlarmFrames = 60;
-
-        /// <summary>Bounds on the loops, so a test fails rather than hangs if a progression stops ending.</summary>
-        public const int LongerThanAnyAlarm = 600;
-
-        /// <inheritdoc cref="LongerThanAnyAlarm" />
-        public const int LongerThanAnyDeath = 100;
-
-        public static void SoundTheWholeAlarm(BlobOverload overload)
-        {
-            for (int frame = 0; frame < AlarmFrames; frame++)
-            {
-                overload.CountAnAlarmFrame();
-            }
-        }
-    }
-
     /// <summary>
     ///     The frame counter the flicker on his skin and the shake of the picture are both read off.
     ///     It was two of Blob's fields, stepped at the top of his overload update.
@@ -425,6 +405,26 @@ public class BlobOverloadTests
             Assert.Equal(frame % OverloadSettings.BeamArcFrames, overload.ArcFrame);
             Assert.InRange(overload.ArcFrame, 0, OverloadSettings.BeamArcFrames - 1);
             overload.CountAFrame();
+        }
+    }
+
+    private static class TestData
+    {
+        /// <summary>A second of alarm at fifty hertz, as <see cref="BlobOverload" /> sets it.</summary>
+        public const int AlarmFrames = 60;
+
+        /// <summary>Bounds on the loops, so a test fails rather than hangs if a progression stops ending.</summary>
+        public const int LongerThanAnyAlarm = 600;
+
+        /// <inheritdoc cref="LongerThanAnyAlarm" />
+        public const int LongerThanAnyDeath = 100;
+
+        public static void SoundTheWholeAlarm(BlobOverload overload)
+        {
+            for (int frame = 0; frame < AlarmFrames; frame++)
+            {
+                overload.CountAnAlarmFrame();
+            }
         }
     }
 }

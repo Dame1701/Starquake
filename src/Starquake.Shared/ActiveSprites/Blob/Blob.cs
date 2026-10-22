@@ -1,9 +1,9 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
-using Microsoft.Xna.Framework.Graphics;
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.Animations;
 using Starquake.Collisions;
 using Starquake.Constants;
@@ -53,12 +53,6 @@ internal class Blob
     private const int WalkSpeed = 8;
 
     /// <summary>
-    ///     How far apart a slow walk's footfalls are: as far as the full step covers while the
-    ///     footfall sound, a tenth of a second long, plays once. See <see cref="PatterFeet" />.
-    /// </summary>
-    private static readonly int FootfallSpacing = WalkSpeed * LogicClock.Seconds(0.1);
-
-    /// <summary>
     ///     Where the teleport beam and the shot's smoke trail are emitted from, measured in from the
     ///     top left of Blob and of the shot.
     /// </summary>
@@ -79,6 +73,12 @@ internal class Blob
     /// <inheritdoc cref="TunnelExitLeftXOffset" />
     private const int TunnelExitYOffset = 32;
 
+    /// <summary>
+    ///     How far apart a slow walk's footfalls are: as far as the full step covers while the
+    ///     footfall sound, a tenth of a second long, plays once. See <see cref="PatterFeet" />.
+    /// </summary>
+    private static readonly int FootfallSpacing = WalkSpeed * LogicClock.Seconds(0.1);
+
     private readonly Animation _blobAnimLeft;
     private readonly Animation _blobAnimRight;
 
@@ -88,20 +88,26 @@ internal class Blob
 
     private readonly IStandardParticleEffect _blobTeleporterBeam;
     private readonly BreakableBridges _breakableBridges;
-    private readonly BlobEntryPoint _entryPoint = new();
     private readonly EnergyDrain _drain = new();
-    private readonly TeleportFade _teleport = new();
+    private readonly BlobEntryPoint _entryPoint = new();
     private readonly BlobFall _fall = new();
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsSet _graphicsSet;
     private readonly Inventory _inventory;
     private readonly TunnelLift _lift;
+
+    /// <summary>
+    ///     Called when Blob comes apart, so the picture can be shaken. A callback rather than the
+    ///     thing that does the shaking, which Blob has no business holding.
+    /// </summary>
+    private readonly Action _onExploded;
     private readonly BlobOverload _overload = new();
     private readonly ResourceManager _resources;
     private readonly ScreenDirectory _screenDirectory;
     private readonly ScreenEffectEngine _screenEffects;
     private readonly Shuttle _shuttle = new();
     private readonly PlayerStats _stats;
+    private readonly TeleportFade _teleport = new();
     private readonly List<ResetTile> _tilesToReset = [];
     private readonly UnstickProbe _unstickProbe;
 
@@ -111,24 +117,20 @@ internal class Blob
 
     private Direction _blobsLastAnimDirection = Direction.None;
 
-    /// <summary>How far Blob has walked since the walk cycle last moved on. See <see cref="Stride" />.</summary>
-    private int _strideWalked;
+    private Guid _blobTunnelLiftSoundId = Guid.Empty;
+
+    private Direction _directionGoingThroughTunnel = Direction.None;
 
     /// <summary>How much further a slow walk goes before the next footfall. See <see cref="PatterFeet" />.</summary>
     private int _distanceToFootfall;
-
-    private Guid _blobTunnelLiftSoundId = Guid.Empty;
-
-    private int _xPos;
-
-    private int _yPos;
-
-    private Direction _directionGoingThroughTunnel = Direction.None;
 
     private bool _inventoryAccessed;
 
     private bool _jumpPressed;
     private bool _resetBlobToScreenEntryPoint;
+
+    /// <summary>How far Blob has walked since the walk cycle last moved on. See <see cref="Stride" />.</summary>
+    private int _strideWalked;
 
     /// <summary>
     ///     The last reading of Blob's surroundings. A field rather than a local, because a shuttle pad
@@ -136,6 +138,10 @@ internal class Blob
     ///     <see cref="UpdateNormalState" />.
     /// </summary>
     private BlobSurroundings _surroundings;
+
+    private int _xPos;
+
+    private int _yPos;
 
 
     public Blob(
@@ -253,12 +259,6 @@ internal class Blob
     public BlobWeapon Weapon { get; }
 
     public CustomControl Control { get; }
-
-    /// <summary>
-    ///     Called when Blob comes apart, so the picture can be shaken. A callback rather than the
-    ///     thing that does the shaking, which Blob has no business holding.
-    /// </summary>
-    private readonly Action _onExploded;
 
     public event RaiseScreenChanged? OnScreenChanged;
 
@@ -1028,8 +1028,6 @@ internal class Blob
     }
 
 
-
-
     /// <summary>
     ///     The shader Blob burns with, pointed at the pose about to be drawn. Flickers at
     ///     <see cref="ElectricSettings.FlickerAt" />, the same rate as the node and gate arcs, so the
@@ -1257,7 +1255,6 @@ internal class Blob
     ///     The red wash showing energy being drained. It runs down while a nasty is touching Blob and
     ///     back up once that stops, so a glancing touch shows as a flash rather than a step change.
     /// </summary>
-
     /// <summary>Blob walking about, reddening while a nasty drains his energy.</summary>
     /// <remarks>
     ///     The tint stays white and the shader supplies the red. The shader is skipped entirely when

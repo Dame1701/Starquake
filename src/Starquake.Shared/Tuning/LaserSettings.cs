@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 
 namespace Starquake.Tuning;
@@ -22,15 +22,6 @@ internal static class LaserSettings
     ///     reads as a band rather than a beam.
     /// </summary>
     public const float CoreWidth = 0.3f;
-
-    /// <summary>What burns down the middle of the shot.</summary>
-    public static Vector3 CoreColour => new(1f, 0.97f, 0.9f);
-
-    /// <summary>
-    ///     What spreads off it. The cyan the redrawn flame already uses, so the spread is more of the
-    ///     same light rather than a second colour.
-    /// </summary>
-    public static Vector3 EdgeColour => new(0.3f, 0.8f, 0.95f);
 
     /// <summary>How quickly the coloured spread falls away from the axis.</summary>
     public const float Spread = 1.35f;
@@ -101,6 +92,27 @@ internal static class LaserSettings
     /// </summary>
     public const float BackShare = 0.62f;
 
+    /// <summary>The single knob for how hard the whole beam burns.</summary>
+    /// <remarks>
+    ///     Deliberately over one. The beam is drawn additively, so this is how much light it adds
+    ///     rather than an opacity, and there is nothing to clip against short of white.
+    ///     <para>
+    ///         If the shot ever looks too much, check what else is drawn on it before turning this
+    ///         down. <c>FireTrail</c> balloons every particle to 256 pixels, so its count and
+    ///         lifetime wash the screen out far more readily than this does.
+    ///     </para>
+    /// </remarks>
+    public const float Intensity = 1.15f;
+
+    /// <summary>What burns down the middle of the shot.</summary>
+    public static Vector3 CoreColour => new(1f, 0.97f, 0.9f);
+
+    /// <summary>
+    ///     What spreads off it. The cyan the redrawn flame already uses, so the spread is more of the
+    ///     same light rather than a second colour.
+    /// </summary>
+    public static Vector3 EdgeColour => new(0.3f, 0.8f, 0.95f);
+
     /// <summary>
     ///     Where the waves have travelled to by a given logic frame. Logic frames, so the beam
     ///     writhes at the same rate whatever the display is doing.
@@ -117,16 +129,4 @@ internal static class LaserSettings
             : ((int)(Length * OnFootLength),
                 (int)(Thickness * OnFootThickness),
                 Intensity * OnFootIntensity);
-
-    /// <summary>The single knob for how hard the whole beam burns.</summary>
-    /// <remarks>
-    ///     Deliberately over one. The beam is drawn additively, so this is how much light it adds
-    ///     rather than an opacity, and there is nothing to clip against short of white.
-    ///     <para>
-    ///         If the shot ever looks too much, check what else is drawn on it before turning this
-    ///         down. <c>FireTrail</c> balloons every particle to 256 pixels, so its count and
-    ///         lifetime wash the screen out far more readily than this does.
-    ///     </para>
-    /// </remarks>
-    public const float Intensity = 1.15f;
 }

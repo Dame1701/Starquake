@@ -1,31 +1,29 @@
-﻿namespace ProjectMercury.ContentPipeline.Emitters
-{
-    using Microsoft.Xna.Framework.Content;
-    using Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate;
-    using ProjectMercury.Emitters;
-    using System;
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
 
-    //[ContentTypeSerializer]
-    //public class ConeEmitterSerializer : AbstractEmitterSerializer<ConeEmitter>
-    //{
-    //    protected override void Serialize(IntermediateWriter output, ConeEmitter value, ContentSerializerAttribute format)
-    //    {
-    //        base.Serialize(output, value, format);
+namespace ProjectMercury.ContentPipeline.Emitters;
 
-    //        output.Xml.WriteElementString("Direction", value.Direction.ToString());
-    //        output.Xml.WriteElementString("ConeAngle", value.ConeAngle.ToString());
-    //    }
+//[ContentTypeSerializer]
+//public class ConeEmitterSerializer : AbstractEmitterSerializer<ConeEmitter>
+//{
+//    protected override void Serialize(IntermediateWriter output, ConeEmitter value, ContentSerializerAttribute format)
+//    {
+//        base.Serialize(output, value, format);
 
-    //    protected override ConeEmitter Deserialize(IntermediateReader input, ContentSerializerAttribute format, ConeEmitter existingInstance)
-    //    {
-    //        ConeEmitter value = existingInstance ?? new ConeEmitter();
+//        output.Xml.WriteElementString("Direction", value.Direction.ToString());
+//        output.Xml.WriteElementString("ConeAngle", value.ConeAngle.ToString());
+//    }
 
-    //        base.Deserialize(input, format, value);
+//    protected override ConeEmitter Deserialize(IntermediateReader input, ContentSerializerAttribute format, ConeEmitter existingInstance)
+//    {
+//        ConeEmitter value = existingInstance ?? new ConeEmitter();
 
-    //        value.Direction = Single.Parse(input.Xml.ReadElementString("Direction"));
-    //        value.ConeAngle = Single.Parse(input.Xml.ReadElementString("ConeAngle"));
+//        base.Deserialize(input, format, value);
 
-    //        return value;
-    //    }
-    //}
-}
+//        value.Direction = Single.Parse(input.Xml.ReadElementString("Direction"));
+//        value.ConeAngle = Single.Parse(input.Xml.ReadElementString("ConeAngle"));
+
+//        return value;
+//    }
+//}

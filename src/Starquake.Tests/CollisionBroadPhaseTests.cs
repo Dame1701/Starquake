@@ -1,7 +1,7 @@
-// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Starquake.Collisions;
 using Starquake.Core;
 using Xunit;
@@ -257,12 +257,6 @@ public class CollisionBroadPhaseTests
         public const int CellSize = 32;
 
         /// <summary>
-        ///     Box sizes to sweep, odd ones included. The halves are integer divisions, so 31 and
-        ///     33 are the sizes that tell whether the solved form rounds the way the walk does.
-        /// </summary>
-        public static readonly int[] Sizes = [31, 32, 33, 56, 64];
-
-        /// <summary>
         ///     Far enough along the other axis to stay overlapping, so the sweep tests the move
         ///     rather than the boxes missing each other sideways.
         /// </summary>
@@ -297,6 +291,12 @@ public class CollisionBroadPhaseTests
         ///     margin past it where the answer must be the full velocity.
         /// </summary>
         public const int SweepReach = 80;
+
+        /// <summary>
+        ///     Box sizes to sweep, odd ones included. The halves are integer divisions, so 31 and
+        ///     33 are the sizes that tell whether the solved form rounds the way the walk does.
+        /// </summary>
+        public static readonly int[] Sizes = [31, 32, 33, 56, 64];
 
         public static readonly int[] Velocities = [1, 2, 8, 16];
     }

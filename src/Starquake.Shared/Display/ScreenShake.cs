@@ -1,9 +1,9 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
 
 using Starquake.Core;
+
 namespace Starquake.Display;
 
 /// <summary>
@@ -55,9 +55,9 @@ internal sealed class ScreenShake
 
     private int _framesShaken;
 
-    private int _joltFramesLeft;
-
     private int _framesToShake;
+
+    private int _joltFramesLeft;
 
     private bool _shaking;
 

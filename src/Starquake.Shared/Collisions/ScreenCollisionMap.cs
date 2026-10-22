@@ -1,7 +1,7 @@
-// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.Core;
@@ -786,6 +786,16 @@ internal class ScreenCollisionMap
     /// </summary>
     private sealed class StaticLayer
     {
+
+        /// <inheritdoc cref="_bakedScreen" />
+        private readonly int[,] _bakedFrom = new int[TileMetrics.TilesAcross, TileMetrics.TilesDown];
+
+        /// <summary>
+        ///     The screen the bake is of, and the tile images it was baked from. The images are kept
+        ///     so staleness is decided by looking rather than by being told. See the class remarks on
+        ///     <see cref="ScreenCollisionMap" />.
+        /// </summary>
+        private int _bakedScreen = -1;
         /// <summary>The tile image behind each cell that stops everything, or <see cref="NoCell" />.</summary>
         public int[,] StopsEveryone { get; } = new int[CellsAcrossScreen, CellsDownScreen];
 
@@ -794,16 +804,6 @@ internal class ScreenCollisionMap
         ///     mouth. Kept apart from <see cref="StopsEveryone" /> because one cell can be both.
         /// </summary>
         public int[,] StopsNastiesOnly { get; } = new int[CellsAcrossScreen, CellsDownScreen];
-
-        /// <summary>
-        ///     The screen the bake is of, and the tile images it was baked from. The images are kept
-        ///     so staleness is decided by looking rather than by being told. See the class remarks on
-        ///     <see cref="ScreenCollisionMap" />.
-        /// </summary>
-        private int _bakedScreen = -1;
-
-        /// <inheritdoc cref="_bakedScreen" />
-        private readonly int[,] _bakedFrom = new int[TileMetrics.TilesAcross, TileMetrics.TilesDown];
 
         public void BakeIfStale(int screenNumber, GameScreenData screen, int[,,] tileCollisionData)
         {
@@ -982,7 +982,7 @@ internal class ScreenCollisionMap
         }
 
         private static (int X, int Y) CellAt(int tileX, int tileY, int cellAcross, int cellDown)
-            => ((tileX * TileMetrics.TileWidth) / TileMetrics.CollisionCellWidth + cellAcross,
-                (tileY * TileMetrics.TileHeight) / TileMetrics.CollisionCellHeight + cellDown);
+            => (tileX * TileMetrics.TileWidth / TileMetrics.CollisionCellWidth + cellAcross,
+                tileY * TileMetrics.TileHeight / TileMetrics.CollisionCellHeight + cellDown);
     }
 }

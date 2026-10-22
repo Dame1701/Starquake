@@ -1,9 +1,9 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
-using Microsoft.Xna.Framework.Graphics;
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.ContentManagement;
@@ -60,6 +60,15 @@ internal sealed class BlobWeapon
 
 
     private readonly Animation _animFire1;
+
+    /// <summary>
+    ///     The batch and the single white texel the beam is laid over. There is no beam artwork,
+    ///     because the shader works out every pixel and only needs something to work them out on.
+    /// </summary>
+    private readonly SpriteBatch _beam;
+
+    /// <inheritdoc cref="_beam" />
+    private readonly Texture2D _beamQuad;
     private readonly BlobFire _fire;
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsSet _graphicsSet;
@@ -74,15 +83,6 @@ internal sealed class BlobWeapon
     private readonly IPositionalTriggerParticleEffect _sparks;
     private readonly PlayerStats _stats;
     private readonly IStandardParticleEffect _trail;
-
-    /// <summary>
-    ///     The batch and the single white texel the beam is laid over. There is no beam artwork,
-    ///     because the shader works out every pixel and only needs something to work them out on.
-    /// </summary>
-    private readonly SpriteBatch _beam;
-
-    /// <inheritdoc cref="_beam" />
-    private readonly Texture2D _beamQuad;
 
     /// <summary>
     ///     Logic frames the weapon has run for, which drives the beam's writhing. Counted on update
@@ -274,7 +274,9 @@ internal sealed class BlobWeapon
         // as well, so the shot's own angle is used. On foot it is one of two.
         float along = onShuttle
             ? MathHelper.ToRadians(_rotation)
-            : _directionFired == Direction.Left ? MathHelper.Pi : 0f;
+            : _directionFired == Direction.Left
+                ? MathHelper.Pi
+                : 0f;
 
         _beam.Begin(SpriteSortMode.Deferred, BlendState.Additive, null, null, null, laser);
         // Centred where the trail is emitted from, which is the middle of the shot. Offsetting by

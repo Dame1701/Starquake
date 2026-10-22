@@ -1,10 +1,10 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
 
 using Starquake.Core;
 using Starquake.Tuning;
+
 namespace Starquake.ActiveSprites;
 
 /// <summary>
@@ -60,8 +60,6 @@ internal sealed class BlobOverload
 
     private int _dischargeFramesDone;
 
-    private OverloadStage _stage;
-
     /// <summary>
     ///     How big Blob is drawn. Only ever grows: out to <see cref="CrackScale" /> while coming
     ///     apart, and further out through the blast.
@@ -71,13 +69,13 @@ internal sealed class BlobOverload
     /// <summary>
     ///     Which part of coming apart Blob is in, so the draw can tell cracking from bursting.
     /// </summary>
-    public OverloadStage Stage => _stage;
+    public OverloadStage Stage { get; private set; }
 
     /// <summary>
     ///     How far open the cracks are, from nought to one. Nought once past that stage, so nothing
     ///     has to ask whether it is still running.
     /// </summary>
-    public float Split => _stage == OverloadStage.Cracking
+    public float Split => Stage == OverloadStage.Cracking
         ? Math.Clamp(_crackFramesDone / (float)CrackFrames, 0f, 1f)
         : 0f;
 
@@ -85,7 +83,7 @@ internal sealed class BlobOverload
     ///     Whether the alarm is still running. False from the start for a death that skips it, as
     ///     <see cref="Begin" /> is told.
     /// </summary>
-    public bool AlarmSounding => _stage != OverloadStage.Exploded && _alarmFramesSounded < AlarmFrames;
+    public bool AlarmSounding => Stage != OverloadStage.Exploded && _alarmFramesSounded < AlarmFrames;
 
     /// <summary>
     ///     Whether the alarm began this frame, which is when the sound is asked for. That is the
@@ -103,23 +101,6 @@ internal sealed class BlobOverload
     ///     alarm has run its course, whether or not there was one.
     /// </summary>
     public bool ShowingTheAlarm => _alarmFramesSounded < AlarmFrames;
-
-    /// <summary>Starts a death.</summary>
-    /// <param name="soundTheAlarmFirst">
-    ///     True for running out of energy, which gives a second of warning. False for everything else,
-    ///     which begins already exploded. That is how the alarm is skipped, and the only thing
-    ///     <see cref="AlarmSounding" /> tests the stage for.
-    /// </param>
-    public void Begin(bool soundTheAlarmFirst)
-    {
-        _stage = soundTheAlarmFirst ? OverloadStage.Cracking : OverloadStage.Exploded;
-        _alarmFramesSounded = 0;
-        _crackFramesDone = 0;
-        _dischargeFramesDone = 0;
-    }
-
-    /// <summary>One more frame of the alarm.</summary>
-    public void CountAnAlarmFrame() => _alarmFramesSounded++;
 
     /// <summary>
     ///     Logic frames the overload has run for, which drives both the flicker on Blob's skin and
@@ -141,6 +122,23 @@ internal sealed class BlobOverload
     /// </summary>
     public int ArcFrame => Frame % OverloadSettings.BeamArcFrames;
 
+    /// <summary>Starts a death.</summary>
+    /// <param name="soundTheAlarmFirst">
+    ///     True for running out of energy, which gives a second of warning. False for everything else,
+    ///     which begins already exploded. That is how the alarm is skipped, and the only thing
+    ///     <see cref="AlarmSounding" /> tests the stage for.
+    /// </param>
+    public void Begin(bool soundTheAlarmFirst)
+    {
+        Stage = soundTheAlarmFirst ? OverloadStage.Cracking : OverloadStage.Exploded;
+        _alarmFramesSounded = 0;
+        _crackFramesDone = 0;
+        _dischargeFramesDone = 0;
+    }
+
+    /// <summary>One more frame of the alarm.</summary>
+    public void CountAnAlarmFrame() => _alarmFramesSounded++;
+
     /// <inheritdoc cref="Frame" />
     public void CountAFrame() => Frame++;
 
@@ -150,7 +148,7 @@ internal sealed class BlobOverload
     /// </summary>
     public OverloadStage Swell()
     {
-        if (_stage == OverloadStage.Cracking)
+        if (Stage == OverloadStage.Cracking)
         {
             _crackFramesDone++;
 
@@ -160,31 +158,31 @@ internal sealed class BlobOverload
 
             if (_crackFramesDone >= CrackFrames)
             {
-                _stage = OverloadStage.Discharging;
+                Stage = OverloadStage.Discharging;
                 Scale = CrackScale;
             }
 
-            return _stage;
+            return Stage;
         }
 
-        if (_stage == OverloadStage.Discharging)
+        if (Stage == OverloadStage.Discharging)
         {
             _dischargeFramesDone++;
             Scale += DischargeStep;
 
             if (_dischargeFramesDone >= DischargeFrames)
             {
-                _stage = OverloadStage.Exploded;
+                Stage = OverloadStage.Exploded;
             }
         }
 
-        return _stage;
+        return Stage;
     }
 
     /// <summary>Back to normal size, ready for the next death.</summary>
     public void Reset()
     {
-        _stage = OverloadStage.Cracking;
+        Stage = OverloadStage.Cracking;
         _crackFramesDone = 0;
         _dischargeFramesDone = 0;
         Scale = 1f;

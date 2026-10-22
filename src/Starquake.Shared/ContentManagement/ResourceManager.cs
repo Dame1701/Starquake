@@ -1,11 +1,11 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using MessagePack;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework;
 using Starquake.Core;
 using Starquake.Particles;
 using Starquake.SharedLibs;
@@ -21,9 +21,9 @@ internal class ResourceManager : StartableGameComponentBase
     ///     message stays up before the game takes over. Long enough to read rather than flash past.
     /// </summary>
     private const int FullyLoadedPercent = 100;
+    private readonly List<AnimSpriteDescription> _animSpriteDescriptions;
 
     private readonly AnimTiles _animTiles;
-    private readonly List<AnimSpriteDescription> _animSpriteDescriptions;
     private readonly ContentManager _contentManagerInstance;
     private readonly List<DataDescription> _dataDescriptions;
     private readonly GraphicsDeviceManager _graphicsDeviceManager;

@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 
@@ -19,20 +19,6 @@ namespace Starquake.Tuning;
 /// </remarks>
 internal static class OverloadSettings
 {
-    /// <summary>The coldest stop of the heat ramp: Blob before any charge has built.</summary>
-    public static Vector3 EmberColour => new(0.5f, 0.12f, 0.06f);
-
-    /// <inheritdoc cref="EmberColour" />
-    public static Vector3 MidColour => new(1f, 0.5f, 0.1f);
-
-    /// <inheritdoc cref="EmberColour" />
-    public static Vector3 HotColour => new(1f, 0.97f, 0.85f);
-
-    /// <summary>
-    ///     The skin of charge crawling over Blob. Electric blue against the heat, because the two
-    ///     must be told apart at a glance: he burns from within and arcs on the outside.
-    /// </summary>
-    public static Vector3 RimColour => new(0.55f, 0.85f, 1f);
 
     /// <summary>How hard the rim burns.</summary>
     public const float RimAmount = 2.2f;
@@ -45,9 +31,6 @@ internal static class OverloadSettings
     ///     copies of a solid Blob read as five Blobs, where five outlines read as a blast.
     /// </summary>
     public const float InteriorWash = 0.18f;
-
-    /// <summary>What comes out of the cracks as he splits.</summary>
-    public static Vector3 CrackColour => new(1f, 0.95f, 0.8f);
 
     /// <summary>How hard the light out of the cracks burns.</summary>
     public const float CrackBrightness = 2.6f;
@@ -79,6 +62,26 @@ internal static class OverloadSettings
     /// <summary>How far out they are thrown by the time Blob has come apart, in pixels.</summary>
     private const float BeamReach = 46f;
 
+    /// <summary>How far Blob shakes at worst, in pixels.</summary>
+    private const float ShakeDistance = 3.5f;
+    /// <summary>The coldest stop of the heat ramp: Blob before any charge has built.</summary>
+    public static Vector3 EmberColour => new(0.5f, 0.12f, 0.06f);
+
+    /// <inheritdoc cref="EmberColour" />
+    public static Vector3 MidColour => new(1f, 0.5f, 0.1f);
+
+    /// <inheritdoc cref="EmberColour" />
+    public static Vector3 HotColour => new(1f, 0.97f, 0.85f);
+
+    /// <summary>
+    ///     The skin of charge crawling over Blob. Electric blue against the heat, because the two
+    ///     must be told apart at a glance: he burns from within and arcs on the outside.
+    /// </summary>
+    public static Vector3 RimColour => new(0.55f, 0.85f, 1f);
+
+    /// <summary>What comes out of the cracks as he splits.</summary>
+    public static Vector3 CrackColour => new(1f, 0.95f, 0.8f);
+
     /// <summary>
     ///     Where one beam sits relative to Blob's middle, and which way it points.
     /// </summary>
@@ -101,9 +104,6 @@ internal static class OverloadSettings
             new Vector2((float)Math.Cos(turned) * reach, (float)Math.Sin(turned) * reach),
             turned);
     }
-
-    /// <summary>How far Blob shakes at worst, in pixels.</summary>
-    private const float ShakeDistance = 3.5f;
 
     /// <summary>
     ///     How hard Blob is shaking on a given logic frame, growing as the cracks widen.

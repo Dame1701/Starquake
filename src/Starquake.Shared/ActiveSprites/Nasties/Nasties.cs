@@ -1,9 +1,9 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
-using Microsoft.Xna.Framework.Input;
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using Starquake.Collisions;
 using Starquake.Constants;
 using Starquake.ContentManagement;
@@ -54,15 +54,15 @@ internal class Nasties
     private readonly List<Nasty> _nasties;
     private readonly int _nastyCount;
     private readonly IPositionalTriggerParticleEffect _nastySmokes;
-    private readonly Random _randomNumberGenerator;
-    private readonly ResourceManager _resources;
-    private int _previousScreenVisited;
 
     /// <summary>
     ///     Called when one of these blows apart, and handed on to each of them. Only the mechanical
     ///     ones ever raise it.
     /// </summary>
     private readonly Action _onNastyExploded;
+    private readonly Random _randomNumberGenerator;
+    private readonly ResourceManager _resources;
+    private int _previousScreenVisited;
 
     public Nasties(
         ResourceManager resources,

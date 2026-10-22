@@ -1,124 +1,133 @@
-/*  
- Copyright © 2009 Project Mercury Team Members (http://mpe.codeplex.com/People/ProjectPeople.aspx)
+// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
 
- This program is licensed under the Microsoft Permissive License (Ms-PL).  You should 
+/*
+ Copyright ï¿½ 2009 Project Mercury Team Members (http://mpe.codeplex.com/People/ProjectPeople.aspx)
+
+ This program is licensed under the Microsoft Permissive License (Ms-PL).  You should
  have received a copy of the license along with the source code.  If not, an online copy
  of the license can be found at http://mpe.codeplex.com/license.
 */
 
-namespace ProjectMercury.Renderers
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
+using ProjectMercury.Emitters;
+
+namespace ProjectMercury.Renderers;
+
+/// <summary>
+///     Defines the abstract base class for a Renderer.
+/// </summary>
+public abstract class Renderer : IDisposable
 {
-    using System;
-    using Emitters;
-    using Microsoft.Xna.Framework;
-    using Microsoft.Xna.Framework.Content;
-    using Microsoft.Xna.Framework.Graphics;
+    /// <summary>
+    ///     Hold a reference to the games GraphicsDeviceService.
+    /// </summary>
+    public IGraphicsDeviceService GraphicsDeviceService;
 
     /// <summary>
-    /// Defines the abstract base class for a Renderer.
+    ///     Disposes any unmanaged resources being used by this instance.
     /// </summary>
-    public abstract class Renderer : IDisposable
+    public void Dispose()
     {
-        /// <summary>
-        /// Hold a reference to the games GraphicsDeviceService.
-        /// </summary>
-        public IGraphicsDeviceService GraphicsDeviceService;
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
 
-        /// <summary>
-        /// Releases unmanaged and - optionally - managed resources
-        /// </summary>
-        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
-        protected virtual void Dispose(bool disposing) { }
+    /// <summary>
+    ///     Releases unmanaged and - optionally - managed resources
+    /// </summary>
+    /// <param name="disposing">
+    ///     <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only
+    ///     unmanaged resources.
+    /// </param>
+    protected virtual void Dispose(bool disposing) { }
 
-        /// <summary>
-        /// Disposes any unmanaged resources being used by this instance.
-        /// </summary>
-        public void Dispose()
+    /// <summary>
+    ///     Releases unmanaged resources and performs other cleanup operations before the
+    ///     <see cref="Renderer" /> is reclaimed by garbage collection.
+    /// </summary>
+    ~Renderer()
+    {
+        Dispose(false);
+    }
+
+    /// <summary>
+    ///     Loads any content needed by the Renderer.
+    /// </summary>
+    public virtual void LoadContent(ContentManager content) { }
+
+    /// <summary>
+    ///     Renders the specified Emitter.
+    /// </summary>
+    public virtual void RenderEmitter(Emitter emitter)
+    {
+        Guard.ArgumentNull("emitter", emitter);
+
+        Matrix ident = Matrix.Identity;
+
+        RenderEmitter(emitter, ref ident);
+    }
+
+    /// <summary>
+    ///     Renders the specified Emitter, applying the specified transformation offset.
+    /// </summary>
+    public abstract void RenderEmitter(Emitter emitter, ref Matrix transform);
+
+    /// <summary>
+    ///     Renders the specified Emitter, applying the specified transformation offset with a screenfade.
+    /// </summary>
+    public abstract void RenderEmitter(Emitter emitter, ref Matrix transform, int screenFade);
+
+    /// <summary>
+    ///     Renders the specified ParticleEffect.
+    /// </summary>
+    public virtual void RenderEffect(ParticleEffect effect)
+    {
+        Guard.ArgumentNull("effect", effect);
+
+        Matrix ident = Matrix.Identity;
+
+        RenderEffect(effect, ref ident);
+    }
+
+    /// <summary>
+    ///     Renders the specified ParticleEffect with a screen fade.
+    /// </summary>
+    public virtual void RenderEffect(ParticleEffect effect, int screenFade)
+    {
+        Guard.ArgumentNull("effect", effect);
+
+        Matrix ident = Matrix.Identity;
+
+        RenderEffect(effect, ref ident, screenFade);
+    }
+
+    /// <summary>
+    ///     Renders the specified ParticleEffect, applying the specified transformation offset.
+    /// </summary>
+    public virtual void RenderEffect(ParticleEffect effect, ref Matrix transform)
+    {
+        Guard.ArgumentNull("effect", effect);
+
+        for (int i = 0; i < effect.Count; i++)
         {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
+            RenderEmitter(effect[i], ref transform);
         }
+    }
 
-        /// <summary>
-        /// Releases unmanaged resources and performs other cleanup operations before the
-        /// <see cref="Renderer"/> is reclaimed by garbage collection.
-        /// </summary>
-        ~Renderer()
+    /// <summary>
+    ///     Renders the specified ParticleEffect, applying the specified transformation offset with a screen fade.
+    /// </summary>
+    public virtual void RenderEffect(ParticleEffect effect, ref Matrix transform, int screenFade)
+    {
+        Guard.ArgumentNull("effect", effect);
+
+        for (int i = 0; i < effect.Count; i++)
         {
-            this.Dispose(false);
-        }
-
-        /// <summary>
-        /// Loads any content needed by the Renderer.
-        /// </summary>
-        public virtual void LoadContent(ContentManager content) { }
-
-        /// <summary>
-        /// Renders the specified Emitter.
-        /// </summary>
-        public virtual void RenderEmitter(Emitter emitter)
-        {
-            Guard.ArgumentNull("emitter", emitter);
-
-            Matrix ident = Matrix.Identity;
-
-            this.RenderEmitter(emitter, ref ident);
-        }
-
-        /// <summary>
-        /// Renders the specified Emitter, applying the specified transformation offset.
-        /// </summary>
-        public abstract void RenderEmitter(Emitter emitter, ref Matrix transform);
-
-        /// <summary>
-        /// Renders the specified Emitter, applying the specified transformation offset with a screenfade.
-        /// </summary>
-        public abstract void RenderEmitter(Emitter emitter, ref Matrix transform, int screenFade);
-
-        /// <summary>
-        /// Renders the specified ParticleEffect.
-        /// </summary>
-        public virtual void RenderEffect(ParticleEffect effect)
-        {
-            Guard.ArgumentNull("effect", effect);
-
-            Matrix ident = Matrix.Identity;
-
-            this.RenderEffect(effect, ref ident);
-        }
-
-        /// <summary>
-        /// Renders the specified ParticleEffect with a screen fade.
-        /// </summary>
-        public virtual void RenderEffect(ParticleEffect effect, int screenFade)
-        {
-            Guard.ArgumentNull("effect", effect);
-
-            Matrix ident = Matrix.Identity;
-
-            this.RenderEffect(effect, ref ident, screenFade);
-        }
-
-        /// <summary>
-        /// Renders the specified ParticleEffect, applying the specified transformation offset.
-        /// </summary>
-        public virtual void RenderEffect(ParticleEffect effect, ref Matrix transform)
-        {
-            Guard.ArgumentNull("effect", effect);
-
-            for (int i = 0; i < effect.Count; i++)
-                this.RenderEmitter(effect[i], ref transform);
-        }
-
-        /// <summary>
-        /// Renders the specified ParticleEffect, applying the specified transformation offset with a screen fade.
-        /// </summary>
-        public virtual void RenderEffect(ParticleEffect effect, ref Matrix transform, int screenFade)
-        {
-            Guard.ArgumentNull("effect", effect);
-
-            for (int i = 0; i < effect.Count; i++)
-                this.RenderEmitter(effect[i], ref transform, screenFade);
+            RenderEmitter(effect[i], ref transform, screenFade);
         }
     }
 }

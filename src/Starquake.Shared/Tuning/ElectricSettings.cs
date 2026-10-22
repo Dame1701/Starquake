@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -43,6 +43,9 @@ internal static class ElectricSettings
     ///     in place of it.
     /// </summary>
     public const float CoreBoost = 0.8f;
+
+    /// <summary>How far either side of its usual brightness the arc wanders.</summary>
+    private const double FlickerSwing = 0.3;
 
     /// <summary>What the middle of the spark burns.</summary>
     public static Vector3 CoreColour => new(1f, 1f, 1f);
@@ -88,9 +91,6 @@ internal static class ElectricSettings
         return electric;
     }
 
-    /// <summary>How far either side of its usual brightness the arc wanders.</summary>
-    private const double FlickerSwing = 0.3;
-
     /// <summary>How bright the arc burns on a given logic frame.</summary>
     /// <remarks>
     ///     Two sines at rates that do not divide one another, so it never repeats on a period short
@@ -105,5 +105,5 @@ internal static class ElectricSettings
     /// </remarks>
     public static float FlickerAt(int logicFrame)
         => (float)(1.0 + FlickerSwing * 0.5 *
-                   (Math.Sin(logicFrame * 0.9) + Math.Sin(logicFrame * 2.3 + 1.7)));
+            (Math.Sin(logicFrame * 0.9) + Math.Sin(logicFrame * 2.3 + 1.7)));
 }

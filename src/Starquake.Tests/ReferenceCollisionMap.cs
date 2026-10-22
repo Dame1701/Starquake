@@ -1,7 +1,7 @@
-// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.Core;
@@ -275,8 +275,8 @@ internal sealed class ReferenceCollisionMap
         if (colTile.TileImage > 999 &&
             !isBlob &&
             (CollisionObjectType)colTile.TileImage is CollisionObjectType.JumpPlatform or
-                CollisionObjectType.CoreElement or
-                CollisionObjectType.GameObject &&
+            CollisionObjectType.CoreElement or
+            CollisionObjectType.GameObject &&
             Overlaps(
                 new Rectangle(playerXPos, playerYPos, playerWidth, playerHeight),
                 new Rectangle(colTile.XPos, colTile.YPos, GameObjectProbeSize, GameObjectProbeSize)))

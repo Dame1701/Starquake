@@ -1,9 +1,9 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
-using Microsoft.Xna.Framework.Graphics;
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.ActiveSprites;
 using Starquake.Collisions;
 using Starquake.Constants;
@@ -92,6 +92,9 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     private readonly List<Nasty> _coreAliens;
     private readonly IStandardParticleEffect _coreComputationEffect;
 
+    /// <summary>The copies of the core room's loop, held so they can be bent and silenced.</summary>
+    private readonly Guid[] _coreSoundIds = new Guid[CoreSoundSettings.Voices];
+
     private readonly IStandardParticleEffect _coreSparks;
 
     private readonly CoreElements _elements;
@@ -104,6 +107,10 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     private readonly Queue<(int Element, int Slot)> _elementsToReplace = new();
     private readonly GameScreenCollection _gameScreens;
     private readonly ResourceManager _resources;
+    private readonly ScreenDirectory _screenDirectory;
+
+    /// <summary>Held only to wring the room when a part lands in the core.</summary>
+    private readonly ScreenEffectEngine _screenEffects;
 
     /// <summary>
     ///     The quad the funnel is drawn over. A <c>SpriteBatch</c> with a one by one white texture,
@@ -111,17 +118,26 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     /// </summary>
     private readonly Shapes _shapes;
 
-    /// <summary>Held only to wring the room when a part lands in the core.</summary>
-    private readonly ScreenEffectEngine _screenEffects;
-
     /// <summary>Held to glow the inventory slot a part is being drawn out of.</summary>
     private readonly StatusPanel _statusPanel;
+    private int _blankingTilesOpacity;
+    private int _coreAlienCount = MaxCoreAliens;
 
     /// <summary>
     ///     Logic frames the core has been running, which turns the funnel and moves the beams. Counts
     ///     while Blob is elsewhere too, because the core is the one room that carries on off screen.
     /// </summary>
     private int _coreFrame;
+    private int _entryTime;
+
+    /// <summary>How long the core has been making a show of the part it picked out.</summary>
+    private int _framesIdentifying;
+
+    /// <summary>
+    ///     How many frames the core has been winding up towards bearing down on a replacement, or
+    ///     winding back out of one.
+    /// </summary>
+    private int _framesWinding;
 
     /// <summary>
     ///     How far the funnel has turned. Accumulated rather than derived from
@@ -130,33 +146,9 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
     /// </summary>
     private float _funnelTurned;
 
-    /// <summary>
-    ///     How many frames the core has been winding up towards bearing down on a replacement, or
-    ///     winding back out of one.
-    /// </summary>
-    private int _framesWinding;
-
-    /// <summary>How long the core has been making a show of the part it picked out.</summary>
-    private int _framesIdentifying;
-
-
-    /// <summary>
-    ///     How hard the core is bearing down on the slot being filled: one at rest, rising towards
-    ///     <see cref="CoreEnergySettings.FillingBrightness" /> while a part goes in.
-    /// </summary>
-    private float BearingDown => 1f + (CoreEnergySettings.FillingBrightness - 1f)
-        * CoreEnergySettings.WoundUpBy(_framesWinding);
-    private readonly ScreenDirectory _screenDirectory;
-    private int _blankingTilesOpacity;
-    private int _coreAlienCount = MaxCoreAliens;
-    private int _entryTime;
-
     private bool _justEnteredCore = true;
 
     private bool _replacingElements;
-
-    /// <summary>The copies of the core room's loop, held so they can be bent and silenced.</summary>
-    private readonly Guid[] _coreSoundIds = new Guid[CoreSoundSettings.Voices];
 
 
     public PlanetCoreScreen(
@@ -214,6 +206,14 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
         _coreComputationEffect = (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.BinaryEffect, ParticleEffectType.Continual, null);
         _coreSparks = (IStandardParticleEffect)_resources.GetParticleEffectInstance(Assets.Effects.CoreSparks, ParticleEffectType.Continual, null);
     }
+
+
+    /// <summary>
+    ///     How hard the core is bearing down on the slot being filled: one at rest, rising towards
+    ///     <see cref="CoreEnergySettings.FillingBrightness" /> while a part goes in.
+    /// </summary>
+    private float BearingDown => 1f + (CoreEnergySettings.FillingBrightness - 1f)
+        * CoreEnergySettings.WoundUpBy(_framesWinding);
 
     /// <summary>
     ///     The cells of the nine elements standing in the core room, present only while the core room
@@ -480,8 +480,8 @@ internal class PlanetCoreScreen : IGameScreen, IDynamicCollisionCells
 
         // Turned by this frame's own rate. The funnel winds up with everything else.
         _funnelTurned += (CoreEnergySettings.TurnedBy(1) - CoreEnergySettings.TurnedBy(0))
-            * (1f + (CoreEnergySettings.FillingTurnFaster - 1f)
-                * CoreEnergySettings.WoundUpBy(_framesWinding));
+                         * (1f + (CoreEnergySettings.FillingTurnFaster - 1f)
+                             * CoreEnergySettings.WoundUpBy(_framesWinding));
     }
 
     /// <summary>

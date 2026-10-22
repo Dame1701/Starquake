@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 using Starquake.Core;
 using Starquake.Tuning;
@@ -188,7 +188,7 @@ public class CrtSettingsTests
         // Act
         float inOneStep = CrtSettings.AfterglowRetainedOver(seconds);
         float inTwoSteps = CrtSettings.AfterglowRetainedOver(seconds / 2)
-            * CrtSettings.AfterglowRetainedOver(seconds / 2);
+                           * CrtSettings.AfterglowRetainedOver(seconds / 2);
 
         // Assert
         Assert.Equal(inOneStep, inTwoSteps, 5);

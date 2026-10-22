@@ -1,9 +1,9 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
-using Microsoft.Xna.Framework.Graphics;
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Core;
@@ -29,13 +29,13 @@ internal class ConveyorNasty
     private readonly IStandardParticleEffect _conveyorNastyDies;
     private readonly GameScreenCollection _gameScreens;
 
+    private readonly SpriteCollection _nastySprite;
+
     /// <summary>
     ///     Called when this nasty blows apart, so the picture can be shaken. A callback rather than
     ///     the thing that does the shaking, which a nasty has no business holding.
     /// </summary>
     private readonly Action _onExploded;
-
-    private readonly SpriteCollection _nastySprite;
     private readonly Random _randomNumberGenerator;
 
     /// <summary>

@@ -1,10 +1,10 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Core;
@@ -35,6 +35,7 @@ public class GameHost : Game
     ///     input must be read exactly once per frame from exactly one place.
     /// </summary>
     private readonly ToggleKeys _input = new();
+    private readonly GameTime _logicGameTime = new();
 
     /// <summary>
     ///     How many times a real second the game thinks, and so the speed of the game. The engine
@@ -44,11 +45,10 @@ public class GameHost : Game
     /// </summary>
     private readonly LogicRate _logicRate;
 
+    private readonly PreferencesStore _preferencesStore = new();
+
     /// <summary>The settings the function keys change, as saved at the end of the last run.</summary>
     private readonly Preferences _savedPreferences;
-
-    private readonly PreferencesStore _preferencesStore = new();
-    private readonly GameTime _logicGameTime = new();
     private GameEngine? _gameEngine;
 
     /// <summary>

@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 using Starquake.Tuning;
@@ -199,7 +199,7 @@ public class ForceFieldSettingsTests
     {
         // Arrange
         float furthest = 0f;
-        var started = false;
+        bool started = false;
 
         // Act - two seconds, which is more than one trip down
         for (int frame = 0; frame < LogicClock.FramesPerSecond * 2; frame++)

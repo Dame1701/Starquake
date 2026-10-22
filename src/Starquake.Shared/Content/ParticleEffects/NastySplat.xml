@@ -303,6 +303,10 @@
         </Item>
         <Name>NastySplat</Name>
         <Author>Damien Green</Author>
-        <Description>An organic nasty coming apart. Thrown hard and over quickly: every term is half what it was and every rate - the speed the pieces leave at, the rate they tumble - is double, so the whole thing plays at twice the pace. The damping is deliberately left where it was rather than doubled with the rest, which is what makes the pieces carry further as well as faster.</Description>
+        <Description>An organic nasty coming apart. Thrown hard and over quickly: every term is half what it was and
+            every rate - the speed the pieces leave at, the rate they tumble - is double, so the whole thing plays at
+            twice the pace. The damping is deliberately left where it was rather than doubled with the rest, which is
+            what makes the pieces carry further as well as faster.
+        </Description>
     </Asset>
 </XnaContent>

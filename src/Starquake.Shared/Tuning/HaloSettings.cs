@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Starquake.Constants;
 
 namespace Starquake.Tuning;
@@ -28,16 +28,6 @@ internal static class HaloSettings
     public const int Diameter = 64;
 
     /// <summary>
-    ///     What that is as a scale on the tile the quad is cut from, and the shape of the quad it
-    ///     leaves. The tile is 128 by 96, so a quad <see cref="Diameter" /> tall is a third again as
-    ///     wide, which is why the shader is told the ratio and keeps the glow round inside it.
-    /// </summary>
-    public static float Scale => Diameter / (float)TileMetrics.TileHeight;
-
-    /// <inheritdoc cref="Scale" />
-    public static float YOverX => TileMetrics.TileHeight / (float)TileMetrics.TileWidth;
-
-    /// <summary>
     ///     How far across that square the glow reaches before it is gone, as a fraction. Short of the
     ///     whole, so it fades before the corners rather than showing a square edge.
     /// </summary>
@@ -55,6 +45,16 @@ internal static class HaloSettings
     ///     six is lost entirely.
     /// </summary>
     public const int Passes = 3;
+
+    /// <summary>
+    ///     What that is as a scale on the tile the quad is cut from, and the shape of the quad it
+    ///     leaves. The tile is 128 by 96, so a quad <see cref="Diameter" /> tall is a third again as
+    ///     wide, which is why the shader is told the ratio and keeps the glow round inside it.
+    /// </summary>
+    public static float Scale => Diameter / (float)TileMetrics.TileHeight;
+
+    /// <inheritdoc cref="Scale" />
+    public static float YOverX => TileMetrics.TileHeight / (float)TileMetrics.TileWidth;
 
     /// <inheritdoc cref="Reach" />
     public static float OverReach => 1f / Reach;

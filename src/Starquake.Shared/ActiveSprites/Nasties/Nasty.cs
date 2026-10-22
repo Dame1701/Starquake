@@ -1,10 +1,10 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Core;
@@ -111,22 +111,6 @@ internal class Nasty
     /// </summary>
     private const float CreatureSpinSpeed = 32f;
 
-    /// <summary>
-    ///     Which of the two sets of numbers this nasty's death runs on. A machine's wreck lasts
-    ///     thirteen frames and a creature's four, so one constant cannot serve both.
-    /// </summary>
-    private int DeathFadeStep => IsMechanical ? MachineDeathSettings.FadeStep : CreatureFadeStep;
-
-    /// <inheritdoc cref="DeathFadeStep" />
-    private float DeathShrinkStep => IsMechanical ? MachineDeathSettings.ShrinkStep : CreatureShrinkStep;
-
-    /// <inheritdoc cref="DeathFadeStep" />
-    /// <remarks>
-    ///     A machine's wreck does not turn at all, matching the conveyor nasty's. It is sitting in a
-    ///     fire, not tumbling through the air.
-    /// </remarks>
-    private float DeathRotateSpeed => IsMechanical ? NoSpin : CreatureSpinSpeed;
-
     /// <inheritdoc cref="DeathRotateSpeed" />
     private const float NoSpin = 0f;
 
@@ -178,11 +162,6 @@ internal class Nasty
     private readonly GraphicsSet _graphicsSet;
 
     private readonly Animation _nastyAnim;
-    /// <summary>
-    ///     Called when this nasty blows apart, so the picture can be shaken. A callback rather than
-    ///     the thing that does the shaking, which a nasty has no business holding.
-    /// </summary>
-    private readonly Action _onExploded;
 
     private readonly IStandardParticleEffect _nastyArrives;
 
@@ -193,6 +172,11 @@ internal class Nasty
 
     private readonly SpriteCollection _nastySpriteNew;
     private readonly SpriteCollection _nastySpriteOriginal;
+    /// <summary>
+    ///     Called when this nasty blows apart, so the picture can be shaken. A callback rather than
+    ///     the thing that does the shaking, which a nasty has no business holding.
+    /// </summary>
+    private readonly Action _onExploded;
     private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
 
@@ -301,6 +285,22 @@ internal class Nasty
     }
 
     /// <summary>
+    ///     Which of the two sets of numbers this nasty's death runs on. A machine's wreck lasts
+    ///     thirteen frames and a creature's four, so one constant cannot serve both.
+    /// </summary>
+    private int DeathFadeStep => IsMechanical ? MachineDeathSettings.FadeStep : CreatureFadeStep;
+
+    /// <inheritdoc cref="DeathFadeStep" />
+    private float DeathShrinkStep => IsMechanical ? MachineDeathSettings.ShrinkStep : CreatureShrinkStep;
+
+    /// <inheritdoc cref="DeathFadeStep" />
+    /// <remarks>
+    ///     A machine's wreck does not turn at all, matching the conveyor nasty's. It is sitting in a
+    ///     fire, not tumbling through the air.
+    /// </remarks>
+    private float DeathRotateSpeed => IsMechanical ? NoSpin : CreatureSpinSpeed;
+
+    /// <summary>
     ///     Where this nasty is going and how it decided. All movement lives there; this class holds
     ///     the lifecycle and the picture.
     /// </summary>
@@ -346,6 +346,12 @@ internal class Nasty
             Movement.BecomeA(value);
         }
     }
+
+    /// <summary>
+    ///     Whether this nasty is a machine rather than a creature. Machines explode and creatures
+    ///     come apart. One property, so the death shader and the particles cannot disagree.
+    /// </summary>
+    private bool IsMechanical => _nastyType is NastyType.Spiky or NastyType.Conveyor;
 
     /// <summary>
     ///     Takes a snapshot of another nasty. Twice the number of nasties needed are kept, and the set
@@ -655,12 +661,6 @@ internal class Nasty
         _birthTimer++;
     }
 
-    /// <summary>
-    ///     Whether this nasty is a machine rather than a creature. Machines explode and creatures
-    ///     come apart. One property, so the death shader and the particles cannot disagree.
-    /// </summary>
-    private bool IsMechanical => _nastyType is NastyType.Spiky or NastyType.Conveyor;
-
     private void StartDying()
     {
         _deathFadeLevel = ColourLevels.Full;
@@ -949,7 +949,7 @@ internal class Nasty
     private void DrawDeath(int nastyImage, int screenFade)
     {
         // Under the explosion, so the flames and sparks come out of the ring rather than through it.
-_shockwave.Draw(screenFade);
+        _shockwave.Draw(screenFade);
 
         _nastyDies.Draw();
         _nastyDiesType2.Draw();

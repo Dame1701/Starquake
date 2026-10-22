@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Starquake.Core;
@@ -32,6 +32,12 @@ internal class CustomControl(PlayerKeySet playerKeys, ToggleKeys input, GameSess
 
     public PlayerKeySet PlayerKeySet { get; set; } = playerKeys;
 
+    private Vector2 Stick => input.GamePadState.ThumbSticks.Left;
+
+    private bool PadAskedForPlatform => input.GamePadState.Buttons.B == ButtonState.Pressed;
+
+    private bool PadAskedForInventory => input.GamePadState.Buttons.X == ButtonState.Pressed;
+
     public bool MovedUp() =>
         input.KeyboardState.IsKeyDown(PlayerKeySet.Up) ||
         PushedUp(input.GamePadState) ||
@@ -51,8 +57,6 @@ internal class CustomControl(PlayerKeySet playerKeys, ToggleKeys input, GameSess
         input.KeyboardState.IsKeyDown(PlayerKeySet.Right) ||
         PushedRight(input.GamePadState) ||
         Leans(Stick.X, Stick.Y);
-
-    private Vector2 Stick => input.GamePadState.ThumbSticks.Left;
 
     /// <summary>
     ///     How far Blob walks this frame from <paramref name="xPos" />, given the full step. Always
@@ -115,10 +119,6 @@ internal class CustomControl(PlayerKeySet playerKeys, ToggleKeys input, GameSess
     /// <summary>Whether a swap may happen now. See <see cref="LaysPlatform" />.</summary>
     public bool SwapsInventory() =>
         PadAskedForInventory || input.KeyboardState.IsKeyDown(PlayerKeySet.Up) && !Walking();
-
-    private bool PadAskedForPlatform => input.GamePadState.Buttons.B == ButtonState.Pressed;
-
-    private bool PadAskedForInventory => input.GamePadState.Buttons.X == ButtonState.Pressed;
 
     private bool Walking() => MovedLeft() || MovedRight();
 

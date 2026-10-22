@@ -1,9 +1,9 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
-using Microsoft.Xna.Framework.Graphics;
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Core;
@@ -14,10 +14,10 @@ namespace Starquake.World;
 
 internal class ColourAnimations
 {
-
-    private readonly List<ColourFader> _registered;
     private readonly GameScreenCollection _gameScreens;
     private readonly GraphicsSet _graphicsSet;
+
+    private readonly List<ColourFader> _registered;
     private readonly ResourceManager _resources;
 
     public ColourAnimations(ResourceManager resources, GameScreenCollection gameScreens, GraphicsSet graphicsSet)

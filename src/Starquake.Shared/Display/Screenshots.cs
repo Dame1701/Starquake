@@ -1,9 +1,9 @@
-// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
-using Microsoft.Xna.Framework.Graphics;
+// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
 
 namespace Starquake.Display;
@@ -69,7 +69,7 @@ internal sealed class Screenshots
     {
         PresentationParameters buffer = device.PresentationParameters;
 
-        Color[] pixels = new Color[buffer.BackBufferWidth * buffer.BackBufferHeight];
+        var pixels = new Color[buffer.BackBufferWidth * buffer.BackBufferHeight];
         device.GetBackBufferData(pixels);
 
         MakeOpaque(pixels);

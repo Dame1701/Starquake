@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
 using Starquake.Constants;
 
@@ -26,43 +26,12 @@ namespace Starquake.Tuning;
 /// </remarks>
 internal static class MalfunctionSettings
 {
-    /// <summary>
-    ///     Roughly how long between bursts, in logic frames, and how far that wanders either side.
-    /// </summary>
-    /// <remarks>
-    ///     A fault arriving on a fixed beat reads as something being done to the picture rather than
-    ///     something wrong with it, so the gap is jittered by the burst's own number rather than at
-    ///     random, which keeps it identical every time. The jitter stays below the period, which is
-    ///     what makes each window hold exactly one burst.
-    /// </remarks>
-    /// <seealso cref="JitterFor" />
-    private static readonly int BurstPeriod = LogicClock.Seconds(2.1);
-
-    /// <inheritdoc cref="BurstPeriod" />
-    private static readonly int BurstJitter = LogicClock.Seconds(1.3);
-
-    /// <summary>
-    ///     How long a burst lasts. A third of a second: long enough to read as the page coming apart,
-    ///     short enough that the report is legible again before anybody gives up on it.
-    /// </summary>
-    private static readonly int BurstFrames = LogicClock.Seconds(0.34);
 
     /// <summary>
     ///     What the display does between bursts. Small but deliberately not nought, so the set reads
     ///     as failing rather than as being interfered with.
     /// </summary>
     public const float Idle = 0.08f;
-
-    /// <summary>
-    ///     How many bands the page is cut into, and how closely the fine interference lines are
-    ///     spaced, both counted down the page.
-    /// </summary>
-    /// <remarks>
-    ///     The lines are nearly as close as the composition's own rows, so they read as interference
-    ///     in the signal rather than stripes laid over the page. The bands are the coarse fault and
-    ///     these are its texture.
-    /// </remarks>
-    public static Vector2 BandScale => new(26f, 900f);
 
     /// <summary>
     ///     How far a band is thrown sideways at worst, as a fraction of the width, and how far the
@@ -78,9 +47,6 @@ internal static class MalfunctionSettings
     ///     band that has lost it is left showing.
     /// </summary>
     public const float Dropout = 0.17f;
-
-    /// <inheritdoc cref="Dropout" />
-    public static Vector3 SignalColour => new(0.09f, 0.1f, 0.13f);
 
     /// <summary>How fast the bands travel and reshuffle, in bands per logic frame.</summary>
     private const double BandDrift = 0.37;
@@ -104,9 +70,6 @@ internal static class MalfunctionSettings
     /// </summary>
     private const float Flutter = 0.015f;
 
-    /// <inheritdoc cref="Flutter" />
-    private static readonly int FlutterPeriod = LogicClock.Seconds(1.7);
-
     /// <summary>
     ///     How loud the music is left at the height of a burst, and at the height of one that takes
     ///     the vertical hold with it. Those are the worse fault, so they take more of the sound.
@@ -121,6 +84,43 @@ internal static class MalfunctionSettings
     ///     be entirely in it. <see cref="ChromaSplit" /> in sound.
     /// </summary>
     private const float PanSmear = 0.6f;
+    /// <summary>
+    ///     Roughly how long between bursts, in logic frames, and how far that wanders either side.
+    /// </summary>
+    /// <remarks>
+    ///     A fault arriving on a fixed beat reads as something being done to the picture rather than
+    ///     something wrong with it, so the gap is jittered by the burst's own number rather than at
+    ///     random, which keeps it identical every time. The jitter stays below the period, which is
+    ///     what makes each window hold exactly one burst.
+    /// </remarks>
+    /// <seealso cref="JitterFor" />
+    private static readonly int BurstPeriod = LogicClock.Seconds(2.1);
+
+    /// <inheritdoc cref="BurstPeriod" />
+    private static readonly int BurstJitter = LogicClock.Seconds(1.3);
+
+    /// <summary>
+    ///     How long a burst lasts. A third of a second: long enough to read as the page coming apart,
+    ///     short enough that the report is legible again before anybody gives up on it.
+    /// </summary>
+    private static readonly int BurstFrames = LogicClock.Seconds(0.34);
+
+    /// <inheritdoc cref="Flutter" />
+    private static readonly int FlutterPeriod = LogicClock.Seconds(1.7);
+
+    /// <summary>
+    ///     How many bands the page is cut into, and how closely the fine interference lines are
+    ///     spaced, both counted down the page.
+    /// </summary>
+    /// <remarks>
+    ///     The lines are nearly as close as the composition's own rows, so they read as interference
+    ///     in the signal rather than stripes laid over the page. The bands are the coarse fault and
+    ///     these are its texture.
+    /// </remarks>
+    public static Vector2 BandScale => new(26f, 900f);
+
+    /// <inheritdoc cref="Dropout" />
+    public static Vector3 SignalColour => new(0.09f, 0.1f, 0.13f);
 
     /// <summary>
     ///     How badly the computer is failing on a given frame, <see cref="Idle" /> between bursts

@@ -1,9 +1,9 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
-using Microsoft.Xna.Framework.Graphics;
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using ProjectMercury.Emitters;
 using Starquake.Constants;
 using Starquake.ContentManagement;
@@ -157,9 +157,9 @@ internal class ScreenRenderer
     private readonly ColourAnimations _colourAnimations;
     private readonly GraphicsSet _graphicsSet;
     private readonly IStandardParticleEffect _keyDoorForceField;
-    private readonly Shapes _shapes;
     private readonly ResourceManager _resources;
     private readonly GameScreenData[] _screens;
+    private readonly Shapes _shapes;
     private readonly BitmapFont _signpostFont;
 
     private int _ollyEyesX;

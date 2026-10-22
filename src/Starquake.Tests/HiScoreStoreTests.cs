@@ -1,7 +1,7 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Starquake.Scoring;
 using Xunit;
 
@@ -71,7 +71,12 @@ public sealed class HiScoreStoreTests : IDisposable
         // Arrange
         var firstRun = new HiScores(new HiScoreStore(ScoreFilePath));
 
-        firstRun.AddScoreToTable(new HiScore { Name = "ZOE", Score = 99999, AdventureScore = 42 });
+        firstRun.AddScoreToTable(new HiScore
+        {
+            Name = "ZOE",
+            Score = 99999,
+            AdventureScore = 42
+        });
 
         // Act
         firstRun.Save();
@@ -95,7 +100,12 @@ public sealed class HiScoreStoreTests : IDisposable
         // Arrange - a table that has been played and saved
         var played = new HiScores(new HiScoreStore(ScoreFilePath));
 
-        played.AddScoreToTable(new HiScore { Name = "ZOE", Score = 99999, AdventureScore = 42 });
+        played.AddScoreToTable(new HiScore
+        {
+            Name = "ZOE",
+            Score = 99999,
+            AdventureScore = 42
+        });
         played.Save();
 
         // Act
@@ -121,7 +131,12 @@ public sealed class HiScoreStoreTests : IDisposable
         // Arrange
         var firstRun = new HiScores(new HiScoreStore(ScoreFilePath));
 
-        firstRun.AddScoreToTable(new HiScore { Name = "A B C", Score = 99999, AdventureScore = 1 });
+        firstRun.AddScoreToTable(new HiScore
+        {
+            Name = "A B C",
+            Score = 99999,
+            AdventureScore = 1
+        });
         firstRun.Save();
 
         // Act
@@ -141,7 +156,12 @@ public sealed class HiScoreStoreTests : IDisposable
         // Arrange
         var firstRun = new HiScores(new HiScoreStore(ScoreFilePath));
 
-        firstRun.AddScoreToTable(new HiScore { Name = string.Empty, Score = 99999, AdventureScore = 1 });
+        firstRun.AddScoreToTable(new HiScore
+        {
+            Name = string.Empty,
+            Score = 99999,
+            AdventureScore = 1
+        });
         firstRun.Save();
 
         // Act

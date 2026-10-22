@@ -1,7 +1,7 @@
-// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Starquake.Constants;
 
 namespace Starquake.Tuning;
@@ -38,9 +38,6 @@ internal static class CoreSoundSettings
     /// <summary>How far towards a speaker a copy goes at the side of its circle.</summary>
     private const float Spread = 0.75f;
 
-    /// <summary>How long one trip round the listener takes.</summary>
-    private static readonly int OrbitFrames = LogicClock.Seconds(9);
-
     /// <summary>
     ///     How far either side of true each copy plays, where one would be an octave. About a
     ///     seventh of a semitone, which is out of tune enough to chorus and not enough to sour.
@@ -52,6 +49,9 @@ internal static class CoreSoundSettings
     ///     <see cref="Detune" />, so it reads as the core changing rather than the copies drifting.
     /// </summary>
     private const float FlashBend = 0.07f;
+
+    /// <summary>How long one trip round the listener takes.</summary>
+    private static readonly int OrbitFrames = LogicClock.Seconds(9);
 
     /// <summary>
     ///     How strongly the elements, taken together, are showing passed rather than failed: one

@@ -1,9 +1,9 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
-using Microsoft.Xna.Framework.Graphics;
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Core;
@@ -33,15 +33,15 @@ internal sealed class Shockwave
     private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
 
-    private Point _centre;
-    private int _frame;
-    private bool _running;
-
     /// <summary>
     ///     Where this blast started the waves running round its rim, in radians. Dealt fresh on every
     ///     trigger, so two rings going off together do not ripple in step.
     /// </summary>
     private float _attitude;
+
+    private Point _centre;
+    private int _frame;
+    private bool _running;
 
     /// <param name="diameter">How far across the ring reaches, in pixels.</param>
     /// <param name="frames">How many logic frames it takes to get there.</param>

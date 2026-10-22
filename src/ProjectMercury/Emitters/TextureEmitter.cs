@@ -1,178 +1,180 @@
-﻿/*  
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
+/*
  Copyright © 2009 Project Mercury Team Members (http://mpe.codeplex.com/People/ProjectPeople.aspx)
 
- This program is licensed under the Microsoft Permissive License (Ms-PL).  You should 
+ This program is licensed under the Microsoft Permissive License (Ms-PL).  You should
  have received a copy of the license along with the source code.  If not, an online copy
  of the license can be found at http://mpe.codeplex.com/license.
 */
 
-namespace ProjectMercury.Emitters
-{
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using Microsoft.Xna.Framework;
-    using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
-    /// <summary>
-    /// Obsolete.
-    /// </summary>
+namespace ProjectMercury.Emitters;
+
+/// <summary>
+///     Obsolete.
+/// </summary>
 #if WINDOWS
     [TypeConverter("ProjectMercury.Design.Emitters.TextureEmitterTypeConverter, ProjectMercury.Design")]
 #endif
-    [Obsolete("Replaced by MaskEmitter")]
-    public class TextureEmitter : Emitter
+[Obsolete("Replaced by MaskEmitter")]
+public class TextureEmitter : Emitter
+{
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="TextureEmitter" /> class.
+    /// </summary>
+    public TextureEmitter()
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TextureEmitter"/> class.
-        /// </summary>
-        public TextureEmitter()
+        Scale = 1f;
+        PixelOffsets = new Vector2[0];
+        Threshold = 0.5f;
+    }
+
+    private Matrix ScaleMatrix;
+
+    /// <summary>
+    ///     Gets or sets the scale factor of the texture (in screen space).
+    /// </summary>
+    public float Scale
+    {
+        get => ScaleMatrix.M11;
+        set => ScaleMatrix = Matrix.CreateScale(value);
+    }
+
+    private Vector2 TextureOrigin;
+
+    private Vector2[] PixelOffsets;
+
+    private Vector3[] PixelColours;
+
+    private Texture2D _texture;
+
+    /// <summary>
+    ///     Gets or sets the texture used to lookup particle release offsets.
+    /// </summary>
+    /// <value>The texture.</value>
+    public Texture2D Texture
+    {
+        get => _texture;
+        set
         {
-            this.Scale = 1f;
-            this.PixelOffsets = new Vector2[0];
-            this.Threshold = 0.5f;
-        }
+            Guard.ArgumentNull("Texture", value);
 
-        private Matrix ScaleMatrix;
-
-        /// <summary>
-        /// Gets or sets the scale factor of the texture (in screen space).
-        /// </summary>
-        public float Scale
-        {
-            get { return this.ScaleMatrix.M11; }
-            set { this.ScaleMatrix = Matrix.CreateScale(value); }
-        }
-
-        private Vector2 TextureOrigin;
-        
-        private Vector2[] PixelOffsets;
-        
-        private Vector3[] PixelColours;
-        
-        private Texture2D _texture;
-
-        /// <summary>
-        /// Gets or sets the texture used to lookup particle release offsets.
-        /// </summary>
-        /// <value>The texture.</value>
-        public Texture2D Texture
-        {
-            get { return this._texture; }
-            set
+            if (Texture != value)
             {
-                Guard.ArgumentNull("Texture", value);
+                _texture = value;
 
-                if (this.Texture != value)
-                {
-                    this._texture = value;
-
-                    this.CalculateEmissionPoints();
-                }
+                CalculateEmissionPoints();
             }
         }
+    }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether particles should assume the colour of the underlying
-        /// pixel in the texture
-        /// </summary>
-        public bool ApplyPixelColours { get; set; }
+    /// <summary>
+    ///     Gets or sets a value indicating whether particles should assume the colour of the underlying
+    ///     pixel in the texture
+    /// </summary>
+    public bool ApplyPixelColours { get; set; }
 
-        /// <summary>
-        /// Gets or sets the threshold over which pixels will trigger the release of particles.
-        /// </summary>
-        public float Threshold;
+    /// <summary>
+    ///     Gets or sets the threshold over which pixels will trigger the release of particles.
+    /// </summary>
+    public float Threshold;
 
-        /// <summary>
-        /// Calculates the emission points.
-        /// </summary>
-        private void CalculateEmissionPoints()
+    /// <summary>
+    ///     Calculates the emission points.
+    /// </summary>
+    private void CalculateEmissionPoints()
+    {
+        if (Texture == null)
         {
-            if (this.Texture == null)
+            TextureOrigin = Vector2.Zero;
+
+            Array.Resize(ref PixelOffsets, 0);
+            Array.Resize(ref PixelColours, 0);
+
+            return;
+        }
+
+        TextureOrigin = new Vector2(Texture.Width / 2, Texture.Height / 2);
+
+        var offsets = new List<Vector2>();
+        var colours = new List<Vector3>();
+
+        var pixels = new Color[Texture.Width * Texture.Height];
+
+        Texture.GetData(pixels);
+
+        int sourceIndex, destIndex = 0;
+
+        byte minOpacity = Convert.ToByte(Threshold * 255f);
+
+        for (int x = 0; x < Texture.Width; x++)
+        {
+            for (int y = 0; y < Texture.Height; y++)
             {
-                this.TextureOrigin = Vector2.Zero;
-                
-                Array.Resize(ref this.PixelOffsets, 0);
-                Array.Resize(ref this.PixelColours, 0);
-                
-                return;
-            }
+                sourceIndex = Texture.Width * y + x;
 
-            this.TextureOrigin = new Vector2(this.Texture.Width / 2, this.Texture.Height / 2);
-
-            List<Vector2> offsets = new List<Vector2>();
-            List<Vector3> colours = new List<Vector3>();
-
-            Color[] pixels = new Color[this.Texture.Width * this.Texture.Height];
-
-            this.Texture.GetData(pixels);
-
-            int sourceIndex, destIndex = 0;
-
-            byte minOpacity = Convert.ToByte(this.Threshold * 255f);
-
-            for (int x = 0; x < this.Texture.Width; x++)
-            {
-                for (int y = 0; y < this.Texture.Height; y++)
+                if (pixels[sourceIndex].A >= minOpacity)
                 {
-                    sourceIndex = this.Texture.Width * y + x;
-
-                    if (pixels[sourceIndex].A >= minOpacity)
+                    offsets.Add(new Vector2
                     {
-                        offsets.Add(new Vector2
-                            { 
-                                X = x - this.TextureOrigin.X,
-                                Y = y - this.TextureOrigin.Y
-                            });
-                        
-                        colours.Add(pixels[sourceIndex].ToVector3());
+                        X = x - TextureOrigin.X,
+                        Y = y - TextureOrigin.Y
+                    });
 
-                        destIndex++;
-                    }
+                    colours.Add(pixels[sourceIndex].ToVector3());
+
+                    destIndex++;
                 }
             }
-
-            this.PixelOffsets = offsets.ToArray();
-            this.PixelColours = colours.ToArray();
         }
 
-        /// <summary>
-        /// Returns an uninitialised deep copy of the Emitter.
-        /// </summary>
-        /// <returns>A deep copy of the Emitter.</returns>
-        public override Emitter DeepCopy()
+        PixelOffsets = offsets.ToArray();
+        PixelColours = colours.ToArray();
+    }
+
+    /// <summary>
+    ///     Returns an uninitialised deep copy of the Emitter.
+    /// </summary>
+    /// <returns>A deep copy of the Emitter.</returns>
+    public override Emitter DeepCopy()
+    {
+        Emitter copy = new TextureEmitter
         {
-            Emitter copy = new TextureEmitter
-            {
-                ApplyPixelColours = this.ApplyPixelColours,
-                Scale = this.Scale,
-                Texture = this.Texture,
-                Threshold = this.Threshold
-            };
+            ApplyPixelColours = ApplyPixelColours,
+            Scale = Scale,
+            Texture = Texture,
+            Threshold = Threshold
+        };
 
-            base.CopyBaseFields(copy);
+        CopyBaseFields(copy);
 
-            return copy;
-        }
+        return copy;
+    }
 
-        /// <summary>
-        /// Generates an offset vector and force vector for a Particle when it is released.
-        /// </summary>
-        /// <param name="offset">The offset of the Particle from the trigger location.</param>
-        /// <param name="force">A unit vector defining the initial force of the Particle.</param>
-        protected override void GenerateOffsetAndForce(out Vector2 offset, out Vector2 force)
+    /// <summary>
+    ///     Generates an offset vector and force vector for a Particle when it is released.
+    /// </summary>
+    /// <param name="offset">The offset of the Particle from the trigger location.</param>
+    /// <param name="force">A unit vector defining the initial force of the Particle.</param>
+    protected override void GenerateOffsetAndForce(out Vector2 offset, out Vector2 force)
+    {
+        int index = RandomHelper.NextInt(PixelOffsets.Length);
+
+        offset = PixelOffsets[index];
+
+        offset.X *= Scale;
+        offset.Y *= Scale;
+
+        if (ApplyPixelColours)
         {
-            int index = RandomHelper.NextInt(this.PixelOffsets.Length);
-
-            offset = this.PixelOffsets[index];
-
-            offset.X *= this.Scale;
-            offset.Y *= this.Scale;
-
-            if (this.ApplyPixelColours)
-                base.ReleaseColour = this.PixelColours[index];
-
-            force = RandomHelper.NextUnitVector();
+            ReleaseColour = PixelColours[index];
         }
+
+        force = RandomHelper.NextUnitVector();
     }
 }

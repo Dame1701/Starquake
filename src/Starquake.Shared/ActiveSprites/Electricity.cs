@@ -1,9 +1,9 @@
-﻿// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
-using Microsoft.Xna.Framework.Graphics;
+﻿// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Starquake.Constants;
 using Starquake.ContentManagement;
 using Starquake.Core;
@@ -101,12 +101,6 @@ internal class Electricity
     private readonly Blob _blob;
 
     private readonly ConveyorNasties _conveyorNasties;
-    /// <summary>
-    ///     Logic frames since the engine was built, which is all the flicker needs. Counted here
-    ///     rather than in draw: <c>GameHost</c> draws once per vertical retrace, so a flicker counted
-    ///     in drawn frames would crackle faster on a better monitor.
-    /// </summary>
-    private int _flickerFrame;
 
     private readonly Animation _electricityAnimation;
     private readonly Animation _electricityAnimation2;
@@ -115,6 +109,12 @@ internal class Electricity
     private readonly GraphicsSet _graphicsSet;
     private readonly Random _randomNumberGenerator;
     private readonly ResourceManager _resources;
+    /// <summary>
+    ///     Logic frames since the engine was built, which is all the flicker needs. Counted here
+    ///     rather than in draw: <c>GameHost</c> draws once per vertical retrace, so a flicker counted
+    ///     in drawn frames would crackle faster on a better monitor.
+    /// </summary>
+    private int _flickerFrame;
 
     private List<SecondLayerTile>? _secondLayerTiles;
 

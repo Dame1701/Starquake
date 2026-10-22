@@ -1,7 +1,7 @@
-// ---------------------------------------------------------
-// Copyright (c) 2026 Damien C Green. All rights reserved.
-// ---------------------------------------------------------
-// -
+// ---------------------------------------------
+// CapriceNET Copyright (c) 2026 Damien C Green.
+// ---------------------------------------------
+
 namespace Starquake.Core;
 
 /// <summary>
@@ -41,7 +41,10 @@ internal sealed class PreferencesStore
     }
 
     /// <summary>A store over a named file, which is how the tests get one that is not the player's.</summary>
-    public PreferencesStore(string path) => _path = path;
+    public PreferencesStore(string path)
+    {
+        _path = path;
+    }
 
     /// <summary>Beside <c>HiScoreStore.DefaultPath</c>, for the reasons given there.</summary>
     public static string DefaultPath => Path.Combine(
@@ -68,7 +71,7 @@ internal sealed class PreferencesStore
             return Preferences.Defaults;
         }
 
-        Preferences preferences = Preferences.Defaults;
+        var preferences = Preferences.Defaults;
 
         foreach (string line in lines)
         {
@@ -85,15 +88,30 @@ internal sealed class PreferencesStore
             preferences = name switch
             {
                 CrtKey when Enum.TryParse(value, out CrtMode mode) && Enum.IsDefined(mode)
-                    => preferences with { CrtMode = mode },
+                    => preferences with
+                    {
+                        CrtMode = mode
+                    },
                 GraphicsKey when value is Original or Enhanced
-                    => preferences with { OriginalGraphics = value == Original },
+                    => preferences with
+                    {
+                        OriginalGraphics = value == Original
+                    },
                 BackdropsKey when value is On or Off
-                    => preferences with { Backdrops = value == On },
+                    => preferences with
+                    {
+                        Backdrops = value == On
+                    },
                 HertzKey when value is "50" or "60"
-                    => preferences with { Hertz = new LogicRate(int.Parse(value)).Hertz },
+                    => preferences with
+                    {
+                        Hertz = new LogicRate(int.Parse(value)).Hertz
+                    },
                 AnalogueWalkKey when value is On or Off
-                    => preferences with { AnalogueWalk = value == On },
+                    => preferences with
+                    {
+                        AnalogueWalk = value == On
+                    },
                 _ => preferences
             };
         }
