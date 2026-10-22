@@ -2,6 +2,7 @@
 // CapriceNET Copyright (c) 2026 Damien C Green.
 // ---------------------------------------------
 
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework.Content;
 using ProjectMercury;
 using ProjectMercury.Emitters;
@@ -94,7 +95,15 @@ internal static class NativeAot
     ///     <c>.xnb</c>: the reader's name around the asset type's assembly-qualified one. Built from
     ///     the type rather than spelled out, so a version bump cannot silently stop it matching.
     /// </summary>
-    private static void Reflective<T>() =>
+    private static void Reflective<
+        [DynamicallyAccessedMembers(
+            DynamicallyAccessedMemberTypes.PublicConstructors |
+            DynamicallyAccessedMemberTypes.NonPublicConstructors |
+            DynamicallyAccessedMemberTypes.PublicFields |
+            DynamicallyAccessedMemberTypes.NonPublicFields |
+            DynamicallyAccessedMemberTypes.PublicProperties |
+            DynamicallyAccessedMemberTypes.NonPublicProperties)]
+        T>() =>
         Register($"Microsoft.Xna.Framework.Content.ReflectiveReader`1[[{typeof(T).AssemblyQualifiedName}]]",
             static () => new ReflectiveReader<T>());
 
