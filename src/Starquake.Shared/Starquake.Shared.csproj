@@ -133,15 +133,32 @@
     </Target>
 
     <!--
+      MGCB on the .NET 10 runtime, so it can load the net10.0 pipeline extension below.
+
+      MonoGame still ships MGCB as a net8.0 tool. Its runtimeconfig rolls forward to a newer
+      major only when 8.0 is missing, and a machine that still has 8.0 - every GitHub runner
+      image does - would run it on 8 and fail to load the extension, which takes every font
+      and particle effect down with it. LatestMajor makes it take the newest runtime installed
+      whatever else is there. The variable has to be set on MGCB's own command line: the dotnet
+      muxer does not pass its roll-forward switch on to a local tool, and MonoGame's Exec offers
+      no way in for environment variables. _Command is the hook its targets leave for this - they
+      only fill it in when it is empty.
+    -->
+    <PropertyGroup>
+        <_Command Condition="'$(OS)' == 'Windows_NT'">set "DOTNET_ROLL_FORWARD=LatestMajor" &amp;&amp; "$(DotnetCommand)" "$(MGCBCommand)"</_Command>
+        <_Command Condition="'$(OS)' != 'Windows_NT'">DOTNET_ROLL_FORWARD=LatestMajor "$(DotnetCommand)" "$(MGCBCommand)"</_Command>
+    </PropertyGroup>
+
+    <!--
       Content.mgcb references the Project Mercury pipeline extension so MGCB can compile
       the ParticleEffects XML. MGCB runs before project references are resolved, so build
-      that extension here rather than relying on reference ordering. It is a net8.0 tool
-      (MGCB's own runtime) and is never referenced by the game.
+      that extension here rather than relying on reference ordering. It is never referenced
+      by the game.
     -->
     <Target Name="BuildContentPipelineExtension" BeforeTargets="RunContentBuilder">
         <MSBuild Projects="..\ProjectMercury.ContentPipeline\ProjectMercury.ContentPipeline.csproj"
                  Targets="Build"
-                 Properties="Configuration=$(Configuration);TargetFramework=net8.0"/>
+                 Properties="Configuration=$(Configuration);TargetFramework=net10.0"/>
     </Target>
 
 </Project>

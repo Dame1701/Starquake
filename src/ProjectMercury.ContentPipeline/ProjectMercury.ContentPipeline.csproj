@@ -1,7 +1,8 @@
 ﻿<!--
   MGCB extension that compiles the ParticleEffects XML into .xnb. It is a build-time tool,
-  never shipped with the game, and is loaded into MGCB itself, a net8.0 application, so
-  this has to be net8.0 and so does ProjectMercury, which it drags along.
+  never shipped with the game, and is loaded into MGCB itself. MGCB is a net8.0 tool that
+  Starquake.Shared runs on the .NET 10 runtime, which is what lets this and ProjectMercury,
+  which it drags along, target net10.0 like everything else.
 
   Output goes to a fixed bin/mgcb/ folder rather than the usual bin/<Config>/<TFM>/, so
   the /reference: lines in Starquake.Shared/Content/Content.mgcb can name a stable path.
@@ -12,7 +13,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <!--
           Off here alone. This is the Mercury particle engine, written in 2009, long before

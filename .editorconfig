@@ -135,3 +135,6 @@ dotnet_diagnostic.IDE0051.severity = none
 dotnet_diagnostic.IDE0052.severity = none
 dotnet_diagnostic.IDE0059.severity = none
 dotnet_diagnostic.IDE0060.severity = none
+# The language style above reaches it too once it targets net10.0, whose higher analysis level
+# reports AsyncUpdateManager's alias using inside the namespace.
+dotnet_diagnostic.IDE0065.severity = none

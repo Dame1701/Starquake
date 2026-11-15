@@ -12,8 +12,8 @@ target framework and MonoGame runtime, and adds whatever packaging that platform
 | `Starquake.Linux` | Linux | `net10.0` | Native + `Runtime.Linux.Vulkan` |
 | `Starquake.Mac` | macOS | `net10.0` | Native + `Runtime.Mac.Vulkan` |
 | `Starquake.Windows` | Windows | `net10.0` | Native + `Runtime.Windows.Vulkan` |
-| `ProjectMercury` | all (particle engine) | `net8.0` | Native |
-| `ProjectMercury.ContentPipeline` | build-time only (MGCB extension) | `net8.0` | Native |
+| `ProjectMercury` | all (particle engine) | `net10.0` | Native |
+| `ProjectMercury.ContentPipeline` | build-time only (MGCB extension) | `net10.0` | Native |
 | `SharedLibs` | all (screen data structures and world constants) | `net10.0` | — |
 | `ScreenEditor` | all (Avalonia tool, not part of the game) | `net10.0` | — |
 
@@ -578,11 +578,15 @@ that race back.
 
 The `ParticleEffects/*.xml` assets are compiled by an MGCB extension,
 `ProjectMercury.ContentPipeline`, which drags `ProjectMercury` in with it so MGCB can resolve
-`ProjectMercury.ParticleEffect`. **MGCB is a `net8.0` application**, and a `net10.0` assembly
-cannot be loaded into it — that is why those two projects target `net8.0` while the game
-targets `net10.0`. A `net10.0` game referencing a `net8.0` library is fine; the reverse is not.
-Retargeting either of them to `net10.0` produces a build that still "succeeds" while every
-particle effect silently fails to compile.
+`ProjectMercury.ParticleEffect`. **MGCB is a `net8.0` application** - MonoGame 3.8.6 still ships
+it that way - and a `net10.0` assembly cannot be loaded into a process running on .NET 8. Both
+projects target `net10.0` anyway, so that nothing in the solution needs .NET 8, and
+`Starquake.Shared.csproj` runs MGCB with `DOTNET_ROLL_FORWARD=LatestMajor` so it always takes
+the .NET 10 runtime. MGCB's own runtimeconfig would roll forward only when no 8.0 runtime is
+installed at all, and every GitHub runner image has one. Without the override the extension
+fails to load and every font and particle effect with it. The override goes when MonoGame ships
+a `net10.0` MGCB. Opening `Content.mgcb` in the MGCB Editor on a machine that still has a .NET 8
+runtime has the same problem, and the same variable fixes it.
 
 `ProjectMercury.ContentPipeline` writes to a fixed `bin/mgcb/` folder rather than the usual
 `bin/<Config>/<TFM>/`, because the `/reference:` lines in `Content.mgcb` have to name a

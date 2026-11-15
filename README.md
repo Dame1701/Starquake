@@ -60,7 +60,7 @@ dotnet build Starquake.Windows/Starquake.Windows.csproj # Windows
 dotnet test Starquake.Tests/Starquake.Tests.csproj
 ```
 
-Needs the .NET 10 SDK, and 8.0 alongside it — MGCB, the content builder, is a net8.0 application.
+Needs the .NET 10 SDK.
 Every project compiles on any of the three platforms; the macOS build also wraps its output in an
 ad-hoc signed `Starquake.app`. A NativeAOT publish profile per platform ships the game as one
 native executable with no runtime to install.

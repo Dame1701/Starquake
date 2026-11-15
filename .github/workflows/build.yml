@@ -114,12 +114,7 @@ jobs:
       - name: Install .NET
         uses: actions/setup-dotnet@v4
         with:
-          # 8.0 as well as 10.0: MGCB is a net8.0 application and so are ProjectMercury and its
-          # content pipeline extension, which is why they target net8.0 while the game targets
-          # net10.0. See BUILD.md.
-          dotnet-version: |
-            8.0.x
-            10.0.x
+          dotnet-version: 10.0.x
 
       - name: Compile without content
         shell: bash
@@ -145,9 +140,7 @@ jobs:
       - name: Install .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: |
-            8.0.x
-            10.0.x
+          dotnet-version: 10.0.x
 
       - name: Build content
         run: dotnet build Starquake.Shared/Starquake.Shared.csproj -c Release
@@ -183,9 +176,7 @@ jobs:
       - name: Install .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: |
-            8.0.x
-            10.0.x
+          dotnet-version: 10.0.x
 
       # ILC shells out to clang to link and to objcopy to strip symbols. Without the stripping
       # tool the publish fails at the very last step, after all the compiling is done.
