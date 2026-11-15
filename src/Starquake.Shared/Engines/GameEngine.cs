@@ -83,7 +83,7 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
     /// </summary>
     private readonly Action _quitGame;
 
-    /// <summary>Writes a PNG of the back buffer when F5 has asked for one.</summary>
+    /// <summary>Writes a PNG of the picture on the screen when F5 has asked for one.</summary>
     private readonly Screenshots _screenshots = new();
 
     /// <summary>
@@ -990,13 +990,16 @@ internal class GameEngine : StartableGameComponentBase, IDisposable
         _announcement.Draw(Font2, Presentation.Transform);
         _frameRate.Draw(Font2, Presentation.Transform);
 
-        _presenter.Present(sinceLastDraw);
+        _presenter.FinishFrame(sinceLastDraw);
 
-        // After the picture has reached the buffer and after the announcement was drawn, so the
-        // shot is the finished frame and the message about it lands in the next one.
-        if (_screenshots.SaveIfAsked(_graphicsDeviceMgr.GraphicsDevice) is { } saved)
+        // After the announcement was drawn, so the shot is the finished frame and the message about
+        // it lands in the next one. Before the picture goes to the back buffer, for the reason
+        // Screenshots gives.
+        if (_screenshots.SaveIfAsked(_graphicsDeviceMgr.GraphicsDevice, _presenter) is { } saved)
         {
             _announcement.Show(saved ? "SCREENSHOT SAVED" : "SCREENSHOT FAILED");
         }
+
+        _presenter.Present();
     }
 }

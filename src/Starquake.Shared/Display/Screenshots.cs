@@ -1,25 +1,37 @@
-// ---------------------------------------------
+﻿// ---------------------------------------------
 // CapriceNET Copyright (c) 2026 Damien C Green.
 // ---------------------------------------------
 
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Starquake.Constants;
 
 namespace Starquake.Display;
 
 /// <summary>
 ///     Saves the picture the player is looking at as a PNG. Asked for from the update pass and taken
-///     at the end of the draw pass, because the back buffer only holds a finished frame there.
+///     at the end of the draw pass, once the frame is finished.
 /// </summary>
 /// <remarks>
-///     The back buffer rather than the frame <see cref="ScreenPresenter" /> composes into, so a shot
-///     carries the cathode ray tube's scanlines and glow as the player sees them. The tube is applied
-///     on the way to the buffer, so there is no texture holding the finished picture to read instead.
+///     The picture is drawn a second time, through the cathode ray tube, into a render target of its
+///     own, so a shot carries the tube's scanlines and glow as the player sees them. It is not read
+///     off the back buffer: MonoGame 3.8.6's Vulkan backend reads the buffer by submitting the frame
+///     early on the swapchain's own semaphores, and the real present then submits on them again.
+///     MoltenVK took that a few seconds later as a crash in <c>vkQueueSubmit</c>. Reading a render
+///     target flushes without them.
+///     <para>
+///         The read has to come before anything is drawn to the back buffer. The flush submits
+///         everything recorded so far, and drawing on the swapchain image that early would be
+///         drawing on an image that may not have been handed over yet.
+///     </para>
 /// </remarks>
 internal sealed class Screenshots
 {
     private bool _asked;
+
+    /// <summary>
+    ///     Kept from one shot to the next rather than thrown away after each, because 3.8.6's Vulkan
+    ///     backend cannot safely dispose of a resource the frame being recorded has used.
+    /// </summary>
+    private RenderTarget2D? _picture;
 
     /// <summary>
     ///     Beside the player's own pictures rather than the executable. On a Mac the game runs from
@@ -39,7 +51,7 @@ internal sealed class Screenshots
     ///     announces it, so that the message is shown after the pixels have been read rather than
     ///     being drawn into the picture.
     /// </returns>
-    public bool? SaveIfAsked(GraphicsDevice device)
+    public bool? SaveIfAsked(GraphicsDevice device, ScreenPresenter presenter)
     {
         if (!_asked)
         {
@@ -48,9 +60,12 @@ internal sealed class Screenshots
 
         _asked = false;
 
+        RenderTarget2D picture = PictureFor(device);
+        presenter.PresentInto(picture);
+
         try
         {
-            Save(device);
+            Save(picture);
 
             return true;
         }
@@ -60,45 +75,34 @@ internal sealed class Screenshots
         }
     }
 
-    /// <remarks>
-    ///     Reading the buffer and encoding it both happen on this thread, so a shot costs a frame.
-    ///     That is a keypress the player made rather than something the game does to itself, and
-    ///     encoding needs the pixels the device will have moved on from by the next one.
-    /// </remarks>
-    private static void Save(GraphicsDevice device)
+    /// <summary>The target to draw the shot into, sized to the back buffer.</summary>
+    private RenderTarget2D PictureFor(GraphicsDevice device)
     {
         PresentationParameters buffer = device.PresentationParameters;
 
-        var pixels = new Color[buffer.BackBufferWidth * buffer.BackBufferHeight];
-        device.GetBackBufferData(pixels);
+        if (_picture is { } existing &&
+            existing.Width == buffer.BackBufferWidth &&
+            existing.Height == buffer.BackBufferHeight)
+        {
+            return existing;
+        }
 
-        MakeOpaque(pixels);
+        _picture?.Dispose();
+        _picture = new RenderTarget2D(device, buffer.BackBufferWidth, buffer.BackBufferHeight);
 
-        Directory.CreateDirectory(Folder);
-
-        using var picture = new Texture2D(device, buffer.BackBufferWidth, buffer.BackBufferHeight);
-        picture.SetData(pixels);
-
-        using FileStream file = File.Create(NextFilePath());
-        picture.SaveAsPng(file, buffer.BackBufferWidth, buffer.BackBufferHeight);
+        return _picture;
     }
 
-    /// <summary>Turns every pixel fully opaque, which is what the player was looking at.</summary>
     /// <remarks>
-    ///     The buffer's alpha is whatever composing the picture happened to leave behind, and the
-    ///     display never reads it. A PNG does. The status panel is the worst of it: its artwork is
-    ///     almost entirely transparent, reading as black only because the frame beneath was cleared
-    ///     to black, and <c>ScreenEffectEngine</c> composes each view port with
-    ///     <see cref="BlendState.Opaque" />, so the panel's own alpha is written straight through to
-    ///     the buffer. Saved as it stands, the panel comes out see-through and shows whatever the
-    ///     picture is viewed against rather than the black that was on screen.
+    ///     Reading the target and encoding it both happen on this thread, so a shot costs a frame.
+    ///     That is a keypress the player made rather than something the game does to itself.
     /// </remarks>
-    private static void MakeOpaque(Color[] pixels)
+    private static void Save(RenderTarget2D picture)
     {
-        for (int pixel = 0; pixel < pixels.Length; pixel++)
-        {
-            pixels[pixel].A = ColourLevels.Full;
-        }
+        Directory.CreateDirectory(Folder);
+
+        using FileStream file = File.Create(NextFilePath());
+        picture.SaveAsPng(file, picture.Width, picture.Height);
     }
 
     /// <summary>

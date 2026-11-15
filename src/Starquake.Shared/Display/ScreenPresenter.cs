@@ -31,6 +31,16 @@ internal sealed class ScreenPresenter(
 {
     private readonly SpriteBatch _batch = new(graphics.GraphicsDevice);
 
+    /// <summary>
+    ///     Writes only the colour channels and leaves the target's alpha as it was cleared. The
+    ///     frame's alpha is whatever composing it happened to leave behind, and the display never
+    ///     reads it, but a PNG does.
+    /// </summary>
+    private readonly BlendState _colourOnly = new()
+    {
+        ColorWriteChannels = ColorWriteChannels.Red | ColorWriteChannels.Green | ColorWriteChannels.Blue
+    };
+
     private RenderTarget2D? _afterglow;
 
     private RenderTarget2D? _frame;
@@ -82,27 +92,41 @@ internal sealed class ScreenPresenter(
         return frame;
     }
 
-    /// <summary>Draws the caught frame to the back buffer.</summary>
+    /// <summary>Lays the phosphor's afterglow into the caught frame, finishing the picture.</summary>
     /// <param name="sinceLastDraw">
     ///     How long ago the last frame was drawn, for the phosphor to decay by. Real elapsed time:
     ///     <c>GameHost</c> sets <c>IsFixedTimeStep</c> false and draws once per vertical retrace, so
     ///     this is what actually passed rather than a nominal frame.
     /// </param>
-    public void Present(TimeSpan sinceLastDraw)
+    public void FinishFrame(TimeSpan sinceLastDraw) => GlowOnFromTheLastFrame(EnsureFrame(), sinceLastDraw);
+
+    /// <summary>Draws the finished frame to the back buffer.</summary>
+    public void Present() => DrawPicture(null, presentation.ScreenClearColour, BlendState.Opaque);
+
+    /// <summary>
+    ///     Draws the picture <see cref="Present" /> puts on the screen into a target of its own,
+    ///     fully opaque, as the player sees it.
+    /// </summary>
+    public void PresentInto(RenderTarget2D target)
+    {
+        Color clear = presentation.ScreenClearColour;
+        clear.A = ColourLevels.Full;
+
+        DrawPicture(target, clear, _colourOnly);
+    }
+
+    private void DrawPicture(RenderTarget2D? target, Color clear, BlendState blend)
     {
         RenderTarget2D frame = EnsureFrame();
 
-        GlowOnFromTheLastFrame(frame, sinceLastDraw);
-
-        graphics.GraphicsDevice.SetRenderTarget(null);
-        graphics.GraphicsDevice.Clear(presentation.ScreenClearColour);
+        graphics.GraphicsDevice.SetRenderTarget(target);
+        graphics.GraphicsDevice.Clear(clear);
 
         Effect? crt = EffectFor(presentation.CrtMode, frame.Width, frame.Height);
 
-        // Opaque, one texel of the frame to one pixel of the buffer. This is the whole picture, with
-        // nothing underneath to blend with.
-        _batch.Begin(SpriteSortMode.Deferred, BlendState.Opaque, SamplerState.LinearClamp,
-            null, null, crt);
+        // Nothing blended, one texel of the frame to one pixel of the target. This is the whole
+        // picture, with nothing underneath to blend with.
+        _batch.Begin(SpriteSortMode.Deferred, blend, SamplerState.LinearClamp, null, null, crt);
         _batch.Draw(frame, Vector2.Zero, Color.White);
         _batch.End();
     }
